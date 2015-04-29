@@ -25,7 +25,7 @@
   //Run Range for this envelope
   //Int_t runLow = 17359;
   //Int_t runHigh = 19959;
-  Int_t calibrationPeriod = 11;
+  Int_t calibrationPeriod = 7;
   // Source peaks from simulation
   Double_t peakCe = 98.2;
   Double_t peakSn = 331.2;
@@ -34,7 +34,7 @@
 
   // Read data file
   char temp[500];
-  sprintf(temp, "/extern/UCNA/CalibrationPlots_MB/source_runs_RunPeriod_%i.dat",calibrationPeriod);
+  sprintf(temp, "../residuals/source_runs_RunPeriod_%i.dat",calibrationPeriod);
   ifstream filein(temp);
 
   Int_t i = 0;
@@ -57,7 +57,7 @@
   //TFile *outfile = new TFile("EnergyCal_18745-18756.root","RECREATE");
 
   // Fit function
-  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)", 0.0, 2000.0);
+  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)", 0.0, 2500.0);
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
@@ -83,7 +83,7 @@
   grE1->GetYaxis()->SetTitle("E_{Q} [keV]");
   grE1->GetYaxis()->SetTitleOffset(1.6);
   grE1->GetYaxis()->CenterTitle();
-  grE1->GetXaxis()->SetLimits(0.0,1600.0);
+  grE1->GetXaxis()->SetLimits(0.0,2400.0);
   grE1->SetMinimum(0.0);
   grE1->SetMaximum(1000.0);
   grE1->Draw("AP");
@@ -107,21 +107,27 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE1.dat",calibrationPeriod);
+  ofstream oFileE1(temp);
+
   // Calculate residuals in [keV]
   Double_t fitEQ_E1[num];
   for (int j=0; j<num; j++) {
     fitEQ_E1[j]    = offsetE1 + slopeE1*ADCE1[j] + quadE1*ADCE1[j]*ADCE1[j];
     if (fitEQ_E1[j] < 200.) {
       resE1[j] = fitEQ_E1[j] - peakCe;
+      oFileE1 << "Ce_East" << " " << (int) run[j] << " " << resE1[j] << endl;
       //resE1[j] = (fitEQ - peakCe)/peakCe * 100.;
     }
     else if (fitEQ_E1[j] < 400.) {
       resE1[j] = fitEQ_E1[j] - peakSn;
       //resE1[j] = (fitEQ - peakSn)/peakSn * 100.;
+      oFileE1 << "Sn_East" << " " << (int) run[j] << " " << resE1[j] << endl;
     }
     else {
       resE1[j] = fitEQ_E1[j] - peakBiHigh;
       //resE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+      oFileE1 << "Bi_East" << " " << (int) run[j] << " " << resE1[j] << endl;
     }
   }
 
@@ -141,13 +147,13 @@
   grE1r->GetYaxis()->SetTitle("Residuals [keV]");
   grE1r->GetYaxis()->SetTitleOffset(1.2);
   grE1r->GetYaxis()->CenterTitle();
-  grE1r->GetXaxis()->SetLimits(0.0,1600.0);
+  grE1r->GetXaxis()->SetLimits(0.0,2400.0);
   grE1r->SetMinimum(-50.0);
   grE1r->SetMaximum( 50.0);
   grE1r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -185,7 +191,7 @@
   grE2->GetYaxis()->SetTitle("E_{Q} [keV]");
   grE2->GetYaxis()->SetTitleOffset(1.6);
   grE2->GetYaxis()->CenterTitle();
-  grE2->GetXaxis()->SetLimits(0.0,1600.0);
+  grE2->GetXaxis()->SetLimits(0.0,2400.0);
   grE2->SetMinimum(0.0);
   grE2->SetMaximum(1000.0);
   grE2->Draw("AP");
@@ -209,6 +215,9 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE2.dat",calibrationPeriod);
+  ofstream oFileE2(temp);
+
   // Calculate residuals in [keV]
   Double_t fitEQ_E2[num];
   for (int j=0; j<num; j++) {
@@ -216,10 +225,12 @@
     if (fitEQ_E2[j] < 200.) {
       resE2[j] = fitEQ_E2[j] - peakCe;
       //resE2[j] = (fitEQ - peakCe)/peakCe * 100.;
+      oFileE2 << "Ce_East" << " " << (int) run[j] << " " << resE2[j] << endl;
     }
     else if (fitEQ_E2[j] < 400.) {
       resE2[j] = fitEQ_E2[j] - peakSn;
       //resE2[j] = (fitEQ - peakSn)/peakSn * 100.;
+      oFileE2 << "Sn_East" << " " << (int) run[j] << " " << resE2[j] << endl;
     }
     else if (fitEQ_E2[j] < 600.) {
       resE2[j] = fitEQ_E2[j] - peakBiLow;
@@ -228,6 +239,7 @@
     else {
       resE2[j] = fitEQ_E2[j] - peakBiHigh;
       //resE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+      oFileE2 << "Bi_East" << " " << (int) run[j] << " " << resE2[j] << endl;
     }
   }
 
@@ -247,13 +259,13 @@
   grE2r->GetYaxis()->SetTitle("Residuals [keV]");
   grE2r->GetYaxis()->SetTitleOffset(1.2);
   grE2r->GetYaxis()->CenterTitle();
-  grE2r->GetXaxis()->SetLimits(0.0,1600.0);
+  grE2r->GetXaxis()->SetLimits(0.0,2400.0);
   grE2r->SetMinimum(-50.0);
   grE2r->SetMaximum( 50.0);
   grE2r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -315,6 +327,9 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE3.dat",calibrationPeriod);
+  ofstream oFileE3(temp);
+
   // Calculate residuals in [keV]
   Double_t fitEQ_E3[num];
   for (int j=0; j<num; j++) {
@@ -322,10 +337,12 @@
     if (fitEQ_E3[j] < 200.) {
       resE3[j] = fitEQ_E3[j] - peakCe;
       //resE3[j] = (fitEQ - peakCe)/peakCe * 100.;
+      oFileE3 << "Ce_East" << " " << (int) run[j] << " " << resE3[j] << endl;
     }
     else if (fitEQ_E3[j] < 400.) {
       resE3[j] = fitEQ_E3[j] - peakSn;
       //resE3[j] = (fitEQ - peakSn)/peakSn * 100.;
+      oFileE3 << "Sn_East" << " " << (int) run[j] << " " << resE3[j] << endl;
     }
     else if (fitEQ_E3[j] < 600.) {
       resE3[j] = fitEQ_E3[j] - peakBiLow;
@@ -334,6 +351,7 @@
     else {
       resE3[j] = fitEQ_E3[j] - peakBiHigh;
       //resE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+      oFileE3 << "Bi_East" << " " << (int) run[j] << " " << resE3[j] << endl;
     }
   }
 
@@ -353,13 +371,13 @@
   grE3r->GetYaxis()->SetTitle("Residuals [keV]");
   grE3r->GetYaxis()->SetTitleOffset(1.2);
   grE3r->GetYaxis()->CenterTitle();
-  grE3r->GetXaxis()->SetLimits(0.0,1600.0);
+  grE3r->GetXaxis()->SetLimits(0.0,2400.0);
   grE3r->SetMinimum(-50.0);
   grE3r->SetMaximum( 50.0);
   grE3r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -397,7 +415,7 @@
   grE4->GetYaxis()->SetTitle("E_{Q} [keV]");
   grE4->GetYaxis()->SetTitleOffset(1.6);
   grE4->GetYaxis()->CenterTitle();
-  grE4->GetXaxis()->SetLimits(0.0,1600.0);
+  grE4->GetXaxis()->SetLimits(0.0,2400.0);
   grE4->SetMinimum(0.0);
   grE4->SetMaximum(1000.0);
   grE4->Draw("AP");
@@ -421,6 +439,9 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE4.dat",calibrationPeriod);
+  ofstream oFileE4(temp);
+
   // Calculate residuals in [keV]
   Double_t fitEQ_E4[num];
   for (int j=0; j<num; j++) {
@@ -428,10 +449,12 @@
     if (fitEQ_E4[j] < 200.) {
       resE4[j] = fitEQ_E4[j] - peakCe;
       //resE4[j] = (fitEQ - peakCe)/peakCe * 100.;
+      oFileE4 << "Ce_East" << " " << (int) run[j] << " " << resE4[j] << endl;
     }
     else if (fitEQ_E4[j] < 400.) {
       resE4[j] = fitEQ_E4[j] - peakSn;
       //resE4[j] = (fitEQ - peakSn)/peakSn * 100.;
+      oFileE4 << "Sn_East" << " " << (int) run[j] << " " << resE4[j] << endl;
     }
     else if (fitEQ_E4[j] < 600.) {
       resE4[j] = fitEQ_E4[j] - peakBiLow;
@@ -440,6 +463,7 @@
     else {
       resE4[j] = fitEQ_E4[j] - peakBiHigh;
       //resE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+      oFileE4 << "Bi_East" << " " << (int) run[j] << " " << resE4[j] << endl;
     }
   }
 
@@ -459,13 +483,13 @@
   grE4r->GetYaxis()->SetTitle("Residuals [keV]");
   grE4r->GetYaxis()->SetTitleOffset(1.2);
   grE4r->GetYaxis()->CenterTitle();
-  grE4r->GetXaxis()->SetLimits(0.0,1600.0);
+  grE4r->GetXaxis()->SetLimits(0.0,2400.0);
   grE4r->SetMinimum(-50.0);
   grE4r->SetMaximum( 50.0);
   grE4r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -487,7 +511,7 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
-  sprintf(temp,"residuals_East_runPeriod_%i.dat",calibrationPeriod);
+  sprintf(temp,"../residuals/residuals_East_runPeriod_%i.dat",calibrationPeriod);
   ofstream oFileE(temp);
 
   // For now, simply average the East PMT energies
@@ -542,7 +566,7 @@
   grEr->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -580,7 +604,7 @@
   grW1->GetYaxis()->SetTitle("E_{Q} [keV]");
   grW1->GetYaxis()->SetTitleOffset(1.6);
   grW1->GetYaxis()->CenterTitle();
-  grW1->GetXaxis()->SetLimits(0.0,1600.0);
+  grW1->GetXaxis()->SetLimits(0.0,2400.0);
   grW1->SetMinimum(0.0);
   grW1->SetMaximum(1000.0);
   grW1->Draw("AP");
@@ -604,18 +628,24 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW1.dat",calibrationPeriod);
+  ofstream oFileW1(temp);
+  
   // Calculate residuals in [keV]
   Double_t fitEQ_W1[num];
   for (int j=0; j<num; j++) {
     fitEQ_W1[j]    = offsetW1 + slopeW1*ADCW1[j] + quadW1*ADCW1[j]*ADCW1[j];
     if (fitEQ_W1[j] < 200.) {
       resW1[j] = fitEQ_W1[j] - peakCe;
+      oFileW1 << "Ce_West" << " " << (int) run[j] << " " << resW1[j] << endl;
     }
     else if (fitEQ_W1[j] < 400.) {
       resW1[j] = fitEQ_W1[j] - peakSn;
+      oFileW1 << "Sn_West" << " " << (int) run[j] << " " << resW1[j] << endl;
     }
     else {
       resW1[j] = fitEQ_W1[j] - peakBiHigh;
+      oFileW1 << "Bi_West" << " " << (int) run[j] << " " << resW1[j] << endl;
     }
   }
 
@@ -635,13 +665,13 @@
   grW1r->GetYaxis()->SetTitle("Residuals [keV]");
   grW1r->GetYaxis()->SetTitleOffset(1.2);
   grW1r->GetYaxis()->CenterTitle();
-  grW1r->GetXaxis()->SetLimits(0.0,1600.0);
+  grW1r->GetXaxis()->SetLimits(0.0,2400.0);
   grW1r->SetMinimum(-50.0);
   grW1r->SetMaximum( 50.0);
   grW1r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -679,7 +709,7 @@
   grW2->GetYaxis()->SetTitle("E_{Q} [keV]");
   grW2->GetYaxis()->SetTitleOffset(1.6);
   grW2->GetYaxis()->CenterTitle();
-  grW2->GetXaxis()->SetLimits(0.0,1600.0);
+  grW2->GetXaxis()->SetLimits(0.0,2400.0);
   grW2->SetMinimum(0.0);
   grW2->SetMaximum(1000.0);
   grW2->Draw("AP");
@@ -703,18 +733,24 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW2.dat",calibrationPeriod);
+  ofstream oFileW2(temp);
+
   // Calculate residuals in [keV]
   Double_t fitEQ_W2[num];
   for (int j=0; j<num; j++) {
     fitEQ_W2[j]    = offsetW2 + slopeW2*ADCW2[j] + quadW2*ADCW2[j]*ADCW2[j];
     if (fitEQ_W2[j] < 200.) {
       resW2[j] = fitEQ_W2[j] - peakCe;
+      oFileW2 << "Ce_West" << " " << (int) run[j] << " " << resW2[j] << endl;
     }
     else if (fitEQ_W2[j] < 400.) {
       resW2[j] = fitEQ_W2[j] - peakSn;
+      oFileW2 << "Sn_West" << " " << (int) run[j] << " " << resW2[j] << endl;
     }
     else {
       resW2[j] = fitEQ_W2[j] - peakBiHigh;
+      oFileW2 << "Bi_West" << " " << (int) run[j] << " " << resW2[j] << endl;
     }
   }
 
@@ -734,13 +770,13 @@
   grW2r->GetYaxis()->SetTitle("Residuals [keV]");
   grW2r->GetYaxis()->SetTitleOffset(1.2);
   grW2r->GetYaxis()->CenterTitle();
-  grW2r->GetXaxis()->SetLimits(0.0,1600.0);
+  grW2r->GetXaxis()->SetLimits(0.0,2400.0);
   grW2r->SetMinimum(-50.0);
   grW2r->SetMaximum( 50.0);
   grW2r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -778,7 +814,7 @@
   grW3->GetYaxis()->SetTitle("E_{Q} [keV]");
   grW3->GetYaxis()->SetTitleOffset(1.6);
   grW3->GetYaxis()->CenterTitle();
-  grW3->GetXaxis()->SetLimits(0.0,1600.0);
+  grW3->GetXaxis()->SetLimits(0.0,2400.0);
   grW3->SetMinimum(0.0);
   grW3->SetMaximum(1000.0);
   grW3->Draw("AP");
@@ -802,18 +838,24 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW3.dat",calibrationPeriod);
+  ofstream oFileW3(temp);
+
   // Calculate residuals in [keV]
   Double_t fitEQ_W3[num];
   for (int j=0; j<num; j++) {
     fitEQ_W3[j]    = offsetW3 + slopeW3*ADCW3[j] + quadW3*ADCW3[j]*ADCW3[j];
     if (fitEQ_W3[j] < 200.) {
       resW3[j] = fitEQ_W3[j] - peakCe;
+      oFileW3 << "Ce_West" << " " << (int) run[j] << " " << resW3[j] << endl;
     }
     else if (fitEQ_W3[j] < 400.) {
       resW3[j] = fitEQ_W3[j] - peakSn;
+      oFileW3 << "Sn_West" << " " << (int) run[j] << " " << resW3[j] << endl;
     }
     else {
       resW3[j] = fitEQ_W3[j] - peakBiHigh;
+      oFileW3 << "Bi_West" << " " << (int) run[j] << " " << resW3[j] << endl;
     }
   }
 
@@ -833,13 +875,13 @@
   grW3r->GetYaxis()->SetTitle("Residuals [keV]");
   grW3r->GetYaxis()->SetTitleOffset(1.2);
   grW3r->GetYaxis()->CenterTitle();
-  grW3r->GetXaxis()->SetLimits(0.0,1600.0);
+  grW3r->GetXaxis()->SetLimits(0.0,2400.0);
   grW3r->SetMinimum(-50.0);
   grW3r->SetMaximum( 50.0);
   grW3r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -877,11 +919,12 @@
   grW4->GetYaxis()->SetTitle("E_{Q} [keV]");
   grW4->GetYaxis()->SetTitleOffset(1.6);
   grW4->GetYaxis()->CenterTitle();
-  grW4->GetXaxis()->SetLimits(0.0,1600.0);
+  grW4->GetXaxis()->SetLimits(0.0,4096.0);
   grW4->SetMinimum(0.0);
   grW4->SetMaximum(1000.0);
   grW4->Draw("AP");
 
+  fitADC->SetRange(0., 3500.);
   grW4->Fit("fitADC", "R");
   Double_t offsetW4, slopeW4, quadW4;
   offsetW4 = fitADC->GetParameter(0);
@@ -901,18 +944,24 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW4.dat",calibrationPeriod);
+  ofstream oFileW4(temp);
+
   // Calculate residuals in [keV]
   Double_t fitEQ_W4[num];
   for (int j=0; j<num; j++) {
     fitEQ_W4[j]    = offsetW4 + slopeW4*ADCW4[j] + quadW4[j]*ADCW4[j]*ADCW4[j];
     if (fitEQ_W4[j] < 200.) {
       resW4[j] = fitEQ_W4[j] - peakCe;
+      oFileW4 << "Ce_West" << " " << (int) run[j] << " " << resW4[j] << endl;
     }
     else if (fitEQ_W4[j] < 400.) {
       resW4[j] = fitEQ_W4[j] - peakSn;
+      oFileW4 << "Sn_West" << " " << (int) run[j] << " " << resW4[j] << endl;
     }
     else {
       resW4[j] = fitEQ_W4[j] - peakBiHigh;
+      oFileW4 << "Bi_West" << " " << (int) run[j] << " " << resW4[j] << endl;
     }
   }
 
@@ -932,13 +981,13 @@
   grW4r->GetYaxis()->SetTitle("Residuals [keV]");
   grW4r->GetYaxis()->SetTitleOffset(1.2);
   grW4r->GetYaxis()->CenterTitle();
-  grW4r->GetXaxis()->SetLimits(0.0,1600.0);
+  grW4r->GetXaxis()->SetLimits(0.0,4000.);
   grW4r->SetMinimum(-50.0);
   grW4r->SetMaximum( 50.0);
   grW4r->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 4000.};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);
@@ -960,7 +1009,7 @@
   pt1->SetFillColor(0);
   pt1->Draw();
 
-  sprintf(temp,"residuals_West_runPeriod_%i.dat",calibrationPeriod);
+  sprintf(temp,"../residuals/residuals_West_runPeriod_%i.dat",calibrationPeriod);
   ofstream oFileW(temp);
 
   // For now, simply average the West PMT energies
@@ -1014,7 +1063,7 @@
   grWr->Draw("AP");
 
   Int_t n = 2;
-  Double_t x[n] = {0, 1600};
+  Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr1 = new TGraph(n,x,y);

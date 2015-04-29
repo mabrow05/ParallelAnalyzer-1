@@ -34,7 +34,7 @@ void plot_source_peaks(TString runNumber)
 
   // Open input ntuple
   TString filenameIn;
-  filenameIn  = "/extern/UCNA/source_peaks_MB/source_peaks_";
+  filenameIn  = TString(getenv("SOURCE_PEAKS")+TString("/source_peaks_");
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
@@ -45,7 +45,7 @@ void plot_source_peaks(TString runNumber)
   string sourceName[3];
   bool useSource[3] = {false,false,false};
   TString filenameList;
-  filenameList  = "/extern/UCNA/source_list_MB/source_list_";
+  filenameList  = TString(getenv("SOURCE_LIST"))+TString("/source_list_");
   filenameList += runNumber;
   filenameList += ".dat";
   ifstream fileList(filenameList);
@@ -58,7 +58,7 @@ void plot_source_peaks(TString runNumber)
 
   // Output file
   TString filenameOut;
-  filenameOut  = "/extern/UCNA/source_peaks_MB/source_peaks_";
+  filenameOut  = TString(getenv("SOURCE_PEAKS"))+TString("/source_peaks_");
   filenameOut += runNumber;
   filenameOut += ".pdf";
 

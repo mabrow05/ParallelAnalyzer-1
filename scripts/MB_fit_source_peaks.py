@@ -8,7 +8,7 @@ import MButils
 
 
 overwrite = True ### whether to overwrite previous source peak data files
-src_peak_path = "/extern/UCNA/source_peaks_MB/"
+src_peak_path = os.environ("SOURCE_PEAKS")
 runlist_path = "../run_lists/"
 
 for p in range(1,12,1):
@@ -21,7 +21,7 @@ for p in range(1,12,1):
         filepath = src_peak_path +"source_peaks_%i.dat"%int(line)
         print filepath
         if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
-            if int(line)>17949 and int(line)<20000: #TAKE THIS OUT AFTER DOING COMPARISON W/ BRADS ENVELOPE
+            #if int(line)>17949 and int(line)<20000: #TAKE THIS OUT AFTER DOING COMPARISON W/ BRADS ENVELOPE
                 runs.append(int(line))
 
     for run in runs:
