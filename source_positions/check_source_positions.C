@@ -34,7 +34,7 @@ void check_source_positions(TString runNumber)
 
   // Input ntuple
   TString filenameIn;
-  filenameIn  = getenv("REPLAY_PASS3")+"/replay_pass3_";
+  filenameIn  = TString(getenv("REPLAY_PASS3"))+TString("/replay_pass3_");
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
