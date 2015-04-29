@@ -44,7 +44,7 @@ void check_source_positions(TString runNumber)
   int nSources;
   string sourceName[3];
   TString filenameList;
-  filenameList  = getenv("SOURCE_LIST")+"/source_list_";
+  filenameList  = TString(getenv("SOURCE_LIST"))+TString("/source_list_");
   filenameList += runNumber;
   filenameList += ".dat";
   cout << "Reading sources from ... " << filenameList << endl;
@@ -130,7 +130,7 @@ void check_source_positions(TString runNumber)
 
   // Write fit results to file
   TString filenameOut;
-  filenameOut  = getenv("SOURCE_POSITIONS")+"/source_positions_";
+  filenameOut  = TString(getenv("SOURCE_POSITIONS"))+TString("/source_positions_");
   filenameOut += runNumber;
   filenameOut += ".dat";
   //ofstream outFit(filenameOut);

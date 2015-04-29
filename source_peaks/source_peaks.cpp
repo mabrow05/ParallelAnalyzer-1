@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   int nSources = 0;
   string sourceName[3];
   char tempList[500];
-  sprintf(tempList, "/extern/UCNA/source_list_MB/source_list_%s.dat", argv[1]);
+  sprintf(tempList, "%s/source_list_%s.dat",getenv("SOURCE_LIST"), argv[1]);
   ifstream fileList(tempList);
   if (fileList.is_open()) fileList >> nSources;
   cout << " ... Number of sources: " << nSources << endl;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
   // Open output ntuple
   char tempOut[500];
-  sprintf(tempOut, "/extern/UCNA/source_peaks_MB/source_peaks_%s.root", argv[1]);
+  sprintf(tempOut, "%s/source_peaks_%s.root",getenv("SOURCE_PEAKS"), argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
 
 
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
   double xEast[3], yEast[3], sigmaEast[3];
   double xWest[3], yWest[3], sigmaWest[3];
   char tempPos[500];
-  sprintf(tempPos, "/extern/UCNA/source_positions_MB/source_positions_%s.dat", argv[1]);
+  sprintf(tempPos, "%s/source_positions_%s.dat",getenv("SOURCE_POSITIONS"), argv[1]);
   ifstream filePos(tempPos);
   cout << " ... Reading source positions" << endl;
   for (int n=0; n<nSources; n++) {
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
   // Open input ntuple
   char tempIn[500];
-  sprintf(tempIn, "/extern/UCNA/replay_pass3_MB/replay_pass3_%s.root", argv[1]);
+  sprintf(tempIn, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
   TFile *fileIn = new TFile(tempIn, "READ");
   TTree *Tin = (TTree*)(fileIn->Get("pass3"));
 
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
 
   // Write results to file
   char tempResults[500];
-  sprintf(tempResults, "/extern/UCNA/source_peaks_MB/source_peaks_%s.dat", argv[1]);
+  sprintf(tempResults, "%s/source_peaks_%s.txt",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResults(tempResults);
 
   for (int n=0; n<nSources; n++) {
