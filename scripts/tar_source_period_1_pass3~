@@ -1,0 +1,20 @@
+#!/bin/csh
+
+tar -cvf /extern/UCNA/replay_pass3/source_period_1_pass3.tar \
+/extern/UCNA/replay_pass3/replay_pass3_17233.root \
+/extern/UCNA/replay_pass3/replay_pass3_17234.root \
+/extern/UCNA/replay_pass3/replay_pass3_17235.root \
+/extern/UCNA/replay_pass3/replay_pass3_17236.root \
+/extern/UCNA/replay_pass3/replay_pass3_17237.root \
+/extern/UCNA/replay_pass3/replay_pass3_17238.root \
+/extern/UCNA/replay_pass3/replay_pass3_17239.root \
+/extern/UCNA/replay_pass3/replay_pass3_17240.root \
+/extern/UCNA/replay_pass3/replay_pass3_17241.root \
+/extern/UCNA/replay_pass3/replay_pass3_17242.root \
+/extern/UCNA/replay_pass3/replay_pass3_17243.root \
+/extern/UCNA/replay_pass3/replay_pass3_17244.root \
+/extern/UCNA/replay_pass3/replay_pass3_17245.root \
+/extern/UCNA/replay_pass3/replay_pass3_17246.root \
+/extern/UCNA/replay_pass3/replay_pass3_17247.root \
+/extern/UCNA/replay_pass3/replay_pass3_17248.root \
+/extern/UCNA/replay_pass3/replay_pass3_17249.root \

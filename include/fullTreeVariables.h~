@@ -1,0 +1,2 @@
+double Pdc30; // East MWPC Anode PADC
+double Pdc34; // West MWPC Anode PADC
