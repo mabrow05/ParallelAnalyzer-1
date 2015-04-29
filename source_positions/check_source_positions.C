@@ -34,7 +34,7 @@ void check_source_positions(TString runNumber)
 
   // Input ntuple
   TString filenameIn;
-  filenameIn  = "/extern/UCNA/replay_pass3_MB/replay_pass3_";
+  filenameIn  = getenv("REPLAY_PASS3")+"/replay_pass3_";
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
@@ -44,7 +44,7 @@ void check_source_positions(TString runNumber)
   int nSources;
   string sourceName[3];
   TString filenameList;
-  filenameList  = "/extern/UCNA/source_list_MB/source_list_";
+  filenameList  = getenv("SOURCE_LIST")+"/source_list_";
   filenameList += runNumber;
   filenameList += ".dat";
   cout << "Reading sources from ... " << filenameList << endl;
@@ -130,7 +130,7 @@ void check_source_positions(TString runNumber)
 
   // Write fit results to file
   TString filenameOut;
-  filenameOut  = "/extern/UCNA/source_positions_MB/source_positions_";
+  filenameOut  = getenv("SOURCE_POSITIONS")+"/source_positions_";
   filenameOut += runNumber;
   filenameOut += ".dat";
   //ofstream outFit(filenameOut);

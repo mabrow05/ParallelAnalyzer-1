@@ -8,8 +8,8 @@ export PARALLEL_DATA_PATH=/path/to/directory/containing/data/directories
 # has write protected data directories, while mine have the extension _MB), then set the 
 # EXT to your extension. The Env vars below will set these
 
-EXT = "_MB"
-export SOURCE_PEAKS="${PARALLEL_DATA_PATH}/source_peaks${EXT}/"
-export SOURCE_POSITIONS="${PARALLEL_DATA_PATH}/source_positions${EXT}/"
-export SOURCE_LIST="${PARALLEL_DATA_PATH}/source_list${EXT}/"
-export REPLAY_PASS3="${PARALLEL_DATA_PATH}/replay_pass3${EXT}/"
+ext="_MB"
+export SOURCE_PEAKS="${PARALLEL_DATA_PATH}/source_peaks${ext}/"
+export SOURCE_POSITIONS="${PARALLEL_DATA_PATH}/source_positions${ext}/"
+export SOURCE_LIST="${PARALLEL_DATA_PATH}/source_list${ext}/"
+export REPLAY_PASS3="${PARALLEL_DATA_PATH}/replay_pass3${ext}/"
