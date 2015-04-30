@@ -34,7 +34,7 @@ void plot_source_peaks(TString runNumber)
 
   // Open input ntuple
   TString filenameIn;
-  filenameIn  = TString(getenv("SOURCE_PEAKS")+TString("/source_peaks_");
+  filenameIn  = TString(getenv("SOURCE_PEAKS"))+TString("/source_peaks_");
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
