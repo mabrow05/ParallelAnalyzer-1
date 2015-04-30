@@ -263,13 +263,13 @@ int main(int argc, char *argv[])
 
     for (int j=0; j<8; j++) {
       for (int i=maxBin[n][j]; i<nBin; i++) {
-        if (his[n][j]->GetBinContent(i+1) < 0.6*maxCounts[n][j]) {
+        if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
           xHigh[n][j] = his[n][j]->GetBinCenter(i+1);
           break;
         }
       }
       for (int i=maxBin[n][j]; i>0; i--) {
-        if (his[n][j]->GetBinContent(i+1) < 0.6*maxCounts[n][j]) {
+        if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
           xLow[n][j] = his[n][j]->GetBinCenter(i+1);
           break;
         }
@@ -295,6 +295,7 @@ int main(int argc, char *argv[])
 	gaussian_fit[n][j]->SetParameter(0,maxCounts[n][j]);
 	gaussian_fit[n][j]->SetParameter(1,binCenterMax[n][j]);
 	gaussian_fit[n][j]->SetParameter(2,100.0);
+	gaussian_fit[n][j]->SetParLimits(1,xLow[n][j],xHigh[n][j]);
 
 	his[n][j]->Fit(fitName, "LRQ");
 	fitMean[n][j] = gaussian_fit[n][j]->GetParameter(1);

@@ -7,7 +7,7 @@ import os
 import MButils
 
 PMT=3 # 0 -> PMTs averaged over a side; 1,2,3,4 -> Individual PMT
-Side="West" #options: "East", "West", "Both"
+Side="Both" #options: "East", "West", "Both"
 periodLow=2
 periodHigh=10
 skipPeriods=[1,4,9]
