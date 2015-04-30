@@ -10,9 +10,9 @@ import MButils
 CalibrationPeriod = 11
 omittedRuns = [17383,17385,17382,17381,17521,17876,17886,17909,17912,17950,18749,18024,19859,19364,19363,19362,19361,19360,19359,19358,19357,19356,19355,19347,19239]
 
-src_list_path = "/extern/UCNA/source_list_MB/"
-src_peak_path = "/extern/UCNA/source_peaks_MB/"
-outputFile = "/extern/UCNA/CalibrationPlots_MB/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
+src_list_path = os.environ("SOURCE_LIST")
+src_peak_path = os.environ("SOURCE_PEAKS")
+outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
 
 runList = []
 

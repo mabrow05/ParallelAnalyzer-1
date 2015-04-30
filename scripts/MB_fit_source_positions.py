@@ -8,7 +8,7 @@ import MButils
 overwrite = False ### whether to overwrite previous source position data files
                  ### This shouldn't be necessary unless changes are made
                  ### to the Wirechamber position reconstruction routine
-src_positions_path = "/extern/UCNA/source_positions_MB/"
+src_positions_path = os.environ("SOURCE_POSITIONS")
 runlist_path = "../run_lists/"
 
 for p in range(1,12,1):

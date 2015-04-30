@@ -22,13 +22,17 @@
   gStyle->SetPadRightMargin(0.05);
   gStyle->SetPadBottomMargin(0.12);
 
+  Int_t PMT = 1; //0->Average over PMTs; 1,2,3,4 -> single PMT
+
   Int_t calPeriodLow = 2;
-  Int_t calPeriodHigh = 11;
+  Int_t calPeriodHigh = 10;
 
   // Read East data file
   char tempEast[500];
-  if (calPeriodLow!=calPeriodHigh) sprintf(tempEast, "residuals_global_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
-  else sprintf(tempEast, "residuals_East_runPeriod_%i.dat", calPeriodLow);
+  if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_global_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_East_runPeriod_%i.dat", calPeriodLow);
+  else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_global_East_periods_%i-%i_PMTE%i.dat", calPeriodLow, calPeriodHigh, PMT);
+  else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_East_runPeriod_PMTE%i.dat", calPeriodLow,PMT);
   ifstream fileEast(tempEast);
 
   size_t N = 500;
@@ -62,8 +66,10 @@
 
   // Read West data file
   char tempWest[500];
-  if (calPeriodLow!=calPeriodHigh) sprintf(tempWest, "residuals_global_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
-  else sprintf(tempWest, "residuals_West_runPeriod_%i.dat", calPeriodLow);
+  if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_global_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_West_runPeriod_%i.dat", calPeriodLow);
+  else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_global_West_periods_%i-%i_PMTW%i.dat", calPeriodLow, calPeriodHigh, PMT);
+  else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_West_runPeriod_PMTW%i.dat", calPeriodLow,PMT);
   ifstream fileWest(tempWest);
 
   TString sourceWest[N];

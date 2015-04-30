@@ -1,2 +1,0 @@
-double posPdc2[32]; // East MWPC y [0:15] and x[16:31] positions
-double posPadc[32]; // West MWPC y [0:15] and x[16:31] positions
