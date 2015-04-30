@@ -6,13 +6,19 @@
 import os
 import MButils
 
-PMT=1 # 0 -> PMTs averaged over a side; 1,2,3,4 -> Individual PMT
+PMT=3 # 0 -> PMTs averaged over a side; 1,2,3,4 -> Individual PMT
+Side="West" #options: "East", "West", "Both"
 periodLow=2
 periodHigh=10
-Periods = [1,2,3,4,5,6,7,8,9,10,11]
 skipPeriods=[1,4,9]
 
-for side in ["East","West"]:
+sides = [] #holds what sides will be run
+if Side=="Both":
+    sides = ["East","West"]
+else:
+    sides=[Side]
+
+for side in sides:
     outfile=None
     if (PMT==0):
         outfile = open("../residuals/residuals_global_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")

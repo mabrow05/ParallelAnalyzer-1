@@ -41,23 +41,33 @@
   Double_t resEast[N];
   Double_t resCeEast[N], resSnEast[N], resBiEast[N];
 
+  // E_Q peaks 
+  Double_t peakCe = 98.2;
+  Double_t peakSn = 331.2;
+  Double_t peakBiLow = 443.0;
+  Double_t peakBiHigh = 928.0;
+
   Int_t i = 0;
   Int_t nCeEast = 0;
   Int_t nSnEast = 0;
   Int_t nBiEast = 0;
+  cout << "East \"bad\" runs: \n";
   while (!fileEast.eof()) {
     fileEast >> sourceEast[i] >> runEast[i] >> resEast[i];
     if (sourceEast[i] == "Ce_East") {
       resCeEast[nCeEast] = resEast[i];
       nCeEast++;
+      if (resEast[i]>0.05*peakCe) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Sn_East") {
       resSnEast[nSnEast] = resEast[i];
       nSnEast++;
+      if (resEast[i]>0.05*peakSn) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Bi_East") {
       resBiEast[nBiEast] = resEast[i];
       nBiEast++;
+      if (resEast[i]>0.05*peakBiHigh) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (fileEast.fail()) break;
     i++;
@@ -81,19 +91,24 @@
   Int_t nCeWest = 0;
   Int_t nSnWest = 0;
   Int_t nBiWest = 0;
+  
+  cout << "West \"bad\" runs: \n";
   while (!fileWest.eof()) {
     fileWest >> sourceWest[i] >> runWest[i] >> resWest[i];
     if (sourceWest[i] == "Ce_West") {
       resCeWest[nCeWest] = resWest[i];
       nCeWest++;
+      if (resWest[i]>0.05*peakCe) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Sn_West") {
       resSnWest[nSnWest] = resWest[i];
       nSnWest++;
+      if (resWest[i]>0.05*peakSn) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Bi_West") {
       resBiWest[nBiWest] = resWest[i];
       nBiWest++;
+      if (resWest[i]>0.05*peakBiHigh) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (fileWest.fail()) break;
     i++;

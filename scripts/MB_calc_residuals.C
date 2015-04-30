@@ -25,7 +25,7 @@
   //Run Range for this envelope
   //Int_t runLow = 17359;
   //Int_t runHigh = 19959;
-  Int_t calibrationPeriod = 7;
+  Int_t calibrationPeriod = 10;
   // Source peaks from simulation
   Double_t peakCe = 98.2;
   Double_t peakSn = 331.2;
