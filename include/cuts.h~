@@ -1,7 +1,0 @@
-char comment[500]; // dummy for comments in cuts file
-
-double cutEastAnode; // East MWPC Anode
-double cutWestAnode; // West MWPC Anode
-
-double cutEastTwoFold; // East Scintillator Two-Fold Trigger
-double cutWestTwoFold; // West Scintillator Two-Fold Trigger
