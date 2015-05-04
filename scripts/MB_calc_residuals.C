@@ -25,7 +25,7 @@
   //Run Range for this envelope
   //Int_t runLow = 17359;
   //Int_t runHigh = 19959;
-  Int_t calibrationPeriod = 10;
+  Int_t calibrationPeriod = 7;
   // Source peaks from simulation
   Double_t peakCe = 98.2;
   Double_t peakSn = 331.2;
@@ -1016,7 +1016,8 @@
   cout << "CALCULATING WEST RESIDUALS" << endl;
   double EQ_West[num], res_West[num], x_West[num];
   for (int j=0; j<num; j++) {
-    EQ_West[j] = 0.33*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j]);
+    EQ_West[j] = 0.25*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j] + fitEQ_W4[j]);
+    //EQ_West[j] = 0.33*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j]);
 
     if (EQ_West[j] < 200.) {
       res_West[j] = EQ_West[j] - peakCe;

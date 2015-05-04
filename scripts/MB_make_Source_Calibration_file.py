@@ -7,11 +7,18 @@ import os
 import MButils
 
 #runRange = [17359,19959]
-CalibrationPeriod = 11
-omittedRuns = [17383,17385,17382,17381,17521,17876,17886,17909,17912,17950,18749,18024,19859,19364,19363,19362,19361,19360,19359,19358,19357,19356,19355,19347,19239]
+CalibrationPeriod = 8
+omittedRuns = [17383,17385,17382,17886,17912,19859,19239,19232]
+omittedRanges = [(19347,19364),(18020,18055)]
 
-src_list_path = os.environ("SOURCE_LIST")
-src_peak_path = os.environ("SOURCE_PEAKS")
+for Range in omittedRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        omittedRuns.append(run)
+
+print omittedRuns
+
+src_list_path = os.getenv("SOURCE_LIST")
+src_peak_path = os.getenv("SOURCE_PEAKS")
 outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
 
 runList = []
