@@ -7,7 +7,7 @@ import os
 import MButils
 
 #runRange = [17359,19959]
-CalibrationPeriod = 8
+CalibrationPeriod = 11
 omittedRuns = [17383,17385,17382,17886,17912,19859,19239,19232]
 omittedRanges = [(19347,19364),(18020,18055)]
 
