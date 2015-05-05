@@ -8,7 +8,7 @@ import MButils
 
 
 overwrite = True ### whether to overwrite previous source peak data files
-src_peak_path = os.environ("SOURCE_PEAKS")
+src_peak_path = os.environ["SOURCE_PEAKS"]
 runlist_path = "../run_lists/"
 
 for p in range(1,12,1):

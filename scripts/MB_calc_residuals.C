@@ -1,6 +1,6 @@
+#include <vector>
 
-
-//void MB_calc_residuals(Int_t runPeriod)
+void MB_calc_residuals(Int_t runPeriod)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -28,7 +28,7 @@
   //Run Range for this envelope
   //Int_t runLow = 17359;
   //Int_t runHigh = 19959;
-  Int_t calibrationPeriod = 7;
+  Int_t calibrationPeriod = runPeriod;
   // Source peaks from simulation
   Double_t peakCe = 98.2;
   Double_t peakSn = 331.2;
@@ -120,7 +120,7 @@
   ofstream oFileE1(temp);
 
   // Calculate residuals in [keV]
-  Double_t fitEQ_E1[num];
+  vector <Double_t> fitEQ_E1(num,0);
   for (int j=0; j<num; j++) {
     fitEQ_E1[j]    = offsetE1 + slopeE1*ADCE1[j] + quadE1*ADCE1[j]*ADCE1[j];
     if (EQ[j]==98.2) {
@@ -161,7 +161,7 @@
   grE1r->SetMaximum( 50.0);
   grE1r->Draw("AP");
 
-  Int_t n = 2;
+  const Int_t n = 2;
   Double_t x[n] = {0, 2400};
   Double_t y[n] = {0.0, 0.0};
 
@@ -230,7 +230,7 @@
   ofstream oFileE2(temp);
 
   // Calculate residuals in [keV]
-  Double_t fitEQ_E2[num];
+  vector <Double_t> fitEQ_E2(num,0);
   for (int j=0; j<num; j++) {
     fitEQ_E2[j]    = offsetE2 + slopeE2*ADCE2[j] + quadE2*ADCE2[j]*ADCE2[j];
     if (EQ[j]==98.2) {
@@ -344,7 +344,7 @@
   ofstream oFileE3(temp);
 
   // Calculate residuals in [keV]
-  Double_t fitEQ_E3[num];
+  vector <Double_t> fitEQ_E3(num,0);
   for (int j=0; j<num; j++) {
     fitEQ_E3[j]    = offsetE3 + slopeE3*ADCE3[j] + quadE3*ADCE3[j]*ADCE3[j];
     if (EQ[j]==98.2) {
@@ -458,7 +458,7 @@
   ofstream oFileE4(temp);
 
   // Calculate residuals in [keV]
-  Double_t fitEQ_E4[num];
+  vector <Double_t> fitEQ_E4(num,0);
   for (int j=0; j<num; j++) {
     fitEQ_E4[j]    = offsetE4 + slopeE4*ADCE4[j] + quadE4*ADCE4[j]*ADCE4[j];
     if (EQ[j]==98.2) {
@@ -531,7 +531,10 @@
 
   // For now, simply average the East PMT energies
   cout << "CALCULATING EAST RESIDUALS" << endl;
-  double EQ_East[num], res_East[num], x_East[num];
+  vector <Double_t> EQ_East(num,0);
+  vector <Double_t> x_East(num,0);
+  vector <Double_t> res_East(num,0);
+  //double EQ_East[num], res_East[num], x_East[num];
   for (int j=0; j<num; j++) {
     EQ_East[j] = 0.25*(fitEQ_E1[j] + fitEQ_E2[j] + fitEQ_E3[j] + fitEQ_E4[j]);
     //EQ_East[j] = 0.5*(fitEQ_E1[j] + fitEQ_E2[j]);
@@ -563,7 +566,7 @@
   cEr = new TCanvas("cEr", "cEr");
   cEr->SetLogy(0);
 
-  TGraphErrors *grEr = new TGraphErrors(num,x_East,res_East,err,err);
+  TGraphErrors *grEr = new TGraphErrors(num,&x_East[0],&res_East[0],err,err);
   grEr->SetTitle("");
   grEr->SetMarkerColor(1);
   grEr->SetLineColor(1);
@@ -649,7 +652,8 @@
   ofstream oFileW1(temp);
   
   // Calculate residuals in [keV]
-  Double_t fitEQ_W1[num];
+  vector <Double_t> fitEQ_W1(num,0);
+  //Double_t fitEQ_W1[num];
   for (int j=0; j<num; j++) {
     fitEQ_W1[j]    = offsetW1 + slopeW1*ADCW1[j] + quadW1*ADCW1[j]*ADCW1[j];
     if (EQ[j]==98.2) {
@@ -756,7 +760,8 @@
   ofstream oFileW2(temp);
 
   // Calculate residuals in [keV]
-  Double_t fitEQ_W2[num];
+  vector <Double_t> fitEQ_W2(num,0);
+  //Double_t fitEQ_W2[num];
   for (int j=0; j<num; j++) {
     fitEQ_W2[j]    = offsetW2 + slopeW2*ADCW2[j] + quadW2*ADCW2[j]*ADCW2[j];
     if (EQ[j]==98.2) {
@@ -862,7 +867,8 @@
   ofstream oFileW3(temp);
 
   // Calculate residuals in [keV]
-  Double_t fitEQ_W3[num];
+  vector <Double_t> fitEQ_W3(num,0);
+  //Double_t fitEQ_W3[num];
   for (int j=0; j<num; j++) {
     fitEQ_W3[j]    = offsetW3 + slopeW3*ADCW3[j] + quadW3*ADCW3[j]*ADCW3[j];
     if (EQ[j]==98.2) {
@@ -971,7 +977,8 @@
   ofstream oFileW4(temp);
 
   // Calculate residuals in [keV]
-  Double_t fitEQ_W4[num];
+  vector <Double_t> fitEQ_W4(num,0);
+  //Double_t fitEQ_W4[num];
   for (int j=0; j<num; j++) {
     fitEQ_W4[j]    = offsetW4 + slopeW4*ADCW4[j] + quadW4[j]*ADCW4[j]*ADCW4[j];
     if (EQ[j]==98.2) {
@@ -1037,7 +1044,10 @@
 
   // For now, simply average the West PMT energies
   cout << "CALCULATING WEST RESIDUALS" << endl;
-  double EQ_West[num], res_West[num], x_West[num];
+  vector <Double_t> EQ_West(num,0);
+  vector <Double_t> res_West(num,0);
+  vector <Double_t> x_West(num,0);
+  //double EQ_West[num], res_West[num], x_West[num];
   for (int j=0; j<num; j++) {
     EQ_West[j] = 0.25*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j] + fitEQ_W4[j]);
     //EQ_West[j] = 0.33*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j]);
@@ -1069,7 +1079,7 @@
   cWr = new TCanvas("cWr", "cWr");
   cWr->SetLogy(0);
 
-  TGraphErrors *grWr = new TGraphErrors(num,x_West,res_West,err,err);
+  TGraphErrors *grWr = new TGraphErrors(num,&x_West[0],&res_West[0],err,err);
   grWr->SetTitle("");
   grWr->SetMarkerColor(1);
   grWr->SetLineColor(1);
