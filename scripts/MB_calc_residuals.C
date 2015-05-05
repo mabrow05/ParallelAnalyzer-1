@@ -1,3 +1,6 @@
+
+
+//void MB_calc_residuals(Int_t runPeriod)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -56,13 +59,17 @@
 
   //TFile *outfile = new TFile("EnergyCal_18745-18756.root","RECREATE");
 
+  //File to hold the linearity curves for each calibration run period
+  sprintf(temp,"../linearity_curves/lin_curves_srcCal_Period_%i.dat",calibrationPeriod);
+  ofstream linCurves(temp);
+
   // Fit function
   TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)", 0.0, 2500.0);
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
 
-  fitADC->SetParLimits(2, -0.0001, 0.0001);
+  //fitADC->SetParLimits(2, -0.01, 0.01);
 
   fitADC->SetNpx(100000);
   fitADC->SetLineColor(2);
@@ -94,6 +101,8 @@
   slopeE1 = fitADC->GetParameter(1);
   quadE1 = fitADC->GetParameter(2);
 
+  linCurves << offsetE1 << " " << slopeE1 << " " << quadE1 << endl;
+  
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -114,17 +123,17 @@
   Double_t fitEQ_E1[num];
   for (int j=0; j<num; j++) {
     fitEQ_E1[j]    = offsetE1 + slopeE1*ADCE1[j] + quadE1*ADCE1[j]*ADCE1[j];
-    if (fitEQ_E1[j] < 200.) {
+    if (EQ[j]==98.2) {
       resE1[j] = fitEQ_E1[j] - peakCe;
       oFileE1 << "Ce_East" << " " << (int) run[j] << " " << resE1[j] << endl;
       //resE1[j] = (fitEQ - peakCe)/peakCe * 100.;
     }
-    else if (fitEQ_E1[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resE1[j] = fitEQ_E1[j] - peakSn;
       //resE1[j] = (fitEQ - peakSn)/peakSn * 100.;
       oFileE1 << "Sn_East" << " " << (int) run[j] << " " << resE1[j] << endl;
     }
-    else {
+    else if (EQ[j]==928.0) {
       resE1[j] = fitEQ_E1[j] - peakBiHigh;
       //resE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
       oFileE1 << "Bi_East" << " " << (int) run[j] << " " << resE1[j] << endl;
@@ -202,6 +211,8 @@
   slopeE2 = fitADC->GetParameter(1);
   quadE2 = fitADC->GetParameter(2);
 
+  linCurves << offsetE2 << " " << slopeE2 << " " << quadE2 << endl;
+
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -222,21 +233,21 @@
   Double_t fitEQ_E2[num];
   for (int j=0; j<num; j++) {
     fitEQ_E2[j]    = offsetE2 + slopeE2*ADCE2[j] + quadE2*ADCE2[j]*ADCE2[j];
-    if (fitEQ_E2[j] < 200.) {
+    if (EQ[j]==98.2) {
       resE2[j] = fitEQ_E2[j] - peakCe;
       //resE2[j] = (fitEQ - peakCe)/peakCe * 100.;
       oFileE2 << "Ce_East" << " " << (int) run[j] << " " << resE2[j] << endl;
     }
-    else if (fitEQ_E2[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resE2[j] = fitEQ_E2[j] - peakSn;
       //resE2[j] = (fitEQ - peakSn)/peakSn * 100.;
       oFileE2 << "Sn_East" << " " << (int) run[j] << " " << resE2[j] << endl;
     }
-    else if (fitEQ_E2[j] < 600.) {
+    else if (EQ[j]== 443.0) {
       resE2[j] = fitEQ_E2[j] - peakBiLow;
       //resE2[j] = (fitEQ - peakBiLow)/peakBiLow * 100.;
     }
-    else {
+    else if (EQ[j]==928.0) {
       resE2[j] = fitEQ_E2[j] - peakBiHigh;
       //resE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
       oFileE2 << "Bi_East" << " " << (int) run[j] << " " << resE2[j] << endl;
@@ -314,6 +325,8 @@
   slopeE3 = fitADC->GetParameter(1);
   quadE3 = fitADC->GetParameter(2);
 
+  linCurves << offsetE3 << " " << slopeE3 << " " << quadE3 << endl;
+
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -334,21 +347,21 @@
   Double_t fitEQ_E3[num];
   for (int j=0; j<num; j++) {
     fitEQ_E3[j]    = offsetE3 + slopeE3*ADCE3[j] + quadE3*ADCE3[j]*ADCE3[j];
-    if (fitEQ_E3[j] < 200.) {
+    if (EQ[j]==98.2) {
       resE3[j] = fitEQ_E3[j] - peakCe;
       //resE3[j] = (fitEQ - peakCe)/peakCe * 100.;
       oFileE3 << "Ce_East" << " " << (int) run[j] << " " << resE3[j] << endl;
     }
-    else if (fitEQ_E3[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resE3[j] = fitEQ_E3[j] - peakSn;
       //resE3[j] = (fitEQ - peakSn)/peakSn * 100.;
       oFileE3 << "Sn_East" << " " << (int) run[j] << " " << resE3[j] << endl;
     }
-    else if (fitEQ_E3[j] < 600.) {
+    else if (EQ[j]==443.0) {
       resE3[j] = fitEQ_E3[j] - peakBiLow;
       //resE3[j] = (fitEQ - peakBiLow)/peakBiLow * 100.;
     }
-    else {
+    else if (EQ[j]==928.0) {
       resE3[j] = fitEQ_E3[j] - peakBiHigh;
       //resE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
       oFileE3 << "Bi_East" << " " << (int) run[j] << " " << resE3[j] << endl;
@@ -426,6 +439,8 @@
   slopeE4 = fitADC->GetParameter(1);
   quadE4 = fitADC->GetParameter(2);
 
+  linCurves << offsetE4 << " " << slopeE4 << " " << quadE4 << endl;
+
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -446,21 +461,21 @@
   Double_t fitEQ_E4[num];
   for (int j=0; j<num; j++) {
     fitEQ_E4[j]    = offsetE4 + slopeE4*ADCE4[j] + quadE4*ADCE4[j]*ADCE4[j];
-    if (fitEQ_E4[j] < 200.) {
+    if (EQ[j]==98.2) {
       resE4[j] = fitEQ_E4[j] - peakCe;
       //resE4[j] = (fitEQ - peakCe)/peakCe * 100.;
       oFileE4 << "Ce_East" << " " << (int) run[j] << " " << resE4[j] << endl;
     }
-    else if (fitEQ_E4[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resE4[j] = fitEQ_E4[j] - peakSn;
       //resE4[j] = (fitEQ - peakSn)/peakSn * 100.;
       oFileE4 << "Sn_East" << " " << (int) run[j] << " " << resE4[j] << endl;
     }
-    else if (fitEQ_E4[j] < 600.) {
+    else if (EQ[j]==443.0) {
       resE4[j] = fitEQ_E4[j] - peakBiLow;
       //resE4[j] = (fitEQ - peakBiLow)/peakBiLow * 100.;
     }
-    else {
+    else if (EQ[j]==928.0) {
       resE4[j] = fitEQ_E4[j] - peakBiHigh;
       //resE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
       oFileE4 << "Bi_East" << " " << (int) run[j] << " " << resE4[j] << endl;
@@ -521,21 +536,21 @@
     EQ_East[j] = 0.25*(fitEQ_E1[j] + fitEQ_E2[j] + fitEQ_E3[j] + fitEQ_E4[j]);
     //EQ_East[j] = 0.5*(fitEQ_E1[j] + fitEQ_E2[j]);
 
-    if (EQ_East[j] < 200.) {
+    if (EQ[j]==98.2) {
       res_East[j] = EQ_East[j] - peakCe;
       x_East[j] = peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ_East[j] < 400.) {
+    else if (EQ[j]==331.2) {
       res_East[j] = EQ_East[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ_East[j] < 600.) {
+    else if (EQ[j]==443.0) {
       res_East[j] = EQ_East[j] - peakBiLow;
       x_East[j] = peakBiLow;
     }
-    else {
+    else if (EQ[j]==928.0) {
       res_East[j] = EQ_East[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
       oFileE << "Bi_East" << " " << (int) run[j] << " " << res_East[j] << endl;
@@ -615,6 +630,8 @@
   slopeW1 = fitADC->GetParameter(1);
   quadW1 = fitADC->GetParameter(2);
 
+  linCurves << offsetW1 << " " << slopeW1 << " " << quadW1 << endl;
+
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -635,15 +652,15 @@
   Double_t fitEQ_W1[num];
   for (int j=0; j<num; j++) {
     fitEQ_W1[j]    = offsetW1 + slopeW1*ADCW1[j] + quadW1*ADCW1[j]*ADCW1[j];
-    if (fitEQ_W1[j] < 200.) {
+    if (EQ[j]==98.2) {
       resW1[j] = fitEQ_W1[j] - peakCe;
       oFileW1 << "Ce_West" << " " << (int) run[j] << " " << resW1[j] << endl;
     }
-    else if (fitEQ_W1[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resW1[j] = fitEQ_W1[j] - peakSn;
       oFileW1 << "Sn_West" << " " << (int) run[j] << " " << resW1[j] << endl;
     }
-    else {
+    else if (EQ[j]==928.0) {
       resW1[j] = fitEQ_W1[j] - peakBiHigh;
       oFileW1 << "Bi_West" << " " << (int) run[j] << " " << resW1[j] << endl;
     }
@@ -720,6 +737,8 @@
   slopeW2 = fitADC->GetParameter(1);
   quadW2 = fitADC->GetParameter(2);
 
+  linCurves << offsetW2 << " " << slopeW2 << " " << quadW2 << endl;
+
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -740,15 +759,15 @@
   Double_t fitEQ_W2[num];
   for (int j=0; j<num; j++) {
     fitEQ_W2[j]    = offsetW2 + slopeW2*ADCW2[j] + quadW2*ADCW2[j]*ADCW2[j];
-    if (fitEQ_W2[j] < 200.) {
+    if (EQ[j]==98.2) {
       resW2[j] = fitEQ_W2[j] - peakCe;
       oFileW2 << "Ce_West" << " " << (int) run[j] << " " << resW2[j] << endl;
     }
-    else if (fitEQ_W2[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resW2[j] = fitEQ_W2[j] - peakSn;
       oFileW2 << "Sn_West" << " " << (int) run[j] << " " << resW2[j] << endl;
     }
-    else {
+    else if (EQ[j]==928.0) {
       resW2[j] = fitEQ_W2[j] - peakBiHigh;
       oFileW2 << "Bi_West" << " " << (int) run[j] << " " << resW2[j] << endl;
     }
@@ -825,6 +844,7 @@
   slopeW3 = fitADC->GetParameter(1);
   quadW3 = fitADC->GetParameter(2);
 
+  linCurves << offsetW3 << " " << slopeW3 << " " << quadW3 << endl;
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -845,15 +865,15 @@
   Double_t fitEQ_W3[num];
   for (int j=0; j<num; j++) {
     fitEQ_W3[j]    = offsetW3 + slopeW3*ADCW3[j] + quadW3*ADCW3[j]*ADCW3[j];
-    if (fitEQ_W3[j] < 200.) {
+    if (EQ[j]==98.2) {
       resW3[j] = fitEQ_W3[j] - peakCe;
       oFileW3 << "Ce_West" << " " << (int) run[j] << " " << resW3[j] << endl;
     }
-    else if (fitEQ_W3[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resW3[j] = fitEQ_W3[j] - peakSn;
       oFileW3 << "Sn_West" << " " << (int) run[j] << " " << resW3[j] << endl;
     }
-    else {
+    else if (EQ[j]==928.0) {
       resW3[j] = fitEQ_W3[j] - peakBiHigh;
       oFileW3 << "Bi_West" << " " << (int) run[j] << " " << resW3[j] << endl;
     }
@@ -931,6 +951,9 @@
   slopeW4 = fitADC->GetParameter(1);
   quadW4 = fitADC->GetParameter(2);
 
+  linCurves << offsetW4 << " " << slopeW4 << " " << quadW4;
+  linCurves.close();
+  
   Double_t x1_text = 1200;
   Double_t y1_text = 100;
 
@@ -951,15 +974,15 @@
   Double_t fitEQ_W4[num];
   for (int j=0; j<num; j++) {
     fitEQ_W4[j]    = offsetW4 + slopeW4*ADCW4[j] + quadW4[j]*ADCW4[j]*ADCW4[j];
-    if (fitEQ_W4[j] < 200.) {
+    if (EQ[j]==98.2) {
       resW4[j] = fitEQ_W4[j] - peakCe;
       oFileW4 << "Ce_West" << " " << (int) run[j] << " " << resW4[j] << endl;
     }
-    else if (fitEQ_W4[j] < 400.) {
+    else if (EQ[j]==331.2) {
       resW4[j] = fitEQ_W4[j] - peakSn;
       oFileW4 << "Sn_West" << " " << (int) run[j] << " " << resW4[j] << endl;
     }
-    else {
+    else if (EQ[j]==928.0){
       resW4[j] = fitEQ_W4[j] - peakBiHigh;
       oFileW4 << "Bi_West" << " " << (int) run[j] << " " << resW4[j] << endl;
     }
@@ -1019,21 +1042,21 @@
     EQ_West[j] = 0.25*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j] + fitEQ_W4[j]);
     //EQ_West[j] = 0.33*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j]);
 
-    if (EQ_West[j] < 200.) {
+    if (EQ[j]==98.2) {
       res_West[j] = EQ_West[j] - peakCe;
       x_West[j] = peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ_West[j] < 400.) {
+    else if (EQ[j]==331.2) {
       res_West[j] = EQ_West[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ_West[j] < 600.) {
-      res_West[j] = EQ_West[j] - peakBiLow;
-      x_West[j] = peakBiLow;
-    }
-    else {
+    //    else if (EQ_West[j] < 600.) {
+    //res_West[j] = EQ_West[j] - peakBiLow;
+    //x_West[j] = peakBiLow;
+    //}
+    else if (EQ[j]==928.0) {
       res_West[j] = EQ_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
       oFileW << "Bi_West" << " " << (int) run[j] << " " << res_West[j] << endl;

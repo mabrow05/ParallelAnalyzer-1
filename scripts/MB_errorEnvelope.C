@@ -22,7 +22,7 @@
   gStyle->SetPadRightMargin(0.05);
   gStyle->SetPadBottomMargin(0.12);
 
-  Int_t PMT = 1; //0->Average over PMTs; 1,2,3,4 -> single PMT
+  Int_t PMT = 4; //0->Average over PMTs; 1,2,3,4 -> single PMT
 
   Int_t calPeriodLow = 2;
   Int_t calPeriodHigh = 10;
