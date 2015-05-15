@@ -74,17 +74,17 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
     if (sourceEast[i] == "Ce_East") {
       resCeEast[nCeEast] = resEast[i];
       nCeEast++;
-      if (resEast[i]>0.05*peakCe) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakCe) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Sn_East") {
       resSnEast[nSnEast] = resEast[i];
       nSnEast++;
-      if (resEast[i]>0.05*peakSn) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakSn) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Bi_East") {
       resBiEast[nBiEast] = resEast[i];
       nBiEast++;
-      if (resEast[i]>0.05*peakBiHigh) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakBiHigh) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (fileEast.fail()) break;
     i++;
@@ -115,17 +115,17 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
     if (sourceWest[i] == "Ce_West") {
       resCeWest[nCeWest] = resWest[i];
       nCeWest++;
-      if (resWest[i]>0.05*peakCe) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakCe) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Sn_West") {
       resSnWest[nSnWest] = resWest[i];
       nSnWest++;
-      if (resWest[i]>0.05*peakSn) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakSn) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Bi_West") {
       resBiWest[nBiWest] = resWest[i];
       nBiWest++;
-      if (resWest[i]>0.05*peakBiHigh) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakBiHigh) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (fileWest.fail()) break;
     i++;

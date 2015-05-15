@@ -14,6 +14,54 @@ for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
         omittedRuns.append(run)
 
+##### Set up which runs to omit which PMTs
+#### This will be done by having a file with all source runs, where the PMT value
+#### is set to 0 or 1 to represent false (don't use) and true (do use)
+
+EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working
+EPMT2 = []
+EPMT3 = []
+EPMT4 = []
+WPMT1 = []
+WPMT2 = []
+WPMT3 = []
+WPMT4 = []
+
+EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
+EPMT2_runRanges = []
+EPMT3_runRanges = []
+EPMT4_runRanges = []
+WPMT1_runRanges = [(17359,18055)]
+WPMT2_runRanges = [(17233,17249)]
+WPMT3_runRanges = []
+WPMT4_runRanges = [(19347,19960)]
+
+for Range in EPMT1_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        EPMT1.append(run)
+for Range in EPMT2_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        EPMT2.append(run)
+for Range in EPMT3_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        EPMT3.append(run)
+for Range in EPMT4_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        EPMT4.append(run)
+for Range in WPMT1_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        WPMT1.append(run)
+for Range in WPMT2_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        WPMT2.append(run)
+for Range in WPMT3_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        WPMT3.append(run)
+for Range in WPMT4_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        WPMT4.append(run)
+
+
 
 class CalibrationManager:
     
@@ -60,7 +108,51 @@ class CalibrationManager:
             print "Ran fit_source_peaks.C on run %i"%run
 
 
+    def makePMTrunFile(self,CalibrationPeriod=1):
+        outputFile = "../residuals/PMT_runQuality_SrcPeriod_%i.dat"%(CalibrationPeriod)
+        runList = []
+
+        with open("../run_lists/Source_Calibration_Run_Period_%i.dat"%CalibrationPeriod) as runlist:
+            for run in runlist:
+                if os.path.isfile(self.srcListPath+"source_list_%i.dat"%int(run)) and int(run) not in omittedRuns:
+                    srcList = open(self.srcListPath+"source_list_%i.dat"%int(run))
+                    lines = []
+                    for line in srcList:
+                        lines.append(line)
+                    if int(lines[0])>0:
+                        runList.append(int(run))
+
+        outfile = open(outputFile,'w')
+        pmtList = [1,1,1,1,1,1,1,1]
+
+        for run in runList:
+            if run in EPMT1:
+                pmtList[0]=0
+            if run in EPMT2:
+                pmtList[1]=0
+            if run in EPMT3:
+                pmtList[2]=0
+            if run in EPMT4:
+                pmtList[3]=0
+            if run in WPMT1:
+                pmtList[4]=0
+            if run in WPMT2:
+                pmtList[5]=0
+            if run in WPMT3:
+                pmtList[6]=0
+            if run in WPMT4:
+                pmtList[7]=0
+
+            outfile.write("%i %i %i %i %i %i %i %i %i\n"%(run,pmtList[0],pmtList[1],pmtList[2],pmtList[3],
+                                                          pmtList[4],pmtList[5],pmtList[6],pmtList[7]))
+
+        outfile.close()
+        print "Done writing PMT file for Source Period %i"%CalibrationPeriod
+
+
     def makeSourceCalibrationFile(self,CalibrationPeriod=1):
+        #This utilizes the omittedRuns and removes them from the calibration. Any time you make a change
+        # to the runs which are to be omitted, you shoud rerun this!
 
         outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
         runList = []
@@ -167,7 +259,18 @@ class CalibrationManager:
             print "Making Error Envelope for Run Periods %i to %i"%(calPeriodLow,calPeriodHigh)
             os.system("root -l -b -q 'MB_errorEnvelope.C (%i,%i,%i)'"%(calPeriodLow,calPeriodHigh,PMT))
 
-        
+class BetaDecayDataManager:
+    def __init__(self):
+        self.AnalyzerPath = "../"
+        self.runListPath = self.AnalyzerPath + "run_lists/"
+        self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
+        self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
+        self.srcPeakPath = os.getenv("SOURCE_PEAKS")
+        self.replayPass3 = os.getenv("REPLAY_PASS3")
+        self.srcListPath = os.getenv("SOURCE_LIST")
+
+    def runReplayPass4(self, run=None):
+        return 0
 
 
 
@@ -188,6 +291,9 @@ if __name__ == "__main__":
                       help="Combine all residuals into one file for drawing error envelope")
     parser.add_option("--ErrorEnvelope",dest="ErrorEnvelope",action="store_true",default=False,
                       help="Make error envelope and save mean and sigma to file in ../error_envelope.")
+    parser.add_option("--makePMTrunFile",dest="makePMTrunFile",action="store_true",default=False,
+                      help="Make file with booleans for whether to use each PMT for each run.")
+                      
 
     options, args = parser.parse_args()
 
@@ -195,7 +301,7 @@ if __name__ == "__main__":
     ### This will fit all the source peaks for any runs in the runPeriods list below
     if options.fitSrcPeaks:
         
-        runPeriods = [2,3,4,5,6,7,8,9,10,11]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.fitSourcePeaks(period)
@@ -206,11 +312,18 @@ if __name__ == "__main__":
     ### reason to redo them is if the position maps change.
     if options.fitSrcPositions:
         
-        runPeriods = [2,3,4,5,6,7,8,9,10,11]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.fitSourcePositions(period,False)
         
+    ### Makes a file with each run followed by a boolean (0,1) for whether each PMT should be used or not
+    if options.makePMTrunFile:
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11]
+        cal=CalibrationManager()
+        for period in runPeriods:
+            cal.makePMTrunFile(period)
+
 
     ### If you have made changes to the runs which are to be ignored at the top of this script, you should run this 
     if options.makeAllCalFiles:
@@ -219,7 +332,9 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period)
+            cal.makePMTRunFiles
             cal.calculateResiduals(period)
+            
 
         cal.makeGlobalResiduals(runPeriods,PMT=1,Side="Both")
 
