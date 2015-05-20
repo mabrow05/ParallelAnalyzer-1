@@ -389,7 +389,7 @@ if __name__ == "__main__":
     ### If you have made changes to the runs which are to be ignored at the top of this script, you should run this 
     if options.makeAllCalFiles:
     
-        runPeriods = [2,3,4,5,6,7,8,9,11]
+        runPeriods = [1,2,3,4,5,6,7,8,9,11,12]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period)
