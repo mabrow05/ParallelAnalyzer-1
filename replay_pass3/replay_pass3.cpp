@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
   // Open output ntuple
   char tempOut[500];
-  sprintf(tempOut, "/extern/UCNA/replay_pass3_MB/replay_pass3_%s.root", argv[1]);
+  sprintf(tempOut, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
   TTree *Tout = new TTree("pass3", "pass3");
 
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
   // Open input ntuple
   char tempIn[500];
-  sprintf(tempIn, "/extern/UCNA/replay_pass2/replay_pass2_%s.root", argv[1]);
+  sprintf(tempIn, "%s/replay_pass2_%s.root", getenv("REPLAY_PASS2"),argv[1]);
 
   TFile *fileIn = new TFile(tempIn, "READ");
   TTree *Tin = (TTree*)(fileIn->Get("pass2"));

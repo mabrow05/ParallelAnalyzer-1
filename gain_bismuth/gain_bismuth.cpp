@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
   // Open output ntuple
   char tempOut[500];
-  sprintf(tempOut, "/extern/UCNA/gain_bismuth/gain_bismuth_%s.root", argv[1]);
+  sprintf(tempOut, "%s/gain_bismuth_%s.root",getenv("GAIN_BISMUTH"),argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
 
   // Run number integer
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
   // Open input ntuple
   char tempIn[500];
-  sprintf(tempIn, "/extern/UCNA/replay_pass1/replay_pass1_%s.root", argv[1]);
+  sprintf(tempIn, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
   TFile *fileIn = new TFile(tempIn, "READ");
   TTree *Tin = (TTree*)(fileIn->Get("pass1"));
   int nEvents = Tin->GetEntries();
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
   double referenceMean[8];
 
   // Source Calibration Run Period 1
-  if (runNumber >= 17233 && runNumber <= 17358) {
+  if (runNumber >= 17233 && runNumber <= 17249) {
     referenceMean[0] = 2768.38;
     referenceMean[1] = 2911.87;
     referenceMean[2] = 2820.94;
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 2
-  if (runNumber >= 17359 && runNumber <= 17516) {
+  if (runNumber >= 17359 && runNumber <= 17387) {
     referenceMean[0] = 2783.11;
     referenceMean[1] = 2825.62;
     referenceMean[2] = 2665.44;
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 3
-  if (runNumber >= 17517 && runNumber <= 17870) {
+  if (runNumber >= 17517 && runNumber <= 17527) {
     referenceMean[0] = 2925.49;
     referenceMean[1] = 2860.85;
     referenceMean[2] = 2646.09;
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 4
-  if (runNumber >= 17871 && runNumber <= 18356) {
+  if (runNumber >= 17871 && runNumber <= 18055) {
     referenceMean[0] = 2913.21;
     referenceMean[1] = 2726.86;
     referenceMean[2] = 2614.41;
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 5
-  if (runNumber >= 18357 && runNumber <= 18616) {
+  if (runNumber >= 18357 && runNumber <= 18386) {
     referenceMean[0] = 3139.68;
     referenceMean[1] = 2478.71;
     referenceMean[2] = 2635.56;
@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 6
-  if (runNumber >= 18617 && runNumber <= 18744) {
+  if (runNumber >= 18617 && runNumber <= 18640) {
     referenceMean[0] = 2798.3;
     referenceMean[1] = 2648.22;
     referenceMean[2] = 2643.97;
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 7
-  if (runNumber >= 18745 && runNumber <= 19202) {
+  if (runNumber >= 18745 && runNumber <= 18768) {
     referenceMean[0] = 2473.59;
     referenceMean[1] = 2490.29;
     referenceMean[2] = 2635.3;
@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 8
-  if (runNumber >= 19203 && runNumber <= 19504) {
+  if (runNumber >= 19203 && runNumber <= 19239) {
     referenceMean[0] = 2543.39;
     referenceMean[1] = 2581.96;
     referenceMean[2] = 2697.13;
@@ -333,20 +333,33 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 9
+  if (runNumber >= 19347 && runNumber <= 19377) {
+    referenceMean[0] = 2532.88;
+    referenceMean[1] = 2442.47;
+    referenceMean[2] = 2685.81;
+    referenceMean[3] = 2668.67;
+    referenceMean[4] = 2592.06;
+    referenceMean[5] = 2628.69;
+    referenceMean[6] = 2520.98;
+    referenceMean[7] = 781.39; //This PMT is not used for the calibration
+  }
+
+
+  // Source Calibration Run Period 9
   // FOR NOW, USE PREVIOUS RUN PERIOD GAIN (no Se/Sn/Bi in Run Period 9)
-  if (runNumber >= 19505 && runNumber <= 19822) {
-    referenceMean[0] = 2543.39;
-    referenceMean[1] = 2581.96;
-    referenceMean[2] = 2697.13;
-    referenceMean[3] = 2607.16;
-    referenceMean[4] = 2583.02;
-    referenceMean[5] = 2649.35;
-    referenceMean[6] = 2467.87;
-    referenceMean[7] = 2617.73;
+  if (runNumber >= 19505 && runNumber <= 19544) {
+    referenceMean[0] = 2532.88;
+    referenceMean[1] = 2442.47;
+    referenceMean[2] = 2685.81;
+    referenceMean[3] = 2668.67;
+    referenceMean[4] = 2592.06;
+    referenceMean[5] = 2628.69;
+    referenceMean[6] = 2520.98;
+    referenceMean[7] = 781.39; //This PMT is not used for the calibration
   }
 
   // Source Calibration Run Period 10
-  if (runNumber >= 19823 && runNumber <= 19898) {
+  if (runNumber >= 19823 && runNumber <= 19863) {
     referenceMean[0] = 2620.29;
     referenceMean[1] = 2530.83;
     referenceMean[2] = 2689.98;
@@ -384,7 +397,7 @@ int main(int argc, char *argv[])
 
   // Write fit results to file
   char tempFit[500];
-  sprintf(tempFit, "/extern/UCNA/gain_bismuth/gain_bismuth_%s.dat", argv[1]);
+  sprintf(tempFit, "%s/gain_bismuth_%s.dat", getenv("GAIN_BISMUTH"),argv[1]);
   ofstream outFit(tempFit);
 
   for (int n=0; n<8; n++) {

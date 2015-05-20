@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
   // Read cuts file
   char tempFileCuts[500];
-  sprintf(tempFileCuts, "/extern/UCNA/cuts/All_Cuts_Together/cuts_%s.dat", argv[1]);
+  sprintf(tempFileCuts, "%s/cuts/All_Cuts_Together/cuts_%s.dat", getenv("PARALLEL_DATA_PATH"),argv[1]);
   cout << "... Reading: " << tempFileCuts << endl;
 
   ifstream fileCuts(tempFileCuts);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
   // Open output ntuple
   char tempOut[500];
-  sprintf(tempOut, "/extern/UCNA/replay_pass1/replay_pass1_%s.root", argv[1]);
+  sprintf(tempOut, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
   TTree *Tout = new TTree("pass1", "pass1");
 
