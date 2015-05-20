@@ -8,7 +8,7 @@ import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
 omittedRuns = [17381,17383,17385,17382,17886,17912,19232]
-omittedRanges = [(19347,19364),(18020,18055)]
+omittedRanges = [(18020,18055)]
 
 for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -62,7 +62,67 @@ for Range in WPMT4_runRanges:
         WPMT4.append(run)
 
 
+class CalReplayManager:
+    
+    def __init__(self,AnalysisType="MB"):
+        self.AnalyzerPath = "../"
+        self.runListPath = self.AnalyzerPath + "run_lists/"
+        self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
+        self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
+        self.srcPeakPath = os.getenv("SOURCE_PEAKS")
+        self.replayPass3 = os.getenv("REPLAY_PASS3")
+        self.srcListPath = os.getenv("SOURCE_LIST")
 
+    def runReplayPass1(self,srcRunPeriod=1):
+        print "Running replay_pass1 for run period %i"%srcRunPeriod
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+        
+        for run in runs:
+            os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
+        print "DONE"
+        
+    def runReplayPass2(self,srcRunPeriod=1):
+        print "Running replay_pass2 for run period %i"%srcRunPeriod
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+        
+        for run in runs:
+            os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%run)
+        print "DONE"
+        
+    def runReplayPass3(self,srcRunPeriod=1):
+        print "Running replay_pass3 for run period %i"%srcRunPeriod
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+        
+        for run in runs:
+            os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
+        print "DONE"
+        
+    def runGain_Bismuth(self,srcRunPeriod=1):
+        print "Running gain_bismuth for run period %i"%srcRunPeriod
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+        
+        for run in runs:
+            os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
+        print "DONE"
+
+
+        
 class CalibrationManager:
     
     def __init__(self,AnalysisType="MB"):
@@ -302,7 +362,7 @@ if __name__ == "__main__":
     ### This will fit all the source peaks for any runs in the runPeriods list below
     if options.fitSrcPeaks:
         
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.fitSourcePeaks(period)
@@ -313,14 +373,14 @@ if __name__ == "__main__":
     ### reason to redo them is if the position maps change.
     if options.fitSrcPositions:
         
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.fitSourcePositions(period,False)
         
     ### Makes a file with each run followed by a boolean (0,1) for whether each PMT should be used or not
     if options.makePMTrunFile:
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         cal=CalibrationManager()
         for period in runPeriods:
             cal.makePMTrunFile(period)
@@ -329,7 +389,7 @@ if __name__ == "__main__":
     ### If you have made changes to the runs which are to be ignored at the top of this script, you should run this 
     if options.makeAllCalFiles:
     
-        runPeriods = [2,3,4,5,6,7,8,10]
+        runPeriods = [2,3,4,5,6,7,8,9,11]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period)
@@ -352,7 +412,7 @@ if __name__ == "__main__":
     ### given combination of calibration periods and for a certain PMT (PMT=0 is for all 4 combined)
     if options.ErrorEnvelope:
         cal = CalibrationManager()
-        cal.plotErrorEnvelope(calPeriodLow=2,calPeriodHigh=10,PMT=1)
+        cal.plotErrorEnvelope(calPeriodLow=2,calPeriodHigh=11,PMT=1)
 
     
 
@@ -363,3 +423,13 @@ if __name__ == "__main__":
         pmts = [1,2,3,4] #PMT 0 is for the weighted average of all 4
         for pmt in pmts:
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both")
+
+
+    if 1:
+        rep = CalReplayManager()
+        runPeriods = [9]
+        for runPeriod in runPeriods:
+            rep.runReplayPass1(runPeriod)
+            rep.runGainBismuth(runPeriod)
+            rep.runReplayPass2(runPeriod)
+            rep.runReplayPass3(runPeriod)
