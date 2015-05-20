@@ -109,7 +109,7 @@ class CalReplayManager:
             os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
         print "DONE"
         
-    def runGain_Bismuth(self,srcRunPeriod=1):
+    def runGainBismuth(self,srcRunPeriod=1):
         print "Running gain_bismuth for run period %i"%srcRunPeriod
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
