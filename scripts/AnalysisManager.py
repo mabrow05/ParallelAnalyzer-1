@@ -393,7 +393,7 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period)
-            cal.makePMTRunFiles
+            cal.makePMTrunFile(period)
             cal.calculateResiduals(period)
             
 
