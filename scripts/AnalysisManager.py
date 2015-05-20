@@ -229,7 +229,8 @@ class CalibrationManager:
                 if os.path.isfile(filename):
                     resid = open(filename)
                     for line in resid:
-                        outfile.write(line)
+                        if not line[0:3]=="PMT":
+                            outfile.write(line)
 
             outfile.close()
     
@@ -352,3 +353,13 @@ if __name__ == "__main__":
     if options.ErrorEnvelope:
         cal = CalibrationManager()
         cal.plotErrorEnvelope(calPeriodLow=2,calPeriodHigh=10,PMT=1)
+
+    
+
+    ## Makes file holding all the residuals for each PMT for each run which is to be used
+    if options.makeGlobalResiduals:
+        cal = CalibrationManager()
+        runPeriods = [2,3,4,5,6,7,8,10]
+        pmts = [1,2,3,4] #PMT 0 is for the weighted average of all 4
+        for pmt in pmts:
+            cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both")
