@@ -136,7 +136,7 @@ void plot_source_peaks(TString runNumber)
     c2_4->SetLogy(0);
     his1_W3->SetXTitle("West PMT 4");
     his1_W3->GetXaxis()->CenterTitle();
-    his1_W3->GetXaxis()->SetRangeUser(0.0,upperRange+1096.);
+    his1_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
     his1_W3->Draw();
     
     if (nSources > 1 && (useSource[1] || useSource[2])) c2->Print(filenameOut);
@@ -210,7 +210,7 @@ void plot_source_peaks(TString runNumber)
     c4_4->SetLogy(0);
     his2_W3->SetXTitle("West PMT 4");
     his2_W3->GetXaxis()->CenterTitle();
-    his2_W3->GetXaxis()->SetRangeUser(0.0,upperRange+1096.);
+    his2_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
     his2_W3->Draw();
     
     if (nSources > 2 && useSource[2]) c4->Print(filenameOut);
@@ -286,7 +286,7 @@ void plot_source_peaks(TString runNumber)
     c6_4->SetLogy(0);
     his3_W3->SetXTitle("West PMT 4");
     his3_W3->GetXaxis()->CenterTitle();
-    his3_W3->GetXaxis()->SetRangeUser(0.0,upperRange+1096.);
+    his3_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
     his3_W3->Draw();
     
     c6->Print(filenameOutLast);

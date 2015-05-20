@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
   string sourceName[3];
   char tempList[500];
   sprintf(tempList, "%s/source_list_%s.dat",getenv("SOURCE_LIST"), argv[1]);
+  //cout << tempList << endl;
   ifstream fileList(tempList);
   if (fileList.is_open()) fileList >> nSources;
   cout << " ... Number of sources: " << nSources << endl;
