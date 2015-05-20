@@ -1,3 +1,6 @@
+
+
+void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -22,10 +25,24 @@
   gStyle->SetPadRightMargin(0.05);
   gStyle->SetPadBottomMargin(0.12);
 
-  Int_t PMT = 1; //0->Average over PMTs; 1,2,3,4 -> single PMT
+  Int_t PMT = pmt; //0->Average over PMTs; 1,2,3,4 -> single PMT
 
-  Int_t calPeriodLow = 2;
-  Int_t calPeriodHigh = 10;
+  Int_t calPeriodLow = calLow;
+  Int_t calPeriodHigh = calHigh;
+
+  // Setup output file for error Envelope
+  ofstream errEnv;
+  Char_t tempfile[200];
+  if (calPeriodLow!=calPeriodHigh && !PMT) {
+    sprintf(tempfile,"../error_envelope/error_envelope_calPeriods_%i-%i.dat",calPeriodLow,calPeriodHigh);}
+  else if (calPeriodLow!=calPeriodHigh && PMT) {
+    sprintf(tempfile,"../error_envelope/error_envelope_calPeriods_%i-%i_PMT%i.dat",calPeriodLow,calPeriodHigh,PMT);}
+  else if (calPeriodLow==calPeriodHigh && !PMT) {
+    sprintf(tempfile,"../error_envelope/error_envelope_calPeriod_%i.dat",calPeriodHigh);}
+  else if (calPeriodLow==calPeriodHigh && PMT) {
+    sprintf(tempfile,"../error_envelope/error_envelope_calPeriod_%i_PMT%i.dat",calPeriodLow,PMT);}
+
+  errEnv.open(tempfile);
 
   // Read East data file
   char tempEast[500];
@@ -35,7 +52,7 @@
   else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_East_runPeriod_PMTE%i.dat", calPeriodLow,PMT);
   ifstream fileEast(tempEast);
 
-  size_t N = 500;
+  const size_t N = 500;
   TString sourceEast[N];
   Int_t runEast[N];
   Double_t resEast[N];
@@ -57,17 +74,17 @@
     if (sourceEast[i] == "Ce_East") {
       resCeEast[nCeEast] = resEast[i];
       nCeEast++;
-      if (resEast[i]>0.05*peakCe) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakCe) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Sn_East") {
       resSnEast[nSnEast] = resEast[i];
       nSnEast++;
-      if (resEast[i]>0.05*peakSn) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakSn) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Bi_East") {
       resBiEast[nBiEast] = resEast[i];
       nBiEast++;
-      if (resEast[i]>0.05*peakBiHigh) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakBiHigh) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (fileEast.fail()) break;
     i++;
@@ -98,17 +115,17 @@
     if (sourceWest[i] == "Ce_West") {
       resCeWest[nCeWest] = resWest[i];
       nCeWest++;
-      if (resWest[i]>0.05*peakCe) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakCe) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Sn_West") {
       resSnWest[nSnWest] = resWest[i];
       nSnWest++;
-      if (resWest[i]>0.05*peakSn) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakSn) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Bi_West") {
       resBiWest[nBiWest] = resWest[i];
       nBiWest++;
-      if (resWest[i]>0.05*peakBiHigh) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakBiHigh) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (fileWest.fail()) break;
     i++;
@@ -159,6 +176,8 @@
 
   cout << "meanCeEast = " << meanCeEast << endl;
   cout << "     sigma = " << sigmaCeEast << endl;
+  errEnv << "meanCeEast = " << meanCeEast << endl;
+  errEnv << "sigma = " << sigmaCeEast << endl;
 
   double meanSnEast = 0.;
   for (int j=0; j<nSnEast; j++) {
@@ -175,6 +194,8 @@
 
   cout << "meanSnEast = " << meanSnEast << endl;
   cout << "     sigma = " << sigmaSnEast << endl;
+  errEnv << "meanSnEast = " << meanSnEast << endl;
+  errEnv << "sigma = " << sigmaSnEast << endl;
 
   double meanBiEast = 0.;
   for (int j=0; j<nBiEast; j++) {
@@ -191,6 +212,8 @@
 
   cout << "meanBiEast = " << meanBiEast << endl;
   cout << "     sigma = " << sigmaBiEast << endl;
+  errEnv << "meanBiEast = " << meanBiEast << endl;
+  errEnv << "sigma = " << sigmaBiEast << endl;
 
   // Calculate mean and standard deviation
   double meanCeWest = 0.;
@@ -208,6 +231,8 @@
 
   cout << "meanCeWest = " << meanCeWest << endl;
   cout << "     sigma = " << sigmaCeWest << endl;
+  errEnv << "meanCeWest = " << meanCeWest << endl;
+  errEnv << "sigma = " << sigmaCeWest << endl;
 
   double meanSnWest = 0.;
   for (int j=0; j<nSnWest; j++) {
@@ -224,6 +249,8 @@
 
   cout << "meanSnWest = " << meanSnWest << endl;
   cout << "     sigma = " << sigmaSnWest << endl;
+  errEnv << "meanSnWest = " << meanSnWest << endl;
+  errEnv << "sigma = " << sigmaSnWest << endl;
 
   double meanBiWest = 0.;
   for (int j=0; j<nBiWest; j++) {
@@ -240,6 +267,10 @@
 
   cout << "meanBiWest = " << meanBiWest << endl;
   cout << "     sigma = " << sigmaBiWest << endl;
+  errEnv << "meanBiWest = " << meanBiWest << endl;
+  errEnv << "sigma = " << sigmaBiWest << endl;
+
+  errEnv.close();
 
   // Ce East
   c1 = new TCanvas("c1", "c1");
