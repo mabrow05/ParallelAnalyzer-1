@@ -427,9 +427,11 @@ if __name__ == "__main__":
 
     if 1:
         rep = CalReplayManager()
+        cal = CalibrationManager()
         runPeriods = [9]
         for runPeriod in runPeriods:
-            rep.runReplayPass1(runPeriod)
-            rep.runGainBismuth(runPeriod)
-            rep.runReplayPass2(runPeriod)
-            rep.runReplayPass3(runPeriod)
+            #rep.runReplayPass1(runPeriod)
+            #rep.runGainBismuth(runPeriod)
+            #rep.runReplayPass2(runPeriod)
+            #rep.runReplayPass3(runPeriod)
+            cal.fitSourcePeaks(runPeriod)
