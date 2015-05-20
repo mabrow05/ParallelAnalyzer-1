@@ -345,8 +345,8 @@ int main(int argc, char *argv[])
   }
 
 
-  // Source Calibration Run Period 9
-  // FOR NOW, USE PREVIOUS RUN PERIOD GAIN (no Se/Sn/Bi in Run Period 9)
+  // Source Calibration Run Period 10
+  // FOR NOW, USE PREVIOUS RUN PERIOD GAIN (no Se/Sn/Bi in Run Period 10)
   if (runNumber >= 19505 && runNumber <= 19544) {
     referenceMean[0] = 2532.88;
     referenceMean[1] = 2442.47;
@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
     referenceMean[7] = 781.39; //This PMT is not used for the calibration
   }
 
-  // Source Calibration Run Period 10
+  // Source Calibration Run Period 11
   if (runNumber >= 19823 && runNumber <= 19863) {
     referenceMean[0] = 2620.29;
     referenceMean[1] = 2530.83;
@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
     referenceMean[7] = 797.798;
   }
 
-  // Source Calibration Run Period 11
+  // Source Calibration Run Period 12
   if (runNumber >= 19899 && runNumber <= 19966) {
     referenceMean[0] = 2627.55;
     referenceMean[1] = 2540.88;
