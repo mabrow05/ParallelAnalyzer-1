@@ -246,7 +246,7 @@ class CalibrationManager:
     #Calculates residuals for each PMT and as a whole for given run period
     def calculateResiduals(self, CalibrationPeriod=1):
         filename = "../residuals/source_runs_RunPeriod_%i.dat"%CalibrationPeriod
-        if MButils.fileExistsAndNotEmpty(filename):
+        if os.path.isfile(filename):
             os.system("root -l -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
             print "Calculated residuals for Calibration Period %i"%CalibrationPeriod
         else:
@@ -389,7 +389,7 @@ if __name__ == "__main__":
     ### If you have made changes to the runs which are to be ignored at the top of this script, you should run this 
     if options.makeAllCalFiles:
     
-        runPeriods = [1,2,3,4,5,6,7,8,9,11,12]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period)
@@ -397,7 +397,7 @@ if __name__ == "__main__":
             cal.calculateResiduals(period)
             
 
-        cal.makeGlobalResiduals(runPeriods,PMT=1,Side="Both")
+        #cal.makeGlobalResiduals(runPeriods,PMT=1,Side="Both")
 
 
     ### useful if you are going to look at the linearity curves and residuals by eye separately
@@ -419,13 +419,13 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [2,3,4,5,6,7,8,10]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         pmts = [1,2,3,4] #PMT 0 is for the weighted average of all 4
         for pmt in pmts:
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both")
 
 
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
         runPeriods = [9]
