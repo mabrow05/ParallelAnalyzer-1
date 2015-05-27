@@ -135,10 +135,10 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   // Histograms
   TH1F *hisCeEast = new TH1F("hisCeEast", "", 60, -30.0, 30.0);
   TH1F *hisSnEast = new TH1F("hisSnEast", "", 30, -30.0, 30.0);
-  TH1F *hisBiEast = new TH1F("hisBiEast", "", 30, -30.0, 30.0);
+  TH1F *hisBiEast = new TH1F("hisBiEast", "", 30, -60.0, 60.0);
   TH1F *hisCeWest = new TH1F("hisCeWest", "", 60, -30.0, 30.0);
   TH1F *hisSnWest = new TH1F("hisSnWest", "", 30, -30.0, 30.0);
-  TH1F *hisBiWest = new TH1F("hisBiWest", "", 30, -30.0, 30.0);
+  TH1F *hisBiWest = new TH1F("hisBiWest", "", 30, -60.0, 60.0);
 
   // Fill histograms
   for (int j=0; j<nCeEast; j++) {

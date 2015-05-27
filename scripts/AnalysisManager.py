@@ -7,8 +7,8 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17381,17383,17385,17382,17886,17912,19232]
-omittedRanges = [(18020,18055)]
+omittedRuns = []
+omittedRanges = [(17925,18055)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
 
 for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -119,6 +119,7 @@ class CalReplayManager:
         
         for run in runs:
             os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
+            os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%run)
         print "DONE"
 
 
@@ -133,6 +134,34 @@ class CalibrationManager:
         self.srcPeakPath = os.getenv("SOURCE_PEAKS")
         self.replayPass3 = os.getenv("REPLAY_PASS3")
         self.srcListPath = os.getenv("SOURCE_LIST")
+        self.nPEcountPath = os.getenv("NPE_WEIGHTS")
+
+
+    def calc_nPE_per_PMT(self, runAllRefRun=False, run=19359):
+
+        if runAllRefRun:
+            srcRunPeriod=1
+            srcRefRuns = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899]
+            for r in srcRefRuns:
+                os.system("cd ../calc_nPE/; ./calc_nPE.exe %i"%r)
+                print "Ran calc_nPE.exe for run %i"%r
+                runs=[]
+                filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+                infile = open(self.runListPath+filename,'r')
+                for line in infile:
+                    runs.append(int(line))
+                for rn in runs:
+                    os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,r,self.nPEcountPath,rn))
+                srcRunPeriod+=1
+                infile.close()
+                            
+                    
+        else:
+            os.system("cd ../calc_nPE/; ./calc_nPE.exe %i"%run)
+            print "Ran calc_nPE.exe for run %i"%run
+        
+        
+        
 
     def fitSourcePositions(self,srcRunPeriod=1, overwrite=False):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
@@ -293,6 +322,10 @@ class CalibrationManager:
                             outfile.write(line)
 
             outfile.close()
+        if PMT==0:
+            print "Produced global residual file for weighted average of all PMTs, run periods %i-%i, and sides "%(periodLow,periodHigh), sides
+        else:
+            print "Produced global residual file for PMT %i, run periods %i-%i, and sides "%(PMT,periodLow,periodHigh), sides
     
 
     def plotErrorEnvelope(self, calPeriodLow=2, calPeriodHigh=10, PMT=0):
@@ -432,6 +465,10 @@ if __name__ == "__main__":
         for runPeriod in runPeriods:
             #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            #rep.runReplayPass2(runPeriod)
-            #rep.runReplayPass3(runPeriod)
+            rep.runReplayPass2(runPeriod)
+            rep.runReplayPass3(runPeriod)
             cal.fitSourcePeaks(runPeriod)
+
+    if 1:
+        cal = CalibrationManager()
+        cal.calc_nPE_per_PMT(True)

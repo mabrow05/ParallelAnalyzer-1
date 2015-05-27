@@ -34,7 +34,8 @@ void plot_gain_bismuth(TString runNumber)
 
   // Open input file
   TString filenameIn;
-  filenameIn  = "/extern/UCNA/gain_bismuth/gain_bismuth_";
+  TString inDir = TString(getenv("GAIN_BISMUTH"));
+  filenameIn  = inDir + "/gain_bismuth_";
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
@@ -42,7 +43,7 @@ void plot_gain_bismuth(TString runNumber)
 
   // Output file
   TString filenameOut;
-  filenameOut  = "/extern/UCNA/gain_bismuth/gain_bismuth_";
+  filenameOut  = inDir + "/gain_bismuth_";
   filenameOut += runNumber;
   filenameOut += ".pdf";
 
