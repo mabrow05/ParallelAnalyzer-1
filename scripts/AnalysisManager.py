@@ -7,7 +7,7 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = []
+omittedRuns = [19232]
 omittedRanges = [(17925,18055)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
 
 for Range in omittedRanges:
@@ -34,7 +34,7 @@ EPMT4_runRanges = []
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(17233,17249)]
 WPMT3_runRanges = []
-WPMT4_runRanges = [(19347,19960)]
+WPMT4_runRanges = [(18745,18768),(19347,19960)]
 
 for Range in EPMT1_runRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -276,7 +276,7 @@ class CalibrationManager:
     def calculateResiduals(self, CalibrationPeriod=1):
         filename = "../residuals/source_runs_RunPeriod_%i.dat"%CalibrationPeriod
         if os.path.isfile(filename):
-            os.system("root -l -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
+            os.system("root -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
             print "Calculated residuals for Calibration Period %i"%CalibrationPeriod
         else:
             print "No peak file to calculate residuals"
@@ -427,7 +427,7 @@ if __name__ == "__main__":
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period)
             cal.makePMTrunFile(period)
-            cal.calculateResiduals(period)
+            #cal.calculateResiduals(period)
             
 
         #cal.makeGlobalResiduals(runPeriods,PMT=1,Side="Both")
@@ -445,7 +445,7 @@ if __name__ == "__main__":
     ### given combination of calibration periods and for a certain PMT (PMT=0 is for all 4 combined)
     if options.ErrorEnvelope:
         cal = CalibrationManager()
-        cal.plotErrorEnvelope(calPeriodLow=2,calPeriodHigh=11,PMT=1)
+        cal.plotErrorEnvelope(calPeriodLow=1,calPeriodHigh=12,PMT=0)
 
     
 
@@ -453,7 +453,7 @@ if __name__ == "__main__":
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
-        pmts = [1,2,3,4] #PMT 0 is for the weighted average of all 4
+        pmts = [0]#[1,2,3,4] #PMT 0 is for the weighted average of all 4
         for pmt in pmts:
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both")
 
@@ -469,6 +469,6 @@ if __name__ == "__main__":
             rep.runReplayPass3(runPeriod)
             cal.fitSourcePeaks(runPeriod)
 
-    if 1:
+    if 0:
         cal = CalibrationManager()
         cal.calc_nPE_per_PMT(True)

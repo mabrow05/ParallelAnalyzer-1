@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <map>
 
-unsigned int find_vec_location(std::vector<Int_t> vec, Int_t val)
+unsigned int find_vec_location_int(std::vector<Int_t> vec, Int_t val)
 {
   UInt_t size = vec.size();
   //for (int i=0;i<size;i++){cout << vec[i] << endl;}
@@ -12,6 +12,19 @@ unsigned int find_vec_location(std::vector<Int_t> vec, Int_t val)
     return it - vec.begin();
   }
   else cout << "Can't locate run " << val << " in PMT Quality list" << endl; exit(0);
+  
+}
+
+unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
+{
+  UInt_t size = vec.size();
+  //for (int i=0;i<size;i++){cout << vec[i] << endl;}
+
+  std::vector<Double_t>::iterator it = std::find(vec.begin(),vec.end(),val);
+  if (it!=vec.end()) {
+    return it - vec.begin();
+  }
+  else cout << "Can't locate " << val << " in your vector!" << endl; exit(0);
   
 }
 
@@ -100,6 +113,29 @@ void MB_calc_residuals(Int_t runPeriod)
       " " << pmtQuality[i][7] << endl;
   }
 
+  // Filling vectors with the weights for each PMT to be used when calculating the weighted average energy
+ 
+  vector < vector<Double_t> > nPE_per_channel;
+  Double_t nPE_hold, sigma_hold, mean_hold, nPE_per_chan_hold;
+  nPE_per_channel.resize(pmtRun.size(), vector <Double_t> (8,0.));
+  ifstream weightFile;
+  for (int j=0; j<pmtRun.size(); j++) {
+    sprintf(temp,"%s/nPE_weights_%i.dat",getenv("NPE_WEIGHTS"),pmtRun[j]);
+    weightFile.open(temp);
+    int i=0;
+    while (weightFile >> mean_hold >> sigma_hold >> nPE_hold >> nPE_per_chan_hold) {
+      nPE_per_channel[j][i]=nPE_per_chan_hold;
+      i++;
+      if (weightFile.fail()) break;
+    }
+    weightFile.close();
+  }
+
+  //cout << pmtRun[5] << endl;
+  //for (int i=0;i<8;i++) {
+  //  cout << nPE_per_channel[5][i] << endl;
+  // }
+
   // Filling new vectors for each PMT with ADC values only when the PMT is 
   // usable
   vector<int> runE1,runE2,runE3,runE4,runW1,runW2,runW3,runW4;
@@ -110,7 +146,7 @@ void MB_calc_residuals(Int_t runPeriod)
   vector<Double_t> ResW1, ResW2, ResW3, ResW4;
   // Fill run, adc, and eQ vectors
   for (Int_t i=0; i<num;i++) {
-    UInt_t runPos = find_vec_location(pmtRun,(int)run[i]);
+    UInt_t runPos = find_vec_location_int(pmtRun,(int)run[i]);
     cout << "Found run " << (int) run[i] << " in PMT Quality\n";
     if (pmtQuality[runPos][0]) {
       runE1.push_back((int)run[i]);
@@ -183,6 +219,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE1.dat",calibrationPeriod);
   ofstream oFileE1(temp);
+  vector <Double_t> fitEQ_E1(runE1.size(),0);
 
   if (runE1.size()>0 && (std::find(EQE1.begin(),EQE1.end(),peakCe)!=EQE1.end() && std::find(EQE1.begin(),EQE1.end(),peakSn)!=EQE1.end() && std::find(EQE1.begin(),EQE1.end(),peakBiHigh)!=EQE1.end())) {
  
@@ -228,24 +265,28 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
 
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_E1(runE1.size(),0);
+    
     for (int j=0; j<runE1.size(); j++) {
     
       fitEQ_E1[j]    = offsetE1 + slopeE1*ADCE1[j] + quadE1*ADCE1[j]*ADCE1[j];
       if (EQE1[j]==98.2) {
 	ResE1[j] = fitEQ_E1[j] - peakCe;
 	oFileE1 << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*peakCe) cout << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
 	//ResE1[j] = (fitEQ - peakCe)/peakCe * 100.;
       }
       else if (EQE1[j]==331.2) {
 	ResE1[j] = fitEQ_E1[j] - peakSn;
 	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE1 << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*peakSn) cout << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
       }
       else if (EQE1[j]==928.0) {
 	ResE1[j] = fitEQ_E1[j] - peakBiHigh;
 	//ResE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE1 << "Bi_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*peakBiHigh) cout << "Bi_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+ 
       }
     }
 
@@ -302,6 +343,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE2.dat",calibrationPeriod);
   ofstream oFileE2(temp);
+  vector <Double_t> fitEQ_E2(runE2.size(),0);
 
   if (runE2.size()>0 && (std::find(EQE2.begin(),EQE2.end(),peakCe)!=EQE2.end() && std::find(EQE2.begin(),EQE2.end(),peakSn)!=EQE2.end() && std::find(EQE2.begin(),EQE2.end(),peakBiHigh)!=EQE2.end())) {
 
@@ -347,23 +389,26 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
 
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_E2(runE2.size(),0);
+    
     for (int j=0; j<runE2.size(); j++) {
       fitEQ_E2[j]    = offsetE2 + slopeE2*ADCE2[j] + quadE2*ADCE2[j]*ADCE2[j];
       if (EQE2[j]==98.2) {
 	ResE2[j] = fitEQ_E2[j] - peakCe;
 	//ResE2[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE2 << "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;
+	if (ResE2[j]>0.05*peakCe) cout<< "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
       else if (EQE2[j]==331.2) {
 	ResE2[j] = fitEQ_E2[j] - peakSn;
 	//ResE2[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE2 << "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;
+	if (ResE2[j]>0.05*peakSn) cout<< "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
       else if (EQE2[j]==928.0) {
 	ResE2[j] = fitEQ_E2[j] - peakBiHigh;
 	//ResE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE2 << "Bi_East" << " " << runE2[j] << " " << ResE2[j] << endl;
+	if (ResE2[j]>0.05*peakCe) cout<< "Bi_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
     }
 
@@ -420,6 +465,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE3.dat",calibrationPeriod);
   ofstream oFileE3(temp);
+  vector <Double_t> fitEQ_E3(runE3.size(),0);
 
   if (runE3.size()>0 && (std::find(EQE3.begin(),EQE3.end(),peakCe)!=EQE3.end() && std::find(EQE3.begin(),EQE3.end(),peakSn)!=EQE3.end() && std::find(EQE3.begin(),EQE3.end(),peakBiHigh)!=EQE3.end())) {
 
@@ -465,23 +511,26 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
 
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_E3(runE3.size(),0);
+    
     for (int j=0; j<runE3.size(); j++) {
       fitEQ_E3[j]    = offsetE3 + slopeE3*ADCE3[j] + quadE3*ADCE3[j]*ADCE3[j];
       if (EQE3[j]==98.2) {
 	ResE3[j] = fitEQ_E3[j] - peakCe;
 	//ResE3[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE3 << "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;
+	if (ResE3[j]>0.05*peakCe) cout<< "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
       else if (EQE3[j]==331.2) {
 	ResE3[j] = fitEQ_E3[j] - peakSn;
 	//ResE3[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE3 << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;
+	if (ResE3[j]>0.05*peakSn) cout << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
       else if (EQE3[j]==928.0) {
 	ResE3[j] = fitEQ_E3[j] - peakBiHigh;
 	//ResE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE3 << "Bi_East" << " " << runE3[j] << " " << ResE3[j] << endl;
+	if (ResE3[j]>0.05*peakBiHigh) cout << "Bi_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
     }
 
@@ -538,6 +587,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   sprintf(temp,"../residuals/residuals_East_runPeriod_%i_PMTE4.dat",calibrationPeriod);
   ofstream oFileE4(temp);
+  vector <Double_t> fitEQ_E4(runE4.size(),0);
 
   if (runE4.size()>0 && (std::find(EQE4.begin(),EQE4.end(),peakCe)!=EQE4.end() && std::find(EQE4.begin(),EQE4.end(),peakSn)!=EQE4.end() && std::find(EQE4.begin(),EQE4.end(),peakBiHigh)!=EQE4.end())) {
 
@@ -583,23 +633,26 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
 
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_E4(runE4.size(),0);
+    
     for (int j=0; j<runE4.size(); j++) {
       fitEQ_E4[j]    = offsetE4 + slopeE4*ADCE4[j] + quadE4*ADCE4[j]*ADCE4[j];
       if (EQE4[j]==98.2) {
 	ResE4[j] = fitEQ_E4[j] - peakCe;
 	//ResE4[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE4 << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;
+	if (ResE4[j]>0.05*peakCe) cout << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
       else if (EQE4[j]==331.2) {
 	ResE4[j] = fitEQ_E4[j] - peakSn;
 	//ResE4[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE4 << "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;
+	if (ResE4[j]>0.05*peakSn) cout<< "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
       else if (EQE4[j]==928.0) {
 	ResE4[j] = fitEQ_E4[j] - peakBiHigh;
 	//ResE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE4 << "Bi_East" << " " << runE4[j] << " " << ResE4[j] << endl;
+	if (ResE4[j]>0.05*peakBiHigh) cout<< "Bi_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
     }
 
@@ -652,19 +705,82 @@ void MB_calc_residuals(Int_t runPeriod)
     oFileE4 << "PMT NOT USABLE";}
   oFileE4.close();
 
- 
-  /*sprintf(temp,"../residuals/residuals_East_runPeriod_%i.dat",calibrationPeriod);
+  ///////////////////////////////////////////////////////////////////////
+  // Calcuting the weighted mean of the total energy of the East side  //
+  ///////////////////////////////////////////////////////////////////////
+
+  sprintf(temp,"../residuals/residuals_East_runPeriod_%i.dat",calibrationPeriod);
   ofstream oFileE(temp);
 
-  // For now, simply average the East PMT energies
   cout << "CALCULATING EAST RESIDUALS" << endl;
   vector <Double_t> EQ_East(num,0);
   vector <Double_t> x_East(num,0);
   vector <Double_t> res_East(num,0);
-  //double EQ_East[num], res_East[num], x_East[num];
-  for (int j=0; j<num; j++) {
-    EQ_East[j] = 0.25*(fitEQ_E1[j] + fitEQ_E2[j] + fitEQ_E3[j] + fitEQ_E4[j]);
-    //EQ_East[j] = 0.5*(fitEQ_E1[j] + fitEQ_E2[j]);
+
+  std::vector<Int_t>::iterator E1 = runE1.begin();
+  std::vector<Double_t>::iterator E1_EQ = EQE1.begin();
+  std::vector<Double_t>::iterator E1_fitEQ = fitEQ_E1.begin();
+  std::vector<Int_t>::iterator E2 = runE2.begin();
+  std::vector<Double_t>::iterator E2_EQ = EQE2.begin();
+  std::vector<Double_t>::iterator E2_fitEQ = fitEQ_E2.begin();
+  std::vector<Int_t>::iterator E3 = runE3.begin();
+  std::vector<Double_t>::iterator E3_EQ = EQE3.begin();
+  std::vector<Double_t>::iterator E3_fitEQ = fitEQ_E3.begin();
+  std::vector<Int_t>::iterator E4 = runE4.begin();
+  std::vector<Double_t>::iterator E4_EQ = EQE4.begin();
+  std::vector<Double_t>::iterator E4_fitEQ = fitEQ_E4.begin();
+
+  
+  for (int j=0;j<num;j++) {
+    Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
+    Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
+    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
+
+    if (pmtQuality[pmtVecLocation][0] && *E1==(int)run[j] && *E1_EQ==EQ[j]) {
+      Double_t N = adcE1[j]*nPE_per_channel[pmtVecLocation][0];
+      Double_t f = sqrt(N)/N;
+      Energy1 = *E1_fitEQ;
+      weight1 = 1/(Energy1*Energy1*f*f);
+      std::advance(E1,1);
+      std::advance(E1_EQ,1);
+      std::advance(E1_fitEQ,1);
+    }
+    else {weight1=0.; Energy1=0.;}
+
+    if (pmtQuality[pmtVecLocation][1] && *E2==(int)run[j] && *E2_EQ==EQ[j]) {
+      Double_t N = adcE2[j]*nPE_per_channel[pmtVecLocation][1];
+      Double_t f = sqrt(N)/N;
+      Energy2 = *E2_fitEQ;
+      weight2 = 1/(Energy2*Energy2*f*f);
+      std::advance(E2,1);
+      std::advance(E2_EQ,1);
+      std::advance(E2_fitEQ,1);
+    }
+    else {weight2=0.; Energy2=0.;}
+
+    if (pmtQuality[pmtVecLocation][2] && *E3==(int)run[j] && *E3_EQ==EQ[j]) {
+      Double_t N = adcE3[j]*nPE_per_channel[pmtVecLocation][2];
+      Double_t f = sqrt(N)/N;
+      Energy3 = *E3_fitEQ;
+      weight3 = 1/(Energy3*Energy3*f*f);
+      std::advance(E3,1);
+      std::advance(E3_EQ,1);
+      std::advance(E3_fitEQ,1);
+    }
+    else {weight3=0.; Energy3=0.;}
+
+    if (pmtQuality[pmtVecLocation][3] && *E4==(int)run[j] && *E4_EQ==EQ[j]) {
+      Double_t N = adcE4[j]*nPE_per_channel[pmtVecLocation][3];
+      Double_t f = sqrt(N)/N;
+      Energy4 = *E4_fitEQ;
+      weight4 = 1/(Energy4*Energy4*f*f);
+      std::advance(E4,1);
+      std::advance(E4_EQ,1);
+      std::advance(E4_fitEQ,1);
+    }
+    else {weight4=0.; Energy4=0.;}
+
+    EQ_East[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
 
     if (EQ[j]==98.2) {
       res_East[j] = EQ_East[j] - peakCe;
@@ -688,7 +804,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   }
   oFileE.close();
-
+  
   // East Average residuals
   cEr = new TCanvas("cEr", "cEr");
   cEr->SetLogy(0);
@@ -732,12 +848,13 @@ void MB_calc_residuals(Int_t runPeriod)
   pt1->SetFillStyle(0);
   pt1->SetFillColor(0);
   pt1->Draw();
-  */
+  ////////////////////////////////////////////////////////////////////
 
   // West 1
 
   sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW1.dat",calibrationPeriod);
   ofstream oFileW1(temp);
+  vector <Double_t> fitEQ_W1(runW1.size(),0);
 
   if (runW1.size()>0 && (std::find(EQW1.begin(),EQW1.end(),peakCe)!=EQW1.end() && std::find(EQW1.begin(),EQW1.end(),peakSn)!=EQW1.end() && std::find(EQW1.begin(),EQW1.end(),peakBiHigh)!=EQW1.end())) {
 
@@ -783,21 +900,23 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_W1(runW1.size(),0);
     //Double_t fitEQ_W1[num];
     for (int j=0; j<runW1.size(); j++) {
       fitEQ_W1[j]    = offsetW1 + slopeW1*ADCW1[j] + quadW1*ADCW1[j]*ADCW1[j];
       if (EQW1[j]==98.2) {
 	ResW1[j] = fitEQ_W1[j] - peakCe;
 	oFileW1 << "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;
+	if (ResW1[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
       else if (EQW1[j]==331.2) {
 	ResW1[j] = fitEQ_W1[j] - peakSn;
 	oFileW1 << "Sn_West" << " " <<  runW1[j] << " " << ResW1[j] << endl;
+	if (ResW1[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
       else if (EQW1[j]==928.0) {
 	ResW1[j] = fitEQ_W1[j] - peakBiHigh;
 	oFileW1 << "Bi_West" << " " << runW1[j] << " " << ResW1[j] << endl;
+	if (ResW1[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
     }
 
@@ -854,6 +973,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW2.dat",calibrationPeriod);
   ofstream oFileW2(temp);
+  vector <Double_t> fitEQ_W2(runW2.size(),0);
 
   if (runW2.size()>0 && (std::find(EQW2.begin(),EQW2.end(),peakCe)!=EQW2.end() && std::find(EQW2.begin(),EQW2.end(),peakSn)!=EQW2.end() && std::find(EQW2.begin(),EQW2.end(),peakBiHigh)!=EQW2.end())) {
 
@@ -899,21 +1019,23 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
 
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_W2(runW2.size(),0);
     //Double_t fitEQ_W2[num];
     for (int j=0; j<runW2.size(); j++) {
       fitEQ_W2[j]    = offsetW2 + slopeW2*ADCW2[j] + quadW2*ADCW2[j]*ADCW2[j];
       if (EQW2[j]==98.2) {
 	ResW2[j] = fitEQ_W2[j] - peakCe;
 	oFileW2 << "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;
+	if (ResW2[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
       else if (EQW2[j]==331.2) {
 	ResW2[j] = fitEQ_W2[j] - peakSn;
 	oFileW2 << "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;
+	if (ResW2[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
       else if (EQW2[j]==928.0) {
 	ResW2[j] = fitEQ_W2[j] - peakBiHigh;
 	oFileW2 << "Bi_West" << " " << runW2[j] << " " << ResW2[j] << endl;
+	if (ResW2[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
     }
 
@@ -970,6 +1092,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW3.dat",calibrationPeriod);
   ofstream oFileW3(temp);
+  vector <Double_t> fitEQ_W3(runW3.size(),0);
 
   if (runW3.size()>0 && (std::find(EQW3.begin(),EQW3.end(),peakCe)!=EQW3.end() && std::find(EQW3.begin(),EQW3.end(),peakSn)!=EQW3.end() && std::find(EQW3.begin(),EQW3.end(),peakBiHigh)!=EQW3.end())) {
 
@@ -1014,21 +1137,23 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
 
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_W3(runW3.size(),0);
     //Double_t fitEQ_W3[num];
     for (int j=0; j<runW3.size(); j++) {
       fitEQ_W3[j]    = offsetW3 + slopeW3*ADCW3[j] + quadW3*ADCW3[j]*ADCW3[j];
       if (EQW3[j]==98.2) {
 	ResW3[j] = fitEQ_W3[j] - peakCe;
 	oFileW3 << "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;
+	if (ResW3[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
       else if (EQW3[j]==331.2) {
 	ResW3[j] = fitEQ_W3[j] - peakSn;
 	oFileW3 << "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;
+	if (ResW3[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
       else if (EQW3[j]==928.0) {
 	ResW3[j] = fitEQ_W3[j] - peakBiHigh;
 	oFileW3 << "Bi_West" << " " << runW3[j] << " " << ResW3[j] << endl;
+	if (ResW3[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
     }
 
@@ -1085,6 +1210,7 @@ void MB_calc_residuals(Int_t runPeriod)
 
   sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW4.dat",calibrationPeriod);
   ofstream oFileW4(temp);
+  vector <Double_t> fitEQ_W4(runW4.size(),0);
 
   if (runW4.size()>0 && (std::find(EQW4.begin(),EQW4.end(),peakCe)!=EQW4.end() && std::find(EQW4.begin(),EQW4.end(),peakSn)!=EQW4.end() && std::find(EQW4.begin(),EQW4.end(),peakBiHigh)!=EQW4.end())) {
 
@@ -1132,21 +1258,23 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
 
     // Calculate residuals in [keV]
-    vector <Double_t> fitEQ_W4(runW4.size(),0);
     //Double_t fitEQ_W4[num];
     for (int j=0; j<runW4.size(); j++) {
       fitEQ_W4[j]    = offsetW4 + slopeW4*ADCW4[j] + quadW4[j]*ADCW4[j]*ADCW4[j];
       if (EQW4[j]==98.2) {
 	ResW4[j] = fitEQ_W4[j] - peakCe;
 	oFileW4 << "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;
+	if (ResW4[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
       else if (EQW4[j]==331.2) {
 	ResW4[j] = fitEQ_W4[j] - peakSn;
 	oFileW4 << "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;
+	if (ResW4[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
       else if (EQW4[j]==928.0){
 	ResW4[j] = fitEQ_W4[j] - peakBiHigh;
 	oFileW4 << "Bi_West" << " " << runW4[j] << " " << ResW4[j] << endl;
+	if (ResW4[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
     }
 
@@ -1202,18 +1330,83 @@ void MB_calc_residuals(Int_t runPeriod)
   oFileW4.close();
   linCurves.close();
 
-  /*sprintf(temp,"../residuals/residuals_West_runPeriod_%i.dat",calibrationPeriod);
+
+  ///////////////////////////////////////////////////////////////////////
+  // Calculating the weighted mean of the total energy of the West side  //
+  ///////////////////////////////////////////////////////////////////////
+
+  sprintf(temp,"../residuals/residuals_West_runPeriod_%i.dat",calibrationPeriod);
   ofstream oFileW(temp);
 
-  // For now, simply average the West PMT energies
   cout << "CALCULATING WEST RESIDUALS" << endl;
   vector <Double_t> EQ_West(num,0);
-  vector <Double_t> res_West(num,0);
   vector <Double_t> x_West(num,0);
-  //double EQ_West[num], res_West[num], x_West[num];
-  for (int j=0; j<num; j++) {
-    EQ_West[j] = 0.25*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j] + fitEQ_W4[j]);
-    //EQ_West[j] = 0.33*(fitEQ_W1[j] + fitEQ_W2[j] + fitEQ_W3[j]);
+  vector <Double_t> res_West(num,0);
+
+  std::vector<Int_t>::iterator W1 = runW1.begin();
+  std::vector<Double_t>::iterator W1_EQ = EQW1.begin();
+  std::vector<Double_t>::iterator W1_fitEQ = fitEQ_W1.begin();
+  std::vector<Int_t>::iterator W2 = runW2.begin();
+  std::vector<Double_t>::iterator W2_EQ = EQW2.begin();
+  std::vector<Double_t>::iterator W2_fitEQ = fitEQ_W2.begin();
+  std::vector<Int_t>::iterator W3 = runW3.begin();
+  std::vector<Double_t>::iterator W3_EQ = EQW3.begin();
+  std::vector<Double_t>::iterator W3_fitEQ = fitEQ_W3.begin();
+  std::vector<Int_t>::iterator W4 = runW4.begin();
+  std::vector<Double_t>::iterator W4_EQ = EQW4.begin();
+  std::vector<Double_t>::iterator W4_fitEQ = fitEQ_W4.begin();
+
+  
+  for (int j=0;j<num;j++) {
+    Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
+    Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
+    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
+
+    if (pmtQuality[pmtVecLocation][4] && *W1==(int)run[j] && *W1_EQ==EQ[j]) {
+      Double_t N = adcW1[j]*nPE_per_channel[pmtVecLocation][4];
+      Double_t f = sqrt(N)/N;
+      Energy1 = *W1_fitEQ;
+      weight1 = 1/(Energy1*Energy1*f*f);
+      std::advance(W1,1);
+      std::advance(W1_EQ,1);
+      std::advance(W1_fitEQ,1);
+    }
+    else {weight1=0.; Energy1=0.;}
+
+    if (pmtQuality[pmtVecLocation][5] && *W2==(int)run[j] && *W2_EQ==EQ[j]) {
+      Double_t N = adcW2[j]*nPE_per_channel[pmtVecLocation][5];
+      Double_t f = sqrt(N)/N;
+      Energy2 = *W2_fitEQ;
+      weight2 = 1/(Energy2*Energy2*f*f);
+      std::advance(W2,1);
+      std::advance(W2_EQ,1);
+      std::advance(W2_fitEQ,1);
+    }
+    else {weight2=0.; Energy2=0.;}
+
+    if (pmtQuality[pmtVecLocation][6] && *W3==(int)run[j] && *W3_EQ==EQ[j]) {
+      Double_t N = adcW3[j]*nPE_per_channel[pmtVecLocation][6];
+      Double_t f = sqrt(N)/N;
+      Energy3 = *W3_fitEQ;
+      weight3 = 1/(Energy3*Energy3*f*f);
+      std::advance(W3,1);
+      std::advance(W3_EQ,1);
+      std::advance(W3_fitEQ,1);
+    }
+    else {weight3=0.; Energy3=0.;}
+
+    if (pmtQuality[pmtVecLocation][7] && *W4==(int)run[j] && *W4_EQ==EQ[j]) {
+      Double_t N = adcW4[j]*nPE_per_channel[pmtVecLocation][7];
+      Double_t f = sqrt(N)/N;
+      Energy4 = *W4_fitEQ;
+      weight4 = 1/(Energy4*Energy4*f*f);
+      std::advance(W4,1);
+      std::advance(W4_EQ,1);
+      std::advance(W4_fitEQ,1);
+    }
+    else {weight4=0.; Energy4=0.;}
+
+    EQ_West[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
 
     if (EQ[j]==98.2) {
       res_West[j] = EQ_West[j] - peakCe;
@@ -1224,16 +1417,20 @@ void MB_calc_residuals(Int_t runPeriod)
       res_West[j] = EQ_West[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      cout << Energy1 << " " << weight1 << " "
+	   << Energy2 << " " << weight2 << " "
+	   << Energy3 << " " << weight3 << " " 
+	   << Energy4 << " " << weight4 << endl;
     }
-    //    else if (EQ_West[j] < 600.) {
-    //res_West[j] = EQ_West[j] - peakBiLow;
-    //x_West[j] = peakBiLow;
-    //}
+    else if (EQ[j]==443.0) {
+      res_West[j] = EQ_West[j] - peakBiLow;
+      x_West[j] = peakBiLow;
+    }
     else if (EQ[j]==928.0) {
       res_West[j] = EQ_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
       oFileW << "Bi_West" << " " << (int) run[j] << " " << res_West[j] << endl;
-    }
+   }
 
   }
   oFileW.close();
@@ -1284,5 +1481,5 @@ void MB_calc_residuals(Int_t runPeriod)
   
   //outfile->Write();
   //outfile->Close();
-  */
+
 }
