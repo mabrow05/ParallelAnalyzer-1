@@ -791,6 +791,10 @@ void MB_calc_residuals(Int_t runPeriod)
       res_East[j] = EQ_East[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      cout << Energy1 << " " << weight1 << " "
+	   << Energy2 << " " << weight2 << " "
+	   << Energy3 << " " << weight3 << " " 
+	   << Energy4 << " " << weight4 << endl;
     }
     else if (EQ[j]==443.0) {
       res_East[j] = EQ_East[j] - peakBiLow;

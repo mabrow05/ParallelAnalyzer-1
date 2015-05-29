@@ -49,7 +49,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_global_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_East_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_global_East_periods_%i-%i_PMTE%i.dat", calPeriodLow, calPeriodHigh, PMT);
-  else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_East_runPeriod_PMTE%i.dat", calPeriodLow,PMT);
+  else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_East_runPeriod_%i_PMTE%i.dat", calPeriodLow,PMT);
   ifstream fileEast(tempEast);
 
   const size_t N = 500;
@@ -96,7 +96,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_global_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_West_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_global_West_periods_%i-%i_PMTW%i.dat", calPeriodLow, calPeriodHigh, PMT);
-  else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_West_runPeriod_PMTW%i.dat", calPeriodLow,PMT);
+  else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_West_runPeriod_%i_PMTW%i.dat", calPeriodLow,PMT);
   ifstream fileWest(tempWest);
 
   TString sourceWest[N];
@@ -139,25 +139,35 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   TH1F *hisCeWest = new TH1F("hisCeWest", "", 60, -30.0, 30.0);
   TH1F *hisSnWest = new TH1F("hisSnWest", "", 30, -30.0, 30.0);
   TH1F *hisBiWest = new TH1F("hisBiWest", "", 30, -60.0, 60.0);
+  TH1F *hisCe = new TH1F("hisCe", "", 60, -30.0, 30.0);
+  TH1F *hisSn = new TH1F("hisSn", "", 30, -30.0, 30.0);
+  TH1F *hisBi = new TH1F("hisBi", "", 30, -60.0, 60.0);
+  
 
   // Fill histograms
   for (int j=0; j<nCeEast; j++) {
     hisCeEast->Fill(resCeEast[j]);
+    hisCe->Fill(resCeEast[j]);
   }
   for (int j=0; j<nSnEast; j++) {
     hisSnEast->Fill(resSnEast[j]);
+    hisSn->Fill(resSnEast[j]);
   }
   for (int j=0; j<nBiEast; j++) {
     hisBiEast->Fill(resBiEast[j]);
+    hisBi->Fill(resBiEast[j]);
   }
   for (int j=0; j<nCeWest; j++) {
     hisCeWest->Fill(resCeWest[j]);
+    hisCe->Fill(resCeWest[j]);
   }
   for (int j=0; j<nSnWest; j++) {
     hisSnWest->Fill(resSnWest[j]);
+    hisSn->Fill(resSnWest[j]);
   }
   for (int j=0; j<nBiWest; j++) {
     hisBiWest->Fill(resBiWest[j]);
+    hisBi->Fill(resBiWest[j]);
   }
  
   // Calculate mean and standard deviation
@@ -270,6 +280,82 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "meanBiWest = " << meanBiWest << endl;
   errEnv << "sigma = " << sigmaBiWest << endl;
 
+  //Calculate total mean and rms
+  double meanCe = 0.;
+  for (int j=0; j<nCeEast; j++) {
+    meanCe += resCeEast[j];
+  }
+  for (int j=0; j<nCeWest; j++) {
+    meanCe += resCeWest[j];
+  }
+  meanCe = meanCe / (double) (nCeEast+nCeWest);
+
+  double sigmaCe = 0.;
+  for (int j=0; j<nCeEast; j++) {
+    sigmaCe += (resCeEast[j] - meanCe)*(resCeEast[j] - meanCe);
+  }
+  for (int j=0; j<nCeWest; j++) {
+    sigmaCe += (resCeWest[j] - meanCe)*(resCeWest[j] - meanCe);
+  }
+  sigmaCe = sigmaCe / (double) (nCeEast+nCeWest);
+  sigmaCe = sqrt( sigmaCe );
+
+  cout << "meanCe = " << meanCe << endl;
+  cout << "     sigma = " << sigmaCe << endl;
+  errEnv << "meanCe = " << meanCe << endl;
+  errEnv << "sigma = " << sigmaCe << endl;
+
+
+  double meanSn = 0.;
+  for (int j=0; j<nSnEast; j++) {
+    meanSn += resSnEast[j];
+  }
+  for (int j=0; j<nSnWest; j++) {
+    meanSn += resSnWest[j];
+  }
+  meanSn = meanSn / (double) (nSnEast+nSnWest);
+
+  double sigmaSn = 0.;
+  for (int j=0; j<nSnEast; j++) {
+    sigmaSn += (resSnEast[j] - meanSn)*(resSnEast[j] - meanSn);
+  }
+  for (int j=0; j<nSnWest; j++) {
+    sigmaSn += (resSnWest[j] - meanSn)*(resSnWest[j] - meanSn);
+  }
+  sigmaSn = sigmaSn / (double) (nSnEast+nSnWest);
+  sigmaSn = sqrt( sigmaSn );
+
+  cout << "meanSn = " << meanSn << endl;
+  cout << "     sigma = " << sigmaSn << endl;
+  errEnv << "meanSn = " << meanSn << endl;
+  errEnv << "sigma = " << sigmaSn << endl;
+
+
+  double meanBi = 0.;
+  for (int j=0; j<nBiEast; j++) {
+    meanBi += resBiEast[j];
+  }
+  for (int j=0; j<nBiWest; j++) {
+    meanBi += resBiWest[j];
+  }
+  meanBi = meanBi / (double) (nBiEast+nBiWest);
+
+  double sigmaBi = 0.;
+  for (int j=0; j<nBiEast; j++) {
+    sigmaBi += (resBiEast[j] - meanBi)*(resBiEast[j] - meanBi);
+  }
+  for (int j=0; j<nBiWest; j++) {
+    sigmaBi += (resBiWest[j] - meanBi)*(resBiWest[j] - meanBi);
+  }
+  sigmaBi = sigmaBi / (double) (nBiEast+nBiWest);
+  sigmaBi = sqrt( sigmaBi );
+
+  cout << "meanBi = " << meanBi << endl;
+  cout << "     sigma = " << sigmaBi << endl;
+  errEnv << "meanBi = " << meanBi << endl;
+  errEnv << "sigma = " << sigmaBi << endl;
+
+  
   errEnv.close();
 
   // Ce East
@@ -331,5 +417,35 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisBiWest->SetLineColor(1);
   hisBiWest->Draw();
   //hisBiWest->Fit("gaus", "");
+
+  // Ce 
+  c7 = new TCanvas("c7", "c7");
+  c7->SetLogy(0);
+
+  hisCe->SetXTitle("Total Ce E_{Q} Error [keV]");
+  hisCe->GetXaxis()->CenterTitle();
+  hisCe->SetLineColor(1);
+  hisCe->Draw();
+  //hisCeEast->Fit("gaus", "", "", -5.0, 5.0);
+
+  // Sn 
+  c8 = new TCanvas("c8", "c8");
+  c8->SetLogy(0);
+
+  hisSn->SetXTitle("Total Sn E_{Q} Error [keV]");
+  hisSn->GetXaxis()->CenterTitle();
+  hisSn->SetLineColor(1);
+  hisSn->Draw();
+  //hisSnEast->Fit("gaus", "", "", -10.0, 10.0);
+
+  // Bi 
+  c9 = new TCanvas("c9", "c9");
+  c9->SetLogy(0);
+
+  hisBi->SetXTitle("Total Bi E_{Q} Error [keV]");
+  hisBi->GetXaxis()->CenterTitle();
+  hisBi->SetLineColor(1);
+  hisBi->Draw();
+  //hisBiEast->Fit("gaus", "");
 
 }
