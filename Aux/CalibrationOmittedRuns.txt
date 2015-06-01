@@ -6,3 +6,6 @@
 Removing PMTW4 from run period 7...
 
 19232 I believe is way off the chart at least on the west side... I'll check into this
+
+For Run period 4, I am only using runs 17871-17922 as these were normal calibration run. After 
+	17922 the runs become long runs with the sources not being moved.

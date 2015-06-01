@@ -16,3 +16,23 @@ meanSn = 2.4947
 sigma = 5.03488
 meanBi = -3.20926
 sigma = 12.5011
+
+Results of Gaussian Fits:
+meanCeEast = -0.516964
+sigma = 1.50052
+meanSnEast = 2.2218
+sigma = 5.3602
+meanBiEast = -5.17999
+sigma = 14.0322
+meanCeWest = -0.824394
+sigma = 1.33965
+meanCeWest = 1.32513
+sigma = 4.32194
+meanBiWest = 1.84345
+sigma = 15.4661
+meanCe = -0.680522
+sigma = 1.46459
+meanSn = 1.9279
+sigma = 4.34532
+meanBi = -1.86344
+sigma = 12.7077

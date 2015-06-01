@@ -355,8 +355,8 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "meanBi = " << meanBi << endl;
   errEnv << "sigma = " << sigmaBi << endl;
 
-  
-  errEnv.close();
+  cout << endl << "Results of Gaussian Fits:\n";
+  errEnv << endl << "Results of Gaussian Fits:\n";
 
   // Ce East
   c1 = new TCanvas("c1", "c1");
@@ -366,7 +366,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisCeEast->GetXaxis()->CenterTitle();
   hisCeEast->SetLineColor(1);
   hisCeEast->Draw();
-  //hisCeEast->Fit("gaus", "", "", -5.0, 5.0);
+  hisCeEast->Fit("gaus", "", "", -8.0, 8.0);
+  cout << "meanCeEast = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanCeEast = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn East
   c2 = new TCanvas("c2", "c2");
@@ -376,7 +380,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisSnEast->GetXaxis()->CenterTitle();
   hisSnEast->SetLineColor(1);
   hisSnEast->Draw();
-  //hisSnEast->Fit("gaus", "", "", -10.0, 10.0);
+  hisSnEast->Fit("gaus", "", "", -25.0, 25.0);
+  cout << "meanSnEast = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanSnEast = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi East
   c3 = new TCanvas("c3", "c3");
@@ -386,7 +394,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisBiEast->GetXaxis()->CenterTitle();
   hisBiEast->SetLineColor(1);
   hisBiEast->Draw();
-  //hisBiEast->Fit("gaus", "");
+  hisBiEast->Fit("gaus", "","", -46., 46.);
+  cout << "meanBiEast = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanBiEast = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Ce West
   c4 = new TCanvas("c4", "c4");
@@ -396,7 +408,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisCeWest->GetXaxis()->CenterTitle();
   hisCeWest->SetLineColor(1);
   hisCeWest->Draw();
-  //hisCeWest->Fit("gaus", "");
+  hisCeWest->Fit("gaus", "", "", -8., 8.);
+  cout << "meanCeWest = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanCeWest = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn West
   c5 = new TCanvas("c5", "c5");
@@ -406,7 +422,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisSnWest->GetXaxis()->CenterTitle();
   hisSnWest->SetLineColor(1);
   hisSnWest->Draw();
-  //hisSnWest->Fit("gaus", "");
+  hisSnWest->Fit("gaus", "", "", -25., 25.);
+  cout << "meanCeWest = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanCeWest = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi West
   c6 = new TCanvas("c6", "c6");
@@ -416,7 +436,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisBiWest->GetXaxis()->CenterTitle();
   hisBiWest->SetLineColor(1);
   hisBiWest->Draw();
-  //hisBiWest->Fit("gaus", "");
+  hisBiWest->Fit("gaus", "", "", -46., 46.);
+  cout << "meanBiWest = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanBiWest = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Ce 
   c7 = new TCanvas("c7", "c7");
@@ -426,7 +450,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisCe->GetXaxis()->CenterTitle();
   hisCe->SetLineColor(1);
   hisCe->Draw();
-  //hisCeEast->Fit("gaus", "", "", -5.0, 5.0);
+  hisCe->Fit("gaus", "", "", -8.0, 8.0);
+  cout << "meanCe = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanCe = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn 
   c8 = new TCanvas("c8", "c8");
@@ -436,7 +464,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisSn->GetXaxis()->CenterTitle();
   hisSn->SetLineColor(1);
   hisSn->Draw();
-  //hisSnEast->Fit("gaus", "", "", -10.0, 10.0);
+  hisSn->Fit("gaus", "", "", -25.0, 25.0);
+  cout << "meanSn = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanSn = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi 
   c9 = new TCanvas("c9", "c9");
@@ -446,6 +478,11 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   hisBi->GetXaxis()->CenterTitle();
   hisBi->SetLineColor(1);
   hisBi->Draw();
-  //hisBiEast->Fit("gaus", "");
+  hisBi->Fit("gaus", "", "", -46., 46.);
+  cout << "meanBi = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanBi = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
+  errEnv.close();
 }

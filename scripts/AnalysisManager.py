@@ -14,7 +14,7 @@ for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
         omittedRuns.append(run)
 
-##### Set up which runs to omit which PMTs
+##### Set up which runs to omit which PMTs.
 #### This will be done by having a file with all source runs, where the PMT value
 #### is set to 0 or 1 to represent false (don't use) and true (do use)
 
