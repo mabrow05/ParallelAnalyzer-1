@@ -1,20 +1,20 @@
-meanCeEast = -0.506815
+meanCeEast = -0.506814
 sigma = 1.50342
 meanSnEast = 2.97881
 sigma = 4.65237
 meanBiEast = -4.71082
 sigma = 12.1827
-meanCeWest = -0.921041
+meanCeWest = -0.921038
 sigma = 1.64123
-meanSnWest = 2.0106
+meanSnWest = 2.01058
 sigma = 5.34667
-meanBiWest = -1.70771
+meanBiWest = -1.70772
 sigma = 12.6343
-meanCe = -0.713928
+meanCe = -0.713926
 sigma = 1.5874
 meanSn = 2.4947
-sigma = 5.03488
-meanBi = -3.20926
+sigma = 5.03489
+meanBi = -3.20927
 sigma = 12.5011
 
 Results of Gaussian Fits:

@@ -7,10 +7,10 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
 
   // Style options
   gROOT->SetStyle("Plain");
-  //gStyle->SetOptStat(11);
-  gStyle->SetOptStat(0);
-  gStyle->SetStatFontSize(0.020);
-  gStyle->SetOptFit(0); // 1111
+  gStyle->SetOptStat(11);
+  //gStyle->SetOptStat(0);
+  //gStyle->SetStatFontSize(0.020);
+  gStyle->SetOptFit(1011); // 1111
   gStyle->SetOptTitle(1);
   gStyle->SetTitleFontSize(0.05);
   //gStyle->SetTitleX(0.17);
