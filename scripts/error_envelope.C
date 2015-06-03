@@ -49,6 +49,8 @@
   gr1->SetMarkerStyle(20);
   gr1->SetMarkerSize(1.0);
 
+  
+
   TMultiGraph *mg = new TMultiGraph();
   mg->Add(gr1,"P");
   mg->Draw("A");
@@ -63,7 +65,7 @@
   mg->SetMinimum(-30.0);
   mg->SetMaximum( 30.0);
 
-  Int_t n = 2;
+ Int_t n = 2;
   Double_t x[n] = {0, 1000};
   Double_t y[n] = {0.0, 0.0};
 
@@ -73,29 +75,29 @@
   gr0->SetLineColor(1);
   gr0->SetLineStyle(2);
 
-  n = 5;
-  Double_t x2[n] = {0, 98.2., 331.2, 928., 1000.};
-  Double_t percent[n] = {1., 0.014, 0.014, 0.014, 0.014};
-  Double_t y_upper[n], y_lower[n];
-  for (int i=1; i<n; i++) {
-    Double_t val = x[n]*percent[n];
-    y_upper[n]=val;
-    y_lower[n]=-val;
+  Int_t nn = 5;
+  Double_t perc=0.016;
+  Double_t x2[nn] = {0., 98.2., 331.2, 928., 1000.};
+  Double_t percent[nn] = {1., perc, perc, perc, perc};
+  Double_t y_upper[nn], y_lower[nn];
+  for (int i=1; i<nn; i++) {
+    Double_t val = x2[i]*percent[i];
+    y_upper[i]=val;
+    y_lower[i]=-val;
   }
   y_upper[0]=y_upper[1];
   y_lower[0]=y_lower[1];
     
 
-  TGraph *env_upper = new TGraph(n,x2,y_upper);
+  TGraph *env_upper = new TGraph(nn,x2,y_upper);
   env_upper->Draw("Same");
   env_upper->SetLineWidth(2);
-  env_upper->SetLineColor(1);
+  env_upper->SetLineColor(2);
   env_upper->SetLineStyle(2);
   
-  TGraph *env_lower = new TGraph(n,x2,y_lower);
+  TGraph *env_lower = new TGraph(nn,x2,y_lower);
   env_lower->Draw("Same");
   env_lower->SetLineWidth(2);
-  env_lower->SetLineColor(1);
-  env_lower->SetLineStyle(2);
-
+  env_lower->SetLineColor(2);
+  env_lower->SetLineStyle(2); 
 }
