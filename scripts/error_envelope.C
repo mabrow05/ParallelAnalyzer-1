@@ -30,14 +30,14 @@
   double dEQ[3] = {};
 
   double resEast[3];
-  resEast[0] = -0.2002;
-  resEast[1] =  0.5212;
-  resEast[2] = -.3176;
+  resEast[0] = -0.680522;
+  resEast[1] =  1.9279;
+  resEast[2] = -1.86344;
 
   double sigEast[3];
-  sigEast[0] = 1.8833;
-  sigEast[1] = 5.29;
-  sigEast[2] = 10.157;
+  sigEast[0] = 1.46459;
+  sigEast[1] = 4.34532;
+  sigEast[2] = 12.7077;
 
   // Plot
   c1 = new TCanvas("c1", "canvas");
