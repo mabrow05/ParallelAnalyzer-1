@@ -73,4 +73,29 @@
   gr0->SetLineColor(1);
   gr0->SetLineStyle(2);
 
+  n = 5;
+  Double_t x2[n] = {0, 98.2., 331.2, 928., 1000.};
+  Double_t percent[n] = {1., 0.014, 0.014, 0.014, 0.014};
+  Double_t y_upper[n], y_lower[n];
+  for (int i=1; i<n; i++) {
+    Double_t val = x[n]*percent[n];
+    y_upper[n]=val;
+    y_lower[n]=-val;
+  }
+  y_upper[0]=y_upper[1];
+  y_lower[0]=y_lower[1];
+    
+
+  TGraph *env_upper = new TGraph(n,x2,y_upper);
+  env_upper->Draw("Same");
+  env_upper->SetLineWidth(2);
+  env_upper->SetLineColor(1);
+  env_upper->SetLineStyle(2);
+  
+  TGraph *env_lower = new TGraph(n,x2,y_lower);
+  env_lower->Draw("Same");
+  env_lower->SetLineWidth(2);
+  env_lower->SetLineColor(1);
+  env_lower->SetLineStyle(2);
+
 }
