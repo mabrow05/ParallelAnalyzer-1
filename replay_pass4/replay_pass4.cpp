@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
   // Run number integer
   cout << "Run " << argv[1] << " ..." << endl;
   cout << "... Applying Energy Calibration ..." << endl;
-  istringstream ss(argv[1]);
-  int runNumber;
-  ss >> runNumber;
+  //istringstream ss(argv[1]);
+  int runNumber = atoi(argv[1]);
+  //ss >> runNumber;
 
   // Determine linearity curve to use
   char tempFileLinearityCurve[500];
