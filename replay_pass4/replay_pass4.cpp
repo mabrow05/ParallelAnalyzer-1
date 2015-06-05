@@ -55,22 +55,22 @@ int main(int argc, char *argv[])
   else if (runNumber <= 17955) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_4.dat");
   }
-  if (runNumber <= 18386) {
+  else if (runNumber <= 18386) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_5.dat");
   }
-  if (runNumber <= 18683) {
+  else if (runNumber <= 18683) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_6.dat");
   }
-  if (runNumber <= 18994) {
+  else if (runNumber <= 18994) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_7.dat");
   }
-  if (runNumber <= 19239) {
+  else if (runNumber <= 19239) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_8.dat");
   }
-  else if (runNumber < 19544) {
+  else if (runNumber <= 19544) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_9.dat");
   }
-  else if (runNumber < 20000) {
+  else if (runNumber <= 20000) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_11.dat");
   }
   cout << "... Reading: " << tempFileLinearityCurve << endl;
