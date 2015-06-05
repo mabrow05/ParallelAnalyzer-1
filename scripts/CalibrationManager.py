@@ -111,6 +111,7 @@ class CalReplayManager:
 
     def runReplayPass4(self,srcRunPeriod=1):
         print "Running replay_pass4 for run period %i"%srcRunPeriod
+        os.system("mkdir -s %s"%(os.getenv("REPLAY_PASS4")))
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
