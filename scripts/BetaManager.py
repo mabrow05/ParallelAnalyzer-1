@@ -32,7 +32,7 @@ EPMT2_runRanges = []
 EPMT3_runRanges = []
 EPMT4_runRanges = []
 WPMT1_runRanges = [(17359,18055)]
-WPMT2_runRanges = [(17233,17249)]
+WPMT2_runRanges = [(16983,17297)]
 WPMT3_runRanges = []
 WPMT4_runRanges = [(18745,18768),(19347,19960)]
 
@@ -107,6 +107,18 @@ class CalReplayManager:
         
         for run in runs:
             os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
+        print "DONE"
+
+    def runReplayPass4(self,srcRunPeriod=1):
+        print "Running replay_pass4 for run period %i"%srcRunPeriod
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+        
+        for run in runs:
+            os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%run)
         print "DONE"
         
     def runGainBismuth(self,srcRunPeriod=1):
@@ -197,46 +209,76 @@ class CalibrationManager:
             print "Ran fit_source_peaks.C on run %i"%run
 
 
-    def makePMTrunFile(self,CalibrationPeriod=1):
-        outputFile = "../residuals/PMT_runQuality_SrcPeriod_%i.dat"%(CalibrationPeriod)
-        runList = []
+    def makePMTrunFile(self,CalibrationPeriod=1, master=False):
+        if not master:
+            outputFile = "../residuals/PMT_runQuality_SrcPeriod_%i.dat"%(CalibrationPeriod)
+            runList = []
 
-        with open("../run_lists/Source_Calibration_Run_Period_%i.dat"%CalibrationPeriod) as runlist:
-            for run in runlist:
-                if os.path.isfile(self.srcListPath+"source_list_%i.dat"%int(run)) and int(run) not in omittedRuns:
-                    srcList = open(self.srcListPath+"source_list_%i.dat"%int(run))
-                    lines = []
-                    for line in srcList:
-                        lines.append(line)
-                    if int(lines[0])>0:
-                        runList.append(int(run))
+            with open("../run_lists/Source_Calibration_Run_Period_%i.dat"%CalibrationPeriod) as runlist:
+                for run in runlist:
+                    if os.path.isfile(self.srcListPath+"source_list_%i.dat"%int(run)) and int(run) not in omittedRuns:
+                        srcList = open(self.srcListPath+"source_list_%i.dat"%int(run))
+                        lines = []
+                        for line in srcList:
+                            lines.append(line)
+                            if int(lines[0])>0:
+                                runList.append(int(run))
 
-        outfile = open(outputFile,'w')
-        pmtList = [1,1,1,1,1,1,1,1]
+            outfile = open(outputFile,'w')
 
-        for run in runList:
-            if run in EPMT1:
-                pmtList[0]=0
-            if run in EPMT2:
-                pmtList[1]=0
-            if run in EPMT3:
-                pmtList[2]=0
-            if run in EPMT4:
-                pmtList[3]=0
-            if run in WPMT1:
-                pmtList[4]=0
-            if run in WPMT2:
-                pmtList[5]=0
-            if run in WPMT3:
-                pmtList[6]=0
-            if run in WPMT4:
-                pmtList[7]=0
+            for run in runList:
+                pmtList = [1,1,1,1,1,1,1,1]
+                if run in EPMT1:
+                    pmtList[0]=0
+                if run in EPMT2:
+                    pmtList[1]=0
+                if run in EPMT3:
+                    pmtList[2]=0
+                if run in EPMT4:
+                    pmtList[3]=0
+                if run in WPMT1:
+                    pmtList[4]=0
+                if run in WPMT2:
+                    pmtList[5]=0
+                if run in WPMT3:
+                    pmtList[6]=0
+                if run in WPMT4:
+                    pmtList[7]=0
 
-            outfile.write("%i %i %i %i %i %i %i %i %i\n"%(run,pmtList[0],pmtList[1],pmtList[2],pmtList[3],
+                outfile.write("%i %i %i %i %i %i %i %i %i\n"%(run,pmtList[0],pmtList[1],pmtList[2],pmtList[3],
                                                           pmtList[4],pmtList[5],pmtList[6],pmtList[7]))
 
-        outfile.close()
-        print "Done writing PMT file for Source Period %i"%CalibrationPeriod
+            outfile.close()
+            print "Done writing PMT file for Source Period %i"%CalibrationPeriod
+
+        #Update the master list of PMT quality
+        if master:
+            masterFile = open("../residuals/PMT_runQuality_master.dat",'w')
+            
+            for run in range(16983,20000,1):
+                pmtList = [1,1,1,1,1,1,1,1]
+                if run in EPMT1:
+                    pmtList[0]=0
+                if run in EPMT2:
+                    pmtList[1]=0
+                if run in EPMT3:
+                    pmtList[2]=0
+                if run in EPMT4:
+                    pmtList[3]=0
+                if run in WPMT1:
+                    pmtList[4]=0
+                if run in WPMT2:
+                    pmtList[5]=0
+                if run in WPMT3:
+                    pmtList[6]=0
+                if run in WPMT4:
+                    pmtList[7]=0
+
+                masterFile.write("%i %i %i %i %i %i %i %i %i\n"%(run,pmtList[0],pmtList[1],pmtList[2],pmtList[3],
+                                                          pmtList[4],pmtList[5],pmtList[6],pmtList[7]))
+            masterFile.close()
+            print "Updated master list of PMT run quality"
+
 
 
     def makeSourceCalibrationFile(self,CalibrationPeriod=1):
@@ -469,6 +511,7 @@ if __name__ == "__main__":
             rep.runReplayPass3(runPeriod)
             cal.fitSourcePeaks(runPeriod)
 
-    if 0:
+    if 1:
         cal = CalibrationManager()
-        cal.calc_nPE_per_PMT(True)
+        #cal.calc_nPE_per_PMT(True)
+        cal.makePMTrunFile(master=True)

@@ -43,23 +43,35 @@ int main(int argc, char *argv[])
 
   // Determine linearity curve to use
   char tempFileLinearityCurve[500];
-  if (runNumber < 18081) {
+  if (runNumber <= 17297) {
+    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_1.dat");
+  }
+  if (runNumber <= 17439) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_2.dat");
   }
-  else if (runNumber < 18390) {
+  else if (runNumber <= 17734) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_3.dat");
   }
-  else if (runNumber < 18712) {
+  else if (runNumber <= 17955) {
+    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_4.dat");
+  }
+  if (runNumber <= 18386) {
+    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_5.dat");
+  }
+  if (runNumber <= 18683) {
+    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_6.dat");
+  }
+  if (runNumber <= 18994) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_7.dat");
   }
-  else if (runNumber < 19589) {
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_7.dat");
+  if (runNumber <= 19239) {
+    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_8.dat");
   }
-  //else if (runNumber < 19873) {
-  //sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_6.dat");
-  //}
-  else if (runNumber < 19967) {
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_7.dat");
+  else if (runNumber < 19544) {
+    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_9.dat");
+  }
+  else if (runNumber < 20000) {
+    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_11.dat");
   }
   cout << "... Reading: " << tempFileLinearityCurve << endl;
 
@@ -85,7 +97,7 @@ int main(int argc, char *argv[])
   cout << "Reading in PMT Quality file ...\n";
   Int_t pmtQuality[8];
   Char_t temp[200];
-  sprintf(temp,"../residuals/PMT_runQuality_SrcPeriod_7.dat"); //********change this
+  sprintf(temp,"../residuals/PMT_runQuality_master.dat"); 
   ifstream pmt;
   pmt.open(temp);
   Int_t run_hold;
