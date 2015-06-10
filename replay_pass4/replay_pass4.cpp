@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
   if (runNumber <= 17297) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_1.dat");
   }
-  if (runNumber <= 17439) {
+  else if (runNumber <= 17439) {
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_2.dat");
   }
   else if (runNumber <= 17734) {
@@ -112,6 +112,11 @@ int main(int argc, char *argv[])
     cout << "Run not found in PMT quality file!" << endl;
     exit(0);
   }
+  //Also must check that the linearity curves being used had all functioning PMTs... 
+  for (int j=0; j<8; j++) {
+    if (linearityCurve[j][1]==0.) pmtQuality[j]=0;
+  }
+
   cout << pmtQuality[0] << " " << pmtQuality[1] << " " << pmtQuality[2] 
        << " " << pmtQuality[3] << " " << pmtQuality[4] << " " << pmtQuality[5] 
        << " " << pmtQuality[6] << " " << pmtQuality[7] << endl; 
@@ -129,6 +134,7 @@ int main(int argc, char *argv[])
   while (weightFile >> mean_hold >> sigma_hold >> nPE_hold >> nPE_per_chan_hold) {
     nPE_per_channel[ii]=nPE_per_chan_hold;
     ii++;
+    cout << ii << " " << nPE_per_channel[ii-1] << endl;
     if (weightFile.fail()) break;
   }
   weightFile.close();
@@ -153,6 +159,9 @@ int main(int argc, char *argv[])
   Tout->Branch("pmt5_pass4", &pmt_pass4[5], "pmt5_pass4/D");
   Tout->Branch("pmt6_pass4", &pmt_pass4[6], "pmt6_pass4/D");
   Tout->Branch("pmt7_pass4", &pmt_pass4[7], "pmt7_pass4/D");
+
+  Tout->Branch("pmt_Evis", &pmt_Evis,
+	       "Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:weight0:weight1:weight2:weight3:weight4:weight5:weight6:weight7");
 
   Tout->Branch("xE_pass4", &xE_pass4, "xE_pass4/D");
   Tout->Branch("yE_pass4", &yE_pass4, "yE_pass4/D");
@@ -229,83 +238,85 @@ int main(int argc, char *argv[])
     Tin->GetEvent(i);
     Tin2->GetEvent(i);
 
-    Double_t Energy0, Energy1, Energy2, Energy3, Energy4, Energy5, Energy6, Energy7;
-    Energy0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] + linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0];
-    Energy1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] + linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1];
-    Energy2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] + linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2];
-    Energy3 = linearityCurve[3][0] + linearityCurve[3][1]*pmt_pass3[3] + linearityCurve[3][2]*pmt_pass3[3]*pmt_pass3[3];
-    Energy4 = linearityCurve[4][0] + linearityCurve[4][1]*pmt_pass3[4] + linearityCurve[4][2]*pmt_pass3[4]*pmt_pass3[4];
-    Energy5 = linearityCurve[5][0] + linearityCurve[5][1]*pmt_pass3[5] + linearityCurve[5][2]*pmt_pass3[5]*pmt_pass3[5];
-    Energy6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] + linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6];
-    Energy7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] + linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7];
+    
+    pmt_Evis.Evis0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] + linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0];
+    pmt_Evis.Evis1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] + linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1];
+    pmt_Evis.Evis2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] + linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2];
+    pmt_Evis.Evis3 = linearityCurve[3][0] + linearityCurve[3][1]*pmt_pass3[3] + linearityCurve[3][2]*pmt_pass3[3]*pmt_pass3[3];
+    pmt_Evis.Evis4 = linearityCurve[4][0] + linearityCurve[4][1]*pmt_pass3[4] + linearityCurve[4][2]*pmt_pass3[4]*pmt_pass3[4];
+    pmt_Evis.Evis5 = linearityCurve[5][0] + linearityCurve[5][1]*pmt_pass3[5] + linearityCurve[5][2]*pmt_pass3[5]*pmt_pass3[5];
+    pmt_Evis.Evis6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] + linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6];
+    pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] + linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7];
 
-    Double_t weight0, weight1, weight2, weight3, weight4, weight5, weight6, weight7; //these will hold the 4 weights
-    //Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
-
-    if (pmtQuality[0]) {
+    if (pmtQuality[0] && pmt_Evis.Evis0>0.) {
       Double_t N = pmt_pass2[0]*nPE_per_channel[0];
       Double_t f = sqrt(N)/N;
-      weight0 = 1/(Energy0*Energy0*f*f);
+      pmt_Evis.weight0 = 1/(pmt_Evis.Evis0*pmt_Evis.Evis0*f*f);
     }
-    else {weight0=0.;}
+    else {pmt_Evis.weight0=0.;}
 
-    if (pmtQuality[1]) {
+    if (pmtQuality[1] && pmt_Evis.Evis1>0.) {
       Double_t N = pmt_pass2[1]*nPE_per_channel[1];
       Double_t f = sqrt(N)/N;
-      weight1 = 1/(Energy1*Energy1*f*f);
+      pmt_Evis.weight1 = 1/(pmt_Evis.Evis1*pmt_Evis.Evis1*f*f);
     }
-    else {weight1=0.;}
+    else {pmt_Evis.weight1=0.;}
 
-    if (pmtQuality[2]) {
+    if (pmtQuality[2] && pmt_Evis.Evis2>0.) {
       Double_t N = pmt_pass2[2]*nPE_per_channel[2];
       Double_t f = sqrt(N)/N;
-      weight2 = 1/(Energy2*Energy2*f*f);
+      pmt_Evis.weight2 = 1/(pmt_Evis.Evis2*pmt_Evis.Evis2*f*f);
     }
-    else {weight2=0.;}
+    else {pmt_Evis.weight2=0.;}
 
-    if (pmtQuality[3]) {
+    if (pmtQuality[3] && pmt_Evis.Evis3>0.) {
       Double_t N = pmt_pass2[3]*nPE_per_channel[3];
       Double_t f = sqrt(N)/N;
-      weight3 = 1/(Energy3*Energy3*f*f);
+      pmt_Evis.weight3 = 1/(pmt_Evis.Evis3*pmt_Evis.Evis3*f*f);
     }
-    else {weight3=0.;}
+    else {pmt_Evis.weight3=0.;}
 
-    if (pmtQuality[4]) {
+    if (pmtQuality[4] && pmt_Evis.Evis4>0.) {
       Double_t N = pmt_pass2[4]*nPE_per_channel[4];
       Double_t f = sqrt(N)/N;
-      weight4 = 1/(Energy4*Energy4*f*f);
+      pmt_Evis.weight4 = 1/(pmt_Evis.Evis4*pmt_Evis.Evis4*f*f);
     }
-    else {weight4=0.;}
+    else {pmt_Evis.weight4=0.;}
 
-    if (pmtQuality[5]) {
+    if (pmtQuality[5] && pmt_Evis.Evis5>0.) {
       Double_t N = pmt_pass2[5]*nPE_per_channel[5];
       Double_t f = sqrt(N)/N;
-      weight5 = 1/(Energy5*Energy5*f*f);
+      pmt_Evis.weight5 = 1/(pmt_Evis.Evis5*pmt_Evis.Evis5*f*f);
     }
-    else {weight5=0.;}
+    else {pmt_Evis.weight5=0.;}
 
-    if (pmtQuality[6]) {
+    if (pmtQuality[6] && pmt_Evis.Evis6>0.) {
       Double_t N = pmt_pass2[6]*nPE_per_channel[6];
       Double_t f = sqrt(N)/N;
-      weight6 = 1/(Energy6*Energy6*f*f);
+      pmt_Evis.weight6 = 1/(pmt_Evis.Evis6*pmt_Evis.Evis6*f*f);
     }
-    else {weight6=0.;}
+    else {pmt_Evis.weight6=0.;}
 
-    if (pmtQuality[7]) {
+    if (pmtQuality[7] && pmt_Evis.Evis7>0.) {
       Double_t N = pmt_pass2[7]*nPE_per_channel[7];
       Double_t f = sqrt(N)/N;
-      weight7 = 1/(Energy7*Energy7*f*f);
+      pmt_Evis.weight7 = 1/(pmt_Evis.Evis7*pmt_Evis.Evis7*f*f);
     }
-    else {weight7=0.;}
+    else {pmt_Evis.weight7=0.;}
 
     //East side EvisE
-    EvisE = (weight0*Energy0+weight1*Energy1+weight2*Energy2+weight3*Energy3)/(weight0+weight1+weight2+weight3);
+    EvisE = (pmt_Evis.weight0*pmt_Evis.Evis0+pmt_Evis.weight1*pmt_Evis.Evis1+pmt_Evis.weight2*pmt_Evis.Evis2+pmt_Evis.weight3*pmt_Evis.Evis3)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
     //West Side EvisW
-    EvisW = (weight4*Energy4+weight5*Energy5+weight6*Energy6+weight7*Energy7)/(weight4+weight5+weight6+weight7);
+    EvisW = (pmt_Evis.weight4*pmt_Evis.Evis4+pmt_Evis.weight5*pmt_Evis.Evis5+pmt_Evis.weight6*pmt_Evis.Evis6+pmt_Evis.weight7*pmt_Evis.Evis7)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
     
     EvisTot = EvisE+EvisW;
+
+    if (i<20) {
+      cout << pmt_Evis.Evis4 << " " << pmt_Evis.Evis5 << " " << pmt_Evis.Evis6 << " " << pmt_Evis.Evis7 << endl;
+      cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
+    }
     
-    // Pass other variables from pass2 to pass3
+    // Pass other variables from pass3 to pass4
     pmt_pass4[0] = pmt_pass3[0];
     pmt_pass4[1] = pmt_pass3[1];
     pmt_pass4[2] = pmt_pass3[2];

@@ -210,6 +210,24 @@ class CalibrationManager:
             print "Ran fit_source_peaks.C on run %i"%run
 
 
+    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, overwrite=True):
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:       
+            #checking if peaks have already been fit
+            filepath = self.srcPeakPath +"source_peaks_EnergyPeak_%i.dat"%int(line)
+            print filepath
+            if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
+                #if int(line)>18734 and int(line)<18756: #TAKE THIS OUT AFTER DOING COMPARISON W/ BRADS ENVELOPE
+                runs.append(int(line))
+
+        for run in runs:
+            os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
+            os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
+            print "Ran fit_source_peaks_Energy.C on run %i"%run
+
+
     def makePMTrunFile(self,CalibrationPeriod=1, master=False):
         if not master:
             outputFile = "../residuals/PMT_runQuality_SrcPeriod_%i.dat"%(CalibrationPeriod)
@@ -282,11 +300,18 @@ class CalibrationManager:
 
 
 
-    def makeSourceCalibrationFile(self,CalibrationPeriod=1):
+    def makeSourceCalibrationFile(self,CalibrationPeriod=1, PeaksInEnergy=False):
         #This utilizes the omittedRuns and removes them from the calibration. Any time you make a change
         # to the runs which are to be omitted, you shoud rerun this!
 
-        outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
+        outputFile = None
+        src_file_base = None
+        if PeaksInEnergy:
+            outputFile = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
+            src_file_base = self.srcPeakPath + "source_peaks_EnergyPeak_"
+        else:
+            outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
+            src_file_base = self.srcPeakPath + "source_peaks_"
         runList = []
 
         with open("../run_lists/Source_Calibration_Run_Period_%i.dat"%CalibrationPeriod) as runlist:
@@ -304,7 +329,7 @@ class CalibrationManager:
         outfile = open(outputFile,'w')
 
         for run in runList:
-            src_file = self.srcPeakPath + "source_peaks_%i.dat"%run
+            src_file = src_file_base+"%i.dat"%run
             if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
                 infile = open(src_file,'r')
                 for line in infile:
@@ -416,6 +441,8 @@ if __name__ == "__main__":
     parser = OptionParser()
     parser.add_option("--fitSrcPeaks",dest="fitSrcPeaks",action="store_true",default=False,
                       help="Fit Source peaks for all runs unless otherwise stated")
+    parser.add_option("--fitSrcPeaksInEnergy",dest="fitSrcPeaksInEnergy",action="store_true",default=False,
+                      help="Fit Source peaks post replay_pass4 for all runs unless otherwise stated")
     parser.add_option("--fitSrcPositions",dest="fitSrcPositions",action="store_true",default=False,
                       help="Fit for Source Positions for all runs. Only to be done if new replay_pass3 has been done on sources!")
     parser.add_option("--makeAllCalFiles",dest="makeAllCalFiles",action="store_true",default=False,
@@ -442,6 +469,13 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         for period in runPeriods:
             cal.fitSourcePeaks(period)
+
+    if options.fitSrcPeaksInEnergy:
+        
+        runPeriods = [1]#,2,3,4,5,6,7,8,9,10,11,12]
+        cal = CalibrationManager()
+        for period in runPeriods:
+            cal.fitSourcePeaksInEnergy(period)
 
 
     ### This will re-fit all the source positions. Note that by default, even with this option as true, 
@@ -478,10 +512,10 @@ if __name__ == "__main__":
 
     ### useful if you are going to look at the linearity curves and residuals by eye separately
     if options.makePeakFiles:
-        runPeriods = [7]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         cal=CalibrationManager()
         for period in runPeriods:
-            cal.makeSourceCalibrationFile(period)
+            cal.makeSourceCalibrationFile(period, True)
 
 
     ### Saves the results of calculating the mean and RMS of all the global residuals for the 
@@ -501,10 +535,10 @@ if __name__ == "__main__":
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both")
 
 
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
             #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
@@ -517,3 +551,13 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(True)
         cal.makePMTrunFile(master=True)
+
+
+    #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
+    if 1: 
+        runPeriods =  [1,2,3,4,5,6,7,8,9,10,11,12]
+        rep = CalReplayManager()
+        cal = CalibrationManager()
+        for runPeriod in runPeriods:
+            rep.runReplayPass4(runPeriod)
+            cal.makeSourceCalibrationFile(runPeriod, True)
