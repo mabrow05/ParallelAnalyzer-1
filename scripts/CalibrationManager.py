@@ -341,10 +341,15 @@ class CalibrationManager:
 
     
     #Calculates residuals for each PMT and as a whole for given run period
-    def calculateResiduals(self, CalibrationPeriod=1):
+    def calculateResiduals(self, CalibrationPeriod=1, InEnergy=False):
         filename = "../residuals/source_runs_RunPeriod_%i.dat"%CalibrationPeriod
+        if InEnergy:
+            filename = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%CalibrationPeriod
         if os.path.isfile(filename):
-            os.system("root -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
+            if IsEnergy:
+                os.system("root -b -q 'MB_calc_residuals_finalEnergyFits.C (%i)'"%CalibrationPeriod)
+            else:
+                os.system("root -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
             print "Calculated residuals for Calibration Period %i"%CalibrationPeriod
         else:
             print "No peak file to calculate residuals"
@@ -352,7 +357,7 @@ class CalibrationManager:
 
     #Combines residuals for the calPeriods in the list given, for the PMT chosen (0 is PMT as a whole), and for the side
     # which can be "East", "West", or "Both"
-    def makeGlobalResiduals(self,CalPeriods=[1], PMT=0, Side="Both"):
+    def makeGlobalResiduals(self,CalPeriods=[1], PMT=0, Side="Both",InEnergy=False):
         CalPeriods.sort()
         periodLow = CalPeriods[0]
         periodHigh = CalPeriods[len(CalPeriods)-1]
@@ -368,7 +373,10 @@ class CalibrationManager:
         for side in sides:
             outfile=None
             if (PMT==0):
-                outfile = open("../residuals/residuals_global_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
+                if InEnergy:
+                    outfile = open("../residuals/residuals_global_EnergyPeaks_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
+                else:
+                    outfile = open("../residuals/residuals_global_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
             elif (side=="East" and PMT>0):
                 outfile = open("../residuals/residuals_global_%s_periods_%i-%i_PMTE%i.dat"%(side,periodLow,periodHigh,PMT),"w")
             elif (side=="West" and PMT>0):
@@ -377,7 +385,10 @@ class CalibrationManager:
             for period in CalPeriods:
                 filename=None
                 if (PMT==0):
-                    filename = "../residuals/residuals_%s_runPeriod_%i.dat"%(side,period)
+                    if InEnergy:
+                        filename = "../residuals/residuals_%s_EnergyPeaks_runPeriod_%i.dat"%(side,period)
+                    else:
+                        filename = "../residuals/residuals_%s_runPeriod_%i.dat"%(side,period)
                 elif (side=="East" and PMT>0):
                     filename = "../residuals/residuals_%s_runPeriod_%i_PMTE%i.dat"%(side,period,PMT)
                 elif (side=="West" and PMT>0):
@@ -396,7 +407,7 @@ class CalibrationManager:
             print "Produced global residual file for PMT %i, run periods %i-%i, and sides "%(PMT,periodLow,periodHigh), sides
     
 
-    def plotErrorEnvelope(self, calPeriodLow=2, calPeriodHigh=10, PMT=0):
+    def plotErrorEnvelope(self, calPeriodLow=2, calPeriodHigh=10, PMT=0, InEnergy=False):
         ## This runs code which calculates the mean and RMS of the global residual file from 
         ## from Calibration run periods CalPeriodLow to CalPeriodHigh. It prints out the mean and RMS
         ## for each source. Later this will be input into code which actually plots the error envelope.
@@ -532,7 +543,7 @@ if __name__ == "__main__":
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         pmts = [0]#[1,2,3,4] #PMT 0 is for the weighted average of all 4
         for pmt in pmts:
-            cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both")
+            cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True)
 
 
     if 0:
@@ -554,7 +565,7 @@ if __name__ == "__main__":
 
 
     #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
-    if 1: 
+    if 0: 
         runPeriods =  [1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
