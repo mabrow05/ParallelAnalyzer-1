@@ -1,5 +1,13 @@
 #!/usr/bin/python
 
+########################################################################
+# This code is meant to control the replaying and energy calibration of 
+# the source data for a given data set. It is currently set up for the 
+# 2011/2012 data set and needs to be adapted for 2012/2013 unless we 
+# enumerate these source runs starting with the next number in line after
+# 2011/2012...
+########################################################################
+
 import os
 import sys
 from optparse import OptionParser
@@ -201,7 +209,6 @@ class CalibrationManager:
             filepath = self.srcPeakPath +"source_peaks_%i.dat"%int(line)
             print filepath
             if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
-                #if int(line)>18734 and int(line)<18756: #TAKE THIS OUT AFTER DOING COMPARISON W/ BRADS ENVELOPE
                 runs.append(int(line))
 
         for run in runs:
@@ -219,7 +226,6 @@ class CalibrationManager:
             filepath = self.srcPeakPath +"source_peaks_EnergyPeak_%i.dat"%int(line)
             print filepath
             if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
-                #if int(line)>18734 and int(line)<18756: #TAKE THIS OUT AFTER DOING COMPARISON W/ BRADS ENVELOPE
                 runs.append(int(line))
 
         for run in runs:
@@ -357,8 +363,6 @@ class CalibrationManager:
         periodLow = CalPeriods[0]
         periodHigh = CalPeriods[len(CalPeriods)-1]
 
-        #for CalibrationPeriod in CalPeriods:
-
         sides = [] #holds what sides will be run
         if Side=="Both":
             sides = ["East","West"]
@@ -396,7 +400,7 @@ class CalibrationManager:
             print "Produced global residual file for PMT %i, run periods %i-%i, and sides "%(PMT,periodLow,periodHigh), sides
     
 
-    def plotErrorEnvelope(self, calPeriodLow=2, calPeriodHigh=10, PMT=0):
+    def plotErrorEnvelope(self, calPeriodLow=1, calPeriodHigh=11, PMT=0):
         ## This runs code which calculates the mean and RMS of the global residual file from 
         ## from Calibration run periods CalPeriodLow to CalPeriodHigh. It prints out the mean and RMS
         ## for each source. Later this will be input into code which actually plots the error envelope.
