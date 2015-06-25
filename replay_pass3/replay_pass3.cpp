@@ -81,13 +81,13 @@ int main(int argc, char *argv[])
   else if (runNumber < 18712) {
     sprintf(tempFileXePositionMap, "../position_map/position_map_4.dat");
   }
-  else if (runNumber < 19589) {
+  else if (runNumber < 19239) {
     sprintf(tempFileXePositionMap, "../position_map/position_map_5.dat");
   }
   //else if (runNumber < 19873) {
   //sprintf(tempFileXePositionMap, "../position_map/position_map_6.dat");
   //}
-  else if (runNumber < 19967) {
+  else if (runNumber < 20000) {
     sprintf(tempFileXePositionMap, "../position_map/position_map_7.dat");
   }
   cout << "... Reading: " << tempFileXePositionMap << endl;
