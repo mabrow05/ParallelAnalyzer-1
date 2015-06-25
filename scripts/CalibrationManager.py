@@ -401,7 +401,7 @@ class CalibrationManager:
     
 
     def plotErrorEnvelope(self, calPeriodLow=1, calPeriodHigh=11, PMT=0):
-        ## This runs code which calculates the mean and RMS of the global residual file from 
+        ## This runs code which calculates the mean and RMS of the global residual file  
         ## from Calibration run periods CalPeriodLow to CalPeriodHigh. It prints out the mean and RMS
         ## for each source. Later this will be input into code which actually plots the error envelope.
         

@@ -1,5 +1,8 @@
 #### This file contains the environment variables which need to be set for the code to run
 
+#### Set the path to the raw data (in the form of full#.root)
+
+export UCNA_RAW_DATA=/path/to/rawDataDirectory
 
 # Data directory should contain source_peaks, source_lists, source_positions, etc.
 export PARALLEL_DATA_PATH=/path/to/directory/containing/data/directories

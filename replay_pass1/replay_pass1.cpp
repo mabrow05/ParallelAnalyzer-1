@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
   // Read cuts file
   char tempFileCuts[500];
-  sprintf(tempFileCuts, "%s/cuts/All_Cuts_Together/cuts_%s.dat", getenv("PARALLEL_DATA_PATH"),argv[1]);
+  sprintf(tempFileCuts, "%s/cuts_MB/cuts_%s.dat", getenv("PARALLEL_DATA_PATH"),argv[1]);
   cout << "... Reading: " << tempFileCuts << endl;
 
   ifstream fileCuts(tempFileCuts);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
   // Read pedestals file
   char tempFilePed[500];
   int iRun;
-  sprintf(tempFilePed, "/extern/UCNA/pedestals/pedestals_%s.dat", argv[1]);
+  sprintf(tempFilePed, "/extern/UCNA/pedestals_MB/pedestals_%s.dat", argv[1]);
   cout << "... Reading: " << tempFilePed << endl;
 
   ifstream filePed(tempFilePed);

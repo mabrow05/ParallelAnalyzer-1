@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
   // Open output ntuple
   char tempOut[500];
-  sprintf(tempOut, "/extern/UCNA/pedestals/pedestals_%s.root", argv[1]);
+  sprintf(tempOut, "/extern/UCNA/pedestals_MB/pedestals_%s.root", argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
 
   // Define output histograms
@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 
   // Write pedestals to file
   char tempPedFile[500];
-  sprintf(tempPedFile, "/extern/UCNA/pedestals/pedestals_%s.dat", argv[1]);
+  sprintf(tempPedFile, "/extern/UCNA/pedestals_MB/pedestals_%s.dat", argv[1]);
   ofstream outPedFile(tempPedFile);
 
   for (int i=0; i<8; i++) {

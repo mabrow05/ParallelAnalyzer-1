@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
   double referenceMean[8];
 
   // Source Calibration Run Period 1
-  if (runNumber >= 17233 && runNumber <= 17249) {
+  if (runNumber >= 16983 && runNumber <= 17297) {
     referenceMean[0] = 2768.38;
     referenceMean[1] = 2911.87;
     referenceMean[2] = 2820.94;
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 2
-  if (runNumber >= 17359 && runNumber <= 17387) {
+  if (runNumber >= 17359 && runNumber <= 17439) {
     referenceMean[0] = 2783.11;
     referenceMean[1] = 2825.62;
     referenceMean[2] = 2665.44;
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 3
-  if (runNumber >= 17517 && runNumber <= 17527) {
+  if (runNumber >= 17440 && runNumber <= 17734) {
     referenceMean[0] = 2925.49;
     referenceMean[1] = 2860.85;
     referenceMean[2] = 2646.09;
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 4
-  if (runNumber >= 17871 && runNumber <= 18055) {
+  if (runNumber >= 17735 && runNumber <= 18055) {
     referenceMean[0] = 2913.21;
     referenceMean[1] = 2726.86;
     referenceMean[2] = 2614.41;
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 5
-  if (runNumber >= 18357 && runNumber <= 18386) {
+  if (runNumber >= 18081 && runNumber <= 18386) {
     referenceMean[0] = 3139.68;
     referenceMean[1] = 2478.71;
     referenceMean[2] = 2635.56;
@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 6
-  if (runNumber >= 18617 && runNumber <= 18640) {
+  if (runNumber >= 18390 && runNumber <= 18683) {
     referenceMean[0] = 2798.3;
     referenceMean[1] = 2648.22;
     referenceMean[2] = 2643.97;
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 7
-  if (runNumber >= 18745 && runNumber <= 18768) {
+  if (runNumber >= 18712 && runNumber <= 18994) {
     referenceMean[0] = 2473.59;
     referenceMean[1] = 2490.29;
     referenceMean[2] = 2635.3;
@@ -333,7 +333,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 9
-  if (runNumber >= 19347 && runNumber <= 19377) {
+  if (runNumber >= 19347 && runNumber <= 19544) {
     referenceMean[0] = 2532.88;
     referenceMean[1] = 2442.47;
     referenceMean[2] = 2685.81;
@@ -346,20 +346,23 @@ int main(int argc, char *argv[])
 
 
   // Source Calibration Run Period 10
-  // FOR NOW, USE PREVIOUS RUN PERIOD GAIN (no Se/Sn/Bi in Run Period 10)
-  if (runNumber >= 19505 && runNumber <= 19544) {
-    referenceMean[0] = 2532.88;
-    referenceMean[1] = 2442.47;
-    referenceMean[2] = 2685.81;
-    referenceMean[3] = 2668.67;
-    referenceMean[4] = 2592.06;
-    referenceMean[5] = 2628.69;
-    referenceMean[6] = 2520.98;
-    referenceMean[7] = 781.39; //This PMT is not used for the calibration
-  }
+  // This calibration isn't used as of now. These reference means are 
+  // not correct! If this is to ever be used, we need to look up the 
+  // values as fit for the reference run in this period.
+  // FOR NOW, USE NEXT RUN PERIOD GAIN (no Ce/Sn/Bi in Run Period 10)
+  /*if (runNumber >= 19505 && runNumber <= 19544) {
+    referenceMean[0] = 2620.29;
+    referenceMean[1] = 2530.83;
+    referenceMean[2] = 2689.98;
+    referenceMean[3] = 2657.57;
+    referenceMean[4] = 2556.1;
+    referenceMean[5] = 2627.63;
+    referenceMean[6] = 2531.34;
+    referenceMean[7] = 797.798;
+    }*/
 
   // Source Calibration Run Period 11
-  if (runNumber >= 19823 && runNumber <= 19863) {
+  if (runNumber >= 19583 && runNumber <= 20000) {
     referenceMean[0] = 2620.29;
     referenceMean[1] = 2530.83;
     referenceMean[2] = 2689.98;
@@ -371,7 +374,7 @@ int main(int argc, char *argv[])
   }
 
   // Source Calibration Run Period 12
-  if (runNumber >= 19899 && runNumber <= 19966) {
+  /*if (runNumber >= 19899 && runNumber <= 19966) {
     referenceMean[0] = 2627.55;
     referenceMean[1] = 2540.88;
     referenceMean[2] = 2688.1;
@@ -380,7 +383,7 @@ int main(int argc, char *argv[])
     referenceMean[5] = 2642.34;
     referenceMean[6] = 2537.37;
     referenceMean[7] = 776.104;
-  }
+    }*/
 
   // Calculate gain correction factors
   double gainCorrection[8];
