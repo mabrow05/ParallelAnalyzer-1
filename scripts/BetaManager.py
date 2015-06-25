@@ -229,3 +229,8 @@ if __name__ == "__main__":
         beta = BetaReplayManager()
         #for octet in range(0,60,1):
         beta.findPedestals(5)
+
+    if 1:
+        beta = BetaReplayManager()
+        for octet in range(0,60,1):
+            beta.makeBasicHistograms(octet,year = "20112012")
