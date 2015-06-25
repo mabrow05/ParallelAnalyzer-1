@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
   // Open output ntuple
   char tempOut[500];
-  sprintf(tempOut, "/extern/UCNA/basic_histograms/basic_histograms_%s.root", argv[1]);
+  sprintf(tempOut, "/extern/UCNA/basic_histograms_MB/beta/basic_histograms_%s.root", argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
 
   // Define output histograms

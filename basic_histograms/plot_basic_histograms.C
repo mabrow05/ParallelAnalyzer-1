@@ -34,7 +34,7 @@ void plot_basic_histograms(TString runNumber)
 
   // Open input file
   TString filenameIn;
-  filenameIn  = "/extern/UCNA/basic_histograms/basic_histograms_";
+  filenameIn  = "/extern/UCNA/basic_histograms_MB/beta/basic_histograms_";
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
@@ -42,7 +42,7 @@ void plot_basic_histograms(TString runNumber)
 
   // Output file
   TString filenameOut;
-  filenameOut  = "/extern/UCNA/basic_histograms/basic_histograms_";
+  filenameOut  = "/extern/UCNA/basic_histograms_MB/beta/basic_histograms_";
   filenameOut += runNumber;
   filenameOut += ".pdf";
 
