@@ -527,7 +527,7 @@ if __name__ == "__main__":
 
     ### useful if you are going to look at the linearity curves and residuals by eye separately
     if options.makePeakFiles:
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [9,10,12]#[1,2,3,4,5,6,7,8,9,10,11,12]
         cal=CalibrationManager()
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period, True)
@@ -553,14 +553,14 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [9]#[1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
             #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
             #rep.runReplayPass2(runPeriod)
-            #rep.runReplayPass3(runPeriod)
-            #cal.fitSourcePeaks(runPeriod)
-            rep.runReplayPass4(runPeriod)
+            rep.runReplayPass3(runPeriod)
+            cal.fitSourcePeaks(runPeriod)
+            #rep.runReplayPass4(runPeriod)
 
     if 0:
         cal = CalibrationManager()
