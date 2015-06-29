@@ -550,7 +550,7 @@ if __name__ == "__main__":
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True)
 
 
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
         runPeriods = [9]#[1,2,3,4,5,6,7,8,9,10,11,12]
