@@ -51,6 +51,18 @@ int main(int argc, char *argv[])
     cout << "  " << sourceName[n] << endl;
   }
 
+  //Checking if one of the sources is Bi so we can add in that we will fit the second Bi peak as well
+  bool useLowBiPeak=false;
+  int BiPeakIndex = 0;
+  for (int n=0; n<nSources; n++) {
+    if (sourceName[n]=="Bi") {
+      useLowBiPeak=true;
+      BiPeakIndex=n;
+      continue;
+    }
+  }
+      
+
   //Adding in here that we are only looking for runs with Ce, Sn, or Bi in them
   bool correctSource = false;
   bool useSource[3] = {false,false,false};
@@ -126,6 +138,7 @@ int main(int argc, char *argv[])
   //his[2][5] = new TH1F("his3_W1", "", nBin,0.0,1200.0);
   //his[2][6] = new TH1F("his3_W2", "", nBin,0.0,1200.0);
   //his[2][7] = new TH1F("his3_W3", "", nBin,0.0,1200.0);
+
 
   // Open input ntuple
   char tempIn[500];
@@ -223,6 +236,8 @@ int main(int argc, char *argv[])
     }
     
   }
+  
+  his[nSources][0]=(TH1F*)his[BiPeakIndex][0]->Clone();
 
   // Find maximum bin
   double maxBin[3][2];
@@ -249,9 +264,10 @@ int main(int argc, char *argv[])
       }
     }
   }
-
+    
+  
   // Define histogram fit ranges
-  double xLow[3][2], xHigh[3][2];
+  double xLow[4][2], xHigh[4][2];
   for (int n=0; n<nSources; n++) {
 
     for (int j=0; j<2; j++) {
@@ -295,6 +311,26 @@ int main(int argc, char *argv[])
       }
     }
   }
+    
+  double lowBiFitMean[2] = {0.,0.};
+  if (useLowBiPeak) {
+    char fitName[500];
+    TF1 *lowBiGauss[2];
+    for (int j=0;j<2;j++) {
+      sprintf(fitName, "lowBiGauss%i",j);
+      lowBiGauss[j] = new TF1(fitName,"[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",
+				 binCenterMax[BiPeakIndex][j]*.477-50., binCenterMax[BiPeakIndex][j]*.477+50.);
+    
+      lowBiGauss[j]->SetParameter(0,maxCounts[BiPeakIndex][j]/2.1);
+      lowBiGauss[j]->SetParameter(1,binCenterMax[BiPeakIndex][j]*.477);
+      lowBiGauss[j]->SetParameter(2,100.0);
+      lowBiGauss[j]->SetParLimits(1,binCenterMax[BiPeakIndex][j]/.477-50., binCenterMax[BiPeakIndex][j]*.477+50.);
+
+      his[BiPeakIndex][j]->Fit(fitName, "LRQ+");
+      lowBiFitMean[j] = lowBiGauss[j]->GetParameter(1);
+      cout << lowBiFitMean[j] << endl;
+    }
+  }
 
   // Write results to file
   char tempResults[500];
@@ -309,6 +345,13 @@ int main(int argc, char *argv[])
 		 << fitMean[n][1] << " " << endl;
     }
   }
+  if (useLowBiPeak) {
+    outResults << runNumber << " "
+		 << 443.0 << " "
+		 << lowBiFitMean[0] << " "
+		 << lowBiFitMean[1] << " " << endl;
+    }
+  outResults.close();
 
   // Write output ntuple
   fileOut->Write();

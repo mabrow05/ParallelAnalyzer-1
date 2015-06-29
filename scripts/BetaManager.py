@@ -232,5 +232,5 @@ if __name__ == "__main__":
 
     if 1:
         beta = BetaReplayManager()
-        for octet in range(0,60,1):
-            beta.makeBasicHistograms(octet,year = "20112012")
+        for octet in range(0,62,1):
+            beta.makeBasicHistograms(octet,year = "20122013")
