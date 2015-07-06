@@ -199,6 +199,12 @@ void MB_calc_residuals(Int_t runPeriod)
   ResW3.resize(runW3.size());
   ResW4.resize(runW4.size());
   
+  //Checking that there are enough sources to make a linearity curve
+  if (std::find(EQE1.begin(),EQE1.end(),peakCe)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakSn)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakBiHigh)==EQE1.end()) { 
+    cout << "Not enough sources to construct quadratic linearity curve\n";
+    num=0;
+  }
+    
 
   //File to hold the linearity curves for each calibration run period
   sprintf(temp,"../linearity_curves/lin_curves_srcCal_Period_%i.dat",calibrationPeriod);
@@ -209,7 +215,7 @@ void MB_calc_residuals(Int_t runPeriod)
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-
+  //fitADC->FixParameter(0,0.0);
   fitADC->SetParLimits(2, -0.0001, 0.0001);
 
   fitADC->SetNpx(100000);
@@ -243,7 +249,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE1->SetMaximum(1000.0);
     grE1->Draw("AP");
 
-    grE1->Fit("fitADC", "R");
+    grE1->Fit("fitADC", "RQ");
     Double_t offsetE1, slopeE1, quadE1;
     offsetE1 = fitADC->GetParameter(0);
     slopeE1 = fitADC->GetParameter(1);
@@ -284,8 +290,8 @@ void MB_calc_residuals(Int_t runPeriod)
       else if (EQE1[j]==928.0) {
 	ResE1[j] = fitEQ_E1[j] - peakBiHigh;
 	//ResE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
-	oFileE1 << "Bi_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (ResE1[j]>0.05*peakBiHigh) cout << "Bi_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	oFileE1 << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*peakBiHigh) cout << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
  
       }
     }
@@ -367,7 +373,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE2->SetMaximum(1000.0);
     grE2->Draw("AP");
 
-    grE2->Fit("fitADC", "R");
+    grE2->Fit("fitADC", "RQ");
     Double_t offsetE2, slopeE2, quadE2;
     offsetE2 = fitADC->GetParameter(0);
     slopeE2 = fitADC->GetParameter(1);
@@ -407,8 +413,8 @@ void MB_calc_residuals(Int_t runPeriod)
       else if (EQE2[j]==928.0) {
 	ResE2[j] = fitEQ_E2[j] - peakBiHigh;
 	//ResE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
-	oFileE2 << "Bi_East" << " " << runE2[j] << " " << ResE2[j] << endl;
-	if (ResE2[j]>0.05*peakCe) cout<< "Bi_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+	oFileE2 << "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;
+	if (ResE2[j]>0.05*peakBiHigh) cout<< "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
     }
 
@@ -489,7 +495,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE3->SetMaximum(1000.0);
     grE3->Draw("AP");
 
-    grE3->Fit("fitADC", "R");
+    grE3->Fit("fitADC", "RQ");
     Double_t offsetE3, slopeE3, quadE3;
     offsetE3 = fitADC->GetParameter(0);
     slopeE3 = fitADC->GetParameter(1);
@@ -529,8 +535,8 @@ void MB_calc_residuals(Int_t runPeriod)
       else if (EQE3[j]==928.0) {
 	ResE3[j] = fitEQ_E3[j] - peakBiHigh;
 	//ResE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
-	oFileE3 << "Bi_East" << " " << runE3[j] << " " << ResE3[j] << endl;
-	if (ResE3[j]>0.05*peakBiHigh) cout << "Bi_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+	oFileE3 << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;
+	if (ResE3[j]>0.05*peakBiHigh) cout << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
     }
 
@@ -611,7 +617,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE4->SetMaximum(1000.0);
     grE4->Draw("AP");
 
-    grE4->Fit("fitADC", "R");
+    grE4->Fit("fitADC", "RQ");
     Double_t offsetE4, slopeE4, quadE4;
     offsetE4 = fitADC->GetParameter(0);
     slopeE4 = fitADC->GetParameter(1);
@@ -651,8 +657,8 @@ void MB_calc_residuals(Int_t runPeriod)
       else if (EQE4[j]==928.0) {
 	ResE4[j] = fitEQ_E4[j] - peakBiHigh;
 	//ResE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
-	oFileE4 << "Bi_East" << " " << runE4[j] << " " << ResE4[j] << endl;
-	if (ResE4[j]>0.05*peakBiHigh) cout<< "Bi_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+	oFileE4 << "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;
+	if (ResE4[j]>0.05*peakBiHigh) cout<< "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
     }
 
@@ -791,10 +797,10 @@ void MB_calc_residuals(Int_t runPeriod)
       res_East[j] = EQ_East[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
-      cout << Energy1 << " " << weight1 << " "
+      /*cout << Energy1 << " " << weight1 << " "
 	   << Energy2 << " " << weight2 << " "
 	   << Energy3 << " " << weight3 << " " 
-	   << Energy4 << " " << weight4 << endl;
+	   << Energy4 << " " << weight4 << endl;*/
     }
     else if (EQ[j]==443.0) {
       res_East[j] = EQ_East[j] - peakBiLow;
@@ -803,7 +809,7 @@ void MB_calc_residuals(Int_t runPeriod)
     else if (EQ[j]==928.0) {
       res_East[j] = EQ_East[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
-      oFileE << "Bi_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
    }
 
   }
@@ -812,46 +818,49 @@ void MB_calc_residuals(Int_t runPeriod)
   // East Average residuals
   cEr = new TCanvas("cEr", "cEr");
   cEr->SetLogy(0);
+  TGraphErrors *grEr; 
 
-  TGraphErrors *grEr = new TGraphErrors(num,&x_East[0],&res_East[0],err,err);
-  grEr->SetTitle("");
-  grEr->SetMarkerColor(1);
-  grEr->SetLineColor(1);
-  grEr->SetMarkerStyle(20);
-  grEr->SetMarkerSize(0.75);
-  grEr->GetXaxis()->SetTitle("E_{Q} [keV]");
-  grEr->GetXaxis()->SetTitleOffset(1.2);
-  grEr->GetXaxis()->CenterTitle();
-  grEr->GetYaxis()->SetTitle("Residuals [keV]");
-  grEr->GetYaxis()->SetTitleOffset(1.2);
-  grEr->GetYaxis()->CenterTitle();
-  grEr->GetXaxis()->SetLimits(0.0,1200.0);
-  grEr->SetMinimum(-30.0);
-  grEr->SetMaximum( 30.0);
-  grEr->Draw("AP");
-
-  Int_t n = 2;
-  Double_t x[n] = {0, 2400};
-  Double_t y[n] = {0.0, 0.0};
-
-  TGraph *gr1 = new TGraph(n,x,y);
-  gr1->Draw("Same");
-  gr1->SetLineWidth(2);
-  gr1->SetLineColor(1);
-  gr1->SetLineStyle(2);
-
-  Double_t x1_text = 1000;
-  Double_t y1_text = -20;
-
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
-  pt1->SetTextSize(0.042);
-  pt1->SetTextColor(1);
-  pt1->SetTextAlign(12);
-  pt1->AddText("East");
-  pt1->SetBorderSize(0);
-  pt1->SetFillStyle(0);
-  pt1->SetFillColor(0);
-  pt1->Draw();
+  if (num>0) {
+    grEr = new TGraphErrors(num,&x_East[0],&res_East[0],err,err);
+    grEr->SetTitle("");
+    grEr->SetMarkerColor(1);
+    grEr->SetLineColor(1);
+    grEr->SetMarkerStyle(20);
+    grEr->SetMarkerSize(0.75);
+    grEr->GetXaxis()->SetTitle("E_{Q} [keV]");
+    grEr->GetXaxis()->SetTitleOffset(1.2);
+    grEr->GetXaxis()->CenterTitle();
+    grEr->GetYaxis()->SetTitle("Residuals [keV]");
+    grEr->GetYaxis()->SetTitleOffset(1.2);
+    grEr->GetYaxis()->CenterTitle();
+    grEr->GetXaxis()->SetLimits(0.0,1200.0);
+    grEr->SetMinimum(-30.0);
+    grEr->SetMaximum( 30.0);
+    grEr->Draw("AP");
+    
+    Int_t n = 2;
+    Double_t x[n] = {0, 2400};
+    Double_t y[n] = {0.0, 0.0};
+    
+    TGraph *gr1 = new TGraph(n,x,y);
+    gr1->Draw("Same");
+    gr1->SetLineWidth(2);
+    gr1->SetLineColor(1);
+    gr1->SetLineStyle(2);
+    
+    Double_t x1_text = 1000;
+    Double_t y1_text = -20;
+    
+    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    pt1->SetTextSize(0.042);
+    pt1->SetTextColor(1);
+    pt1->SetTextAlign(12);
+    pt1->AddText("East");
+    pt1->SetBorderSize(0);
+    pt1->SetFillStyle(0);
+    pt1->SetFillColor(0);
+    pt1->Draw();
+  }
   ////////////////////////////////////////////////////////////////////
 
   // West 1
@@ -882,7 +891,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grW1->SetMaximum(1000.0);
     grW1->Draw("AP");
 
-    grW1->Fit("fitADC", "R");
+    grW1->Fit("fitADC", "RQ");
     Double_t offsetW1, slopeW1, quadW1;
     offsetW1 = fitADC->GetParameter(0);
     slopeW1 = fitADC->GetParameter(1);
@@ -919,8 +928,8 @@ void MB_calc_residuals(Int_t runPeriod)
       }
       else if (EQW1[j]==928.0) {
 	ResW1[j] = fitEQ_W1[j] - peakBiHigh;
-	oFileW1 << "Bi_West" << " " << runW1[j] << " " << ResW1[j] << endl;
-	if (ResW1[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+	oFileW1 << "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;
+	if (ResW1[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
     }
 
@@ -1001,7 +1010,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grW2->SetMaximum(1000.0);
     grW2->Draw("AP");
 
-    grW2->Fit("fitADC", "R");
+    grW2->Fit("fitADC", "RQ");
     Double_t offsetW2, slopeW2, quadW2;
     offsetW2 = fitADC->GetParameter(0);
     slopeW2 = fitADC->GetParameter(1);
@@ -1038,8 +1047,8 @@ void MB_calc_residuals(Int_t runPeriod)
       }
       else if (EQW2[j]==928.0) {
 	ResW2[j] = fitEQ_W2[j] - peakBiHigh;
-	oFileW2 << "Bi_West" << " " << runW2[j] << " " << ResW2[j] << endl;
-	if (ResW2[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+	oFileW2 << "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;
+	if (ResW2[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
     }
 
@@ -1120,7 +1129,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grW3->SetMaximum(1000.0);
     grW3->Draw("AP");
 
-    grW3->Fit("fitADC", "R");
+    grW3->Fit("fitADC", "RQ");
     Double_t offsetW3, slopeW3, quadW3;
     offsetW3 = fitADC->GetParameter(0);
     slopeW3 = fitADC->GetParameter(1);
@@ -1156,8 +1165,8 @@ void MB_calc_residuals(Int_t runPeriod)
       }
       else if (EQW3[j]==928.0) {
 	ResW3[j] = fitEQ_W3[j] - peakBiHigh;
-	oFileW3 << "Bi_West" << " " << runW3[j] << " " << ResW3[j] << endl;
-	if (ResW3[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+	oFileW3 << "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;
+	if (ResW3[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
     }
 
@@ -1239,7 +1248,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grW4->Draw("AP");
 
     fitADC->SetRange(0., 3500.);
-    grW4->Fit("fitADC", "R");
+    grW4->Fit("fitADC", "RQ");
     Double_t offsetW4, slopeW4, quadW4;
     offsetW4 = fitADC->GetParameter(0);
     slopeW4 = fitADC->GetParameter(1);
@@ -1277,8 +1286,8 @@ void MB_calc_residuals(Int_t runPeriod)
       }
       else if (EQW4[j]==928.0){
 	ResW4[j] = fitEQ_W4[j] - peakBiHigh;
-	oFileW4 << "Bi_West" << " " << runW4[j] << " " << ResW4[j] << endl;
-	if (ResW4[j]>0.05*peakBiHigh) cout<< "Bi_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+	oFileW4 << "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;
+	if (ResW4[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
     }
 
@@ -1421,10 +1430,10 @@ void MB_calc_residuals(Int_t runPeriod)
       res_West[j] = EQ_West[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
-      cout << Energy1 << " " << weight1 << " "
+      /*cout << Energy1 << " " << weight1 << " "
 	   << Energy2 << " " << weight2 << " "
 	   << Energy3 << " " << weight3 << " " 
-	   << Energy4 << " " << weight4 << endl;
+	   << Energy4 << " " << weight4 << endl;*/
     }
     else if (EQ[j]==443.0) {
       res_West[j] = EQ_West[j] - peakBiLow;
@@ -1433,7 +1442,7 @@ void MB_calc_residuals(Int_t runPeriod)
     else if (EQ[j]==928.0) {
       res_West[j] = EQ_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
-      oFileW << "Bi_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
    }
 
   }
@@ -1442,46 +1451,49 @@ void MB_calc_residuals(Int_t runPeriod)
   // West Average residuals
   cWr = new TCanvas("cWr", "cWr");
   cWr->SetLogy(0);
-
-  TGraphErrors *grWr = new TGraphErrors(num,&x_West[0],&res_West[0],err,err);
-  grWr->SetTitle("");
-  grWr->SetMarkerColor(1);
-  grWr->SetLineColor(1);
-  grWr->SetMarkerStyle(20);
-  grWr->SetMarkerSize(0.75);
-  grWr->GetXaxis()->SetTitle("E_{Q} [keV]");
-  grWr->GetXaxis()->SetTitleOffset(1.2);
-  grWr->GetXaxis()->CenterTitle();
-  grWr->GetYaxis()->SetTitle("Residuals [keV]");
-  grWr->GetYaxis()->SetTitleOffset(1.2);
-  grWr->GetYaxis()->CenterTitle();
-  grWr->GetXaxis()->SetLimits(0.0,1200.0);
-  grWr->SetMinimum(-30.0);
-  grWr->SetMaximum( 30.0);
-  grWr->Draw("AP");
-
-  Int_t n = 2;
-  Double_t x[n] = {0, 2400};
-  Double_t y[n] = {0.0, 0.0};
-
-  TGraph *gr1 = new TGraph(n,x,y);
-  gr1->Draw("Same");
-  gr1->SetLineWidth(2);
-  gr1->SetLineColor(1);
-  gr1->SetLineStyle(2);
-
-  Double_t x1_text = 1000;
-  Double_t y1_text = -20;
-
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
-  pt1->SetTextSize(0.042);
-  pt1->SetTextColor(1);
-  pt1->SetTextAlign(12);
-  pt1->AddText("West");
-  pt1->SetBorderSize(0);
-  pt1->SetFillStyle(0);
-  pt1->SetFillColor(0);
-  pt1->Draw();
+  TGraphErrors *grWr;
+ 
+  if (num>0) {
+    grWr = new TGraphErrors(num,&x_West[0],&res_West[0],err,err);
+    grWr->SetTitle("");
+    grWr->SetMarkerColor(1);
+    grWr->SetLineColor(1);
+    grWr->SetMarkerStyle(20);
+    grWr->SetMarkerSize(0.75);
+    grWr->GetXaxis()->SetTitle("E_{Q} [keV]");
+    grWr->GetXaxis()->SetTitleOffset(1.2);
+    grWr->GetXaxis()->CenterTitle();
+    grWr->GetYaxis()->SetTitle("Residuals [keV]");
+    grWr->GetYaxis()->SetTitleOffset(1.2);
+    grWr->GetYaxis()->CenterTitle();
+    grWr->GetXaxis()->SetLimits(0.0,1200.0);
+    grWr->SetMinimum(-30.0);
+    grWr->SetMaximum( 30.0);
+    grWr->Draw("AP");
+    
+    Int_t n = 2;
+    Double_t x[n] = {0, 2400};
+    Double_t y[n] = {0.0, 0.0};
+    
+    TGraph *gr1 = new TGraph(n,x,y);
+    gr1->Draw("Same");
+    gr1->SetLineWidth(2);
+    gr1->SetLineColor(1);
+    gr1->SetLineStyle(2);
+    
+    Double_t x1_text = 1000;
+    Double_t y1_text = -20;
+    
+    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    pt1->SetTextSize(0.042);
+    pt1->SetTextColor(1);
+    pt1->SetTextAlign(12);
+    pt1->AddText("West");
+    pt1->SetBorderSize(0);
+    pt1->SetFillStyle(0);
+    pt1->SetFillColor(0);
+    pt1->Draw();
+  }
   
   //outfile->Write();
   //outfile->Close();

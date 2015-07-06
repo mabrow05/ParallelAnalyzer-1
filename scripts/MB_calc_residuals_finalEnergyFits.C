@@ -104,11 +104,12 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
     else if (EQ[j]==443.0) {
       res_East[j] = eastE[j] - peakBiLow;
       x_East[j] = peakBiLow;
+      oFileE << "Bi2_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
     else if (EQ[j]==928.0) {
       res_East[j] = eastE[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
-      oFileE << "Bi_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
    }
 
   }
@@ -158,12 +159,11 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   pt1->SetFillColor(0);
   pt1->Draw();
   
-  cout << "got here \n";
   ///////////////////////////////////////////////////////////////////////
   // Calculating the weighted mean of the total energy of the West side  //
   ///////////////////////////////////////////////////////////////////////
 
-  sprintf(temp,"../residuals/residuals_West_runPeriod_%i.dat",calibrationPeriod);
+  sprintf(temp,"../residuals/residuals_West_EnergyPeaks_runPeriod_%i.dat",calibrationPeriod);
   ofstream oFileW(temp);
 
   cout << "CALCULATING WEST RESIDUALS" << endl;
@@ -184,11 +184,12 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
     else if (EQ[j]==443.0) {
       res_West[j] = westE[j] - peakBiLow;
       x_West[j] = peakBiLow;
+      oFileW << "Bi2_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
     else if (EQ[j]==928.0) {
       res_West[j] = westE[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
-      oFileW << "Bi_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
    }
 
   }

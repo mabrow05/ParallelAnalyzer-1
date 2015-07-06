@@ -1,6 +1,6 @@
 
 
-void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
+void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPass4)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -33,7 +33,9 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   // Setup output file for error Envelope
   ofstream errEnv;
   Char_t tempfile[200];
-  if (calPeriodLow!=calPeriodHigh && !PMT) {
+  if (postReplayPass4) {
+    sprintf(tempfile,"../error_envelope/error_envelope_PostReplayPass4_calPeriods_%i-%i.dat",calPeriodLow,calPeriodHigh);}
+  else if (calPeriodLow!=calPeriodHigh && !PMT) {
     sprintf(tempfile,"../error_envelope/error_envelope_calPeriods_%i-%i.dat",calPeriodLow,calPeriodHigh);}
   else if (calPeriodLow!=calPeriodHigh && PMT) {
     sprintf(tempfile,"../error_envelope/error_envelope_calPeriods_%i-%i_PMT%i.dat",calPeriodLow,calPeriodHigh,PMT);}
@@ -46,7 +48,8 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
 
   // Read East data file
   char tempEast[500];
-  if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_global_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  if (postReplayPass4) sprintf(tempEast, "../residuals/residuals_global_EnergyPeaks_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  else if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_global_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_East_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_global_East_periods_%i-%i_PMTE%i.dat", calPeriodLow, calPeriodHigh, PMT);
   else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_East_runPeriod_%i_PMTE%i.dat", calPeriodLow,PMT);
@@ -56,7 +59,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   TString sourceEast[N];
   Int_t runEast[N];
   Double_t resEast[N];
-  Double_t resCeEast[N], resSnEast[N], resBiEast[N];
+  Double_t resCeEast[N], resSnEast[N], resBi1East[N], resBi2East[N];
 
   // E_Q peaks 
   Double_t peakCe = 98.2;
@@ -67,7 +70,8 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   Int_t i = 0;
   Int_t nCeEast = 0;
   Int_t nSnEast = 0;
-  Int_t nBiEast = 0;
+  Int_t nBi1East = 0;
+  Int_t nBi2East = 0;
   cout << "East \"bad\" runs: \n";
   while (!fileEast.eof()) {
     fileEast >> sourceEast[i] >> runEast[i] >> resEast[i];
@@ -81,19 +85,25 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
       nSnEast++;
       if (sqrt(resEast[i]*resEast[i])>0.05*peakSn) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
-    if (sourceEast[i] == "Bi_East") {
-      resBiEast[nBiEast] = resEast[i];
-      nBiEast++;
+    if (sourceEast[i] == "Bi1_East") {
+      resBi1East[nBi1East] = resEast[i];
+      nBi1East++;
       if (sqrt(resEast[i]*resEast[i])>0.05*peakBiHigh) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+    }
+    if (sourceEast[i] == "Bi2_East") {
+      resBi2East[nBi2East] = resEast[i];
+      nBi2East++;
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakBiLow) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (fileEast.fail()) break;
     i++;
   }
-  cout << nCeEast << " " << nSnEast << " " << nBiEast << endl;
+  cout << nCeEast << " " << nSnEast << " " << nBi1East << " " << nBi2East << endl;
 
   // Read West data file
   char tempWest[500];
-  if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_global_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  if (postReplayPass4) sprintf(tempWest, "../residuals/residuals_global_EnergyPeaks_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  else if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_global_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_West_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_global_West_periods_%i-%i_PMTW%i.dat", calPeriodLow, calPeriodHigh, PMT);
   else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_West_runPeriod_%i_PMTW%i.dat", calPeriodLow,PMT);
@@ -102,12 +112,13 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   TString sourceWest[N];
   Int_t runWest[N];
   Double_t resWest[N];
-  Double_t resCeWest[N], resSnWest[N], resBiWest[N];
+  Double_t resCeWest[N], resSnWest[N], resBi1West[N], resBi2West[N];
 
   Int_t i = 0;
   Int_t nCeWest = 0;
   Int_t nSnWest = 0;
-  Int_t nBiWest = 0;
+  Int_t nBi1West = 0;
+  Int_t nBi2West = 0;
   
   cout << "West \"bad\" runs: \n";
   while (!fileWest.eof()) {
@@ -121,28 +132,35 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
       resSnWest[nSnWest] = resWest[i];
       nSnWest++;
       if (sqrt(resWest[i]*resWest[i])>0.05*peakSn) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
-    }
-    if (sourceWest[i] == "Bi_West") {
-      resBiWest[nBiWest] = resWest[i];
-      nBiWest++;
+    }    
+    if (sourceWest[i] == "Bi1_West") {
+      resBi1West[nBi1West] = resWest[i];
+      nBi1West++;
       if (sqrt(resWest[i]*resWest[i])>0.05*peakBiHigh) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+    }
+    if (sourceWest[i] == "Bi2_West") {
+      resBi2West[nBi2West] = resWest[i];
+      nBi2West++;
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakBiLow) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (fileWest.fail()) break;
     i++;
   }
-  cout << nCeWest << " " << nSnWest << " " << nBiWest << endl;
+  cout << nCeWest << " " << nSnWest << " " << nBi1West << " " << nBi2West << endl;
 
   // Histograms
   TH1F *hisCeEast = new TH1F("hisCeEast", "", 60, -30.0, 30.0);
   TH1F *hisSnEast = new TH1F("hisSnEast", "", 30, -30.0, 30.0);
-  TH1F *hisBiEast = new TH1F("hisBiEast", "", 30, -60.0, 60.0);
+  TH1F *hisBi1East = new TH1F("hisBi1East", "", 30, -60.0, 60.0);
+  TH1F *hisBi2East = new TH1F("hisBi2East", "", 30, -60.0, 60.0);
   TH1F *hisCeWest = new TH1F("hisCeWest", "", 60, -30.0, 30.0);
   TH1F *hisSnWest = new TH1F("hisSnWest", "", 30, -30.0, 30.0);
-  TH1F *hisBiWest = new TH1F("hisBiWest", "", 30, -60.0, 60.0);
+  TH1F *hisBi1West = new TH1F("hisBi1West", "", 30, -60.0, 60.0);
+  TH1F *hisBi2West = new TH1F("hisBi2West", "", 30, -60.0, 60.0);
   TH1F *hisCe = new TH1F("hisCe", "", 60, -30.0, 30.0);
   TH1F *hisSn = new TH1F("hisSn", "", 30, -30.0, 30.0);
-  TH1F *hisBi = new TH1F("hisBi", "", 30, -60.0, 60.0);
-  
+  TH1F *hisBi1 = new TH1F("hisBi1", "", 30, -60.0, 60.0);
+  TH1F *hisBi2 = new TH1F("hisBi2", "", 30, -60.0, 60.0);
 
   // Fill histograms
   for (int j=0; j<nCeEast; j++) {
@@ -153,9 +171,13 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
     hisSnEast->Fill(resSnEast[j]);
     hisSn->Fill(resSnEast[j]);
   }
-  for (int j=0; j<nBiEast; j++) {
-    hisBiEast->Fill(resBiEast[j]);
-    hisBi->Fill(resBiEast[j]);
+  for (int j=0; j<nBi1East; j++) {
+    hisBi1East->Fill(resBi1East[j]);
+    hisBi1->Fill(resBi1East[j]);
+  }
+  for (int j=0; j<nBi2East; j++) {
+    hisBi2East->Fill(resBi2East[j]);
+    hisBi2->Fill(resBi2East[j]);
   }
   for (int j=0; j<nCeWest; j++) {
     hisCeWest->Fill(resCeWest[j]);
@@ -165,11 +187,14 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
     hisSnWest->Fill(resSnWest[j]);
     hisSn->Fill(resSnWest[j]);
   }
-  for (int j=0; j<nBiWest; j++) {
-    hisBiWest->Fill(resBiWest[j]);
-    hisBi->Fill(resBiWest[j]);
+  for (int j=0; j<nBi1West; j++) {
+    hisBi1West->Fill(resBi1West[j]);
+    hisBi1->Fill(resBi1West[j]);
   }
- 
+ for (int j=0; j<nBi2West; j++) {
+    hisBi2West->Fill(resBi2West[j]);
+    hisBi2->Fill(resBi2West[j]);
+  }
   // Calculate mean and standard deviation
   double meanCeEast = 0.;
   for (int j=0; j<nCeEast; j++) {
@@ -207,24 +232,43 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "meanSnEast = " << meanSnEast << endl;
   errEnv << "sigma = " << sigmaSnEast << endl;
 
-  double meanBiEast = 0.;
-  for (int j=0; j<nBiEast; j++) {
-    meanBiEast += resBiEast[j];
+  double meanBi1East = 0.;
+  for (int j=0; j<nBi1East; j++) {
+    meanBi1East += resBi1East[j];
   }
-  meanBiEast = meanBiEast / (double) nBiEast;
+  meanBi1East = meanBi1East / (double) nBi1East;
 
-  double sigmaBiEast = 0.;
-  for (int j=0; j<nBiEast; j++) {
-    sigmaBiEast += (resBiEast[j] - meanBiEast)*(resBiEast[j] - meanBiEast);
+  double sigmaBi1East = 0.;
+  for (int j=0; j<nBi1East; j++) {
+    sigmaBi1East += (resBi1East[j] - meanBi1East)*(resBi1East[j] - meanBi1East);
   }
-  sigmaBiEast = sigmaBiEast / (double) nBiEast;
-  sigmaBiEast = sqrt( sigmaBiEast );
+  sigmaBi1East = sigmaBi1East / (double) nBi1East;
+  sigmaBi1East = sqrt( sigmaBi1East );
 
-  cout << "meanBiEast = " << meanBiEast << endl;
-  cout << "     sigma = " << sigmaBiEast << endl;
-  errEnv << "meanBiEast = " << meanBiEast << endl;
-  errEnv << "sigma = " << sigmaBiEast << endl;
+  cout << "meanBi1East = " << meanBi1East << endl;
+  cout << "     sigma = " << sigmaBi1East << endl;
+  errEnv << "meanBi1East = " << meanBi1East << endl;
+  errEnv << "sigma = " << sigmaBi1East << endl;
 
+  if (postReplayPass4) {
+    double meanBi2East = 0.;
+    for (int j=0; j<nBi2East; j++) {
+      meanBi2East += resBi2East[j];
+    }
+    meanBi2East = meanBi2East / (double) nBi2East;
+    
+    double sigmaBi2East = 0.;
+    for (int j=0; j<nBi2East; j++) {
+      sigmaBi2East += (resBi2East[j] - meanBi2East)*(resBi2East[j] - meanBi2East);
+    }
+    sigmaBi2East = sigmaBi2East / (double) nBi2East;
+    sigmaBi2East = sqrt( sigmaBi2East );
+    
+    cout << "meanBi2East = " << meanBi2East << endl;
+    cout << "     sigma = " << sigmaBi2East << endl;
+    errEnv << "meanBi2East = " << meanBi2East << endl;
+    errEnv << "sigma = " << sigmaBi2East << endl;
+  }
   // Calculate mean and standard deviation
   double meanCeWest = 0.;
   for (int j=0; j<nCeWest; j++) {
@@ -262,24 +306,43 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "meanSnWest = " << meanSnWest << endl;
   errEnv << "sigma = " << sigmaSnWest << endl;
 
-  double meanBiWest = 0.;
-  for (int j=0; j<nBiWest; j++) {
-    meanBiWest += resBiWest[j];
+  double meanBi1West = 0.;
+  for (int j=0; j<nBi1West; j++) {
+    meanBi1West += resBi1West[j];
   }
-  meanBiWest = meanBiWest / (double) nBiWest;
+  meanBi1West = meanBi1West / (double) nBi1West;
 
-  double sigmaBiWest = 0.;
-  for (int j=0; j<nBiWest; j++) {
-    sigmaBiWest += (resBiWest[j] - meanBiWest)*(resBiWest[j] - meanBiWest);
+  double sigmaBi1West = 0.;
+  for (int j=0; j<nBi1West; j++) {
+    sigmaBi1West += (resBi1West[j] - meanBi1West)*(resBi1West[j] - meanBi1West);
   }
-  sigmaBiWest = sigmaBiWest / (double) nBiWest;
-  sigmaBiWest = sqrt( sigmaBiWest );
+  sigmaBi1West = sigmaBi1West / (double) nBi1West;
+  sigmaBi1West = sqrt( sigmaBi1West );
 
-  cout << "meanBiWest = " << meanBiWest << endl;
-  cout << "     sigma = " << sigmaBiWest << endl;
-  errEnv << "meanBiWest = " << meanBiWest << endl;
-  errEnv << "sigma = " << sigmaBiWest << endl;
+  cout << "meanBi1West = " << meanBi1West << endl;
+  cout << "     sigma = " << sigmaBi1West << endl;
+  errEnv << "meanBi1West = " << meanBi1West << endl;
+  errEnv << "sigma = " << sigmaBi1West << endl;
 
+  if (postReplayPass4) {
+    double meanBi2West = 0.;
+    for (int j=0; j<nBi2West; j++) {
+      meanBi2West += resBi2West[j];
+    }
+    meanBi2West = meanBi2West / (double) nBi2West;
+    
+    double sigmaBi2West = 0.;
+    for (int j=0; j<nBi2West; j++) {
+      sigmaBi2West += (resBi2West[j] - meanBi2West)*(resBi2West[j] - meanBi2West);
+    }
+    sigmaBi2West = sigmaBi2West / (double) nBi2West;
+    sigmaBi2West = sqrt( sigmaBi2West );
+    
+    cout << "meanBi2West = " << meanBi2West << endl;
+    cout << "     sigma = " << sigmaBi2West << endl;
+    errEnv << "meanBi2West = " << meanBi2West << endl;
+    errEnv << "sigma = " << sigmaBi2West << endl;
+  }
   //Calculate total mean and rms
   double meanCe = 0.;
   for (int j=0; j<nCeEast; j++) {
@@ -331,29 +394,55 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "sigma = " << sigmaSn << endl;
 
 
-  double meanBi = 0.;
-  for (int j=0; j<nBiEast; j++) {
-    meanBi += resBiEast[j];
+  double meanBi1 = 0.;
+  for (int j=0; j<nBi1East; j++) {
+    meanBi1 += resBi1East[j];
   }
-  for (int j=0; j<nBiWest; j++) {
-    meanBi += resBiWest[j];
+  for (int j=0; j<nBi1West; j++) {
+    meanBi1 += resBi1West[j];
   }
-  meanBi = meanBi / (double) (nBiEast+nBiWest);
+  meanBi1 = meanBi1 / (double) (nBi1East+nBi1West);
 
-  double sigmaBi = 0.;
-  for (int j=0; j<nBiEast; j++) {
-    sigmaBi += (resBiEast[j] - meanBi)*(resBiEast[j] - meanBi);
+  double sigmaBi1 = 0.;
+  for (int j=0; j<nBi1East; j++) {
+    sigmaBi1 += (resBi1East[j] - meanBi1)*(resBi1East[j] - meanBi1);
   }
-  for (int j=0; j<nBiWest; j++) {
-    sigmaBi += (resBiWest[j] - meanBi)*(resBiWest[j] - meanBi);
+  for (int j=0; j<nBi1West; j++) {
+    sigmaBi1 += (resBi1West[j] - meanBi1)*(resBi1West[j] - meanBi1);
   }
-  sigmaBi = sigmaBi / (double) (nBiEast+nBiWest);
-  sigmaBi = sqrt( sigmaBi );
+  sigmaBi1 = sigmaBi1 / (double) (nBi1East+nBi1West);
+  sigmaBi1 = sqrt( sigmaBi1 );
 
-  cout << "meanBi = " << meanBi << endl;
-  cout << "     sigma = " << sigmaBi << endl;
-  errEnv << "meanBi = " << meanBi << endl;
-  errEnv << "sigma = " << sigmaBi << endl;
+  cout << "meanBi1 = " << meanBi1 << endl;
+  cout << "     sigma = " << sigmaBi1 << endl;
+  errEnv << "meanBi1 = " << meanBi1 << endl;
+  errEnv << "sigma = " << sigmaBi1 << endl;
+
+  if (postReplayPass4) {
+    double meanBi2 = 0.;
+    for (int j=0; j<nBi2East; j++) {
+      meanBi2 += resBi2East[j];
+    }
+    for (int j=0; j<nBi2West; j++) {
+      meanBi2 += resBi2West[j];
+    }
+    meanBi2 = meanBi2 / (double) (nBi2East+nBi2West);
+    
+    double sigmaBi2 = 0.;
+    for (int j=0; j<nBi2East; j++) {
+      sigmaBi2 += (resBi2East[j] - meanBi2)*(resBi2East[j] - meanBi2);
+    }
+    for (int j=0; j<nBi2West; j++) {
+      sigmaBi2 += (resBi2West[j] - meanBi2)*(resBi2West[j] - meanBi2);
+    }
+    sigmaBi2 = sigmaBi2 / (double) (nBi2East+nBi2West);
+    sigmaBi2 = sqrt( sigmaBi2 );
+    
+    cout << "meanBi2 = " << meanBi2 << endl;
+    cout << "     sigma = " << sigmaBi2 << endl;
+    errEnv << "meanBi2 = " << meanBi2 << endl;
+    errEnv << "sigma = " << sigmaBi2 << endl;
+  }
 
   cout << endl << "Results of Gaussian Fits:\n";
   errEnv << endl << "Results of Gaussian Fits:\n";
@@ -386,23 +475,39 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "meanSnEast = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
-  // Bi East
+  // Bi1 East
   c3 = new TCanvas("c3", "c3");
   c3->SetLogy(0);
 
-  hisBiEast->SetXTitle("East Bi E_{Q} Error [keV]");
-  hisBiEast->GetXaxis()->CenterTitle();
-  hisBiEast->SetLineColor(1);
-  hisBiEast->Draw();
-  hisBiEast->Fit("gaus", "","", -46., 46.);
-  cout << "meanBiEast = " << gaus->GetParameter(1) << endl;
+  hisBi1East->SetXTitle("East Bi1 E_{Q} Error [keV]");
+  hisBi1East->GetXaxis()->CenterTitle();
+  hisBi1East->SetLineColor(1);
+  hisBi1East->Draw();
+  hisBi1East->Fit("gaus", "","", -46., 46.);
+  cout << "meanBi1East = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanBiEast = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanBi1East = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
-  // Ce West
+  // Bi2 East
   c4 = new TCanvas("c4", "c4");
   c4->SetLogy(0);
+
+  hisBi2East->SetXTitle("East Bi2 E_{Q} Error [keV]");
+  hisBi2East->GetXaxis()->CenterTitle();
+  hisBi2East->SetLineColor(1);
+  hisBi2East->Draw();
+  hisBi2East->Fit("gaus", "","", -46., 46.);
+  if (postReplayPass4) {
+    cout << "meanBi2East = " << gaus->GetParameter(1) << endl;
+    cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+    errEnv << "meanBi2East = " << gaus->GetParameter(1) << endl;
+    errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+  }
+
+  // Ce West
+  c5 = new TCanvas("c5", "c5");
+  c5->SetLogy(0);
 
   hisCeWest->SetXTitle("West Ce E_{Q} Error [keV]");
   hisCeWest->GetXaxis()->CenterTitle();
@@ -415,8 +520,8 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn West
-  c5 = new TCanvas("c5", "c5");
-  c5->SetLogy(0);
+  c6 = new TCanvas("c6", "c6");
+  c6->SetLogy(0);
 
   hisSnWest->SetXTitle("West Sn E_{Q} Error [keV]");
   hisSnWest->GetXaxis()->CenterTitle();
@@ -428,23 +533,39 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "meanCeWest = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
-  // Bi West
-  c6 = new TCanvas("c6", "c6");
-  c6->SetLogy(0);
-
-  hisBiWest->SetXTitle("West Bi E_{Q} Error [keV]");
-  hisBiWest->GetXaxis()->CenterTitle();
-  hisBiWest->SetLineColor(1);
-  hisBiWest->Draw();
-  hisBiWest->Fit("gaus", "", "", -46., 46.);
-  cout << "meanBiWest = " << gaus->GetParameter(1) << endl;
-  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanBiWest = " << gaus->GetParameter(1) << endl;
-  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
-
-  // Ce 
+  // Bi1 West
   c7 = new TCanvas("c7", "c7");
   c7->SetLogy(0);
+
+  hisBi1West->SetXTitle("West Bi1 E_{Q} Error [keV]");
+  hisBi1West->GetXaxis()->CenterTitle();
+  hisBi1West->SetLineColor(1);
+  hisBi1West->Draw();
+  hisBi1West->Fit("gaus", "", "", -46., 46.);
+  cout << "meanBi1West = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanBi1West = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+
+  // Bi2 West
+  c8 = new TCanvas("c8", "c8");
+  c8->SetLogy(0);
+
+  hisBi2West->SetXTitle("West Bi2 E_{Q} Error [keV]");
+  hisBi2West->GetXaxis()->CenterTitle();
+  hisBi2West->SetLineColor(1);
+  hisBi2West->Draw();
+  hisBi2West->Fit("gaus", "", "", -46., 46.);
+  if (postReplayPass4) {
+    cout << "meanBi2West = " << gaus->GetParameter(1) << endl;
+    cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+    errEnv << "meanBi2West = " << gaus->GetParameter(1) << endl;
+    errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+  }
+
+  // Ce 
+  c9 = new TCanvas("c9", "c9");
+  c9->SetLogy(0);
 
   hisCe->SetXTitle("Total Ce E_{Q} Error [keV]");
   hisCe->GetXaxis()->CenterTitle();
@@ -457,8 +578,8 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn 
-  c8 = new TCanvas("c8", "c8");
-  c8->SetLogy(0);
+  c10 = new TCanvas("c10", "c10");
+  c10->SetLogy(0);
 
   hisSn->SetXTitle("Total Sn E_{Q} Error [keV]");
   hisSn->GetXaxis()->CenterTitle();
@@ -470,19 +591,35 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt)
   errEnv << "meanSn = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
-  // Bi 
-  c9 = new TCanvas("c9", "c9");
-  c9->SetLogy(0);
+  // Bi1 
+  c11 = new TCanvas("c11", "c11");
+  c11->SetLogy(0);
 
-  hisBi->SetXTitle("Total Bi E_{Q} Error [keV]");
-  hisBi->GetXaxis()->CenterTitle();
-  hisBi->SetLineColor(1);
-  hisBi->Draw();
-  hisBi->Fit("gaus", "", "", -46., 46.);
-  cout << "meanBi = " << gaus->GetParameter(1) << endl;
+  hisBi1->SetXTitle("Total Bi1 E_{Q} Error [keV]");
+  hisBi1->GetXaxis()->CenterTitle();
+  hisBi1->SetLineColor(1);
+  hisBi1->Draw();
+  hisBi1->Fit("gaus", "", "", -46., 46.);
+  cout << "meanBi1 = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanBi = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanBi1 = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+
+  // Bi2 
+  c12 = new TCanvas("c12", "c12");
+  c12->SetLogy(0);
+
+  hisBi2->SetXTitle("Total Bi2 E_{Q} Error [keV]");
+  hisBi2->GetXaxis()->CenterTitle();
+  hisBi2->SetLineColor(1);
+  hisBi2->Draw();
+  hisBi2->Fit("gaus", "", "", -46., 46.);
+  if (postReplayPass4) {
+    cout << "meanBi2 = " << gaus->GetParameter(1) << endl;
+    cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+    errEnv << "meanBi2 = " << gaus->GetParameter(1) << endl;
+    errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+  }
 
   errEnv.close();
 }

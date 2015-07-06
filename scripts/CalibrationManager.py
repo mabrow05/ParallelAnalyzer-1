@@ -38,7 +38,7 @@ WPMT4 = []
 EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 EPMT2_runRanges = []
 EPMT3_runRanges = []
-EPMT4_runRanges = []
+EPMT4_runRanges = [(17233,18055)]
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)]
 WPMT3_runRanges = []
@@ -352,7 +352,7 @@ class CalibrationManager:
         if InEnergy:
             filename = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%CalibrationPeriod
         if os.path.isfile(filename):
-            if IsEnergy:
+            if InEnergy:
                 os.system("root -b -q 'MB_calc_residuals_finalEnergyFits.C (%i)'"%CalibrationPeriod)
             else:
                 os.system("root -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
@@ -436,19 +436,6 @@ class CalibrationManager:
             print "Making Error Envelope for Run Periods %i to %i"%(calPeriodLow,calPeriodHigh)
             os.system("root -l -b -q 'MB_errorEnvelope.C (%i,%i,%i)'"%(calPeriodLow,calPeriodHigh,PMT))
 
-class BetaDecayDataManager:
-    def __init__(self):
-        self.AnalyzerPath = "../"
-        self.runListPath = self.AnalyzerPath + "run_lists/"
-        self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
-        self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
-        self.srcPeakPath = os.getenv("SOURCE_PEAKS")
-        self.replayPass3 = os.getenv("REPLAY_PASS3")
-        self.srcListPath = os.getenv("SOURCE_LIST")
-
-    def runReplayPass4(self, run=None):
-        return 0
-
 
 
 if __name__ == "__main__":
@@ -487,7 +474,7 @@ if __name__ == "__main__":
 
     if options.fitSrcPeaksInEnergy:
         
-        runPeriods = [1]#,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         cal = CalibrationManager()
         for period in runPeriods:
             cal.fitSourcePeaksInEnergy(period)
@@ -509,6 +496,8 @@ if __name__ == "__main__":
         cal=CalibrationManager()
         for period in runPeriods:
             cal.makePMTrunFile(period)
+            
+        cal.makePMTrunFile(1,True) #Updates the master list of PMT quality over all runs
 
 
     ### If you have made changes to the runs which are to be ignored at the top of this script, you should run this 
@@ -527,10 +516,10 @@ if __name__ == "__main__":
 
     ### useful if you are going to look at the linearity curves and residuals by eye separately
     if options.makePeakFiles:
-        runPeriods = [9,10,12]#[1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [2]#[1,2,3,4,5,6,7,8,9,10,11,12]
         cal=CalibrationManager()
         for period in runPeriods:
-            cal.makeSourceCalibrationFile(period, True)
+            cal.makeSourceCalibrationFile(period, False)
 
 
     ### Saves the results of calculating the mean and RMS of all the global residuals for the 
@@ -550,17 +539,17 @@ if __name__ == "__main__":
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True)
 
 
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [9]#[1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [2]#[1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
             #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
             #rep.runReplayPass2(runPeriod)
-            rep.runReplayPass3(runPeriod)
-            cal.fitSourcePeaks(runPeriod)
-            #rep.runReplayPass4(runPeriod)
+            #rep.runReplayPass3(runPeriod)
+            #cal.fitSourcePeaks(runPeriod)
+            rep.runReplayPass4(runPeriod)
 
     if 0:
         cal = CalibrationManager()
@@ -569,10 +558,13 @@ if __name__ == "__main__":
 
 
     #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
-    if 0: 
+    if 1: 
         runPeriods =  [1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
+            cal.calculateResiduals(runPeriod,False)
             rep.runReplayPass4(runPeriod)
+            cal.fitSourcePeaksInEnergy(runPeriod)
             cal.makeSourceCalibrationFile(runPeriod, True)
+            cal.calculateResiduals(runPeriod, True)

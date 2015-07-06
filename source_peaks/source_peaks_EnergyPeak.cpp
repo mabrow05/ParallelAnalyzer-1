@@ -237,7 +237,6 @@ int main(int argc, char *argv[])
     
   }
   
-  his[nSources][0]=(TH1F*)his[BiPeakIndex][0]->Clone();
 
   // Find maximum bin
   double maxBin[3][2];
@@ -317,18 +316,40 @@ int main(int argc, char *argv[])
     char fitName[500];
     TF1 *lowBiGauss[2];
     for (int j=0;j<2;j++) {
+      Int_t nbins = his[BiPeakIndex][j]->GetXaxis()->GetNbins();
+      his[BiPeakIndex][j]->GetXaxis()->SetRangeUser(250.,650.);
+      Int_t maxBin = his[BiPeakIndex][j]->GetMaximumBin();
+      Int_t maxBinContent = his[BiPeakIndex][j]->GetBinContent(maxBin);
+      his[BiPeakIndex][j]->GetXaxis()->SetRange(0,nbins);
+      Double_t max = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(maxBin);
+      cout << maxBin << endl;
+      Double_t Xmin, Xmax; //Calculate the max and min bins for fitting
+      Xmin=Xmax=50.;
+      for (int i=maxBin; i<nbins; i++) {
+	if (his[BiPeakIndex][j]->GetBinContent(i+1)<0.5*maxBinContent) {
+	  Xmax = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i+1); 
+	  break;}
+      }
+      for (int i=maxBin; i>0; i--) {
+	if (his[BiPeakIndex][j]->GetBinContent(i-1)<0.5*maxBinContent) {
+	  Xmin = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i-1); 
+	  break;}
+      }
+      cout << Xmin << " " << Xmax << endl;
+
       sprintf(fitName, "lowBiGauss%i",j);
       lowBiGauss[j] = new TF1(fitName,"[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",
-				 binCenterMax[BiPeakIndex][j]*.477-50., binCenterMax[BiPeakIndex][j]*.477+50.);
+				 Xmin, Xmax);
     
-      lowBiGauss[j]->SetParameter(0,maxCounts[BiPeakIndex][j]/2.1);
-      lowBiGauss[j]->SetParameter(1,binCenterMax[BiPeakIndex][j]*.477);
-      lowBiGauss[j]->SetParameter(2,100.0);
-      lowBiGauss[j]->SetParLimits(1,binCenterMax[BiPeakIndex][j]/.477-50., binCenterMax[BiPeakIndex][j]*.477+50.);
+      lowBiGauss[j]->SetParameter(0,(float)maxBinContent);
+      lowBiGauss[j]->SetParameter(1, max);
+      lowBiGauss[j]->SetParameter(2, 100.0);
+      lowBiGauss[j]->SetParLimits(1, Xmin, Xmax);
 
       his[BiPeakIndex][j]->Fit(fitName, "LRQ+");
       lowBiFitMean[j] = lowBiGauss[j]->GetParameter(1);
       cout << lowBiFitMean[j] << endl;
+      //his[BiPeakIndex][j]->GetXaxis()->SetRange(0,nbins);
     }
   }
 

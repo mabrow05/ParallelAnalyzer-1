@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     cout << p0 << " " << p1 << " " << p2 << endl;
     if (fileLinearityCurve.fail()) break;                       
   }
-
+  
   //Read in PMT quality file
   cout << "Reading in PMT Quality file ...\n";
   Int_t pmtQuality[8];
@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
   Tout->Branch("pmt6_pass4", &pmt_pass4[6], "pmt6_pass4/D");
   Tout->Branch("pmt7_pass4", &pmt_pass4[7], "pmt7_pass4/D");
 
+  //Branch with leaves to store the Evis and weights for all 8 PMTs
   Tout->Branch("pmt_Evis", &pmt_Evis,
 	       "Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:weight0:weight1:weight2:weight3:weight4:weight5:weight6:weight7");
 
