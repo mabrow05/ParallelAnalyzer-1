@@ -141,6 +141,15 @@ int main(int argc, char *argv[])
   Tout->Branch("pmt6_pass3", &pmt_pass3[6], "pmt6_pass3/D");
   Tout->Branch("pmt7_pass3", &pmt_pass3[7], "pmt7_pass3/D");
 
+  Tout->Branch("timeE", &timeE, "timeE/D");
+  Tout->Branch("timeW", &timeW, "timeW/D");
+  Tout->Branch("timeE_BB", &timeE_BB, "timeE_BB/D");
+  Tout->Branch("timeW_BB", &timeW_BB, "timeW_BB/D");
+  Tout->Branch("UBtime", &UBtime, "UBtime/D");
+  Tout->Branch("UBtime_BB", &UBtime_BB, "UBtime_BB/D");
+  Tout->Branch("twoFoldE", &twoFoldE, "twoFoldE/D");
+  Tout->Branch("twoFoldW", &twoFoldW, "twoFoldW/D");
+
   Tout->Branch("xE_pass3", &xE_pass3, "xE_pass3/D");
   Tout->Branch("yE_pass3", &yE_pass3, "yE_pass3/D");
   Tout->Branch("xW_pass3", &xW_pass3, "xW_pass3/D");
@@ -167,6 +176,15 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("pmt5_pass2", &pmt_pass2[5]);
   Tin->SetBranchAddress("pmt6_pass2", &pmt_pass2[6]);
   Tin->SetBranchAddress("pmt7_pass2", &pmt_pass2[7]);
+  
+  Tin->SetBranchAddress("timeE", &timeE);
+  Tin->SetBranchAddress("timeW", &timeW);
+  Tin->SetBranchAddress("timeE_BB", &timeE_BB);
+  Tin->SetBranchAddress("timeW_BB", &timeW_BB);
+  Tin->SetBranchAddress("UBtime", &UBtime);
+  Tin->SetBranchAddress("UBtime_BB", &UBtime_BB);
+  Tin->SetBranchAddress("twoFoldE", &twoFoldE);
+  Tin->SetBranchAddress("twoFoldW", &twoFoldW);
 
   Tin->SetBranchAddress("xE_pass2", &xE_pass2);
   Tin->SetBranchAddress("yE_pass2", &yE_pass2);
