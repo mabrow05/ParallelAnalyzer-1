@@ -24,9 +24,9 @@
 
   // East residuals
   double EQ[3];
-  EQ[0] = 98.2;
-  EQ[1] = 331.2;
-  EQ[2] = 928.0;
+  EQ[0] = 80.5;//98.2;
+  EQ[1] = 317.8;//331.2;
+  EQ[2] = 926.0;//928.0;
   double dEQ[3] = {};
 
   double resEast[3];
