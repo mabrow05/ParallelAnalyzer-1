@@ -171,7 +171,16 @@ int main(int argc, char *argv[])
   Tout->Branch("cathW29", &cathodeWest[29], "cathW29/D");
   Tout->Branch("cathW30", &cathodeWest[30], "cathW30/D");
   Tout->Branch("cathW31", &cathodeWest[31], "cathW31/D");
-
+  
+  Tout->Branch("timeE", &timeE, "timeE/D");
+  Tout->Branch("timeW", &timeW, "timeW/D");
+  Tout->Branch("timeE_BB", &timeE_BB, "timeE_BB/D");
+  Tout->Branch("timeW_BB", &timeW_BB, "timeW_BB/D");
+  Tout->Branch("UBtime", &UBtime, "UBtime/D");
+  Tout->Branch("UBtime_BB", &UBtime_BB, "UBtime_BB/D");
+  Tout->Branch("twoFoldE", &twoFoldE, "twoFoldE/D");
+  Tout->Branch("twoFoldW", &twoFoldW, "twoFoldW/D");
+  
   Tout->Branch("xE", &xE, "xE/D");
   Tout->Branch("yE", &yE, "yE/D");
   Tout->Branch("xW", &xW, "xW/D");
@@ -346,6 +355,11 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("Padc31", &Padc[31]);
 
   Tin->SetBranchAddress("S83028", &S83028);
+  Tin->SetBranchAddress("S8200", &S8200);
+  Tin->SetBranchAddress("Clk0", &Clk0);
+  Tin->SetBranchAddress("Clk1", &Clk1);
+  Tin->SetBranchAddress("Clk2", &Clk2);
+  Tin->SetBranchAddress("Clk3", &Clk3);
 
   Tin->SetBranchAddress("Pdc38",  &Pdc38);
   Tin->SetBranchAddress("Pdc39",  &Pdc39);
@@ -686,6 +700,15 @@ int main(int argc, char *argv[])
       if (mwpcHitWest && yMWPCWestSum > 0.)
         yW = yMWPCWest * positionProjection;
 
+      // Pass timing information to next root file
+      timeE = Clk0*scalerCountsToTime;
+      timeW = Clk1*scalerCountsToTime;
+      timeE_BB = Clk2*scalerCountsToTime;
+      timeW_BB = Clk3*scalerCountsToTime;
+      UBtime = S83028*scalerCountsToTime;
+      UBtime_BB = S8200*scalerCountsToTime;
+      twoFoldE = Tdc016;
+      twoFoldW = Tdc017;
     }
 
     Tout->Fill();

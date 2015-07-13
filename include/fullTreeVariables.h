@@ -15,7 +15,13 @@ float Qadc[8]; // East and West PMT QADC
 float Pdc2[32]; // East MWPC Cathode PADC
 float Padc[32]; // West MWPC Cathode PADC
 
-float S83028; // Clock in [us] Since Run Start
+float S83028; // UNBLINDED Clock in [us] Since Run Start
+float S8200; // UNBLINDED Clock in [us] Since most recent beam burst
+
+float Clk0; // East Blinded time
+float Clk1; // West Blinded time
+float Clk2; // East Blinded time since most recent beam-burst
+float Clk3; // West Blinded time since most recent beam-burst
 
 float Pdc38;  // Gate Valve UCN Monitor PADC
 float Pdc39;  // Switcher UCN Monitor PADC
@@ -30,3 +36,4 @@ float Qadc8;  // East Backing Veto QADC
 float Tdc018; // East Backing Veto TDC
 float Qadc10; // West Backing Veto QADC
 float Tdc020; // West Backing Veto TDC
+
