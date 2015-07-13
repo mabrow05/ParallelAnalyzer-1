@@ -160,6 +160,15 @@ int main(int argc, char *argv[])
   Tout->Branch("pmt6_pass4", &pmt_pass4[6], "pmt6_pass4/D");
   Tout->Branch("pmt7_pass4", &pmt_pass4[7], "pmt7_pass4/D");
 
+  Tout->Branch("timeE", &timeE, "timeE/D");
+  Tout->Branch("timeW", &timeW, "timeW/D");
+  Tout->Branch("timeE_BB", &timeE_BB, "timeE_BB/D");
+  Tout->Branch("timeW_BB", &timeW_BB, "timeW_BB/D");
+  Tout->Branch("UBtime", &UBtime, "UBtime/D");
+  Tout->Branch("UBtime_BB", &UBtime_BB, "UBtime_BB/D");
+  Tout->Branch("twoFoldE", &twoFoldE, "twoFoldE/D");
+  Tout->Branch("twoFoldW", &twoFoldW, "twoFoldW/D");
+
   //Branch with leaves to store the Evis and weights for all 8 PMTs
   Tout->Branch("pmt_Evis", &pmt_Evis,
 	       "Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:weight0:weight1:weight2:weight3:weight4:weight5:weight6:weight7");
@@ -194,6 +203,15 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("pmt5_pass3", &pmt_pass3[5]);
   Tin->SetBranchAddress("pmt6_pass3", &pmt_pass3[6]);
   Tin->SetBranchAddress("pmt7_pass3", &pmt_pass3[7]);
+
+  Tin->SetBranchAddress("timeE", &timeE);
+  Tin->SetBranchAddress("timeW", &timeW);
+  Tin->SetBranchAddress("timeE_BB", &timeE_BB);
+  Tin->SetBranchAddress("timeW_BB", &timeW_BB);
+  Tin->SetBranchAddress("UBtime", &UBtime);
+  Tin->SetBranchAddress("UBtime_BB", &UBtime_BB);
+  Tin->SetBranchAddress("twoFoldE", &twoFoldE);
+  Tin->SetBranchAddress("twoFoldW", &twoFoldW);
 
   Tin->SetBranchAddress("xE_pass3", &xE_pass3);
   Tin->SetBranchAddress("yE_pass3", &yE_pass3);
