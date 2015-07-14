@@ -539,15 +539,15 @@ if __name__ == "__main__":
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True)
 
 
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [2]#[1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
-            #rep.runReplayPass1(runPeriod)
+            rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            #rep.runReplayPass2(runPeriod)
-            #rep.runReplayPass3(runPeriod)
+            rep.runReplayPass2(runPeriod)
+            rep.runReplayPass3(runPeriod)
             #cal.fitSourcePeaks(runPeriod)
             rep.runReplayPass4(runPeriod)
 
@@ -558,7 +558,7 @@ if __name__ == "__main__":
 
 
     #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
-    if 1: 
+    if 0: 
         runPeriods =  [1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
