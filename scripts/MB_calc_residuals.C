@@ -275,19 +275,19 @@ void MB_calc_residuals(Int_t runPeriod)
     for (int j=0; j<runE1.size(); j++) {
     
       fitEQ_E1[j]    = offsetE1 + slopeE1*ADCE1[j] + quadE1*ADCE1[j]*ADCE1[j];
-      if (EQE1[j]==98.2) {
+      if (EQE1[j]==peakCe) {
 	ResE1[j] = fitEQ_E1[j] - peakCe;
 	oFileE1 << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
 	if (ResE1[j]>0.05*peakCe) cout << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
 	//ResE1[j] = (fitEQ - peakCe)/peakCe * 100.;
       }
-      else if (EQE1[j]==331.2) {
+      else if (EQE1[j]==peakSn) {
 	ResE1[j] = fitEQ_E1[j] - peakSn;
 	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE1 << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
 	if (ResE1[j]>0.05*peakSn) cout << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
       }
-      else if (EQE1[j]==928.0) {
+      else if (EQE1[j]==peakBiHigh) {
 	ResE1[j] = fitEQ_E1[j] - peakBiHigh;
 	//ResE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE1 << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
@@ -398,19 +398,19 @@ void MB_calc_residuals(Int_t runPeriod)
     
     for (int j=0; j<runE2.size(); j++) {
       fitEQ_E2[j]    = offsetE2 + slopeE2*ADCE2[j] + quadE2*ADCE2[j]*ADCE2[j];
-      if (EQE2[j]==98.2) {
+      if (EQE2[j]==peakCe) {
 	ResE2[j] = fitEQ_E2[j] - peakCe;
 	//ResE2[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE2 << "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;
 	if (ResE2[j]>0.05*peakCe) cout<< "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
-      else if (EQE2[j]==331.2) {
+      else if (EQE2[j]==peakSn) {
 	ResE2[j] = fitEQ_E2[j] - peakSn;
 	//ResE2[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE2 << "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;
 	if (ResE2[j]>0.05*peakSn) cout<< "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
-      else if (EQE2[j]==928.0) {
+      else if (EQE2[j]==peakBiHigh) {
 	ResE2[j] = fitEQ_E2[j] - peakBiHigh;
 	//ResE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE2 << "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;
@@ -520,19 +520,19 @@ void MB_calc_residuals(Int_t runPeriod)
     
     for (int j=0; j<runE3.size(); j++) {
       fitEQ_E3[j]    = offsetE3 + slopeE3*ADCE3[j] + quadE3*ADCE3[j]*ADCE3[j];
-      if (EQE3[j]==98.2) {
+      if (EQE3[j]==peakCe) {
 	ResE3[j] = fitEQ_E3[j] - peakCe;
 	//ResE3[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE3 << "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;
 	if (ResE3[j]>0.05*peakCe) cout<< "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
-      else if (EQE3[j]==331.2) {
+      else if (EQE3[j]==peakSn) {
 	ResE3[j] = fitEQ_E3[j] - peakSn;
 	//ResE3[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE3 << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;
 	if (ResE3[j]>0.05*peakSn) cout << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
-      else if (EQE3[j]==928.0) {
+      else if (EQE3[j]==peakBiHigh) {
 	ResE3[j] = fitEQ_E3[j] - peakBiHigh;
 	//ResE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE3 << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;
@@ -642,19 +642,19 @@ void MB_calc_residuals(Int_t runPeriod)
     
     for (int j=0; j<runE4.size(); j++) {
       fitEQ_E4[j]    = offsetE4 + slopeE4*ADCE4[j] + quadE4*ADCE4[j]*ADCE4[j];
-      if (EQE4[j]==98.2) {
+      if (EQE4[j]==peakCe) {
 	ResE4[j] = fitEQ_E4[j] - peakCe;
 	//ResE4[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE4 << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;
 	if (ResE4[j]>0.05*peakCe) cout << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
-      else if (EQE4[j]==331.2) {
+      else if (EQE4[j]==peakSn) {
 	ResE4[j] = fitEQ_E4[j] - peakSn;
 	//ResE4[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE4 << "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;
 	if (ResE4[j]>0.05*peakSn) cout<< "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
-      else if (EQE4[j]==928.0) {
+      else if (EQE4[j]==peakBiHigh) {
 	ResE4[j] = fitEQ_E4[j] - peakBiHigh;
 	//ResE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE4 << "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;
@@ -788,12 +788,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
     EQ_East[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
 
-    if (EQ[j]==98.2) {
+    if (EQ[j]==peakCe) {
       res_East[j] = EQ_East[j] - peakCe;
       x_East[j] = peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==331.2) {
+    else if (EQ[j]==peakSn) {
       res_East[j] = EQ_East[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
@@ -806,7 +806,7 @@ void MB_calc_residuals(Int_t runPeriod)
       res_East[j] = EQ_East[j] - peakBiLow;
       x_East[j] = peakBiLow;
     }
-    else if (EQ[j]==928.0) {
+    else if (EQ[j]==peakBiHigh) {
       res_East[j] = EQ_East[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
       oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
@@ -916,17 +916,17 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W1[num];
     for (int j=0; j<runW1.size(); j++) {
       fitEQ_W1[j]    = offsetW1 + slopeW1*ADCW1[j] + quadW1*ADCW1[j]*ADCW1[j];
-      if (EQW1[j]==98.2) {
+      if (EQW1[j]==peakCe) {
 	ResW1[j] = fitEQ_W1[j] - peakCe;
 	oFileW1 << "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;
 	if (ResW1[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
-      else if (EQW1[j]==331.2) {
+      else if (EQW1[j]==peakSn) {
 	ResW1[j] = fitEQ_W1[j] - peakSn;
 	oFileW1 << "Sn_West" << " " <<  runW1[j] << " " << ResW1[j] << endl;
 	if (ResW1[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
-      else if (EQW1[j]==928.0) {
+      else if (EQW1[j]==peakBiHigh) {
 	ResW1[j] = fitEQ_W1[j] - peakBiHigh;
 	oFileW1 << "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;
 	if (ResW1[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
@@ -1035,17 +1035,17 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W2[num];
     for (int j=0; j<runW2.size(); j++) {
       fitEQ_W2[j]    = offsetW2 + slopeW2*ADCW2[j] + quadW2*ADCW2[j]*ADCW2[j];
-      if (EQW2[j]==98.2) {
+      if (EQW2[j]==peakCe) {
 	ResW2[j] = fitEQ_W2[j] - peakCe;
 	oFileW2 << "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;
 	if (ResW2[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
-      else if (EQW2[j]==331.2) {
+      else if (EQW2[j]==peakSn) {
 	ResW2[j] = fitEQ_W2[j] - peakSn;
 	oFileW2 << "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;
 	if (ResW2[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
-      else if (EQW2[j]==928.0) {
+      else if (EQW2[j]==peakBiHigh) {
 	ResW2[j] = fitEQ_W2[j] - peakBiHigh;
 	oFileW2 << "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;
 	if (ResW2[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
@@ -1153,17 +1153,17 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W3[num];
     for (int j=0; j<runW3.size(); j++) {
       fitEQ_W3[j]    = offsetW3 + slopeW3*ADCW3[j] + quadW3*ADCW3[j]*ADCW3[j];
-      if (EQW3[j]==98.2) {
+      if (EQW3[j]==peakCe) {
 	ResW3[j] = fitEQ_W3[j] - peakCe;
 	oFileW3 << "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;
 	if (ResW3[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
-      else if (EQW3[j]==331.2) {
+      else if (EQW3[j]==peakSn) {
 	ResW3[j] = fitEQ_W3[j] - peakSn;
 	oFileW3 << "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;
 	if (ResW3[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
-      else if (EQW3[j]==928.0) {
+      else if (EQW3[j]==peakBiHigh) {
 	ResW3[j] = fitEQ_W3[j] - peakBiHigh;
 	oFileW3 << "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;
 	if (ResW3[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
@@ -1274,17 +1274,17 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W4[num];
     for (int j=0; j<runW4.size(); j++) {
       fitEQ_W4[j]    = offsetW4 + slopeW4*ADCW4[j] + quadW4[j]*ADCW4[j]*ADCW4[j];
-      if (EQW4[j]==98.2) {
+      if (EQW4[j]==peakCe) {
 	ResW4[j] = fitEQ_W4[j] - peakCe;
 	oFileW4 << "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;
 	if (ResW4[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
-      else if (EQW4[j]==331.2) {
+      else if (EQW4[j]==peakSn) {
 	ResW4[j] = fitEQ_W4[j] - peakSn;
 	oFileW4 << "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;
 	if (ResW4[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
-      else if (EQW4[j]==928.0){
+      else if (EQW4[j]==peakBiHigh){
 	ResW4[j] = fitEQ_W4[j] - peakBiHigh;
 	oFileW4 << "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;
 	if (ResW4[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
@@ -1421,12 +1421,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
     EQ_West[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
 
-    if (EQ[j]==98.2) {
+    if (EQ[j]==peakCe) {
       res_West[j] = EQ_West[j] - peakCe;
       x_West[j] = peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==331.2) {
+    else if (EQ[j]==peakSn) {
       res_West[j] = EQ_West[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
@@ -1439,7 +1439,7 @@ void MB_calc_residuals(Int_t runPeriod)
       res_West[j] = EQ_West[j] - peakBiLow;
       x_West[j] = peakBiLow;
     }
-    else if (EQ[j]==928.0) {
+    else if (EQ[j]==peakBiHigh) {
       res_West[j] = EQ_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
       oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;

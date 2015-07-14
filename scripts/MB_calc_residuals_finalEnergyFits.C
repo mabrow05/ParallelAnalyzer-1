@@ -91,22 +91,22 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   
   for (int j=0; j<num; j++) {
   
-    if (EQ[j]==98.2) {
+    if (EQ[j]==peakCe) {
       res_East[j] = eastE[j] - peakCe;
       x_East[j] = peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==331.2) {
+    else if (EQ[j]==peakSn) {
       res_East[j] = eastE[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==443.0) {
+    else if (EQ[j]==peakBiLow) {
       res_East[j] = eastE[j] - peakBiLow;
       x_East[j] = peakBiLow;
       oFileE << "Bi2_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==928.0) {
+    else if (EQ[j]==peakBiHigh) {
       res_East[j] = eastE[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
       oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
@@ -171,22 +171,22 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   vector <Double_t> res_West(num,0);
 
   for (int j=0; j<num; j++) {
-    if (EQ[j]==98.2) {
+    if (EQ[j]==peakCe) {
       res_West[j] = westE[j] - peakCe;
       x_West[j] = peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==331.2) {
+    else if (EQ[j]==peakSn) {
       res_West[j] = westE[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==443.0) {
+    else if (EQ[j]==peakBiLow) {
       res_West[j] = westE[j] - peakBiLow;
       x_West[j] = peakBiLow;
       oFileW << "Bi2_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==928.0) {
+    else if (EQ[j]==peakBiHigh) {
       res_West[j] = westE[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
       oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
