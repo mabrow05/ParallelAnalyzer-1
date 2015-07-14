@@ -1,6 +1,7 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include "../include/sourcePeaks.h"
 
 unsigned int find_vec_location_int(std::vector<Int_t> vec, Int_t val)
 {
@@ -57,12 +58,7 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   //Int_t runLow = 17359;
   //Int_t runHigh = 19959;
   Int_t calibrationPeriod = runPeriod;
-  // Source peaks from simulation
-  Double_t peakCe = 80.5; //98.2;
-  Double_t peakSn = 317.8;//331.2;
-  Double_t peakBiLow = 448.8;//443.0;
-  Double_t peakBiHigh = 926.0; //928.0
-
+  
   // Read data file
   char temp[500];
   sprintf(temp, "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat",calibrationPeriod);

@@ -22,6 +22,7 @@
 
 #include "replay_pass2.h"
 #include "replay_pass3.h"
+#include "sourcePeaks.h"
 
 using namespace std;
 
@@ -75,9 +76,9 @@ int main(int argc, char *argv[])
   // Quenched energies from simulation
   double EQ[3];
   for (int n=0; n<nSources; n++) {
-    if (sourceName[n] == "Ce") EQ[n] = 80.5;//98.2;
-    else if (sourceName[n] == "Sn") EQ[n] = 317.8;//331.2;
-    else if (sourceName[n] == "Bi") EQ[n] = 926.0;//928.0;
+    if (sourceName[n] == "Ce") EQ[n] = peakCe;//98.2;
+    else if (sourceName[n] == "Sn") EQ[n] = peakSn;//331.2;
+    else if (sourceName[n] == "Bi") EQ[n] = peakBiHigh;//928.0;
     else {cout << "Unidentified source" << endl; EQ[n] = 1.;} // This is a place holder // exit(0);}
   }
 
