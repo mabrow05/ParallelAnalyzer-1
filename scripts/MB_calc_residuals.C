@@ -802,7 +802,7 @@ void MB_calc_residuals(Int_t runPeriod)
 	   << Energy3 << " " << weight3 << " " 
 	   << Energy4 << " " << weight4 << endl;*/
     }
-    else if (EQ[j]==443.0) {
+    else if (EQ[j]==peakBiLow) {
       res_East[j] = EQ_East[j] - peakBiLow;
       x_East[j] = peakBiLow;
     }
@@ -1435,7 +1435,7 @@ void MB_calc_residuals(Int_t runPeriod)
 	   << Energy3 << " " << weight3 << " " 
 	   << Energy4 << " " << weight4 << endl;*/
     }
-    else if (EQ[j]==443.0) {
+    else if (EQ[j]==peakBiLow) {
       res_West[j] = EQ_West[j] - peakBiLow;
       x_West[j] = peakBiLow;
     }

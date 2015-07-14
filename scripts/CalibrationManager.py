@@ -564,7 +564,7 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         for runPeriod in runPeriods:
             #cal.calculateResiduals(runPeriod,False)
-            rep.runReplayPass4(runPeriod)
+            #rep.runReplayPass4(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod)
             cal.makeSourceCalibrationFile(runPeriod, True)
             #cal.calculateResiduals(runPeriod, True)
