@@ -1,4 +1,6 @@
 {
+  #include "../include/sourcePeaks.h"
+
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
 
@@ -24,9 +26,9 @@
 
   // East residuals
   double EQ[3];
-  EQ[0] = 80.5;//98.2;
-  EQ[1] = 317.8;//331.2;
-  EQ[2] = 926.0;//928.0;
+  EQ[0] = peakCe;//98.2;
+  EQ[1] = peakSn;//331.2;
+  EQ[2] = peakBiHigh;//928.0;
   double dEQ[3] = {};
 
   double resEast[3];

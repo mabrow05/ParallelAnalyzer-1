@@ -1,4 +1,4 @@
-
+#include "../include/sourcePeaks.h"
 
 void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPass4)
 {
@@ -60,12 +60,6 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
   Int_t runEast[N];
   Double_t resEast[N];
   Double_t resCeEast[N], resSnEast[N], resBi1East[N], resBi2East[N];
-
-  // E_Q peaks 
-  Double_t peakCe = 80.5; //98.2;
-  Double_t peakSn = 317.8;//331.2;
-  Double_t peakBiLow = 448.8;//443.0;
-  Double_t peakBiHigh = 926.0; //928.0
 
   Int_t i = 0;
   Int_t nCeEast = 0;

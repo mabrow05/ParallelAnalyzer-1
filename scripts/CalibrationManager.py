@@ -559,12 +559,12 @@ if __name__ == "__main__":
 
     #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
     if 1: 
-        runPeriods =  [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods =  [2]#[1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
-            #cal.calculateResiduals(runPeriod,False)
-            #rep.runReplayPass4(runPeriod)
+            cal.calculateResiduals(runPeriod,False)
+            rep.runReplayPass4(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod)
             cal.makeSourceCalibrationFile(runPeriod, True)
             #cal.calculateResiduals(runPeriod, True)
