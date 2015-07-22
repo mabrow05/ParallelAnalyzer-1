@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
   for (int i=0; i<32; i++) {
     filePed >> iRun >> pedPadc[i];
   }
+  filePed >> iRun >> pedPdc30;
+  filePed >> iRun >> pedPdc34;
 
   // Open output ntuple
   char tempOut[500];
@@ -171,6 +173,9 @@ int main(int argc, char *argv[])
   Tout->Branch("cathW29", &cathodeWest[29], "cathW29/D");
   Tout->Branch("cathW30", &cathodeWest[30], "cathW30/D");
   Tout->Branch("cathW31", &cathodeWest[31], "cathW31/D");
+
+  Tout->Branch("AnodeE", &AnodeE, "AnodeE/D");
+  Tout->Branch("AnodeW", &AnodeW, "AnodeW/D");
   
   Tout->Branch("timeE", &timeE, "timeE/D");
   Tout->Branch("timeW", &timeW, "timeW/D");
@@ -393,6 +398,10 @@ int main(int argc, char *argv[])
       cathodeEast[j] = ((double) Pdc2[j]) - pedPdc2[j];
       cathodeWest[j] = ((double) Padc[j]) - pedPadc[j];
     }
+
+    // Calculate pedestal-subtracted MWPC Anode PADC values
+    AnodeE = ((double) Pdc30) - pedPdc30;
+    AnodeW = ((double) Pdc34) - pedPdc34;
 
     // UCN monitor events
     bool UCNMonitorTrigger = false;

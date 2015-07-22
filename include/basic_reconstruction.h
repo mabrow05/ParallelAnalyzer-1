@@ -23,5 +23,7 @@ double UBtime_BB; //UNBLINDED time since last beam burst [s]
 
 double twoFoldE, twoFoldW; // East/West two-fold trigger TDC
 
+double AnodeE, AnodeW; // MWPC Anode Signals
+
 
  

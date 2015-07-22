@@ -102,6 +102,9 @@ int main(int argc, char *argv[])
   TH1F *his230 = new TH1F("his230", "", 4000,0.5,4000.5); // Padc2[29]
   TH1F *his231 = new TH1F("his231", "", 4000,0.5,4000.5); // Padc2[30]
   TH1F *his232 = new TH1F("his232", "", 4000,0.5,4000.5); // Padc2[31]
+  
+  TH1F *his300 = new TH1F("his300", "", 4000,0.5,4000.5); // Pdc30
+  TH1F *his301 = new TH1F("his301", "", 4000,0.5,4000.5); // Pdc34
 
   // Open input ntuple
   char tempIn[500];
@@ -190,6 +193,9 @@ int main(int argc, char *argv[])
 
   Tin->SetBranchAddress("S83028", &S83028);
 
+  Tin->SetBranchAddress("Pdc30", &Pdc30);
+  Tin->SetBranchAddress("Pdc34", &Pdc34);
+  
   int nEvents = Tin->GetEntries();
   cout << "Run " << argv[1] << " ..." << endl;
   cout << "... Processing nEvents = " << nEvents << endl;
@@ -249,6 +255,8 @@ int main(int argc, char *argv[])
       his131->Fill(Pdc2[30]);
       his132->Fill(Pdc2[31]);
 
+      his300->Fill(Pdc30);
+
       nEastPed++;
     }
 
@@ -291,6 +299,8 @@ int main(int argc, char *argv[])
       his231->Fill(Padc[30]);
       his232->Fill(Padc[31]);
 
+      his301->Fill(Pdc34);
+
       nWestPed++;
     }
 
@@ -300,6 +310,7 @@ int main(int argc, char *argv[])
   for (int i=0; i<8; i++) {
     pedQadc[i] = 0.;
   }
+  
 
   for (int i=0; i<500; i++) {
     pedQadc[0] += (his11->GetBinCenter(i+1)) * (his11->GetBinContent(i+1));
@@ -377,6 +388,8 @@ int main(int argc, char *argv[])
     pedPadc[30] += (his231->GetBinCenter(i+1)) * (his231->GetBinContent(i+1));
     pedPadc[31] += (his232->GetBinCenter(i+1)) * (his232->GetBinContent(i+1));
 
+    pedPdc30 += (his300->GetBinCenter(i+1)) * (his300->GetBinContent(i+1));
+    pedPdc34 += (his301->GetBinCenter(i+1)) * (his301->GetBinContent(i+1));
   }
 
   for (int i=0; i<4; i++) {
@@ -391,6 +404,8 @@ int main(int argc, char *argv[])
     pedPdc2[i] = pedPdc2[i] / ((double) nEastPed);
     pedPadc[i] = pedPadc[i] / ((double) nWestPed);
   }
+  pedPdc30 = pedPdc30/((double) nEastPed);
+  pedPdc34 = pedPdc34/((double) nWestPed);
 
   // Write pedestals to file
   char tempPedFile[500];
@@ -406,6 +421,8 @@ int main(int argc, char *argv[])
   for (int i=0; i<32; i++) {
     outPedFile << argv[1] << " " << pedPadc[i] << endl;
   }
+  outPedFile << argv[1] << " " << pedPdc30 << endl;
+  outPedFile << argv[1] << " " << pedPdc34 << endl;
 
   // Write output ntuple
   fileOut->Write();

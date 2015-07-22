@@ -65,14 +65,15 @@ void MB_calc_residuals(Int_t runPeriod)
   ifstream filein(temp);
 
   Int_t i = 0;
-  Double_t run[500], EQ[500];
+  Double_t run[500];
+  string sourceName[500];
   Double_t adcE1[500], adcE2[500], adcE3[500], adcE4[500];
   Double_t adcW1[500], adcW2[500], adcW3[500], adcW4[500];
   Double_t resE1[500], resE2[500], resE3[500], resE4[500];
   Double_t resW1[500], resW2[500], resW3[500], resW4[500];
   Double_t err[500];
   while (!filein.eof()) {
-    filein >> run[i] >> EQ[i]
+    filein >> run[i] >> sourceName[i]
            >> adcE1[i] >> adcE2[i] >> adcE3[i] >> adcE4[i]
            >> adcW1[i] >> adcW2[i] >> adcW3[i] >> adcW4[i];
     if (filein.fail()) break;
@@ -80,6 +81,16 @@ void MB_calc_residuals(Int_t runPeriod)
   }
   Int_t num = i;
   cout << "Number of data points: " << num << endl;
+
+  // Load the smeared EQ values which are different for each PMT and source
+  vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod);
+  for (int m=0; m<EQsmeared.size(); m++) {
+    for (int mm=0; mm<EQsmeared[m].size(); mm++) {
+      cout << EQsmeared[m][mm] << " ";
+    }
+    cout << endl;
+  }
+
 
   //Read in PMT quality file to save whether or not to use a PMT for each run
   vector<vector<int> > pmtQuality;
@@ -127,6 +138,7 @@ void MB_calc_residuals(Int_t runPeriod)
     weightFile.close();
   }
 
+  
   //cout << pmtRun[5] << endl;
   //for (int i=0;i<8;i++) {
   //  cout << nPE_per_channel[5][i] << endl;
@@ -136,6 +148,7 @@ void MB_calc_residuals(Int_t runPeriod)
   // usable
   vector<int> runE1,runE2,runE3,runE4,runW1,runW2,runW3,runW4;
   vector<Double_t> EQE1,EQE2,EQE3,EQE4,EQW1,EQW2,EQW3,EQW4;
+  vector<string> nameE1,nameE2,nameE3,nameE4,nameW1,nameW2,nameW3,nameW4;
   vector<Double_t> ADCE1, ADCE2, ADCE3, ADCE4;
   vector<Double_t> ADCW1, ADCW2, ADCW3, ADCW4;
   vector<Double_t> ResE1, ResE2, ResE3, ResE4;
@@ -144,47 +157,63 @@ void MB_calc_residuals(Int_t runPeriod)
   for (Int_t i=0; i<num;i++) {
     UInt_t runPos = find_vec_location_int(pmtRun,(int)run[i]);
     cout << "Found run " << (int) run[i] << " in PMT Quality\n";
+    int src_hold;
+    if (sourceName[i]=="Ce") src_hold = 0;
+    else if (sourceName[i]=="Sn") src_hold=1;
+    else if (sourceName[i]=="Bi2") src_hold=2;
+    else if (sourceName[i]=="Bi1") src_hold=3;
+
     if (pmtQuality[runPos][0]) {
       runE1.push_back((int)run[i]);
-      EQE1.push_back(EQ[i]);
+      EQE1.push_back(EQsmeared[0][src_hold]);
+      nameE1.push_back(sourceName[i]);
       ADCE1.push_back(adcE1[i]);
     }
     if (pmtQuality[runPos][1]) {
       runE2.push_back((int)run[i]);
-      EQE2.push_back(EQ[i]);
+      EQE2.push_back(EQsmeared[1][src_hold]);
+      nameE2.push_back(sourceName[i]);
       ADCE2.push_back(adcE2[i]);
     }
     if (pmtQuality[runPos][2]) {
       runE3.push_back((int)run[i]);
-      EQE3.push_back(EQ[i]);
+      EQE3.push_back(EQsmeared[2][src_hold]);
+      nameE3.push_back(sourceName[i]);
       ADCE3.push_back(adcE3[i]);
     }
     if (pmtQuality[runPos][3]) {
       runE4.push_back((int)run[i]);
-      EQE4.push_back(EQ[i]);
+      EQE4.push_back(EQsmeared[3][src_hold]);
+      nameE4.push_back(sourceName[i]);
       ADCE4.push_back(adcE4[i]);
     }
     if (pmtQuality[runPos][4]) {
       runW1.push_back((int)run[i]);
-      EQW1.push_back(EQ[i]);
+      EQW1.push_back(EQsmeared[4][src_hold]);
+      nameW1.push_back(sourceName[i]);
       ADCW1.push_back(adcW1[i]);
     }
     if (pmtQuality[runPos][5]) {
       runW2.push_back((int)run[i]);
-      EQW2.push_back(EQ[i]);
+      EQW2.push_back(EQsmeared[5][src_hold]);
+      nameW2.push_back(sourceName[i]);
       ADCW2.push_back(adcW2[i]);
     }
     if (pmtQuality[runPos][6]) {
       runW3.push_back((int)run[i]);
-      EQW3.push_back(EQ[i]);
+      EQW3.push_back(EQsmeared[6][src_hold]);
+      nameW3.push_back(sourceName[i]);
       ADCW3.push_back(adcW3[i]);
     }
     if (pmtQuality[runPos][7]) {
       runW4.push_back((int)run[i]);
-      EQW4.push_back(EQ[i]);
+      EQW4.push_back(EQsmeared[7][src_hold]);
+      nameW4.push_back(sourceName[i]);
       ADCW4.push_back(adcW4[i]);
     }
   }
+
+
   //Resize res vectors
   ResE1.resize(runE1.size());
   ResE2.resize(runE2.size());
@@ -196,7 +225,11 @@ void MB_calc_residuals(Int_t runPeriod)
   ResW4.resize(runW4.size());
   
   //Checking that there are enough sources to make a linearity curve
-  if (std::find(EQE1.begin(),EQE1.end(),peakCe)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakSn)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakBiHigh)==EQE1.end()) { 
+  /*if (std::find(EQE1.begin(),EQE1.end(),peakCe)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakSn)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakBiHigh)==EQE1.end()) { 
+    cout << "Not enough sources to construct quadratic linearity curve\n";
+    num=0;
+    }*/
+  if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end()) { 
     cout << "Not enough sources to construct quadratic linearity curve\n";
     num=0;
   }
@@ -223,7 +256,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileE1(temp);
   vector <Double_t> fitEQ_E1(runE1.size(),0);
 
-  if (runE1.size()>0 && (std::find(EQE1.begin(),EQE1.end(),peakCe)!=EQE1.end() && std::find(EQE1.begin(),EQE1.end(),peakSn)!=EQE1.end() && std::find(EQE1.begin(),EQE1.end(),peakBiHigh)!=EQE1.end())) {
+  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
  
     c1 = new TCanvas("c1", "c1");
     c1->SetLogy(0);
@@ -271,23 +304,23 @@ void MB_calc_residuals(Int_t runPeriod)
     for (int j=0; j<runE1.size(); j++) {
     
       fitEQ_E1[j]    = offsetE1 + slopeE1*ADCE1[j] + quadE1*ADCE1[j]*ADCE1[j];
-      if (EQE1[j]==peakCe) {
-	ResE1[j] = fitEQ_E1[j] - peakCe;
+      if (nameE1[j]=="Ce") {
+	ResE1[j] = fitEQ_E1[j] - EQE1[j];
 	oFileE1 << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (ResE1[j]>0.05*peakCe) cout << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*EQE1[j]) cout << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
 	//ResE1[j] = (fitEQ - peakCe)/peakCe * 100.;
       }
-      else if (EQE1[j]==peakSn) {
-	ResE1[j] = fitEQ_E1[j] - peakSn;
+      else if (nameE1[j]=="Sn") {
+	ResE1[j] = fitEQ_E1[j] - EQE1[j];
 	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE1 << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (ResE1[j]>0.05*peakSn) cout << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*EQE1[j]) cout << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
       }
-      else if (EQE1[j]==peakBiHigh) {
-	ResE1[j] = fitEQ_E1[j] - peakBiHigh;
+      else if (nameE1[j]=="Bi1") {
+	ResE1[j] = fitEQ_E1[j] - EQE1[j];
 	//ResE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE1 << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (ResE1[j]>0.05*peakBiHigh) cout << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*EQE1[j]) cout << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
  
       }
     }
@@ -347,7 +380,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileE2(temp);
   vector <Double_t> fitEQ_E2(runE2.size(),0);
 
-  if (runE2.size()>0 && (std::find(EQE2.begin(),EQE2.end(),peakCe)!=EQE2.end() && std::find(EQE2.begin(),EQE2.end(),peakSn)!=EQE2.end() && std::find(EQE2.begin(),EQE2.end(),peakBiHigh)!=EQE2.end())) {
+  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
 
     c2 = new TCanvas("c2", "c2");
     c2->SetLogy(0);
@@ -394,23 +427,23 @@ void MB_calc_residuals(Int_t runPeriod)
     
     for (int j=0; j<runE2.size(); j++) {
       fitEQ_E2[j]    = offsetE2 + slopeE2*ADCE2[j] + quadE2*ADCE2[j]*ADCE2[j];
-      if (EQE2[j]==peakCe) {
-	ResE2[j] = fitEQ_E2[j] - peakCe;
+      if (nameE2[j]=="Ce") {
+	ResE2[j] = fitEQ_E2[j] - EQE2[j];
 	//ResE2[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE2 << "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;
-	if (ResE2[j]>0.05*peakCe) cout<< "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+	if (ResE2[j]>0.05*EQE2[j]) cout<< "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
-      else if (EQE2[j]==peakSn) {
-	ResE2[j] = fitEQ_E2[j] - peakSn;
+      else if (nameE2[j]=="Sn") {
+	ResE2[j] = fitEQ_E2[j] - EQE2[j];
 	//ResE2[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE2 << "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;
-	if (ResE2[j]>0.05*peakSn) cout<< "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+	if (ResE2[j]>0.05*EQE2[j]) cout<< "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
-      else if (EQE2[j]==peakBiHigh) {
-	ResE2[j] = fitEQ_E2[j] - peakBiHigh;
+      else if (nameE2[j]=="Bi1") {
+	ResE2[j] = fitEQ_E2[j] - EQE2[j];
 	//ResE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE2 << "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;
-	if (ResE2[j]>0.05*peakBiHigh) cout<< "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+	if (ResE2[j]>0.05*EQE2[j]) cout<< "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
       }
     }
 
@@ -469,7 +502,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileE3(temp);
   vector <Double_t> fitEQ_E3(runE3.size(),0);
 
-  if (runE3.size()>0 && (std::find(EQE3.begin(),EQE3.end(),peakCe)!=EQE3.end() && std::find(EQE3.begin(),EQE3.end(),peakSn)!=EQE3.end() && std::find(EQE3.begin(),EQE3.end(),peakBiHigh)!=EQE3.end())) {
+  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
 
     c3 = new TCanvas("c3", "c3");
     c3->SetLogy(0);
@@ -516,23 +549,23 @@ void MB_calc_residuals(Int_t runPeriod)
     
     for (int j=0; j<runE3.size(); j++) {
       fitEQ_E3[j]    = offsetE3 + slopeE3*ADCE3[j] + quadE3*ADCE3[j]*ADCE3[j];
-      if (EQE3[j]==peakCe) {
-	ResE3[j] = fitEQ_E3[j] - peakCe;
+      if (nameE3[j]=="Ce") {
+	ResE3[j] = fitEQ_E3[j] - EQE3[j];
 	//ResE3[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE3 << "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;
-	if (ResE3[j]>0.05*peakCe) cout<< "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+	if (ResE3[j]>0.05*EQE3[j]) cout<< "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
-      else if (EQE3[j]==peakSn) {
-	ResE3[j] = fitEQ_E3[j] - peakSn;
+      else if (nameE3[j]=="Sn") {
+	ResE3[j] = fitEQ_E3[j] - EQE3[j];
 	//ResE3[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE3 << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;
-	if (ResE3[j]>0.05*peakSn) cout << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+	if (ResE3[j]>0.05*EQE3[j]) cout << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
-      else if (EQE3[j]==peakBiHigh) {
-	ResE3[j] = fitEQ_E3[j] - peakBiHigh;
+      else if (nameE3[j]=="Bi1") {
+	ResE3[j] = fitEQ_E3[j] - EQE3[j];
 	//ResE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE3 << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;
-	if (ResE3[j]>0.05*peakBiHigh) cout << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+	if (ResE3[j]>0.05*EQE3[j]) cout << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
       }
     }
 
@@ -591,7 +624,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileE4(temp);
   vector <Double_t> fitEQ_E4(runE4.size(),0);
 
-  if (runE4.size()>0 && (std::find(EQE4.begin(),EQE4.end(),peakCe)!=EQE4.end() && std::find(EQE4.begin(),EQE4.end(),peakSn)!=EQE4.end() && std::find(EQE4.begin(),EQE4.end(),peakBiHigh)!=EQE4.end())) {
+  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
 
     c4 = new TCanvas("c4", "c4");
     c4->SetLogy(0);
@@ -638,23 +671,23 @@ void MB_calc_residuals(Int_t runPeriod)
     
     for (int j=0; j<runE4.size(); j++) {
       fitEQ_E4[j]    = offsetE4 + slopeE4*ADCE4[j] + quadE4*ADCE4[j]*ADCE4[j];
-      if (EQE4[j]==peakCe) {
-	ResE4[j] = fitEQ_E4[j] - peakCe;
+      if (nameE4[j]=="Ce") {
+	ResE4[j] = fitEQ_E4[j] - EQE4[j];
 	//ResE4[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE4 << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;
-	if (ResE4[j]>0.05*peakCe) cout << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+	if (ResE4[j]>0.05*EQE4[j]) cout << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
-      else if (EQE4[j]==peakSn) {
-	ResE4[j] = fitEQ_E4[j] - peakSn;
+      else if (nameE4[j]=="Sn") {
+	ResE4[j] = fitEQ_E4[j] - EQE4[j];
 	//ResE4[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE4 << "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;
-	if (ResE4[j]>0.05*peakSn) cout<< "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+	if (ResE4[j]>0.05*EQE4[j]) cout<< "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
-      else if (EQE4[j]==peakBiHigh) {
-	ResE4[j] = fitEQ_E4[j] - peakBiHigh;
+      else if (nameE4[j]=="Bi1") {
+	ResE4[j] = fitEQ_E4[j] - EQE4[j];
 	//ResE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE4 << "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;
-	if (ResE4[j]>0.05*peakBiHigh) cout<< "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+	if (ResE4[j]>0.05*EQE4[j]) cout<< "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
       }
     }
 
@@ -731,6 +764,10 @@ void MB_calc_residuals(Int_t runPeriod)
   std::vector<Int_t>::iterator E4 = runE4.begin();
   std::vector<Double_t>::iterator E4_EQ = EQE4.begin();
   std::vector<Double_t>::iterator E4_fitEQ = fitEQ_E4.begin();
+  std::vector<string>::iterator nmE1 = nameE1.begin();
+  std::vector<string>::iterator nmE2 = nameE2.begin();
+  std::vector<string>::iterator nmE3 = nameE3.begin();
+  std::vector<string>::iterator nmE4 = nameE4.begin();
 
   
   for (int j=0;j<num;j++) {
@@ -738,7 +775,7 @@ void MB_calc_residuals(Int_t runPeriod)
     Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
     UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
 
-    if (pmtQuality[pmtVecLocation][0] && *E1==(int)run[j] && *E1_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][0] && *E1==(int)run[j] && *nmE1==sourceName[j]) {
       Double_t N = adcE1[j]*nPE_per_channel[pmtVecLocation][0];
       Double_t f = sqrt(N)/N;
       Energy1 = *E1_fitEQ;
@@ -749,7 +786,7 @@ void MB_calc_residuals(Int_t runPeriod)
     }
     else {weight1=0.; Energy1=0.;}
 
-    if (pmtQuality[pmtVecLocation][1] && *E2==(int)run[j] && *E2_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][1] && *E2==(int)run[j] && *nmE2==sourceName[j]) {
       Double_t N = adcE2[j]*nPE_per_channel[pmtVecLocation][1];
       Double_t f = sqrt(N)/N;
       Energy2 = *E2_fitEQ;
@@ -760,7 +797,7 @@ void MB_calc_residuals(Int_t runPeriod)
     }
     else {weight2=0.; Energy2=0.;}
 
-    if (pmtQuality[pmtVecLocation][2] && *E3==(int)run[j] && *E3_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][2] && *E3==(int)run[j] && *nmE3==sourceName[j]) {
       Double_t N = adcE3[j]*nPE_per_channel[pmtVecLocation][2];
       Double_t f = sqrt(N)/N;
       Energy3 = *E3_fitEQ;
@@ -771,7 +808,7 @@ void MB_calc_residuals(Int_t runPeriod)
     }
     else {weight3=0.; Energy3=0.;}
 
-    if (pmtQuality[pmtVecLocation][3] && *E4==(int)run[j] && *E4_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][3] && *E4==(int)run[j] && *nmE4==sourceName[j]) {
       Double_t N = adcE4[j]*nPE_per_channel[pmtVecLocation][3];
       Double_t f = sqrt(N)/N;
       Energy4 = *E4_fitEQ;
@@ -781,15 +818,15 @@ void MB_calc_residuals(Int_t runPeriod)
       std::advance(E4_fitEQ,1);
     }
     else {weight4=0.; Energy4=0.;}
-
+  
     EQ_East[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
-
-    if (EQ[j]==peakCe) {
+  
+    if (sourceName[j]=="Ce") {
       res_East[j] = EQ_East[j] - peakCe;
       x_East[j] = peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==peakSn) {
+    else if (sourceName[j]=="Sn") {
       res_East[j] = EQ_East[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
@@ -798,11 +835,11 @@ void MB_calc_residuals(Int_t runPeriod)
 	   << Energy3 << " " << weight3 << " " 
 	   << Energy4 << " " << weight4 << endl;*/
     }
-    else if (EQ[j]==peakBiLow) {
+    else if (sourceName[j]=="Bi2") {
       res_East[j] = EQ_East[j] - peakBiLow;
       x_East[j] = peakBiLow;
     }
-    else if (EQ[j]==peakBiHigh) {
+    else if (sourceName[j]=="Bi1") {
       res_East[j] = EQ_East[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
       oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
@@ -865,7 +902,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileW1(temp);
   vector <Double_t> fitEQ_W1(runW1.size(),0);
 
-  if (runW1.size()>0 && (std::find(EQW1.begin(),EQW1.end(),peakCe)!=EQW1.end() && std::find(EQW1.begin(),EQW1.end(),peakSn)!=EQW1.end() && std::find(EQW1.begin(),EQW1.end(),peakBiHigh)!=EQW1.end())) {
+  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
 
     cW1 = new TCanvas("cW1", "cW1");
     cW1->SetLogy(0);
@@ -912,20 +949,20 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W1[num];
     for (int j=0; j<runW1.size(); j++) {
       fitEQ_W1[j]    = offsetW1 + slopeW1*ADCW1[j] + quadW1*ADCW1[j]*ADCW1[j];
-      if (EQW1[j]==peakCe) {
-	ResW1[j] = fitEQ_W1[j] - peakCe;
+      if (nameW1[j]=="Ce") {
+	ResW1[j] = fitEQ_W1[j] - EQW1[j];
 	oFileW1 << "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;
-	if (ResW1[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+	if (ResW1[j]>0.05*EQW1[j]) cout<< "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
-      else if (EQW1[j]==peakSn) {
-	ResW1[j] = fitEQ_W1[j] - peakSn;
+      else if (nameW1[j]=="Sn") {
+	ResW1[j] = fitEQ_W1[j] - EQW1[j];
 	oFileW1 << "Sn_West" << " " <<  runW1[j] << " " << ResW1[j] << endl;
-	if (ResW1[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+	if (ResW1[j]>0.05*EQW1[j]) cout<< "Sn_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
-      else if (EQW1[j]==peakBiHigh) {
-	ResW1[j] = fitEQ_W1[j] - peakBiHigh;
+      else if (nameW1[j]=="Bi1") {
+	ResW1[j] = fitEQ_W1[j] - EQW1[j];
 	oFileW1 << "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;
-	if (ResW1[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+	if (ResW1[j]>0.05*EQW1[j]) cout<< "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
     }
 
@@ -984,7 +1021,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileW2(temp);
   vector <Double_t> fitEQ_W2(runW2.size(),0);
 
-  if (runW2.size()>0 && (std::find(EQW2.begin(),EQW2.end(),peakCe)!=EQW2.end() && std::find(EQW2.begin(),EQW2.end(),peakSn)!=EQW2.end() && std::find(EQW2.begin(),EQW2.end(),peakBiHigh)!=EQW2.end())) {
+  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
 
     cW2 = new TCanvas("cW2", "cW2");
     cW2->SetLogy(0);
@@ -1031,20 +1068,20 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W2[num];
     for (int j=0; j<runW2.size(); j++) {
       fitEQ_W2[j]    = offsetW2 + slopeW2*ADCW2[j] + quadW2*ADCW2[j]*ADCW2[j];
-      if (EQW2[j]==peakCe) {
-	ResW2[j] = fitEQ_W2[j] - peakCe;
+      if (nameW2[j]=="Ce") {
+	ResW2[j] = fitEQ_W2[j] - EQW2[j];
 	oFileW2 << "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;
-	if (ResW2[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+	if (ResW2[j]>0.05*EQW2[j]) cout<< "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
-      else if (EQW2[j]==peakSn) {
-	ResW2[j] = fitEQ_W2[j] - peakSn;
+      else if (nameW2[j]=="Sn") {
+	ResW2[j] = fitEQ_W2[j] - EQW2[j];
 	oFileW2 << "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;
-	if (ResW2[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+	if (ResW2[j]>0.05*EQW2[j]) cout<< "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
-      else if (EQW2[j]==peakBiHigh) {
-	ResW2[j] = fitEQ_W2[j] - peakBiHigh;
+      else if (nameW2[j]=="Bi1") {
+	ResW2[j] = fitEQ_W2[j] - EQW2[j];
 	oFileW2 << "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;
-	if (ResW2[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+	if (ResW2[j]>0.05*EQW2[j]) cout<< "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
     }
 
@@ -1103,7 +1140,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileW3(temp);
   vector <Double_t> fitEQ_W3(runW3.size(),0);
 
-  if (runW3.size()>0 && (std::find(EQW3.begin(),EQW3.end(),peakCe)!=EQW3.end() && std::find(EQW3.begin(),EQW3.end(),peakSn)!=EQW3.end() && std::find(EQW3.begin(),EQW3.end(),peakBiHigh)!=EQW3.end())) {
+  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
 
     cW3 = new TCanvas("cW3", "cW3");
     cW3->SetLogy(0);
@@ -1149,20 +1186,20 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W3[num];
     for (int j=0; j<runW3.size(); j++) {
       fitEQ_W3[j]    = offsetW3 + slopeW3*ADCW3[j] + quadW3*ADCW3[j]*ADCW3[j];
-      if (EQW3[j]==peakCe) {
-	ResW3[j] = fitEQ_W3[j] - peakCe;
+      if (nameW3[j]=="Ce") {
+	ResW3[j] = fitEQ_W3[j] - EQW3[j];
 	oFileW3 << "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;
-	if (ResW3[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+	if (ResW3[j]>0.05*EQW3[j]) cout<< "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
-      else if (EQW3[j]==peakSn) {
-	ResW3[j] = fitEQ_W3[j] - peakSn;
+      else if (nameW3[j]=="Sn") {
+	ResW3[j] = fitEQ_W3[j] - EQW3[j];
 	oFileW3 << "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;
-	if (ResW3[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+	if (ResW3[j]>0.05*EQW3[j]) cout<< "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
-      else if (EQW3[j]==peakBiHigh) {
-	ResW3[j] = fitEQ_W3[j] - peakBiHigh;
+      else if (nameW3[j]=="Bi1") {
+	ResW3[j] = fitEQ_W3[j] - EQW3[j];
 	oFileW3 << "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;
-	if (ResW3[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+	if (ResW3[j]>0.05*EQW3[j]) cout<< "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
     }
 
@@ -1221,7 +1258,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileW4(temp);
   vector <Double_t> fitEQ_W4(runW4.size(),0);
 
-  if (runW4.size()>0 && (std::find(EQW4.begin(),EQW4.end(),peakCe)!=EQW4.end() && std::find(EQW4.begin(),EQW4.end(),peakSn)!=EQW4.end() && std::find(EQW4.begin(),EQW4.end(),peakBiHigh)!=EQW4.end())) {
+  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
 
     cW4 = new TCanvas("cW4", "cW4");
     cW4->SetLogy(0);
@@ -1270,20 +1307,20 @@ void MB_calc_residuals(Int_t runPeriod)
     //Double_t fitEQ_W4[num];
     for (int j=0; j<runW4.size(); j++) {
       fitEQ_W4[j]    = offsetW4 + slopeW4*ADCW4[j] + quadW4[j]*ADCW4[j]*ADCW4[j];
-      if (EQW4[j]==peakCe) {
-	ResW4[j] = fitEQ_W4[j] - peakCe;
+      if (nameW4[j]=="Ce") {
+	ResW4[j] = fitEQ_W4[j] - EQW4[j];
 	oFileW4 << "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;
-	if (ResW4[j]>0.05*peakCe) cout<< "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+	if (ResW4[j]>0.05*EQW4[j]) cout<< "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
-      else if (EQW4[j]==peakSn) {
-	ResW4[j] = fitEQ_W4[j] - peakSn;
+      else if (nameW4[j]=="Sn") {
+	ResW4[j] = fitEQ_W4[j] - EQW4[j];
 	oFileW4 << "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;
-	if (ResW4[j]>0.05*peakSn) cout<< "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+	if (ResW4[j]>0.05*EQW4[j]) cout<< "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
-      else if (EQW4[j]==peakBiHigh){
-	ResW4[j] = fitEQ_W4[j] - peakBiHigh;
+      else if (nameW4[j]=="Bi1"){
+	ResW4[j] = fitEQ_W4[j] - EQW4[j];
 	oFileW4 << "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;
-	if (ResW4[j]>0.05*peakBiHigh) cout<< "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+	if (ResW4[j]>0.05*EQW4[j]) cout<< "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
     }
 
@@ -1364,14 +1401,17 @@ void MB_calc_residuals(Int_t runPeriod)
   std::vector<Int_t>::iterator W4 = runW4.begin();
   std::vector<Double_t>::iterator W4_EQ = EQW4.begin();
   std::vector<Double_t>::iterator W4_fitEQ = fitEQ_W4.begin();
-
+  std::vector<string>::iterator nmW1 = nameW1.begin();
+  std::vector<string>::iterator nmW2 = nameW2.begin();
+  std::vector<string>::iterator nmW3 = nameW3.begin();
+  std::vector<string>::iterator nmW4 = nameW4.begin();
   
   for (int j=0;j<num;j++) {
     Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
     Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
     UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
 
-    if (pmtQuality[pmtVecLocation][4] && *W1==(int)run[j] && *W1_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][4] && *W1==(int)run[j] && *nmW1==sourceName[j]) {
       Double_t N = adcW1[j]*nPE_per_channel[pmtVecLocation][4];
       Double_t f = sqrt(N)/N;
       Energy1 = *W1_fitEQ;
@@ -1382,7 +1422,7 @@ void MB_calc_residuals(Int_t runPeriod)
     }
     else {weight1=0.; Energy1=0.;}
 
-    if (pmtQuality[pmtVecLocation][5] && *W2==(int)run[j] && *W2_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][5] && *W2==(int)run[j] && *nmW2==sourceName[j]) {
       Double_t N = adcW2[j]*nPE_per_channel[pmtVecLocation][5];
       Double_t f = sqrt(N)/N;
       Energy2 = *W2_fitEQ;
@@ -1393,7 +1433,7 @@ void MB_calc_residuals(Int_t runPeriod)
     }
     else {weight2=0.; Energy2=0.;}
 
-    if (pmtQuality[pmtVecLocation][6] && *W3==(int)run[j] && *W3_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][6] && *W3==(int)run[j] && *nmW3==sourceName[j]) {
       Double_t N = adcW3[j]*nPE_per_channel[pmtVecLocation][6];
       Double_t f = sqrt(N)/N;
       Energy3 = *W3_fitEQ;
@@ -1404,7 +1444,7 @@ void MB_calc_residuals(Int_t runPeriod)
     }
     else {weight3=0.; Energy3=0.;}
 
-    if (pmtQuality[pmtVecLocation][7] && *W4==(int)run[j] && *W4_EQ==EQ[j]) {
+    if (pmtQuality[pmtVecLocation][7] && *W4==(int)run[j] && *nmW4==sourceName[j]) {
       Double_t N = adcW4[j]*nPE_per_channel[pmtVecLocation][7];
       Double_t f = sqrt(N)/N;
       Energy4 = *W4_fitEQ;
@@ -1417,12 +1457,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
     EQ_West[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
 
-    if (EQ[j]==peakCe) {
+    if (sourceName[j]=="Ce") {
       res_West[j] = EQ_West[j] - peakCe;
       x_West[j] = peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==peakSn) {
+    else if (sourceName[j]=="Sn") {
       res_West[j] = EQ_West[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
@@ -1431,11 +1471,11 @@ void MB_calc_residuals(Int_t runPeriod)
 	   << Energy3 << " " << weight3 << " " 
 	   << Energy4 << " " << weight4 << endl;*/
     }
-    else if (EQ[j]==peakBiLow) {
+    else if (sourceName[j]=="Bi2") {
       res_West[j] = EQ_West[j] - peakBiLow;
       x_West[j] = peakBiLow;
     }
-    else if (EQ[j]==peakBiHigh) {
+    else if (sourceName[j]=="Bi1") {
       res_West[j] = EQ_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
       oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;

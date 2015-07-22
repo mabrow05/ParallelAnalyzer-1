@@ -75,12 +75,12 @@ int main(int argc, char *argv[])
 
   // Quenched energies from simulation
   double EQ[3];
-  for (int n=0; n<nSources; n++) {
+  /*for (int n=0; n<nSources; n++) {
     if (sourceName[n] == "Ce") EQ[n] = peakCe;//98.2;
     else if (sourceName[n] == "Sn") EQ[n] = peakSn;//331.2;
     else if (sourceName[n] == "Bi") EQ[n] = peakBiHigh;//928.0;
     else {cout << "Unidentified source" << endl; EQ[n] = 1.;} // This is a place holder // exit(0);}
-  }
+    }*/
 
   // Read source positions
   double xEast[3], yEast[3], sigmaEast[3];
@@ -312,8 +312,9 @@ int main(int argc, char *argv[])
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
+      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
       outResults << runNumber << " "
-		 << EQ[n] << " "
+		 << sourceName[n] << " "
 		 << fitMean[n][0] << " "
 		 << fitMean[n][1] << " "
 		 << fitMean[n][2] << " "

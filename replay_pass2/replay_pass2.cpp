@@ -65,6 +65,9 @@ int main(int argc, char *argv[])
   Tout->Branch("pmt6_pass2", &pmt_pass2[6], "pmt6_pass2/D");
   Tout->Branch("pmt7_pass2", &pmt_pass2[7], "pmt7_pass2/D");
 
+  Tout->Branch("AnodeE", &AnodeE, "AnodeE/D");
+  Tout->Branch("AnodeW", &AnodeW, "AnodeW/D");
+
   Tout->Branch("timeE", &timeE, "timeE/D");
   Tout->Branch("timeW", &timeW, "timeW/D");
   Tout->Branch("timeE_BB", &timeE_BB, "timeE_BB/D");
@@ -101,6 +104,9 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("pmt6", &pmt[6]);
   Tin->SetBranchAddress("pmt7", &pmt[7]);
 
+  Tin->SetBranchAddress("AnodeE", &AnodeE);
+  Tin->SetBranchAddress("AnodeW", &AnodeW);
+  
   Tin->SetBranchAddress("timeE", &timeE);
   Tin->SetBranchAddress("timeW", &timeW);
   Tin->SetBranchAddress("timeE_BB", &timeE_BB);

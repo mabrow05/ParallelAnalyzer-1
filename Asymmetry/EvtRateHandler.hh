@@ -17,10 +17,11 @@
 
 class EvtRateHandler {
 public:
-  EvtRateHandler(int run, const std::string& inDir) : runNumber(run),inputDir(inDir) {}
+  EvtRateHandler(int run, bool ukdata , const std::string& inDir) : runNumber(run),inputDir(inDir),UKdata(ukdata) {}
   ~EvtRateHandler() {if (rateE) delete rateE; if (rateW) delete rateW; } //May not want to delete these pointers...
   int runNumber; //Run Number being read in
   std::string inputDir; //input data directory
+  bool UKdata; //This is true if the tree format is UK style, False if it's official analyzer style
   double pol;  //Polarization of run as determined from number of events on each side
                
   double fiducialCut; //definition of a fiducial volume
@@ -40,13 +41,13 @@ protected:
   TH1D *rateE, *rateW; // Rate histogram 
   std::vector<double> rateEvec;
   std::vector<double> rateWvec;
-  float EmwpcX, EmwpcY, WmwpcX, WmwpcY, TimeE, TimeW, Erecon; //Branch Variables being read in
+  double EmwpcX, EmwpcY, WmwpcX, WmwpcY, TimeE, TimeW, Erecon; //Branch Variables being read in
   int PID, Side, Type;
 };
   
 class SimEvtRateHandler: public EvtRateHandler {
 public:
-  SimEvtRateHandler(int run, const std::string& inDir): EvtRateHandler(run, inDir) {}
+  SimEvtRateHandler(int run, const std::string& inDir): EvtRateHandler(run, true, inDir) {}
   ~SimEvtRateHandler() {}
 protected:
   virtual void dataReader(int evtType); //Different set of variables for reverse calibrated simulated data

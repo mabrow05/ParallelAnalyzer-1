@@ -26,17 +26,17 @@ for runPeriod in runPeriods:
         print '%s %s %s %s %s %s %s %s %s %s'%(line[0], line[1], line[2], line[3], line[4], line[5], line[6], line[7], line[8], line[9])
 
     fileout = open("../residuals/source_runs_RunPeriod_%i.dat"%runPeriod, "w")
-    eQ = 0.
+    eQ = ""
     for line in input_hold:
         #print line[1]
         if float(line[1])==98.2:
-            eQ=80.5
+            eQ="Ce"
         elif float(line[1])==331.2:
-            eQ=317.8
+            eQ="Sn"#317.8
         elif float(line[1])==443.0:
-            eQ=448.8
+            eQ="Bi2" #448.8
         elif float(line[1])==928.0:
-            eQ=926.0
+            eQ="Bi1" #926.0
         fileout.write('%s %s %s %s %s %s %s %s %s %s\n'%(line[0], eQ, line[2], line[3], line[4], line[5], line[6], line[7], line[8], line[9]))
 
     fileout.close()
