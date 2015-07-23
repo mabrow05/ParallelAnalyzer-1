@@ -90,8 +90,14 @@ void MB_calc_residuals(Int_t runPeriod)
     }
     cout << endl;
   }
-
-
+  //Load the simulated relationship between EQ and Etrue
+  vector < vector <double> > EQ2Etrue = EQ2EtrueFit(calibrationPeriod);
+  for (int m=0; m<EQ2Etrue.size(); m++) {
+    for (int mm=0; mm<EQ2Etrue[m].size(); mm++) {
+      cout << EQ2Etrue[m][mm] << " ";
+    }
+    cout << endl;
+  }
   //Read in PMT quality file to save whether or not to use a PMT for each run
   vector<vector<int> > pmtQuality;
   vector <int> pmthold(8,0);
@@ -748,7 +754,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileE(temp);
 
   cout << "CALCULATING EAST RESIDUALS" << endl;
-  vector <Double_t> EQ_East(num,0);
+  vector <Double_t> Etrue_East(num,0);
   vector <Double_t> x_East(num,0);
   vector <Double_t> res_East(num,0);
 
@@ -772,62 +778,66 @@ void MB_calc_residuals(Int_t runPeriod)
   
   for (int j=0;j<num;j++) {
     Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
-    Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
+    Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt in true energy
     UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
 
     if (pmtQuality[pmtVecLocation][0] && *E1==(int)run[j] && *nmE1==sourceName[j]) {
       Double_t N = adcE1[j]*nPE_per_channel[pmtVecLocation][0];
       Double_t f = sqrt(N)/N;
-      Energy1 = *E1_fitEQ;
+      Energy1 = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(*E1_fitEQ)+EQ2Etrue[0][2]*(*E1_fitEQ)*(*E1_fitEQ);
       weight1 = 1/(Energy1*Energy1*f*f);
       std::advance(E1,1);
       std::advance(E1_EQ,1);
       std::advance(E1_fitEQ,1);
+      std::advance(nmE1,1);
     }
     else {weight1=0.; Energy1=0.;}
 
     if (pmtQuality[pmtVecLocation][1] && *E2==(int)run[j] && *nmE2==sourceName[j]) {
       Double_t N = adcE2[j]*nPE_per_channel[pmtVecLocation][1];
       Double_t f = sqrt(N)/N;
-      Energy2 = *E2_fitEQ;
+      Energy2 = EQ2Etrue[1][0]+EQ2Etrue[1][1]*(*E2_fitEQ)+EQ2Etrue[1][2]*(*E2_fitEQ)*(*E2_fitEQ);
       weight2 = 1/(Energy2*Energy2*f*f);
       std::advance(E2,1);
       std::advance(E2_EQ,1);
       std::advance(E2_fitEQ,1);
+      std::advance(nmE2,1);
     }
     else {weight2=0.; Energy2=0.;}
 
     if (pmtQuality[pmtVecLocation][2] && *E3==(int)run[j] && *nmE3==sourceName[j]) {
       Double_t N = adcE3[j]*nPE_per_channel[pmtVecLocation][2];
       Double_t f = sqrt(N)/N;
-      Energy3 = *E3_fitEQ;
+      Energy3 = EQ2Etrue[2][0]+EQ2Etrue[2][1]*(*E3_fitEQ)+EQ2Etrue[2][2]*(*E3_fitEQ)*(*E3_fitEQ);;
       weight3 = 1/(Energy3*Energy3*f*f);
       std::advance(E3,1);
       std::advance(E3_EQ,1);
       std::advance(E3_fitEQ,1);
+      std::advance(nmE3,1);
     }
     else {weight3=0.; Energy3=0.;}
 
     if (pmtQuality[pmtVecLocation][3] && *E4==(int)run[j] && *nmE4==sourceName[j]) {
       Double_t N = adcE4[j]*nPE_per_channel[pmtVecLocation][3];
       Double_t f = sqrt(N)/N;
-      Energy4 = *E4_fitEQ;
+      Energy4 = EQ2Etrue[3][0]+EQ2Etrue[3][1]*(*E4_fitEQ)+EQ2Etrue[3][2]*(*E4_fitEQ)*(*E4_fitEQ);
       weight4 = 1/(Energy4*Energy4*f*f);
       std::advance(E4,1);
       std::advance(E4_EQ,1);
       std::advance(E4_fitEQ,1);
+      std::advance(nmE4,1);
     }
     else {weight4=0.; Energy4=0.;}
   
-    EQ_East[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
+    Etrue_East[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
   
     if (sourceName[j]=="Ce") {
-      res_East[j] = EQ_East[j] - peakCe;
+      res_East[j] = Etrue_East[j] - peakCe;
       x_East[j] = peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
-      res_East[j] = EQ_East[j] - peakSn;
+      res_East[j] = Etrue_East[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
       /*cout << Energy1 << " " << weight1 << " "
@@ -836,11 +846,11 @@ void MB_calc_residuals(Int_t runPeriod)
 	   << Energy4 << " " << weight4 << endl;*/
     }
     else if (sourceName[j]=="Bi2") {
-      res_East[j] = EQ_East[j] - peakBiLow;
+      res_East[j] = Etrue_East[j] - peakBiLow;
       x_East[j] = peakBiLow;
     }
     else if (sourceName[j]=="Bi1") {
-      res_East[j] = EQ_East[j] - peakBiHigh;
+      res_East[j] = Etrue_East[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
       oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
    }
@@ -1385,7 +1395,7 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream oFileW(temp);
 
   cout << "CALCULATING WEST RESIDUALS" << endl;
-  vector <Double_t> EQ_West(num,0);
+  vector <Double_t> Etrue_West(num,0);
   vector <Double_t> x_West(num,0);
   vector <Double_t> res_West(num,0);
 
@@ -1414,56 +1424,60 @@ void MB_calc_residuals(Int_t runPeriod)
     if (pmtQuality[pmtVecLocation][4] && *W1==(int)run[j] && *nmW1==sourceName[j]) {
       Double_t N = adcW1[j]*nPE_per_channel[pmtVecLocation][4];
       Double_t f = sqrt(N)/N;
-      Energy1 = *W1_fitEQ;
+      Energy1 = EQ2Etrue[4][0]+EQ2Etrue[4][1]*(*W1_fitEQ)+EQ2Etrue[4][2]*(*W1_fitEQ)*(*W1_fitEQ);
       weight1 = 1/(Energy1*Energy1*f*f);
       std::advance(W1,1);
       std::advance(W1_EQ,1);
       std::advance(W1_fitEQ,1);
+      std::advance(nmW1,1);
     }
     else {weight1=0.; Energy1=0.;}
 
     if (pmtQuality[pmtVecLocation][5] && *W2==(int)run[j] && *nmW2==sourceName[j]) {
       Double_t N = adcW2[j]*nPE_per_channel[pmtVecLocation][5];
       Double_t f = sqrt(N)/N;
-      Energy2 = *W2_fitEQ;
+      Energy2 = EQ2Etrue[5][0]+EQ2Etrue[5][1]*(*W2_fitEQ)+EQ2Etrue[5][2]*(*W2_fitEQ)*(*W2_fitEQ);
       weight2 = 1/(Energy2*Energy2*f*f);
       std::advance(W2,1);
       std::advance(W2_EQ,1);
       std::advance(W2_fitEQ,1);
+      std::advance(nmW2,1);
     }
     else {weight2=0.; Energy2=0.;}
 
     if (pmtQuality[pmtVecLocation][6] && *W3==(int)run[j] && *nmW3==sourceName[j]) {
       Double_t N = adcW3[j]*nPE_per_channel[pmtVecLocation][6];
       Double_t f = sqrt(N)/N;
-      Energy3 = *W3_fitEQ;
+      Energy3 = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(*W3_fitEQ)+EQ2Etrue[6][2]*(*W3_fitEQ)*(*W3_fitEQ);
       weight3 = 1/(Energy3*Energy3*f*f);
       std::advance(W3,1);
       std::advance(W3_EQ,1);
       std::advance(W3_fitEQ,1);
+      std::advance(nmW3,1);
     }
     else {weight3=0.; Energy3=0.;}
 
     if (pmtQuality[pmtVecLocation][7] && *W4==(int)run[j] && *nmW4==sourceName[j]) {
       Double_t N = adcW4[j]*nPE_per_channel[pmtVecLocation][7];
       Double_t f = sqrt(N)/N;
-      Energy4 = *W4_fitEQ;
+      Energy4 = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(*W4_fitEQ)+EQ2Etrue[7][2]*(*W4_fitEQ)*(*W4_fitEQ);
       weight4 = 1/(Energy4*Energy4*f*f);
       std::advance(W4,1);
       std::advance(W4_EQ,1);
       std::advance(W4_fitEQ,1);
+      std::advance(nmW4,1);
     }
     else {weight4=0.; Energy4=0.;}
 
-    EQ_West[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
+    Etrue_West[j] = (weight1*Energy1+weight2*Energy2+weight3*Energy3+weight4*Energy4)/(weight1+weight2+weight3+weight4);
 
     if (sourceName[j]=="Ce") {
-      res_West[j] = EQ_West[j] - peakCe;
+      res_West[j] = Etrue_West[j] - peakCe;
       x_West[j] = peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
-      res_West[j] = EQ_West[j] - peakSn;
+      res_West[j] = Etrue_West[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
       /*cout << Energy1 << " " << weight1 << " "
@@ -1472,11 +1486,11 @@ void MB_calc_residuals(Int_t runPeriod)
 	   << Energy4 << " " << weight4 << endl;*/
     }
     else if (sourceName[j]=="Bi2") {
-      res_West[j] = EQ_West[j] - peakBiLow;
+      res_West[j] = Etrue_West[j] - peakBiLow;
       x_West[j] = peakBiLow;
     }
     else if (sourceName[j]=="Bi1") {
-      res_West[j] = EQ_West[j] - peakBiHigh;
+      res_West[j] = Etrue_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
       oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
    }
