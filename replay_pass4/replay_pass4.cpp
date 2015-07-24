@@ -23,6 +23,7 @@
 #include "replay_pass2.h"
 #include "replay_pass3.h"
 #include "replay_pass4.h"
+#include "sourcePeaks.h"
 
 using namespace std;
 
@@ -40,37 +41,47 @@ int main(int argc, char *argv[])
   //istringstream ss(argv[1]);
   int runNumber = atoi(argv[1]);
   //ss >> runNumber;
-
+  int calibrationPeriod = 1;
   // Determine linearity curve to use
   char tempFileLinearityCurve[500];
   if (runNumber <= 17297) {
+    calibrationPeriod=1;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_1.dat");
   }
   else if (runNumber <= 17439) {
+    calibrationPeriod=2;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_2.dat");
   }
   else if (runNumber <= 17734) {
+    calibrationPeriod=3;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_3.dat");
   }
   else if (runNumber <= 17955) {
+    calibrationPeriod=4;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_4.dat");
   }
   else if (runNumber <= 18386) {
+    calibrationPeriod=5;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_5.dat");
   }
   else if (runNumber <= 18683) {
+    calibrationPeriod=6;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_6.dat");
   }
   else if (runNumber <= 18994) {
+    calibrationPeriod=7;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_7.dat");
   }
   else if (runNumber <= 19239) {
+    calibrationPeriod=8;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_8.dat");
   }
   else if (runNumber <= 19544) {
+    calibrationPeriod=9;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_9.dat");
   }
   else if (runNumber <= 20000) {
+    calibrationPeriod=11;
     sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_11.dat");
   }
   cout << "... Reading: " << tempFileLinearityCurve << endl;
@@ -91,6 +102,16 @@ int main(int argc, char *argv[])
     i++;
     cout << p0 << " " << p1 << " " << p2 << endl;
     if (fileLinearityCurve.fail()) break;                       
+  }
+
+  //Load the simulated relationship between EQ and Etrue
+  vector < vector <double> > EQ2Etrue = EQ2EtrueFit(calibrationPeriod);
+  cout << "EQ to Etrue conversion quadratic:\n" << "const:\tlin:\tquad:\n";
+  for (unsigned int m=0; m<EQ2Etrue.size(); m++) {
+    for (unsigned int mm=0; mm<EQ2Etrue[m].size(); mm++) {
+      cout << EQ2Etrue[m][mm] << " ";
+    }
+    cout << endl;
   }
   
   //Read in PMT quality file
@@ -181,9 +202,9 @@ int main(int argc, char *argv[])
   Tout->Branch("xW_pass4", &xW_pass4, "xW_pass4/D");
   Tout->Branch("yW_pass4", &yW_pass4, "yW_pass4/D");
   
-  Tout->Branch("EvisTot", &EvisTot, "EvisTot/D");
-  Tout->Branch("EvisE", &EvisE, "EvisE/D");
-  Tout->Branch("EvisW", &EvisW, "EvisW/D");
+  Tout->Branch("EreconTot", &EreconTot, "EreconTot/D");
+  Tout->Branch("EreconE", &EreconE, "EreconE/D");
+  Tout->Branch("EreconW", &EreconW, "EreconW/D");
 
   Tout->Branch("PID_pass4",  &PID_pass4,  "PID_pass4/I");
   Tout->Branch("type_pass4", &type_pass4, "type_pass4/I");
@@ -263,7 +284,7 @@ int main(int argc, char *argv[])
     Tin->GetEvent(i);
     Tin2->GetEvent(i);
 
-    
+    //Calculate Evis for each event in each PMT using the linearity curve determined in calibration
     pmt_Evis.Evis0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] + linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0];
     pmt_Evis.Evis1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] + linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1];
     pmt_Evis.Evis2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] + linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2];
@@ -273,56 +294,66 @@ int main(int argc, char *argv[])
     pmt_Evis.Evis6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] + linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6];
     pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] + linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7];
 
-    if (pmtQuality[0] && pmt_Evis.Evis0>0.) {
+    //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
+    Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(pmt_Evis.Evis0)+EQ2Etrue[0][2]*(pmt_Evis.Evis0)*(pmt_Evis.Evis0);
+    Etrue[1] = EQ2Etrue[1][0]+EQ2Etrue[1][1]*(pmt_Evis.Evis1)+EQ2Etrue[1][2]*(pmt_Evis.Evis1)*(pmt_Evis.Evis1);
+    Etrue[2] = EQ2Etrue[2][0]+EQ2Etrue[2][1]*(pmt_Evis.Evis2)+EQ2Etrue[2][2]*(pmt_Evis.Evis2)*(pmt_Evis.Evis2);
+    Etrue[3] = EQ2Etrue[3][0]+EQ2Etrue[3][1]*(pmt_Evis.Evis3)+EQ2Etrue[3][2]*(pmt_Evis.Evis3)*(pmt_Evis.Evis3);
+    Etrue[4] = EQ2Etrue[4][0]+EQ2Etrue[4][1]*(pmt_Evis.Evis4)+EQ2Etrue[4][2]*(pmt_Evis.Evis4)*(pmt_Evis.Evis4);
+    Etrue[5] = EQ2Etrue[5][0]+EQ2Etrue[5][1]*(pmt_Evis.Evis5)+EQ2Etrue[5][2]*(pmt_Evis.Evis5)*(pmt_Evis.Evis5);
+    Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(pmt_Evis.Evis6)+EQ2Etrue[6][2]*(pmt_Evis.Evis6)*(pmt_Evis.Evis6);
+    Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(pmt_Evis.Evis7)+EQ2Etrue[7][2]*(pmt_Evis.Evis7)*(pmt_Evis.Evis7);
+
+    if (pmtQuality[0] && pmt_Evis.Evis0>0. && (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[0]*nPE_per_channel[0];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight0 = 1/(pmt_Evis.Evis0*pmt_Evis.Evis0*f*f);
     }
     else {pmt_Evis.weight0=0.;}
 
-    if (pmtQuality[1] && pmt_Evis.Evis1>0.) {
+    if (pmtQuality[1] && pmt_Evis.Evis1>0. && (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[1]*nPE_per_channel[1];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight1 = 1/(pmt_Evis.Evis1*pmt_Evis.Evis1*f*f);
     }
     else {pmt_Evis.weight1=0.;}
 
-    if (pmtQuality[2] && pmt_Evis.Evis2>0.) {
+    if (pmtQuality[2] && pmt_Evis.Evis2>0. && (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[2]*nPE_per_channel[2];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight2 = 1/(pmt_Evis.Evis2*pmt_Evis.Evis2*f*f);
     }
     else {pmt_Evis.weight2=0.;}
 
-    if (pmtQuality[3] && pmt_Evis.Evis3>0.) {
+    if (pmtQuality[3] && pmt_Evis.Evis3>0. && (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[3]*nPE_per_channel[3];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight3 = 1/(pmt_Evis.Evis3*pmt_Evis.Evis3*f*f);
     }
     else {pmt_Evis.weight3=0.;}
 
-    if (pmtQuality[4] && pmt_Evis.Evis4>0.) {
+    if (pmtQuality[4] && pmt_Evis.Evis4>0. && (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[4]*nPE_per_channel[4];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight4 = 1/(pmt_Evis.Evis4*pmt_Evis.Evis4*f*f);
     }
     else {pmt_Evis.weight4=0.;}
 
-    if (pmtQuality[5] && pmt_Evis.Evis5>0.) {
+    if (pmtQuality[5] && pmt_Evis.Evis5>0. && (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[5]*nPE_per_channel[5];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight5 = 1/(pmt_Evis.Evis5*pmt_Evis.Evis5*f*f);
     }
     else {pmt_Evis.weight5=0.;}
 
-    if (pmtQuality[6] && pmt_Evis.Evis6>0.) {
+    if (pmtQuality[6] && pmt_Evis.Evis6>0. && (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[6]*nPE_per_channel[6];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight6 = 1/(pmt_Evis.Evis6*pmt_Evis.Evis6*f*f);
     }
     else {pmt_Evis.weight6=0.;}
 
-    if (pmtQuality[7] && pmt_Evis.Evis7>0.) {
+    if (pmtQuality[7] && pmt_Evis.Evis7>0. && (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[7]*nPE_per_channel[7];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight7 = 1/(pmt_Evis.Evis7*pmt_Evis.Evis7*f*f);
@@ -330,14 +361,18 @@ int main(int argc, char *argv[])
     else {pmt_Evis.weight7=0.;}
 
     //East side EvisE
-    EvisE = (pmt_Evis.weight0*pmt_Evis.Evis0+pmt_Evis.weight1*pmt_Evis.Evis1+pmt_Evis.weight2*pmt_Evis.Evis2+pmt_Evis.weight3*pmt_Evis.Evis3)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
+    if (side_pass3==0 || type_pass3==1) {
+      EreconE = (pmt_Evis.weight0*Etrue[0]+pmt_Evis.weight1*Etrue[1]+pmt_Evis.weight2*Etrue[2]+pmt_Evis.weight3*Etrue[3])/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);}
+    else EreconE=0.;
     //West Side EvisW
-    EvisW = (pmt_Evis.weight4*pmt_Evis.Evis4+pmt_Evis.weight5*pmt_Evis.Evis5+pmt_Evis.weight6*pmt_Evis.Evis6+pmt_Evis.weight7*pmt_Evis.Evis7)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
+    if (side_pass3==1 || type_pass3==1) {
+      EreconW = (pmt_Evis.weight4*Etrue[4]+pmt_Evis.weight5*Etrue[5]+pmt_Evis.weight6*Etrue[6]+pmt_Evis.weight7*Etrue[7])/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);}
+    else EreconW=0.;
     
-    EvisTot = EvisE+EvisW;
+    EreconTot = EreconE+EreconW;
 
     if (i<20) {
-      cout << pmt_Evis.Evis4 << " " << pmt_Evis.Evis5 << " " << pmt_Evis.Evis6 << " " << pmt_Evis.Evis7 << endl;
+      cout << Etrue[4] << " " << Etrue[5] << " " << Etrue[6] << " " << Etrue[7] << endl;
       cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
     }
     
