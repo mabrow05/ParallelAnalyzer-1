@@ -162,8 +162,8 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("xW_pass4", &xW_pass4);
   Tin->SetBranchAddress("yW_pass4", &yW_pass4);
 
-  Tin->SetBranchAddress("EvisE", &EvisE);
-  Tin->SetBranchAddress("EvisW", &EvisW);
+  Tin->SetBranchAddress("EreconE", &EreconE);
+  Tin->SetBranchAddress("EreconW", &EreconW);
 
   Tin->SetBranchAddress("PID_pass4",  &PID_pass4);
   Tin->SetBranchAddress("type_pass4", &type_pass4);
@@ -188,14 +188,14 @@ int main(int argc, char *argv[])
 	if ( (xE_pass4 - xEast[0])*(xE_pass4 - xEast[0]) +
 	     (yE_pass4 - yEast[0])*(yE_pass4 - yEast[0]) <
 	     (2.*sigmaEast[0])*(2.*sigmaEast[0]) ) {
-	  his[0][0]->Fill(EvisE);
+	  his[0][0]->Fill(EreconE);
 	}
       }
       if (side_pass4 == 1) {
 	if ( (xW_pass4 - xWest[0])*(xW_pass4 - xWest[0]) +
 	     (yW_pass4 - yWest[0])*(yW_pass4 - yWest[0]) <
 	     (2.*sigmaWest[0])*(2.*sigmaWest[0]) ) {
-	  his[0][1]->Fill(EvisW);
+	  his[0][1]->Fill(EreconW);
 	}
       }
     }
@@ -206,14 +206,14 @@ int main(int argc, char *argv[])
 	if ( (xE_pass4 - xEast[1])*(xE_pass4 - xEast[1]) +
 	     (yE_pass4 - yEast[1])*(yE_pass4 - yEast[1]) <
 	     (2.*sigmaEast[1])*(2.*sigmaEast[1]) ) {
-	  his[1][0]->Fill(EvisE);
+	  his[1][0]->Fill(EreconE);
 	}
       }
       if (side_pass4 == 1) {
 	if ( (xW_pass4 - xWest[1])*(xW_pass4 - xWest[1]) +
 	     (yW_pass4 - yWest[1])*(yW_pass4 - yWest[1]) <
 	     (2.*sigmaWest[1])*(2.*sigmaWest[1]) ) {
-	  his[1][1]->Fill(EvisW);
+	  his[1][1]->Fill(EreconW);
 	}
       }
     }
@@ -224,14 +224,14 @@ int main(int argc, char *argv[])
 	if ( (xE_pass4 - xEast[2])*(xE_pass4 - xEast[2]) +
              (yE_pass4 - yEast[2])*(yE_pass4 - yEast[2]) <
              (2.*sigmaEast[2])*(2.*sigmaEast[2]) ) {
-	  his[2][0]->Fill(EvisE);
+	  his[2][0]->Fill(EreconE);
 	}
       }
       if (side_pass4 == 1) {
 	if ( (xW_pass4 - xWest[2])*(xW_pass4 - xWest[2]) +
              (yW_pass4 - yWest[2])*(yW_pass4 - yWest[2]) <
              (2.*sigmaWest[2])*(2.*sigmaWest[2]) ) {
-	  his[2][1]->Fill(EvisW);         
+	  his[2][1]->Fill(EreconW);         
 	}
       }
     }
