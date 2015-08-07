@@ -65,12 +65,13 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   ifstream filein(temp);
 
   Int_t i = 0;
-  Double_t run[500], EQ[500];
+  Double_t run[500], Etrue[500];
+  string sourceName[500];
   Double_t eastE[500], westE[500];
   Double_t resE[500], resW[500];
   Double_t err[500];
   while (!filein.eof()) {
-    filein >> run[i] >> EQ[i]
+    filein >> run[i] >> sourceName[i]
            >> eastE[i] >> westE[i];
     if (filein.fail()) break;
     i++;
@@ -87,22 +88,22 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   
   for (int j=0; j<num; j++) {
   
-    if (EQ[j]==peakCe) {
+    if (sourceName[j]=="Ce") {
       res_East[j] = eastE[j] - peakCe;
       x_East[j] = peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==peakSn) {
+    else if (sourceName[j]=="Sn") {
       res_East[j] = eastE[j] - peakSn;
       x_East[j] = peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==peakBiLow) {
+    else if (sourceName[j]=="Bi2") {
       res_East[j] = eastE[j] - peakBiLow;
       x_East[j] = peakBiLow;
       oFileE << "Bi2_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
-    else if (EQ[j]==peakBiHigh) {
+    else if (sourceName[j]=="Bi1") {
       res_East[j] = eastE[j] - peakBiHigh;
       x_East[j] = peakBiHigh;
       oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
@@ -121,7 +122,7 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   grEr->SetLineColor(1);
   grEr->SetMarkerStyle(20);
   grEr->SetMarkerSize(0.75);
-  grEr->GetXaxis()->SetTitle("E_{Q} [keV]");
+  grEr->GetXaxis()->SetTitle("E_{true} [keV]");
   grEr->GetXaxis()->SetTitleOffset(1.2);
   grEr->GetXaxis()->CenterTitle();
   grEr->GetYaxis()->SetTitle("Residuals [keV]");
@@ -167,22 +168,22 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   vector <Double_t> res_West(num,0);
 
   for (int j=0; j<num; j++) {
-    if (EQ[j]==peakCe) {
+    if (sourceName[j]=="Ce") {
       res_West[j] = westE[j] - peakCe;
       x_West[j] = peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==peakSn) {
+    else if (sourceName[j]=="Sn") {
       res_West[j] = westE[j] - peakSn;
       x_West[j] = peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==peakBiLow) {
+    else if (sourceName[j]=="Bi2") {
       res_West[j] = westE[j] - peakBiLow;
       x_West[j] = peakBiLow;
       oFileW << "Bi2_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
-    else if (EQ[j]==peakBiHigh) {
+    else if (sourceName[j]=="Bi1") {
       res_West[j] = westE[j] - peakBiHigh;
       x_West[j] = peakBiHigh;
       oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
@@ -201,7 +202,7 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   grWr->SetLineColor(1);
   grWr->SetMarkerStyle(20);
   grWr->SetMarkerSize(0.75);
-  grWr->GetXaxis()->SetTitle("E_{Q} [keV]");
+  grWr->GetXaxis()->SetTitle("E_{true} [keV]");
   grWr->GetXaxis()->SetTitleOffset(1.2);
   grWr->GetXaxis()->CenterTitle();
   grWr->GetYaxis()->SetTitle("Residuals [keV]");

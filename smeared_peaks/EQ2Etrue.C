@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "../include/sourcePeaks.h"
 
 using namespace std;
 
@@ -15,20 +16,18 @@ void EQ2Etrue (int runPeriod) {
   //store the data from smeared files
   ifstream infile;
   vector < vector <double> > EQ_smeared;
-  EQ_smeared.resize(8, vector <double> (4,0.));
-
-  sprintf(filename,"smear_%i.dat",runPeriod);
-  infile.open(filename);
+  EQ_smeared = returnPeaks(runPeriod,"EQ");
 
   for (int i=0; i<8; i++) {
     for (int j=0; j<4; j++) {
-      infile >> EQ_smeared[i][j];
       cout << EQ_smeared[i][j] << " ";
     } 
     cout << endl;
   }
 
   //Store the true peak values (weighted average of K,L,M shells (N if in data sheet)
+  vector < vector <Double_t> > Etrue_smeared;
+  Etrue_smeared = returnPeaks(runPeriod,"Etrue");
   Double_t Etrue[4];
   Etrue[0] = 131.5956; //Ce139 
   Etrue[1] = 368.4938; //Sn113
@@ -47,7 +46,7 @@ void EQ2Etrue (int runPeriod) {
     can[i]->cd();
     sprintf(name, "graph%i",i);
     sprintf(title, "PMT %i",i);
-    graph[i] = new TGraph(4, &EQ_smeared[i][0], Etrue);
+    graph[i] = new TGraph(4, &EQ_smeared[i][0], &Etrue_smeared[i][0]);
     graph[i]->SetMarkerStyle(20);
     graph[i]->SetMarkerSize(0.75);
     graph[i]->GetXaxis()->SetTitle("Smeared E_{Q} [keV]");

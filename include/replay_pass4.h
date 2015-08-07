@@ -10,6 +10,8 @@ int side_pass4; // Trigger side: 0 = East, 1 = West
 
 int posError_pass4; // MWPC Position Reconstruction Error
 
+double Etrue[8] = {0.}; //Etrue value for each of the 8 PMTs to construct EtrueE/W/Total
+
  //The reconstructed energy in each individual PMT and their weight
 struct PMT_Evis {
   double Evis0;
@@ -30,4 +32,4 @@ struct PMT_Evis {
   double weight7;
 } pmt_Evis;
 
-double EvisW, EvisE, EvisTot; // Weighted Visible energy as seen in the PMTs for each side
+double EreconW, EreconE, EreconTot; // Weighted Visible energy as seen in the PMTs for each side
