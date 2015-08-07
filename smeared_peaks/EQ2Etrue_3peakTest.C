@@ -6,7 +6,7 @@
 using namespace std;
 
 
-void EQ2Etrue (int runPeriod) {
+void EQ2Etrue_3peakTest (int runPeriod) {
 
   //define output file
   Char_t filename[100];
@@ -17,13 +17,8 @@ void EQ2Etrue (int runPeriod) {
   ifstream infile;
   vector < vector <double> > EQ_smeared;
   EQ_smeared = returnPeaks(runPeriod,"EQ");
-
-  for (int i=0; i<8; i++) {
-    for (int j=0; j<4; j++) {
-      cout << EQ_smeared[i][j] << " ";
-    } 
-    cout << endl;
-  }
+  
+  
 
   //Store the true peak values (weighted average of K,L,M shells (N if in data sheet)
   vector < vector <Double_t> > Etrue_smeared;
@@ -33,6 +28,23 @@ void EQ2Etrue (int runPeriod) {
   Etrue[1] = 368.4938; //Sn113
   Etrue[2] = 501.420; // Bi207 lower peak
   Etrue[3] = 993.789; // Bi207 upper peak
+
+  vector < vector <double> > EQ_smeared_test;
+  EQ_smeared_test.resize(8, vector <double> (3,0));
+  vector < vector <double> > Etrue_smeared_test;
+  Etrue_smeared_test.resize(8, vector <double> (3,0));
+
+  for (int i=0; i<8; i++) {
+    for (int j=0; j<4; j++) {
+      if (j==2) continue;
+      int m=j;
+      if (j==3) m=2;
+      EQ_smeared_test[i][m] = EQ_smeared[i][j];
+      Etrue_smeared_test[i][m] = Etrue_smeared[i][j];
+      cout << EQ_smeared[i][j] << " ";
+    } 
+    cout << endl;
+  }
 
   vector <TCanvas*> can (8);
   //TCanvas *c1 = new TCanvas("c1");
@@ -46,7 +58,7 @@ void EQ2Etrue (int runPeriod) {
     can[i]->cd();
     sprintf(name, "graph%i",i);
     sprintf(title, "PMT %i",i);
-    graph[i] = new TGraph(4, &EQ_smeared[i][0], &Etrue_smeared[i][0]);
+    graph[i] = new TGraph(3, &EQ_smeared_test[i][0], &Etrue_smeared_test[i][0]);
     graph[i]->SetMarkerStyle(20);
     graph[i]->SetMarkerSize(0.75);
     graph[i]->GetXaxis()->SetTitle("Smeared E_{Q} [keV]");

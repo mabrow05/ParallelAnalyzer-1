@@ -83,7 +83,7 @@ void MB_calc_residuals(Int_t runPeriod)
   cout << "Number of data points: " << num << endl;
 
   // Load the smeared EQ values which are different for each PMT and source
-  vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod);
+  vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod,"EQ");
   for (int m=0; m<EQsmeared.size(); m++) {
     for (int mm=0; mm<EQsmeared[m].size(); mm++) {
       cout << EQsmeared[m][mm] << " ";

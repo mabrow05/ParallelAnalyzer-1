@@ -12,18 +12,18 @@
 using namespace std;
 
 // These are the weighted true peaks from the KLM CE sources
-const static double peakCe = 131.5956;//80.5;
+const static double peakCe = 130.3;// 131.5956;//80.5;
 const static double peakSn = 368.4938;//317.8;
-const static double peakBiLow = 501.420;//448.8;
+const static double peakBiLow = 498.;//501.420;//448.8;
 const static double peakBiHigh = 993.789;//926.;
 
-
-vector < vector <double> > returnPeaks(int srcPeriod) {
+//Below "type" should be "EQ" or "Etrue"
+vector < vector <double> > returnPeaks(int srcPeriod, string type) {
   vector < vector <double> > peaks;
   peaks.resize( 8, vector <double> (4,0.));
   ifstream peakfile;
   char filename[500];
-  sprintf(filename, "../smeared_peaks/smear_%i.dat",srcPeriod);
+  sprintf(filename, "../smeared_peaks/%s_smeared_%i.dat",type.c_str(),srcPeriod);
   peakfile.open(filename);
   
   for (int pmt = 0; pmt<8; pmt++) {
