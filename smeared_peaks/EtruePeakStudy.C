@@ -1,11 +1,11 @@
 {
   Double_t alphaLow = 0.001;
-  Double_t alphaHigh = 1.;
-  Double_t inc = 0.001;
+  Double_t alphaHigh = 0.1;
+  Double_t inc = 0.0005;
   Double_t alpha_comp = 5.; //used to determine peak to be compared against
 
   ofstream outfile;
-  outfile.open("alphaTrack.dat");
+  outfile.open("alphaTrack_0.001-0.1.dat");
 
   Char_t temp[500];
   TChain *chain = new TChain("Evts");
