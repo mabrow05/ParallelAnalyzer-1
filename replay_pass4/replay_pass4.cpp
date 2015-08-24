@@ -201,10 +201,14 @@ int main(int argc, char *argv[])
   Tout->Branch("yE_pass4", &yE_pass4, "yE_pass4/D");
   Tout->Branch("xW_pass4", &xW_pass4, "xW_pass4/D");
   Tout->Branch("yW_pass4", &yW_pass4, "yW_pass4/D");
+
+  Tout->Branch("EvisTot", &EvisTot, "EvisTot/D");
+  Tout->Branch("EvisE", &EvisE, "EvisE/D");
+  Tout->Branch("EvisW", &EvisW, "EvisW/D");
   
-  Tout->Branch("EreconTot", &EreconTot, "EreconTot/D");
-  Tout->Branch("EreconE", &EreconE, "EreconE/D");
-  Tout->Branch("EreconW", &EreconW, "EreconW/D");
+  //Tout->Branch("EreconTot", &EreconTot, "EreconTot/D");
+  //Tout->Branch("EreconE", &EreconE, "EreconE/D");
+  //Tout->Branch("EreconW", &EreconW, "EreconW/D");
 
   Tout->Branch("PID_pass4",  &PID_pass4,  "PID_pass4/I");
   Tout->Branch("type_pass4", &type_pass4, "type_pass4/I");
@@ -295,7 +299,7 @@ int main(int argc, char *argv[])
     pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] + linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7];
 
     //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
-    Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(pmt_Evis.Evis0)+EQ2Etrue[0][2]*(pmt_Evis.Evis0)*(pmt_Evis.Evis0);
+    /*Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(pmt_Evis.Evis0)+EQ2Etrue[0][2]*(pmt_Evis.Evis0)*(pmt_Evis.Evis0);
     Etrue[1] = EQ2Etrue[1][0]+EQ2Etrue[1][1]*(pmt_Evis.Evis1)+EQ2Etrue[1][2]*(pmt_Evis.Evis1)*(pmt_Evis.Evis1);
     Etrue[2] = EQ2Etrue[2][0]+EQ2Etrue[2][1]*(pmt_Evis.Evis2)+EQ2Etrue[2][2]*(pmt_Evis.Evis2)*(pmt_Evis.Evis2);
     Etrue[3] = EQ2Etrue[3][0]+EQ2Etrue[3][1]*(pmt_Evis.Evis3)+EQ2Etrue[3][2]*(pmt_Evis.Evis3)*(pmt_Evis.Evis3);
@@ -303,7 +307,7 @@ int main(int argc, char *argv[])
     Etrue[5] = EQ2Etrue[5][0]+EQ2Etrue[5][1]*(pmt_Evis.Evis5)+EQ2Etrue[5][2]*(pmt_Evis.Evis5)*(pmt_Evis.Evis5);
     Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(pmt_Evis.Evis6)+EQ2Etrue[6][2]*(pmt_Evis.Evis6)*(pmt_Evis.Evis6);
     Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(pmt_Evis.Evis7)+EQ2Etrue[7][2]*(pmt_Evis.Evis7)*(pmt_Evis.Evis7);
-
+    */
     if (pmtQuality[0] && pmt_Evis.Evis0>0. && (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[0]*nPE_per_channel[0];
       Double_t f = sqrt(N)/N;
@@ -362,17 +366,16 @@ int main(int argc, char *argv[])
 
     //East side EvisE
     if (side_pass3==0 || type_pass3==1) {
-      EreconE = (pmt_Evis.weight0*Etrue[0]+pmt_Evis.weight1*Etrue[1]+pmt_Evis.weight2*Etrue[2]+pmt_Evis.weight3*Etrue[3])/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);}
-    else EreconE=0.;
+      EvisE = (pmt_Evis.weight0*pmt_Evis.Evis0+pmt_Evis.weight1*pmt_Evis.Evis1+pmt_Evis.weight2*pmt_Evis.Evis2+pmt_Evis.weight3*pmt_Evis.Evis3)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);}
+    else EvisE=0.;
     //West Side EvisW
     if (side_pass3==1 || type_pass3==1) {
-      EreconW = (pmt_Evis.weight4*Etrue[4]+pmt_Evis.weight5*Etrue[5]+pmt_Evis.weight6*Etrue[6]+pmt_Evis.weight7*Etrue[7])/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);}
-    else EreconW=0.;
+      EvisW = (pmt_Evis.weight4*pmt_Evis.Evis4+pmt_Evis.weight5*pmt_Evis.Evis5+pmt_Evis.weight6*pmt_Evis.Evis6+pmt_Evis.weight7*pmt_Evis.Evis7)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);}
+    else EvisW=0.;
     
-    EreconTot = EreconE+EreconW;
+    EvisTot = EvisE+EvisW;
 
     if (i<20) {
-      cout << Etrue[4] << " " << Etrue[5] << " " << Etrue[6] << " " << Etrue[7] << endl;
       cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
     }
     

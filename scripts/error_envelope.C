@@ -26,20 +26,20 @@
 
   // East residuals
   double EQ[3];
-  EQ[0] = peakCe;//98.2;
-  EQ[1] = peakSn;//331.2;
-  EQ[2] = peakBiHigh;//928.0;
+  EQ[0] = peakCe_EQ;//98.2;
+  EQ[1] = peakSn_EQ;//331.2;
+  EQ[2] = peakBiHigh_EQ;//928.0;
   double dEQ[3] = {};
 
   double resEast[3];
-  resEast[0] = -0.680522;
-  resEast[1] =  1.9279;
-  resEast[2] = -1.86344;
+  resEast[0] = -0.650223;
+  resEast[1] =  1.58579;
+  resEast[2] = -0.406868;
 
   double sigEast[3];
-  sigEast[0] = 1.46459;
-  sigEast[1] = 4.34532;
-  sigEast[2] = 12.7077;
+  sigEast[0] = 1.27093;
+  sigEast[1] = 4.15851;
+  sigEast[2] = 11.6881;
 
   // Plot
   c1 = new TCanvas("c1", "canvas");
@@ -78,9 +78,12 @@
   gr0->SetLineStyle(2);
 
   Int_t nn = 5;
-  Double_t perc=0.016;
-  Double_t x2[nn] = {0., 98.2., 331.2, 928., 1000.};
-  Double_t percent[nn] = {1., perc, perc, perc, perc};
+  Double_t perc1=0.02;
+  Double_t perc2=0.018;
+  Double_t perc3=0.013;
+  Double_t perc4=0.013;
+  Double_t x2[nn] = {0., peakCe_EQ, peakSn_EQ, peakBiHigh_EQ, 1000.};
+  Double_t percent[nn] = {1., perc1, perc2, perc3, perc4};
   Double_t y_upper[nn], y_lower[nn];
   for (int i=1; i<nn; i++) {
     Double_t val = x2[i]*percent[i];

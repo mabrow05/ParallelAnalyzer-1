@@ -119,7 +119,7 @@ class CalReplayManager:
 
     def runReplayPass4(self,srcRunPeriod=1):
         print "Running replay_pass4 for run period %i"%srcRunPeriod
-        os.system("mkdir -s %s"%(os.getenv("REPLAY_PASS4")))
+        os.system("mkdir -p %s"%(os.getenv("REPLAY_PASS4")))
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
@@ -237,15 +237,16 @@ class CalibrationManager:
         runs = []
         for line in infile:       
             #checking if peaks have already been fit
-            filepath = self.srcPeakPath +"source_peaks_EnergyPeak_%i.dat"%int(line)
+            #filepath = self.srcPeakPath +"source_peaks_EnergyPeak_%i.dat"%int(line)
+            filepath = self.srcPeakPath +"source_peaks_EvisPMTbyPMT_%i.dat"%int(line)
             print filepath
             if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
                 runs.append(int(line))
 
         for run in runs:
-            os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
-            os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
-            print "Ran fit_source_peaks_Energy.C on run %i"%run
+            os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
+            os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
+            print "Ran fit_source_peaks_Evis.C on run %i"%run
 
 
     def makePMTrunFile(self,CalibrationPeriod=1, master=False):
@@ -327,8 +328,8 @@ class CalibrationManager:
         outputFile = None
         src_file_base = None
         if PeaksInEnergy:
-            outputFile = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
-            src_file_base = self.srcPeakPath + "source_peaks_EnergyPeak_"
+            outputFile = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%(CalibrationPeriod)
+            src_file_base = self.srcPeakPath + "source_peaks_EvisPMTbyPMT_"
         else:
             outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
             src_file_base = self.srcPeakPath + "source_peaks_"
@@ -367,7 +368,7 @@ class CalibrationManager:
             filename = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%CalibrationPeriod
         if os.path.isfile(filename):
             if InEnergy:
-                os.system("root -b -q 'MB_calc_residuals_finalEnergyFits.C (%i)'"%CalibrationPeriod)
+                os.system("root -b -q 'MB_calc_residuals_EvisPMTbyPMT.C (%i)'"%CalibrationPeriod)
             else:
                 os.system("root -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
             print "Calculated residuals for Calibration Period %i"%CalibrationPeriod
@@ -392,7 +393,7 @@ class CalibrationManager:
             outfile=None
             if (PMT==0):
                 if InEnergy:
-                    outfile = open("../residuals/residuals_global_EnergyPeaks_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
+                    outfile = open("../residuals/residuals_global_EvisPMTbyPMT_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
                 else:
                     outfile = open("../residuals/residuals_global_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
             elif (side=="East" and PMT>0):
@@ -404,7 +405,7 @@ class CalibrationManager:
                 filename=None
                 if (PMT==0):
                     if InEnergy:
-                        filename = "../residuals/residuals_%s_EnergyPeaks_runPeriod_%i.dat"%(side,period)
+                        filename = "../residuals/residuals_EvisPMTbyPMT_%s_runPeriod_%i.dat"%(side,period)
                     else:
                         filename = "../residuals/residuals_%s_runPeriod_%i.dat"%(side,period)
                 elif (side=="East" and PMT>0):
@@ -573,13 +574,13 @@ if __name__ == "__main__":
 
 
     #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
-    if 1: 
-        runPeriods =  [2]#[1,2,3,4,5,6,7,8,9,10,11,12]
+    if 0: 
+        runPeriods =  [1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
             #cal.calculateResiduals(runPeriod,False)
-            rep.runReplayPass4(runPeriod)
-            cal.fitSourcePeaksInEnergy(runPeriod)
-            cal.makeSourceCalibrationFile(runPeriod, True)
-            #cal.calculateResiduals(runPeriod, True)
+            #rep.runReplayPass4(runPeriod)
+            #cal.fitSourcePeaksInEnergy(runPeriod)
+            #cal.makeSourceCalibrationFile(runPeriod, True)
+            cal.calculateResiduals(runPeriod, True)

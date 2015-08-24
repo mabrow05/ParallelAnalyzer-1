@@ -17,6 +17,11 @@ const static double peakSn = 368.4938;//317.8;
 const static double peakBiLow = 498.;//501.420;//448.8;
 const static double peakBiHigh = 993.789;//926.;
 
+const static double peakCe_EQ = 80.5;
+const static double peakSn_EQ = 317.8;
+const static double peakBiLow_EQ = 448.8;
+const static double peakBiHigh_EQ = 926.;
+
 //Below "type" should be "EQ" or "Etrue"
 vector < vector <double> > returnPeaks(int srcPeriod, string type) {
   vector < vector <double> > peaks;

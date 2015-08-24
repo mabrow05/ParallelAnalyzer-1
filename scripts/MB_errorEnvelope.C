@@ -48,7 +48,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
 
   // Read East data file
   char tempEast[500];
-  if (postReplayPass4) sprintf(tempEast, "../residuals/residuals_global_EnergyPeaks_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  if (postReplayPass4) sprintf(tempEast, "../residuals/residuals_global_EvisPMTbyPMT_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_global_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_East_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_global_East_periods_%i-%i_PMTE%i.dat", calPeriodLow, calPeriodHigh, PMT);
@@ -72,22 +72,22 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
     if (sourceEast[i] == "Ce_East") {
       resCeEast[nCeEast] = resEast[i];
       nCeEast++;
-      if (sqrt(resEast[i]*resEast[i])>0.05*peakCe) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakCe_EQ) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Sn_East") {
       resSnEast[nSnEast] = resEast[i];
       nSnEast++;
-      if (sqrt(resEast[i]*resEast[i])>0.05*peakSn) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakSn_EQ) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Bi1_East") {
       resBi1East[nBi1East] = resEast[i];
       nBi1East++;
-      if (sqrt(resEast[i]*resEast[i])>0.05*peakBiHigh) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakBiHigh_EQ) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Bi2_East") {
       resBi2East[nBi2East] = resEast[i];
       nBi2East++;
-      if (sqrt(resEast[i]*resEast[i])>0.05*peakBiLow) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakBiLow_EQ) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (fileEast.fail()) break;
     i++;
@@ -96,7 +96,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
 
   // Read West data file
   char tempWest[500];
-  if (postReplayPass4) sprintf(tempWest, "../residuals/residuals_global_EnergyPeaks_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  if (postReplayPass4) sprintf(tempWest, "../residuals/residuals_global_EvisPMTbyPMT_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_global_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_West_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_global_West_periods_%i-%i_PMTW%i.dat", calPeriodLow, calPeriodHigh, PMT);
@@ -120,22 +120,22 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
     if (sourceWest[i] == "Ce_West") {
       resCeWest[nCeWest] = resWest[i];
       nCeWest++;
-      if (sqrt(resWest[i]*resWest[i])>0.05*peakCe) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakCe_EQ) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Sn_West") {
       resSnWest[nSnWest] = resWest[i];
       nSnWest++;
-      if (sqrt(resWest[i]*resWest[i])>0.05*peakSn) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakSn_EQ) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }    
     if (sourceWest[i] == "Bi1_West") {
       resBi1West[nBi1West] = resWest[i];
       nBi1West++;
-      if (sqrt(resWest[i]*resWest[i])>0.05*peakBiHigh) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakBiHigh_EQ) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Bi2_West") {
       resBi2West[nBi2West] = resWest[i];
       nBi2West++;
-      if (sqrt(resWest[i]*resWest[i])>0.05*peakBiLow) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakBiLow_EQ) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (fileWest.fail()) break;
     i++;

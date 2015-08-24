@@ -145,13 +145,6 @@ void MB_calc_residuals(Int_t runPeriod)
     weightFile.close();
   }
 
-   //Peak values to be used for EQ calibration when plotting the overall weighted residuals
-  const double peakCe_EQ = 80.5;
-  const double peakSn_EQ = 317.8;
-  const double peakBiLow_EQ = 448.8;
-  const double peakBiHigh_EQ = 926.;
-
-  
   //cout << pmtRun[5] << endl;
   //for (int i=0;i<8;i++) {
   //  cout << nPE_per_channel[5][i] << endl;

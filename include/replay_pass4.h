@@ -32,4 +32,6 @@ struct PMT_Evis {
   double weight7;
 } pmt_Evis;
 
-double EreconW, EreconE, EreconTot; // Weighted Visible energy as seen in the PMTs for each side
+double EvisE, EvisW, EvisTot; //Weighted Quenched energy as seen in the Scintillator
+
+double EreconW, EreconE, EreconTot; // Energy after applying conversion from EQ to Etrue space

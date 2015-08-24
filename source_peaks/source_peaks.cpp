@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
 
   // Quenched energies from simulation
-  double EQ[3];
+  //double EQ[3];
   /*for (int n=0; n<nSources; n++) {
     if (sourceName[n] == "Ce") EQ[n] = peakCe;//98.2;
     else if (sourceName[n] == "Sn") EQ[n] = peakSn;//331.2;

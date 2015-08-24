@@ -19,9 +19,13 @@ CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
 .PHONY: all
-all: source_peaks.exe source_peaks_EnergyPeak.exe
+all: source_peaks.exe source_peaks_EvisPMTbyPMT.exe source_peaks_EnergyPeak.exe
 source_peaks.exe: source_peaks.o
 	$(CXX) $(CXXFLAGS) -o source_peaks.exe source_peaks.o $(LIBS)
+	@echo "Done"
+
+source_peaks_EvisPMTbyPMT.exe: source_peaks_EvisPMTbyPMT.o
+	$(CXX) $(CXXFLAGS) -o source_peaks_EvisPMTbyPMT.exe source_peaks_EvisPMTbyPMT.o $(LIBS)
 	@echo "Done"
 
 source_peaks_EnergyPeak.exe: source_peaks_EnergyPeak.o
