@@ -1,3 +1,5 @@
+//Code to study the effect of changing alpha on the peaks in the 
+// Bi spectrum
 {
 Char_t temp[500];
 TChain *chain = new TChain("Evts");
