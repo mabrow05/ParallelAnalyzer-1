@@ -170,6 +170,7 @@ void weightPeaks (Int_t runNumber, string source)
     }
     //cout << "filled event " << evt << endl;
   }
+  delete chain;
   
   //vector <TF1*> func (2,0);
   
