@@ -93,16 +93,17 @@ void weightPeaks (Int_t runNumber, string source)
   //Fill histograms with smeared and weighted energies, add them after
   vector <TH1D*> pmt (8,0);
   //Final histograms which are the addition of the previous histrograms
-  TH1D *finalE = new TH1D("finalE", "Simulated Weighted Sum East", 400, 0., 1200.);
-  TH1D *finalW = new TH1D("finalW", "Simulated Weighted Sum West", 400, 0., 1200.);
+  vector <TH1D*> finalEn (2,0);
+  finalEn[0] = new TH1D("finalE", "Simulated Weighted Sum East", 400, 0., 1200.);
+  finalEn[1] = new TH1D("finalW", "Simulated Weighted Sum West", 400, 0., 1200.);
   Char_t name[200];
   Char_t file[500];
 
   Char_t temp[500];
   TChain *chain = new TChain("anaTree");
-  for (int i=0; i<1; i++) {
-    //  sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
-    sprintf(temp,"../../../data/analyzed_%i.root",i);
+  for (int i=0; i<125; i++) {
+    sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
+    //sprintf(temp,"../../../data/analyzed_%i.root",i);
     chain->AddFile(temp);
   }
   Int_t PID;
@@ -146,7 +147,7 @@ void weightPeaks (Int_t runNumber, string source)
 	numer+=E_sm[p]*weight[p];
 	denom+=weight[p];
       }
-      finalE->Fill(numer/denom);
+      finalEn[0]->Fill(numer/denom);
     }
     //Check for West type 0
     else if (EdepQW>0. && EdepQE==0. && MWPCEnergyW>0. && MWPCEnergyE==0.) {
@@ -165,13 +166,12 @@ void weightPeaks (Int_t runNumber, string source)
 	denom+=weight[p];
       }
       //cout << numer/denom << endl;
-      finalW->Fill(numer/denom);
+      finalEn[1]->Fill(numer/denom);
     }
     //cout << "filled event " << evt << endl;
   }
   
-  outfile->Write();
-  outfile->Close();
+  //vector <TF1*> func (2,0);
   
   //TCanvas *c1 = new TCanvas();
   //finalE->Draw();
@@ -179,30 +179,59 @@ void weightPeaks (Int_t runNumber, string source)
   //TCanvas *c2 = new TCanvas();
   //finalW->Draw();
 
-  /*    h->Draw();
-
-    Int_t maxBin = h->GetMaximumBin();
-    Double_t peak = h->GetXaxis()->GetBinCenter(maxBin);
-    Double_t maxBinContent = h->GetBinContent(maxBin);
+  for (UInt_t n=0;n<2;n++) {
+    Int_t maxBin = finalEn[n]->GetMaximumBin();
+    Double_t peak = finalEn[n]->GetXaxis()->GetBinCenter(maxBin);
+    Double_t maxBinContent = finalEn[n]->GetBinContent(maxBin);
     Double_t high = 0., low=0.;
     
     for (int i=maxBin; i<400; i++) {
-      if (h->GetBinContent(i+1) < 0.5*maxBinContent) {
-	high= h->GetXaxis()->GetBinCenter(i+1);
+      if (finalEn[n]->GetBinContent(i+1) < 0.5*maxBinContent) {
+	high= finalEn[n]->GetXaxis()->GetBinCenter(i+1);
 	break;
       }
     }
     for (int i=maxBin; i<400; i--) {
-      if (h->GetBinContent(i-1) < 0.5*maxBinContent) {
-	low= h->GetXaxis()->GetBinCenter(i-1);
+      if (finalEn[n]->GetBinContent(i-1) < 0.5*maxBinContent) {
+	low= finalEn[n]->GetXaxis()->GetBinCenter(i-1);
 	break;
       }
     }
     
-    
     TF1 *func = new TF1("func", "gaus", low, high);
     //h->SetParameter(1,peak);
-    h->Fit("func", "LRQ");
-    cout << alpha << " \t" << func->GetParameter(1) << endl;
-    }*/
+    finalEn[n]->Fit("func", "LRQ");
+    cout << func->GetParameter(1) << endl;
+    delete func;
+  }
+  if (source=="Bi207") {
+    for (UInt_t n=0;n<2;n++) {
+      finalEn[n]->GetXaxis()->SetRangeUser(200., 700.);
+      Int_t maxBin = finalEn[n]->GetMaximumBin();
+      Double_t peak = finalEn[n]->GetXaxis()->GetBinCenter(maxBin);
+      Double_t maxBinContent = finalEn[n]->GetBinContent(maxBin);
+      Double_t high = 0., low=0.;
+      
+      for (int i=maxBin; i<400; i++) {
+	if (finalEn[n]->GetBinContent(i+1) < 0.5*maxBinContent) {
+	  high= finalEn[n]->GetXaxis()->GetBinCenter(i+1);
+	  break;
+	}
+      }
+      for (int i=maxBin; i<400; i--) {
+	if (finalEn[n]->GetBinContent(i-1) < 0.5*maxBinContent) {
+	  low= finalEn[n]->GetXaxis()->GetBinCenter(i-1);
+	  break;
+	}
+      }
+      finalEn[n]->GetXaxis()->SetRange(0,400);
+      TF1 *func = new TF1("func", "gaus", low, high);
+      //h->SetParameter(1,peak);
+      finalEn[n]->Fit("func", "LRQ+");
+      cout << func->GetParameter(1) << endl;
+      delete func;
+    }
+  }
+  outfile->Write();
+  outfile->Close();
 }
