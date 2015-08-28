@@ -101,22 +101,22 @@ void weightPeaks (Int_t runNumber, string source)
 
   Char_t temp[500];
   TChain *chain = new TChain("anaTree");
-  for (int i=0; i<10; i++) {
-    sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
-    //sprintf(temp,"../../../data/analyzed_%i.root",i);
+  for (int i=0; i<2; i++) {
+    //sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
+    sprintf(temp,"../../../data/analyzed_%i.root",i);
     chain->AddFile(temp);
   }
   Int_t PID;
-  //Double_t EdepQ[2], MWPCEnergy[2];
-  Double_t EdepQE, EdepQW, MWPCEnergyE, MWPCEnergyW;
+  Double_t EdepQ[2], MWPCEnergy[2];
+  //Double_t EdepQE, EdepQW, MWPCEnergyE, MWPCEnergyW;
   Double_t E_sm[8]={0.}; //Hold the smeared energy
   Double_t weight[8]={0.}; // Hold the weight calculated based upon alpha
-  //chain->SetBranchAddress("EdepQ",EdepQ);
-  //chain->SetBranchAddress("MWPCEnergy",MWPCEnergy);
-  chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
-  chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
-  chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
-  chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
+  chain->SetBranchAddress("EdepQ",EdepQ);
+  chain->SetBranchAddress("MWPCEnergy",MWPCEnergy);
+  //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
+  //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
+  //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
+  //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 
   TRandom3 *rand = new TRandom3(0);
   Int_t nevents = chain->GetEntries();
@@ -132,9 +132,9 @@ void weightPeaks (Int_t runNumber, string source)
   for (Int_t evt=0; evt<nevents; evt++) {
     chain->GetEvent(evt);
     //Check for east type 0
-    if (EdepQE>0. && EdepQW==0. && MWPCEnergyE>0. && MWPCEnergyW==0.) {
+    if (EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0.) {
       for (UInt_t p=0; p<4; p++) {
-	E_sm[p] = rand->Gaus(EdepQE,sqrt(EdepQE/alphas[p]));
+	E_sm[p] = rand->Gaus(EdepQ[0],sqrt(EdepQ[0]/alphas[p]));
 	if (pmtQuality[p] && E_sm[p]>0.) {
 	  weight[p] = alphas[p]/E_sm[p];
 	  //cout << p << " " << E_sm << " " << weight << endl;
@@ -150,9 +150,9 @@ void weightPeaks (Int_t runNumber, string source)
       finalEn[0]->Fill(numer/denom);
     }
     //Check for West type 0
-    else if (EdepQW>0. && EdepQE==0. && MWPCEnergyW>0. && MWPCEnergyE==0.) {
+    else if (EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0.) {
       for (UInt_t p=4; p<8; p++) {
-	E_sm[p] = rand->Gaus(EdepQW,sqrt(EdepQW/alphas[p]));
+	E_sm[p] = rand->Gaus(EdepQ[1],sqrt(EdepQ[1]/alphas[p]));
 	if (pmtQuality[p] && E_sm[p]>0.) {
 	  weight[p] = alphas[p]/E_sm[p];
 	  //cout << p << " " << E_sm << " " << weight << endl;
@@ -180,7 +180,7 @@ void weightPeaks (Int_t runNumber, string source)
   //TCanvas *c2 = new TCanvas();
   //finalW->Draw();
 
-  /*  for (UInt_t n=0;n<2;n++) {
+  for (UInt_t n=0;n<2;n++) {
 
     Int_t maxBin = finalEn[n]->GetMaximumBin();
     Double_t peak = finalEn[n]->GetXaxis()->GetBinCenter(maxBin);
@@ -188,10 +188,8 @@ void weightPeaks (Int_t runNumber, string source)
     Double_t high = 0., low=0.;
     cout << maxBin << " " <<  maxBinContent << endl;;
     for (int i=maxBin; i<400; i++) {
-      cout << "I'm here folks 2\n";
       if (finalEn[n]->GetBinContent(i+1) < 0.5*maxBinContent) {
 	high= finalEn[n]->GetXaxis()->GetBinCenter(i+1);
-	cout << "I'm here folks 3\n";
 	break;
       }
     }
@@ -201,7 +199,7 @@ void weightPeaks (Int_t runNumber, string source)
 	break;
       }
     }
-    cout << "Made it here\n";
+    
     TF1 *func = new TF1("func", "gaus", low, high);
     //h->SetParameter(1,peak);
     finalEn[n]->Fit("func", "LRQ");
@@ -235,7 +233,7 @@ void weightPeaks (Int_t runNumber, string source)
       cout << func->GetParameter(1) << endl;
       delete func;
     }
-    }*/
+  }
   outfile->Write();
   outfile->Close();
 }
