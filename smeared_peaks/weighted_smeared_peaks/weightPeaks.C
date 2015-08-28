@@ -101,7 +101,7 @@ void weightPeaks (Int_t runNumber, string source)
 
   Char_t temp[500];
   TChain *chain = new TChain("anaTree");
-  for (int i=0; i<125; i++) {
+  for (int i=0; i<10; i++) {
     sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
     //sprintf(temp,"../../../data/analyzed_%i.root",i);
     chain->AddFile(temp);
@@ -168,10 +168,10 @@ void weightPeaks (Int_t runNumber, string source)
       //cout << numer/denom << endl;
       finalEn[1]->Fill(numer/denom);
     }
-    //cout << "filled event " << evt << endl;
+    cout << "filled event " << evt << endl;
   }
   delete chain;
-  
+
   //vector <TF1*> func (2,0);
   
   //TCanvas *c1 = new TCanvas();
@@ -180,15 +180,18 @@ void weightPeaks (Int_t runNumber, string source)
   //TCanvas *c2 = new TCanvas();
   //finalW->Draw();
 
-  for (UInt_t n=0;n<2;n++) {
+  /*  for (UInt_t n=0;n<2;n++) {
+
     Int_t maxBin = finalEn[n]->GetMaximumBin();
     Double_t peak = finalEn[n]->GetXaxis()->GetBinCenter(maxBin);
     Double_t maxBinContent = finalEn[n]->GetBinContent(maxBin);
     Double_t high = 0., low=0.;
-    
+    cout << maxBin << " " <<  maxBinContent << endl;;
     for (int i=maxBin; i<400; i++) {
+      cout << "I'm here folks 2\n";
       if (finalEn[n]->GetBinContent(i+1) < 0.5*maxBinContent) {
 	high= finalEn[n]->GetXaxis()->GetBinCenter(i+1);
+	cout << "I'm here folks 3\n";
 	break;
       }
     }
@@ -198,7 +201,7 @@ void weightPeaks (Int_t runNumber, string source)
 	break;
       }
     }
-    
+    cout << "Made it here\n";
     TF1 *func = new TF1("func", "gaus", low, high);
     //h->SetParameter(1,peak);
     finalEn[n]->Fit("func", "LRQ");
@@ -232,7 +235,7 @@ void weightPeaks (Int_t runNumber, string source)
       cout << func->GetParameter(1) << endl;
       delete func;
     }
-  }
+    }*/
   outfile->Write();
   outfile->Close();
 }
