@@ -1,3 +1,5 @@
+//Code to study the effect of changing alpha on the peaks in the 
+// Bi spectrum
 {
   Double_t alphaLow = 0.001;
   Double_t alphaHigh = 0.1;
