@@ -29,6 +29,22 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
   
 }
 
+vector < vector <Double_t> > returnSmearedWeightedSimPeaks(Int_t runPeriod)
+{
+  vector < vector <double> > peaks;
+  peaks.resize( 4, vector <double> (2,0.));
+  ifstream peakfile;
+  char filename[500];
+  sprintf(filename, "../smeared_peaks/weighted_smeared_peaks/weightedSimPeaks_runPeriod_%i.dat",runPeriod);
+  peakfile.open(filename);
+  
+  for (int srcPeaks = 0; srcPeaks<4; srcPeaks++) {
+    peakfile >> peaks[srcPeaks][0] >> peaks[srcPeaks][1];
+    cout << peaks[srcPeaks][0] << peaks[srcPeaks][1] << endl;
+  }
+  return peaks;
+}
+
 void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
 {
   cout.setf(ios::fixed, ios::floatfield);
@@ -58,6 +74,10 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   //Int_t runLow = 17359;
   //Int_t runHigh = 19959;
   Int_t calibrationPeriod = runPeriod;
+
+  //Read in the smeared and weighted combination of the PMT response
+  // for each of the four sources on each side
+  vector < vector <Double_t> > simPeaks = returnSmearedWeightedSimPeaks(runPeriod);
   
   // Read data file
   char temp[500];
@@ -89,23 +109,23 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   for (int j=0; j<num; j++) {
   
     if (sourceName[j]=="Ce") {
-      res_East[j] = eastE[j] - peakCe;
-      x_East[j] = peakCe;
+      res_East[j] = eastE[j] - simPeaks[0][0];
+      x_East[j] = simPeaks[0][0];//peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
-      res_East[j] = eastE[j] - peakSn;
-      x_East[j] = peakSn;
+      res_East[j] = eastE[j] - simPeaks[1][0];
+      x_East[j] = simPeaks[1][0];//peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Bi2") {
-      res_East[j] = eastE[j] - peakBiLow;
-      x_East[j] = peakBiLow;
+      res_East[j] = eastE[j] - simPeaks[2][0];
+      x_East[j] = simPeaks[2][0];//peakBiLow;
       oFileE << "Bi2_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Bi1") {
-      res_East[j] = eastE[j] - peakBiHigh;
-      x_East[j] = peakBiHigh;
+      res_East[j] = eastE[j] - simPeaks[3][0];
+      x_East[j] = simPeaks[3][0];//peakBiHigh;
       oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
    }
 
@@ -169,23 +189,23 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
 
   for (int j=0; j<num; j++) {
     if (sourceName[j]=="Ce") {
-      res_West[j] = westE[j] - peakCe;
-      x_West[j] = peakCe;
+      res_West[j] = westE[j] - simPeaks[0][1];
+      x_West[j] = simPeaks[0][1];//peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
-      res_West[j] = westE[j] - peakSn;
-      x_West[j] = peakSn;
+      res_West[j] = westE[j] - simPeaks[1][1];
+      x_West[j] = simPeaks[1][1];//peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Bi2") {
-      res_West[j] = westE[j] - peakBiLow;
-      x_West[j] = peakBiLow;
+      res_West[j] = westE[j] - simPeaks[2][1];
+      x_West[j] = simPeaks[2][1];//peakBiLow;
       oFileW << "Bi2_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Bi1") {
-      res_West[j] = westE[j] - peakBiHigh;
-      x_West[j] = peakBiHigh;
+      res_West[j] = westE[j] - simPeaks[3][1];
+      x_West[j] = simPeaks[3][1];// peakBiHigh;
       oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
    }
 
