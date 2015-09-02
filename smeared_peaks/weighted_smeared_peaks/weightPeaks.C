@@ -207,8 +207,9 @@ void weightPeaks (Int_t runNumber, string source)
     peakDat << func->GetParameter(1) << " ";
     delete func;
   }
-  peakDat << endl;
+  
   if (source=="Bi207") {
+    peakDat << endl;
     for (UInt_t n=0;n<2;n++) {
       finalEn[n]->GetXaxis()->SetRangeUser(200., 700.);
       Int_t maxBin = finalEn[n]->GetMaximumBin();
