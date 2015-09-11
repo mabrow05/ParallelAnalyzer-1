@@ -28,7 +28,10 @@ vector < vector <double> > returnPeaks(int srcPeriod, string type) {
   peaks.resize( 8, vector <double> (4,0.));
   ifstream peakfile;
   char filename[500];
-  sprintf(filename, "../smeared_peaks/%s_smeared_%i.dat",type.c_str(),srcPeriod);
+  if (type=="EQ") {
+    sprintf(filename, "../smeared_peaks/weighted_smeared_peaks/fits/weightedSimPeaks_PMTbyPMT_runPeriod_%i.dat",srcPeriod);}
+  else {
+    sprintf(filename, "../smeared_peaks/%s_smeared_%i.dat",type.c_str(),srcPeriod);}
   peakfile.open(filename);
   
   for (int pmt = 0; pmt<8; pmt++) {

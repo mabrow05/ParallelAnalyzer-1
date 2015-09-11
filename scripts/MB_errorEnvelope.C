@@ -48,7 +48,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
 
   // Read East data file
   char tempEast[500];
-  if (postReplayPass4) sprintf(tempEast, "../residuals/residuals_global_EvisPMTbyPMT_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  if (postReplayPass4) sprintf(tempEast, "../residuals/residuals_global_EnergyPeaks_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_global_East_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempEast, "../residuals/residuals_East_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_global_East_periods_%i-%i_PMTE%i.dat", calPeriodLow, calPeriodHigh, PMT);
@@ -96,7 +96,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
 
   // Read West data file
   char tempWest[500];
-  if (postReplayPass4) sprintf(tempWest, "../residuals/residuals_global_EvisPMTbyPMT_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
+  if (postReplayPass4) sprintf(tempWest, "../residuals/residuals_global_EnergyPeaks_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow!=calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_global_West_periods_%i-%i.dat", calPeriodLow, calPeriodHigh);
   else if (calPeriodLow==calPeriodHigh && !PMT) sprintf(tempWest, "../residuals/residuals_West_runPeriod_%i.dat", calPeriodLow);
   else if (calPeriodLow!=calPeriodHigh && PMT) sprintf(tempWest,"../residuals/residuals_global_West_periods_%i-%i_PMTW%i.dat", calPeriodLow, calPeriodHigh, PMT);

@@ -83,7 +83,7 @@ void weightPeaks (Int_t runNumber, string source)
     exit(0);}
 
   Char_t outputfile[500];
-  sprintf(outputfile,"%i_%s_weightedSimPeaks.root",runNumber,source.c_str());
+  sprintf(outputfile,"fits/%i_%s_weightedSimPeaks.root",runNumber,source.c_str());
   TFile *outfile = new TFile(outputfile, "RECREATE");
   vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
   UInt_t calibrationPeriod = getRunPeriod(runNumber); // retrieve the calibration period for this run
@@ -121,6 +121,9 @@ void weightPeaks (Int_t runNumber, string source)
   TRandom3 *rand = new TRandom3(0);
   Int_t nevents = chain->GetEntries();
   cout << "events = " << nevents << endl;
+
+  //Set Hard cut on threshold for now...
+  Double_t Threshold=25.;
   
   //Create PMT histograms
   for (UInt_t p=0; p<8; p++) {
@@ -135,7 +138,7 @@ void weightPeaks (Int_t runNumber, string source)
     if (EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0.) {
       for (UInt_t p=0; p<4; p++) {
 	E_sm[p] = rand->Gaus(EdepQ[0],sqrt(EdepQ[0]/alphas[p]));
-	if (pmtQuality[p] && E_sm[p]>0.) {
+	if (pmtQuality[p] && E_sm[p]>Threshold) {
 	  weight[p] = alphas[p]/E_sm[p];
 	  //cout << p << " " << E_sm << " " << weight << endl;
 	  pmt[p]->Fill(E_sm[p]);
@@ -153,7 +156,7 @@ void weightPeaks (Int_t runNumber, string source)
     else if (EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0.) {
       for (UInt_t p=4; p<8; p++) {
 	E_sm[p] = rand->Gaus(EdepQ[1],sqrt(EdepQ[1]/alphas[p]));
-	if (pmtQuality[p] && E_sm[p]>0.) {
+	if (pmtQuality[p] && E_sm[p]>Threshold) {
 	  weight[p] = alphas[p]/E_sm[p];
 	  //cout << p << " " << E_sm << " " << weight << endl;
 	  pmt[p]->Fill(E_sm[p]);
@@ -179,8 +182,85 @@ void weightPeaks (Int_t runNumber, string source)
 
   //TCanvas *c2 = new TCanvas();
   //finalW->Draw();
-  sprintf(outputfile,"%i_%s_weightedSimPeaks.dat",runNumber, source.c_str());
+
+  //Fit the 8 individual PMTs for comparison when doing linearity curves
+  sprintf(outputfile,"fits/%i_%s_weightedSimPeaks_PMTbyPMT.dat",runNumber, source.c_str());
   ofstream peakDat(outputfile);
+  for (UInt_t n=0;n<8;n++) {
+    if (pmtQuality[n]) {
+      Int_t maxBin = pmt[n]->GetMaximumBin();
+      Double_t peak = pmt[n]->GetXaxis()->GetBinCenter(maxBin);
+      Double_t maxBinContent = pmt[n]->GetBinContent(maxBin);
+      Double_t high = 0., low=0.;
+      for (int i=maxBin; i<400; i++) {
+	if (pmt[n]->GetBinContent(i+1) < 0.5*maxBinContent || pmt[n]->GetXaxis()->GetBinCenter(i+1)>1170.) {
+	  high= pmt[n]->GetXaxis()->GetBinCenter(i+1);
+	  break;
+	}
+      }
+      for (int i=maxBin; i<400; i--) {
+	if (pmt[n]->GetBinContent(i-1) < 0.5*maxBinContent) {
+	  low= pmt[n]->GetXaxis()->GetBinCenter(i-1);
+	  break;
+	}
+      }
+      
+      TF1 *func = new TF1("func", "gaus", low, high);
+      //h->SetParameter(1,peak);
+      pmt[n]->Fit("func", "LRQ");
+      cout << func->GetParameter(1) << endl;
+      peakDat << func->GetParameter(1) << " ";
+      delete func;
+    }
+    else {
+      peakDat << 0. << " ";
+      cout << "BAD PMT\n";
+    }   
+    
+    if (source=="Bi207") {
+      if (pmtQuality[n]) {  
+	pmt[n]->GetXaxis()->SetRangeUser(200., 700.);
+	Int_t maxBin = pmt[n]->GetMaximumBin();
+	Double_t peak = pmt[n]->GetXaxis()->GetBinCenter(maxBin);
+	Double_t maxBinContent = pmt[n]->GetBinContent(maxBin);
+	Double_t high = 0., low=0.;
+	
+	for (int i=maxBin; i<400; i++) {
+	  if (pmt[n]->GetBinContent(i+1) < 0.5*maxBinContent || pmt[n]->GetXaxis()->GetBinCenter(i+1)>670.) {
+	    high= pmt[n]->GetXaxis()->GetBinCenter(i+1);
+	    break;
+	  } 
+	}
+	for (int i=maxBin; i<400; i--) {
+	  if (pmt[n]->GetBinContent(i-1) < 0.5*maxBinContent || pmt[n]->GetXaxis()->GetBinCenter(i)<230.) {
+	    low= pmt[n]->GetXaxis()->GetBinCenter(i-1);
+	    break;
+	  }
+	}
+	pmt[n]->GetXaxis()->SetRange(0,400);
+	TF1 *func = new TF1("func", "gaus", low, high);
+	//h->SetParameter(1,peak);
+	pmt[n]->Fit("func", "LRQ+");
+	cout << func->GetParameter(1) << endl;
+	peakDat << func->GetParameter(1) << " ";
+	delete func;
+      }    
+      else {
+	peakDat << 0. << " ";
+	cout << "BAD PMT\n";
+      }
+    }
+    cout << "Finished PMT " << n << endl;
+    if (n<7) peakDat << endl;
+  }
+
+  peakDat.close();
+
+
+  sprintf(outputfile,"fits/%i_%s_weightedSimPeaks.dat",runNumber, source.c_str());
+  peakDat.open(outputfile);
+  
+  //Fit the final weighted histograms
   for (UInt_t n=0;n<2;n++) {
 
     Int_t maxBin = finalEn[n]->GetMaximumBin();

@@ -26,7 +26,7 @@ for Range in omittedRanges:
 #### This will be done by having a file with all source runs, where the PMT value
 #### is set to 0 or 1 to represent false (don't use) and true (do use)
 
-EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working
+EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. This removes source outliers from
 EPMT2 = []
 EPMT3 = []
 EPMT4 = []
@@ -81,9 +81,16 @@ class CalReplayManager:
         self.replayPass3 = os.getenv("REPLAY_PASS3")
         self.srcListPath = os.getenv("SOURCE_LIST")
 
-    def runReplayPass1(self,srcRunPeriod=1):
-        print "Running replay_pass1 for run period %i"%srcRunPeriod
-        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+    def runReplayPass1(self,srcRunPeriod=1, sourceORxenon="source"):
+        print "Running replay_pass1 for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
@@ -93,9 +100,16 @@ class CalReplayManager:
             os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
         print "DONE"
         
-    def runReplayPass2(self,srcRunPeriod=1):
-        print "Running replay_pass2 for run period %i"%srcRunPeriod
-        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+    def runReplayPass2(self,srcRunPeriod=1, sourceORxenon="source"):
+        print "Running replay_pass2 for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
@@ -105,9 +119,16 @@ class CalReplayManager:
             os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%run)
         print "DONE"
         
-    def runReplayPass3(self,srcRunPeriod=1):
-        print "Running replay_pass3 for run period %i"%srcRunPeriod
-        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+    def runReplayPass3(self,srcRunPeriod=1, sourceORxenon="source"):
+        print "Running replay_pass3 for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
@@ -117,10 +138,17 @@ class CalReplayManager:
             os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
         print "DONE"
 
-    def runReplayPass4(self,srcRunPeriod=1):
-        print "Running replay_pass4 for run period %i"%srcRunPeriod
+    def runReplayPass4(self,srcRunPeriod=1, sourceORxenon="source"):
+        print "Running replay_pass4 for %s run period %i"%(sourceORxenon,srcRunPeriod)
         os.system("mkdir -p %s"%(os.getenv("REPLAY_PASS4")))
-        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
@@ -130,9 +158,16 @@ class CalReplayManager:
             os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%run)
         print "DONE"
         
-    def runGainBismuth(self,srcRunPeriod=1):
-        print "Running gain_bismuth for run period %i"%srcRunPeriod
-        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+    def runGainBismuth(self,srcRunPeriod=1, sourceORxenon="source"):
+        print "Running gain_bismuth for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
@@ -144,9 +179,16 @@ class CalReplayManager:
         print "DONE"
 
 
-    def findPedestals(self, srcRunPeriod=1):
-        print "Running pedestals for run period %i"%srcRunPeriod
-        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+    def findPedestals(self, srcRunPeriod=1, sourceORxenon="source"):
+        print "Running pedestals for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
@@ -171,12 +213,36 @@ class CalibrationManager:
         self.srcListPath = os.getenv("SOURCE_LIST")
         self.nPEcountPath = os.getenv("NPE_WEIGHTS")
 
+    def findCalibrationPeriod(self, runNumber):
+        if runNumber <= 17297:
+            return 1
+        elif runNumber <= 17439:
+            return 2
+        elif runNumber <= 17734:
+            return 3
+        elif runNumber <= 17955:
+            return 4
+        elif runNumber <= 18386:
+            return 5
+        elif runNumber <= 18683:
+            return 6
+        elif runNumber <= 18994:
+            return 7
+        elif runNumber <= 19239:
+            return 8
+        elif runNumber <= 19544:
+            return 9
+        elif runNumber <= 20000:
+            return 11
+        
 
-    def calc_nPE_per_PMT(self, runAllRefRun=False, run=19359):
+    def calc_nPE_per_PMT(self, runAllRefRun=False, run=19359, writeNPEforAllRuns=False):
+
+        srcRefRuns = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899]
 
         if runAllRefRun:
             srcRunPeriod=1
-            srcRefRuns = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899]
+            
             for r in srcRefRuns:
                 os.system("cd ../calc_nPE/; ./calc_nPE.exe %i"%r)
                 print "Ran calc_nPE.exe for run %i"%r
@@ -189,11 +255,17 @@ class CalibrationManager:
                     os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,r,self.nPEcountPath,rn))
                 srcRunPeriod+=1
                 infile.close()
-                            
-                    
+
+        elif writeNPEforAllRuns:
+            for rn in range(16000,20000,1):
+                calPeriod = self.findCalibrationPeriod(rn)
+                os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,srcRefRuns[calPeriod-1],self.nPEcountPath,rn))
+
         else:
             os.system("cd ../calc_nPE/; ./calc_nPE.exe %i"%run)
             print "Ran calc_nPE.exe for run %i"%run
+
+        
         
         
         
@@ -231,22 +303,28 @@ class CalibrationManager:
             print "Ran fit_source_peaks.C on run %i"%run
 
 
-    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, overwrite=True):
+    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, PMTbyPMT=False,overwrite=True):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:       
             #checking if peaks have already been fit
-            #filepath = self.srcPeakPath +"source_peaks_EnergyPeak_%i.dat"%int(line)
             filepath = self.srcPeakPath +"source_peaks_EvisPMTbyPMT_%i.dat"%int(line)
+            if not PMTbyPMT:
+                filepath = self.srcPeakPath +"source_peaks_EnergyPeak_%i.dat"%int(line)
+            
             print filepath
             if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
                 runs.append(int(line))
 
         for run in runs:
-            os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
-            os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
-            print "Ran fit_source_peaks_Evis.C on run %i"%run
+            if PMTbyPMT:
+                os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
+                os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
+            else:
+                os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
+                os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
+            print "Ran plot_source_peaks.C on run %i"%run
 
 
     def makePMTrunFile(self,CalibrationPeriod=1, master=False):
@@ -321,15 +399,18 @@ class CalibrationManager:
 
 
 
-    def makeSourceCalibrationFile(self,CalibrationPeriod=1, PeaksInEnergy=False):
+    def makeSourceCalibrationFile(self,CalibrationPeriod=1, PeaksInEnergy=False, PMTbyPMT=False):
         #This utilizes the omittedRuns and removes them from the calibration. Any time you make a change
         # to the runs which are to be omitted, you shoud rerun this!
 
         outputFile = None
         src_file_base = None
-        if PeaksInEnergy:
+        if PeaksInEnergy and PMTbyPMT:
             outputFile = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%(CalibrationPeriod)
             src_file_base = self.srcPeakPath + "source_peaks_EvisPMTbyPMT_"
+        elif PeaksInEnergy and not PMTbyPMT:
+            outputFile = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
+            src_file_base = self.srcPeakPath + "source_peaks_EnergyPeak_"
         else:
             outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
             src_file_base = self.srcPeakPath + "source_peaks_"
@@ -362,13 +443,17 @@ class CalibrationManager:
 
     
     #Calculates residuals for each PMT and as a whole for given run period
-    def calculateResiduals(self, CalibrationPeriod=1, InEnergy=False):
+    def calculateResiduals(self, CalibrationPeriod=1, InEnergy=False, PMTbyPMT=False):
         filename = "../residuals/source_runs_RunPeriod_%i.dat"%CalibrationPeriod
-        if InEnergy:
+        if InEnergy and PMTbyPMT:
+            filename = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%CalibrationPeriod
+        elif InEnergy and not PMTbyPMT:
             filename = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%CalibrationPeriod
         if os.path.isfile(filename):
-            if InEnergy:
+            if InEnergy and PMTbyPMT:
                 os.system("root -b -q 'MB_calc_residuals_EvisPMTbyPMT.C (%i)'"%CalibrationPeriod)
+            elif InEnergy and not PMTbyPMT:
+                os.system("root -b -q 'MB_calc_residuals_finalEnergyFits.C (%i)'"%CalibrationPeriod)
             else:
                 os.system("root -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
             print "Calculated residuals for Calibration Period %i"%CalibrationPeriod
@@ -378,7 +463,7 @@ class CalibrationManager:
 
     #Combines residuals for the calPeriods in the list given, for the PMT chosen (0 is PMT as a whole), and for the side
     # which can be "East", "West", or "Both"
-    def makeGlobalResiduals(self,CalPeriods=[1], PMT=0, Side="Both",InEnergy=False):
+    def makeGlobalResiduals(self,CalPeriods=[1], PMT=0, Side="Both",InEnergy=False, PMTbyPMT=False):
         CalPeriods.sort()
         periodLow = CalPeriods[0]
         periodHigh = CalPeriods[len(CalPeriods)-1]
@@ -392,8 +477,10 @@ class CalibrationManager:
         for side in sides:
             outfile=None
             if (PMT==0):
-                if InEnergy:
+                if InEnergy and PMTbyPMT:
                     outfile = open("../residuals/residuals_global_EvisPMTbyPMT_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
+                elif InEnergy and not PMTbyPMT:
+                    outfile = open("../residuals/residuals_global_EnergyPeaks_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
                 else:
                     outfile = open("../residuals/residuals_global_%s_periods_%i-%i.dat"%(side,periodLow,periodHigh),"w")
             elif (side=="East" and PMT>0):
@@ -404,8 +491,10 @@ class CalibrationManager:
             for period in CalPeriods:
                 filename=None
                 if (PMT==0):
-                    if InEnergy:
+                    if InEnergy and PMTbyPMT:
                         filename = "../residuals/residuals_EvisPMTbyPMT_%s_runPeriod_%i.dat"%(side,period)
+                    elif InEnergy and not PMTbyPMT:
+                        filename = "../residuals/residuals_%s_EnergyPeaks_runPeriod_%i.dat"%(side,period)
                     else:
                         filename = "../residuals/residuals_%s_runPeriod_%i.dat"%(side,period)
                 elif (side=="East" and PMT>0):
@@ -551,7 +640,7 @@ if __name__ == "__main__":
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         pmts = [0]#[1,2,3,4] #PMT 0 is for the weighted average of all 4
         for pmt in pmts:
-            cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True)
+            cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True, PMTbyPMT=False)
 
 
     if 0:
@@ -574,13 +663,28 @@ if __name__ == "__main__":
 
 
     #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
-    if 0: 
-        runPeriods =  [1,2,3,4,5,6,7,8,9,10,11,12]
+    if 1: 
+        runPeriods =[2,5]# [1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
-            #cal.calculateResiduals(runPeriod,False)
-            #rep.runReplayPass4(runPeriod)
-            #cal.fitSourcePeaksInEnergy(runPeriod)
-            #cal.makeSourceCalibrationFile(runPeriod, True)
-            cal.calculateResiduals(runPeriod, True)
+            cal.calculateResiduals(runPeriod,False)
+            rep.runReplayPass4(runPeriod)
+            cal.fitSourcePeaksInEnergy(runPeriod, True)
+            cal.makeSourceCalibrationFile(runPeriod, True, True)
+            #cal.calculateResiduals(runPeriod, True, True)
+
+        #cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
+
+
+    if 0: 
+        runPeriods = [2,4,5,6,7]#[3]
+        rep = CalReplayManager()
+        cal = CalibrationManager()
+        #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
+        for runPeriod in runPeriods:           
+            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
+

@@ -246,15 +246,22 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream linCurves(temp);
 
   // Fit function
-  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)", 0.0, 2500.0);
+  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x + [3]*x*x*x)", 0.0, 2500.0);
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-  //fitADC->FixParameter(0,0.0);
-  fitADC->SetParLimits(2, -0.0001, 0.0001);
+  fitADC->SetParameter(3, 0.0);
+  //fitADC->FixParameter(2,0.0);
+  fitADC->FixParameter(0,0.0);
+  //fitADC->SetParLimits(0,0., 20.);
+  //fitADC->SetParLimits(2, -0.004, 0.004);
+  fitADC->SetParLimits(3, -0.0000001, 0.0000001);
+  fitADC->FixParameter(3,0.0);
 
   fitADC->SetNpx(100000);
   fitADC->SetLineColor(2);
+
+  Double_t offset=0., slope=0., quad=0., cubic=0.; //
 
   // East 1
 
@@ -285,12 +292,12 @@ void MB_calc_residuals(Int_t runPeriod)
     grE1->Draw("AP");
 
     grE1->Fit("fitADC", "RQ");
-    Double_t offsetE1, slopeE1, quadE1;
-    offsetE1 = fitADC->GetParameter(0);
-    slopeE1 = fitADC->GetParameter(1);
-    quadE1 = fitADC->GetParameter(2);
 
-    linCurves << offsetE1 << " " << slopeE1 << " " << quadE1 << endl;
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
   
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -309,24 +316,24 @@ void MB_calc_residuals(Int_t runPeriod)
     
     for (int j=0; j<runE1.size(); j++) {
     
-      fitEQ_E1[j]    = offsetE1 + slopeE1*ADCE1[j] + quadE1*ADCE1[j]*ADCE1[j];
+      fitEQ_E1[j]    = offset + slope*ADCE1[j] + quad*ADCE1[j]*ADCE1[j] + cubic*ADCE1[j]*ADCE1[j]*ADCE1[j];
       if (nameE1[j]=="Ce") {
 	ResE1[j] = fitEQ_E1[j] - EQE1[j];
 	oFileE1 << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (ResE1[j]>0.05*EQE1[j]) cout << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (sqrt(ResE1[j]*ResE1[j])>0.025*EQE1[j]) cout << "Ce_East" << " PMT1 " << runE1[j] << " " << ResE1[j] << endl;
 	//ResE1[j] = (fitEQ - peakCe)/peakCe * 100.;
       }
       else if (nameE1[j]=="Sn") {
 	ResE1[j] = fitEQ_E1[j] - EQE1[j];
 	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE1 << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (ResE1[j]>0.05*EQE1[j]) cout << "Sn_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (sqrt(ResE1[j]*ResE1[j])>0.025*EQE1[j]) cout << "Sn_East" << " " << "PMT1 " << runE1[j] << " " << ResE1[j] << endl;
       }
       else if (nameE1[j]=="Bi1") {
 	ResE1[j] = fitEQ_E1[j] - EQE1[j];
 	//ResE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE1 << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (ResE1[j]>0.05*EQE1[j]) cout << "Bi1_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (sqrt(ResE1[j]*ResE1[j])>0.025*EQE1[j]) cout << "Bi1_East" << " " << "PMT1 " << runE1[j] << " " << ResE1[j] << endl;
  
       }
     }
@@ -376,7 +383,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << endl;
     oFileE1 << "PMT NOT USABLE";}
   oFileE1.close();
 
@@ -409,12 +416,12 @@ void MB_calc_residuals(Int_t runPeriod)
     grE2->Draw("AP");
 
     grE2->Fit("fitADC", "RQ");
-    Double_t offsetE2, slopeE2, quadE2;
-    offsetE2 = fitADC->GetParameter(0);
-    slopeE2 = fitADC->GetParameter(1);
-    quadE2 = fitADC->GetParameter(2);
 
-    linCurves << offsetE2 << " " << slopeE2 << " " << quadE2 << endl;
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -432,24 +439,24 @@ void MB_calc_residuals(Int_t runPeriod)
     // Calculate residuals in [keV]
     
     for (int j=0; j<runE2.size(); j++) {
-      fitEQ_E2[j]    = offsetE2 + slopeE2*ADCE2[j] + quadE2*ADCE2[j]*ADCE2[j];
+      fitEQ_E2[j]    = offset + slope*ADCE2[j] + quad*ADCE2[j]*ADCE2[j] + cubic*ADCE2[j]*ADCE2[j]*ADCE2[j];
       if (nameE2[j]=="Ce") {
 	ResE2[j] = fitEQ_E2[j] - EQE2[j];
 	//ResE2[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE2 << "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;
-	if (ResE2[j]>0.05*EQE2[j]) cout<< "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+	if (sqrt(ResE2[j]*ResE2[j])>0.025*EQE2[j]) cout<< "Ce_East" << " " << "PMT2 " << runE2[j] << " " << ResE2[j] << endl;  
       }
       else if (nameE2[j]=="Sn") {
 	ResE2[j] = fitEQ_E2[j] - EQE2[j];
 	//ResE2[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE2 << "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;
-	if (ResE2[j]>0.05*EQE2[j]) cout<< "Sn_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+	if (sqrt(ResE2[j]*ResE2[j])>0.025*EQE2[j]) cout<< "Sn_East" << " " << "PMT2 " << runE2[j] << " " << ResE2[j] << endl;  
       }
       else if (nameE2[j]=="Bi1") {
 	ResE2[j] = fitEQ_E2[j] - EQE2[j];
 	//ResE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE2 << "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;
-	if (ResE2[j]>0.05*EQE2[j]) cout<< "Bi1_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+	if (sqrt(ResE2[j]*ResE2[j])>0.025*EQE2[j]) cout<< "Bi1_East" << " " << "PMT2 " << runE2[j] << " " << ResE2[j] << endl;  
       }
     }
 
@@ -498,7 +505,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE2 << "PMT NOT USABLE";}
   oFileE2.close();
 
@@ -531,12 +538,12 @@ void MB_calc_residuals(Int_t runPeriod)
     grE3->Draw("AP");
 
     grE3->Fit("fitADC", "RQ");
-    Double_t offsetE3, slopeE3, quadE3;
-    offsetE3 = fitADC->GetParameter(0);
-    slopeE3 = fitADC->GetParameter(1);
-    quadE3 = fitADC->GetParameter(2);
 
-    linCurves << offsetE3 << " " << slopeE3 << " " << quadE3 << endl;
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -554,24 +561,24 @@ void MB_calc_residuals(Int_t runPeriod)
     // Calculate residuals in [keV]
     
     for (int j=0; j<runE3.size(); j++) {
-      fitEQ_E3[j]    = offsetE3 + slopeE3*ADCE3[j] + quadE3*ADCE3[j]*ADCE3[j];
+      fitEQ_E3[j]    = offset + slope*ADCE3[j] + quad*ADCE3[j]*ADCE3[j] + cubic*ADCE3[j]*ADCE3[j]*ADCE3[j];
       if (nameE3[j]=="Ce") {
 	ResE3[j] = fitEQ_E3[j] - EQE3[j];
 	//ResE3[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE3 << "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;
-	if (ResE3[j]>0.05*EQE3[j]) cout<< "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+	if (sqrt(ResE3[j]*ResE3[j])>0.025*EQE3[j]) cout<< "Ce_East" << " " << "PMT3 " << runE3[j] << " " << ResE3[j] << endl;  
       }
       else if (nameE3[j]=="Sn") {
 	ResE3[j] = fitEQ_E3[j] - EQE3[j];
 	//ResE3[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE3 << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;
-	if (ResE3[j]>0.05*EQE3[j]) cout << "Sn_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+	if (sqrt(ResE3[j]*ResE3[j])>0.025*EQE3[j]) cout << "Sn_East" << " " << "PMT3 " << runE3[j] << " " << ResE3[j] << endl;  
       }
       else if (nameE3[j]=="Bi1") {
 	ResE3[j] = fitEQ_E3[j] - EQE3[j];
 	//ResE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE3 << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;
-	if (ResE3[j]>0.05*EQE3[j]) cout << "Bi1_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+	if (sqrt(ResE3[j]*ResE3[j])>0.025*EQE3[j]) cout << "Bi1_East" << " " << "PMT3 " << runE3[j] << " " << ResE3[j] << endl;  
       }
     }
 
@@ -620,7 +627,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE3 << "PMT NOT USABLE";}
   oFileE3.close();
 
@@ -653,12 +660,12 @@ void MB_calc_residuals(Int_t runPeriod)
     grE4->Draw("AP");
 
     grE4->Fit("fitADC", "RQ");
-    Double_t offsetE4, slopeE4, quadE4;
-    offsetE4 = fitADC->GetParameter(0);
-    slopeE4 = fitADC->GetParameter(1);
-    quadE4 = fitADC->GetParameter(2);
 
-    linCurves << offsetE4 << " " << slopeE4 << " " << quadE4 << endl;
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -676,24 +683,24 @@ void MB_calc_residuals(Int_t runPeriod)
     // Calculate residuals in [keV]
     
     for (int j=0; j<runE4.size(); j++) {
-      fitEQ_E4[j]    = offsetE4 + slopeE4*ADCE4[j] + quadE4*ADCE4[j]*ADCE4[j];
+      fitEQ_E4[j]    = offset + slope*ADCE4[j] + quad*ADCE4[j]*ADCE4[j] + cubic*ADCE4[j]*ADCE4[j]*ADCE4[j];
       if (nameE4[j]=="Ce") {
 	ResE4[j] = fitEQ_E4[j] - EQE4[j];
 	//ResE4[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE4 << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;
-	if (ResE4[j]>0.05*EQE4[j]) cout << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+	if (sqrt(ResE4[j]*ResE4[j])>0.025*EQE4[j]) cout << "Ce_East" << " " << "PMT4 " << runE4[j] << " " << ResE4[j] << endl;  
       }
       else if (nameE4[j]=="Sn") {
 	ResE4[j] = fitEQ_E4[j] - EQE4[j];
 	//ResE4[j] = (fitEQ - peakSn)/peakSn * 100.;
 	oFileE4 << "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;
-	if (ResE4[j]>0.05*EQE4[j]) cout<< "Sn_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+	if (sqrt(ResE4[j]*ResE4[j])>0.025*EQE4[j]) cout<< "Sn_East" << " " << "PMT4 " << runE4[j] << " " << ResE4[j] << endl;  
       }
       else if (nameE4[j]=="Bi1") {
 	ResE4[j] = fitEQ_E4[j] - EQE4[j];
 	//ResE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE4 << "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;
-	if (ResE4[j]>0.05*EQE4[j]) cout<< "Bi1_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+	if (sqrt(ResE4[j]*ResE4[j])>0.025*EQE4[j]) cout<< "Bi1_East" << " " << "PMT4 " << runE4[j] << " " << ResE4[j] << endl;  
       }
     }
 
@@ -742,7 +749,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE4 << "PMT NOT USABLE";}
   oFileE4.close();
 
@@ -952,12 +959,12 @@ void MB_calc_residuals(Int_t runPeriod)
     grW1->Draw("AP");
 
     grW1->Fit("fitADC", "RQ");
-    Double_t offsetW1, slopeW1, quadW1;
-    offsetW1 = fitADC->GetParameter(0);
-    slopeW1 = fitADC->GetParameter(1);
-    quadW1 = fitADC->GetParameter(2);
 
-    linCurves << offsetW1 << " " << slopeW1 << " " << quadW1 << endl;
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -975,21 +982,21 @@ void MB_calc_residuals(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W1[num];
     for (int j=0; j<runW1.size(); j++) {
-      fitEQ_W1[j]    = offsetW1 + slopeW1*ADCW1[j] + quadW1*ADCW1[j]*ADCW1[j];
+      fitEQ_W1[j]    = offset + slope*ADCW1[j] + quad*ADCW1[j]*ADCW1[j] + cubic*ADCW1[j]*ADCW1[j]*ADCW1[j];
       if (nameW1[j]=="Ce") {
 	ResW1[j] = fitEQ_W1[j] - EQW1[j];
 	oFileW1 << "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;
-	if (ResW1[j]>0.05*EQW1[j]) cout<< "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+	if (sqrt(ResW1[j]*ResW1[j])>0.025*EQW1[j]) cout<< "Ce_West" << " " << "PMT1 " << runW1[j] << " " << ResW1[j] << endl;  
       }
       else if (nameW1[j]=="Sn") {
 	ResW1[j] = fitEQ_W1[j] - EQW1[j];
 	oFileW1 << "Sn_West" << " " <<  runW1[j] << " " << ResW1[j] << endl;
-	if (ResW1[j]>0.05*EQW1[j]) cout<< "Sn_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+	if (sqrt(ResW1[j]*ResW1[j])>0.025*EQW1[j]) cout<< "Sn_West" << " " << "PMT1 " << runW1[j] << " " << ResW1[j] << endl;  
       }
       else if (nameW1[j]=="Bi1") {
 	ResW1[j] = fitEQ_W1[j] - EQW1[j];
 	oFileW1 << "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;
-	if (ResW1[j]>0.05*EQW1[j]) cout<< "Bi1_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+	if (sqrt(ResW1[j]*ResW1[j])>0.025*EQW1[j]) cout<< "Bi1_West" << " " << "PMT1 " << runW1[j] << " " << ResW1[j] << endl;  
       }
     }
 
@@ -1038,7 +1045,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW1 << "PMT NOT USABLE";}
   oFileW1.close();
 
@@ -1071,12 +1078,12 @@ void MB_calc_residuals(Int_t runPeriod)
     grW2->Draw("AP");
 
     grW2->Fit("fitADC", "RQ");
-    Double_t offsetW2, slopeW2, quadW2;
-    offsetW2 = fitADC->GetParameter(0);
-    slopeW2 = fitADC->GetParameter(1);
-    quadW2 = fitADC->GetParameter(2);
 
-    linCurves << offsetW2 << " " << slopeW2 << " " << quadW2 << endl;
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1094,21 +1101,21 @@ void MB_calc_residuals(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W2[num];
     for (int j=0; j<runW2.size(); j++) {
-      fitEQ_W2[j]    = offsetW2 + slopeW2*ADCW2[j] + quadW2*ADCW2[j]*ADCW2[j];
+      fitEQ_W2[j]    = offset + slope*ADCW2[j] + quad*ADCW2[j]*ADCW2[j] + cubic*ADCW2[j]*ADCW2[j]*ADCW2[j];
       if (nameW2[j]=="Ce") {
 	ResW2[j] = fitEQ_W2[j] - EQW2[j];
 	oFileW2 << "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;
-	if (ResW2[j]>0.05*EQW2[j]) cout<< "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+	if (sqrt(ResW2[j]*ResW2[j])>0.025*EQW2[j]) cout<< "Ce_West" << " " << "PMT2 " << runW2[j] << " " << ResW2[j] << endl;  
       }
       else if (nameW2[j]=="Sn") {
 	ResW2[j] = fitEQ_W2[j] - EQW2[j];
 	oFileW2 << "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;
-	if (ResW2[j]>0.05*EQW2[j]) cout<< "Sn_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+	if (sqrt(ResW2[j]*ResW2[j])>0.025*EQW2[j]) cout<< "Sn_West" << " " << "PMT2 " << runW2[j] << " " << ResW2[j] << endl;  
       }
       else if (nameW2[j]=="Bi1") {
 	ResW2[j] = fitEQ_W2[j] - EQW2[j];
 	oFileW2 << "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;
-	if (ResW2[j]>0.05*EQW2[j]) cout<< "Bi1_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+	if (sqrt(ResW2[j]*ResW2[j])>0.025*EQW2[j]) cout<< "Bi1_West" << " " << "PMT2 " << runW2[j] << " " << ResW2[j] << endl;  
       }
     }
 
@@ -1157,7 +1164,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW2 << "PMT NOT USABLE";}
   oFileW2.close();
 
@@ -1190,12 +1197,13 @@ void MB_calc_residuals(Int_t runPeriod)
     grW3->Draw("AP");
 
     grW3->Fit("fitADC", "RQ");
-    Double_t offsetW3, slopeW3, quadW3;
-    offsetW3 = fitADC->GetParameter(0);
-    slopeW3 = fitADC->GetParameter(1);
-    quadW3 = fitADC->GetParameter(2);
+  
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
-    linCurves << offsetW3 << " " << slopeW3 << " " << quadW3 << endl;
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
@@ -1212,21 +1220,21 @@ void MB_calc_residuals(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W3[num];
     for (int j=0; j<runW3.size(); j++) {
-      fitEQ_W3[j]    = offsetW3 + slopeW3*ADCW3[j] + quadW3*ADCW3[j]*ADCW3[j];
+      fitEQ_W3[j]    = offset + slope*ADCW3[j] + quad*ADCW3[j]*ADCW3[j] + cubic*ADCW3[j]*ADCW3[j]*ADCW3[j];
       if (nameW3[j]=="Ce") {
 	ResW3[j] = fitEQ_W3[j] - EQW3[j];
 	oFileW3 << "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;
-	if (ResW3[j]>0.05*EQW3[j]) cout<< "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+	if (sqrt(ResW3[j]*ResW3[j])>0.025*EQW3[j]) cout<< "Ce_West" << " " << "PMT3 " << runW3[j] << " " << ResW3[j] << endl;  
       }
       else if (nameW3[j]=="Sn") {
 	ResW3[j] = fitEQ_W3[j] - EQW3[j];
 	oFileW3 << "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;
-	if (ResW3[j]>0.05*EQW3[j]) cout<< "Sn_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+	if (sqrt(ResW3[j]*ResW3[j])>0.025*EQW3[j]) cout<< "Sn_West" << " " << "PMT3 " << runW3[j] << " " << ResW3[j] << endl;  
       }
       else if (nameW3[j]=="Bi1") {
 	ResW3[j] = fitEQ_W3[j] - EQW3[j];
 	oFileW3 << "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;
-	if (ResW3[j]>0.05*EQW3[j]) cout<< "Bi1_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+	if (sqrt(ResW3[j]*ResW3[j])>0.025*EQW3[j]) cout<< "Bi1_West" << " " << "PMT3 " << runW3[j] << " " << ResW3[j] << endl;  
       }
     }
 
@@ -1275,7 +1283,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW3 << "PMT NOT USABLE";}
   oFileW3.close();
 
@@ -1309,12 +1317,13 @@ void MB_calc_residuals(Int_t runPeriod)
 
     fitADC->SetRange(0., 3500.);
     grW4->Fit("fitADC", "RQ");
-    Double_t offsetW4, slopeW4, quadW4;
-    offsetW4 = fitADC->GetParameter(0);
-    slopeW4 = fitADC->GetParameter(1);
-    quadW4 = fitADC->GetParameter(2);
 
-    linCurves << offsetW4 << " " << slopeW4 << " " << quadW4;
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    cubic = fitADC->GetParameter(3);
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
+
     linCurves.close();
   
     Double_t x1_text = 1200;
@@ -1333,21 +1342,21 @@ void MB_calc_residuals(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W4[num];
     for (int j=0; j<runW4.size(); j++) {
-      fitEQ_W4[j]    = offsetW4 + slopeW4*ADCW4[j] + quadW4[j]*ADCW4[j]*ADCW4[j];
+      fitEQ_W4[j]    = offset + slope*ADCW4[j] + quad*ADCW4[j]*ADCW4[j] + cubic*ADCW4[j]*ADCW4[j]*ADCW4[j];
       if (nameW4[j]=="Ce") {
 	ResW4[j] = fitEQ_W4[j] - EQW4[j];
 	oFileW4 << "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;
-	if (ResW4[j]>0.05*EQW4[j]) cout<< "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+	if (sqrt(ResW4[j]*ResW4[j])>0.025*EQW4[j]) cout<< "Ce_West" << " " << "PMT4 " << runW4[j] << " " << ResW4[j] << endl;  
       }
       else if (nameW4[j]=="Sn") {
 	ResW4[j] = fitEQ_W4[j] - EQW4[j];
 	oFileW4 << "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;
-	if (ResW4[j]>0.05*EQW4[j]) cout<< "Sn_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+	if (sqrt(ResW4[j]*ResW4[j])>0.025*EQW4[j]) cout<< "Sn_West" << " " << "PMT4 " << runW4[j] << " " << ResW4[j] << endl;  
       }
       else if (nameW4[j]=="Bi1"){
 	ResW4[j] = fitEQ_W4[j] - EQW4[j];
 	oFileW4 << "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;
-	if (ResW4[j]>0.05*EQW4[j]) cout<< "Bi1_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+	if (sqrt(ResW4[j]*ResW4[j])>0.025*EQW4[j]) cout<< "Bi1_West" << " " << "PMT4 " << runW4[j] << " " << ResW4[j] << endl;  
       }
     }
 
@@ -1397,7 +1406,7 @@ void MB_calc_residuals(Int_t runPeriod)
   }
   
   else { 
-    linCurves << 0. << " " << 0. << " " << 0. << endl;
+    linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW4 << "PMT NOT USABLE";
   }
   oFileW4.close();

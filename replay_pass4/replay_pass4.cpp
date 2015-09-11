@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   cout.precision(12);  
 
   Int_t nPMTs = 8;
-  Int_t nParams = 3; //quadratic fit
+  Int_t nParams = 4; //cubic fit
   
   // Run number integer
   cout << "Run " << argv[1] << " ..." << endl;
@@ -93,14 +93,15 @@ int main(int argc, char *argv[])
   cout << "Reading in linearity curve:\n";
   cout << "p0\tp1\tp2\n";
   ifstream fileLinearityCurve(tempFileLinearityCurve);
-  Double_t p0,p1,p2;
+  Double_t p0,p1,p2,p3;
   Int_t i=0;
-  while (fileLinearityCurve >> p0 >> p1 >> p2) {
+  while (fileLinearityCurve >> p0 >> p1 >> p2 >> p3) {
     linearityCurve[i][0] = p0;
     linearityCurve[i][1] = p1;
     linearityCurve[i][2] = p2;
+    linearityCurve[i][3] = p3;
     i++;
-    cout << p0 << " " << p1 << " " << p2 << endl;
+    cout << p0 << " " << p1 << " " << p2 << " " << p3 << endl;
     if (fileLinearityCurve.fail()) break;                       
   }
 
@@ -289,14 +290,22 @@ int main(int argc, char *argv[])
     Tin2->GetEvent(i);
 
     //Calculate Evis for each event in each PMT using the linearity curve determined in calibration
-    pmt_Evis.Evis0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] + linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0];
-    pmt_Evis.Evis1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] + linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1];
-    pmt_Evis.Evis2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] + linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2];
-    pmt_Evis.Evis3 = linearityCurve[3][0] + linearityCurve[3][1]*pmt_pass3[3] + linearityCurve[3][2]*pmt_pass3[3]*pmt_pass3[3];
-    pmt_Evis.Evis4 = linearityCurve[4][0] + linearityCurve[4][1]*pmt_pass3[4] + linearityCurve[4][2]*pmt_pass3[4]*pmt_pass3[4];
-    pmt_Evis.Evis5 = linearityCurve[5][0] + linearityCurve[5][1]*pmt_pass3[5] + linearityCurve[5][2]*pmt_pass3[5]*pmt_pass3[5];
-    pmt_Evis.Evis6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] + linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6];
-    pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] + linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7];
+    pmt_Evis.Evis0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] 
+      + linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0] + linearityCurve[0][3]*pmt_pass3[0]*pmt_pass3[0]*pmt_pass3[0];
+    pmt_Evis.Evis1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] 
+      + linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1] + linearityCurve[1][3]*pmt_pass3[1]*pmt_pass3[1]*pmt_pass3[1];
+    pmt_Evis.Evis2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] 
+      + linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2] + linearityCurve[2][3]*pmt_pass3[2]*pmt_pass3[2]*pmt_pass3[2];
+    pmt_Evis.Evis3 = linearityCurve[3][0] + linearityCurve[3][1]*pmt_pass3[3] 
+      + linearityCurve[3][2]*pmt_pass3[3]*pmt_pass3[3] + linearityCurve[3][3]*pmt_pass3[3]*pmt_pass3[3]*pmt_pass3[3];
+    pmt_Evis.Evis4 = linearityCurve[4][0] + linearityCurve[4][1]*pmt_pass3[4] 
+      + linearityCurve[4][2]*pmt_pass3[4]*pmt_pass3[4] + linearityCurve[4][3]*pmt_pass3[4]*pmt_pass3[4]*pmt_pass3[4];
+    pmt_Evis.Evis5 = linearityCurve[5][0] + linearityCurve[5][1]*pmt_pass3[5] 
+      + linearityCurve[5][2]*pmt_pass3[5]*pmt_pass3[5] + linearityCurve[5][3]*pmt_pass3[5]*pmt_pass3[5]*pmt_pass3[5];
+    pmt_Evis.Evis6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] 
+      + linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6] + linearityCurve[6][3]*pmt_pass3[6]*pmt_pass3[6]*pmt_pass3[6];
+    pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] 
+      + linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7] + linearityCurve[7][3]*pmt_pass3[7]*pmt_pass3[7]*pmt_pass3[7];
 
     //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
     /*Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(pmt_Evis.Evis0)+EQ2Etrue[0][2]*(pmt_Evis.Evis0)*(pmt_Evis.Evis0);
@@ -308,56 +317,56 @@ int main(int argc, char *argv[])
     Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(pmt_Evis.Evis6)+EQ2Etrue[6][2]*(pmt_Evis.Evis6)*(pmt_Evis.Evis6);
     Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(pmt_Evis.Evis7)+EQ2Etrue[7][2]*(pmt_Evis.Evis7)*(pmt_Evis.Evis7);
     */
-    if (pmtQuality[0] && pmt_Evis.Evis0>0. && (side_pass3==0 || type_pass3==1)) {
+    if (pmtQuality[0] && pmt_Evis.Evis0>0.) { // && (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[0]*nPE_per_channel[0];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight0 = 1/(pmt_Evis.Evis0*pmt_Evis.Evis0*f*f);
     }
     else {pmt_Evis.weight0=0.;}
 
-    if (pmtQuality[1] && pmt_Evis.Evis1>0. && (side_pass3==0 || type_pass3==1)) {
+    if (pmtQuality[1] && pmt_Evis.Evis1>0.) { //&& (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[1]*nPE_per_channel[1];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight1 = 1/(pmt_Evis.Evis1*pmt_Evis.Evis1*f*f);
     }
     else {pmt_Evis.weight1=0.;}
 
-    if (pmtQuality[2] && pmt_Evis.Evis2>0. && (side_pass3==0 || type_pass3==1)) {
+    if (pmtQuality[2] && pmt_Evis.Evis2>0.) { //&& (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[2]*nPE_per_channel[2];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight2 = 1/(pmt_Evis.Evis2*pmt_Evis.Evis2*f*f);
     }
     else {pmt_Evis.weight2=0.;}
 
-    if (pmtQuality[3] && pmt_Evis.Evis3>0. && (side_pass3==0 || type_pass3==1)) {
+    if (pmtQuality[3] && pmt_Evis.Evis3>0.) { //&& (side_pass3==0 || type_pass3==1)) {
       Double_t N = pmt_pass2[3]*nPE_per_channel[3];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight3 = 1/(pmt_Evis.Evis3*pmt_Evis.Evis3*f*f);
     }
     else {pmt_Evis.weight3=0.;}
 
-    if (pmtQuality[4] && pmt_Evis.Evis4>0. && (side_pass3==1 || type_pass3==1)) {
+    if (pmtQuality[4] && pmt_Evis.Evis4>0.) { //&& (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[4]*nPE_per_channel[4];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight4 = 1/(pmt_Evis.Evis4*pmt_Evis.Evis4*f*f);
     }
     else {pmt_Evis.weight4=0.;}
 
-    if (pmtQuality[5] && pmt_Evis.Evis5>0. && (side_pass3==1 || type_pass3==1)) {
+    if (pmtQuality[5] && pmt_Evis.Evis5>0.) { //&& (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[5]*nPE_per_channel[5];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight5 = 1/(pmt_Evis.Evis5*pmt_Evis.Evis5*f*f);
     }
     else {pmt_Evis.weight5=0.;}
 
-    if (pmtQuality[6] && pmt_Evis.Evis6>0. && (side_pass3==1 || type_pass3==1)) {
+    if (pmtQuality[6] && pmt_Evis.Evis6>0.) { //&& (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[6]*nPE_per_channel[6];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight6 = 1/(pmt_Evis.Evis6*pmt_Evis.Evis6*f*f);
     }
     else {pmt_Evis.weight6=0.;}
 
-    if (pmtQuality[7] && pmt_Evis.Evis7>0. && (side_pass3==1 || type_pass3==1)) {
+    if (pmtQuality[7] && pmt_Evis.Evis7>0.) { //&& (side_pass3==1 || type_pass3==1)) {
       Double_t N = pmt_pass2[7]*nPE_per_channel[7];
       Double_t f = sqrt(N)/N;
       pmt_Evis.weight7 = 1/(pmt_Evis.Evis7*pmt_Evis.Evis7*f*f);
@@ -365,13 +374,13 @@ int main(int argc, char *argv[])
     else {pmt_Evis.weight7=0.;}
 
     //East side EvisE
-    if (side_pass3==0 || type_pass3==1) {
-      EvisE = (pmt_Evis.weight0*pmt_Evis.Evis0+pmt_Evis.weight1*pmt_Evis.Evis1+pmt_Evis.weight2*pmt_Evis.Evis2+pmt_Evis.weight3*pmt_Evis.Evis3)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);}
-    else EvisE=0.;
+    //if (side_pass3==0 || type_pass3==1) {
+    EvisE = (pmt_Evis.weight0*pmt_Evis.Evis0+pmt_Evis.weight1*pmt_Evis.Evis1+pmt_Evis.weight2*pmt_Evis.Evis2+pmt_Evis.weight3*pmt_Evis.Evis3)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
+    //else EvisE=0.;
     //West Side EvisW
-    if (side_pass3==1 || type_pass3==1) {
-      EvisW = (pmt_Evis.weight4*pmt_Evis.Evis4+pmt_Evis.weight5*pmt_Evis.Evis5+pmt_Evis.weight6*pmt_Evis.Evis6+pmt_Evis.weight7*pmt_Evis.Evis7)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);}
-    else EvisW=0.;
+    //if (side_pass3==1 || type_pass3==1) {
+    EvisW = (pmt_Evis.weight4*pmt_Evis.Evis4+pmt_Evis.weight5*pmt_Evis.Evis5+pmt_Evis.weight6*pmt_Evis.Evis6+pmt_Evis.weight7*pmt_Evis.Evis7)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
+      //else EvisW=0.;
     
     EvisTot = EvisE+EvisW;
 

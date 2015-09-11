@@ -35,7 +35,7 @@ vector < vector <Double_t> > returnSmearedWeightedSimPeaks(Int_t runPeriod)
   peaks.resize( 4, vector <double> (2,0.));
   ifstream peakfile;
   char filename[500];
-  sprintf(filename, "../smeared_peaks/weighted_smeared_peaks/weightedSimPeaks_runPeriod_%i.dat",runPeriod);
+  sprintf(filename, "../smeared_peaks/weighted_smeared_peaks/fits/weightedSimPeaks_runPeriod_%i.dat",runPeriod);
   peakfile.open(filename);
   
   for (int srcPeaks = 0; srcPeaks<4; srcPeaks++) {
