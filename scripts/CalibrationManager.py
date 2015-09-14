@@ -662,29 +662,29 @@ if __name__ == "__main__":
         cal.makePMTrunFile(master=True)
 
 
-    #Trying to figure out why the east side isn't reconstructed as well after replay pass 4
+    #Source Runs
     if 1: 
-        runPeriods =[2,5]# [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
-            cal.calculateResiduals(runPeriod,False)
+            #cal.calculateResiduals(runPeriod,False)
             rep.runReplayPass4(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod, True)
             cal.makeSourceCalibrationFile(runPeriod, True, True)
-            #cal.calculateResiduals(runPeriod, True, True)
+            cal.calculateResiduals(runPeriod, True, True)
 
-        #cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
+        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
-
-    if 0: 
-        runPeriods = [2,4,5,6,7]#[3]
+    #Xenon runs
+    if 1: 
+        runPeriods = [2,3,4,5,6,7]#[3]
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:           
-            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 

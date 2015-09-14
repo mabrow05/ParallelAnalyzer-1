@@ -29,7 +29,7 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
   
 }
 
-void MB_calc_residuals(Int_t runPeriod)
+void MB_calc_residuals_originDataPointInc(Int_t runPeriod)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -246,26 +246,22 @@ void MB_calc_residuals(Int_t runPeriod)
   ofstream linCurves(temp);
 
   // Fit function
-  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x + [3]*x*x*x)", 0., 2500.0);
+  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x + [3]*x*x*x)", 0.0, 2500.0);
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
   fitADC->SetParameter(3, 0.0);
   //fitADC->FixParameter(2,0.0);
   //fitADC->FixParameter(0,0.0);
-  //fitADC->SetParLimits(0,0., 20.);
-  fitADC->SetParLimits(2, -0.004, 0.004);
-  //fitADC->SetParLimits(3, -0.0000001, 0.0000001);
-  fitADC->FixParameter(3,0.0);
+  fitADC->SetParLimits(0,0., 20.);
+  //fitADC->SetParLimits(2, -0.004, 0.004);
+  fitADC->SetParLimits(3, -0.0000001, 0.0000001);
+  //fitADC->FixParameter(3,0.0);
 
   fitADC->SetNpx(100000);
   fitADC->SetLineColor(2);
 
-  Double_t offset=0., slope=0., quad=0., cubic=0.; //Fit Parameters
-  Double_t slopeToOrigin = 0.; //This is the slope calculated from the low end of the fit range to the origin
-  Double_t lowFitThreshold = 0.; //This is the low end of the quadratic fit region defined to be 
-                                 // (2/3)*(Average Ce Peak in ADC).
-  Double_t highFitThreshold = 0.; // This is the upper end of the quadratic fit
+  Double_t offset=0., slope=0., quad=0., cubic=0.; //
 
   // East 1
 
@@ -275,28 +271,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
   if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
  
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;;
-    for (UInt_t ii=0; ii<runE1.size(); ii++) {
-      if (nameE1[ii]=="Ce") {
-	sum1+=ADCE1[ii];
-	entries1++;
-      }
-      if (nameE1[ii]=="Bi1") {
-	sum2+=ADCE1[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-    cout << lowFitThreshold << endl;
-    cout << highFitThreshold << endl;
-
     c1 = new TCanvas("c1", "c1");
     c1->SetLogy(0);
 
-    TGraphErrors *grE1 = new TGraphErrors(runE1.size(),&ADCE1[0],&EQE1[0],err,err);
+    TGraphErrors *grE1 = new TGraphErrors(runE1.size()+1,&ADCE1[0],&EQE1[0],err,err);
+    grE1->SetPoint(runE1.size(), 0., 0.);
+    grE1->SetPointError(runE1.size(), 0., 0.);
     grE1->SetTitle("");
     grE1->SetMarkerColor(1);
     grE1->SetLineColor(1);
@@ -308,19 +288,18 @@ void MB_calc_residuals(Int_t runPeriod)
     grE1->GetYaxis()->SetTitle("E_{Q} [keV]");
     grE1->GetYaxis()->SetTitleOffset(1.6);
     grE1->GetYaxis()->CenterTitle();
-    grE1->GetXaxis()->SetLimits(0.0,2400.);
+    grE1->GetXaxis()->SetLimits(0.0,2400.0);
     grE1->SetMinimum(0.0);
     grE1->SetMaximum(1000.0);
     grE1->Draw("AP");
 
-    grE1->Fit("fitADC", "Q","", lowFitThreshold, highFitThreshold);
+    grE1->Fit("fitADC", "RQ");
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
   
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -377,7 +356,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE1r->GetYaxis()->SetTitle("Residuals [keV]");
     grE1r->GetYaxis()->SetTitleOffset(1.2);
     grE1r->GetYaxis()->CenterTitle();
-    grE1r->GetXaxis()->SetLimits(0.0,2400.);
+    grE1r->GetXaxis()->SetLimits(0.0,2400.0);
     grE1r->SetMinimum(-50.0);
     grE1r->SetMaximum( 50.0);
     grE1r->Draw("AP");
@@ -406,7 +385,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << endl;
     oFileE1 << "PMT NOT USABLE";}
   oFileE1.close();
 
@@ -418,26 +397,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
   if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
 
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;
-    for (UInt_t ii=0; ii<runE2.size(); ii++) {
-      if (nameE2[ii]=="Ce") {
-	sum1+=ADCE2[ii];
-	entries1++;
-      }
-      if (nameE2[ii]=="Bi1") {
-	sum2+=ADCE2[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-
     c2 = new TCanvas("c2", "c2");
     c2->SetLogy(0);
 
-    TGraphErrors *grE2 = new TGraphErrors(runE2.size(),&ADCE2[0],&EQE2[0],err,err);
+    TGraphErrors *grE2 = new TGraphErrors(runE2.size()+1,&ADCE2[0],&EQE2[0],err,err);
+    grE2->SetPoint(runE2.size(), 0., 0.);
+    grE2->SetPointError(runE2.size(), 0., 0.);
     grE2->SetTitle("");
     grE2->SetMarkerColor(1);
     grE2->SetLineColor(1);
@@ -449,19 +414,18 @@ void MB_calc_residuals(Int_t runPeriod)
     grE2->GetYaxis()->SetTitle("E_{Q} [keV]");
     grE2->GetYaxis()->SetTitleOffset(1.6);
     grE2->GetYaxis()->CenterTitle();
-    grE2->GetXaxis()->SetLimits(0.0,2400.);
+    grE2->GetXaxis()->SetLimits(0.0,2400.0);
     grE2->SetMinimum(0.0);
     grE2->SetMaximum(1000.0);
     grE2->Draw("AP");
 
-    grE2->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grE2->Fit("fitADC", "RQ");
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -516,7 +480,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE2r->GetYaxis()->SetTitle("Residuals [keV]");
     grE2r->GetYaxis()->SetTitleOffset(1.2);
     grE2r->GetYaxis()->CenterTitle();
-    grE2r->GetXaxis()->SetLimits(0.0,2400.);
+    grE2r->GetXaxis()->SetLimits(0.0,2400.0);
     grE2r->SetMinimum(-50.0);
     grE2r->SetMaximum( 50.0);
     grE2r->Draw("AP");
@@ -545,7 +509,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE2 << "PMT NOT USABLE";}
   oFileE2.close();
 
@@ -557,26 +521,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
   if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
 
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;;
-    for (UInt_t ii=0; ii<runE3.size(); ii++) {
-      if (nameE3[ii]=="Ce") {
-	sum1+=ADCE3[ii];
-	entries1++;
-      }
-      if (nameE3[ii]=="Bi1") {
-	sum2+=ADCE3[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-
     c3 = new TCanvas("c3", "c3");
     c3->SetLogy(0);
 
-    TGraphErrors *grE3 = new TGraphErrors(runE3.size(),&ADCE3[0],&EQE3[0],err,err);
+    TGraphErrors *grE3 = new TGraphErrors(runE3.size()+1,&ADCE3[0],&EQE3[0],err,err);
+    grE3->SetPoint(runE3.size(), 0., 0.);
+    grE3->SetPointError(runE3.size(), 0., 0.);
     grE3->SetTitle("");
     grE3->SetMarkerColor(1);
     grE3->SetLineColor(1);
@@ -593,14 +543,13 @@ void MB_calc_residuals(Int_t runPeriod)
     grE3->SetMaximum(1000.0);
     grE3->Draw("AP");
 
-    grE3->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grE3->Fit("fitADC", "RQ");
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -655,7 +604,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE3r->GetYaxis()->SetTitle("Residuals [keV]");
     grE3r->GetYaxis()->SetTitleOffset(1.2);
     grE3r->GetYaxis()->CenterTitle();
-    grE3r->GetXaxis()->SetLimits(0.0,2400.);
+    grE3r->GetXaxis()->SetLimits(0.0,2400.0);
     grE3r->SetMinimum(-50.0);
     grE3r->SetMaximum( 50.0);
     grE3r->Draw("AP");
@@ -684,7 +633,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE3 << "PMT NOT USABLE";}
   oFileE3.close();
 
@@ -696,26 +645,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
   if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
 
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;;
-    for (UInt_t ii=0; ii<runE4.size(); ii++) {
-      if (nameE4[ii]=="Ce") {
-	sum1+=ADCE4[ii];
-	entries1++;
-      }
-      if (nameE4[ii]=="Bi1") {
-	sum2+=ADCE4[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-
     c4 = new TCanvas("c4", "c4");
     c4->SetLogy(0);
 
-    TGraphErrors *grE4 = new TGraphErrors(runE4.size(),&ADCE4[0],&EQE4[0],err,err);
+    TGraphErrors *grE4 = new TGraphErrors(runE4.size()+1,&ADCE4[0],&EQE4[0],err,err);
+    grE4->SetPoint(runE4.size(), 0., 0.);
+    grE4->SetPointError(runE4.size(), 0., 0.);
     grE4->SetTitle("");
     grE4->SetMarkerColor(1);
     grE4->SetLineColor(1);
@@ -727,19 +662,18 @@ void MB_calc_residuals(Int_t runPeriod)
     grE4->GetYaxis()->SetTitle("E_{Q} [keV]");
     grE4->GetYaxis()->SetTitleOffset(1.6);
     grE4->GetYaxis()->CenterTitle();
-    grE4->GetXaxis()->SetLimits(0.0,2400.);
+    grE4->GetXaxis()->SetLimits(0.0,2400.0);
     grE4->SetMinimum(0.0);
     grE4->SetMaximum(1000.0);
     grE4->Draw("AP");
 
-    grE4->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grE4->Fit("fitADC", "RQ");
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -794,7 +728,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grE4r->GetYaxis()->SetTitle("Residuals [keV]");
     grE4r->GetYaxis()->SetTitleOffset(1.2);
     grE4r->GetYaxis()->CenterTitle();
-    grE4r->GetXaxis()->SetLimits(0.0,2400.);
+    grE4r->GetXaxis()->SetLimits(0.0,2400.0);
     grE4r->SetMinimum(-50.0);
     grE4r->SetMaximum( 50.0);
     grE4r->Draw("AP");
@@ -823,7 +757,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE4 << "PMT NOT USABLE";}
   oFileE4.close();
 
@@ -1012,26 +946,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
   if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
 
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;;
-    for (UInt_t ii=0; ii<runW1.size(); ii++) {
-      if (nameW1[ii]=="Ce") {
-	sum1+=ADCW1[ii];
-	entries1++;
-      }
-      if (nameW1[ii]=="Bi1") {
-	sum2+=ADCW1[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-
     cW1 = new TCanvas("cW1", "cW1");
     cW1->SetLogy(0);
 
-    TGraphErrors *grW1 = new TGraphErrors(runW1.size(),&ADCW1[0],&EQW1[0],err,err);
+    TGraphErrors *grW1 = new TGraphErrors(runW1.size()+1,&ADCW1[0],&EQW1[0],err,err);
+    grW1->SetPoint(runW1.size(), 0., 0.);
+    grW1->SetPointError(runW1.size(), 0., 0.);
     grW1->SetTitle("");
     grW1->SetMarkerColor(1);
     grW1->SetLineColor(1);
@@ -1043,19 +963,18 @@ void MB_calc_residuals(Int_t runPeriod)
     grW1->GetYaxis()->SetTitle("E_{Q} [keV]");
     grW1->GetYaxis()->SetTitleOffset(1.6);
     grW1->GetYaxis()->CenterTitle();
-    grW1->GetXaxis()->SetLimits(0.0,2400.);
+    grW1->GetXaxis()->SetLimits(0.0,2400.0);
     grW1->SetMinimum(0.0);
     grW1->SetMaximum(1000.0);
     grW1->Draw("AP");
 
-    grW1->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grW1->Fit("fitADC", "RQ");
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1107,7 +1026,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grW1r->GetYaxis()->SetTitle("Residuals [keV]");
     grW1r->GetYaxis()->SetTitleOffset(1.2);
     grW1r->GetYaxis()->CenterTitle();
-    grW1r->GetXaxis()->SetLimits(0.0,2400.);
+    grW1r->GetXaxis()->SetLimits(0.0,2400.0);
     grW1r->SetMinimum(-50.0);
     grW1r->SetMaximum( 50.0);
     grW1r->Draw("AP");
@@ -1136,7 +1055,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW1 << "PMT NOT USABLE";}
   oFileW1.close();
 
@@ -1148,27 +1067,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
   if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
 
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;;
-    for (UInt_t ii=0; ii<runW2.size(); ii++) {
-      if (nameW2[ii]=="Ce") {
-	sum1+=ADCW2[ii];
-	entries1++;
-      }
-      if (nameW2[ii]=="Bi1") {
-	sum2+=ADCW2[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-
-
     cW2 = new TCanvas("cW2", "cW2");
     cW2->SetLogy(0);
 
-    TGraphErrors *grW2 = new TGraphErrors(runW2.size(),&ADCW2[0],&EQW2[0],err,err);
+    TGraphErrors *grW2 = new TGraphErrors(runW2.size()+1,&ADCW2[0],&EQW2[0],err,err);
+    grW2->SetPoint(runW2.size(), 0., 0.);
+    grW2->SetPointError(runW2.size(), 0., 0.);
     grW2->SetTitle("");
     grW2->SetMarkerColor(1);
     grW2->SetLineColor(1);
@@ -1180,19 +1084,18 @@ void MB_calc_residuals(Int_t runPeriod)
     grW2->GetYaxis()->SetTitle("E_{Q} [keV]");
     grW2->GetYaxis()->SetTitleOffset(1.6);
     grW2->GetYaxis()->CenterTitle();
-    grW2->GetXaxis()->SetLimits(0.0,2400.);
+    grW2->GetXaxis()->SetLimits(0.0,2400.0);
     grW2->SetMinimum(0.0);
     grW2->SetMaximum(1000.0);
     grW2->Draw("AP");
 
-    grW2->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grW2->Fit("fitADC", "RQ");
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1244,7 +1147,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grW2r->GetYaxis()->SetTitle("Residuals [keV]");
     grW2r->GetYaxis()->SetTitleOffset(1.2);
     grW2r->GetYaxis()->CenterTitle();
-    grW2r->GetXaxis()->SetLimits(0.0,2400.);
+    grW2r->GetXaxis()->SetLimits(0.0,2400.0);
     grW2r->SetMinimum(-50.0);
     grW2r->SetMaximum( 50.0);
     grW2r->Draw("AP");
@@ -1273,7 +1176,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW2 << "PMT NOT USABLE";}
   oFileW2.close();
 
@@ -1285,27 +1188,12 @@ void MB_calc_residuals(Int_t runPeriod)
 
   if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
 
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;;
-    for (UInt_t ii=0; ii<runW3.size(); ii++) {
-      if (nameW3[ii]=="Ce") {
-	sum1+=ADCW3[ii];
-	entries1++;
-      }
-      if (nameW3[ii]=="Bi1") {
-	sum2+=ADCW3[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-
-    
     cW3 = new TCanvas("cW3", "cW3");
     cW3->SetLogy(0);
 
-    TGraphErrors *grW3 = new TGraphErrors(runW3.size(),&ADCW3[0],&EQW3[0],err,err);
+    TGraphErrors *grW3 = new TGraphErrors(runW3.size()+1,&ADCW3[0],&EQW3[0],err,err);
+    grW3->SetPoint(runW3.size(), 0., 0.);
+    grW3->SetPointError(runW3.size(), 0., 0.);
     grW3->SetTitle("");
     grW3->SetMarkerColor(1);
     grW3->SetLineColor(1);
@@ -1317,19 +1205,18 @@ void MB_calc_residuals(Int_t runPeriod)
     grW3->GetYaxis()->SetTitle("E_{Q} [keV]");
     grW3->GetYaxis()->SetTitleOffset(1.6);
     grW3->GetYaxis()->CenterTitle();
-    grW3->GetXaxis()->SetLimits(0.0,2400.);
+    grW3->GetXaxis()->SetLimits(0.0,2400.0);
     grW3->SetMinimum(0.0);
     grW3->SetMaximum(1000.0);
     grW3->Draw("AP");
 
-    grW3->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grW3->Fit("fitADC", "RQ");
   
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1381,7 +1268,7 @@ void MB_calc_residuals(Int_t runPeriod)
     grW3r->GetYaxis()->SetTitle("Residuals [keV]");
     grW3r->GetYaxis()->SetTitleOffset(1.2);
     grW3r->GetYaxis()->CenterTitle();
-    grW3r->GetXaxis()->SetLimits(0.0,2400.);
+    grW3r->GetXaxis()->SetLimits(0.0,2400.0);
     grW3r->SetMinimum(-50.0);
     grW3r->SetMaximum( 50.0);
     grW3r->Draw("AP");
@@ -1410,7 +1297,7 @@ void MB_calc_residuals(Int_t runPeriod)
     pt1->Draw();
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW3 << "PMT NOT USABLE";}
   oFileW3.close();
 
@@ -1419,30 +1306,15 @@ void MB_calc_residuals(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_West_runPeriod_%i_PMTW4.dat",calibrationPeriod);
   ofstream oFileW4(temp);
   vector <Double_t> fitEQ_W4(runW4.size(),0);
-  highFitThreshold=0.;
+
   if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
 
-    //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;;
-    for (UInt_t ii=0; ii<runW4.size(); ii++) {
-      if (nameW4[ii]=="Ce") {
-	sum1+=ADCW4[ii];
-	entries1++;
-      }
-      if (nameW4[ii]=="Bi1") {
-	cout << ADCW4[ii] << endl;
-	sum2+=ADCW4[ii];
-	entries2++;
-      }
-    }
-    lowFitThreshold = (2./3.)*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
-    cout << highFitThreshold << endl;
     cW4 = new TCanvas("cW4", "cW4");
     cW4->SetLogy(0);
 
-    TGraphErrors *grW4 = new TGraphErrors(runW4.size(),&ADCW4[0],&EQW4[0],err,err);
+    TGraphErrors *grW4 = new TGraphErrors(runW4.size()+1,&ADCW4[0],&EQW4[0],err,err);
+    grW4->SetPoint(runW4.size(), 0., 0.);
+    grW4->SetPointError(runW4.size(), 0., 0.);
     grW4->SetTitle("");
     grW4->SetMarkerColor(1);
     grW4->SetLineColor(1);
@@ -1459,15 +1331,14 @@ void MB_calc_residuals(Int_t runPeriod)
     grW4->SetMaximum(1000.0);
     grW4->Draw("AP");
 
-    //fitADC->SetRange(0., 3500.);
-    grW4->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    fitADC->SetRange(0., 3500.);
+    grW4->Fit("fitADC", "RQ");
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << cubic << endl;
 
     linCurves.close();
   
@@ -1551,7 +1422,7 @@ void MB_calc_residuals(Int_t runPeriod)
   }
   
   else { 
-    linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW4 << "PMT NOT USABLE";
   }
   oFileW4.close();

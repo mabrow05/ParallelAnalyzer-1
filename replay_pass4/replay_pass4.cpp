@@ -33,7 +33,8 @@ int main(int argc, char *argv[])
   cout.precision(12);  
 
   Int_t nPMTs = 8;
-  Int_t nParams = 4; //cubic fit
+  Int_t nParams = 6; //cubic fit plus two terms for the linear piece wise term where p0->p3 are for cubic and 
+                     // and p4 is the where the low energy fit becomes linear and p5 is the slope of this line
   
   // Run number integer
   cout << "Run " << argv[1] << " ..." << endl;
@@ -93,15 +94,17 @@ int main(int argc, char *argv[])
   cout << "Reading in linearity curve:\n";
   cout << "p0\tp1\tp2\n";
   ifstream fileLinearityCurve(tempFileLinearityCurve);
-  Double_t p0,p1,p2,p3;
+  Double_t p0,p1,p2,p3,p4,p5;
   Int_t i=0;
-  while (fileLinearityCurve >> p0 >> p1 >> p2 >> p3) {
+  while (fileLinearityCurve >> p0 >> p1 >> p2 >> p3 >> p4 >> p5) {
     linearityCurve[i][0] = p0;
     linearityCurve[i][1] = p1;
     linearityCurve[i][2] = p2;
     linearityCurve[i][3] = p3;
+    linearityCurve[i][4] = p4;
+    linearityCurve[i][5] = p5;
     i++;
-    cout << p0 << " " << p1 << " " << p2 << " " << p3 << endl;
+    cout << p0 << " " << p1 << " " << p2 << " " << p3 << " " << p4 << " " << p5 << endl;
     if (fileLinearityCurve.fail()) break;                       
   }
 
@@ -290,22 +293,53 @@ int main(int argc, char *argv[])
     Tin2->GetEvent(i);
 
     //Calculate Evis for each event in each PMT using the linearity curve determined in calibration
-    pmt_Evis.Evis0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] 
-      + linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0] + linearityCurve[0][3]*pmt_pass3[0]*pmt_pass3[0]*pmt_pass3[0];
-    pmt_Evis.Evis1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] 
-      + linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1] + linearityCurve[1][3]*pmt_pass3[1]*pmt_pass3[1]*pmt_pass3[1];
-    pmt_Evis.Evis2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] 
-      + linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2] + linearityCurve[2][3]*pmt_pass3[2]*pmt_pass3[2]*pmt_pass3[2];
-    pmt_Evis.Evis3 = linearityCurve[3][0] + linearityCurve[3][1]*pmt_pass3[3] 
-      + linearityCurve[3][2]*pmt_pass3[3]*pmt_pass3[3] + linearityCurve[3][3]*pmt_pass3[3]*pmt_pass3[3]*pmt_pass3[3];
-    pmt_Evis.Evis4 = linearityCurve[4][0] + linearityCurve[4][1]*pmt_pass3[4] 
-      + linearityCurve[4][2]*pmt_pass3[4]*pmt_pass3[4] + linearityCurve[4][3]*pmt_pass3[4]*pmt_pass3[4]*pmt_pass3[4];
-    pmt_Evis.Evis5 = linearityCurve[5][0] + linearityCurve[5][1]*pmt_pass3[5] 
-      + linearityCurve[5][2]*pmt_pass3[5]*pmt_pass3[5] + linearityCurve[5][3]*pmt_pass3[5]*pmt_pass3[5]*pmt_pass3[5];
-    pmt_Evis.Evis6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] 
-      + linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6] + linearityCurve[6][3]*pmt_pass3[6]*pmt_pass3[6]*pmt_pass3[6];
-    pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] 
-      + linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7] + linearityCurve[7][3]*pmt_pass3[7]*pmt_pass3[7]*pmt_pass3[7];
+    if (pmt_pass3[0]>linearityCurve[0][4]) {
+      pmt_Evis.Evis0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] 
+	+ linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0] + linearityCurve[0][3]*pmt_pass3[0]*pmt_pass3[0]*pmt_pass3[0];
+    }
+    else pmt_Evis.Evis0 = linearityCurve[0][5]*pmt_pass3[0];
+
+    if (pmt_pass3[1]>linearityCurve[1][4]) {
+      pmt_Evis.Evis1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] 
+	+ linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1] + linearityCurve[1][3]*pmt_pass3[1]*pmt_pass3[1]*pmt_pass3[1];
+    }
+    else pmt_Evis.Evis1 = linearityCurve[1][5]*pmt_pass3[1];
+
+    if (pmt_pass3[2]>linearityCurve[2][4]) {
+      pmt_Evis.Evis2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] 
+	+ linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2] + linearityCurve[2][3]*pmt_pass3[2]*pmt_pass3[2]*pmt_pass3[2];
+    }
+    else pmt_Evis.Evis2 = linearityCurve[2][5]*pmt_pass3[2];
+
+    if (pmt_pass3[3]>linearityCurve[3][4]) {
+      pmt_Evis.Evis3 = linearityCurve[3][0] + linearityCurve[3][1]*pmt_pass3[3] 
+	+ linearityCurve[3][2]*pmt_pass3[3]*pmt_pass3[3] + linearityCurve[3][3]*pmt_pass3[3]*pmt_pass3[3]*pmt_pass3[3];
+    }
+    else pmt_Evis.Evis3 = linearityCurve[3][5]*pmt_pass3[3];
+
+    if (pmt_pass3[4]>linearityCurve[4][4]) {
+      pmt_Evis.Evis4 = linearityCurve[4][0] + linearityCurve[4][1]*pmt_pass3[4] 
+	+ linearityCurve[4][2]*pmt_pass3[4]*pmt_pass3[4] + linearityCurve[4][3]*pmt_pass3[4]*pmt_pass3[4]*pmt_pass3[4];
+    }
+    else pmt_Evis.Evis4 = linearityCurve[4][5]*pmt_pass3[4];
+
+    if (pmt_pass3[5]>linearityCurve[5][4]) {
+      pmt_Evis.Evis5 = linearityCurve[5][0] + linearityCurve[5][1]*pmt_pass3[5] 
+	+ linearityCurve[5][2]*pmt_pass3[5]*pmt_pass3[5] + linearityCurve[5][3]*pmt_pass3[5]*pmt_pass3[5]*pmt_pass3[5];
+    }
+    else pmt_Evis.Evis5 = linearityCurve[5][5]*pmt_pass3[5];
+
+    if (pmt_pass3[6]>linearityCurve[6][4]) {
+      pmt_Evis.Evis6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] 
+	+ linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6] + linearityCurve[6][3]*pmt_pass3[6]*pmt_pass3[6]*pmt_pass3[6];
+    }
+    else pmt_Evis.Evis6 = linearityCurve[6][5]*pmt_pass3[6];
+
+    if (pmt_pass3[7]>linearityCurve[7][4]) {
+      pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] 
+	+ linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7] + linearityCurve[7][3]*pmt_pass3[7]*pmt_pass3[7]*pmt_pass3[7];
+    }
+    else pmt_Evis.Evis7 = linearityCurve[7][5]*pmt_pass3[7];
 
     //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
     /*Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(pmt_Evis.Evis0)+EQ2Etrue[0][2]*(pmt_Evis.Evis0)*(pmt_Evis.Evis0);
