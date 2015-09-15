@@ -4,12 +4,15 @@
 
 export UCNA_RAW_DATA=/path/to/rawDataDirectory
 
-# Data directory should contain source_peaks, source_lists, source_positions, etc.
+# Data directory will contain calibration databases in the form
+# of readable data files as well as replayed data.
 export PARALLEL_DATA_PATH=/path/to/directory/containing/data/directories
 
-# If there is an extension on your data directory (In my own personal case, Brad
-# has write protected data directories, while mine have the extension _MB), then set the 
-# EXT to your extension. The Env vars below will set these
+
+# Set the ext below to whatever you want to be appended to your own personal directories
+# so that you do not overwrite others' directories. Mine is MB (my initials) so
+# I suggest using your initials. The environment variables below will set all 
+# of the specific data and calibration data directories. 
 
 ext="_MB"
 export SOURCE_PEAKS="${PARALLEL_DATA_PATH}/source_peaks${ext}/"
