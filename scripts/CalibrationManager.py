@@ -441,21 +441,32 @@ class CalibrationManager:
         outfile.close()
         print "Made combined source peak file for Calibration Period %i"%CalibrationPeriod
 
-    
-    #Calculates residuals for each PMT and as a whole for given run period
-    def calculateResiduals(self, CalibrationPeriod=1, InEnergy=False, PMTbyPMT=False):
-        filename = "../residuals/source_runs_RunPeriod_%i.dat"%CalibrationPeriod
-        if InEnergy and PMTbyPMT:
-            filename = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%CalibrationPeriod
-        elif InEnergy and not PMTbyPMT:
-            filename = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%CalibrationPeriod
+
+    #### Calculate the linearity curves for each PMT from a source run period
+    def LinearityCurves(self,CalibrationPeriod=1):
+        filename = "../residuals/source_runs_RunPeriod_%i.dat"%CalibrationPeriod #Files which hold fitted source peaks
         if os.path.isfile(filename):
-            if InEnergy and PMTbyPMT:
+            os.system("root -b -q 'LinearityCurves.C (%i)'"%CalibrationPeriod)
+            print "Calculated linearity curves for Calibration Period %i"%CalibrationPeriod
+        else:
+            print "No peak file to calculate linearity curves"
+            sys.exit
+
+
+    #Calculates residuals for each PMT and as a whole for given run period
+    def calculateResiduals(self, CalibrationPeriod=1, PMTbyPMT=False):
+        filename = None
+        if PMTbyPMT: #Residuals are calculated for each PMT, then the weighted average of the residuals is plotted
+            filename = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%CalibrationPeriod
+        else: #Residuals are calculated based on the final weighted energy peak
+            filename = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%CalibrationPeriod
+
+        if os.path.isfile(filename):
+            if PMTbyPMT:
                 os.system("root -b -q 'MB_calc_residuals_EvisPMTbyPMT.C (%i)'"%CalibrationPeriod)
-            elif InEnergy and not PMTbyPMT:
-                os.system("root -b -q 'MB_calc_residuals_finalEnergyFits.C (%i)'"%CalibrationPeriod)
             else:
-                os.system("root -b -q 'MB_calc_residuals.C (%i)'"%CalibrationPeriod)
+                os.system("root -b -q 'MB_calc_residuals_finalEnergyFits.C (%i)'"%CalibrationPeriod)
+            
             print "Calculated residuals for Calibration Period %i"%CalibrationPeriod
         else:
             print "No peak file to calculate residuals"
@@ -463,7 +474,7 @@ class CalibrationManager:
 
     #Combines residuals for the calPeriods in the list given, for the PMT chosen (0 is PMT as a whole), and for the side
     # which can be "East", "West", or "Both"
-    def makeGlobalResiduals(self,CalPeriods=[1], PMT=0, Side="Both",InEnergy=False, PMTbyPMT=False):
+    def makeGlobalResiduals(self,CalPeriods=[1], PMT=0, Side="Both",InEnergy=True, PMTbyPMT=False):
         CalPeriods.sort()
         periodLow = CalPeriods[0]
         periodHigh = CalPeriods[len(CalPeriods)-1]
@@ -563,6 +574,8 @@ if __name__ == "__main__":
                       help="Make error envelope and save mean and sigma to file in ../error_envelope.")
     parser.add_option("--makePMTrunFile",dest="makePMTrunFile",action="store_true",default=False,
                       help="Make file with booleans for whether to use each PMT for each run.")
+    parser.add_option("--LinearityCurves",dest="LinearityCurves",action="store_true",default=False,
+                      help="Run script which calculates linearity curves for PMTs.")
                       
 
     options, args = parser.parse_args()
@@ -626,6 +639,14 @@ if __name__ == "__main__":
             cal.makeSourceCalibrationFile(period, False)
 
 
+    ### Does the linearity curves for all the source calibration periods
+    if options.LinearityCurves:
+        runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]
+        cal = CalibrationManager()
+        for runPeriod in runPeriods:
+            cal.LinearityCurves(runPeriod)
+
+
     ### Saves the results of calculating the mean and RMS of all the global residuals for the 
     ### given combination of calibration periods and for a certain PMT (PMT=0 is for all 4 combined)
     if options.ErrorEnvelope:
@@ -643,6 +664,7 @@ if __name__ == "__main__":
             cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True, PMTbyPMT=False)
 
 
+    #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
@@ -656,27 +678,29 @@ if __name__ == "__main__":
             #cal.fitSourcePeaks(runPeriod)
             rep.runReplayPass4(runPeriod)
 
+    ### Making the files which hold the PMT quality
     if 0:
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(True)
         cal.makePMTrunFile(master=True)
 
 
-    #Source Runs
+    ### Source Run Calibration Steps...
     if 1: 
         runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
-            #cal.calculateResiduals(runPeriod,False)
+            #cal.LinearityCurves(runPeriod)
             rep.runReplayPass4(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod, True)
             cal.makeSourceCalibrationFile(runPeriod, True, True)
-            cal.calculateResiduals(runPeriod, True, True)
+            cal.calculateResiduals(runPeriod, PMTbyPMT=True)
 
         cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
-    #Xenon runs
+    ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
+    ### be done once unless fundamental changes to the code are made upstream
     if 1: 
         runPeriods = [2,3,4,5,6,7]#[3]
         rep = CalReplayManager()
