@@ -288,10 +288,10 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
-    cout << lowFitThreshold << endl;
-    cout << highFitThreshold << endl;
+    //cout << lowFitThreshold << endl;
+    //cout << highFitThreshold << endl;
 
     c1 = new TCanvas("c1", "c1");
     c1->SetLogy(0);
@@ -431,7 +431,7 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
 
     c2 = new TCanvas("c2", "c2");
@@ -570,7 +570,7 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
 
     c3 = new TCanvas("c3", "c3");
@@ -709,7 +709,7 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
 
     c4 = new TCanvas("c4", "c4");
@@ -1025,7 +1025,7 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
 
     cW1 = new TCanvas("cW1", "cW1");
@@ -1161,7 +1161,7 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
 
 
@@ -1298,7 +1298,7 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
 
     
@@ -1436,9 +1436,9 @@ void LinearityCurves(Int_t runPeriod)
 	entries2++;
       }
     }
-    lowFitThreshold = (2./3.)*sum1/entries1;
+    lowFitThreshold = 0.5*sum1/entries1;
     highFitThreshold = 1.5*sum2/entries2;
-    cout << highFitThreshold << endl;
+    //cout << highFitThreshold << endl;
     cW4 = new TCanvas("cW4", "cW4");
     cW4->SetLogy(0);
 

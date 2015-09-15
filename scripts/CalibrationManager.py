@@ -691,7 +691,7 @@ if __name__ == "__main__":
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
-            #cal.LinearityCurves(runPeriod)
+            cal.LinearityCurves(runPeriod)
             rep.runReplayPass4(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod, True)
             cal.makeSourceCalibrationFile(runPeriod, True, True)
@@ -701,7 +701,7 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 1: 
+    if 0: 
         runPeriods = [2,3,4,5,6,7]#[3]
         rep = CalReplayManager()
         cal = CalibrationManager()
