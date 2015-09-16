@@ -295,6 +295,7 @@ int main(int argc, char *argv[])
       for (int i=maxBin[n][j]; i>0; i--) {
         if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
           xLow[n][j] = his[n][j]->GetBinCenter(i+1);
+	  if ((maxBin[n][j]-i)<5) xLow[n][j] = binCenterMax[n][j]-30.; //In case the statistics cause a poor determination of FWHM, set one to capture the fit
           break;
         }
       }

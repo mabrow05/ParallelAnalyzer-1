@@ -219,7 +219,7 @@ void weightPeaks (Int_t runNumber, string source)
     
     if (source=="Bi207") {
       if (pmtQuality[n]) {  
-	pmt[n]->GetXaxis()->SetRangeUser(200., 700.);
+	pmt[n]->GetXaxis()->SetRangeUser(200., 600.);
 	Int_t maxBin = pmt[n]->GetMaximumBin();
 	Double_t peak = pmt[n]->GetXaxis()->GetBinCenter(maxBin);
 	Double_t maxBinContent = pmt[n]->GetBinContent(maxBin);
@@ -228,6 +228,7 @@ void weightPeaks (Int_t runNumber, string source)
 	for (int i=maxBin; i<400; i++) {
 	  if (pmt[n]->GetBinContent(i+1) < 0.5*maxBinContent || pmt[n]->GetXaxis()->GetBinCenter(i+1)>670.) {
 	    high= pmt[n]->GetXaxis()->GetBinCenter(i+1);
+	    if (high>550.) {high = 550.; peak = 450.;} // In case the 2 peaks are too close together due to low nPE
 	    break;
 	  } 
 	}
@@ -239,7 +240,7 @@ void weightPeaks (Int_t runNumber, string source)
 	}
 	pmt[n]->GetXaxis()->SetRange(0,400);
 	TF1 *func = new TF1("func", "gaus", low, high);
-	//h->SetParameter(1,peak);
+	func->SetParameter(1,peak);
 	pmt[n]->Fit("func", "LRQ+");
 	cout << func->GetParameter(1) << endl;
 	peakDat << func->GetParameter(1) << " ";
