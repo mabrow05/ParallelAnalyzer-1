@@ -90,9 +90,9 @@ void weightPeaks (Int_t runNumber, string source)
   vector <Double_t> alphas = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
 
 
-  //Fill histograms with smeared and weighted energies, add them after
+  //PMT histograms with smeared and weighted energies
   vector <TH1D*> pmt (8,0);
-  //Final histograms which are the addition of the previous histrograms
+  //Final histograms which are the weighted average of the previous histrograms data
   vector <TH1D*> finalEn (2,0);
   finalEn[0] = new TH1D("finalE", "Simulated Weighted Sum East", 400, 0., 1200.);
   finalEn[1] = new TH1D("finalW", "Simulated Weighted Sum West", 400, 0., 1200.);
@@ -100,6 +100,8 @@ void weightPeaks (Int_t runNumber, string source)
   Char_t file[500];
 
   Char_t temp[500];
+
+  //Read in simulated data
   TChain *chain = new TChain("anaTree");
   for (int i=0; i<250; i++) {
     sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);

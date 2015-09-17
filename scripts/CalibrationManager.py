@@ -691,9 +691,9 @@ if __name__ == "__main__":
         rep = CalReplayManager()
         cal = CalibrationManager()
         for runPeriod in runPeriods:
-            cal.LinearityCurves(runPeriod)
-            rep.runReplayPass4(runPeriod)
-            cal.fitSourcePeaksInEnergy(runPeriod, True)
+            #cal.LinearityCurves(runPeriod)
+            #rep.runReplayPass4(runPeriod)
+            #cal.fitSourcePeaksInEnergy(runPeriod, True)
             cal.makeSourceCalibrationFile(runPeriod, True, True)
             cal.calculateResiduals(runPeriod, PMTbyPMT=True)
 

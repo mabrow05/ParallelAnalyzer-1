@@ -264,7 +264,7 @@ void LinearityCurves(Int_t runPeriod)
   Double_t offset=0., slope=0., quad=0., cubic=0.; //Fit Parameters
   Double_t slopeToOrigin = 0.; //This is the slope calculated from the low end of the fit range to the origin
   Double_t lowFitThreshold = 0.; //This is the low end of the quadratic fit region defined to be 
-                                 // (2/3)*(Average Ce Peak in ADC).
+                                 // (1/2)*(Average Ce Peak in ADC).
   Double_t highFitThreshold = 0.; // This is the upper end of the quadratic fit
 
   // East 1
@@ -319,7 +319,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
   
     Double_t x1_text = 1200;
@@ -460,7 +460,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
 
     Double_t x1_text = 1200;
@@ -599,7 +599,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
 
     Double_t x1_text = 1200;
@@ -738,7 +738,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
 
     Double_t x1_text = 1200;
@@ -1054,7 +1054,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
 
     Double_t x1_text = 1200;
@@ -1191,7 +1191,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
 
     Double_t x1_text = 1200;
@@ -1328,7 +1328,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
 
     Double_t x1_text = 1200;
@@ -1431,7 +1431,7 @@ void LinearityCurves(Int_t runPeriod)
 	entries1++;
       }
       if (nameW4[ii]=="Bi1") {
-	cout << ADCW4[ii] << endl;
+	//cout << ADCW4[ii] << endl;
 	sum2+=ADCW4[ii];
 	entries2++;
       }
@@ -1466,7 +1466,7 @@ void LinearityCurves(Int_t runPeriod)
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     cubic = fitADC->GetParameter(3);
-    slopeToOrigin = (offset + slope*50. + quad*50.*50. + cubic*50.*50.*50.)/50.;
+    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
     linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
 
     linCurves.close();

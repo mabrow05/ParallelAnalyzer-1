@@ -18,7 +18,8 @@ for run in runs:
     outfile1 = open("fits/weightedSimPeaks_runPeriod_%i.dat"%runPeriod,'w')
     outfile2 = open("fits/weightedSimPeaks_PMTbyPMT_runPeriod_%i.dat"%runPeriod,'w')
     for source in sources:
-        os.system("root -l -b -q 'weightPeaks.C(%i,\"%s\")'"%(run,source))
+        if source=="Bi207":
+            os.system("root -l -b -q 'weightPeaks.C(%i,\"%s\")'"%(run,source))
 
         # to combine the peaks from a run into a source run period file
         if 1:           
