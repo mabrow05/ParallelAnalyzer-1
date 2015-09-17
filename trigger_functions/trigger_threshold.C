@@ -40,20 +40,33 @@ void trigger_threshold(Int_t XeRunPeriod) {
   //TTree *t = (TTree*)file->Get("pass4");
 
   Int_t nbins = 75;
-  TH1F *Etype1 = new TH1F("Etype1","West Type 1: EvisE",nbins,0.,150.);
-  TH1F *Etype23 = new TH1F("Etype23","West Type 2/3: EvisE",nbins,0.,150.);
-  TH1F *Etotal = new TH1F("Etotal","West Type 1,2/3: EvisE",nbins,0.,150.);
-  TH1F *Etrigg = new TH1F("Etrigg","East Trigger Probability",nbins,0.,150.);
+  Double_t East_upper_limit = 100.;
+  Double_t West_upper_limit = 60.;
+  TH1F *Etype1 = new TH1F("Etype1","West Type 1: EvisE",nbins,0.,East_upper_limit);
+  TH1F *Etype23 = new TH1F("Etype23","West Type 2/3: EvisE",nbins,0.,East_upper_limit);
+  TH1F *Etotal = new TH1F("Etotal","West Type 1,2/3: EvisE",nbins,0.,East_upper_limit);
+  TH1F *Etrigg = new TH1F("Etrigg","East Trigger Probability",nbins,0.,East_upper_limit);
   Etrigg->SetMarkerStyle(20);
 
-  TH1F *Wtype1 = new TH1F("Wtype1","East Type 1: EvisW",nbins,0.,150.);
-  TH1F *Wtype23 = new TH1F("Wtype23","East Type 2/3: EvisW",nbins,0.,150.);
-  TH1F *Wtotal = new TH1F("Wtotal","East Type 1,2/3: EvisW",nbins,0.,150.);
-  TH1F *Wtrigg = new TH1F("Wtrigg","West Trigger Probability",nbins,0.,150.);
+  TH1F *Wtype1 = new TH1F("Wtype1","East Type 1: EvisW",nbins,0.,West_upper_limit);
+  TH1F *Wtype23 = new TH1F("Wtype23","East Type 2/3: EvisW",nbins,0.,West_upper_limit);
+  TH1F *Wtotal = new TH1F("Wtotal","East Type 1,2/3: EvisW",nbins,0.,West_upper_limit);
+  TH1F *Wtrigg = new TH1F("Wtrigg","West Trigger Probability",nbins,0.,West_upper_limit);
   Wtrigg->SetMarkerStyle(20);
 
-  TF1 *erf = new TF1("erf","(TMath::Erf((x-[0])/[1])/2.+0.5)+[2]*TMath::Gaus(x,[3],[4])",-80.,150.);
+  //TF1 *erf = new TF1("erf","([5]*TMath::Erf((x-[0])/[1])+0.5)+[2]*TMath::Gaus(x,[3],[4])",0.,150.);
+  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))+[4]*TMath::Gaus(x,[5],[6])",0.,150.);
   
+  erf->SetParameter(0,0.5); //Constant offset of erf
+  erf->SetParameter(1,0.5); //Scaling of erf
+  erf->SetParameter(2,25.); //Mean of gaussian integrated for erf
+  erf->SetParameter(3,13.); //std. dev. of gaussian integrated for erf
+  erf->SetParameter(4,-0.1); //Scaling of additional gaussian for cancellation of erf overshooting distribution
+  erf->SetParameter(5,33.); //Mean of additional gaussian
+  erf->SetParameter(6,19.); //Std. dev of additional gaussian
+  //erf->SetParLimits(6,1.,25.);
+  //erf->SetParLimits(4,-5.,0.);
+
   TCanvas *c1 = new TCanvas("c1"," ",1200.,1600.);
   c1->Divide(2,2);
   c1->cd(1);
@@ -68,14 +81,7 @@ void trigger_threshold(Int_t XeRunPeriod) {
   Etrigg->SetStats(0);
   //Etrigg->Draw("P");
 
-  erf->SetParameter(0,25.);
-  erf->SetParameter(1,5.);
-  erf->SetParameter(3,50.);
-  erf->SetParameter(2,-1.);
-  erf->SetParameter(4,10.);
-  erf->SetParLimits(4,1.,25.);
-  erf->SetParLimits(2,-5.,0.)
-  Etrigg->Fit("erf","R");
+  Etrigg->Fit("erf","","",0.,East_upper_limit);
   
   Etrigg->Draw("P");
   triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << endl;
@@ -95,14 +101,16 @@ void trigger_threshold(Int_t XeRunPeriod) {
   Wtrigg->SetStats(0);
   //Wtrigg->Draw("P");
 
-  erf->SetParameter(0,25.);
-  erf->SetParameter(1,5.);
-  erf->SetParameter(3,50.);
-  erf->SetParameter(2,-1.);
-  erf->SetParameter(4,10.);
-  erf->SetParLimits(4,1.,25.);
-  erf->SetParLimits(2,-5.,0.)
-  Wtrigg->Fit("erf","R");
+  erf->SetParameter(0,0.5); //Constant offset of erf
+  erf->SetParameter(1,0.5); //Scaling of erf
+  erf->SetParameter(2,10.); //Mean of gaussian integrated for erf
+  erf->SetParameter(3,5.); //std. dev. of gaussian integrated for erf
+  erf->SetParameter(4,-0.1); //Scaling of additional gaussian for cancellation of erf overshooting distribution
+  erf->SetParameter(5,14.); //Mean of additional gaussian
+  erf->SetParameter(6,6.); //Std. dev of additional gaussian
+  
+  Wtrigg->Fit("erf","","",0.,West_upper_limit);
+  //Wtrigg->Fit("erf","R");
 
   Wtrigg->Draw("P");
 
