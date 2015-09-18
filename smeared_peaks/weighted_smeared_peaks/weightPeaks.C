@@ -209,7 +209,7 @@ void weightPeaks (Int_t runNumber, string source)
       Double_t triggProb = triggerProbability(triggerFunc[1],totalEn);
       //Fill histograms if event passes trigger function
       if (rand->Rndm(0)<triggProb) {
-	finalEn[0]->Fill(totalEn);
+	finalEn[1]->Fill(totalEn);
 	for (UInt_t p=4;p<8;p++) {
 	  if (pmtQuality[p]) pmt[p]->Fill(E_sm[p]);
 	}
