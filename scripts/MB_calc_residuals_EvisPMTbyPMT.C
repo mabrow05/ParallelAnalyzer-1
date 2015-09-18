@@ -233,7 +233,6 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
   }
 
-
   //Resize res vectors
   ResE1.resize(runE1.size());
   ResE2.resize(runE2.size());
@@ -249,8 +248,8 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     cout << "Not enough sources to construct quadratic linearity curve\n";
     num=0;
     }*/
-  if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end()) { 
-    cout << "Not enough sources to construct quadratic linearity curve\n";
+  if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end()) { 
+    cout << "No Sn, Ce, or Bi to calculate residuals\n";
     num=0;
   }
  
@@ -260,7 +259,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_East_runPeriod_%i_PMTE1.dat",calibrationPeriod);
   ofstream oFileE1(temp);
 
-  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
+  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
  
     
 
@@ -350,7 +349,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileE2(temp);
   vector <Double_t> fitEQ_E2(runE2.size(),0);
 
-  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
+  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
 
     
 
@@ -439,7 +438,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileE3(temp);
   vector <Double_t> fitEQ_E3(runE3.size(),0);
 
-  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
+  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
 
     
 
@@ -527,7 +526,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_East_runPeriod_%i_PMTE4.dat",calibrationPeriod);
   ofstream oFileE4(temp);
 
-  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
+  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
 
     
     // Calculate residuals in [keV]
@@ -640,7 +639,6 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   std::vector<Double_t>::iterator RE2 = ResE2.begin();
   std::vector<Double_t>::iterator RE3 = ResE3.begin();
   std::vector<Double_t>::iterator RE4 = ResE4.begin();
-
   
   for (int j=0;j<num;j++) {
     Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
@@ -719,6 +717,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
       //res_East[j] = Etrue_East[j] - peakSn;
       x_East[j] = peakSn_EQ;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      cout << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
       /*cout << Energy1 << " " << weight1 << " "
 	   << Energy2 << " " << weight2 << " "
 	   << Energy3 << " " << weight3 << " " 
@@ -791,7 +790,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_West_runPeriod_%i_PMTW1.dat",calibrationPeriod);
   ofstream oFileW1(temp);
 
-  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
+  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
 
     
   
@@ -876,7 +875,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileW2(temp);
  
 
-  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
+  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
 
   
 
@@ -961,7 +960,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileW3(temp);
   
 
-  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
+  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() || std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() || std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
 
     
 
@@ -1045,7 +1044,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_West_runPeriod_%i_PMTW4.dat",calibrationPeriod);
   ofstream oFileW4(temp);
 
-  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
+  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() || std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() || std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
 
     
     // Calculate residuals in [keV]
