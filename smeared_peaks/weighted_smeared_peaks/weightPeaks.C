@@ -4,6 +4,30 @@ of the detector */
 
 #include <vector>
 
+vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams) {
+  Char_t infile[500];
+  sprintf(infile,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
+  vector < vector <Double_t> > func;
+  func.resize(2,vector <Double_t> (nParams,0.));
+  
+  for (Int_t side = 0; side<2; side++) {
+    Int_t param = 0;
+    while (param<nParams) {
+      infile >> func[side][param];
+      cout << func[side][param] << " ";
+      param++;
+    }
+    cout << endl;
+  }
+  return func;
+}
+
+Double_t triggerProbability(vector <Double_t> params, Double_t En) {
+  Double_t prob = params[0]+params[1]*TMath::Erf((En-params[2])/params[3])
+    + params[4]*TMath::Gaus(En,params[5],params[6]);
+  return prob;
+}
+
 UInt_t getRunPeriod(Int_t runNumber) {
   UInt_t calibrationPeriod=0;
   if (runNumber <= 17297) {
@@ -88,7 +112,7 @@ void weightPeaks (Int_t runNumber, string source)
   vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
   UInt_t calibrationPeriod = getRunPeriod(runNumber); // retrieve the calibration period for this run
   vector <Double_t> alphas = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
-
+  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(7,7); // 2D vector with trigger function for East side and West side in that order
 
   //PMT histograms with smeared and weighted energies
   vector <TH1D*> pmt (8,0);
@@ -140,38 +164,56 @@ void weightPeaks (Int_t runNumber, string source)
     if (EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0.) {
       for (UInt_t p=0; p<4; p++) {
 	E_sm[p] = rand->Gaus(EdepQ[0],sqrt(EdepQ[0]/alphas[p]));
-	if (pmtQuality[p] && E_sm[p]>Threshold) {
+	if (pmtQuality[p]) {
 	  weight[p] = alphas[p]/E_sm[p];
 	  //cout << p << " " << E_sm << " " << weight << endl;
-	  pmt[p]->Fill(E_sm[p]);
+	  //pmt[p]->Fill(E_sm[p]);
 	}
-	else {weight[p]=0.; E_sm[p]=0.;}
+	else {weight[p]=0.;}
       }
       Double_t numer=0., denom=0.;
       for (UInt_t p=0;p<4;p++) {
 	numer+=E_sm[p]*weight[p];
 	denom+=weight[p];
       }
-      finalEn[0]->Fill(numer/denom);
+      //Now we apply the trigger probability
+      Double_t totalEn = numer/denom;
+      Double_t triggProb = triggerProbability(triggerFunc[0],totalEn);
+      //Fill histograms if event passes trigger function
+      if (rand->Rndm(0)<triggProb) {
+	finalEn[0]->Fill(totalEn);
+	for (UInt_t p=0;p<4;p++) {
+	  if (pmtQuality[p]) pmt[p]->Fill(E_sm[p]);
+	}	
+      }
     }
     //Check for West type 0
     else if (EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0.) {
       for (UInt_t p=4; p<8; p++) {
 	E_sm[p] = rand->Gaus(EdepQ[1],sqrt(EdepQ[1]/alphas[p]));
-	if (pmtQuality[p] && E_sm[p]>Threshold) {
+	if (pmtQuality[p]) {
 	  weight[p] = alphas[p]/E_sm[p];
 	  //cout << p << " " << E_sm << " " << weight << endl;
-	  pmt[p]->Fill(E_sm[p]);
+	  //pmt[p]->Fill(E_sm[p]);
 	}
-	else {weight[p]=0.; E_sm[p]=0.;}
+	else {weight[p]=0.;}
       }
+      //Calculate the total weighted energy
       Double_t numer=0., denom=0.;
       for (UInt_t p=4;p<8;p++) {
 	numer+=E_sm[p]*weight[p];
 	denom+=weight[p];
       }
-      //cout << numer/denom << endl;
-      finalEn[1]->Fill(numer/denom);
+      //Now we apply the trigger probability
+      Double_t totalEn = numer/denom;
+      Double_t triggProb = triggerProbability(triggerFunc[1],totalEn);
+      //Fill histograms if event passes trigger function
+      if (rand->Rndm(0)<triggProb) {
+	finalEn[0]->Fill(totalEn);
+	for (UInt_t p=4;p<8;p++) {
+	  if (pmtQuality[p]) pmt[p]->Fill(E_sm[p]);
+	}
+      }
     }
     cout << "filled event " << evt << endl;
   }

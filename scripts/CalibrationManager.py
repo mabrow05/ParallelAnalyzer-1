@@ -694,7 +694,7 @@ if __name__ == "__main__":
             #cal.LinearityCurves(runPeriod)
             #rep.runReplayPass4(runPeriod)
             #cal.fitSourcePeaksInEnergy(runPeriod, True)
-            cal.makeSourceCalibrationFile(runPeriod, True, True)
+            #cal.makeSourceCalibrationFile(runPeriod, True, True)
             cal.calculateResiduals(runPeriod, PMTbyPMT=True)
 
         cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
