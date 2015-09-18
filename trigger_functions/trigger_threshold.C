@@ -84,7 +84,7 @@ void trigger_threshold(Int_t XeRunPeriod) {
   Etrigg->Fit("erf","","",0.,East_upper_limit);
   
   Etrigg->Draw("P");
-  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << endl;
+  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " << erf->GetParameter(6) << endl;
 
 
   TCanvas *c2 = new TCanvas("c2"," ",1200.,1600.);
@@ -114,7 +114,7 @@ void trigger_threshold(Int_t XeRunPeriod) {
 
   Wtrigg->Draw("P");
 
-  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4);
+  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " << erf->GetParameter(6);
 
   triggFunc.close();
   
@@ -123,6 +123,6 @@ void trigger_threshold(Int_t XeRunPeriod) {
   TString canvas1 = TString(getenv("TRIGGER_FUNC")) + TString("trigger_functions_XePeriod_")+TString(temp)+TString(".pdf(");
   TString canvas2 = TString(getenv("TRIGGER_FUNC")) + TString("trigger_functions_XePeriod_")+TString(temp)+TString(".pdf)");
   c1->Print(canvas1);
-  c1->Print(canvas2);
+  c2->Print(canvas2);
   
 }
