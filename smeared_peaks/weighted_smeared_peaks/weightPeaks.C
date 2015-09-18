@@ -3,13 +3,15 @@ weighted spectra which would be seen as a reconstructed energy on one side
 of the detector */
 
 #include <vector>
+#include <cstdlib>
 
 vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams) {
-  Char_t infile[500];
-  sprintf(infile,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
+  Char_t file[500];
+  sprintf(file,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
+  ifstream infile(file);
   vector < vector <Double_t> > func;
   func.resize(2,vector <Double_t> (nParams,0.));
-  
+  //cout << "made it here\n";
   for (Int_t side = 0; side<2; side++) {
     Int_t param = 0;
     while (param<nParams) {
@@ -19,6 +21,7 @@ vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t
     }
     cout << endl;
   }
+  infile.close();
   return func;
 }
 
@@ -209,7 +212,7 @@ void weightPeaks (Int_t runNumber, string source)
       Double_t triggProb = triggerProbability(triggerFunc[1],totalEn);
       //Fill histograms if event passes trigger function
       if (rand->Rndm(0)<triggProb) {
-	finalEn[0]->Fill(totalEn);
+	finalEn[1]->Fill(totalEn);
 	for (UInt_t p=4;p<8;p++) {
 	  if (pmtQuality[p]) pmt[p]->Fill(E_sm[p]);
 	}
