@@ -1,6 +1,6 @@
 /* Code to take a run number, retrieve it's runperiod, and contruct the 
 weighted spectra which would be seen as a reconstructed energy on one side
-of the detector */
+of the detector. Also applies the trigger functions */
 
 #include <vector>
 #include <cstdlib>
@@ -31,7 +31,7 @@ Double_t triggerProbability(vector <Double_t> params, Double_t En) {
   return prob;
 }
 
-UInt_t getRunPeriod(Int_t runNumber) {
+UInt_t getSrcRunPeriod(Int_t runNumber) {
   UInt_t calibrationPeriod=0;
   if (runNumber <= 17297) {
     calibrationPeriod=1;
@@ -63,6 +63,33 @@ UInt_t getRunPeriod(Int_t runNumber) {
   else if (runNumber <= 20000) {
     calibrationPeriod=11;
   }
+  return calibrationPeriod;
+}
+
+UInt_t getXeRunPeriod(Int_t runNumber) {
+  UInt_t calibrationPeriod=0;
+  if (runNumber <= 18080) {
+    calibrationPeriod=2;
+  }
+  else if (runNumber <= 18389) {
+    calibrationPeriod=3;
+  }
+  else if (runNumber <= 18711) {
+    calibrationPeriod=4;
+  }
+  else if (runNumber <= 19238) {
+    calibrationPeriod=5;
+  }
+  //else if (runNumber <= 19872) {
+  //calibrationPeriod=6;
+  //}
+  else if (runNumber <= 20000) {
+    calibrationPeriod=7;
+  }
+  else {
+    cout << "Bad run number\n";
+    exit(0);}
+
   return calibrationPeriod;
 }
 
@@ -113,9 +140,10 @@ void weightPeaks (Int_t runNumber, string source)
   sprintf(outputfile,"fits/%i_%s_weightedSimPeaks.root",runNumber,source.c_str());
   TFile *outfile = new TFile(outputfile, "RECREATE");
   vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
-  UInt_t calibrationPeriod = getRunPeriod(runNumber); // retrieve the calibration period for this run
+  UInt_t calibrationPeriod = getSrcRunPeriod(runNumber); // retrieve the calibration period for this run
+  UInt_t XePeriod = getXeRunPeriod(runNumber);
   vector <Double_t> alphas = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
-  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(7,7); // 2D vector with trigger function for East side and West side in that order
+  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,7); // 2D vector with trigger function for East side and West side in that order
 
   //PMT histograms with smeared and weighted energies
   vector <TH1D*> pmt (8,0);
