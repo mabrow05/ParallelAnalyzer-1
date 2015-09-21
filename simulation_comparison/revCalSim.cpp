@@ -5,12 +5,16 @@ of the detector. Also applies the trigger functions */
 #include <vector>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 
+#include <TRandom3.h>
 #include <TTree.h>
 #include <TFile.h>
 #include <TH1F.h>
 #include <TF1.h>
 #include <TH1D.h>
+#include <TChain.h>
+#include <TMath.h>
 
 using namespace std;
 
@@ -246,14 +250,14 @@ void revCalSimulation (Int_t runNumber, string source)
       else {weight[p]=0.;}
     }
     //Calculate the total weighted energy
-    Double_t numer=0., denom=0.;
+    numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
       numer+=E_sm[p]*weight[p];
       denom+=weight[p];
     }
     //Now we apply the trigger probability
     Double_t totalEnW = numer/denom;
-    Double_t triggProb = triggerProbability(triggerFunc[1],totalEnW);
+    triggProb = triggerProbability(triggerFunc[1],totalEnW);
     //Fill histograms if event passes trigger function
     if (rand->Rndm(0)<triggProb) {
       WestScintTrigger = true;
@@ -265,20 +269,20 @@ void revCalSimulation (Int_t runNumber, string source)
     
     //Fill proper total event histogram based on event type
     if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && !WMWPCTrigger) {
-      finalHisto[0]->Fill(totalEnE);
+      finalEn[0]->Fill(totalEnE);
     }
     if (WestScintTrigger && WMWPCTrigger && !EastScintTrigger && !EMWPCTrigger) {
-      finalHisto[1]->Fill(totalEnW);
+      finalEn[1]->Fill(totalEnW);
     }
     if (EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
-      if (time[0]<time[1]) finalHisto[2]->Fill(totalEnE);
-      if (time[0]>time[1]) finalHisto[3]->Fill(totalEnEW);
+      if (time[0]<time[1]) finalEn[2]->Fill(totalEnE);
+      if (time[0]>time[1]) finalEn[3]->Fill(totalEnW);
     }
     if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && WMWPCTrigger) {
-      finalHisto[4]->Fill(totalEnE);
+      finalEn[4]->Fill(totalEnE);
     }
     if (!EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
-      finalHisto[5]->Fill(totalEnW);
+      finalEn[5]->Fill(totalEnW);
     }   
     
     cout << "filled event " << evt << endl;
@@ -288,6 +292,10 @@ void revCalSimulation (Int_t runNumber, string source)
   outfile->Close();
 }
 
+int main(int argc, char *argv[]) {
+  string source = string(argv[2]);
+  revCalSimulation(atoi(argv[1]),source);
+}
   //vector <TF1*> func (2,0);
   
   //TCanvas *c1 = new TCanvas();
