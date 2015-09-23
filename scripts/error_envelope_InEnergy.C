@@ -34,16 +34,16 @@
   double dEQ[4] = {0.};
 
   double resEast[4];
-  resEast[0] = -.8;
+  resEast[0] = -1.1.;
   resEast[1] =  1.8;
-  resEast[2] = -2.;
-  resEast[3] = 0.8;
+  resEast[2] = -.04;
+  resEast[3] = 1.1;
 
   double sigEast[4];
-  sigEast[0] = 1.3;
+  sigEast[0] = 1.5;
   sigEast[1] = 3.9;
-  sigEast[2] = 4.9;
-  sigEast[3] = 10.5;
+  sigEast[2] = 5.6;
+  sigEast[3] = 9.6;
 
   // Plot
   c1 = new TCanvas("c1", "canvas");
@@ -82,7 +82,7 @@
   gr0->SetLineStyle(2);
 
   Int_t nn = 5;
-  Double_t perc1=0.022;
+  Double_t perc1=0.025;
   Double_t perc2=0.018;
   Double_t perc3=0.013;
   Double_t perc4=0.013;

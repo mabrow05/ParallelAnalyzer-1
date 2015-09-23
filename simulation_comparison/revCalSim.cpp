@@ -2,6 +2,8 @@
 weighted spectra which would be seen as a reconstructed energy on one side
 of the detector. Also applies the trigger functions */
 
+#include "revCalSim.h"
+
 #include <vector>
 #include <cstdlib>
 #include <iostream>
@@ -133,7 +135,7 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
 {
   Char_t temp[500];
   vector < Double_t > alphas (8,0.);
-  sprintf(temp,"../nPE_Kev_%i.dat",runPeriod);
+  sprintf(temp,"../smeared_peaks/nPE_Kev_%i.dat",runPeriod);
   ifstream infile;
   infile.open(temp);
   Int_t i = 0;
@@ -142,48 +144,79 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
   return alphas;
 }
 
+void SetUpTree(TTree *tree) {
+  tree->Branch("PID", &PID, "PID/I");
+  tree->Branch("side", &side, "side/I");
+  tree->Branch("type", &type, "type/I");
+  tree->Branch("EvisTot", &EvisTot,"EvisTot/D");
+  
+  tree->Branch("Evis",&evis,"EvisE/D:EvisW");
+  tree->Branch("Edep",&edep,"EdepE/D:EdepW");
+  tree->Branch("EdepQ",&edepQ,"EdepQE/D:EdepQW");
+  
+  tree->Branch("time",&Time,"timeE/D:timeW");
+  tree->Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
+  tree->Branch("MWPCPos",&mwpc_pos,"MWPCPosE/D:MWPCPosW");
+  tree->Branch("ScintPos",&scint_pos,"ScintPosE/D:ScintPosW");
+  tree->Branch("PMT_Evis",&pmt_Evis,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:weight0:weight1:weight2:weight3:weight4:weight5:weight6:weight7");
+  
+}
+  
+
 void revCalSimulation (Int_t runNumber, string source) 
 {
+  //First get the number of total electron events from the data file
+  Char_t temp[500];
+  sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
+  TFile *dataFile = new TFile(temp,"READ");
+  TTree *data = (TTree*)(dataFile->Get("pass4"));
+  sprintf(temp,"type_pass4==0 || type_pass4==1 || type_pass4==2");
+  UInt_t BetaEvents = data->GetEntries(temp);
+  cout << "Electron Events in Data file: " << BetaEvents << endl;
+  delete data;
+  dataFile->Close();
+
+  //Create simulation output file
   Char_t outputfile[500];
-  //sprintf(outputfile,"%s/revCalSim_%i.root",getenv("REVCALSIM"),runNumber);
-  sprintf(outputfile,"revCalSim_%i.root",runNumber);
-  TFile *outfile = new TFile(outputfile, "RECREATE");
+  sprintf(outputfile,"%s/revCalSim_%i.root",getenv("REVCALSIM"),runNumber);
+  //sprintf(outputfile,"revCalSim_%i.root",runNumber);
+  TFile *outfile = new TFile(outputfile, "RECREATE")
+;
   vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
   UInt_t calibrationPeriod = getSrcRunPeriod(runNumber); // retrieve the calibration period for this run
-  UInt_t XePeriod = getXeRunPeriod(runNumber);
+  UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
   vector <Double_t> alphas = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
   vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,7); // 2D vector with trigger function for East side and West side in that order
 
-  //PMT histograms with smeared and weighted energies
-  vector <TH1D*> pmt (8,0);
-  //Final histograms which are the weighted average of the previous histrograms data
-  vector <TH1D*> finalEn (6,0);
+  //Setup the output tree
+  TTree *tree = new TTree("revCalSim", "revCalSim");
+  SetUpTree(tree); //Setup the output tree and branches
+
+  //Histograms of event types for quick checks
+  vector <TH1D*> finalEn (6,NULL);
   finalEn[0] = new TH1D("finalE0", "Simulated Weighted Sum East Type 0", 400, 0., 1200.);
   finalEn[1] = new TH1D("finalW0", "Simulated Weighted Sum West Type 0", 400, 0., 1200.);
   finalEn[2] = new TH1D("finalE1", "Simulated Weighted Sum East Type 1", 400, 0., 1200.);
   finalEn[3] = new TH1D("finalW1", "Simulated Weighted Sum West Type 1", 400, 0., 1200.);
   finalEn[4] = new TH1D("finalE23", "Simulated Weighted Sum East Type 2/3", 400, 0., 1200.);
   finalEn[5] = new TH1D("finalW23", "Simulated Weighted Sum West Type 2/3", 400, 0., 1200.);
-  Char_t name[200];
-  Char_t file[500];
 
-  Char_t temp[500];
 
-  //Read in simulated data
+  //Read in simulated data and put in a TChain
   TChain *chain = new TChain("anaTree");
   for (int i=0; i<250; i++) {
     sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
     //sprintf(temp,"../../../data/analyzed_%i.root",i);
     chain->AddFile(temp);
   }
-  Int_t PID;
-  Double_t EdepQ[2], MWPCEnergy[2], time[2];
-  //Double_t EdepQE, EdepQW, MWPCEnergyE, MWPCEnergyW;
-  Double_t E_sm[8]={0.}; //Hold the smeared energy
-  Double_t weight[8]={0.}; // Hold the weight calculated based upon alpha
-  chain->SetBranchAddress("EdepQ",EdepQ);
-  chain->SetBranchAddress("MWPCEnergy",MWPCEnergy);
-  chain->SetBranchAddress("time",time);
+  
+  // Set the addresses of the information read in from the simulation file
+  chain->SetBranchAddress("MWPCEnergy",&mwpcE);
+  chain->SetBranchAddress("time",&Time);
+  chain->SetBranchAddress("Edep",&edep);
+  chain->SetBranchAddress("EdepQ",&edepQ);
+  chain->SetBranchAddress("MWPCPos",&mwpc_pos);
+  chain->SetBranchAddress("ScintPos",&scint_pos);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
   //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
@@ -191,101 +224,166 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-  Double_t MWPCThreshold=0.;
+  Double_t MWPCThreshold=0.01;
 
+  //Set random number generator
   TRandom3 *rand = new TRandom3(0);
-  Int_t nevents = chain->GetEntries();
+  
+  //Get total number of events in TChain
+  UInt_t nevents = chain->GetEntries();
   cout << "events = " << nevents << endl;
  
-  
-  //Create PMT histograms
-  for (UInt_t p=0; p<8; p++) {
-    sprintf(name,"PMT %i",p);
-    pmt[p] = new TH1D(name,name, 400, 0., 1200.);
-  }
-  
+  //Start from random position in evt sequence
+  UInt_t evtStart = rand->Rndm()*nevents;
+  UInt_t evtTally = 0; //To keep track ot the number of events 
+  UInt_t evt = evtStart; //current event number
+
   //Read in events and determine evt type based on triggers
-  for (Int_t evt=0; evt<nevents; evt++) {
-    EastScintTrigger = WestScintTrigger = EMWPCTrigger = WMWPCTrigger = false;
+  while (evtTally<=BetaEvents) {
+    if (evt>nevents) evt=0; //Wrapping the events back to the beginning
+    EastScintTrigger = WestScintTrigger = EMWPCTrigger = WMWPCTrigger = false; //Resetting triggers each event
+
     chain->GetEvent(evt);
    
     //MWPC triggers
-    if (MWPCEnergy[0]>MWPCThreshold) EMWPCTrigger=true;
-    if (MWPCEnergy[1]>MWPCThreshold) WMWPCTrigger=true;
-   
+    if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
+    if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
+
+    //East Side smeared PMT energies
     for (UInt_t p=0; p<4; p++) {
-      E_sm[p] = rand->Gaus(EdepQ[0],sqrt(EdepQ[0]/alphas[p]));
-      if (pmtQuality[p]) {
-	weight[p] = alphas[p]/E_sm[p];
-	//cout << p << " " << E_sm << " " << weight << endl;
-	//pmt[p]->Fill(E_sm[p]);
+      pmt_Evis.Evis[p] = -1.;
+      while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
+	pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQE,sqrt(edepQ.EdepQE/alphas[p]));
       }
-      else {weight[p]=0.;}
+      if (pmtQuality[p] && pmt_Evis.Evis[p]>1.) {
+	pmt_Evis.weight[p] = alphas[p]/pmt_Evis.Evis[p];
+	//cout << p << " " << pmt_Evis.Evis << " " << pmt_Evis.weight << endl;
+	//pmt[p]->Fill(pmt_Evis.Evis[p]);
+      }
+      else {pmt_Evis.weight[p]=alphas[p];} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
     }
+    //Calculate the weighted energy on a side
     Double_t numer=0., denom=0.;
     for (UInt_t p=0;p<4;p++) {
-      numer+=E_sm[p]*weight[p];
-      denom+=weight[p];
+      numer+=pmt_Evis.Evis[p]*pmt_Evis.weight[p];
+      denom+=pmt_Evis.weight[p];
     }
     //Now we apply the trigger probability
     Double_t totalEnE = numer/denom;
+    evis.EvisE = totalEnE;
     Double_t triggProb = triggerProbability(triggerFunc[0],totalEnE);
-    //Fill histograms if event passes trigger function
+ 
+    //Set East Scint Trigger to true if event passes triggProb
     if (rand->Rndm(0)<triggProb) {
       EastScintTrigger=true;
-      //finalEn[0]->Fill(totalEn);
-      for (UInt_t p=0;p<4;p++) {
-	if (pmtQuality[p]) pmt[p]->Fill(E_sm[p]);
-      }	
     }
+    	
     
     //West Side
     for (UInt_t p=4; p<8; p++) {
-      E_sm[p] = rand->Gaus(EdepQ[1],sqrt(EdepQ[1]/alphas[p]));
-      if (pmtQuality[p]) {
-	weight[p] = alphas[p]/E_sm[p];
-	//cout << p << " " << E_sm << " " << weight << endl;
-	//pmt[p]->Fill(E_sm[p]);
+      pmt_Evis.Evis[p] = -1.;
+      while (pmt_Evis.Evis[p]<0.) {
+	pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQW,sqrt(edepQ.EdepQW/alphas[p]));
       }
-      else {weight[p]=0.;}
+      if (pmtQuality[p] && pmt_Evis.Evis[p]>0.) {
+	pmt_Evis.weight[p] = alphas[p]/pmt_Evis.Evis[p];
+	//cout << p << " " << pmt_Evis.Evis << " " << pmt_Evis.weight << endl;
+      }
+      else {pmt_Evis.weight[p]=alphas[p];}
     }
     //Calculate the total weighted energy
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
-      numer+=E_sm[p]*weight[p];
-      denom+=weight[p];
+      numer+=pmt_Evis.Evis[p]*pmt_Evis.weight[p];
+      denom+=pmt_Evis.weight[p];
     }
     //Now we apply the trigger probability
     Double_t totalEnW = numer/denom;
+    evis.EvisW = totalEnW;
     triggProb = triggerProbability(triggerFunc[1],totalEnW);
     //Fill histograms if event passes trigger function
     if (rand->Rndm(0)<triggProb) {
       WestScintTrigger = true;
-      //finalEn[1]->Fill(totalEn);
-      for (UInt_t p=4;p<8;p++) {
-	if (pmtQuality[p]) pmt[p]->Fill(E_sm[p]);
-      }
     }
     
+    //Fill total Energy loss
+    EvisTot = evis.EvisW+evis.EvisE+mwpcE.MWPCEnergyE+mwpcE.MWPCEnergyW;
+
     //Fill proper total event histogram based on event type
     if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && !WMWPCTrigger) {
+      PID=1;
+      type=0;
+      side=0;
       finalEn[0]->Fill(totalEnE);
+      //cout << "Type 0 East E = " << totalEnE << endl;
     }
-    if (WestScintTrigger && WMWPCTrigger && !EastScintTrigger && !EMWPCTrigger) {
+    else if (WestScintTrigger && WMWPCTrigger && !EastScintTrigger && !EMWPCTrigger) {
+      PID=1;
+      type=0;
+      side=1;
       finalEn[1]->Fill(totalEnW);
     }
-    if (EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
-      if (time[0]<time[1]) finalEn[2]->Fill(totalEnE);
-      if (time[0]>time[1]) finalEn[3]->Fill(totalEnW);
+    else if (EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
+      PID=1;
+      type=1;
+      if (Time.timeE<Time.timeW) {
+	finalEn[2]->Fill(totalEnE);
+	side=0;
+      }
+      else if (Time.timeE>Time.timeW) {
+	finalEn[3]->Fill(totalEnW);
+	side=1;
+      }
     }
-    if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && WMWPCTrigger) {
+    else if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && WMWPCTrigger) {
+      PID=1;
+      type=2;
+      side=0;
       finalEn[4]->Fill(totalEnE);
+      //cout << "Type 2/3 East E = " << totalEnE << endl;
     }
-    if (!EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
+    else if (!EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
+      PID=1;
+      type=2;
+      side=1;
       finalEn[5]->Fill(totalEnW);
+      //cout << "Type 2/3 East W = " << totalEnW << endl;
     }   
+    //Gamma events and missed events (Type 4)
+    else if (!WMWPCTrigger && !EMWPCTrigger) {
+      if (EastScintTrigger && !WestScintTrigger) {
+	PID=0;
+	type=0;
+	side=0;
+      }
+      else if (!EastScintTrigger && WestScintTrigger) {
+	PID=0;
+	type=0;
+	side=1;
+      }
+      else if (EastScintTrigger && WestScintTrigger) {
+	PID=0;
+	type=1;
+	if (Time.timeE<Time.timeW) {
+	  side=0;
+	}
+	else if (Time.timeE>Time.timeW) {
+	  side=1;
+	}
+      }
+      else {
+	PID=6;
+	type=4;
+	side=2; //Unknown Side
+      }
+    }
+	
+    // Increment the event tally if the event was PID = 1 (electron)
+    if (PID==1) evtTally++;
+    evt++;
+    tree->Fill();
     
-    cout << "filled event " << evt << endl;
+    //cout << "filled event " << evt << endl;
   }
   delete chain;
   outfile->Write();
@@ -296,148 +394,4 @@ int main(int argc, char *argv[]) {
   string source = string(argv[2]);
   revCalSimulation(atoi(argv[1]),source);
 }
-  //vector <TF1*> func (2,0);
-  
-  //TCanvas *c1 = new TCanvas();
-  //finalE->Draw();
-
-  //TCanvas *c2 = new TCanvas();
-  //finalW->Draw();
-
-  //Fit the 8 individual PMTs for comparison when doing linearity curves
-  /*sprintf(outputfile,"fits/%i_%s_weightedSimPeaks_PMTbyPMT.dat",runNumber, source.c_str());
-  ofstream peakDat(outputfile);
-  for (UInt_t n=0;n<8;n++) {
-    if (pmtQuality[n]) {
-      Int_t maxBin = pmt[n]->GetMaximumBin();
-      Double_t peak = pmt[n]->GetXaxis()->GetBinCenter(maxBin);
-      Double_t maxBinContent = pmt[n]->GetBinContent(maxBin);
-      Double_t high = 0., low=0.;
-      for (int i=maxBin; i<400; i++) {
-	if (pmt[n]->GetBinContent(i+1) < 0.5*maxBinContent || pmt[n]->GetXaxis()->GetBinCenter(i+1)>1170.) {
-	  high= pmt[n]->GetXaxis()->GetBinCenter(i+1);
-	  break;
-	}
-      }
-      for (int i=maxBin; i<400; i--) {
-	if (pmt[n]->GetBinContent(i-1) < 0.5*maxBinContent) {
-	  low= pmt[n]->GetXaxis()->GetBinCenter(i-1);
-	  break;
-	}
-      }
-      
-      TF1 *func = new TF1("func", "gaus", low, high);
-      //h->SetParameter(1,peak);
-      pmt[n]->Fit("func", "LRQ");
-      cout << func->GetParameter(1) << endl;
-      peakDat << func->GetParameter(1) << " ";
-      delete func;
-    }
-    else {
-      peakDat << 0. << " ";
-      cout << "BAD PMT\n";
-    }   
-    
-    if (source=="Bi207") {
-      if (pmtQuality[n]) {  
-	pmt[n]->GetXaxis()->SetRangeUser(200., 600.);
-	Int_t maxBin = pmt[n]->GetMaximumBin();
-	Double_t peak = pmt[n]->GetXaxis()->GetBinCenter(maxBin);
-	Double_t maxBinContent = pmt[n]->GetBinContent(maxBin);
-	Double_t high = 0., low=0.;
-	
-	for (int i=maxBin; i<400; i++) {
-	  if (pmt[n]->GetBinContent(i+1) < 0.5*maxBinContent || pmt[n]->GetXaxis()->GetBinCenter(i+1)>670.) {
-	    high= pmt[n]->GetXaxis()->GetBinCenter(i+1);
-	    if (high>550.) {high = 550.; peak = 450.;} // In case the 2 peaks are too close together due to low nPE
-	    break;
-	  } 
-	}
-	for (int i=maxBin; i<400; i--) {
-	  if (pmt[n]->GetBinContent(i-1) < 0.5*maxBinContent || pmt[n]->GetXaxis()->GetBinCenter(i)<230.) {
-	    low= pmt[n]->GetXaxis()->GetBinCenter(i-1);
-	    break;
-	  }
-	}
-	pmt[n]->GetXaxis()->SetRange(0,400);
-	TF1 *func = new TF1("func", "gaus", low, high);
-	func->SetParameter(1,peak);
-	pmt[n]->Fit("func", "LRQ+");
-	cout << func->GetParameter(1) << endl;
-	peakDat << func->GetParameter(1) << " ";
-	delete func;
-      }    
-      else {
-	peakDat << 0. << " ";
-	cout << "BAD PMT\n";
-      }
-    }
-    cout << "Finished PMT " << n << endl;
-    if (n<7) peakDat << endl;
-  }
-
-  peakDat.close();
-
-
-  sprintf(outputfile,"fits/%i_%s_weightedSimPeaks.dat",runNumber, source.c_str());
-  peakDat.open(outputfile);
-  
-  //Fit the final weighted histograms
-  for (UInt_t n=0;n<2;n++) {
-
-    Int_t maxBin = finalEn[n]->GetMaximumBin();
-    Double_t peak = finalEn[n]->GetXaxis()->GetBinCenter(maxBin);
-    Double_t maxBinContent = finalEn[n]->GetBinContent(maxBin);
-    Double_t high = 0., low=0.;
-    for (int i=maxBin; i<400; i++) {
-      if (finalEn[n]->GetBinContent(i+1) < 0.5*maxBinContent) {
-	high= finalEn[n]->GetXaxis()->GetBinCenter(i+1);
-	break;
-      }
-    }
-    for (int i=maxBin; i<400; i--) {
-      if (finalEn[n]->GetBinContent(i-1) < 0.5*maxBinContent) {
-	low= finalEn[n]->GetXaxis()->GetBinCenter(i-1);
-	break;
-      }
-    }
-    
-    TF1 *func = new TF1("func", "gaus", low, high);
-    //h->SetParameter(1,peak);
-    finalEn[n]->Fit("func", "LRQ");
-    cout << func->GetParameter(1) << endl;
-    peakDat << func->GetParameter(1) << " ";
-    delete func;
-  }
-  
-  if (source=="Bi207") {
-    peakDat << endl;
-    for (UInt_t n=0;n<2;n++) {
-      finalEn[n]->GetXaxis()->SetRangeUser(200., 700.);
-      Int_t maxBin = finalEn[n]->GetMaximumBin();
-      Double_t peak = finalEn[n]->GetXaxis()->GetBinCenter(maxBin);
-      Double_t maxBinContent = finalEn[n]->GetBinContent(maxBin);
-      Double_t high = 0., low=0.;
-      
-      for (int i=maxBin; i<400; i++) {
-	if (finalEn[n]->GetBinContent(i+1) < 0.5*maxBinContent) {
-	  high= finalEn[n]->GetXaxis()->GetBinCenter(i+1);
-	  break;
-	}
-      }
-      for (int i=maxBin; i<400; i--) {
-	if (finalEn[n]->GetBinContent(i-1) < 0.5*maxBinContent) {
-	  low= finalEn[n]->GetXaxis()->GetBinCenter(i-1);
-	  break;
-	}
-      }
-      finalEn[n]->GetXaxis()->SetRange(0,400);
-      TF1 *func = new TF1("func", "gaus", low, high);
-      //h->SetParameter(1,peak);
-      finalEn[n]->Fit("func", "LRQ+");
-      cout << func->GetParameter(1) << endl;
-      peakDat << func->GetParameter(1) << " ";
-      delete func;
-    }
-    }*/
   
