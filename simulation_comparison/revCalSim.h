@@ -39,6 +39,6 @@ struct ScintPos {
 } scint_pos;
 
 struct PMT_Evis {
-  double Evis[8];
-  double weight[8]; 
+  double Evis[8]={0.};
+  double weight[8]={0.}; 
 } pmt_Evis;

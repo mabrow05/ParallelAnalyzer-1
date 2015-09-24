@@ -224,7 +224,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-  Double_t MWPCThreshold=0.01;
+  Double_t MWPCThreshold=0.0;
 
   //Set random number generator
   TRandom3 *rand = new TRandom3(0);
@@ -251,17 +251,23 @@ void revCalSimulation (Int_t runNumber, string source)
 
     //East Side smeared PMT energies
     for (UInt_t p=0; p<4; p++) {
-      pmt_Evis.Evis[p] = -1.;
-      while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
-	pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQE,sqrt(edepQ.EdepQE/alphas[p]));
+      if (pmtQuality[p]) { //Check to make sure PMT was functioning
+	pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
+	while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
+	  pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQE,sqrt(edepQ.EdepQE/alphas[p]));
+	}
+	if (pmt_Evis.Evis[p]>0.001) {
+	  pmt_Evis.weight[p] = alphas[p]/pmt_Evis.Evis[p];
+	}
+	else {pmt_Evis.weight[p]=alphas[p]/0.001;} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
       }
-      if (pmtQuality[p] && pmt_Evis.Evis[p]>1.) {
-	pmt_Evis.weight[p] = alphas[p]/pmt_Evis.Evis[p];
-	//cout << p << " " << pmt_Evis.Evis << " " << pmt_Evis.weight << endl;
-	//pmt[p]->Fill(pmt_Evis.Evis[p]);
+      // If PMT quality failed, set the evis and the weight to zero for this PMT
+      else {
+	pmt_Evis.weight[p]=0.;
+	pmt_Evis.Evis[p]=0.;
       }
-      else {pmt_Evis.weight[p]=alphas[p];} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
     }
+
     //Calculate the weighted energy on a side
     Double_t numer=0., denom=0.;
     for (UInt_t p=0;p<4;p++) {
@@ -274,23 +280,30 @@ void revCalSimulation (Int_t runNumber, string source)
     Double_t triggProb = triggerProbability(triggerFunc[0],totalEnE);
  
     //Set East Scint Trigger to true if event passes triggProb
-    if (rand->Rndm(0)<triggProb) {
+    if (rand->Rndm(0)<triggProb && evis.EvisE>0.) {
       EastScintTrigger=true;
     }
     	
     
     //West Side
     for (UInt_t p=4; p<8; p++) {
-      pmt_Evis.Evis[p] = -1.;
-      while (pmt_Evis.Evis[p]<0.) {
-	pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQW,sqrt(edepQ.EdepQW/alphas[p]));
+      if (pmtQuality[p]) { //Check to make sure PMT was functioning
+	pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
+	while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
+	  pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQW,sqrt(edepQ.EdepQW/alphas[p]));
+	}
+	if (pmt_Evis.Evis[p]>0.001) {
+	  pmt_Evis.weight[p] = alphas[p]/pmt_Evis.Evis[p];
+	}
+	else {pmt_Evis.weight[p]=alphas[p]/0.001;} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
       }
-      if (pmtQuality[p] && pmt_Evis.Evis[p]>0.) {
-	pmt_Evis.weight[p] = alphas[p]/pmt_Evis.Evis[p];
-	//cout << p << " " << pmt_Evis.Evis << " " << pmt_Evis.weight << endl;
+      // If PMT quality failed, set the evis and the weight to zero for this PMT
+      else {
+	pmt_Evis.weight[p]=0.;
+	pmt_Evis.Evis[p]=0.;
       }
-      else {pmt_Evis.weight[p]=alphas[p];}
     }
+
     //Calculate the total weighted energy
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
@@ -302,34 +315,40 @@ void revCalSimulation (Int_t runNumber, string source)
     evis.EvisW = totalEnW;
     triggProb = triggerProbability(triggerFunc[1],totalEnW);
     //Fill histograms if event passes trigger function
-    if (rand->Rndm(0)<triggProb) {
-      WestScintTrigger = true;
+    if (rand->Rndm(0)<triggProb && evis.EvisW>0.) {
+      WestScintTrigger = true;      
     }
     
     //Fill total Energy loss
     EvisTot = evis.EvisW+evis.EvisE+mwpcE.MWPCEnergyE+mwpcE.MWPCEnergyW;
 
     //Fill proper total event histogram based on event type
+
+    //Type 0 East
     if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && !WMWPCTrigger) {
       PID=1;
       type=0;
       side=0;
-      finalEn[0]->Fill(totalEnE);
+      finalEn[0]->Fill(evis.EvisE);
       //cout << "Type 0 East E = " << totalEnE << endl;
     }
+    //Type 0 West
     else if (WestScintTrigger && WMWPCTrigger && !EastScintTrigger && !EMWPCTrigger) {
       PID=1;
       type=0;
       side=1;
       finalEn[1]->Fill(totalEnW);
     }
+    //Type 1 
     else if (EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
       PID=1;
       type=1;
+      //East
       if (Time.timeE<Time.timeW) {
 	finalEn[2]->Fill(totalEnE);
 	side=0;
       }
+      //West
       else if (Time.timeE>Time.timeW) {
 	finalEn[3]->Fill(totalEnW);
 	side=1;
@@ -350,25 +369,27 @@ void revCalSimulation (Int_t runNumber, string source)
       //cout << "Type 2/3 East W = " << totalEnW << endl;
     }   
     //Gamma events and missed events (Type 4)
-    else if (!WMWPCTrigger && !EMWPCTrigger) {
-      if (EastScintTrigger && !WestScintTrigger) {
-	PID=0;
-	type=0;
-	side=0;
-      }
-      else if (!EastScintTrigger && WestScintTrigger) {
-	PID=0;
-	type=0;
-	side=1;
-      }
-      else if (EastScintTrigger && WestScintTrigger) {
-	PID=0;
-	type=1;
-	if (Time.timeE<Time.timeW) {
+    else {
+      if (!WMWPCTrigger && !EMWPCTrigger) {
+	if (EastScintTrigger && !WestScintTrigger) {
+	  PID=0;
+	  type=0;
 	  side=0;
 	}
-	else if (Time.timeE>Time.timeW) {
+	else if (!EastScintTrigger && WestScintTrigger) {
+	  PID=0;
+	  type=0;
 	  side=1;
+	}
+	else if (EastScintTrigger && WestScintTrigger) {
+	  PID=0;
+	  type=1;
+	  if (Time.timeE<Time.timeW) {
+	    side=0;
+	  }
+	  else if (Time.timeE>Time.timeW) {
+	    side=1;
+	  }
 	}
       }
       else {
@@ -393,5 +414,14 @@ void revCalSimulation (Int_t runNumber, string source)
 int main(int argc, char *argv[]) {
   string source = string(argv[2]);
   revCalSimulation(atoi(argv[1]),source);
+
+  //tests
+  /*UInt_t XePeriod = getXeRunPeriod(atoi(argv[1]));
+  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,7);
+  Double_t triggProbE = triggerProbability(triggerFunc[0],25.);
+  Double_t triggProbW = triggerProbability(triggerFunc[1],25.);
+  cout << triggProbE << " " << triggProbW << endl;*/
+
+
 }
   

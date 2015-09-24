@@ -351,59 +351,55 @@ int main(int argc, char *argv[])
     Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(pmt_Evis.Evis6)+EQ2Etrue[6][2]*(pmt_Evis.Evis6)*(pmt_Evis.Evis6);
     Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(pmt_Evis.Evis7)+EQ2Etrue[7][2]*(pmt_Evis.Evis7)*(pmt_Evis.Evis7);
     */
-    if (pmtQuality[0] && pmt_Evis.Evis0>0.) { // && (side_pass3==0 || type_pass3==1)) {
-      Double_t N = pmt_pass2[0]*nPE_per_channel[0];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight0 = 1/(pmt_Evis.Evis0*pmt_Evis.Evis0*f*f);
+    Double_t lowestPMTenergy = 0.001; //This is for setting an upper limit on the weight since
+                                        // at E=0, the weight goes to infiniti
+    Double_t lowestADC = 0.;
+
+    if (pmtQuality[0]) { // && pmt_Evis.Evis0>0.) { // && (side_pass3==0 || type_pass3==1)) {
+      if (pmt_Evis.Evis0>lowestPMTenergy && pmt_pass2[0]>lowestADC) pmt_Evis.weight0 = pmt_pass2[0]*nPE_per_channel[0]/(pmt_Evis.Evis0*pmt_Evis.Evis0);
+      else pmt_Evis.weight0 = lowestADC*nPE_per_channel[0]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight0=0.;}
 
-    if (pmtQuality[1] && pmt_Evis.Evis1>0.) { //&& (side_pass3==0 || type_pass3==1)) {
-      Double_t N = pmt_pass2[1]*nPE_per_channel[1];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight1 = 1/(pmt_Evis.Evis1*pmt_Evis.Evis1*f*f);
+    if (pmtQuality[1]) { // && pmt_Evis.Evis1>0.) { //&& (side_pass3==0 || type_pass3==1)) {
+      if (pmt_Evis.Evis1>lowestPMTenergy && pmt_pass2[1]>lowestADC) pmt_Evis.weight1 = pmt_pass2[1]*nPE_per_channel[1]/(pmt_Evis.Evis1*pmt_Evis.Evis1);
+      else pmt_Evis.weight1 = lowestADC*nPE_per_channel[1]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight1=0.;}
 
-    if (pmtQuality[2] && pmt_Evis.Evis2>0.) { //&& (side_pass3==0 || type_pass3==1)) {
-      Double_t N = pmt_pass2[2]*nPE_per_channel[2];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight2 = 1/(pmt_Evis.Evis2*pmt_Evis.Evis2*f*f);
+    if (pmtQuality[2]) { // && pmt_Evis.Evis2>0.) { //&& (side_pass3==0 || type_pass3==1)) {
+      if (pmt_Evis.Evis2>lowestPMTenergy && pmt_pass2[2]>lowestADC) pmt_Evis.weight2 = pmt_pass2[2]*nPE_per_channel[2]/(pmt_Evis.Evis2*pmt_Evis.Evis2);
+      else pmt_Evis.weight2 = lowestADC*nPE_per_channel[2]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight2=0.;}
 
-    if (pmtQuality[3] && pmt_Evis.Evis3>0.) { //&& (side_pass3==0 || type_pass3==1)) {
-      Double_t N = pmt_pass2[3]*nPE_per_channel[3];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight3 = 1/(pmt_Evis.Evis3*pmt_Evis.Evis3*f*f);
+    if (pmtQuality[3]) { // && pmt_Evis.Evis3>0.) { //&& (side_pass3==0 || type_pass3==1)) {
+      if (pmt_Evis.Evis3>lowestPMTenergy && pmt_pass2[3]>lowestADC) pmt_Evis.weight3 = pmt_pass2[3]*nPE_per_channel[3]/(pmt_Evis.Evis3*pmt_Evis.Evis3);
+      else pmt_Evis.weight3 = lowestADC*nPE_per_channel[3]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight3=0.;}
 
-    if (pmtQuality[4] && pmt_Evis.Evis4>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      Double_t N = pmt_pass2[4]*nPE_per_channel[4];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight4 = 1/(pmt_Evis.Evis4*pmt_Evis.Evis4*f*f);
+    if (pmtQuality[4]) { // && pmt_Evis.Evis4>0.) { //&& (side_pass3==1 || type_pass3==1)) {
+      if (pmt_Evis.Evis4>lowestPMTenergy && pmt_pass2[4]>lowestADC) pmt_Evis.weight4 = pmt_pass2[4]*nPE_per_channel[4]/(pmt_Evis.Evis4*pmt_Evis.Evis4);
+      else pmt_Evis.weight4 = lowestADC*nPE_per_channel[4]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight4=0.;}
 
-    if (pmtQuality[5] && pmt_Evis.Evis5>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      Double_t N = pmt_pass2[5]*nPE_per_channel[5];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight5 = 1/(pmt_Evis.Evis5*pmt_Evis.Evis5*f*f);
+    if (pmtQuality[5]) { // && pmt_Evis.Evis5>0.) { //&& (side_pass3==1 || type_pass3==1)) {
+      if (pmt_Evis.Evis5>lowestPMTenergy && pmt_pass2[5]>lowestADC) pmt_Evis.weight5 = pmt_pass2[5]*nPE_per_channel[5]/(pmt_Evis.Evis5*pmt_Evis.Evis5);
+      else pmt_Evis.weight5 = lowestADC*nPE_per_channel[5]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight5=0.;}
 
-    if (pmtQuality[6] && pmt_Evis.Evis6>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      Double_t N = pmt_pass2[6]*nPE_per_channel[6];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight6 = 1/(pmt_Evis.Evis6*pmt_Evis.Evis6*f*f);
+    if (pmtQuality[6]) { // && pmt_Evis.Evis6>0.) { //&& (side_pass3==1 || type_pass3==1)) {
+      if (pmt_Evis.Evis6>lowestPMTenergy && pmt_pass2[6]>lowestADC) pmt_Evis.weight6 = pmt_pass2[6]*nPE_per_channel[6]/(pmt_Evis.Evis6*pmt_Evis.Evis6);
+      else pmt_Evis.weight6 = lowestADC*nPE_per_channel[6]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight6=0.;}
 
-    if (pmtQuality[7] && pmt_Evis.Evis7>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      Double_t N = pmt_pass2[7]*nPE_per_channel[7];
-      Double_t f = sqrt(N)/N;
-      pmt_Evis.weight7 = 1/(pmt_Evis.Evis7*pmt_Evis.Evis7*f*f);
+    if (pmtQuality[7]) { // && pmt_Evis.Evis7>0.) { //&& (side_pass3==1 || type_pass3==1)) {
+      if (pmt_Evis.Evis7>lowestPMTenergy && pmt_pass2[7]>lowestADC) pmt_Evis.weight7 = pmt_pass2[7]*nPE_per_channel[7]/(pmt_Evis.Evis7*pmt_Evis.Evis7);
+      else pmt_Evis.weight7 = lowestADC*nPE_per_channel[7]/(lowestPMTenergy*lowestPMTenergy);
     }
     else {pmt_Evis.weight7=0.;}
 
