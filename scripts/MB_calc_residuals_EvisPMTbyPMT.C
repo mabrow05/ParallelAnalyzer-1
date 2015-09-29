@@ -29,6 +29,19 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
   
 }
 
+vector < vector <double> > returnPeaksOtherSource(int srcPeriod, string src) {
+  vector < double > peaks;
+  peaks.resize(8,0.);
+  ifstream peakfile;
+  char filename[500];
+  sprintf(filename, "../smeared_peaks/weighted_smeared_peaks/fits/weightedSimPeaks_PMTbyPMT_%s_runPeriod_%i.dat",src.c_str(),srcPeriod);}
+  
+  for (int pmt = 0; pmt<8; pmt++) {
+    peakfile >> peaks[pmt];
+  }
+  return peaks;
+}
+
 vector < Double_t > GetAlphaValues(Int_t runPeriod)
 {
   Char_t temp[500];
@@ -95,7 +108,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   Int_t num = i;
   cout << "Number of data points: " << num << endl;
 
-  // Load the smeared EQ values which are different for each PMT and source
+  // Load the smeared EQ values which are different for each PMT and source. This is only Ce, Sn, and Bi
   vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod,"EQ");
   for (int m=0; m<EQsmeared.size(); m++) {
     for (int mm=0; mm<EQsmeared[m].size(); mm++) {
@@ -103,6 +116,9 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     cout << endl;
   }
+
+  //Load the Indium peaks.... At some point need to add in which side the In was facing...
+  vector < vector < double > > EQsmeared_In = returnPeaksOtherSource(calibrationPeriod,"In114E");
  
   //Load the simulated relationship between EQ and Etrue
   vector < vector <double> > EQ2Etrue = EQ2EtrueFit(calibrationPeriod);
@@ -182,52 +198,61 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else if (sourceName[i]=="Sn") src_hold=1;
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;
+    else src_hold = -1;
 
     if (pmtQuality[runPos][0]) {
       runE1.push_back((int)run[i]);
-      EQE1.push_back(EQsmeared[0][src_hold]);
+      if (src_hold!=-1) EQE1.push_back(EQsmeared[0][src_hold]);
+      else EQE1.push_back(EQsmeared_In[0]);
       nameE1.push_back(sourceName[i]);
       EVISE1.push_back(EvisE1[i]);
     }
     if (pmtQuality[runPos][1]) {
       runE2.push_back((int)run[i]);
-      EQE2.push_back(EQsmeared[1][src_hold]);
+      if (src_hold!=-1) EQE2.push_back(EQsmeared[1][src_hold]);
+      else EQE2.push_back(EQsmeared_In[1]);
       nameE2.push_back(sourceName[i]);
       EVISE2.push_back(EvisE2[i]);
     }
     if (pmtQuality[runPos][2]) {
       runE3.push_back((int)run[i]);
-      EQE3.push_back(EQsmeared[2][src_hold]);
+      if (src_hold!=-1) EQE3.push_back(EQsmeared[2][src_hold]);
+      else EQE3.push_back(EQsmeared_In[2]);
       nameE3.push_back(sourceName[i]);
       EVISE3.push_back(EvisE3[i]);
     }
     if (pmtQuality[runPos][3]) {
       runE4.push_back((int)run[i]);
-      EQE4.push_back(EQsmeared[3][src_hold]);
+      if (src_hold!=-1) EQE4.push_back(EQsmeared[3][src_hold]);
+      else EQE4.push_back(EQsmeared_In[3]);
       nameE4.push_back(sourceName[i]);
       EVISE4.push_back(EvisE4[i]);
     }
     if (pmtQuality[runPos][4]) {
       runW1.push_back((int)run[i]);
-      EQW1.push_back(EQsmeared[4][src_hold]);
+      if (src_hold!=-1) EQW1.push_back(EQsmeared[4][src_hold]);
+      else EQW1.push_back(EQsmeared_In[4]);
       nameW1.push_back(sourceName[i]);
       EVISW1.push_back(EvisW1[i]);
     }
     if (pmtQuality[runPos][5]) {
       runW2.push_back((int)run[i]);
-      EQW2.push_back(EQsmeared[5][src_hold]);
+      if (src_hold!=-1) EQW2.push_back(EQsmeared[5][src_hold]);
+      else EQW2.push_back(EQsmeared_In[5]);
       nameW2.push_back(sourceName[i]);
       EVISW2.push_back(EvisW2[i]);
     }
     if (pmtQuality[runPos][6]) {
       runW3.push_back((int)run[i]);
-      EQW3.push_back(EQsmeared[6][src_hold]);
+      if (src_hold!=-1) EQW3.push_back(EQsmeared[6][src_hold]);
+      else EQW3.push_back(EQsmeared_In[6]);
       nameW3.push_back(sourceName[i]);
       EVISW3.push_back(EvisW3[i]);
     }
     if (pmtQuality[runPos][7]) {
       runW4.push_back((int)run[i]);
-      EQW4.push_back(EQsmeared[7][src_hold]);
+      if (src_hold!=-1) EQW4.push_back(EQsmeared[7][src_hold]);
+      else EQW4.push_back(EQsmeared_In[7]);
       nameW4.push_back(sourceName[i]);
       EVISW4.push_back(EvisW4[i]);
     }
