@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
   double binCenterMax[3][8];
   double binCounts[3][8];
   for (int n=0; n<nSources; n++) {
-    for (int i=0; i<nBin; i++) {
+    for (int i=1; i<nBin; i++) { //Don't want zeroth bin
       for (int j=0; j<8; j++) {
         binCenter[n][j] = his[n][j]->GetBinCenter(i+1);
         binCounts[n][j] = his[n][j]->GetBinContent(i+1);

@@ -2,14 +2,14 @@
 
 import os
 
-runs = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899]
+runs = [19857,19899]#[17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899]
 #runs = [19232,19359,19511,19857,19899]
 
 sources = ["Ce139", "Sn113", "Bi207"]
 
-runPeriod=1
+runPeriod=11 #STARTING RUN PERIOD IN LIST ABOVE
 
-if 0:
+if 1:
     for run in runs:
         srcPeaksByPMT = [] #holds the source peaks by PMT to be written to file
         for n in range(0,8,1):
@@ -59,7 +59,7 @@ if 0:
 
 
 
-if 1:
+if 0:
     srcs = ["In114E","In114W"]
     runs = [17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899]
     for src in srcs:
