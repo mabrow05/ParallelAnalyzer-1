@@ -27,29 +27,32 @@
   // East residuals
   double EQ[4];
   EQ[0] = peakCe_EQ;//98.2;
-  EQ[1] = peakSn_EQ;//331.2;
-  EQ[2] = peakBiLow_EQ; //443.0;
-  EQ[3] = peakBiHigh_EQ;//928.0;
+  EQ[1] = peakIn_EQ;
+  EQ[2] = peakSn_EQ;//331.2;
+  EQ[3] = peakBiLow_EQ; //443.0;
+  EQ[4] = peakBiHigh_EQ;//928.0;
  
-  double dEQ[4] = {0.};
+  double dEQ[5] = {0.};
 
-  double resEast[4];
+  double resEast[5];
   resEast[0] = -1.1.;
-  resEast[1] =  1.8;
-  resEast[2] = -.04;
-  resEast[3] = 1.1;
+  resEast[1] = -.67;
+  resEast[2] =  1.8;
+  resEast[3] = -.02;
+  resEast[4] = 1.1;
 
-  double sigEast[4];
+  double sigEast[5];
   sigEast[0] = 1.5;
-  sigEast[1] = 3.9;
-  sigEast[2] = 5.6;
-  sigEast[3] = 9.6;
+  sigEast[1] = 2.87;
+  sigEast[2] = 3.9;
+  sigEast[3] = 5.68;
+  sigEast[4] = 10.;
 
   // Plot
   c1 = new TCanvas("c1", "canvas");
   c1->SetLogy(0);
 
-  TGraphErrors *gr1 = new TGraphErrors(4,EQ,resEast,dEQ,sigEast);
+  TGraphErrors *gr1 = new TGraphErrors(5,EQ,resEast,dEQ,sigEast);
   gr1->SetTitle("");
   gr1->SetMarkerColor(1);
   gr1->SetMarkerStyle(20);

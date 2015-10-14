@@ -55,7 +55,7 @@ string getIndiumSide(int runNumber) {
   std::string dbAddressFull = "mysql://"+dbAddress+":"+port+"/"+dbname;
   
   std::string qresult;
-  std::string Side;
+  std::string Side="";
   bool passFlag = false;
 
   char cmd[200];
@@ -64,7 +64,7 @@ string getIndiumSide(int runNumber) {
   TSQLServer *db = TSQLServer::Connect(dbAddressFull.c_str(), dbUser.c_str(), dbPass.c_str());
   if (!db) cout << "Couldn't connect to database\n";
   else {
-    cout << "Connected to DB Server\n";
+    //cout << "Connected to DB Server\n";
     TSQLResult *res = db->Query(cmd);
     int rows = res->GetRowCount();
     cout << rows << endl;
@@ -84,10 +84,9 @@ string getIndiumSide(int runNumber) {
       else cout << "This run is not an Indium Run\n";
     }
   }
-  //delete row;
-  //delete res; 
-  //delete db;
-  db->Close();
+  //delete (row);
+  //delete (res); 
+  //db->Close();
   return Side;
 }
 
@@ -170,9 +169,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   vector < vector <double> > EQsmeared_In114;
   EQsmeared_In114.push_back(returnPeaksOtherSource(calibrationPeriod,"In114E"));
   EQsmeared_In114.push_back(returnPeaksOtherSource(calibrationPeriod,"In114W"));
-  //EQsmeared_In114.resize(2, vector <double> (8,0.));
-  //EQsmeared_In114[0] = returnPeaksOtherSource(calibrationPeriod,"In114E");
-  //EQsmeared_In114[1] = returnPeaksOtherSource(calibrationPeriod,"In114W");
+  
   for (int i=0; i<8; i++) {
     cout << EQsmeared_In114[0][i] << " " << EQsmeared_In114[1][i] << endl;
   } 
@@ -260,9 +257,10 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;
     else { 
-      cout << (int) run[i] << endl;
+      //cout << (int) run[i] << endl;
       src_hold = -1; 
-      IndiumSide = (getIndiumSide((int) run[i])=="East")?0:(getIndiumSide((int) run[i])=="West"?1:-1);
+      string side = getIndiumSide((int) run[i]);
+      IndiumSide = (side=="East")?0:(side=="West"?1:-1);
       if (IndiumSide==-1) {cout << "Bad indium side determination\n"; exit(0);}
     }
 
