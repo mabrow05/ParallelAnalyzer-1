@@ -18,6 +18,7 @@ const static double peakBiLow = 498.;//501.420;//448.8;
 const static double peakBiHigh = 993.789;//926.;
 
 const static double peakCe_EQ = 80.5;
+const static double peakIn_EQ = 120.;
 const static double peakSn_EQ = 317.8;
 const static double peakBiLow_EQ = 448.8;
 const static double peakBiHigh_EQ = 926.;

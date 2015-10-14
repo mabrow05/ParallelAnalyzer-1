@@ -132,8 +132,8 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
 void weightPeaks (Int_t runNumber, string source) 
 {
 
-  if (source!="Ce139" && source!="Sn113" && source!="Bi207") {
-    cout << "Source Options are: \"Ce139\", \"Sn113\", \"Bi207\"\n";
+  if (source!="Ce139" && source!="Sn113" && source!="Bi207" && source!="In114E" && source!="In114W") {
+    cout << "Source Options are: \"Ce139\", \"Sn113\", \"Bi207\", \"In114E/W\"\n";
     exit(0);}
 
   Char_t outputfile[500];
@@ -158,7 +158,9 @@ void weightPeaks (Int_t runNumber, string source)
 
   //Read in simulated data
   TChain *chain = new TChain("anaTree");
-  for (int i=0; i<250; i++) {
+  UInt_t numfiles = 250;
+  if (source=="In114E" || source=="In114W") numfiles = 125;
+  for (int i=0; i<numfiles; i++) {
     sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
     //sprintf(temp,"../../../data/analyzed_%i.root",i);
     chain->AddFile(temp);
@@ -246,7 +248,9 @@ void weightPeaks (Int_t runNumber, string source)
 	}
       }
     }
+    if (evt%10000==0) {
     cout << "filled event " << evt << endl;
+    }
   }
   delete chain;
 

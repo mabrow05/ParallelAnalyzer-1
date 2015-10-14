@@ -59,10 +59,11 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   TString sourceEast[N];
   Int_t runEast[N];
   Double_t resEast[N];
-  Double_t resCeEast[N], resSnEast[N], resBi1East[N], resBi2East[N];
+  Double_t resCeEast[N], resInEast[N], resSnEast[N], resBi1East[N], resBi2East[N];
 
   Int_t i = 0;
   Int_t nCeEast = 0;
+  Int_t nInEast = 0;
   Int_t nSnEast = 0;
   Int_t nBi1East = 0;
   Int_t nBi2East = 0;
@@ -73,6 +74,11 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
       resCeEast[nCeEast] = resEast[i];
       nCeEast++;
       if (sqrt(resEast[i]*resEast[i])>0.05*peakCe_EQ) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
+    }
+    if (sourceEast[i] == "In_East") {
+      resInEast[nInEast] = resEast[i];
+      nInEast++;
+      if (sqrt(resEast[i]*resEast[i])>0.05*peakIn_EQ) cout << runEast[i] << " " << sourceEast[i] << " " << resEast[i] << endl; 
     }
     if (sourceEast[i] == "Sn_East") {
       resSnEast[nSnEast] = resEast[i];
@@ -92,7 +98,7 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
     if (fileEast.fail()) break;
     i++;
   }
-  cout << nCeEast << " " << nSnEast << " " << nBi1East << " " << nBi2East << endl;
+  cout << nCeEast << " " << nInEast << " " << nSnEast << " " << nBi1East << " " << nBi2East << endl;
 
   // Read West data file
   char tempWest[500];
@@ -106,10 +112,11 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   TString sourceWest[N];
   Int_t runWest[N];
   Double_t resWest[N];
-  Double_t resCeWest[N], resSnWest[N], resBi1West[N], resBi2West[N];
+  Double_t resCeWest[N], resInWest[N], resSnWest[N], resBi1West[N], resBi2West[N];
 
   Int_t i = 0;
   Int_t nCeWest = 0;
+  Int_t nInWest = 0;
   Int_t nSnWest = 0;
   Int_t nBi1West = 0;
   Int_t nBi2West = 0;
@@ -121,6 +128,11 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
       resCeWest[nCeWest] = resWest[i];
       nCeWest++;
       if (sqrt(resWest[i]*resWest[i])>0.05*peakCe_EQ) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
+    }
+    if (sourceWest[i] == "In_West") {
+      resInWest[nInWest] = resWest[i];
+      nInWest++;
+      if (sqrt(resWest[i]*resWest[i])>0.05*peakIn_EQ) cout << runWest[i] << " " << sourceWest[i] << " " << resWest[i] << endl; 
     }
     if (sourceWest[i] == "Sn_West") {
       resSnWest[nSnWest] = resWest[i];
@@ -140,18 +152,21 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
     if (fileWest.fail()) break;
     i++;
   }
-  cout << nCeWest << " " << nSnWest << " " << nBi1West << " " << nBi2West << endl;
+  cout << nCeWest << " " << nInWest << " " << nSnWest << " " << nBi1West << " " << nBi2West << endl;
 
   // Histograms
   TH1F *hisCeEast = new TH1F("hisCeEast", "", 60, -30.0, 30.0);
+  TH1F *hisInEast = new TH1F("hisInEast", "", 40, -30.0, 30.0);
   TH1F *hisSnEast = new TH1F("hisSnEast", "", 30, -30.0, 30.0);
   TH1F *hisBi1East = new TH1F("hisBi1East", "", 30, -60.0, 60.0);
   TH1F *hisBi2East = new TH1F("hisBi2East", "", 30, -60.0, 60.0);
   TH1F *hisCeWest = new TH1F("hisCeWest", "", 60, -30.0, 30.0);
+  TH1F *hisInWest = new TH1F("hisInWest", "", 60, -30.0, 30.0);
   TH1F *hisSnWest = new TH1F("hisSnWest", "", 30, -30.0, 30.0);
   TH1F *hisBi1West = new TH1F("hisBi1West", "", 30, -60.0, 60.0);
   TH1F *hisBi2West = new TH1F("hisBi2West", "", 30, -60.0, 60.0);
   TH1F *hisCe = new TH1F("hisCe", "", 60, -30.0, 30.0);
+  TH1F *hisIn = new TH1F("hisIn", "", 60, -30.0, 30.0);
   TH1F *hisSn = new TH1F("hisSn", "", 30, -30.0, 30.0);
   TH1F *hisBi1 = new TH1F("hisBi1", "", 30, -60.0, 60.0);
   TH1F *hisBi2 = new TH1F("hisBi2", "", 30, -60.0, 60.0);
@@ -160,6 +175,10 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   for (int j=0; j<nCeEast; j++) {
     hisCeEast->Fill(resCeEast[j]);
     hisCe->Fill(resCeEast[j]);
+  }
+  for (int j=0; j<nInEast; j++) {
+    hisInEast->Fill(resInEast[j]);
+    hisIn->Fill(resInEast[j]);
   }
   for (int j=0; j<nSnEast; j++) {
     hisSnEast->Fill(resSnEast[j]);
@@ -176,6 +195,10 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   for (int j=0; j<nCeWest; j++) {
     hisCeWest->Fill(resCeWest[j]);
     hisCe->Fill(resCeWest[j]);
+  }
+  for (int j=0; j<nInWest; j++) {
+    hisInWest->Fill(resInWest[j]);
+    hisIn->Fill(resInWest[j]);
   }
   for (int j=0; j<nSnWest; j++) {
     hisSnWest->Fill(resSnWest[j]);
@@ -207,6 +230,24 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   cout << "     sigma = " << sigmaCeEast << endl;
   errEnv << "meanCeEast = " << meanCeEast << endl;
   errEnv << "sigma = " << sigmaCeEast << endl;
+
+  double meanInEast = 0.;
+  for (int j=0; j<nInEast; j++) {
+    meanInEast += resInEast[j];
+  }
+  meanInEast = meanInEast / (double) nInEast;
+
+  double sigmaInEast = 0.;
+  for (int j=0; j<nInEast; j++) {
+    sigmaInEast += (resInEast[j] - meanInEast)*(resInEast[j] - meanInEast);
+  }
+  sigmaInEast = sigmaInEast / (double) nInEast;
+  sigmaInEast = sqrt( sigmaInEast );
+
+  cout << "meanInEast = " << meanInEast << endl;
+  cout << "     sigma = " << sigmaInEast << endl;
+  errEnv << "meanInEast = " << meanInEast << endl;
+  errEnv << "sigma = " << sigmaInEast << endl;
 
   double meanSnEast = 0.;
   for (int j=0; j<nSnEast; j++) {
@@ -281,6 +322,24 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   cout << "     sigma = " << sigmaCeWest << endl;
   errEnv << "meanCeWest = " << meanCeWest << endl;
   errEnv << "sigma = " << sigmaCeWest << endl;
+
+  double meanInWest = 0.;
+  for (int j=0; j<nInWest; j++) {
+    meanInWest += resInWest[j];
+  }
+  meanInWest = meanInWest / (double) nInWest;
+
+  double sigmaInWest = 0.;
+  for (int j=0; j<nInWest; j++) {
+    sigmaInWest += (resInWest[j] - meanInWest)*(resInWest[j] - meanInWest);
+  }
+  sigmaInWest = sigmaInWest / (double) nInWest;
+  sigmaInWest = sqrt( sigmaInWest );
+
+  cout << "meanInWest = " << meanInWest << endl;
+  cout << "     sigma = " << sigmaInWest << endl;
+  errEnv << "meanInWest = " << meanInWest << endl;
+  errEnv << "sigma = " << sigmaInWest << endl;
 
   double meanSnWest = 0.;
   for (int j=0; j<nSnWest; j++) {
@@ -361,6 +420,30 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   cout << "     sigma = " << sigmaCe << endl;
   errEnv << "meanCe = " << meanCe << endl;
   errEnv << "sigma = " << sigmaCe << endl;
+
+  double meanIn = 0.;
+  for (int j=0; j<nInEast; j++) {
+    meanIn += resInEast[j];
+  }
+  for (int j=0; j<nInWest; j++) {
+    meanIn += resInWest[j];
+  }
+  meanIn = meanIn / (double) (nInEast+nInWest);
+
+  double sigmaIn = 0.;
+  for (int j=0; j<nInEast; j++) {
+    sigmaIn += (resInEast[j] - meanIn)*(resInEast[j] - meanIn);
+  }
+  for (int j=0; j<nInWest; j++) {
+    sigmaIn += (resInWest[j] - meanIn)*(resInWest[j] - meanIn);
+  }
+  sigmaIn = sigmaIn / (double) (nInEast+nInWest);
+  sigmaIn = sqrt( sigmaIn );
+
+  cout << "meanIn = " << meanIn << endl;
+  cout << "     sigma = " << sigmaIn << endl;
+  errEnv << "meanIn = " << meanIn << endl;
+  errEnv << "sigma = " << sigmaIn << endl;
 
 
   double meanSn = 0.;
@@ -455,9 +538,23 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "meanCeEast = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
-  // Sn East
+  //In East
   c2 = new TCanvas("c2", "c2");
   c2->SetLogy(0);
+
+  hisInEast->SetXTitle("East In E_{Q} Error [keV]");
+  hisInEast->GetXaxis()->CenterTitle();
+  hisInEast->SetLineColor(1);
+  hisInEast->Draw();
+  hisInEast->Fit("gaus", "", "", -8.0, 8.0);
+  cout << "meanInEast = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanInEast = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+
+  // Sn East
+  c3 = new TCanvas("c3", "c3");
+  c3->SetLogy(0);
 
   hisSnEast->SetXTitle("East Sn E_{Q} Error [keV]");
   hisSnEast->GetXaxis()->CenterTitle();
@@ -470,8 +567,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 East
-  c3 = new TCanvas("c3", "c3");
-  c3->SetLogy(0);
+  c4 = new TCanvas("c4", "c4");
+  c4->SetLogy(0);
 
   hisBi1East->SetXTitle("East Bi1 E_{Q} Error [keV]");
   hisBi1East->GetXaxis()->CenterTitle();
@@ -484,8 +581,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi2 East
-  c4 = new TCanvas("c4", "c4");
-  c4->SetLogy(0);
+  c5 = new TCanvas("c5", "c5");
+  c5->SetLogy(0);
 
   hisBi2East->SetXTitle("East Bi2 E_{Q} Error [keV]");
   hisBi2East->GetXaxis()->CenterTitle();
@@ -500,8 +597,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   }
 
   // Ce West
-  c5 = new TCanvas("c5", "c5");
-  c5->SetLogy(0);
+  c6 = new TCanvas("c6", "c6");
+  c6->SetLogy(0);
 
   hisCeWest->SetXTitle("West Ce E_{Q} Error [keV]");
   hisCeWest->GetXaxis()->CenterTitle();
@@ -513,9 +610,24 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "meanCeWest = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
+  // In West
+  c7 = new TCanvas("c7", "c7");
+  c7->SetLogy(0);
+
+  hisInWest->SetXTitle("West In E_{Q} Error [keV]");
+  hisInWest->GetXaxis()->CenterTitle();
+  hisInWest->SetLineColor(1);
+  hisInWest->Draw();
+  hisInWest->Fit("gaus", "", "", -8., 8.);
+  cout << "meanInWest = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanInWest = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+
+
   // Sn West
-  c6 = new TCanvas("c6", "c6");
-  c6->SetLogy(0);
+  c8 = new TCanvas("c8", "c8");
+  c8->SetLogy(0);
 
   hisSnWest->SetXTitle("West Sn E_{Q} Error [keV]");
   hisSnWest->GetXaxis()->CenterTitle();
@@ -528,8 +640,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 West
-  c7 = new TCanvas("c7", "c7");
-  c7->SetLogy(0);
+  c9 = new TCanvas("c9", "c9");
+  c9->SetLogy(0);
 
   hisBi1West->SetXTitle("West Bi1 E_{Q} Error [keV]");
   hisBi1West->GetXaxis()->CenterTitle();
@@ -542,8 +654,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi2 West
-  c8 = new TCanvas("c8", "c8");
-  c8->SetLogy(0);
+  c10 = new TCanvas("c10", "c10");
+  c10->SetLogy(0);
 
   hisBi2West->SetXTitle("West Bi2 E_{Q} Error [keV]");
   hisBi2West->GetXaxis()->CenterTitle();
@@ -558,8 +670,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   }
 
   // Ce 
-  c9 = new TCanvas("c9", "c9");
-  c9->SetLogy(0);
+  c11= new TCanvas("c11", "c11");
+  c11->SetLogy(0);
 
   hisCe->SetXTitle("Total Ce E_{Q} Error [keV]");
   hisCe->GetXaxis()->CenterTitle();
@@ -571,9 +683,23 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "meanCe = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
+  // In 
+  c12= new TCanvas("c12", "c12");
+  c12->SetLogy(0);
+
+  hisIn->SetXTitle("Total In E_{Q} Error [keV]");
+  hisIn->GetXaxis()->CenterTitle();
+  hisIn->SetLineColor(1);
+  hisIn->Draw();
+  hisIn->Fit("gaus", "", "", -10.0, 10.0);
+  cout << "meanIn = " << gaus->GetParameter(1) << endl;
+  cout << "     sigma = " << gaus->GetParameter(2)  << endl;
+  errEnv << "meanIn = " << gaus->GetParameter(1) << endl;
+  errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+
   // Sn 
-  c10 = new TCanvas("c10", "c10");
-  c10->SetLogy(0);
+  c13 = new TCanvas("c13", "c13");
+  c13->SetLogy(0);
 
   hisSn->SetXTitle("Total Sn E_{Q} Error [keV]");
   hisSn->GetXaxis()->CenterTitle();
@@ -586,8 +712,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 
-  c11 = new TCanvas("c11", "c11");
-  c11->SetLogy(0);
+  c14 = new TCanvas("c14", "c14");
+  c14->SetLogy(0);
 
   hisBi1->SetXTitle("Total Bi1 E_{Q} Error [keV]");
   hisBi1->GetXaxis()->CenterTitle();
@@ -600,8 +726,8 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi2 
-  c12 = new TCanvas("c12", "c12");
-  c12->SetLogy(0);
+  c15 = new TCanvas("c15", "c15");
+  c15->SetLogy(0);
 
   hisBi2->SetXTitle("Total Bi2 E_{Q} Error [keV]");
   hisBi2->GetXaxis()->CenterTitle();

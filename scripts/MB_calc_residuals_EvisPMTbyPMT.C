@@ -1,6 +1,10 @@
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <string>
+#include <cstdlib>
+#include <TSQLRow.h>
+#include <TSQLResult.h>
 #include "../include/sourcePeaks.h"
 
 unsigned int find_vec_location_int(std::vector<Int_t> vec, Int_t val)
@@ -27,6 +31,63 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
   }
   else cout << "Can't locate " << val << " in your vector!" << endl; exit(0);
   
+}
+
+vector < double > returnPeaksOtherSource(int srcPeriod, string src) {
+  vector < double > peaks;
+  peaks.resize(8,0.);
+  ifstream peakfile;
+  char filename[500];
+  sprintf(filename, "../smeared_peaks/weighted_smeared_peaks/fits/weightedSimPeaks_PMTbyPMT_%s_runPeriod_%i.dat",src.c_str(),srcPeriod);
+  peakfile.open(filename);
+  for (int pmt = 0; pmt<8; pmt++) {
+    peakfile >> peaks[pmt];
+  }
+  return peaks;
+}
+
+string getIndiumSide(int runNumber) {
+  std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
+  std::string dbname = std::string(getenv("UCNADB"));
+  std::string dbUser = std::string(getenv("UCNADBUSER"));
+  std::string dbPass = std::string(getenv("UCNADBPASS"));
+  std::string port = "3306";
+  std::string dbAddressFull = "mysql://"+dbAddress+":"+port+"/"+dbname;
+  
+  std::string qresult;
+  std::string Side="";
+  bool passFlag = false;
+
+  char cmd[200];
+  sprintf(cmd,"SELECT sourcetype FROM sources WHERE run_number=%i;",runNumber);
+
+  TSQLServer *db = TSQLServer::Connect(dbAddressFull.c_str(), dbUser.c_str(), dbPass.c_str());
+  if (!db) cout << "Couldn't connect to database\n";
+  else {
+    //cout << "Connected to DB Server\n";
+    TSQLResult *res = db->Query(cmd);
+    int rows = res->GetRowCount();
+    cout << rows << endl;
+    TSQLRow *row = res->Next();
+   
+    if (!row) {
+      cout << "This run wasn't a source run of any type\n";
+    }
+    else {
+      for (int i=0; i<rows; i++) {
+	qresult = std::string(row->GetField(0));
+	if (qresult=="In114W") {Side="West"; passFlag = true; continue;}
+	else if (qresult=="In114E") {Side="East"; passFlag = true; continue;}
+	row = res->Next();
+      }
+      if (passFlag) std::cout << "Run " << runNumber << " Indium Facing " << Side << std::endl;
+      else cout << "This run is not an Indium Run\n";
+    }
+  }
+  //delete (row);
+  //delete (res); 
+  //db->Close();
+  return Side;
 }
 
 vector < Double_t > GetAlphaValues(Int_t runPeriod)
@@ -95,7 +156,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   Int_t num = i;
   cout << "Number of data points: " << num << endl;
 
-  // Load the smeared EQ values which are different for each PMT and source
+  // Load the smeared EQ values which are different for each PMT and source. This is only Ce, Sn, and Bi
   vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod,"EQ");
   for (int m=0; m<EQsmeared.size(); m++) {
     for (int mm=0; mm<EQsmeared[m].size(); mm++) {
@@ -103,7 +164,19 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     cout << endl;
   }
- 
+
+  //Load the Indium peaks.... At some point need to add in which side the In was facing...
+  vector < vector <double> > EQsmeared_In114;
+  EQsmeared_In114.push_back(returnPeaksOtherSource(calibrationPeriod,"In114E"));
+  EQsmeared_In114.push_back(returnPeaksOtherSource(calibrationPeriod,"In114W"));
+  
+  for (int i=0; i<8; i++) {
+    cout << EQsmeared_In114[0][i] << " " << EQsmeared_In114[1][i] << endl;
+  } 
+  //string side = getIndiumSide(18372);
+
+
+
   //Load the simulated relationship between EQ and Etrue
   vector < vector <double> > EQ2Etrue = EQ2EtrueFit(calibrationPeriod);
   for (int m=0; m<EQ2Etrue.size(); m++) {
@@ -178,56 +251,72 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     UInt_t runPos = find_vec_location_int(pmtRun,(int)run[i]);
     cout << "Found run " << (int) run[i] << " in PMT Quality\n";
     int src_hold;
+    int IndiumSide = -1; // Indium side will be 0 if east facing and 1 if west facing
     if (sourceName[i]=="Ce") src_hold = 0;
     else if (sourceName[i]=="Sn") src_hold=1;
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;
+    else { 
+      //cout << (int) run[i] << endl;
+      src_hold = -1; 
+      string side = getIndiumSide((int) run[i]);
+      IndiumSide = (side=="East")?0:(side=="West"?1:-1);
+      if (IndiumSide==-1) {cout << "Bad indium side determination\n"; exit(0);}
+    }
 
     if (pmtQuality[runPos][0]) {
       runE1.push_back((int)run[i]);
-      EQE1.push_back(EQsmeared[0][src_hold]);
+      if (src_hold!=-1) EQE1.push_back(EQsmeared[0][src_hold]);
+      else EQE1.push_back(EQsmeared_In114[IndiumSide][0]);
       nameE1.push_back(sourceName[i]);
       EVISE1.push_back(EvisE1[i]);
     }
     if (pmtQuality[runPos][1]) {
       runE2.push_back((int)run[i]);
-      EQE2.push_back(EQsmeared[1][src_hold]);
+      if (src_hold!=-1) EQE2.push_back(EQsmeared[1][src_hold]);
+      else EQE2.push_back(EQsmeared_In114[IndiumSide][1]);
       nameE2.push_back(sourceName[i]);
       EVISE2.push_back(EvisE2[i]);
     }
     if (pmtQuality[runPos][2]) {
       runE3.push_back((int)run[i]);
-      EQE3.push_back(EQsmeared[2][src_hold]);
+      if (src_hold!=-1) EQE3.push_back(EQsmeared[2][src_hold]);
+      else EQE3.push_back(EQsmeared_In114[IndiumSide][2]);
       nameE3.push_back(sourceName[i]);
       EVISE3.push_back(EvisE3[i]);
     }
     if (pmtQuality[runPos][3]) {
       runE4.push_back((int)run[i]);
-      EQE4.push_back(EQsmeared[3][src_hold]);
+      if (src_hold!=-1) EQE4.push_back(EQsmeared[3][src_hold]);
+      else EQE4.push_back(EQsmeared_In114[IndiumSide][3]);
       nameE4.push_back(sourceName[i]);
       EVISE4.push_back(EvisE4[i]);
     }
     if (pmtQuality[runPos][4]) {
       runW1.push_back((int)run[i]);
-      EQW1.push_back(EQsmeared[4][src_hold]);
+      if (src_hold!=-1) EQW1.push_back(EQsmeared[4][src_hold]);
+      else EQW1.push_back(EQsmeared_In114[IndiumSide][4]);
       nameW1.push_back(sourceName[i]);
       EVISW1.push_back(EvisW1[i]);
     }
     if (pmtQuality[runPos][5]) {
       runW2.push_back((int)run[i]);
-      EQW2.push_back(EQsmeared[5][src_hold]);
+      if (src_hold!=-1) EQW2.push_back(EQsmeared[5][src_hold]);
+      else EQW2.push_back(EQsmeared_In114[IndiumSide][5]);
       nameW2.push_back(sourceName[i]);
       EVISW2.push_back(EvisW2[i]);
     }
     if (pmtQuality[runPos][6]) {
       runW3.push_back((int)run[i]);
-      EQW3.push_back(EQsmeared[6][src_hold]);
+      if (src_hold!=-1) EQW3.push_back(EQsmeared[6][src_hold]);
+      else EQW3.push_back(EQsmeared_In114[IndiumSide][6]);
       nameW3.push_back(sourceName[i]);
       EVISW3.push_back(EvisW3[i]);
     }
     if (pmtQuality[runPos][7]) {
       runW4.push_back((int)run[i]);
-      EQW4.push_back(EQsmeared[7][src_hold]);
+      if (src_hold!=-1) EQW4.push_back(EQsmeared[7][src_hold]);
+      else EQW4.push_back(EQsmeared_In114[IndiumSide][7]);
       nameW4.push_back(sourceName[i]);
       EVISW4.push_back(EvisW4[i]);
     }
@@ -248,8 +337,8 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     cout << "Not enough sources to construct quadratic linearity curve\n";
     num=0;
     }*/
-  if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end()) { 
-    cout << "No Sn, Ce, or Bi to calculate residuals\n";
+  if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"In")==nameE1.end()) { 
+    cout << "No Sn, In, Ce, or Bi to calculate residuals\n";
     num=0;
   }
  
@@ -259,7 +348,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_East_runPeriod_%i_PMTE1.dat",calibrationPeriod);
   ofstream oFileE1(temp);
 
-  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
+  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"In")!=nameE1.end())) {
  
     
 
@@ -271,6 +360,12 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	oFileE1 << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
 	if (ResE1[j]>0.05*EQE1[j]) cout << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
 	//ResE1[j] = (fitEQ - peakCe)/peakCe * 100.;
+      }
+      else if (nameE1[j]=="In") {
+	ResE1[j] = EVISE1[j] - EQE1[j];
+	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
+	oFileE1 << "In_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (ResE1[j]>0.05*EQE1[j]) cout << "In_East" << " " << runE1[j] << " " << ResE1[j] << endl;
       }
       else if (nameE1[j]=="Sn") {
 	ResE1[j] = EVISE1[j] - EQE1[j];
@@ -349,7 +444,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileE2(temp);
   vector <Double_t> fitEQ_E2(runE2.size(),0);
 
-  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
+  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"In")!=nameE2.end())) {
 
     
 
@@ -362,6 +457,12 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	//ResE2[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE2 << "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;
 	if (ResE2[j]>0.05*EQE2[j]) cout<< "Ce_East" << " " << runE2[j] << " " << ResE2[j] << endl;  
+      }
+      else if (nameE2[j]=="In") {
+	ResE2[j] = EVISE2[j] - EQE2[j];
+	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
+	oFileE2 << "In_East" << " " << runE2[j] << " " << ResE2[j] << endl;
+	if (ResE2[j]>0.05*EQE2[j]) cout << "In_East" << " " << runE2[j] << " " << ResE2[j] << endl;
       }
       else if (nameE2[j]=="Sn") {
 	ResE2[j] = EVISE2[j] - EQE2[j];
@@ -438,7 +539,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileE3(temp);
   vector <Double_t> fitEQ_E3(runE3.size(),0);
 
-  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
+  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"In")!=nameE3.end())) {
 
     
 
@@ -451,6 +552,12 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	//ResE3[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE3 << "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;
 	if (ResE3[j]>0.05*EQE3[j]) cout<< "Ce_East" << " " << runE3[j] << " " << ResE3[j] << endl;  
+      }
+      else if (nameE3[j]=="In") {
+	ResE3[j] = EVISE3[j] - EQE3[j];
+	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
+	oFileE3 << "In_East" << " " << runE3[j] << " " << ResE3[j] << endl;
+	if (ResE3[j]>0.05*EQE3[j]) cout << "In_East" << " " << runE3[j] << " " << ResE3[j] << endl;
       }
       else if (nameE3[j]=="Sn") {
 	ResE3[j] = EVISE3[j] - EQE3[j];
@@ -526,7 +633,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_East_runPeriod_%i_PMTE4.dat",calibrationPeriod);
   ofstream oFileE4(temp);
 
-  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
+  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"In")!=nameE4.end())) {
 
     
     // Calculate residuals in [keV]
@@ -538,6 +645,12 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	//ResE4[j] = (fitEQ - peakCe)/peakCe * 100.;
 	oFileE4 << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;
 	if (ResE4[j]>0.05*EQE4[j]) cout << "Ce_East" << " " << runE4[j] << " " << ResE4[j] << endl;  
+      }
+      else if (nameE4[j]=="In") {
+	ResE4[j] = EVISE4[j] - EQE4[j];
+	//ResE1[j] = (fitEQ - peakSn)/peakSn * 100.;
+	oFileE4 << "In_East" << " " << runE4[j] << " " << ResE4[j] << endl;
+	if (ResE4[j]>0.05*EQE4[j]) cout << "In_East" << " " << runE4[j] << " " << ResE4[j] << endl;
       }
       else if (nameE4[j]=="Sn") {
 	ResE4[j] = EVISE4[j] - EQE4[j];
@@ -606,6 +719,8 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 
   else {  oFileE4 << "PMT NOT USABLE";}
   oFileE4.close();
+
+  
 
   ///////////////////////////////////////////////////////////////////////
   // Calcuting the weighted mean of the total energy of the East side  //
@@ -713,6 +828,12 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
       x_East[j] = peakCe_EQ;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
+    else if (sourceName[j]=="In") {
+      //res_East[j] = Etrue_East[j] - peakSn;
+      x_East[j] = peakIn_EQ;
+      oFileE << "In_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      cout << "In_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+    }
     else if (sourceName[j]=="Sn") {
       //res_East[j] = Etrue_East[j] - peakSn;
       x_East[j] = peakSn_EQ;
@@ -736,7 +857,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 
   }
   oFileE.close();
-  
+
   // East Average residuals
   cEr = new TCanvas("cEr", "cEr");
   cEr->SetLogy(0);
@@ -783,6 +904,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     pt1->SetFillColor(0);
     pt1->Draw();
   }
+
   ////////////////////////////////////////////////////////////////////
 
   // West 1
@@ -790,7 +912,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_West_runPeriod_%i_PMTW1.dat",calibrationPeriod);
   ofstream oFileW1(temp);
 
-  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
+  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"In")!=nameW1.end())) {
 
     
   
@@ -802,6 +924,11 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	ResW1[j] = EVISW1[j] - EQW1[j];
 	oFileW1 << "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;
 	if (ResW1[j]>0.05*EQW1[j]) cout<< "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
+      }
+      else if (nameW1[j]=="In") {
+	ResW1[j] = EVISW1[j] - EQW1[j];
+	oFileW1 << "In_West" << " " <<  runW1[j] << " " << ResW1[j] << endl;
+	if (ResW1[j]>0.05*EQW1[j]) cout<< "In_West" << " " << runW1[j] << " " << ResW1[j] << endl;  
       }
       else if (nameW1[j]=="Sn") {
 	ResW1[j] = EVISW1[j] - EQW1[j];
@@ -875,7 +1002,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileW2(temp);
  
 
-  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
+  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"In")!=nameW2.end())) {
 
   
 
@@ -887,6 +1014,11 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	ResW2[j] = EVISW2[j] - EQW2[j];
 	oFileW2 << "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;
 	if (ResW2[j]>0.05*EQW2[j]) cout<< "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
+      }
+      else if (nameW2[j]=="In") {
+	ResW2[j] = EVISW2[j] - EQW2[j];
+	oFileW2 << "In_West" << " " << runW2[j] << " " << ResW2[j] << endl;
+	if (ResW2[j]>0.05*EQW2[j]) cout<< "In_West" << " " << runW2[j] << " " << ResW2[j] << endl;  
       }
       else if (nameW2[j]=="Sn") {
 	ResW2[j] = EVISW2[j] - EQW2[j];
@@ -960,7 +1092,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ofstream oFileW3(temp);
   
 
-  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() || std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() || std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
+  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() || std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() || std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end() || std::find(nameW3.begin(),nameW3.end(),"In")!=nameW3.end())) {
 
     
 
@@ -972,6 +1104,11 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	ResW3[j] = EVISW3[j] - EQW3[j];
 	oFileW3 << "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;
 	if (ResW3[j]>0.05*EQW3[j]) cout<< "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
+      }
+      else if (nameW3[j]=="In") {
+	ResW3[j] = EVISW3[j] - EQW3[j];
+	oFileW3 << "In_West" << " " << runW3[j] << " " << ResW3[j] << endl;
+	if (ResW3[j]>0.05*EQW3[j]) cout<< "In_West" << " " << runW3[j] << " " << ResW3[j] << endl;  
       }
       else if (nameW3[j]=="Sn") {
 	ResW3[j] = EVISW3[j] - EQW3[j];
@@ -1044,7 +1181,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   sprintf(temp,"../residuals/residuals_EvisPMTbyPMT_West_runPeriod_%i_PMTW4.dat",calibrationPeriod);
   ofstream oFileW4(temp);
 
-  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() || std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() || std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
+  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() || std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() || std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end() || std::find(nameW4.begin(),nameW4.end(),"In")!=nameW4.end())) {
 
     
     // Calculate residuals in [keV]
@@ -1055,6 +1192,11 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
 	ResW4[j] = EVISW4[j] - EQW4[j];
 	oFileW4 << "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;
 	if (ResW4[j]>0.05*EQW4[j]) cout<< "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;  
+      }
+      else if (nameW4[j]=="In") {
+	ResW4[j] = EVISW4[j] - EQW4[j];
+	oFileW4 << "In_West" << " " << runW4[j] << " " << ResW4[j] << endl;
+	if (ResW4[j]>0.05*EQW4[j]) cout<< "In_West4" << " " << runW4[j] << " " << ResW4[j] << endl;  
       }
       else if (nameW4[j]=="Sn") {
 	ResW4[j] = EVISW4[j] - EQW4[j];
@@ -1122,7 +1264,6 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     oFileW4 << "PMT NOT USABLE";
   }
   oFileW4.close();
-
 
   ///////////////////////////////////////////////////////////////////////
   // Calculating the weighted mean of the total energy of the West side  //
@@ -1230,14 +1371,15 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
       x_West[j] = peakCe_EQ;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
+    else if (sourceName[j]=="In") {
+      //res_West[j] = Etrue_West[j] - peakIn;
+      x_West[j] = peakIn_EQ;
+      oFileW << "In_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+    }
     else if (sourceName[j]=="Sn") {
       //res_West[j] = Etrue_West[j] - peakSn;
       x_West[j] = peakSn_EQ;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
-      /*cout << Energy1 << " " << weight1 << " "
-	   << Energy2 << " " << weight2 << " "
-	   << Energy3 << " " << weight3 << " " 
-	   << Energy4 << " " << weight4 << endl;*/
     }
     else if (sourceName[j]=="Bi1") {
       //res_West[j] = Etrue_West[j] - peakBiHigh;

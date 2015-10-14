@@ -199,4 +199,53 @@ void plot_resid_vs_pos(string SRC) {
   westY->GetYaxis()->SetTitle("residual (keV)");
   westY->Draw("AP");
   gr0->Draw("SAME");
+
+  TCanvas *c3 = new TCanvas("c3", "c3", 1400, 1000);
+  c3->Divide(1,2);
+  c3->cd(1);
+  TGraph2D *east = new TGraph2D(runE.size(),&xposE[0],&yposE[0], &residualE[0]);
+  east->SetMarkerStyle(20);
+  east->SetMarkerColor(kBlue);
+  sprintf(name, "East %s",SRC.c_str());
+  east->SetTitle(name);
+  east->GetXaxis()->SetTitle("x (mm)");
+  east->GetYaxis()->SetTitle("y (mm)");
+  east->GetZaxis()->SetTitle("residual (keV)");
+  east->GetXaxis()->SetTitleOffset(1.8);
+  east->GetYaxis()->SetTitleOffset(1.8);
+  east->GetXaxis()->SetLimits(-50., 50.);
+  east->GetYaxis()->SetLimits(-50., 50.);
+  east->GetZaxis()->SetRangeUser(-50., 50.);
+  //eastY->GetXaxis()->SetRangeUser(-50., 50.);
+  //east->GetXaxis()->SetLimits(-20., 20.);
+  east->GetXaxis()->CenterTitle();
+  east->GetYaxis()->CenterTitle();
+  east->GetZaxis()->CenterTitle();
+  east->Draw("PCOLZ");
+  //gr0->Draw("SAME");
+  
+  //TCanvas *c2 = new TCanvas("c2", "c2", 1400, 500);
+  c3->cd(2);
+  TGraph2D *west = new TGraph2D(runW.size(),&xposW[0],&yposW[0],&residualW[0]);
+  west->SetMarkerStyle(20);
+  west->SetMarkerColor(kBlue);
+  sprintf(name, "West %s",SRC.c_str());
+  west->SetTitle(name);
+  west->GetXaxis()->SetTitle("x (mm)");
+  west->GetYaxis()->SetTitle("y (mm))");
+  west->GetZaxis()->SetTitle("residual (keV)");
+  west->GetXaxis()->SetTitleOffset(1.8);
+  west->GetYaxis()->SetTitleOffset(1.8);
+  west->GetXaxis()->SetLimits(-50., 50.);
+  west->GetYaxis()->SetLimits(-50., 50.);
+  west->GetZaxis()->SetRangeUser(-50., 50.);
+  west->GetXaxis()->CenterTitle();
+  west->GetYaxis()->CenterTitle();
+  west->GetZaxis()->CenterTitle();
+  west->Draw("PCOLZ");
+  //gr0->Draw("SAME");
+
+  //TCanvas *c5 = new TCanvas("c5");
+  //TH2D *h = (TH2D*)east->Project("x:y");
+  //h->Draw("colz");
 }
