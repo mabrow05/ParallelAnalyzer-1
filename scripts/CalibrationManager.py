@@ -679,14 +679,14 @@ if __name__ == "__main__":
             rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
-    if 0:
+    if 1:
         cal = CalibrationManager()
-        #cal.calc_nPE_per_PMT(True)
-        cal.makePMTrunFile(master=True)
+        cal.calc_nPE_per_PMT(writeNPEforAllRuns=True)
+        #cal.makePMTrunFile(master=True)
 
 
     ### Source Run Calibration Steps...
-    if 1: 
+    if 0: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
         rep = CalReplayManager()
         cal = CalibrationManager()
