@@ -1,4 +1,4 @@
-/* Code to take a run number, retrieve it's runperiod, and contruct the 
+/* Code to take a run number, retrieve it's runperiod, and construct the 
 weighted spectra which would be seen as a reconstructed energy on one side
 of the detector. Also applies the trigger functions */
 
@@ -17,6 +17,8 @@ of the detector. Also applies the trigger functions */
 #include <TH1D.h>
 #include <TChain.h>
 #include <TMath.h>
+#include <TSQLRow.h>
+#include <TSQLResult.h>
 
 using namespace std;
 
@@ -45,6 +47,88 @@ Double_t triggerProbability(vector <Double_t> params, Double_t En) {
     + params[4]*TMath::Gaus(En,params[5],params[6]);
   return prob;
 }
+
+vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
+  Char_t temp[500];
+  sprintf(temp,"%s/source_list_%i.dat",getenv("SOURCE_LIST"),runNumber);
+  ifstream file(temp);
+  cout << src << endl;
+  int num = 0;
+  file >> num;
+  cout << num << endl;
+  int srcNum = 0;
+  string src_check;
+  for (int i=0; i<num;srcNum++,i++) {
+    file >> src_check;
+    cout << src_check << endl;
+    if (src_check==src) break;   
+  }
+  cout << "The source Number is: " << srcNum << endl;
+  if (srcNum==num) {
+    cout << "Didn't find source in that run\n"; exit(0);
+  }
+  file.close();
+  
+  sprintf(temp,"%s/source_positions_%i.dat",getenv("SOURCE_POSITIONS"),runNumber);
+  file.open(temp);
+  
+  vector < vector < double > > srcPos;
+  srcPos.resize(2,vector <double> (3,0.));
+  
+  for (int i=0; i<srcNum+1; i++) {
+    for (int j=0; j<2; j++) {
+      for (int jj=0; jj<3; jj++) {
+	file >> srcPos[j][jj];
+      }
+    }
+  }
+  return srcPos;
+}
+
+string getIndiumSide(int runNumber) {
+  std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
+  std::string dbname = std::string(getenv("UCNADB"));
+  std::string dbUser = std::string(getenv("UCNADBUSER"));
+  std::string dbPass = std::string(getenv("UCNADBPASS"));
+  std::string port = "3306";
+  std::string dbAddressFull = "mysql://"+dbAddress+":"+port+"/"+dbname;
+  
+  std::string qresult;
+  std::string Side="";
+  bool passFlag = false;
+
+  char cmd[200];
+  sprintf(cmd,"SELECT sourcetype FROM sources WHERE run_number=%i;",runNumber);
+
+  TSQLServer *db = TSQLServer::Connect(dbAddressFull.c_str(), dbUser.c_str(), dbPass.c_str());
+  if (!db) cout << "Couldn't connect to database\n";
+  else {
+    //cout << "Connected to DB Server\n";
+    TSQLResult *res = db->Query(cmd);
+    int rows = res->GetRowCount();
+    cout << rows << endl;
+    TSQLRow *row = res->Next();
+   
+    if (!row) {
+      cout << "This run wasn't a source run of any type\n";
+    }
+    else {
+      for (int i=0; i<rows; i++) {
+	qresult = std::string(row->GetField(0));
+	if (qresult=="In114W") {Side="West"; passFlag = true; continue;}
+	else if (qresult=="In114E") {Side="East"; passFlag = true; continue;}
+	row = res->Next();
+      }
+      if (passFlag) std::cout << "Run " << runNumber << " Indium Facing " << Side << std::endl;
+      else cout << "This run is not an Indium Run\n";
+    }
+  }
+  //delete (row);
+  //delete (res); 
+  db->Close();
+  return Side;
+}
+
 
 UInt_t getSrcRunPeriod(Int_t runNumber) {
   UInt_t calibrationPeriod=0;
@@ -165,12 +249,30 @@ void SetUpTree(TTree *tree) {
 
 void revCalSimulation (Int_t runNumber, string source) 
 {
-  //First get the number of total electron events from the data file
+  //Start by getting the source position if not a Beta decay run
+  vector < vector <double> > srcPos;
+  if (source!="Beta") {
+    string srcShort = source;
+    srcShort.erase(2);
+    srcPos = returnSourcePosition(runNumber, srcShort);
+  }
+  //If the source is In114, checking which side the Indium was facing
+  if (source=="In114") {
+    string side = getIndiumSide(runNumber);
+    if (side=="East") source+="E";
+    else if (side=="West") source+="W";
+    else {cout << "can't find Indium in run requested\n"; exit(0);}
+  }
+
+  //First get the number of total electron events around the source position from the data file
   Char_t temp[500];
   sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
   TFile *dataFile = new TFile(temp,"READ");
   TTree *data = (TTree*)(dataFile->Get("pass4"));
-  sprintf(temp,"type_pass4==0 || type_pass4==1 || type_pass4==2");
+  if (source!="Beta") {
+  sprintf(temp,"type_pass4<3 && (EvisE>0. || EvisW>0.) && xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f)",srcPos[0][0],srcPos[0][2],srcPos[0][0],srcPos[0][2],srcPos[0][1],srcPos[0][2],srcPos[0][1],srcPos[0][2]);
+  }
+  else sprintf(temp,"type_pass4<3 && (EvisE>0. || EvisW>0.)");
   UInt_t BetaEvents = data->GetEntries(temp);
   cout << "Electron Events in Data file: " << BetaEvents << endl;
   delete data;
@@ -178,7 +280,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Create simulation output file
   Char_t outputfile[500];
-  sprintf(outputfile,"%s/revCalSim_%i.root",getenv("REVCALSIM"),runNumber);
+  sprintf(outputfile,"%s/revCalSim_%i_%s.root",getenv("REVCALSIM"),runNumber,source);
   //sprintf(outputfile,"revCalSim_%i.root",runNumber);
   TFile *outfile = new TFile(outputfile, "RECREATE")
 ;
