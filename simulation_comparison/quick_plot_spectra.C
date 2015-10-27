@@ -44,12 +44,14 @@ void quick_plot_spectra(Int_t runNumber, string src) {
   sprintf(temp,"/extern/UCNA/replay_pass4_MB/replay_pass4_%i.root",runNumber);
   TFile *data = new TFile(temp,"READ");
   TTree *TData = (TTree*)(data->Get("pass4"));
-  sprintf(temp,"/extern/UCNA/reverse_cal_sim_MB/revCalSim_%i.root",runNumber);
+  sprintf(temp,"/extern/UCNA/reverse_cal_sim_MB/revCalSim_%i_%s.root",runNumber, src.c_str());
   TFile *sim = new TFile(temp,"READ");
   TTree *TSim = (TTree*)(sim->Get("revCalSim"));
   cout << "Opened Files\n";
 
-  vector < vector <double> > srcPos = returnSourcePosition(runNumber,src);
+  string srcShort = src;
+  srcShort.erase(2);
+  vector < vector <double> > srcPos = returnSourcePosition(runNumber,srcShort);
   
   for (int j=0; j<2; j++) {
       for (int jj=0; jj<3; jj++) {
@@ -73,15 +75,15 @@ void quick_plot_spectra(Int_t runNumber, string src) {
 
   sprintf(cuts,"PID_pass4==1 && type_pass4<3 && side_pass4==0 && EvisE>0. && xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f)",srcPos[0][0],srcPos[0][2],srcPos[0][0],srcPos[0][2],srcPos[0][1],srcPos[0][2],srcPos[0][1],srcPos[0][2]);  
   TData->Draw("EvisE>>data_E_all", cuts);
-  data_E_all->GetXaxis()->SetRangeUser(0.,250.);
+  //data_E_all->GetXaxis()->SetRangeUser(0.,250.);
   Double_t integralE = data_E_all->Integral();
-  data_E_all->GetXaxis()->SetRangeUser(0.,1200.);
+  //data_E_all->GetXaxis()->SetRangeUser(0.,1200.);
 
   sprintf(cuts,"PID==1 && side==0 && type<3 && EvisE>0.");
   TSim->Draw("EvisE>>sim_E_all",cuts,"SAME");
-  sim_E_all->GetXaxis()->SetRangeUser(0.,250.);
+  //sim_E_all->GetXaxis()->SetRangeUser(0.,250.);
   Double_t scaleValE = integralE/sim_E_all->Integral();
-  sim_E_all->GetXaxis()->SetRangeUser(0.,1200.);
+  //sim_E_all->GetXaxis()->SetRangeUser(0.,1200.);
   sim_E_all->Scale(scaleValE);
   sim_E_all->Draw("SAME");
 
@@ -89,15 +91,15 @@ void quick_plot_spectra(Int_t runNumber, string src) {
   
   sprintf(cuts,"PID_pass4==1 && type_pass4<3 && side_pass4==1 && EvisW>0. && xW_pass4>(%f-2.*%f) && xW_pass4<(%f+2.*%f) && yW_pass4>(%f-2.*%f) && yW_pass4<(%f+2.*%f)",srcPos[1][0],srcPos[1][2],srcPos[1][0],srcPos[1][2],srcPos[1][1],srcPos[1][2],srcPos[1][1],srcPos[1][2]);  
   TData->Draw("EvisW>>data_W_all", cuts);
-  data_W_all->GetXaxis()->SetRangeUser(0.,250.);
+  //data_W_all->GetXaxis()->SetRangeUser(0.,250.);
   Double_t integralW = data_W_all->Integral();
-  data_W_all->GetXaxis()->SetRangeUser(0.,1200.);
+  //data_W_all->GetXaxis()->SetRangeUser(0.,1200.);
 
   sprintf(cuts,"PID==1 && side==1 && type<3 && EvisW>0.");
   TSim->Draw("EvisW>>sim_W_all",cuts,"SAME");
-  sim_W_all->GetXaxis()->SetRangeUser(0.,250.);
+  //sim_W_all->GetXaxis()->SetRangeUser(0.,250.);
   Double_t scaleValW = integralW/sim_W_all->Integral();
-  sim_W_all->GetXaxis()->SetRangeUser(0.,1200.);
+  //sim_W_all->GetXaxis()->SetRangeUser(0.,1200.);
   sim_W_all->Scale(scaleValW);
   sim_W_all->Draw("SAME");
 

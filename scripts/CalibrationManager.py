@@ -200,6 +200,50 @@ class CalReplayManager:
         print "DONE"
 
 
+    def runReverseCalibration(self, srcRunPeriod=1, sourceORxenon="source"):
+        print "Running reverse calibration for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+
+        for run in runs:
+            filename = self.srcListPath+"source_list_%i.dat"%run
+            if not MButils.fileExistsAndNotEmpty(filename):
+                continue
+            srcFile = open(filename)
+            srcFileInput = []
+            for line in srcFile:
+                srcFileInput.append(line)
+            for src in range(1,int(srcFileInput[0])+1):
+                source = srcFileInput[src][0:2]
+                if source=="Ce":
+                    source = source+"139"
+                elif source=='Sn':
+                    source = source + "113"
+                elif source=="Bi":
+                    source = source + "207"
+                elif source == "In":
+                    source = source + "114"
+                elif source == "Cd":
+                    source = source + "109"
+                elif source == "Cs":
+                    source = source+"137"
+
+                os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, source))
+                #print "./../simulation_comparison/revCalSim.exe %i %s"%(run, source)
+
+        print "Finished reverse calibration for " + sourceORxenon + "run period %i"%srcRunPeriod
+
+
         
 class CalibrationManager:
     
@@ -679,25 +723,27 @@ if __name__ == "__main__":
             rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
-    if 1:
+    if 0:
         cal = CalibrationManager()
         cal.calc_nPE_per_PMT(writeNPEforAllRuns=True)
         #cal.makePMTrunFile(master=True)
 
 
     ### Source Run Calibration Steps...
-    if 0: 
+    if 1: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
         rep = CalReplayManager()
         cal = CalibrationManager()
-        #for runPeriod in runPeriods:
+        
+        for runPeriod in runPeriods:
             #cal.LinearityCurves(runPeriod)
             #rep.runReplayPass4(runPeriod)
             #cal.fitSourcePeaksInEnergy(runPeriod, True)
             #cal.makeSourceCalibrationFile(runPeriod, True, True)
             #cal.calculateResiduals(runPeriod, PMTbyPMT=True)
+            rep.runReverseCalibration(runPeriod)
 
-        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
+        #cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
