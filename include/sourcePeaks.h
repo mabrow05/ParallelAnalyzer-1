@@ -8,6 +8,9 @@
 #include <cstdlib>
 #include <string>
 
+#include <TSQLServer.h>
+#include <TSQLResult.h>
+#include <TSQLRow.h>
 
 using namespace std;
 
@@ -55,4 +58,47 @@ vector < vector <double> > EQ2EtrueFit(int srcPeriod) {
   return fits;
 }
 
+string getIndiumSide(int runNumber) {
+  std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
+  std::string dbname = std::string(getenv("UCNADB"));
+  std::string dbUser = std::string(getenv("UCNADBUSER"));
+  std::string dbPass = std::string(getenv("UCNADBPASS"));
+  std::string port = "3306";
+  std::string dbAddressFull = "mysql://"+dbAddress+":"+port+"/"+dbname;
+  
+  std::string qresult;
+  std::string Side="";
+  bool passFlag = false;
+
+  char cmd[200];
+  sprintf(cmd,"SELECT sourcetype FROM sources WHERE run_number=%i;",runNumber);
+
+  TSQLServer *db = TSQLServer::Connect(dbAddressFull.c_str(), dbUser.c_str(), dbPass.c_str());
+  if (!db) cout << "Couldn't connect to database\n";
+  else {
+    //cout << "Connected to DB Server\n";
+    TSQLResult *res = db->Query(cmd);
+    int rows = res->GetRowCount();
+    cout << rows << endl;
+    TSQLRow *row = res->Next();
+   
+    if (!row) {
+      cout << "This run wasn't a source run of any type\n";
+    }
+    else {
+      for (int i=0; i<rows; i++) {
+	qresult = std::string(row->GetField(0));
+	if (qresult=="In114W") {Side="West"; passFlag = true; continue;}
+	else if (qresult=="In114E") {Side="East"; passFlag = true; continue;}
+	row = res->Next();
+      }
+      if (passFlag) std::cout << "Run " << runNumber << " Indium Facing " << Side << std::endl;
+      else cout << "This run is not an Indium Run\n";
+    }
+  }
+  //delete (row);
+  //delete (res); 
+  db->Close();
+  return Side;
+}
 

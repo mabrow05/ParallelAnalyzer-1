@@ -287,7 +287,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Create simulation output file
   Char_t outputfile[500];
-  sprintf(outputfile,"%s/revCalSim_%i_%s.root",getenv("REVCALSIM"),runNumber,source.c_str());
+  sprintf(outputfile,"%s/sources/revCalSim_%i_%s.root",getenv("REVCALSIM"),runNumber,source.c_str());
   //sprintf(outputfile,"revCalSim_%i.root",runNumber);
   TFile *outfile = new TFile(outputfile, "RECREATE")
 ;

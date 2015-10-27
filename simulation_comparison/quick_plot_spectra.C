@@ -44,7 +44,7 @@ void quick_plot_spectra(Int_t runNumber, string src) {
   sprintf(temp,"/extern/UCNA/replay_pass4_MB/replay_pass4_%i.root",runNumber);
   TFile *data = new TFile(temp,"READ");
   TTree *TData = (TTree*)(data->Get("pass4"));
-  sprintf(temp,"/extern/UCNA/reverse_cal_sim_MB/revCalSim_%i_%s.root",runNumber, src.c_str());
+  sprintf(temp,"/extern/UCNA/reverse_cal_sim_MB/sources/revCalSim_%i_%s.root",runNumber, src.c_str());
   TFile *sim = new TFile(temp,"READ");
   TTree *TSim = (TTree*)(sim->Get("revCalSim"));
   cout << "Opened Files\n";

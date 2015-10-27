@@ -347,7 +347,7 @@ class CalibrationManager:
             print "Ran fit_source_peaks.C on run %i"%run
 
 
-    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, PMTbyPMT=False,overwrite=True):
+    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, PMTbyPMT=False, simulation=False, overwrite=True):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
@@ -363,8 +363,12 @@ class CalibrationManager:
 
         for run in runs:
             if PMTbyPMT:
-                os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
-                os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
+                if simulation:
+                     os.system("cd ../source_peaks; ./sim_source_peaks_EvisPMTbyPMT.exe %i"%run)
+                     os.system("root -b -q '../source_peaks/plot_sim_source_peaks_Evis.C(\"%i\")'"%run)
+                else:   
+                    os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
+                    os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
             else:
                 os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
                 os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
@@ -736,12 +740,14 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
+            #rep.runReverseCalibration(runPeriod)
+            cal.fitSourcePeaksInEnergy(runPeriod, True, simulation=True)
             #cal.LinearityCurves(runPeriod)
             #rep.runReplayPass4(runPeriod)
             #cal.fitSourcePeaksInEnergy(runPeriod, True)
             #cal.makeSourceCalibrationFile(runPeriod, True, True)
             #cal.calculateResiduals(runPeriod, PMTbyPMT=True)
-            rep.runReverseCalibration(runPeriod)
+            
 
         #cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
