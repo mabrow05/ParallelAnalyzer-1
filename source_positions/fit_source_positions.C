@@ -6,6 +6,7 @@
 #include "TSpectrum2.h"
 #include "TH2.h"
 #include "TF2.h"
+#include "TMath.h"
 
 void fit_source_positions(TString runNumber)
 {
@@ -94,7 +95,7 @@ void fit_source_positions(TString runNumber)
     hisexy->Fit("fit2DGauss", "R0");
     xEast[p] = fit2DGauss->GetParameter(1);
     yEast[p] = fit2DGauss->GetParameter(3);
-    sigmaEast[p] = (fit2DGauss->GetParameter(2) + fit2DGauss->GetParameter(4))/2.;
+    sigmaEast[p] = (abs(fit2DGauss->GetParameter(2)) + abs(fit2DGauss->GetParameter(4)))/2.;
 
     cout << xEast[p] << " " << yEast[p] << " " << sigmaEast[p] << endl;
   }
@@ -123,7 +124,7 @@ void fit_source_positions(TString runNumber)
     hiswxy->Fit("fit2DGauss", "R0");
     xWest[p] = fit2DGauss->GetParameter(1);
     yWest[p] = fit2DGauss->GetParameter(3);
-    sigmaWest[p] = (fit2DGauss->GetParameter(2) + fit2DGauss->GetParameter(4))/2.;
+    sigmaWest[p] = (abs(fit2DGauss->GetParameter(2)) + abs(fit2DGauss->GetParameter(4)))/2.;
 
     cout << xWest[p] << " " << yWest[p] << " " << sigmaWest[p] << endl;
   }

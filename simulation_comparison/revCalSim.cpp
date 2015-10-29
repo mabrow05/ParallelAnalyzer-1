@@ -4,6 +4,7 @@ of the detector. Also applies the trigger functions */
 
 #include "revCalSim.h"
 #include "posMapReader.h"
+#include "sourcePeaks.h"
 
 #include <vector>
 #include <cstdlib>
@@ -86,50 +87,6 @@ vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
     }
   }
   return srcPos;
-}
-
-string getIndiumSide(int runNumber) {
-  std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
-  std::string dbname = std::string(getenv("UCNADB"));
-  std::string dbUser = std::string(getenv("UCNADBUSER"));
-  std::string dbPass = std::string(getenv("UCNADBPASS"));
-  std::string port = "3306";
-  std::string dbAddressFull = "mysql://"+dbAddress+":"+port+"/"+dbname;
-  
-  std::string qresult;
-  std::string Side="";
-  bool passFlag = false;
-
-  char cmd[200];
-  sprintf(cmd,"SELECT sourcetype FROM sources WHERE run_number=%i;",runNumber);
-
-  TSQLServer *db = TSQLServer::Connect(dbAddressFull.c_str(), dbUser.c_str(), dbPass.c_str());
-  if (!db) cout << "Couldn't connect to database\n";
-  else {
-    //cout << "Connected to DB Server\n";
-    TSQLResult *res = db->Query(cmd);
-    int rows = res->GetRowCount();
-    cout << rows << endl;
-    TSQLRow *row = res->Next();
-   
-    if (!row) {
-      cout << "This run wasn't a source run of any type\n";
-    }
-    else {
-      for (int i=0; i<rows; i++) {
-	qresult = std::string(row->GetField(0));
-	if (qresult=="In114W") {Side="West"; passFlag = true; continue;}
-	else if (qresult=="In114E") {Side="East"; passFlag = true; continue;}
-	row = res->Next();
-      }
-      if (passFlag) std::cout << "Run " << runNumber << " Indium Facing " << Side << std::endl;
-      else cout << "This run is not an Indium Run\n";
-    }
-  }
-  //delete (row);
-  //delete (res); 
-  db->Close();
-  return Side;
 }
 
 
@@ -275,8 +232,8 @@ void revCalSimulation (Int_t runNumber, string source)
   TFile *dataFile = new TFile(temp,"READ");
   TTree *data = (TTree*)(dataFile->Get("pass4"));
   if (source!="Beta") {
-    sprintf(tempE,"type_pass4<3 && PID_pass4==1 && side_pass4==0 && EvisE>0. && (xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f))",srcPos[0][0],srcPos[0][2],srcPos[0][0],srcPos[0][2],srcPos[0][1],srcPos[0][2],srcPos[0][1],srcPos[0][2]);
-    sprintf(tempW,"type_pass4<3 && PID_pass4==1 && side_pass4==1 && EvisW>0. && (xW_pass4>(%f-2.*%f) && xW_pass4<(%f+2.*%f) && yW_pass4>(%f-2.*%f) && yW_pass4<(%f+2.*%f))",srcPos[1][0],srcPos[1][2],srcPos[1][0],srcPos[1][2],srcPos[1][1],srcPos[1][2],srcPos[1][1],srcPos[1][2]);
+    sprintf(tempE,"type_pass4<3 && PID_pass4==1 && side_pass4==0 && EvisE>0. && (xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f))",srcPos[0][0],abs(srcPos[0][2]),srcPos[0][0],abs(srcPos[0][2]),srcPos[0][1],abs(srcPos[0][2]),srcPos[0][1],abs(srcPos[0][2]));
+    sprintf(tempW,"type_pass4<3 && PID_pass4==1 && side_pass4==1 && EvisW>0. && (xW_pass4>(%f-2.*%f) && xW_pass4<(%f+2.*%f) && yW_pass4>(%f-2.*%f) && yW_pass4<(%f+2.*%f))",srcPos[1][0],abs(srcPos[1][2]),srcPos[1][0],abs(srcPos[1][2]),srcPos[1][1],abs(srcPos[1][2]),srcPos[1][1],abs(srcPos[1][2]));
   }
   else sprintf(temp,"type_pass4<3 && PID_pass4==1 && (EvisE>0. || EvisW>0.)");
   UInt_t BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
@@ -415,10 +372,10 @@ void revCalSimulation (Int_t runNumber, string source)
     //primX = rand2->Gaus(srcPos[primSide][0],srcPos[primSide][2]);
     //primY = rand2->Gaus(srcPos[primSide][1],srcPos[primSide][2]);
 
-    scint_pos_adj.ScintPosAdjE[0] = rand2->Gaus(srcPos[0][0], srcPos[0][2]);
-    scint_pos_adj.ScintPosAdjE[1] = rand2->Gaus(srcPos[0][1], srcPos[0][2]);
-    scint_pos_adj.ScintPosAdjW[0] = rand2->Gaus(srcPos[1][0], srcPos[1][2]);//sqrt(0.6)*10.*scint_pos.ScintPosW[0]+displacementX;
-    scint_pos_adj.ScintPosAdjW[1] = rand2->Gaus(srcPos[1][1], srcPos[1][2]);//sqrt(0.6)*10.*scint_pos.ScintPosW[1]+displacementY;
+    scint_pos_adj.ScintPosAdjE[0] = rand2->Gaus(srcPos[0][0], abs(srcPos[0][2]));
+    scint_pos_adj.ScintPosAdjE[1] = rand2->Gaus(srcPos[0][1], abs(srcPos[0][2]));
+    scint_pos_adj.ScintPosAdjW[0] = rand2->Gaus(srcPos[1][0], abs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[0]+displacementX;
+    scint_pos_adj.ScintPosAdjW[1] = rand2->Gaus(srcPos[1][1], abs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[1]+displacementY;
     
     /*Double_t displacementX=0., displacementY=0.;
     if (primType==1) {
