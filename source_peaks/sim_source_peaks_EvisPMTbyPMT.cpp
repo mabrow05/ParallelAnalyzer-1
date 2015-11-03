@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
   }
       
 
-  //Adding in here that we are only looking for runs with Ce, Sn, or Bi in them
+  //Adding in here that we are only looking for runs with Ce, Sn, In, or Bi in them
   bool correctSource = false;
   bool useSource[3] = {false,false,false};
   for (int n=0; n<nSources; n++) {

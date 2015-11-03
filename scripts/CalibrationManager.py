@@ -395,8 +395,12 @@ class CalibrationManager:
                     os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
                     os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
             else:
-                os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
-                os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
+                if Simulation:
+                    os.system("cd ../source_peaks; ./sim_source_peaks_EnergyPeak.exe %i"%run)
+                    #os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
+                else:
+                    os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
+                    os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
             print "Ran plot_source_peaks.C on run %i"%run
 
 
@@ -486,8 +490,12 @@ class CalibrationManager:
                 outputFile = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%(CalibrationPeriod)
                 src_file_base = self.srcPeakPath + "source_peaks_EvisPMTbyPMT_"               
         elif PeaksInEnergy and not PMTbyPMT:
-            outputFile = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
-            src_file_base = self.srcPeakPath + "source_peaks_EnergyPeak_"
+            if Simulation:
+                outputFile = "../residuals/SIM_source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
+                src_file_base = self.revCalSimPath + "/source_peaks/source_peaks_EnergyPeak_"
+            else:
+                outputFile = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
+                src_file_base = self.srcPeakPath + "source_peaks_EnergyPeak_"
         else:
             outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
             src_file_base = self.srcPeakPath + "source_peaks_"
@@ -781,11 +789,11 @@ if __name__ == "__main__":
         for runPeriod in runPeriods:
             #cal.LinearityCurves(runPeriod)
             #rep.runReplayPass4(runPeriod)
-            #cal.fitSourcePeaksInEnergy(runPeriod, True)
-            cal.makeSourceCalibrationFile(runPeriod, True, True)
-            cal.calculateResiduals(runPeriod, PMTbyPMT=True)
+            #cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=False, Simulation=True)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=False, Simulation=True)
+            cal.calculateResiduals(runPeriod, PMTbyPMT=False)
             
-        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
+        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=False)
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream

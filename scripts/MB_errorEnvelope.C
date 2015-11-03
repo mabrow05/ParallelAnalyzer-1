@@ -67,8 +67,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
   Int_t nBi1East = 0;
   Int_t nBi2East = 0;
   cout << "East \"bad\" runs: \n";
-  while (!fileEast.eof()) {
-    fileEast >> sourceEast[i] >> runEast[i] >> resEast[i];
+  while (fileEast >> sourceEast[i] >> runEast[i] >> resEast[i]) {
     if (sourceEast[i] == "Ce_East") {
       resCeEast[nCeEast] = resEast[i];
       nCeEast++;
@@ -115,8 +114,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
   Int_t nBi2West = 0;
   
   cout << "West \"bad\" runs: \n";
-  while (!fileWest.eof()) {
-    fileWest >> sourceWest[i] >> runWest[i] >> resWest[i];
+  while (fileWest >> sourceWest[i] >> runWest[i] >> resWest[i]) {
     if (sourceWest[i] == "Ce_West") {
       resCeWest[nCeWest] = resWest[i];
       nCeWest++;
