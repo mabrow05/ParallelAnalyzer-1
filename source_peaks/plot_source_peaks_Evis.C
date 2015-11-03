@@ -53,7 +53,7 @@ void plot_source_peaks_Evis(TString runNumber)
   cout << "... nSources: " << nSources << endl;
   for (int n=0; n<nSources;n++) {
     fileList >> sourceName[n];
-    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi") useSource[n]=true;
+    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi" || sourceName[n]=="In") useSource[n]=true;
   }
 
   // Output file

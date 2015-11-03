@@ -63,19 +63,49 @@ void LinearityCurves(Int_t runPeriod)
   char temp[500];
   sprintf(temp, "../residuals/source_runs_RunPeriod_%i.dat",calibrationPeriod);
   ifstream filein(temp);
+  sprintf(temp, "../residuals/SIM_source_runs_EvisPMTbyPMT_RunPeriod_%i.dat",calibrationPeriod);
+  ifstream simFileIn(temp);
 
   Int_t i = 0;
-  Double_t run[500];
-  string sourceName[500];
+  Int_t run[500], run_hold=0;
+  string sourceName[500], sourceName_hold="";
   Double_t adcE1[500], adcE2[500], adcE3[500], adcE4[500];
   Double_t adcW1[500], adcW2[500], adcW3[500], adcW4[500];
+  Double_t EqE1[500], EqE2[500], EqE3[500], EqE4[500];
+  Double_t EqW1[500], EqW2[500], EqW3[500], EqW4[500];
   Double_t resE1[500], resE2[500], resE3[500], resE4[500];
   Double_t resW1[500], resW2[500], resW3[500], resW4[500];
   Double_t err[500];
-  while (!filein.eof()) {
-    filein >> run[i] >> sourceName[i]
-           >> adcE1[i] >> adcE2[i] >> adcE3[i] >> adcE4[i]
-           >> adcW1[i] >> adcW2[i] >> adcW3[i] >> adcW4[i];
+  Double_t Eq_hold[8];
+  
+  while (filein >> run[i] >> sourceName[i]
+	 >> adcE1[i] >> adcE2[i] >> adcE3[i] >> adcE4[i]
+	 >> adcW1[i] >> adcW2[i] >> adcW3[i] >> adcW4[i]) {
+
+    while (!(run_hold==run[i] && sourceName_hold==sourceName[i])) {
+      simFileIn >> run_hold >> sourceName_hold >> Eq_hold[0] >> Eq_hold[1] >> Eq_hold[2]
+		>> Eq_hold[3] >> Eq_hold[4] >> Eq_hold[5] >> Eq_hold[6] >> Eq_hold[7];
+    }
+    cout << run_hold << " " << sourceName_hold << " ";
+    if (run_hold==run[i] && sourceName_hold==sourceName[i]) { 
+      EqE1[i] = Eq_hold[0];
+      EqE2[i] = Eq_hold[1];
+      EqE3[i] = Eq_hold[2];
+      EqE4[i] = Eq_hold[3];
+      EqW1[i] = Eq_hold[4];
+      EqW2[i] = Eq_hold[5];
+      EqW3[i] = Eq_hold[6];
+      EqW4[i] = Eq_hold[7];
+      //simFileIn >> EqE1[i] >> EqE2[i] >> EqE3[i] >> EqE4[i]
+      //	>> EqW1[i] >> EqW2[i] >> EqW3[i] >> EqW4[i];
+      //cout << EqE1[i] << " " << EqE2[i] << " " << EqE3[i] << " " << EqE4[i] << " "
+      //   << EqW1[i] << " " << EqW2[i] << " " << EqW3[i] << " " << EqW4[i] << endl;
+    }
+    else {
+      cout << "The simulation and data source peak files don't match. You need to re-make the source calibration files for both sim and data\n";
+      exit(0);
+    }
+
     if (filein.fail()) break;
     i++;
   }
@@ -161,59 +191,59 @@ void LinearityCurves(Int_t runPeriod)
   vector<Double_t> ResW1, ResW2, ResW3, ResW4;
   // Fill run, adc, and eQ vectors
   for (Int_t i=0; i<num;i++) {
-    UInt_t runPos = find_vec_location_int(pmtRun,(int)run[i]);
-    cout << "Found run " << (int) run[i] << " in PMT Quality\n";
-    int src_hold;
+    UInt_t runPos = find_vec_location_int(pmtRun,run[i]);
+    cout << "Found run " <<  run[i] << " in PMT Quality\n";
+    /*int src_hold;
     if (sourceName[i]=="Ce") src_hold = 0;
     else if (sourceName[i]=="Sn") src_hold=1;
     else if (sourceName[i]=="Bi2") src_hold=2;
-    else if (sourceName[i]=="Bi1") src_hold=3;
+    else if (sourceName[i]=="Bi1") src_hold=3;*/
 
     if (pmtQuality[runPos][0]) {
-      runE1.push_back((int)run[i]);
-      EQE1.push_back(EQsmeared[0][src_hold]);
+      runE1.push_back(run[i]);
+      EQE1.push_back(EqE1[i]);
       nameE1.push_back(sourceName[i]);
       ADCE1.push_back(adcE1[i]);
     }
     if (pmtQuality[runPos][1]) {
-      runE2.push_back((int)run[i]);
-      EQE2.push_back(EQsmeared[1][src_hold]);
+      runE2.push_back(run[i]);
+      EQE2.push_back(EqE2[i]);
       nameE2.push_back(sourceName[i]);
       ADCE2.push_back(adcE2[i]);
     }
     if (pmtQuality[runPos][2]) {
-      runE3.push_back((int)run[i]);
-      EQE3.push_back(EQsmeared[2][src_hold]);
+      runE3.push_back(run[i]);
+      EQE3.push_back(EqE3[i]);
       nameE3.push_back(sourceName[i]);
       ADCE3.push_back(adcE3[i]);
     }
     if (pmtQuality[runPos][3]) {
-      runE4.push_back((int)run[i]);
-      EQE4.push_back(EQsmeared[3][src_hold]);
+      runE4.push_back(run[i]);
+      EQE4.push_back(EqE4[i]);
       nameE4.push_back(sourceName[i]);
       ADCE4.push_back(adcE4[i]);
     }
     if (pmtQuality[runPos][4]) {
-      runW1.push_back((int)run[i]);
-      EQW1.push_back(EQsmeared[4][src_hold]);
+      runW1.push_back(run[i]);
+      EQW1.push_back(EqW1[i]);
       nameW1.push_back(sourceName[i]);
       ADCW1.push_back(adcW1[i]);
     }
     if (pmtQuality[runPos][5]) {
-      runW2.push_back((int)run[i]);
-      EQW2.push_back(EQsmeared[5][src_hold]);
+      runW2.push_back(run[i]);
+      EQW2.push_back(EqW2[i]);
       nameW2.push_back(sourceName[i]);
       ADCW2.push_back(adcW2[i]);
     }
     if (pmtQuality[runPos][6]) {
-      runW3.push_back((int)run[i]);
-      EQW3.push_back(EQsmeared[6][src_hold]);
+      runW3.push_back(run[i]);
+      EQW3.push_back(EqW3[i]);
       nameW3.push_back(sourceName[i]);
       ADCW3.push_back(adcW3[i]);
     }
     if (pmtQuality[runPos][7]) {
-      runW4.push_back((int)run[i]);
-      EQW4.push_back(EQsmeared[7][src_hold]);
+      runW4.push_back(run[i]);
+      EQW4.push_back(EqW4[i]);
       nameW4.push_back(sourceName[i]);
       ADCW4.push_back(adcW4[i]);
     }
@@ -221,7 +251,7 @@ void LinearityCurves(Int_t runPeriod)
 
 
   //Resize res vectors
-  ResE1.resize(runE1.size());
+ResE1.resize(runE1.size());
   ResE2.resize(runE2.size());
   ResE3.resize(runE3.size());
   ResE4.resize(runE4.size());
@@ -865,9 +895,9 @@ void LinearityCurves(Int_t runPeriod)
     Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
     Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt in true energy
     Double_t ResidualE1, ResidualE2, ResidualE3, ResidualE4; //These hold the residuals for the weighting method..
-    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
+    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,run[j]);
 
-    if (pmtQuality[pmtVecLocation][0] && *E1==(int)run[j] && *nmE1==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][0] && *E1==run[j] && *nmE1==sourceName[j]) {
       Double_t N = adcE1[j]*nPE_per_channel[pmtVecLocation][0];
       Double_t f = sqrt(N)/N;
       ResidualE1 = *RE1;
@@ -882,7 +912,7 @@ void LinearityCurves(Int_t runPeriod)
     }
     else {weight1=0.; Energy1=0.; ResidualE1=0.;}
 
-    if (pmtQuality[pmtVecLocation][1] && *E2==(int)run[j] && *nmE2==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][1] && *E2==run[j] && *nmE2==sourceName[j]) {
       Double_t N = adcE2[j]*nPE_per_channel[pmtVecLocation][1];
       Double_t f = sqrt(N)/N;
       ResidualE2 = *RE2;
@@ -897,7 +927,7 @@ void LinearityCurves(Int_t runPeriod)
     }
     else {weight2=0.; Energy2=0.; ResidualE2=0.;}
 
-    if (pmtQuality[pmtVecLocation][2] && *E3==(int)run[j] && *nmE3==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][2] && *E3==run[j] && *nmE3==sourceName[j]) {
       Double_t N = adcE3[j]*nPE_per_channel[pmtVecLocation][2];
       Double_t f = sqrt(N)/N;
       ResidualE4 = *RE3;
@@ -912,7 +942,7 @@ void LinearityCurves(Int_t runPeriod)
     }
     else {weight3=0.; Energy3=0.; ResidualE3=0.;}
 
-    if (pmtQuality[pmtVecLocation][3] && *E4==(int)run[j] && *nmE4==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][3] && *E4==run[j] && *nmE4==sourceName[j]) {
       Double_t N = adcE4[j]*nPE_per_channel[pmtVecLocation][3];
       Double_t f = sqrt(N)/N;
       ResidualE4 = *RE4;
@@ -932,12 +962,12 @@ void LinearityCurves(Int_t runPeriod)
     if (sourceName[j]=="Ce") {
       //res_East[j] = Etrue_East[j] - peakCe;
       x_East[j] = peakCe_EQ;
-      oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Ce_East" << " " <<  run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
       //res_East[j] = Etrue_East[j] - peakSn;
       x_East[j] = peakSn_EQ;
-      oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Sn_East" << " " <<  run[j] << " " << res_East[j] << endl;
       /*cout << Energy1 << " " << weight1 << " "
 	   << Energy2 << " " << weight2 << " "
 	   << Energy3 << " " << weight3 << " " 
@@ -950,7 +980,7 @@ void LinearityCurves(Int_t runPeriod)
     else if (sourceName[j]=="Bi1") {
       //res_East[j] = Etrue_East[j] - peakBiHigh;
       x_East[j] = peakBiHigh_EQ;
-      oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Bi1_East" << " " <<  run[j] << " " << res_East[j] << endl;
    }
 
   }
@@ -1595,9 +1625,9 @@ void LinearityCurves(Int_t runPeriod)
     Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
     Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
     Double_t ResidualW1, ResidualW2, ResidualW3, ResidualW4;
-    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
+    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,run[j]);
 
-    if (pmtQuality[pmtVecLocation][4] && *W1==(int)run[j] && *nmW1==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][4] && *W1==run[j] && *nmW1==sourceName[j]) {
       Double_t N = adcW1[j]*nPE_per_channel[pmtVecLocation][4];
       Double_t f = sqrt(N)/N;
       ResidualW1 = *RW1;
@@ -1612,7 +1642,7 @@ void LinearityCurves(Int_t runPeriod)
     }
     else {weight1=0.; Energy1=0.; ResidualW1=0.;}
 
-    if (pmtQuality[pmtVecLocation][5] && *W2==(int)run[j] && *nmW2==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][5] && *W2==run[j] && *nmW2==sourceName[j]) {
       Double_t N = adcW2[j]*nPE_per_channel[pmtVecLocation][5];
       Double_t f = sqrt(N)/N;
       ResidualW2 = *RW2;
@@ -1627,7 +1657,7 @@ void LinearityCurves(Int_t runPeriod)
     }
     else {weight2=0.; Energy2=0.; ResidualW2=0.;}
 
-    if (pmtQuality[pmtVecLocation][6] && *W3==(int)run[j] && *nmW3==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][6] && *W3==run[j] && *nmW3==sourceName[j]) {
       Double_t N = adcW3[j]*nPE_per_channel[pmtVecLocation][6];
       Double_t f = sqrt(N)/N;
       ResidualW3 = *RW3;
@@ -1642,7 +1672,7 @@ void LinearityCurves(Int_t runPeriod)
     }
     else {weight3=0.; Energy3=0.; ResidualW3=0.;}
 
-    if (pmtQuality[pmtVecLocation][7] && *W4==(int)run[j] && *nmW4==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][7] && *W4==run[j] && *nmW4==sourceName[j]) {
       Double_t N = adcW4[j]*nPE_per_channel[pmtVecLocation][7];
       Double_t f = sqrt(N)/N;
       ResidualW4 = *RW4;
@@ -1662,12 +1692,12 @@ void LinearityCurves(Int_t runPeriod)
     if (sourceName[j]=="Ce") {
       //res_West[j] = Etrue_West[j] - peakCe;
       x_West[j] = peakCe_EQ;
-      oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Ce_West" << " " <<  run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
       //res_West[j] = Etrue_West[j] - peakSn;
       x_West[j] = peakSn_EQ;
-      oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Sn_West" << " " <<  run[j] << " " << res_West[j] << endl;
       /*cout << Energy1 << " " << weight1 << " "
 	   << Energy2 << " " << weight2 << " "
 	   << Energy3 << " " << weight3 << " " 
@@ -1680,7 +1710,7 @@ void LinearityCurves(Int_t runPeriod)
     else if (sourceName[j]=="Bi1") {
       //res_West[j] = Etrue_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh_EQ;
-      oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Bi1_West" << " " <<  run[j] << " " << res_West[j] << endl;
    }
 
   }

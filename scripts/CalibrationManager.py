@@ -26,7 +26,7 @@ for Range in omittedRanges:
 #### This will be done by having a file with all source runs, where the PMT value
 #### is set to 0 or 1 to represent false (don't use) and true (do use)
 
-EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. This removes source outliers from
+EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
 EPMT2 = []
 EPMT3 = []
 EPMT4 = []
@@ -78,8 +78,32 @@ class CalReplayManager:
         self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
         self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
         self.srcPeakPath = os.getenv("SOURCE_PEAKS")
+        self.replayPass1 = os.getenv("REPLAY_PASS1")
+        self.replayPass2 = os.getenv("REPLAY_PASS2")
         self.replayPass3 = os.getenv("REPLAY_PASS3")
+        self.replayPass4 = os.getenv("REPLAY_PASS4")
         self.srcListPath = os.getenv("SOURCE_LIST")
+        self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
+        self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
+        self.octetListPath = os.getenv("OCTET_LIST")
+        self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
+        self.revCalSimPath = os.getenv("REVCALSIM")
+
+    def makeAllDirectories(self):
+        #os.sys("mkdir -p %s"%self.AnalysisDataPath)
+        os.sys("mkdir -p %s"%self.srcPositionsPath)
+        os.sys("mkdir -p %s"%self.srcPeakPath)
+        os.sys("mkdir -p %s"%self.srcListPath)
+        os.sys("mkdir -p %s"%self.replayPass1)
+        os.sys("mkdir -p %s"%self.replayPass2)
+        os.sys("mkdir -p %s"%self.replayPass3)
+        os.sys("mkdir -p %s"%self.replayPass4)
+        os.sys("mkdir -p %s"%self.gainBismuthPath)
+        os.sys("mkdir -p %s"%self.nPEweightsPath)
+        os.sys("mkdir -p %s"%self.octetListPath)
+        os.sys("mkdir -p %s"%self.triggerFuncPath)
+        os.sys("mkdir -p %s"%self.revCalSimPath)
+
 
     def runReplayPass1(self,srcRunPeriod=1, sourceORxenon="source"):
         print "Running replay_pass1 for %s run period %i"%(sourceORxenon,srcRunPeriod)
@@ -728,8 +752,8 @@ if __name__ == "__main__":
             #rep.runGainBismuth(runPeriod)
             rep.runReplayPass2(runPeriod)
             rep.runReplayPass3(runPeriod)
-            #cal.fitSourcePeaks(runPeriod)
-            rep.runReplayPass4(runPeriod)
+            cal.fitSourcePeaks(runPeriod)
+            #rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
     if 0:
@@ -738,7 +762,7 @@ if __name__ == "__main__":
         #cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
-    if 1: 
+    if 0: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
@@ -758,7 +782,7 @@ if __name__ == "__main__":
             #cal.LinearityCurves(runPeriod)
             #rep.runReplayPass4(runPeriod)
             #cal.fitSourcePeaksInEnergy(runPeriod, True)
-            #cal.makeSourceCalibrationFile(runPeriod, True, True)
+            cal.makeSourceCalibrationFile(runPeriod, True, True)
             cal.calculateResiduals(runPeriod, PMTbyPMT=True)
             
         cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)

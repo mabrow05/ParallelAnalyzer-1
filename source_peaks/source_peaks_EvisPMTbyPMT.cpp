@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
   double binCenterMax[3][8];
   double binCounts[3][8];
   for (int n=0; n<nSources; n++) {
-    for (int i=1; i<nBin; i++) { //Don't want zeroth bin
+    for (int i=0.045*nBin; i<nBin; i++) { //Don't want zeroth bin or any bins affected by forcing PMT curves to zero at low energy
       for (int j=0; j<8; j++) {
         binCenter[n][j] = his[n][j]->GetBinCenter(i+1);
         binCounts[n][j] = his[n][j]->GetBinContent(i+1);
@@ -289,6 +289,7 @@ int main(int argc, char *argv[])
       for (int i=maxBin[n][j]; i<nBin; i++) {
         if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
           xHigh[n][j] = his[n][j]->GetBinCenter(i+1);
+	  if ((i-maxBin[n][j])<5) xHigh[n][j] = binCenterMax[n][j]+50.; //In case the statistics cause a poor determination of FWHM, set one to capture the fit
           break;
         }
       }
@@ -320,10 +321,22 @@ int main(int argc, char *argv[])
 	gaussian_fit[n][j]->SetParameter(0,maxCounts[n][j]);
 	gaussian_fit[n][j]->SetParameter(1,binCenterMax[n][j]);
 	gaussian_fit[n][j]->SetParameter(2,100.0);
-	gaussian_fit[n][j]->SetParLimits(1,xLow[n][j],xHigh[n][j]);
+	//gaussian_fit[n][j]->SetParLimits(1,xLow[n][j],xHigh[n][j]);
 
-	his[n][j]->Fit(fitName, "LRQ");
-	fitMean[n][j] = gaussian_fit[n][j]->GetParameter(1);
+	fitMean[n][j] = 0.;
+	Int_t ntries = 0;
+	while (fitMean[n][j]<xLow[n][j] || fitMean[n][j]>xHigh[n][j]) {
+	  his[n][j]->Fit(fitName, "RQ");
+	  fitMean[n][j] = gaussian_fit[n][j]->GetParameter(1);	 
+	  //cout << fitMean[n][j] << endl;
+	  gaussian_fit[n][j]->SetParameter(1,binCenterMax[n][j]-1.);
+	  ntries++;
+ 
+	  if (ntries>4) {
+	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << endl;
+	    break;
+	  }
+	}
       }
     }
   }
@@ -339,13 +352,17 @@ int main(int argc, char *argv[])
       Int_t maxBinContent = his[BiPeakIndex][j]->GetBinContent(maxBin);
       his[BiPeakIndex][j]->GetXaxis()->SetRange(0,nbins);
       Double_t max = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(maxBin);
-      cout << maxBin << endl;
+      //cout << maxBin << endl;
       Double_t Xmin, Xmax; //Calculate the max and min bins for fitting
-      Xmin=Xmax=50.;
+      Xmin=250.;
+      Xmax=650.;
       for (int i=maxBin; i<nbins; i++) {
 	if (his[BiPeakIndex][j]->GetBinContent(i+1)<0.5*maxBinContent) {
 	  Xmax = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i+1); 
-	  if (Xmax>600.) Xmax=560.;
+	  if (Xmax>600.) Xmax=600.;
+	  break;}
+	if (his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i)>600.) {
+	  Xmax = 600.;
 	  break;}
       }
       for (int i=maxBin; i>0; i--) {
@@ -353,7 +370,7 @@ int main(int argc, char *argv[])
 	  Xmin = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i-1); 
 	  break;}
       }
-      cout << Xmin << " " << Xmax << endl;
+      //cout << Xmin << " " << Xmax << endl;
 
       sprintf(fitName, "lowBiGauss%i",j);
       lowBiGauss[j] = new TF1(fitName,"[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",
@@ -362,12 +379,23 @@ int main(int argc, char *argv[])
       lowBiGauss[j]->SetParameter(0,(float)maxBinContent);
       lowBiGauss[j]->SetParameter(1, max);
       lowBiGauss[j]->SetParameter(2, 100.0);
-      lowBiGauss[j]->SetParLimits(1, Xmin, Xmax);
+      //lowBiGauss[j]->SetParLimits(1, Xmin, Xmax);
 
-      his[BiPeakIndex][j]->Fit(fitName, "LRQ+");
-      lowBiFitMean[j] = lowBiGauss[j]->GetParameter(1);
-      cout << lowBiFitMean[j] << endl;
+      lowBiFitMean[j] = 0.;
+      Int_t ntries = 0;
+      while (lowBiFitMean[j]<Xmin || lowBiFitMean[j]>Xmax) {
+	
+	his[BiPeakIndex][j]->Fit(fitName, "LRQ+");
+	lowBiFitMean[j] = lowBiGauss[j]->GetParameter(1);
+	lowBiGauss[j]->SetParameter(1,max-1.);
+	ntries++;
+	//cout << lowBiFitMean[j] << endl;
       //his[BiPeakIndex][j]->GetXaxis()->SetRange(0,nbins);
+	if (ntries>4) {
+	  cout << "Run " << runNumber << " can't converge on Bi2 peak in PMT " << j << endl;
+	  break;
+	}
+      }
     }
   }
 
