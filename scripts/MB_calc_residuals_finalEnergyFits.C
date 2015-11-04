@@ -82,23 +82,35 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   // Read data file
   char temp[500];
   sprintf(temp, "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat",calibrationPeriod);
-  ifstream filein(temp);
+  ifstream filein_data(temp);
+  sprintf(temp, "../residuals/SIM_source_runs_EnergyPeaks_RunPeriod_%i.dat",calibrationPeriod);
+  ifstream filein_sim(temp);
 
   Int_t i = 0;
-  Double_t run[500], Etrue[500];
-  string sourceName[500];
-  Double_t eastE[500], westE[500];
+  Int_t run[500], simRun=0; 
+  string sourceName[500], simSourceName="";
+  Double_t eastE[500], westE[500], sim_eastE[500], sim_westE[500];
   Double_t resE[500], resW[500];
   Double_t err[500];
-  while (!filein.eof()) {
-    filein >> run[i] >> sourceName[i]
-           >> eastE[i] >> westE[i];
-    if (filein.fail()) break;
+  while (filein_data >> run[i] >> sourceName[i]
+	 >> eastE[i] >> westE[i]) {
+    filein_sim >> simRun >> simSourceName;
+    if (simRun==run[i] && simSourceName==sourceName[i]) {
+      filein_sim >> sim_eastE[i] >> sim_westE[i]; 
+    }
+    else {
+      cout << "Data and sim files don't match. Rerun MakeSourceCalibrationFiles!\n"; 
+      exit(0);
+    }
+    if (filein_data.fail()) break;
     i++;
   }
+  filein_data.close();
+  filein_sim.close();
   Int_t num = i;
-  cout << "Number of data points: " << num << endl;
- 
+  cout << "Number of data peaks: " << num << endl;
+
+
   ///////////////////////////////////////////////////////////////////
 
 
@@ -111,23 +123,28 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
   for (int j=0; j<num; j++) {
   
     if (sourceName[j]=="Ce") {
-      res_East[j] = eastE[j] - simPeaks[0][0];
-      x_East[j] = simPeaks[0][0];//peakCe;
+      res_East[j] = eastE[j] - sim_eastE[j];
+      x_East[j] = sim_eastE[j];//simPeaks[0][0];//peakCe;
       oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
+    if (sourceName[j]=="In") {
+      res_East[j] = eastE[j] - sim_eastE[j];
+      x_East[j] = sim_eastE[j];//peakIn;
+      oFileE << "In_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+    }
     else if (sourceName[j]=="Sn") {
-      res_East[j] = eastE[j] - simPeaks[1][0];
-      x_East[j] = simPeaks[1][0];//peakSn;
+      res_East[j] = eastE[j] - sim_eastE[j];
+      x_East[j] = sim_eastE[j];//simPeaks[1][0];//peakSn;
       oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Bi2") {
-      res_East[j] = eastE[j] - simPeaks[2][0];
-      x_East[j] = simPeaks[2][0];//peakBiLow;
+      res_East[j] = eastE[j] - sim_eastE[j];
+      x_East[j] = sim_eastE[j];//simPeaks[2][0];//peakBiLow;
       oFileE << "Bi2_East" << " " << (int) run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Bi1") {
-      res_East[j] = eastE[j] - simPeaks[3][0];
-      x_East[j] = simPeaks[3][0];//peakBiHigh;
+      res_East[j] = eastE[j] - sim_eastE[j];
+      x_East[j] = sim_eastE[j];//simPeaks[3][0];//peakBiHigh;
       oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
    }
 
@@ -191,23 +208,28 @@ void MB_calc_residuals_finalEnergyFits(Int_t runPeriod)
 
   for (int j=0; j<num; j++) {
     if (sourceName[j]=="Ce") {
-      res_West[j] = westE[j] - simPeaks[0][1];
-      x_West[j] = simPeaks[0][1];//peakCe;
+      res_West[j] = westE[j] - sim_westE[j];
+      x_West[j] = sim_westE[j];//simPeaks[0][1];//peakCe;
       oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
+    if (sourceName[j]=="In") {
+      res_West[j] = westE[j] - sim_westE[j];
+      x_West[j] = sim_westE[j];//simPeaks[0][1];//peakCe;
+      oFileW << "In_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+    }
     else if (sourceName[j]=="Sn") {
-      res_West[j] = westE[j] - simPeaks[1][1];
-      x_West[j] = simPeaks[1][1];//peakSn;
+      res_West[j] = westE[j] - sim_westE[j];
+      x_West[j] = sim_westE[j];//simPeaks[1][1];//peakSn;
       oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Bi2") {
-      res_West[j] = westE[j] - simPeaks[2][1];
-      x_West[j] = simPeaks[2][1];//peakBiLow;
+      res_West[j] = westE[j] - sim_westE[j];
+      x_West[j] = sim_westE[j];//simPeaks[2][1];//peakBiLow;
       oFileW << "Bi2_West" << " " << (int) run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Bi1") {
-      res_West[j] = westE[j] - simPeaks[3][1];
-      x_West[j] = simPeaks[3][1];// peakBiHigh;
+      res_West[j] = westE[j] - sim_westE[j];
+      x_West[j] = sim_westE[j];//simPeaks[3][1];// peakBiHigh;
       oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
    }
 

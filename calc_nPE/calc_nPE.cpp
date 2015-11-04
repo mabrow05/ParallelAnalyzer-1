@@ -118,29 +118,29 @@ int main(int argc, char *argv[])
 
   // Open input ntuple
   char tempIn[500];
-  sprintf(tempIn, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
+  sprintf(tempIn, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
   TFile *fileIn = new TFile(tempIn, "READ");
-  TTree *Tin = (TTree*)(fileIn->Get("pass1"));
+  TTree *Tin = (TTree*)(fileIn->Get("pass3"));
 
   // Variables
-  Tin->SetBranchAddress("pmt0", &pmt_pass3[0]);
-  Tin->SetBranchAddress("pmt1", &pmt_pass3[1]);
-  Tin->SetBranchAddress("pmt2", &pmt_pass3[2]);
-  Tin->SetBranchAddress("pmt3", &pmt_pass3[3]);
-  Tin->SetBranchAddress("pmt4", &pmt_pass3[4]);
-  Tin->SetBranchAddress("pmt5", &pmt_pass3[5]);
-  Tin->SetBranchAddress("pmt6", &pmt_pass3[6]);
-  Tin->SetBranchAddress("pmt7", &pmt_pass3[7]);
+  Tin->SetBranchAddress("pmt0_pass3", &pmt_pass3[0]);
+  Tin->SetBranchAddress("pmt1_pass3", &pmt_pass3[1]);
+  Tin->SetBranchAddress("pmt2_pass3", &pmt_pass3[2]);
+  Tin->SetBranchAddress("pmt3_pass3", &pmt_pass3[3]);
+  Tin->SetBranchAddress("pmt4_pass3", &pmt_pass3[4]);
+  Tin->SetBranchAddress("pmt5_pass3", &pmt_pass3[5]);
+  Tin->SetBranchAddress("pmt6_pass3", &pmt_pass3[6]);
+  Tin->SetBranchAddress("pmt7_pass3", &pmt_pass3[7]);
 
-  Tin->SetBranchAddress("xE", &xE_pass3);
-  Tin->SetBranchAddress("yE", &yE_pass3);
-  Tin->SetBranchAddress("xW", &xW_pass3);
-  Tin->SetBranchAddress("yW", &yW_pass3);
+  Tin->SetBranchAddress("xE_pass3", &xE_pass3);
+  Tin->SetBranchAddress("yE_pass3", &yE_pass3);
+  Tin->SetBranchAddress("xW_pass3", &xW_pass3);
+  Tin->SetBranchAddress("yW_pass3", &yW_pass3);
 
-  Tin->SetBranchAddress("PID",  &PID_pass3);
-  Tin->SetBranchAddress("type", &type_pass3);
-  Tin->SetBranchAddress("side", &side_pass3);
-  Tin->SetBranchAddress("posError", &posError_pass3);
+  Tin->SetBranchAddress("PID_pass3",  &PID_pass3);
+  Tin->SetBranchAddress("type_pass3", &type_pass3);
+  Tin->SetBranchAddress("side_pass3", &side_pass3);
+  Tin->SetBranchAddress("posError_pass3", &posError_pass3);
 
   int nEvents = Tin->GetEntries();
   cout << "Processing " << argv[1] << " ... " << endl;

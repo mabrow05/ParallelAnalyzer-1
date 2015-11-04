@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   bool correctSource = false;
   bool useSource[3] = {false,false,false};
   for (int n=0; n<nSources; n++) {
-    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi") {
+    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi" || sourceName[n]=="In") {
       correctSource = true;
       useSource[n]=true;
       continue; 
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
     Tin->GetEvent(i);
 
     // Use Type 0 events
-    if (type_pass4 != 0) continue;
+    if (type_pass4 != 0 || PID_pass4!=1) continue;
 
     // First source (x,y)
     if (useSource[0]) {

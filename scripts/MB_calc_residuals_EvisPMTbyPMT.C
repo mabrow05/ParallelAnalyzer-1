@@ -46,7 +46,7 @@ vector < double > returnPeaksOtherSource(int srcPeriod, string src) {
   return peaks;
 }
 
-string getIndiumSide(int runNumber) {
+/*string getIndiumSide(int runNumber) {
   std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
   std::string dbname = std::string(getenv("UCNADB"));
   std::string dbUser = std::string(getenv("UCNADBUSER"));
@@ -88,7 +88,7 @@ string getIndiumSide(int runNumber) {
   //delete (res); 
   //db->Close();
   return Side;
-}
+  }*/
 
 vector < Double_t > GetAlphaValues(Int_t runPeriod)
 {
@@ -136,28 +136,44 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   // Read data file
   char temp[500];
   sprintf(temp, "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat",calibrationPeriod);
-  ifstream filein(temp);
+  ifstream dataFileIn(temp);
+  sprintf(temp, "../residuals/SIM_source_runs_EvisPMTbyPMT_RunPeriod_%i.dat",calibrationPeriod);
+  ifstream simFileIn(temp);
 
   Int_t i = 0;
-  Double_t run[500];
-  string sourceName[500];
+  Int_t run[500], run_hold;
+  string sourceName[500], sourceName_hold;
   Double_t EvisE1[500], EvisE2[500], EvisE3[500], EvisE4[500];
   Double_t EvisW1[500], EvisW2[500], EvisW3[500], EvisW4[500];
-  Double_t resE1[500], resE2[500], resE3[500], resE4[500];
-  Double_t resW1[500], resW2[500], resW3[500], resW4[500];
+  Double_t EqE1[500], EqE2[500], EqE3[500], EqE4[500];
+  Double_t EqW1[500], EqW2[500], EqW3[500], EqW4[500];
+  //Double_t resE1[500], resE2[500], resE3[500], resE4[500];
+  //Double_t resW1[500], resW2[500], resW3[500], resW4[500];
   Double_t err[500];
-  while (!filein.eof()) {
-    filein >> run[i] >> sourceName[i]
+  while (dataFileIn >> run[i] >> sourceName[i]
            >> EvisE1[i] >> EvisE2[i] >> EvisE3[i] >> EvisE4[i]
-           >> EvisW1[i] >> EvisW2[i] >> EvisW3[i] >> EvisW4[i];
-    if (filein.fail()) break;
+           >> EvisW1[i] >> EvisW2[i] >> EvisW3[i] >> EvisW4[i]) {
+     
+    simFileIn >> run_hold >> sourceName_hold;
+    //cout << run_hold << " " << sourceName_hold << " ";
+    if (run_hold==run[i] && sourceName_hold==sourceName[i]) { 
+      simFileIn >> EqE1[i] >> EqE2[i] >> EqE3[i] >> EqE4[i]
+		>> EqW1[i] >> EqW2[i] >> EqW3[i] >> EqW4[i];
+      //cout << EqE1[i] << " " << EqE2[i] << " " << EqE3[i] << " " << EqE4[i] << " "
+      //   << EqW1[i] << " " << EqW2[i] << " " << EqW3[i] << " " << EqW4[i] << endl;
+    }
+    else {
+      cout << "The simulation and data source peak files don't match. You need to re-make the source calibration files for both sim and data\n";
+      exit(0);
+    }
+    if (dataFileIn.fail()) break;
     i++;
   }
   Int_t num = i;
   cout << "Number of data points: " << num << endl;
-
+  
   // Load the smeared EQ values which are different for each PMT and source. This is only Ce, Sn, and Bi
-  vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod,"EQ");
+  /*vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod,"EQ");
   for (int m=0; m<EQsmeared.size(); m++) {
     for (int mm=0; mm<EQsmeared[m].size(); mm++) {
       cout << EQsmeared[m][mm] << " ";
@@ -184,7 +200,8 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
       cout << EQ2Etrue[m][mm] << " ";
     }
     cout << endl;
-  }
+    }*/
+
   //Read in PMT quality file to save whether or not to use a PMT for each run
   vector<vector<int> > pmtQuality;
   vector <int> pmthold(8,0);
@@ -248,9 +265,9 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   vector<Double_t> ResW1, ResW2, ResW3, ResW4;
   // Fill run, Evis, and eQ vectors
   for (Int_t i=0; i<num;i++) {
-    UInt_t runPos = find_vec_location_int(pmtRun,(int)run[i]);
-    cout << "Found run " << (int) run[i] << " in PMT Quality\n";
-    int src_hold;
+    UInt_t runPos = find_vec_location_int(pmtRun,run[i]);
+    cout << "Found run " << run[i] << " in PMT Quality\n";
+    /*int src_hold;
     int IndiumSide = -1; // Indium side will be 0 if east facing and 1 if west facing
     if (sourceName[i]=="Ce") src_hold = 0;
     else if (sourceName[i]=="Sn") src_hold=1;
@@ -262,61 +279,53 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
       string side = getIndiumSide((int) run[i]);
       IndiumSide = (side=="East")?0:(side=="West"?1:-1);
       if (IndiumSide==-1) {cout << "Bad indium side determination\n"; exit(0);}
-    }
+      }*/
 
     if (pmtQuality[runPos][0]) {
-      runE1.push_back((int)run[i]);
-      if (src_hold!=-1) EQE1.push_back(EQsmeared[0][src_hold]);
-      else EQE1.push_back(EQsmeared_In114[IndiumSide][0]);
+      runE1.push_back(run[i]);
+      EQE1.push_back(EqE1[i]);
       nameE1.push_back(sourceName[i]);
       EVISE1.push_back(EvisE1[i]);
     }
     if (pmtQuality[runPos][1]) {
-      runE2.push_back((int)run[i]);
-      if (src_hold!=-1) EQE2.push_back(EQsmeared[1][src_hold]);
-      else EQE2.push_back(EQsmeared_In114[IndiumSide][1]);
+      runE2.push_back(run[i]);
+      EQE2.push_back(EqE2[i]);
       nameE2.push_back(sourceName[i]);
       EVISE2.push_back(EvisE2[i]);
     }
     if (pmtQuality[runPos][2]) {
-      runE3.push_back((int)run[i]);
-      if (src_hold!=-1) EQE3.push_back(EQsmeared[2][src_hold]);
-      else EQE3.push_back(EQsmeared_In114[IndiumSide][2]);
+      runE3.push_back(run[i]);
+      EQE3.push_back(EqE3[i]);
       nameE3.push_back(sourceName[i]);
       EVISE3.push_back(EvisE3[i]);
     }
     if (pmtQuality[runPos][3]) {
-      runE4.push_back((int)run[i]);
-      if (src_hold!=-1) EQE4.push_back(EQsmeared[3][src_hold]);
-      else EQE4.push_back(EQsmeared_In114[IndiumSide][3]);
+      runE4.push_back(run[i]);
+      EQE4.push_back(EqE4[i]);
       nameE4.push_back(sourceName[i]);
       EVISE4.push_back(EvisE4[i]);
     }
     if (pmtQuality[runPos][4]) {
-      runW1.push_back((int)run[i]);
-      if (src_hold!=-1) EQW1.push_back(EQsmeared[4][src_hold]);
-      else EQW1.push_back(EQsmeared_In114[IndiumSide][4]);
+      runW1.push_back(run[i]);
+      EQW1.push_back(EqW1[i]);
       nameW1.push_back(sourceName[i]);
       EVISW1.push_back(EvisW1[i]);
     }
     if (pmtQuality[runPos][5]) {
-      runW2.push_back((int)run[i]);
-      if (src_hold!=-1) EQW2.push_back(EQsmeared[5][src_hold]);
-      else EQW2.push_back(EQsmeared_In114[IndiumSide][5]);
+      runW2.push_back(run[i]);
+      EQW2.push_back(EqW2[i]);
       nameW2.push_back(sourceName[i]);
       EVISW2.push_back(EvisW2[i]);
     }
     if (pmtQuality[runPos][6]) {
-      runW3.push_back((int)run[i]);
-      if (src_hold!=-1) EQW3.push_back(EQsmeared[6][src_hold]);
-      else EQW3.push_back(EQsmeared_In114[IndiumSide][6]);
+      runW3.push_back(run[i]);
+      EQW3.push_back(EqW3[i]);
       nameW3.push_back(sourceName[i]);
       EVISW3.push_back(EvisW3[i]);
     }
     if (pmtQuality[runPos][7]) {
-      runW4.push_back((int)run[i]);
-      if (src_hold!=-1) EQW4.push_back(EQsmeared[7][src_hold]);
-      else EQW4.push_back(EQsmeared_In114[IndiumSide][7]);
+      runW4.push_back(run[i]);
+      EQW4.push_back(EqW4[i]);
       nameW4.push_back(sourceName[i]);
       EVISW4.push_back(EvisW4[i]);
     }
@@ -332,11 +341,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
   ResW3.resize(runW3.size());
   ResW4.resize(runW4.size());
   
-  //Checking that there are enough sources to make a linearity curve
-  /*if (std::find(EQE1.begin(),EQE1.end(),peakCe)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakSn)==EQE1.end() || std::find(EQE1.begin(),EQE1.end(),peakBiHigh)==EQE1.end()) { 
-    cout << "Not enough sources to construct quadratic linearity curve\n";
-    num=0;
-    }*/
+  
   if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"In")==nameE1.end()) { 
     cout << "No Sn, In, Ce, or Bi to calculate residuals\n";
     num=0;
@@ -759,9 +764,9 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
     Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt in true energy
     Double_t ResidualE1, ResidualE2, ResidualE3, ResidualE4; //These hold the residuals for the weighting method..
-    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
+    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,run[j]);
 
-    if (pmtQuality[pmtVecLocation][0] && *E1==(int)run[j] && *nmE1==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][0] && *E1==run[j] && *nmE1==sourceName[j]) {
       Double_t N = EvisE1[j]*alphas[0];
       Double_t f = sqrt(N)/N;
       ResidualE1 = *RE1;
@@ -776,7 +781,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     else {weight1=0.; Energy1=0.; ResidualE1=0.;}
 
-    if (pmtQuality[pmtVecLocation][1] && *E2==(int)run[j] && *nmE2==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][1] && *E2==run[j] && *nmE2==sourceName[j]) {
       Double_t N = EvisE2[j]*alphas[1];
       Double_t f = sqrt(N)/N;
       ResidualE2 = *RE2;
@@ -791,7 +796,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     else {weight2=0.; Energy2=0.; ResidualE2=0.;}
 
-    if (pmtQuality[pmtVecLocation][2] && *E3==(int)run[j] && *nmE3==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][2] && *E3==run[j] && *nmE3==sourceName[j]) {
       Double_t N = EvisE3[j]*alphas[2];
       Double_t f = sqrt(N)/N;
       ResidualE4 = *RE3;
@@ -806,7 +811,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     else {weight3=0.; Energy3=0.; ResidualE3=0.;}
 
-    if (pmtQuality[pmtVecLocation][3] && *E4==(int)run[j] && *nmE4==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][3] && *E4==run[j] && *nmE4==sourceName[j]) {
       Double_t N = EvisE4[j]*alphas[3];
       Double_t f = sqrt(N)/N;
       ResidualE4 = *RE4;
@@ -826,19 +831,19 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     if (sourceName[j]=="Ce") {
       //res_East[j] = Etrue_East[j] - peakCe;
       x_East[j] = peakCe_EQ;
-      oFileE << "Ce_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Ce_East" << " " <<  run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="In") {
       //res_East[j] = Etrue_East[j] - peakSn;
       x_East[j] = peakIn_EQ;
-      oFileE << "In_East" << " " << (int) run[j] << " " << res_East[j] << endl;
-      cout << "In_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "In_East" << " " <<  run[j] << " " << res_East[j] << endl;
+      cout << "In_East" << " " <<  run[j] << " " << res_East[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
       //res_East[j] = Etrue_East[j] - peakSn;
       x_East[j] = peakSn_EQ;
-      oFileE << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
-      cout << "Sn_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Sn_East" << " " <<  run[j] << " " << res_East[j] << endl;
+      cout << "Sn_East" << " " <<  run[j] << " " << res_East[j] << endl;
       /*cout << Energy1 << " " << weight1 << " "
 	   << Energy2 << " " << weight2 << " "
 	   << Energy3 << " " << weight3 << " " 
@@ -847,12 +852,12 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else if (sourceName[j]=="Bi1") {
       //res_East[j] = Etrue_East[j] - peakBiHigh;
       x_East[j] = peakBiHigh_EQ;
-      oFileE << "Bi1_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Bi1_East" << " " <<  run[j] << " " << res_East[j] << endl;
    }
     else if (sourceName[j]=="Bi2") {
       //res_East[j] = Etrue_East[j] - peakBiHigh;
       x_East[j] = peakBiLow_EQ;
-      oFileE << "Bi2_East" << " " << (int) run[j] << " " << res_East[j] << endl;
+      oFileE << "Bi2_East" << " " <<  run[j] << " " << res_East[j] << endl;
    }
 
   }
@@ -1302,9 +1307,9 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     Double_t weight1, weight2, weight3, weight4; //these will hold the 4 weights
     Double_t Energy1, Energy2, Energy3, Energy4; //These will hold the energies for each pmt
     Double_t ResidualW1, ResidualW2, ResidualW3, ResidualW4;
-    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,(int)run[j]);
+    UInt_t pmtVecLocation = find_vec_location_int(pmtRun,run[j]);
 
-    if (pmtQuality[pmtVecLocation][4] && *W1==(int)run[j] && *nmW1==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][4] && *W1==run[j] && *nmW1==sourceName[j]) {
       Double_t N = EvisW1[j]*alphas[4];
       Double_t f = sqrt(N)/N;
       ResidualW1 = *RW1;
@@ -1319,7 +1324,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     else {weight1=0.; Energy1=0.; ResidualW1=0.;}
 
-    if (pmtQuality[pmtVecLocation][5] && *W2==(int)run[j] && *nmW2==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][5] && *W2==run[j] && *nmW2==sourceName[j]) {
       Double_t N = EvisW2[j]*alphas[5];
       Double_t f = sqrt(N)/N;
       ResidualW2 = *RW2;
@@ -1334,7 +1339,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     else {weight2=0.; Energy2=0.; ResidualW2=0.;}
 
-    if (pmtQuality[pmtVecLocation][6] && *W3==(int)run[j] && *nmW3==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][6] && *W3==run[j] && *nmW3==sourceName[j]) {
       Double_t N = EvisW3[j]*alphas[6];
       Double_t f = sqrt(N)/N;
       ResidualW3 = *RW3;
@@ -1349,7 +1354,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     }
     else {weight3=0.; Energy3=0.; ResidualW3=0.;}
 
-    if (pmtQuality[pmtVecLocation][7] && *W4==(int)run[j] && *nmW4==sourceName[j]) {
+    if (pmtQuality[pmtVecLocation][7] && *W4==run[j] && *nmW4==sourceName[j]) {
       Double_t N = EvisW4[j]*alphas[7];
       Double_t f = sqrt(N)/N;
       ResidualW4 = *RW4;
@@ -1369,27 +1374,27 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     if (sourceName[j]=="Ce") {
       //res_West[j] = Etrue_West[j] - peakCe;
       x_West[j] = peakCe_EQ;
-      oFileW << "Ce_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Ce_West" << " " <<  run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="In") {
       //res_West[j] = Etrue_West[j] - peakIn;
       x_West[j] = peakIn_EQ;
-      oFileW << "In_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "In_West" << " " <<  run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
       //res_West[j] = Etrue_West[j] - peakSn;
       x_West[j] = peakSn_EQ;
-      oFileW << "Sn_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Sn_West" << " " <<  run[j] << " " << res_West[j] << endl;
     }
     else if (sourceName[j]=="Bi1") {
       //res_West[j] = Etrue_West[j] - peakBiHigh;
       x_West[j] = peakBiHigh_EQ;
-      oFileW << "Bi1_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Bi1_West" << " " <<  run[j] << " " << res_West[j] << endl;
    }
     else if (sourceName[j]=="Bi2") {
       //res_West[j] = Etrue_West[j] - peakBiHigh;
       x_West[j] = peakBiLow_EQ;
-      oFileW << "Bi2_West" << " " << (int) run[j] << " " << res_West[j] << endl;
+      oFileW << "Bi2_West" << " " <<  run[j] << " " << res_West[j] << endl;
    }
 
   }

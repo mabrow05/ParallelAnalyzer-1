@@ -1,3 +1,9 @@
+//////////////////////////////////////////////////////////////////
+// Code to apply cuts and do pedestal subtraction. 
+// Ultimately produces first trees with branches of physical 
+// meaning to be further processed in later replays.
+//////////////////////////////////////////////////////////////////
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -89,9 +95,12 @@ int main(int argc, char *argv[])
   for (int i=0; i<32; i++) {
     filePed >> iRun >> pedPadc[i];
   }
-  filePed >> iRun >> pedPdc30;
-  filePed >> iRun >> pedPdc34;
+  //filePed >> iRun >> pedPdc30;
+  //filePed >> iRun >> pedPdc34;
 
+  //cout << iRun << " " << pedPdc30 << endl;
+  //cout << iRun << " " << pedPdc34 << endl;
+  
   // Open output ntuple
   char tempOut[500];
   sprintf(tempOut, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
@@ -400,8 +409,9 @@ int main(int argc, char *argv[])
     }
 
     // Calculate pedestal-subtracted MWPC Anode PADC values
-    AnodeE = ((double) Pdc30) - pedPdc30;
-    AnodeW = ((double) Pdc34) - pedPdc34;
+    //Took this out for now. We are comparing against a cut instead...
+    //AnodeE = ((double) Pdc30) - pedPdc30;
+    //AnodeW = ((double) Pdc34) - pedPdc34;
 
     // UCN monitor events
     bool UCNMonitorTrigger = false;

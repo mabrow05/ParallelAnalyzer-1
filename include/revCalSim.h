@@ -29,16 +29,21 @@ struct MWPCEnergy {
 } mwpcE;
 
 struct MWPCPos {
-  double MWPCPosE;
-  double MWPCPosW;
+  double MWPCPosE[3];
+  double MWPCPosW[3];
 } mwpc_pos;
 
 struct ScintPos {
-  double ScintPosE;
-  double ScintPosW;
+  double ScintPosE[3];
+  double ScintPosW[3];
 } scint_pos;
 
+struct ScintPosAdjusted {
+  double ScintPosAdjE[3];
+  double ScintPosAdjW[3];
+} scint_pos_adj;
+
 struct PMT_Evis {
-  double Evis[8]={0.};
-  double weight[8]={0.}; 
+  double Evis[8];
+  double weight[8]; 
 } pmt_Evis;

@@ -1,6 +1,6 @@
 // Usage: root[0] .x plot_source_peaks.C("runNumber")
 
-void plot_source_peaks(TString runNumber)
+void plot_sim_source_peaks_Evis(TString runNumber)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -34,7 +34,7 @@ void plot_source_peaks(TString runNumber)
 
   // Open input ntuple
   TString filenameIn;
-  filenameIn  = TString(getenv("SOURCE_PEAKS"))+TString("/source_peaks_");
+  filenameIn  = TString(getenv("REVCALSIM"))+TString("/source_peaks/source_peaks_EvisPMTbyPMT_");
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
@@ -53,12 +53,12 @@ void plot_source_peaks(TString runNumber)
   cout << "... nSources: " << nSources << endl;
   for (int n=0; n<nSources;n++) {
     fileList >> sourceName[n];
-    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi") useSource[n]=true;
+    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi" || sourceName[n]=="In") useSource[n]=true;
   }
 
   // Output file
   TString filenameOut;
-  filenameOut  = TString(getenv("SOURCE_PEAKS"))+TString("/source_peaks_");
+  filenameOut  = TString(getenv("REVCALSIM"))+TString("/source_peaks/source_peaks_EvisPMTbyPMT_");
   filenameOut += runNumber;
   filenameOut += ".pdf";
 
@@ -72,8 +72,8 @@ void plot_source_peaks(TString runNumber)
 
   // Source #1: East
   if (useSource[0]) {
-    double upperRange = 2000.;
-    if (sourceName[0]=="Bi") upperRange = 3000.;
+    double upperRange = 600.;
+    if (sourceName[0]=="Bi") upperRange = 1200.;
     c1 = new TCanvas("c1","c1");
     c1->Divide(2,2);
 
@@ -136,15 +136,15 @@ void plot_source_peaks(TString runNumber)
     c2_4->SetLogy(0);
     his1_W3->SetXTitle("West PMT 4");
     his1_W3->GetXaxis()->CenterTitle();
-    his1_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
+    his1_W3->GetXaxis()->SetRangeUser(0.0,upperRange);
     his1_W3->Draw();
     
     if (nSources > 1 && (useSource[1] || useSource[2])) c2->Print(filenameOut);
     else c2->Print(filenameOutLast);
   }
   if (nSources > 1 && useSource[1]) {
-    double upperRange = 2000.;
-    if (sourceName[1]=="Bi") upperRange = 3000.;
+    double upperRange = 600.;
+    if (sourceName[1]=="Bi") upperRange = 1200.;
       
     // Source #2: East
     c3 = new TCanvas("c3","c3");
@@ -210,7 +210,7 @@ void plot_source_peaks(TString runNumber)
     c4_4->SetLogy(0);
     his2_W3->SetXTitle("West PMT 4");
     his2_W3->GetXaxis()->CenterTitle();
-    his2_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
+    his2_W3->GetXaxis()->SetRangeUser(0.0,upperRange);
     his2_W3->Draw();
     
     if (nSources > 2 && useSource[2]) c4->Print(filenameOut);
@@ -219,8 +219,8 @@ void plot_source_peaks(TString runNumber)
   }
 
   if (nSources > 2 && useSource[2]) {
-    double upperRange = 2000.;
-    if (sourceName[2]=="Bi") upperRange = 3000.;
+    double upperRange = 600.;
+    if (sourceName[2]=="Bi") upperRange = 1200.;
 
     // Source #3: East
     c5 = new TCanvas("c5","c5");
@@ -286,7 +286,7 @@ void plot_source_peaks(TString runNumber)
     c6_4->SetLogy(0);
     his3_W3->SetXTitle("West PMT 4");
     his3_W3->GetXaxis()->CenterTitle();
-    his3_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
+    his3_W3->GetXaxis()->SetRangeUser(0.0,upperRange);
     his3_W3->Draw();
     
     c6->Print(filenameOutLast);

@@ -26,7 +26,7 @@ for Range in omittedRanges:
 #### This will be done by having a file with all source runs, where the PMT value
 #### is set to 0 or 1 to represent false (don't use) and true (do use)
 
-EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. This removes source outliers from
+EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
 EPMT2 = []
 EPMT3 = []
 EPMT4 = []
@@ -78,8 +78,32 @@ class CalReplayManager:
         self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
         self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
         self.srcPeakPath = os.getenv("SOURCE_PEAKS")
+        self.replayPass1 = os.getenv("REPLAY_PASS1")
+        self.replayPass2 = os.getenv("REPLAY_PASS2")
         self.replayPass3 = os.getenv("REPLAY_PASS3")
+        self.replayPass4 = os.getenv("REPLAY_PASS4")
         self.srcListPath = os.getenv("SOURCE_LIST")
+        self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
+        self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
+        self.octetListPath = os.getenv("OCTET_LIST")
+        self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
+        self.revCalSimPath = os.getenv("REVCALSIM")
+
+    def makeAllDirectories(self):
+        #os.sys("mkdir -p %s"%self.AnalysisDataPath)
+        os.sys("mkdir -p %s"%self.srcPositionsPath)
+        os.sys("mkdir -p %s"%self.srcPeakPath)
+        os.sys("mkdir -p %s"%self.srcListPath)
+        os.sys("mkdir -p %s"%self.replayPass1)
+        os.sys("mkdir -p %s"%self.replayPass2)
+        os.sys("mkdir -p %s"%self.replayPass3)
+        os.sys("mkdir -p %s"%self.replayPass4)
+        os.sys("mkdir -p %s"%self.gainBismuthPath)
+        os.sys("mkdir -p %s"%self.nPEweightsPath)
+        os.sys("mkdir -p %s"%self.octetListPath)
+        os.sys("mkdir -p %s"%self.triggerFuncPath)
+        os.sys("mkdir -p %s"%self.revCalSimPath)
+
 
     def runReplayPass1(self,srcRunPeriod=1, sourceORxenon="source"):
         print "Running replay_pass1 for %s run period %i"%(sourceORxenon,srcRunPeriod)
@@ -200,6 +224,50 @@ class CalReplayManager:
         print "DONE"
 
 
+    def runReverseCalibration(self, srcRunPeriod=1, sourceORxenon="source"):
+        print "Running reverse calibration for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+
+        for run in runs:
+            filename = self.srcListPath+"source_list_%i.dat"%run
+            if not MButils.fileExistsAndNotEmpty(filename):
+                continue
+            srcFile = open(filename)
+            srcFileInput = []
+            for line in srcFile:
+                srcFileInput.append(line)
+            for src in range(1,int(srcFileInput[0])+1):
+                source = srcFileInput[src][0:2]
+                if source=="Ce":
+                    source = source+"139"
+                elif source=='Sn':
+                    source = source + "113"
+                elif source=="Bi":
+                    source = source + "207"
+                elif source == "In":
+                    source = source + "114"
+                elif source == "Cd":
+                    source = source + "109"
+                elif source == "Cs":
+                    source = source+"137"
+
+                os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, source))
+                #print "./../simulation_comparison/revCalSim.exe %i %s"%(run, source)
+
+        print "Finished reverse calibration for " + sourceORxenon + "run period %i"%srcRunPeriod
+
+
         
 class CalibrationManager:
     
@@ -212,6 +280,7 @@ class CalibrationManager:
         self.replayPass3 = os.getenv("REPLAY_PASS3")
         self.srcListPath = os.getenv("SOURCE_LIST")
         self.nPEcountPath = os.getenv("NPE_WEIGHTS")
+        self.revCalSimPath = os.getenv("REVCALSIM")
 
     def findCalibrationPeriod(self, runNumber):
         if runNumber <= 17297:
@@ -303,7 +372,7 @@ class CalibrationManager:
             print "Ran fit_source_peaks.C on run %i"%run
 
 
-    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, PMTbyPMT=False,overwrite=True):
+    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, PMTbyPMT=False, Simulation=False, overwrite=True):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
@@ -319,11 +388,19 @@ class CalibrationManager:
 
         for run in runs:
             if PMTbyPMT:
-                os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
-                os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
+                if Simulation:
+                     os.system("cd ../source_peaks; ./sim_source_peaks_EvisPMTbyPMT.exe %i"%run)
+                     os.system("root -b -q '../source_peaks/plot_sim_source_peaks_Evis.C(\"%i\")'"%run)
+                else:   
+                    os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
+                    os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
             else:
-                os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
-                os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
+                if Simulation:
+                    os.system("cd ../source_peaks; ./sim_source_peaks_EnergyPeak.exe %i"%run)
+                    #os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
+                else:
+                    os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
+                    os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
             print "Ran plot_source_peaks.C on run %i"%run
 
 
@@ -399,18 +476,26 @@ class CalibrationManager:
 
 
 
-    def makeSourceCalibrationFile(self,CalibrationPeriod=1, PeaksInEnergy=False, PMTbyPMT=False):
+    def makeSourceCalibrationFile(self,CalibrationPeriod=1, PeaksInEnergy=False, PMTbyPMT=False, Simulation=False):
         #This utilizes the omittedRuns and removes them from the calibration. Any time you make a change
         # to the runs which are to be omitted, you shoud rerun this!
 
         outputFile = None
         src_file_base = None
         if PeaksInEnergy and PMTbyPMT:
-            outputFile = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%(CalibrationPeriod)
-            src_file_base = self.srcPeakPath + "source_peaks_EvisPMTbyPMT_"
+            if Simulation:
+                outputFile = "../residuals/SIM_source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%(CalibrationPeriod)
+                src_file_base = self.revCalSimPath + "/source_peaks/source_peaks_EvisPMTbyPMT_"
+            else:
+                outputFile = "../residuals/source_runs_EvisPMTbyPMT_RunPeriod_%i.dat"%(CalibrationPeriod)
+                src_file_base = self.srcPeakPath + "source_peaks_EvisPMTbyPMT_"               
         elif PeaksInEnergy and not PMTbyPMT:
-            outputFile = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
-            src_file_base = self.srcPeakPath + "source_peaks_EnergyPeak_"
+            if Simulation:
+                outputFile = "../residuals/SIM_source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
+                src_file_base = self.revCalSimPath + "/source_peaks/source_peaks_EnergyPeak_"
+            else:
+                outputFile = "../residuals/source_runs_EnergyPeaks_RunPeriod_%i.dat"%(CalibrationPeriod)
+                src_file_base = self.srcPeakPath + "source_peaks_EnergyPeak_"
         else:
             outputFile = "../residuals/source_runs_RunPeriod_%i.dat"%(CalibrationPeriod)
             src_file_base = self.srcPeakPath + "source_peaks_"
@@ -675,29 +760,40 @@ if __name__ == "__main__":
             #rep.runGainBismuth(runPeriod)
             rep.runReplayPass2(runPeriod)
             rep.runReplayPass3(runPeriod)
-            #cal.fitSourcePeaks(runPeriod)
-            rep.runReplayPass4(runPeriod)
+            cal.fitSourcePeaks(runPeriod)
+            #rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
     if 0:
         cal = CalibrationManager()
-        #cal.calc_nPE_per_PMT(True)
-        cal.makePMTrunFile(master=True)
+        cal.calc_nPE_per_PMT(writeNPEforAllRuns=True)
+        #cal.makePMTrunFile(master=True)
 
+    ### Simulation reverse calibration procedure
+    if 0: 
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        rep = CalReplayManager()
+        cal = CalibrationManager()
+        
+        for runPeriod in runPeriods:
+            rep.runReverseCalibration(runPeriod)
+            cal.fitSourcePeaksInEnergy(runPeriod, True, Simulation=True)
+            cal.makeSourceCalibrationFile(runPeriod, True, True, Simulation=True)
 
     ### Source Run Calibration Steps...
     if 1: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
         rep = CalReplayManager()
         cal = CalibrationManager()
-        #for runPeriod in runPeriods:
+        
+        for runPeriod in runPeriods:
             #cal.LinearityCurves(runPeriod)
             #rep.runReplayPass4(runPeriod)
-            #cal.fitSourcePeaksInEnergy(runPeriod, True)
-            #cal.makeSourceCalibrationFile(runPeriod, True, True)
-            #cal.calculateResiduals(runPeriod, PMTbyPMT=True)
-
-        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
+            #cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=False, Simulation=True)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=False, Simulation=True)
+            cal.calculateResiduals(runPeriod, PMTbyPMT=False)
+            
+        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=False)
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
@@ -712,3 +808,5 @@ if __name__ == "__main__":
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
+            
+    
