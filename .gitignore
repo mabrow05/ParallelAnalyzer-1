@@ -4,3 +4,4 @@
 *#
 *cxx*
 *.pyc
+residuals/.*

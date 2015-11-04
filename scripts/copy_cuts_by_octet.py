@@ -9,7 +9,7 @@ octet_range = []
 cuts_base = os.getenv("CUTS")
 if year==2011:
     octet_file_base = "/extern/UCNA/octet_list_MB/2011-2012/"
-    octet_range = [0,1]
+    octet_range = [0,59]
 elif year==2012:
     octet_file_base = "/extern/UCNA/octet_list_MB/2012-2013/"
     octet_range = [60,121]
