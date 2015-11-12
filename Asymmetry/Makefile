@@ -15,7 +15,7 @@ LIBS		= $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS       += $(ROOTCFLAGS) -Iinclude
 LIBS	       += -lSpectrum -lMinuit
 
-objects = Asymmetries.o BGSubtraction.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o
+objects = Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o
 
 .PHONY: all
 all: MBAnalyzer.exe 

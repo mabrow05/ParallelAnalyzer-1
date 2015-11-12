@@ -31,10 +31,10 @@ int EvtRateHandler::polarization(int run) {
   
 };
 
-void EvtRateHandler::CalcRates(int evtType, double enBins, double fidCut) {
+void EvtRateHandler::CalcRates(int evtType, double enBinWidth, double fidCut) {
   char temp1[200], temp2[200];
   fiducialCut = fidCut;
-  numEnergyBins = int(1200./enBins);
+  numEnergyBins = int(1200./enBinWidth);
   
   if (evtType==0 || evtType==1 || evtType==23)
     {
@@ -78,32 +78,54 @@ TH1D EvtRateHandler::getRateHist(int side) {
 
 void EvtRateHandler::dataReader(int evtType) {
   char temp[100];
-  sprintf(temp,"spec_%i.root",runNumber);
-  std::string infile = inputDir+"/"+std::string(temp);
-  TFile *input = new TFile(infile.c_str(), "READ");
-  TTree *Tin = (TTree*)input->Get("phys"); //TODO: make sure this is the correct tree name
+  
+  std::string infile;
+  TFile *input;
+  TTree *Tin;
   
   //Set branch addresses
-  Tin->SetBranchAddress("PID", &PID);
-  Tin->SetBranchAddress("Type", &Type);
-  Tin->SetBranchAddress("Side", &Side); 
-  Tin->SetBranchAddress("Etrue",&Erecon);
-  Tin->SetBranchAddress("TimeE",&TimeE);
-  Tin->SetBranchAddress("TimeW",&TimeW);
-  Tin->GetBranch("xEmpm")->GetLeaf("center")->SetAddress(&EmwpcX);
-  Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY);
-  Tin->GetBranch("xWmpm")->GetLeaf("center")->SetAddress(&WmwpcX);
-  Tin->GetBranch("yWmpm")->GetLeaf("center")->SetAddress(&WmwpcY);
+  if (UKdata) {
+    sprintf(temp,"replay_pass4_%i.root",runNumber);
+    std::string infile = inputDir+"/"+std::string(temp);
+    input = new TFile(infile.c_str(), "READ");
+    Tin = (TTree*)input->Get("pass4");
 
+    Tin->SetBranchAddress("PID_pass4", &PID);
+    Tin->SetBranchAddress("type_pass4", &Type);
+    Tin->SetBranchAddress("side_pass4", &Side); 
+    Tin->SetBranchAddress("EvisTot",&Erecon);
+    Tin->SetBranchAddress("timeE",&TimeE);
+    Tin->SetBranchAddress("timeW",&TimeW);
+    Tin->SetBranchAddress("xE_pass4",&EmwpcX);
+    Tin->SetBranchAddress("yE_pass4",&EmwpcY);
+    Tin->SetBranchAddress("xW_pass4",&WmwpcX);
+    Tin->SetBranchAddress("yW_pass4",&WmwpcY);
+  }
+  else {
+    sprintf(temp,"spec_%i.root",runNumber);
+    std::string infile = inputDir+"/"+std::string(temp);
+    input = new TFile(infile.c_str(), "READ");
+    Tin = (TTree*)input->Get("phys");
+
+    Tin->SetBranchAddress("PID", &PID);
+    Tin->SetBranchAddress("Type", &Type);
+    Tin->SetBranchAddress("Side", &Side); 
+    Tin->SetBranchAddress("Etrue",&Erecon);
+    Tin->SetBranchAddress("TimeE",&TimeE);
+    Tin->SetBranchAddress("TimeW",&TimeW);
+    Tin->GetBranch("xEmpm")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("xWmpm")->GetLeaf("center")->SetAddress(&WmwpcX);
+  }
   unsigned int nevents = Tin->GetEntriesFast();
  
   //Determine total time on each side
   Tin->GetEvent(nevents-1);
  
-  float totalTimeE = TimeE;
-  double EastWeight = 1./double(totalTimeE);
-  float totalTimeW = TimeW;
-  double WestWeight = 1./double(totalTimeW);
+  runLength[0] = (double)TimeE;
+  double EastWeight = 1./runLength[0];
+  runLength[1] = (double)TimeW;
+  double WestWeight = 1./runLength[1];
 
   //Run over all events in file, fill output histogram with rate
   
@@ -240,19 +262,37 @@ void BGSubtractedRate::CreateRateHistograms() {
 
 void BGSubtractedRate::LoadRatesByBin(int side) {
   int bgRun = getBackgroundRun(runNumber);
+  std::string indir;
 
-  std::string indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
+  if (UKdata) indir = std::string(getenv("REPLAY_PASS4"));
+  else indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
+
   EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir);
   evtBG->CalcRates(evtType,EnergyBinWidth,fiducialCut);
   BGRate = evtBG->getRateVector(side);
+  runLengthBG[side] = evtBG->returnRunLength(side);
   delete evtBG;
 
   EvtRateHandler *evt = new EvtRateHandler(runNumber, indir);
   evt->CalcRates(evtType,EnergyBinWidth,fiducialCut);
   BetaRate = evt->getRateVector(side);
+  runLengthBeta[side] = evt->returnRunLength(side);
   delete evt;
   
 };
+
+std::vector<double> BGSubtractedRate::returnRunLengths(bool beta) {
+  std::vector<double> lengths;
+  if (beta) {
+    lengths.push_back(runLengthBeta[0]);
+    lengths.push_back(runLengthBeta[1]);
+  }
+  else {
+    lengths.push_back(runLengthBG[0]);
+    lengths.push_back(runLengthBG[1]);
+  }
+  return lengths;
+}
 
 void BGSubtractedRate::CalcFinalRate()  {
 
@@ -262,7 +302,7 @@ void BGSubtractedRate::CalcFinalRate()  {
       for (unsigned int i=0; i<BetaRate.size(); i++)
 	{
 	  FinalRate[i] = BetaRate[i]-BGRate[i];
-	  std::cout << BetaRate[i] << " " << BGRate[i] << " " << FinalRate[i] << std::endl;
+	  //std::cout << BetaRate[i] << " " << BGRate[i] << " " << FinalRate[i] << std::endl;
 	}
     }
   else throw "Number of energy bins do not agree between Beta and BG runs. Can't calculate final rate!";

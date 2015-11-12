@@ -755,12 +755,12 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         runPeriods = [1,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
-            #rep.findPedestals(runPeriod)
-            rep.runReplayPass1(runPeriod)
+            rep.findPedestals(runPeriod)
+            #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            rep.runReplayPass2(runPeriod)
-            rep.runReplayPass3(runPeriod)
-            cal.fitSourcePeaks(runPeriod)
+            #rep.runReplayPass2(runPeriod)
+            #rep.runReplayPass3(runPeriod)
+            #cal.fitSourcePeaks(runPeriod)
             #rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
@@ -781,7 +781,7 @@ if __name__ == "__main__":
             cal.makeSourceCalibrationFile(runPeriod, True, True, Simulation=True)
 
     ### Source Run Calibration Steps...
-    if 1: 
+    if 0: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
         rep = CalReplayManager()
         cal = CalibrationManager()

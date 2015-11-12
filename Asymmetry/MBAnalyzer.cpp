@@ -18,12 +18,12 @@ Maybe even add in writing the final answer to the database if the user wants to
 
 int main()
 {
-  int run = 17800;
-  std::string inDir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
+  int run = 17126;
+  std::string inDir = std::string(getenv("REPLAY_PASS4"));
   try {
     EvtRateHandler *rt = new EvtRateHandler(run,inDir);
-  
-    std::cout << rt->polarization(run) << std::endl;
+    rt->polarization(run);
+    std::cout << rt->pol  << std::endl;
     rt->CalcRates(0,50,50.);
     TFile *f = new TFile("test.root","RECREATE");
     TH1D hisE = rt->getRateHist(0);
@@ -42,16 +42,20 @@ int main()
 
     //testing BG subtracted rate
 
-    BGSubtractedRate *bg = new BGSubtractedRate(run,50., 50.,0);
+    BGSubtractedRate *bg = new BGSubtractedRate(run,50.,45.,0,true);
 
     std::cout << "initialized BGStubtractedRate\n";
-    std::cout << bg->getBackgroundRun(18137) << std::endl;
+    std::cout << bg->getBackgroundRun(17126) << std::endl;
     std::vector <double> evecbg = bg->ReturnBGSubtRate(0);
     std::vector <double> wvecbg = bg->ReturnBGSubtRate(1);
 
-    for (unsigned int i=0; i<evecbg.size(); i++) {
-      std::cout << evecbg[i] << " " << wvecbg[i] << std::endl;
-      }
+    //for (unsigned int i=0; i<evecbg.size(); i++) {
+    //std::cout << evecbg[i] << " " << wvecbg[i] << std::endl;
+    //}
+
+    std::cout << "RunLength: E      W\n" 
+    	      << bg->runLengthBeta[0] << " " << bg->runLengthBeta[1] << std::endl
+    	      << bg->runLengthBG[0] << " " << bg->runLengthBG[1] << std::endl;
   }
   catch(const char* ex){
     std::cerr << "Error: " << ex << std::endl;

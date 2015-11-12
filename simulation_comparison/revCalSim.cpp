@@ -5,6 +5,7 @@ of the detector. Also applies the trigger functions */
 #include "revCalSim.h"
 #include "posMapReader.h"
 #include "sourcePeaks.h"
+#include "runInfo.h"
 
 #include <vector>
 #include <cstdlib>
@@ -87,69 +88,6 @@ vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
     }
   }
   return srcPos;
-}
-
-
-UInt_t getSrcRunPeriod(Int_t runNumber) {
-  UInt_t calibrationPeriod=0;
-  if (runNumber <= 17297) {
-    calibrationPeriod=1;
-  }
-  else if (runNumber <= 17439) {
-    calibrationPeriod=2;
-  }
-  else if (runNumber <= 17734) {
-    calibrationPeriod=3;
-  }
-  else if (runNumber <= 17955) {
-    calibrationPeriod=4;
-  }
-  else if (runNumber <= 18386) {
-    calibrationPeriod=5;
-  }
-  else if (runNumber <= 18683) {
-    calibrationPeriod=6;
-  }
-  else if (runNumber <= 18994) {
-    calibrationPeriod=7;
-  }
-  else if (runNumber <= 19239) {
-    calibrationPeriod=8;
-  }
-  else if (runNumber <= 19544) {
-    calibrationPeriod=9;
-  }
-  else if (runNumber <= 20000) {
-    calibrationPeriod=11;
-  }
-  return calibrationPeriod;
-}
-
-UInt_t getXeRunPeriod(Int_t runNumber) {
-  UInt_t calibrationPeriod=0;
-  if (runNumber <= 18080) {
-    calibrationPeriod=2;
-  }
-  else if (runNumber <= 18389) {
-    calibrationPeriod=3;
-  }
-  else if (runNumber <= 18711) {
-    calibrationPeriod=4;
-  }
-  else if (runNumber <= 19238) {
-    calibrationPeriod=5;
-  }
-  //else if (runNumber <= 19872) {
-  //calibrationPeriod=6;
-  //}
-  else if (runNumber <= 20000) {
-    calibrationPeriod=7;
-  }
-  else {
-    cout << "Bad run number\n";
-    exit(0);}
-
-  return calibrationPeriod;
 }
 
 vector <Int_t> getPMTQuality(Int_t runNumber) {

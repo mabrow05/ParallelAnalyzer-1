@@ -19,6 +19,7 @@
 #include "pedestals.h"
 #include "cuts.h"
 #include "basic_reconstruction.h"
+#include "runInfo.h"
 
 using namespace std;
 
@@ -27,16 +28,34 @@ int main(int argc, char *argv[])
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
 
-  // Open output ntuple
-  char tempOut[500];
-  sprintf(tempOut, "%s/gain_bismuth_%s.root",getenv("GAIN_BISMUTH"),argv[1]);
-  TFile *fileOut = new TFile(tempOut,"RECREATE");
-
   // Run number integer
   istringstream ss(argv[1]);
   int runNumber;
   ss >> runNumber;
   cout << "runNumber = " << runNumber << endl;
+
+
+  //First check that if the run isn't the reference run, the reference has been run at least
+  unsigned int referenceRun = getGainReferenceRun(runNumber);
+  char tempIn[500];
+
+  if ((int)referenceRun!=runNumber) {
+    sprintf(tempIn,"%s/gain_bismuth_%i.dat",getenv("GAIN_BISMUTH"),referenceRun);
+    ifstream refGainFile(tempIn);
+    if (refGainFile.good()) {
+      refGainFile.close();
+    }
+    else {
+      cout << "The reference run hasn't been run yet! Run reference runs then try again!\n";
+      exit(0);
+    }
+  }
+
+  // Open output ntuple
+  char tempOut[500];
+  sprintf(tempOut, "%s/gain_bismuth_%s.root",getenv("GAIN_BISMUTH"),argv[1]);
+  TFile *fileOut = new TFile(tempOut,"RECREATE");
+
 
   // Output histograms
   int nBin = 200;
@@ -51,7 +70,7 @@ int main(int argc, char *argv[])
   his[7] = new TH1F("hisW3", "", nBin,0.0,4000.0);
 
   // Open input ntuple
-  char tempIn[500];
+  
   sprintf(tempIn, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
   TFile *fileIn = new TFile(tempIn, "READ");
   TTree *Tin = (TTree*)(fileIn->Get("pass1"));
@@ -235,160 +254,24 @@ int main(int argc, char *argv[])
 
   // Calculate gain correction factors
   double referenceMean[8];
-
-  // Source Calibration Run Period 1
-  if (runNumber >= 16983 && runNumber <= 17297) {
-    referenceMean[0] = 2768.38;
-    referenceMean[1] = 2911.87;
-    referenceMean[2] = 2820.94;
-    referenceMean[3] = 3020.11;
-    referenceMean[4] = 2870.89;
-    referenceMean[5] = -1.;
-    referenceMean[6] = 2756.86;
-    referenceMean[7] = 2887.47;
-  }
-
-  // Source Calibration Run Period 2
-  if (runNumber >= 17359 && runNumber <= 17439) {
-    referenceMean[0] = 2783.11;
-    referenceMean[1] = 2825.62;
-    referenceMean[2] = 2665.44;
-    referenceMean[3] = 2613.36;
-    referenceMean[4] = 715.844;
-    referenceMean[5] = 2471.9;
-    referenceMean[6] = 2497.24;
-    referenceMean[7] = 2974.43;
-  }
-
-  // Source Calibration Run Period 3
-  if (runNumber >= 17440 && runNumber <= 17734) {
-    referenceMean[0] = 2925.49;
-    referenceMean[1] = 2860.85;
-    referenceMean[2] = 2646.09;
-    referenceMean[3] = 2609.76;
-    referenceMean[4] = 728.335;
-    referenceMean[5] = 2740.75;
-    referenceMean[6] = 2591.74;
-    referenceMean[7] = 2458.67;
-  }
-
-  // Source Calibration Run Period 4
-  if (runNumber >= 17735 && runNumber <= 18055) {
-    referenceMean[0] = 2913.21;
-    referenceMean[1] = 2726.86;
-    referenceMean[2] = 2614.41;
-    referenceMean[3] = 2574.88;
-    referenceMean[4] = 685.297;
-    referenceMean[5] = 2710.91;
-    referenceMean[6] = 2557.8;
-    referenceMean[7] = 2457.16;
-  }
-
-  // Source Calibration Run Period 5
-  if (runNumber >= 18081 && runNumber <= 18386) {
-    referenceMean[0] = 3139.68;
-    referenceMean[1] = 2478.71;
-    referenceMean[2] = 2635.56;
-    referenceMean[3] = 2603.68;
-    referenceMean[4] = 2602.94;
-    referenceMean[5] = 2118.06;
-    referenceMean[6] = 2549.17;
-    referenceMean[7] = 1710.95;
-  }
-
-  // Source Calibration Run Period 6
-  if (runNumber >= 18390 && runNumber <= 18683) {
-    referenceMean[0] = 2798.3;
-    referenceMean[1] = 2648.22;
-    referenceMean[2] = 2643.97;
-    referenceMean[3] = 2580.29;
-    referenceMean[4] = 2557.37;
-    referenceMean[5] = 2850.5;
-    referenceMean[6] = 2484.63;
-    referenceMean[7] = 1266.61;
-  }
-
-  // Source Calibration Run Period 7
-  if (runNumber >= 18712 && runNumber <= 18994) {
-    referenceMean[0] = 2473.59;
-    referenceMean[1] = 2490.29;
-    referenceMean[2] = 2635.3;
-    referenceMean[3] = 2575.75;
-    referenceMean[4] = 2562.27;
-    referenceMean[5] = 2609.88;
-    referenceMean[6] = 2456.6;
-    referenceMean[7] = 1313.06;
-  }
-
-  // Source Calibration Run Period 8
-  if (runNumber >= 19203 && runNumber <= 19239) {
-    referenceMean[0] = 2543.39;
-    referenceMean[1] = 2581.96;
-    referenceMean[2] = 2697.13;
-    referenceMean[3] = 2607.16;
-    referenceMean[4] = 2583.02;
-    referenceMean[5] = 2649.35;
-    referenceMean[6] = 2467.87;
-    referenceMean[7] = 2617.73;
-  }
-
-  // Source Calibration Run Period 9
-  if (runNumber >= 19347 && runNumber <= 19544) {
-    referenceMean[0] = 2532.88;
-    referenceMean[1] = 2442.47;
-    referenceMean[2] = 2685.81;
-    referenceMean[3] = 2668.67;
-    referenceMean[4] = 2592.06;
-    referenceMean[5] = 2628.69;
-    referenceMean[6] = 2520.98;
-    referenceMean[7] = 781.39; //This PMT is not used for the calibration
-  }
-
-
-  // Source Calibration Run Period 10
-  // This calibration isn't used as of now. These reference means are 
-  // not correct! If this is to ever be used, we need to look up the 
-  // values as fit for the reference run in this period.
-  // FOR NOW, USE NEXT RUN PERIOD GAIN (no Ce/Sn/Bi in Run Period 10)
-  /*if (runNumber >= 19505 && runNumber <= 19544) {
-    referenceMean[0] = 2620.29;
-    referenceMean[1] = 2530.83;
-    referenceMean[2] = 2689.98;
-    referenceMean[3] = 2657.57;
-    referenceMean[4] = 2556.1;
-    referenceMean[5] = 2627.63;
-    referenceMean[6] = 2531.34;
-    referenceMean[7] = 797.798;
-    }*/
-
-  // Source Calibration Run Period 11
-  if (runNumber >= 19583 && runNumber <= 20000) {
-    referenceMean[0] = 2620.29;
-    referenceMean[1] = 2530.83;
-    referenceMean[2] = 2689.98;
-    referenceMean[3] = 2657.57;
-    referenceMean[4] = 2556.1;
-    referenceMean[5] = 2627.63;
-    referenceMean[6] = 2531.34;
-    referenceMean[7] = 797.798;
-  }
-
-  // Source Calibration Run Period 12
-  /*if (runNumber >= 19899 && runNumber <= 19966) {
-    referenceMean[0] = 2627.55;
-    referenceMean[1] = 2540.88;
-    referenceMean[2] = 2688.1;
-    referenceMean[3] = 2646.31;
-    referenceMean[4] = 2560.41;
-    referenceMean[5] = 2642.34;
-    referenceMean[6] = 2537.37;
-    referenceMean[7] = 776.104;
-    }*/
-
-  // Calculate gain correction factors
   double gainCorrection[8];
-  for (int n=0; n<8; n++) {
-    gainCorrection[n] = referenceMean[n] / fitMean[n];
+
+  if ((int)referenceRun!=runNumber) {
+    sprintf(tempIn,"%s/gain_bismuth_%i.dat",getenv("GAIN_BISMUTH"),referenceRun);
+    ifstream refGainFile(tempIn);
+    double numHold;
+    int ii=0;
+    while (refGainFile >> referenceMean[ii] >> numHold) ii++;
+    refGainFile.close();
+      
+    for (int n=0; n<8; n++) {
+      gainCorrection[n] = referenceMean[n] / fitMean[n];
+    }    
+  }
+  else {
+    for (int n=0; n<8; n++) {
+      gainCorrection[n] = 1.;
+    }
   }
 
   // Close input ntuple

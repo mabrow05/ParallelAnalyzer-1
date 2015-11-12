@@ -28,4 +28,4 @@ export OCTET_LIST="${PARALLEL_DATA_PATH}/octet_list${ext}/"
 export TRIGGER_FUNC="${PARALLEL_DATA_PATH}/trigger_functions${ext}/"
 export REVCALSIM="${PARALLEL_DATA_PATH}/reverse_cal_sim${ext}/"
 export CUTS="${PARALLEL_DATA_PATH}/CUTS${ext}/"	
-
+export ANALYSIS_RESULTS="${PARALLEL_DATA_PATH}/analysis_results${ext}/"
