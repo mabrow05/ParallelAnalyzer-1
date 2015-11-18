@@ -24,5 +24,13 @@ MBAnalyzer.exe: MBAnalyzer.o $(objects)
 	$(CXX) $(CXXFLAGS) -o MBAnalyzer.exe MBAnalyzer.o $(objects) $(LIBS) 
 	@echo "Done"
 
+Asymmetries.o: Asymmetries.hh
+
+EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh
+
+SQLintercace.o: SQLinterface.hh
+
+SystematicCorrections.o: SystematicCorrections.hh
+
 clean:
 		@rm -f *.o *~  core

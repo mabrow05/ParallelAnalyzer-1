@@ -21,46 +21,91 @@ int main()
   int run = 17126;
   std::string inDir = std::string(getenv("REPLAY_PASS4"));
   try {
+    /*std::cout << "Run " << run << std::endl;
     EvtRateHandler *rt = new EvtRateHandler(run,inDir);
     rt->polarization(run);
     std::cout << rt->pol  << std::endl;
-    rt->CalcRates(0,50,50.);
+    rt->CalcRates(10,60.);
     TFile *f = new TFile("test.root","RECREATE");
-    TH1D hisE = rt->getRateHist(0);
-    TH1D hisW = rt->getRateHist(1);
+    TH1D hisE = rt->getRateHist(0,0);
+    TH1D hisW = rt->getRateHist(1,0);
     f->Write();
     f->Close();
     
-    std::vector <double> evec = rt->getRateVector(0);
-    std::vector <double> wvec = rt->getRateVector(1);
+    std::vector< std::vector <double> > evec = rt->getRateVectors(0);
+    std::vector< std::vector <double> > wvec = rt->getRateVectors(1);
 
+    double timeE = rt->returnRunLength(0);
+    double timeW = rt->returnRunLength(1);
     delete rt;
 
-    for (unsigned int i=0; i<evec.size(); i++) {
-      std::cout << evec[i] << " " << wvec[i] << std::endl;
-    }
+    std::cout << timeE << "\t" << timeW << std::endl << "/////////////////////////////////////////\n";;
+      //for (unsigned int i=0; i<evec[0].size(); i++) {
+      //std::cout << evec[0][i] << " " << wvec[0][i] << std::endl;
+      //}
 
     //testing BG subtracted rate
 
-    BGSubtractedRate *bg = new BGSubtractedRate(run,50.,45.,0,true);
+    BGSubtractedRate *bg = new BGSubtractedRate(run,10.,60.,true,false);
 
     std::cout << "initialized BGStubtractedRate\n";
     std::cout << bg->getBackgroundRun(17126) << std::endl;
-    std::vector <double> evecbg = bg->ReturnBGSubtRate(0);
-    std::vector <double> wvecbg = bg->ReturnBGSubtRate(1);
+    bg->calcBGSubtRates();
+    std::vector <double> evecbg = bg->returnBGSubtRate(0,0);
+    std::vector <double> wvecbg = bg->returnBGSubtRate(1,0);
 
-    //for (unsigned int i=0; i<evecbg.size(); i++) {
-    //std::cout << evecbg[i] << " " << wvecbg[i] << std::endl;
-    //}
+    std::vector<double> runLengthBeta = bg->returnRunLengths(true);
+    std::vector<double> runLengthBG = bg->returnRunLengths(false);
 
+    for (unsigned int i=0; i<evecbg.size(); i++) {
+      std::cout << evecbg[i]*runLengthBeta[0] << " " << wvecbg[i]*runLengthBeta[1] << std::endl;
+    }
+    
     std::cout << "RunLength: E      W\n" 
-    	      << bg->runLengthBeta[0] << " " << bg->runLengthBeta[1] << std::endl
-    	      << bg->runLengthBG[0] << " " << bg->runLengthBG[1] << std::endl;
+    	      << runLengthBeta[0] << " " << runLengthBeta[1] << std::endl
+    	      << runLengthBG[0] << " " << runLengthBG[1] << std::endl;
+
+	      delete bg;*/
+
+    //Looking at octet evts and asymmetries
+
+    //unsigned int octetNum = 1;
+    double enWinLow = 200.;
+    double enWinHigh = 600.;
+    double evts[4]={0.};
+    double totalEvts[4]={0.};
+    OctetAsymmetry *oct;
+    for (unsigned int octet=0; octet<60;octet++) {
+      oct = new OctetAsymmetry(octet,10.,45.);
+      oct->calcBGsubtractedEvts();
+      for (unsigned int type=0;type<4;type++) {
+	evts[type] = oct->getNumBGsubtrEvts(enWinLow,enWinHigh,type);
+	totalEvts[type]+=evts[type];
+      }
+	  
+      std::cout << "Type0: " << evts[0] 
+		<<"\nType1: " << evts[1]
+		<<"\nType2: " << evts[2]
+		<<"\nType3: " << evts[3]
+		<< std::endl;
+      delete oct;
+    }
+    
+    std::cout << "Total Event counts for energy window " << enWinLow << " - " << enWinHigh << ":\n"
+	      <<"Type0: " << totalEvts[0] 
+	      <<"\nType1: " << totalEvts[1]
+	      <<"\nType2: " << totalEvts[2]
+	      <<"\nType3: " << totalEvts[3]
+	      <<"\nTotal Betas: " << totalEvts[0]+totalEvts[1]+totalEvts[2]+totalEvts[3]
+	      << std::endl;
+
+      
   }
   catch(const char* ex){
     std::cerr << "Error: " << ex << std::endl;
-    }
-  return 0;
+  }
+    
+    return 0;
 
   /*std::string dbAddress = "localhost";
   std::string dbname = "UCNADB_full_quad1";
@@ -90,3 +135,5 @@ int main()
   }
   file = new TFile(outputFile.c_str(),"RECREATE");
 */
+
+

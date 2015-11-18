@@ -22,6 +22,8 @@ public:
   ~SQLdatabase() {if (res) delete (res); if (db) db->Close();}
 
   void fetchQuery(const char* q=NULL); //run an SQL query and assign result to res
+  
+  bool queryReturnsTrue();
 
   std::string returnQueryEntry(int field = NULL, TSQLResult* r = NULL); //This will return a string with each field value separated by a space, unless a particular field number is declared for int field, in which case it returns that field value only. You will need to convert this string to whatever type suits your use
 

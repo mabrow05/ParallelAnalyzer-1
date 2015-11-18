@@ -45,13 +45,20 @@ void SQLdatabase::fetchQuery(const char* q) {
   }
 }
 
+bool SQLdatabase::queryReturnsTrue() {
+  if (!res) return false;
+  else if (res->GetFieldCount()>0) return true;
+  else return false;
+};
+    
+
 std::string SQLdatabase::returnQueryEntry(int field, TSQLResult* r) {
   std::string result;
   if (!r) r=res;
   else numFields = r->GetFieldCount();
   TSQLRow *row = r->Next();
   if (!field) {
-    if (!row) throw "Row doesn't exist in Query. Query may be empty";
+    if (!row) return "";// "Row doesn't exist in Query. Query may be empty";
     for (int f = 0; f<numFields; f++)
       {
 	result += std::string(row->GetField(f));
