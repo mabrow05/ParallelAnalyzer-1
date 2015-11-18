@@ -166,8 +166,8 @@ int WireChamberResponse::ResponseType(Float_t cath[]){
 			   	     if((quadmax[1]>trifrac*quadmax[2] ||  (quadind[0]-quadind[2])^2>1 ) && (quadind[0]-quadind[1])==1 ){this->wcpos=quadind[0];return 2; } //right leaning
 			   	    else if((quadmax[1]>trifrac*quadmax[2] ||  (quadind[0]-quadind[2])^2>1 ) && (quadind[0]-quadind[1])==-1 ){this->wcpos=quadind[0]; return 3; } //left leaning
 			            else if ((quadind[0]-quadind[2])^2==1){this->wcpos=quadind[0]; return 1;} //centered triangle
-			         }
-		                 else{this->wcpos=quadind[0]; return 0;} //series of spread out points above threshold, return the largest. 			
+				}
+				else{this->wcpos=quadind[0]; return 0;} //series of spread out points above threshold, return the largest. 			
 			    }	
 		    }
 	

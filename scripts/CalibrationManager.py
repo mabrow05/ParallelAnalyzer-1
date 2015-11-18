@@ -797,16 +797,16 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 0: 
-        runPeriods = [2,3,4,5,6,7]#[3]
+    if 1: 
+        runPeriods = [3]#[2,3,4,5,6,7]
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:           
-            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             
     

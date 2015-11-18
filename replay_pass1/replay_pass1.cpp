@@ -23,6 +23,7 @@
 #include "pedestals.h"
 #include "cuts.h"
 #include "basic_reconstruction.h"
+#include "WireChamberResponse.h"
 
 using namespace std;
 
@@ -199,6 +200,15 @@ int main(int argc, char *argv[])
   Tout->Branch("yE", &yE, "yE/D");
   Tout->Branch("xW", &xW, "xW/D");
   Tout->Branch("yW", &yW, "yW/D");
+
+  // Swank's addition   (1 of 2)  
+  int xeRC,yeRC,xwRC,ywRC;
+  WireChamberResponse * WCR = new WireChamberResponse();	
+  Tout->Branch("xeRC", &xeRC, "xeRC/I"); //x east response class. 
+  Tout->Branch("yeRC", &yeRC, "yeRC/I"); //y east response class... 
+  Tout->Branch("xwRC", &xwRC, "xwRC/I");
+  Tout->Branch("ywRC", &ywRC, "ywRC/I");
+  //end of Swank's addition (1 of 2)
 
   Tout->Branch("PID",  &PID,  "PID/I");
   Tout->Branch("type", &type, "type/I");
@@ -671,6 +681,27 @@ int main(int argc, char *argv[])
         posError = 1;
       }
       */
+      //////////////////////////////////////////////////////////////////////////////////
+      /*  Swank's addition to the UK PA.  (2 of 2)
+	 this seems like a good spot since its around the position calculation. 
+      */
+      //changing the length 32 double array to length 16  float array.  using variables defined in WCR. 
+      for(int j = 0; j<16; j++)
+	{
+	  WCR->cathex[j]=(float)cathodeEast[16+j];
+	  WCR->cathey[j]=(float)cathodeEast[j];
+	  WCR->cathwx[j]=(float)cathodeWest[16+j];
+	  WCR->cathwy[j]=(float)cathodeWest[j];
+	} 
+      
+      xeRC=WCR->ResponseType(WCR->cathex);   //response class x co-ordinate, East. 
+      yeRC=WCR->ResponseType(WCR->cathey);   //response class y co-ordinate, East. 
+      xwRC=WCR->ResponseType(WCR->cathwx);   //response class x co-ordinate, West. 
+      ywRC=WCR->ResponseType(WCR->cathwy);   //response class y co-ordinate, West.
+      /*
+	End of swank's addtion (2 of 2)
+      */
+      ////////////////////////////////////////////////////////////////////////////////////
 
       double xMWPCEast = 0.;
       double yMWPCEast = 0.;

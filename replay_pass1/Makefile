@@ -8,6 +8,8 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
+VPATH = ./:../include/
+
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -18,9 +20,15 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-replay_pass1.exe: replay_pass1.o
-	$(CXX) $(CXXFLAGS) -o replay_pass1.exe replay_pass1.o $(LIBS)
+objects = WireChamberResponse.o
+.PHONY: all
+all: replay_pass1.exe
+
+replay_pass1.exe: replay_pass1.o $(objects)
+	$(CXX) $(CXXFLAGS) -o replay_pass1.exe replay_pass1.o $(objects) $(LIBS)
 	@echo "Done"
+
+WireChamberResponse.o: WireChamberResponse.h
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from
