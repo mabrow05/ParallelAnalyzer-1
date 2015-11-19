@@ -804,7 +804,7 @@ if __name__ == "__main__":
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:           
             rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 

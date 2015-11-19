@@ -27,15 +27,15 @@ void WireChamberResponse::SetPhysTree(int rnum){
 }
 
 //Find Max index
-int WireChamberResponse::MaxInd(Float_t cath[])
+Int_t WireChamberResponse::MaxInd(Float_t cath[])
 {   
 	Float_t tempcath[16];
-	for(unsigned int i =0; i< (16-sizeof(cath)*CHAR_BIT/32); i++)
+	for(int i =0; i<16 ; i++)  //(16-sizeof(cath)*CHAR_BIT/32) this was dumb..
 	{
 	tempcath[i]=cath[i];
 	}
 	
-	this->max=-3.40282e+38; //barely floats
+	this->max=-1.40282e+30; //barely floats
 	for (int i=0; i<16; ++i)
 	{
                     
@@ -64,8 +64,8 @@ void WireChamberResponse::TriMax(Float_t cath[]){  //this function isn't used.
 void WireChamberResponse::QuadMax(Float_t cath[]){
 	this->SetTempCaths(cath);
 	for (int i = 0; i<4;i++){	
-	quadind[i]=MaxInd(tempcath); //This function exports the index and stores the maximum internally
-	quadmax[i]=max;	//this is where the maximum is located in the class. 
+	quadind[i]=this->MaxInd(tempcath); //This function exports the index and stores the maximum internally
+	quadmax[i]=this->max;	//this is where the maximum is located in the class. 
 	tempcath[quadind[i]]=0;
 	}
 	return;
@@ -97,24 +97,24 @@ void WireChamberResponse::SetTempCaths(Float_t cath[]){
 
 //This is were the rubber meets the road. As in this is where the wire chamber response class is chosen.  
 int WireChamberResponse::ResponseType(Float_t cath[]){
-  this->QuadMax(cath);
-  if (quadmax[0]>threshold){	
+ QuadMax(cath);
+ if (quadmax[0]>threshold){	
     //Platue Response. 	
     int platnum=1;
     for (int i =0; i<3; i++){	
       if ((platfrac*quadmax[0])<quadmax[i+1]) {platnum++;}
     }
-    //we have a platue, is it continious?  //I have no idea how this works anymore, it probably made sense at the time. 
+    //we have a platue, is it continious? 
     if (platnum>1) {
-      int platcheck=1;
-      bool cont=false;		
-      float indtemp[platnum];
-      for (int i = 0; i<platnum; i++) indtemp[i]=(float)this->quadind[i]; 
-      for (int i = platnum; i<4; i++) indtemp[i]=-42;
-      this->QuadMax(indtemp);
-      for(int i = 0; i<platnum-1;i++){
-	if(abs((int)quadmax[i]-(int)quadmax[i+1])==1) platcheck++;					
-      }
+      int platcheck=1;		
+      Float_t indtemp[16];
+      for (int i = 0; i<platnum; i++) {indtemp[i]=(Float_t)this->quadind[i];} 
+      for (int i = platnum; i<16; i++) {indtemp[i]=(Float_t)-42.00;}
+      QuadMax(indtemp);
+      for(int i = 0; i<platnum;i++){
+	if(((int)(quadmax[i])-(int)(quadmax[i+1]))==1) {platcheck+=1;}				     
+		}
+	  
       if(platcheck==platnum) {this->wcpos=(int)quadmax[0]; this->QuadMax(cath); return (platnum+2);}
       else {this->wcpos=0; this->QuadMax(cath); return 8;} ///Split Platue !! undefined response (too complicated)
     }
@@ -126,9 +126,11 @@ int WireChamberResponse::ResponseType(Float_t cath[]){
       //We have a triangle! 			
       else {
 	if ( (int)pow(quadind[0]-quadind[1],2.)==1) {
-	  if (      ( quadmax[1]>trifrac*quadmax[2] || (int)pow(quadind[0]-quadind[2],2.)>1  ) && (quadind[0]-quadind[1])==1   ){this->wcpos=quadind[0];return 2; } //right leaning
-	  else if(  ( quadmax[1]>trifrac*quadmax[2] || (int)pow(quadind[0]-quadind[2],2.)>1  ) && (quadind[0]-quadind[1])==-1   ){this->wcpos=quadind[0]; return 3; } //left leaning
+	  if (      ( quadmax[1]>trifrac*quadmax[2] || (int)pow(quadind[0]-quadind[2],2.)>1  ) && (quadind[0]-quadind[1])==1   ){this->wcpos=quadind[0];return 2; } //right leaning  or maybe its left..
+	  else if(  ( quadmax[1]>trifrac*quadmax[2] || (int)pow(quadind[0]-quadind[2],2.)>1  ) && (quadind[0]-quadind[1])==-1   ){this->wcpos=quadind[0]; return 3; } //left leaning,  maybe right.. depending on which direction you are looking at the wire chamber...
 	  else {this->wcpos=quadind[0]; return 1;} //centered triangle
+	
+	  
 	}
 	else{this->wcpos=quadind[0]; return 0;} //series of spread out points above threshold, return the largest. 			
       }	
@@ -152,9 +154,9 @@ int WireChamberResponse::ResponseType(Float_t cath[]){
 
 
 
-/*
+
 //testing grounds
-int main()
+/*int main()
 {
 	
   	WireChamberResponse *WCR =new WireChamberResponse();
@@ -185,10 +187,9 @@ int main()
 
 	
   return 0;
-}
+  }*/
 
 
-*/	
 
 /*  //Make Histograms! if 2D use TH2F.. etc.
 TH1F * gainhist = new TH1F("gain","gain hist",30,-1,4);//,30,0,10);

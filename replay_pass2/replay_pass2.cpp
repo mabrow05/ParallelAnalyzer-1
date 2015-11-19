@@ -25,6 +25,7 @@
 
 #include "replay_pass2.h"
 
+
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -87,6 +88,12 @@ int main(int argc, char *argv[])
   Tout->Branch("xW_pass2", &xW_pass2, "xW_pass2/D");
   Tout->Branch("yW_pass2", &yW_pass2, "yW_pass2/D");
 
+  int xeRC,yeRC,xwRC,ywRC;	
+  Tout->Branch("xeRC", &xeRC, "xeRC/I"); //x east response class. 
+  Tout->Branch("yeRC", &yeRC, "yeRC/I"); //y east response class... 
+  Tout->Branch("xwRC", &xwRC, "xwRC/I");
+  Tout->Branch("ywRC", &ywRC, "ywRC/I");
+
   Tout->Branch("PID_pass2",  &PID_pass2,  "PID_pass2/I");
   Tout->Branch("type_pass2", &type_pass2, "type_pass2/I");
   Tout->Branch("side_pass2", &side_pass2, "side_pass2/I");
@@ -125,6 +132,12 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("yE", &yE);
   Tin->SetBranchAddress("xW", &xW);
   Tin->SetBranchAddress("yW", &yW);
+
+  //Adding in wirechamber class variable
+  Tin->SetBranchAddress("xeRC",&xeRC);
+  Tin->SetBranchAddress("yeRC",&yeRC);
+  Tin->SetBranchAddress("xwRC",&xwRC);
+  Tin->SetBranchAddress("ywRC",&ywRC);
 
   Tin->SetBranchAddress("PID",  &PID);
   Tin->SetBranchAddress("type", &type);

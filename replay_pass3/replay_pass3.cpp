@@ -157,6 +157,12 @@ int main(int argc, char *argv[])
   Tout->Branch("yE_pass3", &yE_pass3, "yE_pass3/D");
   Tout->Branch("xW_pass3", &xW_pass3, "xW_pass3/D");
   Tout->Branch("yW_pass3", &yW_pass3, "yW_pass3/D");
+  
+  int xeRC,yeRC,xwRC,ywRC;	
+  Tout->Branch("xeRC", &xeRC, "xeRC/I"); //x east response class. 
+  Tout->Branch("yeRC", &yeRC, "yeRC/I"); //y east response class... 
+  Tout->Branch("xwRC", &xwRC, "xwRC/I");
+  Tout->Branch("ywRC", &ywRC, "ywRC/I");
 
   Tout->Branch("PID_pass3",  &PID_pass3,  "PID_pass3/I");
   Tout->Branch("type_pass3", &type_pass3, "type_pass3/I");
@@ -196,6 +202,12 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("yE_pass2", &yE_pass2);
   Tin->SetBranchAddress("xW_pass2", &xW_pass2);
   Tin->SetBranchAddress("yW_pass2", &yW_pass2);
+
+  //Adding in wirechamber class variable
+  Tin->SetBranchAddress("xeRC",&xeRC);
+  Tin->SetBranchAddress("yeRC",&yeRC);
+  Tin->SetBranchAddress("xwRC",&xwRC);
+  Tin->SetBranchAddress("ywRC",&ywRC);
 
   Tin->SetBranchAddress("PID_pass2",  &PID_pass2);
   Tin->SetBranchAddress("type_pass2", &type_pass2);

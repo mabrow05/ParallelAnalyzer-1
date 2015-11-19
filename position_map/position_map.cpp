@@ -1,5 +1,7 @@
+//SWANKS EDIT
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include <cmath>
 #include <cstdlib>
 #include <string>
@@ -24,6 +26,12 @@
 
 using namespace std;
 
+string itos(int val) {
+  char temp[32];
+  sprintf(temp,"%i",val);
+  return string(temp);
+};
+
 int main(int argc, char *argv[])
 {
   cout.setf(ios::fixed, ios::floatfield);
@@ -31,11 +39,44 @@ int main(int argc, char *argv[])
 
   // Prompt for filename of run numbers
   int iXeRunPeriod;
+  bool allResponseClasses = true;
+  int numResponseClasses = 0;
+  vector <int> responseClasses;
   int nRuns;
   int runList[500];
   cout << "Enter Xenon run period: " << endl;
   cin  >> iXeRunPeriod;
   cout << endl;
+
+  cout << "All Response Classes? (true=1/false=0): " << endl;
+  cin  >> allResponseClasses;
+  cout << endl;
+
+  if (!allResponseClasses) {
+    
+    cout << "Enter number of response classes: " << endl;
+    cin >> numResponseClasses;
+    cout << endl;
+
+    if (numResponseClasses<1 || numResponseClasses>9) {
+      cout << "Bad number of response classes to include!!\n";
+      exit(1);
+    }
+    responseClasses.resize(numResponseClasses,0);
+    char quest[30];
+    for (int i=0; i<numResponseClasses; i++) {
+      sprintf(quest,"Enter class #%i: ",i+1);
+      cout << quest;
+      cin >> responseClasses[i];
+      cout << endl;
+      
+      if (responseClasses[i]<0 || responseClasses[i]>8) {
+	cout << "You entered a non-existent response class!\n";
+	exit(1);
+      }
+    }
+  }
+
 
   char temp[500];
   sprintf(temp, "xenon_runs_%i.dat", iXeRunPeriod);
@@ -82,10 +123,18 @@ int main(int argc, char *argv[])
   }
 
   // Open output ntuple
-  char tempOut[500];
+  string tempOutBase;
+  string tempOut;
   //sprintf(tempOut, "position_map_%s.root", argv[1]);
-  sprintf(tempOut, "position_map_%i.root", iXeRunPeriod);
-  TFile *fileOut = new TFile(tempOut,"RECREATE");
+  tempOutBase = "position_map_" + itos(iXeRunPeriod);
+  if (!allResponseClasses) {
+    tempOutBase+="_RC_";
+    for (int i=0; i< numResponseClasses; i++) {
+      tempOutBase+=itos(responseClasses[i]);
+    }
+  }
+  tempOut = tempOutBase+".root";
+  TFile *fileOut = new TFile(tempOut.c_str(),"RECREATE");
 
   // Output histograms
   int nPMT = 8;
@@ -146,11 +195,19 @@ int main(int argc, char *argv[])
     Tin->SetBranchAddress("yE_pass2", &yE_pass2);
     Tin->SetBranchAddress("xW_pass2", &xW_pass2);
     Tin->SetBranchAddress("yW_pass2", &yW_pass2);
+	
+    //Swank addition
+    int xeRC,yeRC,xwRC,ywRC;
+    Tin->SetBranchAddress("xeRC",&xeRC);
+    Tin->SetBranchAddress("yeRC",&yeRC);
+    Tin->SetBranchAddress("xwRC",&xwRC);
+    Tin->SetBranchAddress("ywRC",&ywRC);
     
     Tin->SetBranchAddress("PID_pass2", &PID_pass2);
     Tin->SetBranchAddress("type_pass2", &type_pass2);
     Tin->SetBranchAddress("side_pass2", &side_pass2);
     Tin->SetBranchAddress("posError_pass2", &posError_pass2);
+
 
     // Loop over events
     for (int i=0; i<nEvents; i++) {
@@ -160,11 +217,22 @@ int main(int argc, char *argv[])
       if (PID_pass2 != 1) continue;
       if (type_pass2 > 0) continue;
 
-      // Type 0 East Trigger
-      int intBinX, intBinY;
+	  
+		
 
+      // Type 0 East Trigger
+      int intBinX, intBinY; 
+      bool moveOn = false;
       if (side_pass2 == 0) {
-        intBinX = -1;
+	//Swank addition: Wire Chamber Response class. Only allow triangles. 
+	for (int t=0; t<numResponseClasses; t++) {
+	  if (xeRC != responseClasses[t]) {moveOn=true; continue;}
+	  if (yeRC != responseClasses[t]) {moveOn=true; continue;}
+	}
+      
+	if (moveOn) continue;
+
+	intBinX = -1;
         intBinY = -1;
 
         // Determine position bin
@@ -184,6 +252,14 @@ int main(int argc, char *argv[])
 
       // Type 0 West Trigger
       if (side_pass2 == 1) {
+	//Swank Only Allow triangles!!!	  	
+	for (int t=0; t<numResponseClasses; t++) {
+	  if (xwRC != responseClasses[t]) {moveOn=true; continue;}
+	  if (ywRC != responseClasses[t]) {moveOn=true; continue;}
+	}
+      
+	if (moveOn) continue;
+	
         intBinX = -1;
         intBinY = -1;
         // Determine position bin
@@ -427,9 +503,9 @@ int main(int argc, char *argv[])
   }
 
   // Write position maps to file
-  char tempMap[500];
-  sprintf(tempMap, "position_map_%i.dat", iXeRunPeriod);
-  ofstream outMap(tempMap);
+  string tempMap;
+  tempMap = tempOutBase + ".dat";
+  ofstream outMap(tempMap.c_str());
 
   for (int i=0; i<nPosBinsX; i++) {
     for (int j=0; j<nPosBinsY; j++) {
@@ -445,15 +521,17 @@ int main(int argc, char *argv[])
              << positionMap[7][i][j] << endl;
     }
   }
+  outMap.close();
 
   // Write norms to file
-  char tempNorm[500];
-  sprintf(tempNorm, "norm_%i.dat", iXeRunPeriod);
-  ofstream outNorm(tempNorm);
+  string tempNorm;
+  tempNorm = "norm_"+tempMap;
+  ofstream outNorm(tempNorm.c_str());
 
   for (int p=0; p<nPMT; p++) {
     outNorm << norm[p] << endl;
   }
+  outNorm.close();
 
   // Write output ntuple
   fileOut->Write();

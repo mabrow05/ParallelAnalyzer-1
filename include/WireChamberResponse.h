@@ -44,11 +44,11 @@ public:
   WireChamberResponse() {}
   //look at all of these public (government funded) types!
   char * ORD;//=getenv ("UCNAOUTPUTDIR"); //Official Replay Data 
-  const static Float_t threshold=50;    //what is the event threshold on the wires. 
-  const static Float_t threshold2=10;   //what is the event threshold on the neighbors. 	
+  static const Float_t threshold=120;    //what is the event threshold on the wires. 
+  static const Float_t threshold2=82;   //what is the event threshold on the neighbors. 	
   Float_t cathwx[16];   //cathode data
-  const static Float_t platfrac=0.9;
-  const static Float_t trifrac=1.5;	
+  static const Float_t platfrac=0.9;
+  static const Float_t trifrac=1.5;	
   Float_t cathwy[16];
   Float_t cathex[16];
   Float_t cathey[16];
