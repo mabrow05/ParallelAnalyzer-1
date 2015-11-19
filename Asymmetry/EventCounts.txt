@@ -1,11 +1,16 @@
 no Energy Cut and fid<60.0 mm
 Total Event counts for energy window 0 - 800:
-Type0: 3.27047e+07
-Type1: 902690
-Type2: 774492
+Type0: 3.27047e+07  	(95.1%)
+Type1: 902690       	(2.6%)
+Type2: 774492		(2.3%)
 Type3: 0
 Total Betas: 3.43819e+07
 
 energy cut (on Evis) and fid<45 mm
-
+Total Event counts for energy window 200 - 600:
+Type0: 1.71916e+07	(95.7%)
+Type1: 558931		(3.1%)
+Type2: 207123		(1.2%)
+Type3: 0
+Total Betas: 1.79576e+07
 
