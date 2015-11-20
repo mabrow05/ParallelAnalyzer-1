@@ -90,19 +90,19 @@ class CalReplayManager:
         self.revCalSimPath = os.getenv("REVCALSIM")
 
     def makeAllDirectories(self):
-        #os.sys("mkdir -p %s"%self.AnalysisDataPath)
-        os.sys("mkdir -p %s"%self.srcPositionsPath)
-        os.sys("mkdir -p %s"%self.srcPeakPath)
-        os.sys("mkdir -p %s"%self.srcListPath)
-        os.sys("mkdir -p %s"%self.replayPass1)
-        os.sys("mkdir -p %s"%self.replayPass2)
-        os.sys("mkdir -p %s"%self.replayPass3)
-        os.sys("mkdir -p %s"%self.replayPass4)
-        os.sys("mkdir -p %s"%self.gainBismuthPath)
-        os.sys("mkdir -p %s"%self.nPEweightsPath)
-        os.sys("mkdir -p %s"%self.octetListPath)
-        os.sys("mkdir -p %s"%self.triggerFuncPath)
-        os.sys("mkdir -p %s"%self.revCalSimPath)
+        #os.system("mkdir -p %s"%self.AnalysisDataPath)
+        os.system("mkdir -p %s"%self.srcPositionsPath)
+        os.system("mkdir -p %s"%self.srcPeakPath)
+        os.system("mkdir -p %s"%self.srcListPath)
+        os.system("mkdir -p %s"%self.replayPass1)
+        os.system("mkdir -p %s"%self.replayPass2)
+        os.system("mkdir -p %s"%self.replayPass3)
+        os.system("mkdir -p %s"%self.replayPass4)
+        os.system("mkdir -p %s"%self.gainBismuthPath)
+        os.system("mkdir -p %s"%self.nPEweightsPath)
+        os.system("mkdir -p %s"%self.octetListPath)
+        os.system("mkdir -p %s"%self.triggerFuncPath)
+        os.system("mkdir -p %s"%self.revCalSimPath)
 
 
     def runReplayPass1(self,srcRunPeriod=1, sourceORxenon="source"):

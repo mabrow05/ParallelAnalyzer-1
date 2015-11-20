@@ -64,6 +64,8 @@ void EvtRateHandler::CalcRates(double enBinWidth, double fidCut) {
 std::vector< std::vector<double> > EvtRateHandler::getRateVectors(int side) {
   rateEvec.resize(4, std::vector<double> (numEnergyBins,0.)); 
   rateWvec.resize(4,std::vector <double> (numEnergyBins,0.));
+  rateEerr.resize(4, std::vector<double> (numEnergyBins,0.)); 
+  rateWerr.resize(4,std::vector <double> (numEnergyBins,0.));
 
   if (side==0)
     {
@@ -79,6 +81,25 @@ std::vector< std::vector<double> > EvtRateHandler::getRateVectors(int side) {
     return rateWvec;
   }
   else throw "Bad value for side thrown in getRateVector";
+};
+
+std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
+  rateEerr.resize(4, std::vector<double> (numEnergyBins,0.)); 
+  rateWerr.resize(4,std::vector <double> (numEnergyBins,0.));
+
+  if (side==0) {
+    for (unsigned int j=0; j<4; j++) {
+      for (unsigned int i=0; i<numEnergyBins; i++) {rateEerr[j][i]=sqrt(rateE[j]->GetBinContent(i)/runLength[0]);}
+    }
+    return rateEerr;
+  }
+  else if (side==1) {
+    for (unsigned int j=0; j<4; j++) {
+      for (unsigned int i=0; i<numEnergyBins; i++) {rateWerr[j][i]=sqrt(rateW[j]->GetBinContent(i)/runLength[1]);}
+    }
+    return rateWerr;
+  }
+  else throw "Bad value for side thrown in getRateErrors";
 };
 
 TH1D EvtRateHandler::getRateHist(int side, int evtType) {
@@ -124,21 +145,27 @@ void EvtRateHandler::dataReader() {
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("Type", &Type);
     Tin->SetBranchAddress("Side", &Side); 
-    Tin->SetBranchAddress("Etrue",&Erecon);
-    Tin->SetBranchAddress("TimeE",&TimeE);
-    Tin->SetBranchAddress("TimeW",&TimeW);
-    Tin->GetBranch("xEmpm")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("xWmpm")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->SetBranchAddress("Erecon",&Erecon_f);
+    Tin->SetBranchAddress("TimeE",&TimeE_f);
+    Tin->SetBranchAddress("TimeW",&TimeW_f);
+    Tin->GetBranch("xEmpm")->GetLeaf("center")->SetAddress(&EmwpcX_f);
+    Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY_f);
+    Tin->GetBranch("xWmpm")->GetLeaf("center")->SetAddress(&WmwpcX_f);
+    Tin->GetBranch("yWmpm")->GetLeaf("center")->SetAddress(&WmwpcY_f);
   }
   unsigned int nevents = Tin->GetEntriesFast();
   std::cout << nevents << std::endl;
   //Determine total time on each side
   Tin->GetEvent(nevents-1);
  
-  runLength[0] = (double)TimeE;
+  if (!UKdata) {
+    TimeE = (double) TimeE_f;
+    TimeW = (double) TimeW_f;
+  }
+
+  runLength[0] = TimeE;
   double EastWeight = 1./runLength[0];
-  runLength[1] = (double)TimeW;
+  runLength[1] = TimeW;
   double WestWeight = 1./runLength[1];
 
   //Run over all events in file, fill output histogram with rate
@@ -148,6 +175,17 @@ void EvtRateHandler::dataReader() {
   for (unsigned int i=0; i<nevents; i++)
     {
       Tin->GetEvent(i);
+
+      //Cast float variables to double if they are from MPM replay
+      if (!UKdata) {
+	EmwpcX = (double) EmwpcX_f;
+	EmwpcY = (double) EmwpcY_f;
+	WmwpcX = (double) WmwpcX_f;
+	WmwpcY = (double) WmwpcY_f;
+	Erecon = (double) Erecon_f;
+	//TimeE = (double) TimeE_f;
+	//TimeW = (double) TimeW_f;
+      }
       if (PID==1) 
 	{
 	  counter++;
@@ -156,7 +194,7 @@ void EvtRateHandler::dataReader() {
 	      r2=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateE[Type]->Fill(double(Erecon), EastWeight);
+		  rateE[Type]->Fill(Erecon, EastWeight);
 		}
 	    }
 	  else if (Side==1)
@@ -164,7 +202,7 @@ void EvtRateHandler::dataReader() {
 	      r2=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateW[Type]->Fill(double(Erecon), WestWeight);
+		  rateW[Type]->Fill(Erecon, WestWeight);
 		}
 	    }
 	}
@@ -238,6 +276,12 @@ BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool uk
   BetaRateW.resize(4, std::vector <double> (numBins,0.));
   BGRateW.resize(4, std::vector <double> (numBins,0.));
   FinalRateW.resize(4, std::vector <double> (numBins,0.));
+  BetaRateErrorE.resize(4, std::vector <double> (numBins,0.));
+  BGRateErrorE.resize(4, std::vector <double> (numBins,0.));
+  FinalRateErrorE.resize(4, std::vector <double> (numBins,0.));
+  BetaRateErrorW.resize(4, std::vector <double> (numBins,0.));
+  BGRateErrorW.resize(4, std::vector <double> (numBins,0.));
+  FinalRateErrorW.resize(4, std::vector <double> (numBins,0.));
 };
 
 
@@ -269,6 +313,14 @@ std::vector<double > BGSubtractedRate::returnBGSubtRate(int side, int etype) {
   else throw "Invalid event type when returning BG subtracted rate";
 };
 
+std::vector<double > BGSubtractedRate::returnBGSubtRateError(int side, int etype) {
+  if (etype==0 || etype==1 || etype==2 || etype==3) {  
+    if (side==0) return FinalRateErrorE[etype];
+    else if (side==1) return FinalRateErrorW[etype];
+    else throw "Invalid side when returning BG subtracted rate error";
+  }
+  else throw "Invalid event type when returning BG subtracted rate error";
+};
 
 int BGSubtractedRate::getBackgroundRun(int run) {
   std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
@@ -322,18 +374,22 @@ void BGSubtractedRate::LoadRatesByBin() {
   if (UKdata) indir = std::string(getenv("REPLAY_PASS4"));
   else indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
 
-  EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir);
+  EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir, UKdata);
   evtBG->CalcRates(EnergyBinWidth,fiducialCut);
   BGRateE = evtBG->getRateVectors(0);
+  BGRateErrorE = evtBG->getRateErrors(0);
   BGRateW = evtBG->getRateVectors(1);
+  BGRateErrorW = evtBG->getRateErrors(1);
   runLengthBG[0] = evtBG->returnRunLength(0);
   runLengthBG[1] = evtBG->returnRunLength(1);
   delete evtBG;
     
-  EvtRateHandler *evt = new EvtRateHandler(runNumber, indir);
+  EvtRateHandler *evt = new EvtRateHandler(runNumber, indir, UKdata);
   evt->CalcRates(EnergyBinWidth,fiducialCut);
   BetaRateE = evt->getRateVectors(0);
+  BetaRateErrorE = evt->getRateErrors(0);
   BetaRateW = evt->getRateVectors(1);
+  BetaRateErrorW = evt->getRateErrors(1);
   runLengthBeta[0] = evt->returnRunLength(0);
   runLengthBeta[1] = evt->returnRunLength(1);
   delete evt;
@@ -361,6 +417,7 @@ void BGSubtractedRate::CalcFinalRate()  {
 	for (unsigned int i=0; i<BetaRateE[evtType].size(); i++)
 	  {
 	    FinalRateE[evtType][i] = BetaRateE[evtType][i]-BGRateE[evtType][i];
+	    FinalRateErrorE[evtType][i] = sqrt(pow(BetaRateErrorE[evtType][i],2.)+pow(BGRateErrorE[evtType][i],2.));
 	    //std::cout << BetaRateE[evtType][i] << " " << BGRateE[evtType][i] << " " << FinalRateE[evtType][i] << std::endl;
 	  }
       }
@@ -371,6 +428,7 @@ void BGSubtractedRate::CalcFinalRate()  {
 	for (unsigned int i=0; i<BetaRateW[evtType].size(); i++)
 	  {
 	    FinalRateW[evtType][i] = BetaRateW[evtType][i]-BGRateW[evtType][i];
+	    FinalRateErrorW[evtType][i] = sqrt(pow(BetaRateErrorW[evtType][i],2.)+pow(BGRateErrorW[evtType][i],2.));
 	    //std::cout << BetaRate[i] << " " << BGRate[i] << " " << FinalRate[i] << std::endl;
 	  }
       }

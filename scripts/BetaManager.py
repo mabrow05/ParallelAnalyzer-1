@@ -5,7 +5,7 @@ import sys
 from optparse import OptionParser
 from math import *
 import MButils
-import CalibrationManager
+#import CalibrationManager
 
 ##### Set up list of runs which are to be omitted from the beta data sets
 omittedBetaRuns = [19232]
@@ -29,7 +29,20 @@ class BetaReplayManager:
         self.replayPass3 = os.getenv("REPLAY_PASS3")
         self.replayPass4 = os.getenv("REPLAY_PASS4")
         self.srcListPath = os.getenv("SOURCE_LIST")
-        self.octetList = os.getenv("OCTET_LIST")
+        self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
+        self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
+        self.octetListPath = os.getenv("OCTET_LIST")
+        self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
+        self.revCalSimPath = os.getenv("REVCALSIM")
+        self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
+        self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
+
+    def makeAllDirectories(self):
+        os.system("mkdir -p %s"%self.octetListPath)
+        os.system("mkdir -p %s"%self.triggerFuncPath)
+        os.system("mkdir -p %s"%self.revCalSimPath)
+        os.system("mkdir -p %s"%self.revCalSimPath)
+        os.system("mkdir -p %s"%self.AnalysisResultsPath)
 
     def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
 	for year in ["20112012","20122013"]:			
@@ -191,8 +204,31 @@ class BetaAsymmetryManager:
         self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
         self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
         self.srcPeakPath = os.getenv("SOURCE_PEAKS")
+        self.replayPass1 = os.getenv("REPLAY_PASS1")
+        self.replayPass2 = os.getenv("REPLAY_PASS2")
         self.replayPass3 = os.getenv("REPLAY_PASS3")
+        self.replayPass4 = os.getenv("REPLAY_PASS4")
         self.srcListPath = os.getenv("SOURCE_LIST")
+        self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
+        self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
+        self.octetListPath = os.getenv("OCTET_LIST")
+        self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
+        self.revCalSimPath = os.getenv("REVCALSIM")
+        self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
+        self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
+
+    def makeOctetAnalysisDirectories(self, AnalysisChoice=None):
+        for octet in range(0,122,1):
+            if not AnalysisChoice:
+                os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.AnalysisResultsPath,octet))
+                os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.AnalysisResultsPath,octet))
+                os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.AnalysisResultsPath,octet))
+            else:
+                os.system("mkdir -p %s/Octet_%i/OctetAsymmetry_%s"%(self.AnalysisResultsPath,octet,AnalysisChoice))
+                os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry_%s"%(self.AnalysisResultsPath,octet,AnalysisChoice))
+                os.system("mkdir -p %s/Octet_%i/PairAsymmetry_%s"%(self.AnalysisResultsPath,octet, AnalysisChoice))
+                           
+        print "Made all octet analysis directories"
 
 
 
@@ -230,13 +266,17 @@ if __name__ == "__main__":
         #for octet in range(0,60,1):
         beta.findPedestals(5)
 
+    if 1: 
+        asymm = BetaAsymmetryManager()
+        asymm.makeOctetAnalysisDirectories()
+
     if 0:
         beta = BetaReplayManager()
         for octet in range(0,62,1):
             beta.makeBasicHistograms(octet,year = "20122013")
 
 
-    if 1:
+    if 0:
         octet_range = [0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
@@ -247,3 +287,4 @@ if __name__ == "__main__":
             beta.runReplayPass3(octet)
             beta.runReplayPass4(octet)
             
+    

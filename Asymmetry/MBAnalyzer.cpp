@@ -43,7 +43,7 @@ int main()
       //for (unsigned int i=0; i<evec[0].size(); i++) {
       //std::cout << evec[0][i] << " " << wvec[0][i] << std::endl;
       //}
-
+      
     //testing BG subtracted rate
 
     BGSubtractedRate *bg = new BGSubtractedRate(run,10.,60.,true,false);
@@ -54,29 +54,33 @@ int main()
     std::vector <double> evecbg = bg->returnBGSubtRate(0,0);
     std::vector <double> wvecbg = bg->returnBGSubtRate(1,0);
 
+    std::vector <double> evecbgErr = bg->returnBGSubtRateError(0,0);
+    std::vector <double> wvecbgErr = bg->returnBGSubtRateError(1,0);
+
     std::vector<double> runLengthBeta = bg->returnRunLengths(true);
     std::vector<double> runLengthBG = bg->returnRunLengths(false);
 
     for (unsigned int i=0; i<evecbg.size(); i++) {
-      std::cout << evecbg[i]*runLengthBeta[0] << " " << wvecbg[i]*runLengthBeta[1] << std::endl;
+      std::cout << evecbg[i] << " " << evecbgErr[i] << " " << wvecbg[i] << " " << wvecbgErr[i] << std::endl;
     }
     
     std::cout << "RunLength: E      W\n" 
     	      << runLengthBeta[0] << " " << runLengthBeta[1] << std::endl
     	      << runLengthBG[0] << " " << runLengthBG[1] << std::endl;
 
-	      delete bg;*/
+    delete bg;*/
 
     //Looking at octet evts and asymmetries
 
     //unsigned int octetNum = 1;
-    double enWinLow = 200.;
-    double enWinHigh = 600.;
+    double enWinLow = 0.;
+    double enWinHigh = 800.;
     double evts[4]={0.};
     double totalEvts[4]={0.};
     OctetAsymmetry *oct;
-    for (unsigned int octet=0; octet<60;octet++) {
-      oct = new OctetAsymmetry(octet,10.,45.);
+    for (unsigned int octet=0; octet<0;octet++) {
+      oct = new OctetAsymmetry(octet,10.,60.);
+      oct->UKdata = false;
       oct->calcBGsubtractedEvts();
       for (unsigned int type=0;type<4;type++) {
 	evts[type] = oct->getNumBGsubtrEvts(enWinLow,enWinHigh,type);

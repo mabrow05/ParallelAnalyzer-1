@@ -10,11 +10,13 @@
 // Class for determining asymmetry from one run
 class AsymmetryBase {
 public:
-  AsymmetryBase(int oct) : octet(oct) {readOctetFile();}
+  AsymmetryBase(int oct) : UKdata(true), Simulation(false), octet(oct) {readOctetFile();}
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
   int getRunsInOctet() {return runsInOctet;}
+  bool UKdata;
+  bool Simulation;
 protected: 
   int octet;
   int runsInOctet;
@@ -31,6 +33,7 @@ public:
   void calcBGsubtractedEvts();
   double getNumBGsubtrEvts(double enWinLow, double enWinHigh, int evtType);
   bool checkIfBetaRun(std::string type);
+  void writeRatesToFile(); //For now this only uses type0 evts
 
 private:
   //double numBGsubtractedEvts; //double because this is calculated using the rate*runLength

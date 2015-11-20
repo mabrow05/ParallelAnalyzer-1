@@ -11,6 +11,7 @@
 #include <TH1.h>
 #include <vector>
 #include <cstdlib>
+#include <cmath>
 #include "SQLinterface.hh"
 
 
@@ -34,6 +35,7 @@ public:
   void CalcRates(double enBinWidth=10., double fidCut=45.); //evtType (0,1,2,3) for now. This returns a histogram of
                                                                             // rates
   std::vector< std::vector<double> > getRateVectors(int side);
+  std::vector< std::vector<double> > getRateErrors(int side);
   TH1D getRateHist(int side, int evtType);
 
 protected:
@@ -45,7 +47,10 @@ protected:
   std::vector <TH1D*> rateW; // Rate histograms 
   std::vector< std::vector<double> > rateEvec;
   std::vector< std::vector<double> > rateWvec;
+  std::vector< std::vector<double> > rateEerr; //Stores the statistical error for each Bin
+  std::vector< std::vector<double> > rateWerr;
   double EmwpcX, EmwpcY, WmwpcX, WmwpcY, TimeE, TimeW, Erecon; //Branch Variables being read in
+  float EmwpcX_f, EmwpcY_f, WmwpcX_f, WmwpcY_f, TimeE_f, TimeW_f, Erecon_f; // For reading in data from MPM replays
   int PID, Side, Type;
 };
   
@@ -70,20 +75,28 @@ public:
   bool Simulation; //Whether the rate is from simulation or not, in which case there is no background run
 
   std::vector<double> returnRunLengths(bool beta=true); // for BG do beta=false
-  void calcBGSubtRates();
-  std::vector<double> returnBGSubtRate(int side, int etype); //This handles Loading rates by bin and creating the rate histograms via
-                                          // the private methods below. It then returns a vector holding all the BG subtracted rates.
+  void calcBGSubtRates(); //Loads the rates and calculates BG subtr rates and errors
+  std::vector<double> returnBGSubtRate(int side, int etype); //returns a vector holding all the BG subtracted rates.
+  std::vector<double> returnBGSubtRateError(int side, int etype); //Returns background subtracted rate statistical error
+
   int getBackgroundRun(int run); //Returns the background run number for the run specified
   void CreateRateHistograms(); //Create, fill, and save rate histograms to file.
 private:
  
   std::vector< std::vector<double> > BetaRateE; //Save the rates here for beta run
+  std::vector< std::vector<double> > BetaRateErrorE; //Save the error here for beta run
   std::vector< std::vector<double> > BGRateE;   // Save the background rates here
+  std::vector< std::vector<double> > BGRateErrorE;   // Save the background rates here
   std::vector< std::vector<double> > FinalRateE; //This is the difference in the rates
+  std::vector< std::vector<double> > FinalRateErrorE; //This is the statistical error in the difference in the rates
+  
 
   std::vector< std::vector<double> > BetaRateW; //Save the rates here for beta run
+  std::vector< std::vector<double> > BetaRateErrorW; //Save the error here for beta run
   std::vector< std::vector<double> > BGRateW;   // Save the background rates here
+  std::vector< std::vector<double> > BGRateErrorW;   // Save the background rates here
   std::vector< std::vector<double> > FinalRateW; //This is the difference in the rates
+  std::vector< std::vector<double> > FinalRateErrorW; //This is the statistical error in the difference in the rates
 
   double runLengthBG[2]; // E/W
   double runLengthBeta[2];

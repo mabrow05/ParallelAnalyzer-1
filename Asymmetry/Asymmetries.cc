@@ -45,7 +45,7 @@ void OctetAsymmetry::calcBGsubtractedEvts() {
   BGSubtractedRate *bg;
   while (it!=runType.end()) {
     if (checkIfBetaRun(it->first)) {
-      bg = new BGSubtractedRate(it->second,energyBinWidth,fiducialCut,true,false);
+      bg = new BGSubtractedRate(it->second,energyBinWidth,fiducialCut,UKdata,Simulation);
 
       std::cout << "initialized BGStubtractedRate for run " << it->second << " (BG run " 
 		<< bg->getBackgroundRun(it->second) << ") \n";
