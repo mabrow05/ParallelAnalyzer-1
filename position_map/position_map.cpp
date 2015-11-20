@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
   for (int i=0; i<nRuns; i++) {
 
     // Open input ntuple
-    sprintf(tempIn, "/extern/UCNA/replay_pass2/replay_pass2_%i.root", runList[i]);
+    sprintf(tempIn, "%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"), runList[i]);
     TFile *fileIn = new TFile(tempIn, "READ");
     TTree *Tin = (TTree*)(fileIn->Get("pass2"));
     int nEvents = Tin->GetEntriesFast();
@@ -222,15 +222,15 @@ int main(int argc, char *argv[])
 
       // Type 0 East Trigger
       int intBinX, intBinY; 
-      bool moveOn = false;
+      bool moveOnX = true, moveOnY=true; // Determining if the event is of the correct response class in x and y
       if (side_pass2 == 0) {
-	//Swank addition: Wire Chamber Response class. Only allow triangles. 
+	//Swank addition: Wire Chamber Response class. 
 	for (int t=0; t<numResponseClasses; t++) {
-	  if (xeRC != responseClasses[t]) {moveOn=true; continue;}
-	  if (yeRC != responseClasses[t]) {moveOn=true; continue;}
+	  if (xeRC == responseClasses[t]) {moveOnX=false;}
+	  if (yeRC == responseClasses[t]) {moveOnY=false;}
 	}
       
-	if (moveOn) continue;
+	if (moveOnX || moveOnY) continue;
 
 	intBinX = -1;
         intBinY = -1;
@@ -251,14 +251,15 @@ int main(int argc, char *argv[])
       }
 
       // Type 0 West Trigger
+      moveOnX=moveOnY=true;
       if (side_pass2 == 1) {
 	//Swank Only Allow triangles!!!	  	
 	for (int t=0; t<numResponseClasses; t++) {
-	  if (xwRC != responseClasses[t]) {moveOn=true; continue;}
-	  if (ywRC != responseClasses[t]) {moveOn=true; continue;}
+	  if (xwRC == responseClasses[t]) {moveOnX=false;}
+	  if (ywRC == responseClasses[t]) {moveOnY=false;}
 	}
       
-	if (moveOn) continue;
+	if (moveOnX || moveOnY) continue;
 	
         intBinX = -1;
         intBinY = -1;
