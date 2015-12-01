@@ -1,3 +1,4 @@
+////////////// UK Replay ///////////////
 no Energy Cut and fid<60.0 mm
 Total Event counts for energy window 0 - 800:
 Type0: 3.27047e+07  	(95.1%)
@@ -13,4 +14,13 @@ Type1: 558931		(3.1%)
 Type2: 207123		(1.2%)
 Type3: 0
 Total Betas: 1.79576e+07
+
+/////////// MPM replay ////////////////
+no Energy Cut and fid<60 mm
+Total Event counts for energy window 0 - 800:
+Type0: 3.38175e+07
+Type1: 932409
+Type2: 346941
+Type3: 473079
+Total Betas: 3.55699e+07
 

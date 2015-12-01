@@ -170,8 +170,8 @@ void revCalSimulation (Int_t runNumber, string source)
   TFile *dataFile = new TFile(temp,"READ");
   TTree *data = (TTree*)(dataFile->Get("pass4"));
   if (source!="Beta") {
-    sprintf(tempE,"type_pass4<3 && PID_pass4==1 && side_pass4==0 && EvisE>0. && (xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f))",srcPos[0][0],abs(srcPos[0][2]),srcPos[0][0],abs(srcPos[0][2]),srcPos[0][1],abs(srcPos[0][2]),srcPos[0][1],abs(srcPos[0][2]));
-    sprintf(tempW,"type_pass4<3 && PID_pass4==1 && side_pass4==1 && EvisW>0. && (xW_pass4>(%f-2.*%f) && xW_pass4<(%f+2.*%f) && yW_pass4>(%f-2.*%f) && yW_pass4<(%f+2.*%f))",srcPos[1][0],abs(srcPos[1][2]),srcPos[1][0],abs(srcPos[1][2]),srcPos[1][1],abs(srcPos[1][2]),srcPos[1][1],abs(srcPos[1][2]));
+    sprintf(tempE,"type_pass4<3 && PID_pass4==1 && side_pass4==0 && EvisE>0. && (xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
+    sprintf(tempW,"type_pass4<3 && PID_pass4==1 && side_pass4==1 && EvisW>0. && (xW_pass4>(%f-2.*%f) && xW_pass4<(%f+2.*%f) && yW_pass4>(%f-2.*%f) && yW_pass4<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
   }
   else sprintf(temp,"type_pass4<3 && PID_pass4==1 && (EvisE>0. || EvisW>0.)");
   UInt_t BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
@@ -310,10 +310,10 @@ void revCalSimulation (Int_t runNumber, string source)
     //primX = rand2->Gaus(srcPos[primSide][0],srcPos[primSide][2]);
     //primY = rand2->Gaus(srcPos[primSide][1],srcPos[primSide][2]);
 
-    scint_pos_adj.ScintPosAdjE[0] = rand2->Gaus(srcPos[0][0], abs(srcPos[0][2]));
-    scint_pos_adj.ScintPosAdjE[1] = rand2->Gaus(srcPos[0][1], abs(srcPos[0][2]));
-    scint_pos_adj.ScintPosAdjW[0] = rand2->Gaus(srcPos[1][0], abs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[0]+displacementX;
-    scint_pos_adj.ScintPosAdjW[1] = rand2->Gaus(srcPos[1][1], abs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[1]+displacementY;
+    scint_pos_adj.ScintPosAdjE[0] = rand2->Gaus(srcPos[0][0], fabs(srcPos[0][2]));
+    scint_pos_adj.ScintPosAdjE[1] = rand2->Gaus(srcPos[0][1], fabs(srcPos[0][2]));
+    scint_pos_adj.ScintPosAdjW[0] = rand2->Gaus(srcPos[1][0], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[0]+displacementX;
+    scint_pos_adj.ScintPosAdjW[1] = rand2->Gaus(srcPos[1][1], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[1]+displacementY;
     
     /*Double_t displacementX=0., displacementY=0.;
     if (primType==1) {

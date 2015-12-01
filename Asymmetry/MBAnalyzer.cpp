@@ -15,10 +15,13 @@ Maybe even add in writing the final answer to the database if the user wants to
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
+#include <cmath>
+#include <fstream>
 
 int main()
 {
   int run = 17126;
+
   std::string inDir = std::string(getenv("REPLAY_PASS4"));
   try {
     /*std::cout << "Run " << run << std::endl;
@@ -73,15 +76,34 @@ int main()
     //Looking at octet evts and asymmetries
 
     //unsigned int octetNum = 1;
-    double enWinLow = 0.;
-    double enWinHigh = 800.;
+    ofstream rawAsym("rawAsymmetryByOctet_0-59_AnaCh7_50mm.dat");
+    
+    double enWinLow = 170.; //170
+    double enWinHigh = 630.; //630
     double evts[4]={0.};
     double totalEvts[4]={0.};
     OctetAsymmetry *oct;
-    for (unsigned int octet=0; octet<0;octet++) {
-      oct = new OctetAsymmetry(octet,10.,60.);
-      oct->UKdata = false;
-      oct->calcBGsubtractedEvts();
+    for (unsigned int octet=0; octet<60;octet++) {
+      oct = new OctetAsymmetry(octet,10.,50.);
+      oct->UKdata = true;
+      oct->loadRates();
+      oct->calcTotalAsymmetry(enWinLow,enWinHigh,7);
+      std::cout<<std::endl;
+      //oct->calcAsymmetryBinByBin(1);
+      std::cout<<std::endl;
+      //oct->calcTotalAsymmetry(170.,630.,1);
+     
+      double Asym = oct->returnTotalAsymmetry();
+      double AsymError = oct->returnTotalAsymmetryError();
+      std::cout << "Asymmetry for Octet " << octet << ":\n";
+      std::cout << Asym << " +- " << AsymError << std::endl;
+      rawAsym << Asym << " " << AsymError << "\n";
+    
+      delete oct;
+    }
+    rawAsym.close();
+	
+      /*oct->calcBGsubtractedEvts();
       for (unsigned int type=0;type<4;type++) {
 	evts[type] = oct->getNumBGsubtrEvts(enWinLow,enWinHigh,type);
 	totalEvts[type]+=evts[type];
@@ -102,7 +124,7 @@ int main()
 	      <<"\nType3: " << totalEvts[3]
 	      <<"\nTotal Betas: " << totalEvts[0]+totalEvts[1]+totalEvts[2]+totalEvts[3]
 	      << std::endl;
-
+      */
       
   }
   catch(const char* ex){

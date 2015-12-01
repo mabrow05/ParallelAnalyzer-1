@@ -2,7 +2,7 @@
 
 #include <string>
 
-void plot_position_map(int iRunPeriod)
+void compare_posMaps(int iRunPeriod)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -92,26 +92,42 @@ void plot_position_map(int iRunPeriod)
 
   // Read position map
   char tempIn[500];
+  sprintf(tempIn, "position_map_%i.dat", iRunPeriod);
+  cout << "Processing ... " << tempIn ;
+  ifstream fileIn1(tempIn);
+
   sprintf(tempIn, "position_map_%i_RC_123.dat", iRunPeriod);
-  cout << "Processing ... " << tempIn << endl;
-  ifstream fileIn(tempIn);
+  cout << " over " << tempIn << endl;
+  ifstream fileIn2(tempIn);
 
   const int nPMT = 8;
-  double posMap[nPMT][nPosBinsX][nPosBinsY];
+  double posMap1[nPMT][nPosBinsX][nPosBinsY];
+  double posMap2[nPMT][nPosBinsX][nPosBinsY];
 
   double x, y;
   for (int i=0; i<nPosBinsX; i++) {
     for (int j=0; j<nPosBinsY; j++) {
-      fileIn >> x
-             >> y
-             >> posMap[0][i][j]
-             >> posMap[1][i][j]
-             >> posMap[2][i][j]
-             >> posMap[3][i][j]
-             >> posMap[4][i][j]
-             >> posMap[5][i][j]
-             >> posMap[6][i][j]
-	     >> posMap[7][i][j];
+      fileIn1 >> x
+	      >> y
+	      >> posMap1[0][i][j]
+	      >> posMap1[1][i][j]
+	      >> posMap1[2][i][j]
+	      >> posMap1[3][i][j]
+	      >> posMap1[4][i][j]
+	      >> posMap1[5][i][j]
+	      >> posMap1[6][i][j]
+	      >> posMap1[7][i][j];
+
+      fileIn2 >> x
+	      >> y
+	      >> posMap2[0][i][j]
+	      >> posMap2[1][i][j]
+	      >> posMap2[2][i][j]
+	      >> posMap2[3][i][j]
+	      >> posMap2[4][i][j]
+	      >> posMap2[5][i][j]
+	      >> posMap2[6][i][j]
+	      >> posMap2[7][i][j];
     }
   }
 
@@ -119,27 +135,27 @@ void plot_position_map(int iRunPeriod)
   for (int i=0; i<nPosBinsX; i++) {
     for (int j=0; j<nPosBinsY; j++) {
       if (sqrt(xBinCenter[i]*xBinCenter[i] + yBinCenter[j]*yBinCenter[j]) <= 50.) {
-        hisE0->Fill(xBinCenter[i],yBinCenter[j],posMap[0][i][j]);
-        hisE1->Fill(xBinCenter[i],yBinCenter[j],posMap[1][i][j]);
-        hisE2->Fill(xBinCenter[i],yBinCenter[j],posMap[2][i][j]);
-        hisE3->Fill(xBinCenter[i],yBinCenter[j],posMap[3][i][j]);
-        hisW0->Fill(xBinCenter[i],yBinCenter[j],posMap[4][i][j]);
-        hisW1->Fill(xBinCenter[i],yBinCenter[j],posMap[5][i][j]);
-        hisW2->Fill(xBinCenter[i],yBinCenter[j],posMap[6][i][j]);
-        hisW3->Fill(xBinCenter[i],yBinCenter[j],posMap[7][i][j]);
+        hisE0->Fill(xBinCenter[i],yBinCenter[j],posMap1[0][i][j]/posMap2[0][i][j]);
+        hisE1->Fill(xBinCenter[i],yBinCenter[j],posMap1[1][i][j]/posMap2[1][i][j]);
+        hisE2->Fill(xBinCenter[i],yBinCenter[j],posMap1[2][i][j]/posMap2[2][i][j]);
+        hisE3->Fill(xBinCenter[i],yBinCenter[j],posMap1[3][i][j]/posMap2[3][i][j]);
+        hisW0->Fill(xBinCenter[i],yBinCenter[j],posMap1[4][i][j]/posMap2[4][i][j]);
+        hisW1->Fill(xBinCenter[i],yBinCenter[j],posMap1[5][i][j]/posMap2[5][i][j]);
+        hisW2->Fill(xBinCenter[i],yBinCenter[j],posMap1[6][i][j]/posMap2[6][i][j]);
+        hisW3->Fill(xBinCenter[i],yBinCenter[j],posMap1[7][i][j]/posMap2[7][i][j]);
       }
     }
   }
 
   // Output PDF file
   TString filenameOut;
-  if (iRunPeriod == 1) filenameOut  = "position_map_1.pdf";
-  if (iRunPeriod == 2) filenameOut  = "position_map_2.pdf";
-  if (iRunPeriod == 3) filenameOut  = "position_map_3_RC_123.pdf";
-  if (iRunPeriod == 4) filenameOut  = "position_map_4.pdf";
-  if (iRunPeriod == 5) filenameOut  = "position_map_5.pdf";
-  if (iRunPeriod == 6) filenameOut  = "position_map_6.pdf";
-  if (iRunPeriod == 7) filenameOut  = "position_map_7.pdf";
+  if (iRunPeriod == 1) filenameOut  = "position_map_1_comp.pdf";
+  if (iRunPeriod == 2) filenameOut  = "position_map_2_comp.pdf";
+  if (iRunPeriod == 3) filenameOut  = "position_map_3_comp.pdf";
+  if (iRunPeriod == 4) filenameOut  = "position_map_4_comp.pdf";
+  if (iRunPeriod == 5) filenameOut  = "position_map_5_comp.pdf";
+  if (iRunPeriod == 6) filenameOut  = "position_map_6_comp.pdf";
+  if (iRunPeriod == 7) filenameOut  = "position_map_7_comp.pdf";
 
   TString filenameOutFirst;
   filenameOutFirst  = filenameOut;

@@ -15,7 +15,7 @@ LIBS		= $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS       += $(ROOTCFLAGS) -Iinclude
 LIBS	       += -lSpectrum -lMinuit
 
-objects = Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o
+objects = Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o #MBUtils.o
 
 .PHONY: all
 all: MBAnalyzer.exe 
@@ -31,6 +31,8 @@ EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh
 SQLintercace.o: SQLinterface.hh
 
 SystematicCorrections.o: SystematicCorrections.hh
+
+#MBUtils.o: MBUtils.hh
 
 clean:
 		@rm -f *.o *~  core
