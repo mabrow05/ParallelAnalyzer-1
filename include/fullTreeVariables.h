@@ -7,6 +7,15 @@ float Pdc34; // West MWPC Anode PADC
 
 float Tdc016; // East Two-Fold Timing TDC
 float Tdc017; // West Two-Fold Timing TDC
+float Tdc00;  // East individual PMT trigger TDC
+float Tdc01; 
+float Tdc02; 
+float Tdc03;
+float Tdc08;  // West individual PMT trigger TDC
+float Tdc09;
+float Tdc010;
+float Tdc011;
+
 
 float Sis00; // Sis00 Input Register
 
@@ -36,4 +45,11 @@ float Qadc8;  // East Backing Veto QADC
 float Tdc018; // East Backing Veto TDC
 float Qadc10; // West Backing Veto QADC
 float Tdc020; // West Backing Veto TDC
+
+float Number; // event trigger number
+float Delta0; // Time since last event 
+float S8200;  // unblinded time since last beam burst
+
+
+
 
