@@ -38,10 +38,21 @@ class BetaReplayManager:
         self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
 
     def makeAllDirectories(self):
+        os.system("mkdir -p %s"%os.getenv("PEDESTALS"))
+        os.system("mkdir -p %s"%os.getenv("BASIC_HISTOGRAMS"))
+        os.system("mkdir -p %s"%self.srcPositionsPath)
+        os.system("mkdir -p %s"%self.srcPeakPath)
+        os.system("mkdir -p %s"%self.srcListPath)
+        os.system("mkdir -p %s"%self.replayPass1)
+        os.system("mkdir -p %s"%self.replayPass2)
+        os.system("mkdir -p %s"%self.replayPass3)
+        os.system("mkdir -p %s"%self.replayPass4)
+        os.system("mkdir -p %s"%self.gainBismuthPath)
+        os.system("mkdir -p %s"%self.nPEweightsPath)
         os.system("mkdir -p %s"%self.octetListPath)
         os.system("mkdir -p %s"%self.triggerFuncPath)
         os.system("mkdir -p %s"%self.revCalSimPath)
-        os.system("mkdir -p %s"%self.revCalSimPath)
+        os.system("mkdir -p %s"%self.UKspecReplayPath)
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
 
     def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
@@ -249,11 +260,16 @@ if __name__ == "__main__":
                       help="Run replayPass4 on specified runs or octets (Applies Energy Calibration)")
     parser.add_option("--runGainBismuth",dest="runGainBismuth",action="store_true",default=False,
                       help="Calculate and plot the Bi pulser spectra and track the gain relative to the reference run")
-
-    
+    parser.add_option("--makeDirectories",dest="makeDirectories",action="store_true",default=False,
+                      help="Makes all the analysis directories.")
                       
 
     options, args = parser.parse_args()
+
+
+    if options.makeDirectories:
+        beta = BetaReplayManager()
+        cal.makeAllDirectories()
 
 
  

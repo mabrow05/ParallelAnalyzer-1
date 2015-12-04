@@ -88,10 +88,14 @@ class CalReplayManager:
         self.octetListPath = os.getenv("OCTET_LIST")
         self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
         self.revCalSimPath = os.getenv("REVCALSIM")
+        self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
+        self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
 
     def makeAllDirectories(self):
         #os.system("mkdir -p %s"%self.AnalysisDataPath)
         os.system("mkdir -p %s"%self.srcPositionsPath)
+        os.system("mkdir -p %s"%os.getenv("BASIC_HISTOGRAMS"))
+        os.system("mkdir -p %s"%os.getenv("PEDESTALS"))
         os.system("mkdir -p %s"%self.srcPeakPath)
         os.system("mkdir -p %s"%self.srcListPath)
         os.system("mkdir -p %s"%self.replayPass1)
@@ -103,7 +107,8 @@ class CalReplayManager:
         os.system("mkdir -p %s"%self.octetListPath)
         os.system("mkdir -p %s"%self.triggerFuncPath)
         os.system("mkdir -p %s"%self.revCalSimPath)
-
+        os.system("mkdir -p %s"%self.UKspecReplayPath)
+        os.system("mkdir -p %s"%self.AnalysisResultsPath)
 
     def runReplayPass1(self,srcRunPeriod=1, sourceORxenon="source"):
         print "Running replay_pass1 for %s run period %i"%(sourceORxenon,srcRunPeriod)
@@ -661,9 +666,16 @@ if __name__ == "__main__":
                       help="Make file with booleans for whether to use each PMT for each run.")
     parser.add_option("--LinearityCurves",dest="LinearityCurves",action="store_true",default=False,
                       help="Run script which calculates linearity curves for PMTs.")
+    parser.add_option("--makeDirectories",dest="makeDirectories",action="store_true",default=False,
+                      help="Makes all the analysis directories.")
                       
 
     options, args = parser.parse_args()
+
+
+    if options.makeDirectories:
+        cal = CalibrationManager()
+        cal.makeAllDirectories()
 
 
     ### This will fit all the source peaks for any runs in the runPeriods list below

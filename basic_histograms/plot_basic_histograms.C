@@ -1,4 +1,5 @@
 // Usage: root[0] .x plot_basic_histograms.C("runNumber")
+#include <cstdlib>
 
 void plot_basic_histograms(TString runNumber)
 {
@@ -34,7 +35,7 @@ void plot_basic_histograms(TString runNumber)
 
   // Open input file
   TString filenameIn;
-  filenameIn  = "/extern/UCNA/basic_histograms_MB/beta/basic_histograms_";
+  filenameIn  = TString(getenv("BASIC_HISTOGRAMS"))+"/beta/basic_histograms_";
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;

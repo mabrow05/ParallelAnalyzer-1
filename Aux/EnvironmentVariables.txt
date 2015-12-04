@@ -15,6 +15,8 @@ export PARALLEL_DATA_PATH=/path/to/directory/containing/data/directories
 # of the specific data and calibration data directories. 
 
 ext="_MB"
+export BASIC_HISTOGRAMS="${PARALLEL_DATA_PATH}/basic_histograms${ext}/"
+export PEDESTALS="${PARALLEL_DATA_PATH}/pedestals${ext}/"
 export SOURCE_PEAKS="${PARALLEL_DATA_PATH}/source_peaks${ext}/"
 export SOURCE_POSITIONS="${PARALLEL_DATA_PATH}/source_positions${ext}/"
 export SOURCE_LIST="${PARALLEL_DATA_PATH}/source_list${ext}/"

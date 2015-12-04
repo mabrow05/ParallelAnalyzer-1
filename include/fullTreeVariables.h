@@ -48,7 +48,7 @@ float Tdc020; // West Backing Veto TDC
 
 float Number; // event trigger number
 float Delta0; // Time since last event 
-float S8200;  // unblinded time since last beam burst
+
 
 
 

@@ -21,7 +21,7 @@ SQLdatabase::SQLdatabase(const std::string& name,
 	if(!ntries)
 	  break;
 	printf("** DB Connection %s@%s failed... retrying...\n",dbUser.c_str(),dbAddressFull.c_str());
-	sleep(2);
+	//sleep(2);
       } else {
 	printf("Connected to DB server: %s\n", db->ServerInfo());
 	return;
@@ -52,7 +52,7 @@ bool SQLdatabase::queryReturnsTrue() {
 };
     
 
-std::string SQLdatabase::returnQueryEntry(int field, TSQLResult* r) {
+std::string SQLdatabase::returnQueryEntry(int* field, TSQLResult* r) {
   std::string result;
   if (!r) r=res;
   else numFields = r->GetFieldCount();
@@ -66,8 +66,8 @@ std::string SQLdatabase::returnQueryEntry(int field, TSQLResult* r) {
       }
   }
   else {
-    if (field>=numFields) throw "Chose field outside number of fields in query";
-    result += std::string(row->GetField(field));
+    if (*field>=numFields) throw "Chose field outside number of fields in query";
+    result += std::string(row->GetField(*field));
   }
  
   return result;

@@ -25,7 +25,7 @@ public:
   
   bool queryReturnsTrue();
 
-  std::string returnQueryEntry(int field = NULL, TSQLResult* r = NULL); //This will return a string with each field value separated by a space, unless a particular field number is declared for int field, in which case it returns that field value only. You will need to convert this string to whatever type suits your use
+  std::string returnQueryEntry(int* field = NULL, TSQLResult* r = NULL); //This will return a string with each field value separated by a space, unless a particular field number is declared for int field, in which case it returns that field value only. You will need to convert this string to whatever type suits your use
 
   int numFields;      // number of columns in a query
   std::string query;	//can be set to some default query if desired
