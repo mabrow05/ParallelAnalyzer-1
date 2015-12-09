@@ -1,20 +1,20 @@
-#include "makeOutputTree.hh"
+#include "DataTree.hh"
 
 
-DataTree::DataTree(std::string tree) : infile(NULL), outfile(NULL), inputTree(NULL), outputTree(NULL) {
+DataTree::DataTree() : inputFile(NULL), outputFile(NULL), inputTree(NULL), outputTree(NULL) {
   
 };
 
 DataTree::~DataTree() {
   if (outputTree) delete outputTree;
-  if (outPutFile) {outputFile.Close();  delete outputFile;}
+  if (outputFile) {outputFile->Close();  delete outputFile;}
   if (inputTree) delete inputTree;
-  if (inputFile) { inputFile.Close(); delete inputFile;}
+  if (inputFile) { inputFile->Close(); delete inputFile;}
 };
 
-void DataTree::makeOutputTree(std::string outputFile, std::string outputTreeName) {
-  outputFile = new TFile(outputFile.c_str(),"RECREATE");
-  outputTree = new TTree(outputTreeName.c_str());
+void DataTree::makeOutputTree(std::string outputFileName, std::string outputTreeName) {
+  outputFile = new TFile(outputFileName.c_str(),"RECREATE");
+  outputTree = new TTree(outputTreeName.c_str(),outputTreeName.c_str());
 
   outputTree->Branch("TriggerNum",&TriggerNum, "TriggerNum/I");
   outputTree->Branch("EvtN",&EvtN, "EvtN/I");
@@ -74,18 +74,23 @@ void DataTree::makeOutputTree(std::string outputFile, std::string outputTreeName
   outputTree->Branch("EvnbGood",&EvnbGood,"EvnbGood/I");
   outputTree->Branch("BkhfGood",&BkhfGood,"BkhfGood/I");
 
+  outputTree->Branch("xeRC", &xeRC, "xeRC/I"); //x east response class. 
+  outputTree->Branch("yeRC", &yeRC, "yeRC/I"); //y east response class... 
+  outputTree->Branch("xwRC", &xwRC, "xwRC/I");
+  outputTree->Branch("ywRC", &ywRC, "ywRC/I");
+
   outputTree->Branch("PID",&PID,"PID/I");
   outputTree->Branch("Side",&Side,"Side/I"); 
   outputTree->Branch("Type",&Type,"Type/I");
   outputTree->Branch("ProbIII",&ProbIII,"ProbIII/D");
   outputTree->Branch("Erecon",&Erecon,"Erecon/D");
 
-  std::cout << "Created output tree " << outputTreeName << " in " << outputFile << "...\n";
+  std::cout << "Created output tree " << outputTreeName << " in " << outputFileName << "...\n";
 };
 
-void DataTree::setupInputTree(std::string inputFile, std::string inputTreeName) {
-  outputFile = new TFile(inputFile.c_str(),"READ");
-  outputTree = (TTree*)(outputFile->Get(inputTreeName.c_str()));
+void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeName) {
+  inputFile = new TFile(inputFileName.c_str(),"READ");
+  inputTree = (TTree*)(outputFile->Get(inputTreeName.c_str()));
 
   outputTree->SetBranchAddress("TriggerNum",&TriggerNum);
   outputTree->SetBranchAddress("EvtN",&EvtN);
@@ -145,11 +150,18 @@ void DataTree::setupInputTree(std::string inputFile, std::string inputTreeName) 
   outputTree->SetBranchAddress("EvnbGood",&EvnbGood);
   outputTree->SetBranchAddress("BkhfGood",&BkhfGood);
 
+  outputTree->SetBranchAddress("xeRC", &xeRC); //x east response class. 
+  outputTree->SetBranchAddress("yeRC", &yeRC); //y east response class... 
+  outputTree->SetBranchAddress("xwRC", &xwRC);
+  outputTree->SetBranchAddress("ywRC", &ywRC);
+
   outputTree->SetBranchAddress("PID",&PID);
   outputTree->SetBranchAddress("Side",&Side); 
   outputTree->SetBranchAddress("Type",&Type);
   outputTree->SetBranchAddress("ProbIII",&ProbIII);
   outputTree->SetBranchAddress("Erecon",&Erecon);
 
-  std::cout << "Created output tree " << outputTreeName << " in " << outputFile << "...\n";
+  std::cout << "Prepared input tree " << inputTreeName << " in " << inputFileName << "...\n";
 };
+
+

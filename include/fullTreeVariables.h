@@ -47,9 +47,10 @@ float Qadc10; // West Backing Veto QADC
 float Tdc020; // West Backing Veto TDC
 
 float Number; // event trigger number
-float Delta0; // Time since last event 
+float Delt0; // Time since last event 
 
-
+float Evnb[5]; //Headers
+float Bkhf[5]; //footers
 
 
 

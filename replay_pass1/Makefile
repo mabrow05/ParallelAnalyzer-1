@@ -20,7 +20,7 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = WireChamberResponse.o
+objects = WireChamberResponse.o DataTree.o
 .PHONY: all
 all: replay_pass1.exe
 
@@ -29,6 +29,8 @@ replay_pass1.exe: replay_pass1.o $(objects)
 	@echo "Done"
 
 WireChamberResponse.o: WireChamberResponse.h
+
+DataTree.o: DataTree.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

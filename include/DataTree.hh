@@ -2,7 +2,9 @@
 #define DATATREE_H
 
 #include <TTree.h>
+#include <TFile.h>
 #include <string>
+#include <iostream>
 
 struct MWPC {
   Double_t center;
@@ -25,13 +27,17 @@ struct Scint {
 };
 
 class DataTree {
+private:
+  TFile *inputFile, *outputFile; 
+  TTree *inputTree, *outputTree;
+
 public:
   DataTree(); //Constructor
   ~DataTree();
 
   void makeOutputTree(std::string outputFile, std::string outputTree); 
-  void fillOutputTree() {outputTree->Fill();}
-  void writeOutputFile() {outputFile->Write();)
+  void fillOutputTree() {if (outputTree) outputTree->Fill();};
+  void writeOutputFile() {if (outputFile) outputFile->Write();}
   void setupInputTree(std::string inputFile, std::string inputTree);
   void getEvent(UInt_t N) {inputTree->GetEvent(N);}
   Int_t getEntries() {return inputTree->GetEntriesFast();}
@@ -68,6 +74,8 @@ public:
   Double_t EastTopVetoADC; //East Top veto ADC (No west)
   Double_t EastTopVetoTDC; // East top veto TDC (No west)
   bool EvnbGood, BkhfGood; // DAQ header and footer quality
+
+  Int_t xeRC, yeRC, xwRC, ywRC; //Swank's wirechamber response class variables
   
   Int_t PID; //Particle ID
   Int_t Type; //Event type
@@ -75,11 +83,9 @@ public:
   Double_t ProbIII; //Probability of type 3 event
   Double_t Erecon; //Final reconstructed energy of an event
 
-private:
-  TFile *inputFile, *outputFile; 
-  TTree *inputTree, *outputTree; 
+ 
   //std::string inputTreeName, outputTreeName; 
-}
+};
   
 
 
