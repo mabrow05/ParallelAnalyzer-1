@@ -762,15 +762,15 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [1,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
-            rep.findPedestals(runPeriod)
-            #rep.runReplayPass1(runPeriod)
+            #rep.findPedestals(runPeriod)
+            rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            #rep.runReplayPass2(runPeriod)
+            rep.runReplayPass2(runPeriod)
             #rep.runReplayPass3(runPeriod)
             #cal.fitSourcePeaks(runPeriod)
             #rep.runReplayPass4(runPeriod)
@@ -810,12 +810,12 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 1: 
-        runPeriods = [3]#[2,3,4,5,6,7]
+        runPeriods = [2,3,4,5,6,7]
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:           
-            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")

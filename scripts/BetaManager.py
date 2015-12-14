@@ -56,27 +56,28 @@ class BetaReplayManager:
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
 
     def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
-	for year in ["20112012","20122013"]:			
-            octet=0
-            with open(self.octetList+"OctetList_%s.txt"%year) as fp:
+        octet=0
+	for year in ["20112012","20122013"]:
+            with open(self.octetListPath+"OctetList_%s.txt"%year) as fp:
                 for line in fp:
                     if (line[:6]=="Octet:"):
-			with open(self.octetList+"%s-%s/octet_list_%i.dat"%(year[:4],year[4:],octet), "wt") as out:
+			with open(self.octetListPath+"%s-%s/octet_list_%i.dat"%(year[:4],year[4:],octet), "wt") as out:
                             words=line.split()
                             for idx, w in enumerate(words):
                                 if w[:1]=='A' or w[:1]=='B' and int(words[idx+2]) not in omittedBetaRuns:
                                     out.write(words[idx] + ' ' + words[idx+2] + '\n')
+                        shutil.copy(self.octetListPath+"%s-%s/octet_list_%i.dat"%(year[:4],year[4:],octet),self.octetListPath+"All_Octets/octet_list_%i.dat"%(year[:4],year[4:],octet))
                         octet+=1
      
-    def makeBasicHistograms(self, runORoctet, year="20112012"):
+    def makeBasicHistograms(self, runORoctet):
         runs = []
         if runORoctet > 16000:
             print "Making basic histograms for run %i"%runORoctet
             os.system("cd ../basic_histograms/; ./basic_histograms.exe %i"%runORoctet)
             os.system("root -l -b -q '../basic_histograms/plot_basic_histograms.C(\"%i\")'"%runORoctet)
         else: 
-            filename = "%s-%s/octet_list_%i.dat"%(year[:4],year[4:],runORoctet)
-            infile = open(self.octetList+filename,'r')
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
         
             for line in infile:  
                 words=line.split()
@@ -88,14 +89,14 @@ class BetaReplayManager:
                 os.system("root -l -b -q '../basic_histograms/plot_basic_histograms.C(\"%i\")'"%run)
         print "DONE"
     
-    def findPedestals(self, runORoctet, year="20112012"):
+    def findPedestals(self, runORoctet):
         runs = []
         if runORoctet > 16000:
             print "Running pedestals for run %i"%runORoctet
             os.system("cd ../pedestals/; ./pedestals.exe %i"%runORoctet)
         else: 
-            filename = "%s-%s/octet_list_%i.dat"%(year[:4],year[4:],runORoctet)
-            infile = open(self.octetList+filename,'r')
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
         
             for line in infile:  
                 words=line.split()
@@ -107,15 +108,15 @@ class BetaReplayManager:
         print "DONE"
 
 
-    def runGainBismuth(self,runORoctet,year="20112012"):
+    def runGainBismuth(self,runORoctet):
         runs = []
         if runORoctet > 16000:
             print "Running gain_bismuth for run %i"%runORoctet
             os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%runORoctet)
             os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%runORoctet)
         else: 
-            filename = "%s-%s/octet_list_%i.dat"%(year[:4],year[4:],runORoctet)
-            infile = open(self.octetList+filename,'r')
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
         
             for line in infile:      
                 words=line.split()
@@ -128,14 +129,14 @@ class BetaReplayManager:
         print "DONE"
     
 
-    def runReplayPass1(self,runORoctet,year="20112012"):
+    def runReplayPass1(self,runORoctet):
         runs = []
         if runORoctet > 16000:
             print "Running replay_pass1 for run %i"%runORoctet
             os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%runORoctet)
         else: 
-            filename = "%s-%s/octet_list_%i.dat"%(year[:4],year[4:],runORoctet)
-            infile = open(self.octetList+filename,'r')
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
         
             for line in infile:  
                 words=line.split()
@@ -147,14 +148,14 @@ class BetaReplayManager:
         print "DONE"
 
         
-    def runReplayPass2(self,runORoctet,year="20112012"):
+    def runReplayPass2(self,runORoctet):
         runs = []
         if runORoctet > 16000:
             print "Running replay_pass2 for run %i"%runORoctet
             os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%runORoctet)
         else: 
-            filename = "%s-%s/octet_list_%i.dat"%(year[:4],year[4:],runORoctet)
-            infile = open(self.octetList+filename,'r')
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
         
             for line in infile:     
                 words=line.split()
@@ -166,14 +167,14 @@ class BetaReplayManager:
         print "DONE"
 
         
-    def runReplayPass3(self,runORoctet,year="20112012"):
+    def runReplayPass3(self,runORoctet):
         runs = []
         if runORoctet > 16000:
             print "Running replay_pass3 for run %i"%runORoctet
             os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%runORoctet)
         else: 
-            filename = "%s-%s/octet_list_%i.dat"%(year[:4],year[4:],runORoctet)
-            infile = open(self.octetList+filename,'r')
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
         
             for line in infile:      
                 words=line.split()
@@ -185,14 +186,14 @@ class BetaReplayManager:
         print "DONE"
 
     
-    def runReplayPass4(self,runORoctet,year="20112012"):
+    def runReplayPass4(self,runORoctet):
         runs = []
         if runORoctet > 16000:
             print "Running replay_pass4 for run %i"%runORoctet
             os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%runORoctet)
         else: 
-            filename = "%s-%s/octet_list_%i.dat"%(year[:4],year[4:],runORoctet)
-            infile = open(self.octetList+filename,'r')
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
         
             for line in infile:      
                 words=line.split()
@@ -282,25 +283,25 @@ if __name__ == "__main__":
         #for octet in range(0,60,1):
         beta.findPedestals(5)
 
-    if 1: 
+    if 0: 
         asymm = BetaAsymmetryManager()
         asymm.makeOctetAnalysisDirectories()
 
     if 0:
         beta = BetaReplayManager()
-        for octet in range(0,62,1):
-            beta.makeBasicHistograms(octet,year = "20122013")
+        for octet in range(0,59,1):
+            beta.makeBasicHistograms(octet)
 
 
-    if 0:
+    if 1:
         octet_range = [0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
-            beta.findPedestals(octet)
+            #beta.findPedestals(octet)
             beta.runReplayPass1(octet)
-            beta.runGainBismuth(octet)
+            #beta.runGainBismuth(octet)
             beta.runReplayPass2(octet)
-            beta.runReplayPass3(octet)
-            beta.runReplayPass4(octet)
+            #beta.runReplayPass3(octet)
+            #beta.runReplayPass4(octet)
             
     
