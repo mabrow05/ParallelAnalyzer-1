@@ -8,6 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
+VPATH = ./:../include
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -18,14 +19,16 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
+objects = DataTree.o
+
 .PHONY: all
 all: source_peaks.exe source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.exe 
-source_peaks.exe: source_peaks.o
-	$(CXX) $(CXXFLAGS) -o source_peaks.exe source_peaks.o $(LIBS)
+source_peaks.exe: source_peaks.o $(objects)
+	$(CXX) $(CXXFLAGS) -o source_peaks.exe source_peaks.o $(objects) $(LIBS)
 	@echo "Done"
 
-source_peaks_EvisPMTbyPMT.exe: source_peaks_EvisPMTbyPMT.o
-	$(CXX) $(CXXFLAGS) -o source_peaks_EvisPMTbyPMT.exe source_peaks_EvisPMTbyPMT.o $(LIBS)
+source_peaks_EvisPMTbyPMT.exe: source_peaks_EvisPMTbyPMT.o $(objects)
+	$(CXX) $(CXXFLAGS) -o source_peaks_EvisPMTbyPMT.exe source_peaks_EvisPMTbyPMT.o $(objects) $(LIBS)
 	@echo "Done"
 
 sim_source_peaks_EvisPMTbyPMT.exe: sim_source_peaks_EvisPMTbyPMT.o
@@ -36,9 +39,11 @@ sim_source_peaks_EnergyPeak.exe: sim_source_peaks_EnergyPeak.o
 	$(CXX) $(CXXFLAGS) -o sim_source_peaks_EnergyPeak.exe sim_source_peaks_EnergyPeak.o $(LIBS)
 	@echo "Done"
 
-source_peaks_EnergyPeak.exe: source_peaks_EnergyPeak.o
-	$(CXX) $(CXXFLAGS) -o source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.o $(LIBS)
+source_peaks_EnergyPeak.exe: source_peaks_EnergyPeak.o $(objects)
+	$(CXX) $(CXXFLAGS) -o source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.o $(objects) $(LIBS)
 	@echo "Done"
+
+DataTree.o: DataTree.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

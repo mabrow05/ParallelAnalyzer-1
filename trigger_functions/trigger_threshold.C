@@ -70,9 +70,9 @@ void trigger_threshold(Int_t XeRunPeriod) {
   TCanvas *c1 = new TCanvas("c1"," ",1200.,1600.);
   c1->Divide(2,2);
   c1->cd(1);
-  chain->Draw("EvisE>>Etype1","type_pass4==1 && side_pass4==1 && PID_pass4==1 && EvisE>0.");
+  chain->Draw("EvisE>>Etype1","Type==1 && Side==1 && PID==1 && EvisE>0.");
   c1->cd(2);  
-  chain->Draw("EvisE>>Etype23","type_pass4==2 && side_pass4==1 && PID_pass4==1 && EvisE>0.");
+  chain->Draw("EvisE>>Etype23","Type==2 && Side==1 && PID==1 && EvisE>0.");
   c1->cd(3);
   Etotal->Add(Etype1,Etype23);
   Etotal->Draw();
@@ -90,9 +90,9 @@ void trigger_threshold(Int_t XeRunPeriod) {
   TCanvas *c2 = new TCanvas("c2"," ",1200.,1600.);
   c2->Divide(2,2);
   c2->cd(1);
-  chain->Draw("EvisW>>Wtype1","type_pass4==1 && side_pass4==0 && PID_pass4==1 && EvisW>0.");
+  chain->Draw("EvisW>>Wtype1","Type==1 && Side==0 && PID==1 && EvisW>0.");
   c2->cd(2);  
-  chain->Draw("EvisW>>Wtype23","type_pass4==2 && side_pass4==0 && PID_pass4==1 && EvisW>0.");
+  chain->Draw("EvisW>>Wtype23","Type==2 && Side==0 && PID==1 && EvisW>0.");
   c2->cd(3);
   Wtotal->Add(Wtype1,Wtype23);
   Wtotal->Draw();

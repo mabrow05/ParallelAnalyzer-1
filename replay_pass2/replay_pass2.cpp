@@ -22,6 +22,7 @@
 #include "pedestals.h"
 #include "cuts.h"
 #include "basic_reconstruction.h"
+#include "DataTree.hh"
 
 #include "replay_pass2.h"
 
@@ -58,7 +59,46 @@ int main(int argc, char *argv[])
   // Open output ntuple
   char tempOut[500];
   sprintf(tempOut, "%s/replay_pass2_%s.root",getenv("REPLAY_PASS2"), argv[1]);
-  TFile *fileOut = new TFile(tempOut,"RECREATE");
+  //sprintf(tempOut, "replay_pass2_%s.root", argv[1]);
+  DataTree *t = new DataTree();
+  t->makeOutputTree(std::string(tempOut),"pass2");
+
+  char tempIn[500];
+  sprintf(tempIn, "%s/replay_pass1_%s.root", getenv("REPLAY_PASS1"),argv[1]);
+  //sprintf(tempIn, "../replay_pass1/replay_pass1_%s.root", argv[1]);
+  t->setupInputTree(std::string(tempIn),"pass1");
+
+  int nEvents = t->getEntries();
+  cout << "... Processing nEvents = " << nEvents << endl;
+
+  // Loop over events
+  for (Int_t i=0; i<nEvents; i++) {
+    t->getEvent(i);
+
+    // Apply gain correction factors
+    t->ScintE.q1 = t->ScintE.q1*gainCorrection[0];
+    t->ScintE.q2 = t->ScintE.q2*gainCorrection[1];
+    t->ScintE.q3 = t->ScintE.q3*gainCorrection[2];
+    t->ScintE.q4 = t->ScintE.q4*gainCorrection[3];
+
+    t->ScintW.q1 = t->ScintW.q1*gainCorrection[4];
+    t->ScintW.q2 = t->ScintW.q2*gainCorrection[5];
+    t->ScintW.q3 = t->ScintW.q3*gainCorrection[6];
+    t->ScintW.q4 = t->ScintW.q4*gainCorrection[7]; 
+
+    t->fillOutputTree();
+  }
+
+  // Write output ntuple
+  t->writeOutputFile();
+  delete t;
+
+  return 0;
+}
+
+//////// OLD OUTPUT INPUT TREES /////////////////
+
+/*TFile *fileOut = new TFile(tempOut,"RECREATE");
   TTree *Tout = new TTree("pass2", "pass2");
 
   // Variables
@@ -143,36 +183,4 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("type", &type);
   Tin->SetBranchAddress("side", &side);
   Tin->SetBranchAddress("posError", &posError);
-
-  int nEvents = Tin->GetEntries();
-  cout << "... Processing nEvents = " << nEvents << endl;
-
-  // Loop over events
-  for (int i=0; i<nEvents; i++) {
-    Tin->GetEvent(i);
-
-    // Apply gain correction factors
-    for (int j=0; j<8; j++) {
-      pmt_pass2[j] = pmt[j] * gainCorrection[j];
-    }
-
-    // Pass other variables from pass1 to pass2
-    xE_pass2 = xE;
-    yE_pass2 = yE;
-    xW_pass2 = xW;
-    yW_pass2 = yW;
-
-    PID_pass2 = PID;
-    type_pass2 = type;
-    side_pass2 = side;
-    posError_pass2 = posError;    
-
-    Tout->Fill();
-  }
-
-  // Write output ntuple
-  fileOut->Write();
-  fileOut->Close();
-
-  return 0;
-}
+*/

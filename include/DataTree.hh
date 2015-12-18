@@ -62,18 +62,18 @@ public:
   Double_t CathMaxE, CathMaxW; //smaller max-value of each plane
   Double_t EMWPC_E, EMWPC_W; // estimated wirechamber energy deposition
   Double_t AnodeE, AnodeW; // Wirechamber anode signals
-  bool PassedAnoE, PassedAnoW; //Whether or not passed anode threshold
-  bool PassedCathE, PassedCathW; //Whether or not passed cathode threshold
-  bool TaggedBackE, TaggedBackW; // Whether or not tagged by backing veto
-  bool TaggedTopE, TaggedTopW;  // Whether tagged as muon by top veto
+  Bool_t PassedAnoE, PassedAnoW; //Whether or not passed anode threshold
+  Bool_t PassedCathE, PassedCathW; //Whether or not passed cathode threshold
+  Bool_t TaggedBackE, TaggedBackW; // Whether or not tagged by backing veto
+  Bool_t TaggedTopE, TaggedTopW;  // Whether tagged as muon by top veto
                                 // which was only on East side so west is 0
-  bool TaggedDriftE, TaggedDriftW; // Whether tagged by muon veto drift tubes
+  Bool_t TaggedDriftE, TaggedDriftW; // Whether tagged by muon veto drift tubes
   Double_t EastBackADC, WestBackADC; // muon backing veto ADC
   Double_t EastBackTDC, WestBackTDC; // muon backing veto TDC
   Double_t EastDriftVetoADC, WestDriftVetoADC; // muon drift veto ADC
   Double_t EastTopVetoADC; //East Top veto ADC (No west)
   Double_t EastTopVetoTDC; // East top veto TDC (No west)
-  bool EvnbGood, BkhfGood; // DAQ header and footer quality
+  Bool_t EvnbGood, BkhfGood; // DAQ header and footer quality
 
   Int_t xeRC, yeRC, xwRC, ywRC; //Swank's wirechamber response class variables
   

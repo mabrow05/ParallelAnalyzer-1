@@ -8,6 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
+VPATH = ./:../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -18,9 +19,13 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-position_map.exe: position_map.o
-	$(CXX) $(CXXFLAGS) -o position_map.exe position_map.o $(LIBS)
+objects = DataTree.o
+
+position_map.exe: position_map.o $(objects)
+	$(CXX) $(CXXFLAGS) -o position_map.exe position_map.o $(objects) $(LIBS)
 	@echo "Done"
+
+DataTree.o: DataTree.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

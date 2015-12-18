@@ -294,14 +294,14 @@ if __name__ == "__main__":
 
 
     if 1:
-        octet_range = [0,59];
+        octet_range = [10,14]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
-            beta.runReplayPass1(octet)
+            #beta.runReplayPass1(octet)
             #beta.runGainBismuth(octet)
             beta.runReplayPass2(octet)
-            #beta.runReplayPass3(octet)
+            beta.runReplayPass3(octet)
             #beta.runReplayPass4(octet)
             
     

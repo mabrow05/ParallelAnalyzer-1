@@ -19,6 +19,8 @@
 #include "pedestals.h"
 #include "cuts.h"
 #include "basic_reconstruction.h"
+#include "runInfo.h"
+#include "DataTree.hh"
 
 #include "replay_pass2.h"
 #include "replay_pass3.h"
@@ -72,24 +74,10 @@ int main(int argc, char *argv[])
 
   // Determine position map to use
   char tempFileXePositionMap[500];
-  if (runNumber < 18081) {
-    sprintf(tempFileXePositionMap, "../position_map/position_map_2.dat");
-  }
-  else if (runNumber < 18390) {
-    sprintf(tempFileXePositionMap, "../position_map/position_map_3.dat");
-  }
-  else if (runNumber < 18712) {
-    sprintf(tempFileXePositionMap, "../position_map/position_map_4.dat");
-  }
-  else if (runNumber < 19239) {
-    sprintf(tempFileXePositionMap, "../position_map/position_map_5.dat");
-  }
-  //else if (runNumber < 19873) {
-  //sprintf(tempFileXePositionMap, "../position_map/position_map_6.dat");
-  //}
-  else if (runNumber < 20000) {
-    sprintf(tempFileXePositionMap, "../position_map/position_map_7.dat");
-  }
+
+  unsigned int XePeriod = getXeRunPeriod(runNumber);
+  sprintf(tempFileXePositionMap, "../position_map/position_map_%i_RC_123.dat",XePeriod);
+  
   cout << "... Reading: " << tempFileXePositionMap << endl;
 
   // Read position map
@@ -125,10 +113,74 @@ int main(int argc, char *argv[])
     }
   }
 
+  // DataTree structure
+  DataTree *t = new DataTree();
+
   // Open output ntuple
   char tempOut[500];
   sprintf(tempOut, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
-  TFile *fileOut = new TFile(tempOut,"RECREATE");
+  //sprintf(tempOut, "replay_pass3_%s.root", argv[1]);
+  t->makeOutputTree(std::string(tempOut),"pass3");
+
+  // Input ntuple
+  char tempIn[500];
+  sprintf(tempIn, "%s/replay_pass2_%s.root", getenv("REPLAY_PASS2"),argv[1]);
+  //sprintf(tempIn, "../replay_pass2/replay_pass2_%s.root",argv[1]);
+  t->setupInputTree(std::string(tempIn),"pass2");
+ 
+  int nEvents = t->getEntries();
+  cout << "... Processing nEvents = " << nEvents << endl;
+
+  // Loop over events
+  for (int i=0; i<nEvents; i++) {
+    t->getEvent(i);
+
+    // Determine (x,y) bin
+    int intEastBinX = -1;
+    int intEastBinY = -1;
+    int intWestBinX = -1;
+    int intWestBinY = -1;
+
+    for (int m=0; m<nPosBinsX; m++) {
+      if ( (t->xE.center >= xBinLower[m]) && (t->xE.center < xBinUpper[m]) ) intEastBinX = m;
+      if ( (t->xW.center >= xBinLower[m]) && (t->xW.center < xBinUpper[m]) ) intWestBinX = m;
+    }
+
+    for (int m=0; m<nPosBinsY; m++) {
+      if ( (t->yE.center >= yBinLower[m]) && (t->yE.center < yBinUpper[m]) ) intEastBinY = m;
+      if ( (t->yW.center >= yBinLower[m]) && (t->yW.center < yBinUpper[m]) ) intWestBinY = m;
+    }
+
+    // Apply (x,y) correction factor
+    if (intEastBinX > -1 && intEastBinY > -1) {
+      t->ScintE.q1 = t->ScintE.q1 * eta[0][intEastBinX][intEastBinY];
+      t->ScintE.q2 = t->ScintE.q2 * eta[1][intEastBinX][intEastBinY];
+      t->ScintE.q3 = t->ScintE.q3 * eta[2][intEastBinX][intEastBinY];
+      t->ScintE.q4 = t->ScintE.q4 * eta[3][intEastBinX][intEastBinY];
+    }
+    
+    if (intWestBinX > -1 && intWestBinY > -1) {
+      t->ScintW.q1 = t->ScintW.q1 * eta[4][intWestBinX][intWestBinY];
+      t->ScintW.q2 = t->ScintW.q2 * eta[5][intWestBinX][intWestBinY];
+      t->ScintW.q3 = t->ScintW.q3 * eta[6][intWestBinX][intWestBinY];
+      t->ScintW.q4 = t->ScintW.q4 * eta[7][intWestBinX][intWestBinY];
+    }
+
+    
+    t->fillOutputTree();
+  }
+
+  // Write output ntuple
+  t->writeOutputFile();
+  
+  delete t; //Closes files
+
+  return 0;
+}
+
+//////////// OLD INPUT OUTPUT FILE METHOD /////////////////
+/*
+TFile *fileOut = new TFile(tempOut,"RECREATE");
   TTree *Tout = new TTree("pass3", "pass3");
 
   // Variables
@@ -213,73 +265,4 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("type_pass2", &type_pass2);
   Tin->SetBranchAddress("side_pass2", &side_pass2);
   Tin->SetBranchAddress("posError_pass2", &posError_pass2);
-
-  int nEvents = Tin->GetEntries();
-  cout << "... Processing nEvents = " << nEvents << endl;
-
-  // Loop over events
-  for (int i=0; i<nEvents; i++) {
-    Tin->GetEvent(i);
-
-    // Determine (x,y) bin
-    int intEastBinX = -1;
-    int intEastBinY = -1;
-    int intWestBinX = -1;
-    int intWestBinY = -1;
-
-    for (int m=0; m<nPosBinsX; m++) {
-      if ( (xE_pass2 >= xBinLower[m]) && (xE_pass2 < xBinUpper[m]) ) intEastBinX = m;
-      if ( (xW_pass2 >= xBinLower[m]) && (xW_pass2 < xBinUpper[m]) ) intWestBinX = m;
-    }
-
-    for (int m=0; m<nPosBinsY; m++) {
-      if ( (yE_pass2 >= yBinLower[m]) && (yE_pass2 < yBinUpper[m]) ) intEastBinY = m;
-      if ( (yW_pass2 >= yBinLower[m]) && (yW_pass2 < yBinUpper[m]) ) intWestBinY = m;
-    }
-
-    // Apply (x,y) correction factor
-    if (intEastBinX > -1 && intEastBinY > -1) {
-      pmt_pass3[0] = pmt_pass2[0] * eta[0][intEastBinX][intEastBinY];
-      pmt_pass3[1] = pmt_pass2[1] * eta[1][intEastBinX][intEastBinY];
-      pmt_pass3[2] = pmt_pass2[2] * eta[2][intEastBinX][intEastBinY];
-      pmt_pass3[3] = pmt_pass2[3] * eta[3][intEastBinX][intEastBinY];
-    }
-    else {
-      pmt_pass3[0] = pmt_pass2[0];
-      pmt_pass3[1] = pmt_pass2[1];
-      pmt_pass3[2] = pmt_pass2[2];
-      pmt_pass3[3] = pmt_pass2[3];
-    }
-    if (intWestBinX > -1 && intWestBinY > -1) {
-      pmt_pass3[4] = pmt_pass2[4] * eta[4][intWestBinX][intWestBinY];
-      pmt_pass3[5] = pmt_pass2[5] * eta[5][intWestBinX][intWestBinY];
-      pmt_pass3[6] = pmt_pass2[6] * eta[6][intWestBinX][intWestBinY];
-      pmt_pass3[7] = pmt_pass2[7] * eta[7][intWestBinX][intWestBinY];
-    }
-    else {
-      pmt_pass3[4] = pmt_pass2[4];
-      pmt_pass3[5] = pmt_pass2[5];
-      pmt_pass3[6] = pmt_pass2[6];
-      pmt_pass3[7] = pmt_pass2[7];
-    }
-
-    // Pass other variables from pass2 to pass3
-    xE_pass3 = xE_pass2;
-    yE_pass3 = yE_pass2;
-    xW_pass3 = xW_pass2;
-    yW_pass3 = yW_pass2;
-
-    PID_pass3 = PID_pass2;
-    type_pass3 = type_pass2;
-    side_pass3 = side_pass2;
-    posError_pass3 = posError_pass2;
-
-    Tout->Fill();
-  }
-
-  // Write output ntuple
-  fileOut->Write();
-  fileOut->Close();
-
-  return 0;
-}
+*/

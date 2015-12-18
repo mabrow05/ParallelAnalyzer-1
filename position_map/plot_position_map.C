@@ -118,7 +118,7 @@ void plot_position_map(int iRunPeriod)
   // Fill histograms
   for (int i=0; i<nPosBinsX; i++) {
     for (int j=0; j<nPosBinsY; j++) {
-      if (sqrt(xBinCenter[i]*xBinCenter[i] + yBinCenter[j]*yBinCenter[j]) <= 50.) {
+      if (sqrt(xBinCenter[i]*xBinCenter[i] + yBinCenter[j]*yBinCenter[j]) <= 52.5) {
         hisE0->Fill(xBinCenter[i],yBinCenter[j],posMap[0][i][j]);
         hisE1->Fill(xBinCenter[i],yBinCenter[j],posMap[1][i][j]);
         hisE2->Fill(xBinCenter[i],yBinCenter[j],posMap[2][i][j]);
@@ -133,13 +133,13 @@ void plot_position_map(int iRunPeriod)
 
   // Output PDF file
   TString filenameOut;
-  if (iRunPeriod == 1) filenameOut  = "position_map_1.pdf";
-  if (iRunPeriod == 2) filenameOut  = "position_map_2.pdf";
+  if (iRunPeriod == 1) filenameOut  = "position_map_1_RC_123.pdf";
+  if (iRunPeriod == 2) filenameOut  = "position_map_2_RC_123.pdf";
   if (iRunPeriod == 3) filenameOut  = "position_map_3_RC_123.pdf";
-  if (iRunPeriod == 4) filenameOut  = "position_map_4.pdf";
-  if (iRunPeriod == 5) filenameOut  = "position_map_5.pdf";
-  if (iRunPeriod == 6) filenameOut  = "position_map_6.pdf";
-  if (iRunPeriod == 7) filenameOut  = "position_map_7.pdf";
+  if (iRunPeriod == 4) filenameOut  = "position_map_4_RC_123.pdf";
+  if (iRunPeriod == 5) filenameOut  = "position_map_5_RC_123.pdf";
+  if (iRunPeriod == 6) filenameOut  = "position_map_6_RC_123.pdf";
+  if (iRunPeriod == 7) filenameOut  = "position_map_7_RC_123.pdf";
 
   TString filenameOutFirst;
   filenameOutFirst  = filenameOut;

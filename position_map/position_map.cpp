@@ -21,6 +21,7 @@
 #include "pedestals.h"
 #include "cuts.h"
 #include "basic_reconstruction.h"
+#include "DataTree.hh"
 
 #include "replay_pass2.h"
 
@@ -175,47 +176,22 @@ int main(int argc, char *argv[])
 
     // Open input ntuple
     sprintf(tempIn, "%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"), runList[i]);
-    TFile *fileIn = new TFile(tempIn, "READ");
-    TTree *Tin = (TTree*)(fileIn->Get("pass2"));
-    int nEvents = Tin->GetEntriesFast();
+    DataTree *t = new DataTree();
+    t->setupInputTree(std::string(tempIn),"pass2");
+    //TFile *fileIn = new TFile(tempIn, "READ");
+    //TTree *Tin = (TTree*)(fileIn->Get("pass2"));
+    int nEvents = t->getEntries();
     cout << "Processing " << runList[i] << " ... " << endl;
     cout << "... nEvents = " << nEvents << endl;
-
-    // Input variables (moved to here)
-    Tin->SetBranchAddress("pmt0_pass2", &pmt_pass2[0]);
-    Tin->SetBranchAddress("pmt1_pass2", &pmt_pass2[1]);
-    Tin->SetBranchAddress("pmt2_pass2", &pmt_pass2[2]);
-    Tin->SetBranchAddress("pmt3_pass2", &pmt_pass2[3]);
-    Tin->SetBranchAddress("pmt4_pass2", &pmt_pass2[4]);
-    Tin->SetBranchAddress("pmt5_pass2", &pmt_pass2[5]);
-    Tin->SetBranchAddress("pmt6_pass2", &pmt_pass2[6]);
-    Tin->SetBranchAddress("pmt7_pass2", &pmt_pass2[7]);
-    
-    Tin->SetBranchAddress("xE_pass2", &xE_pass2);
-    Tin->SetBranchAddress("yE_pass2", &yE_pass2);
-    Tin->SetBranchAddress("xW_pass2", &xW_pass2);
-    Tin->SetBranchAddress("yW_pass2", &yW_pass2);
-	
-    //Swank addition
-    int xeRC,yeRC,xwRC,ywRC;
-    Tin->SetBranchAddress("xeRC",&xeRC);
-    Tin->SetBranchAddress("yeRC",&yeRC);
-    Tin->SetBranchAddress("xwRC",&xwRC);
-    Tin->SetBranchAddress("ywRC",&ywRC);
-    
-    Tin->SetBranchAddress("PID_pass2", &PID_pass2);
-    Tin->SetBranchAddress("type_pass2", &type_pass2);
-    Tin->SetBranchAddress("side_pass2", &side_pass2);
-    Tin->SetBranchAddress("posError_pass2", &posError_pass2);
 
 
     // Loop over events
     for (int i=0; i<nEvents; i++) {
-      Tin->GetEvent(i);  
+      t->getEvent(i);  
 
       // Select Type 0 events
-      if (PID_pass2 != 1) continue;
-      if (type_pass2 > 0) continue;
+      if (t->PID != 1) continue;
+      if (t->Type > 0) continue;
 
 	  
 		
@@ -223,11 +199,11 @@ int main(int argc, char *argv[])
       // Type 0 East Trigger
       int intBinX, intBinY; 
       bool moveOnX = true, moveOnY=true; // Determining if the event is of the correct response class in x and y
-      if (side_pass2 == 0) {
+      if (t->Side == 0) {
 	//Swank addition: Wire Chamber Response class. 
-	for (int t=0; t<numResponseClasses; t++) {
-	  if (xeRC == responseClasses[t]) {moveOnX=false;}
-	  if (yeRC == responseClasses[t]) {moveOnY=false;}
+	for (int j=0; j<numResponseClasses; j++) {
+	  if (t->xeRC == responseClasses[j]) {moveOnX=false;}
+	  if (t->yeRC == responseClasses[j]) {moveOnY=false;}
 	}
       
 	if (moveOnX || moveOnY) continue;
@@ -237,26 +213,26 @@ int main(int argc, char *argv[])
 
         // Determine position bin
         for (int m=0; m<nPosBinsX; m++) {
-          if ( (xE_pass2 >= xBinLower[m]) && (xE_pass2 < xBinUpper[m]) ) intBinX = m;
+          if ( (t->xE.center >= xBinLower[m]) && (t->xE.center < xBinUpper[m]) ) intBinX = m;
         }
         for (int m=0; m<nPosBinsY; m++) {
-          if ( (yE_pass2 >= yBinLower[m]) && (yE_pass2 < yBinUpper[m]) ) intBinY = m;
+          if ( (t->yE.center >= yBinLower[m]) && (t->yE.center < yBinUpper[m]) ) intBinY = m;
         }
 
         // Fill PMT histograms
-        if (intBinX>-1 && intBinY>-1) hisxy[0][intBinX][intBinY]->Fill(pmt_pass2[0]);
-        if (intBinX>-1 && intBinY>-1) hisxy[1][intBinX][intBinY]->Fill(pmt_pass2[1]);
-        if (intBinX>-1 && intBinY>-1) hisxy[2][intBinX][intBinY]->Fill(pmt_pass2[2]);
-        if (intBinX>-1 && intBinY>-1) hisxy[3][intBinX][intBinY]->Fill(pmt_pass2[3]);
+        if (intBinX>-1 && intBinY>-1) hisxy[0][intBinX][intBinY]->Fill(t->ScintE.q1);
+        if (intBinX>-1 && intBinY>-1) hisxy[1][intBinX][intBinY]->Fill(t->ScintE.q2);
+        if (intBinX>-1 && intBinY>-1) hisxy[2][intBinX][intBinY]->Fill(t->ScintE.q3);
+        if (intBinX>-1 && intBinY>-1) hisxy[3][intBinX][intBinY]->Fill(t->ScintE.q4);
       }
 
       // Type 0 West Trigger
       moveOnX=moveOnY=true;
-      if (side_pass2 == 1) {
+      if (t->Side == 1) {
 	//Swank Only Allow triangles!!!	  	
-	for (int t=0; t<numResponseClasses; t++) {
-	  if (xwRC == responseClasses[t]) {moveOnX=false;}
-	  if (ywRC == responseClasses[t]) {moveOnY=false;}
+	for (int j=0; j<numResponseClasses; j++) {
+	  if (t->xwRC == responseClasses[j]) {moveOnX=false;}
+	  if (t->ywRC == responseClasses[j]) {moveOnY=false;}
 	}
       
 	if (moveOnX || moveOnY) continue;
@@ -265,24 +241,24 @@ int main(int argc, char *argv[])
         intBinY = -1;
         // Determine position bin
         for (int m=0; m<nPosBinsX; m++) {
-          if ( (xW_pass2 >= xBinLower[m]) && (xW_pass2 < xBinUpper[m]) ) intBinX = m;
+          if ( (t->xW.center >= xBinLower[m]) && (t->xW.center < xBinUpper[m]) ) intBinX = m;
         }
         for (int m=0; m<nPosBinsY; m++) {
-          if ( (yW_pass2 >= yBinLower[m]) && (yW_pass2 < yBinUpper[m]) ) intBinY = m;
+          if ( (t->yW.center >= yBinLower[m]) && (t->yW.center < yBinUpper[m]) ) intBinY = m;
         }
 
 	// Fill PMT histograms 
-        if (intBinX>-1 && intBinY>-1) hisxy[4][intBinX][intBinY]->Fill(pmt_pass2[4]);
-        if (intBinX>-1 && intBinY>-1) hisxy[5][intBinX][intBinY]->Fill(pmt_pass2[5]);
-        if (intBinX>-1 && intBinY>-1) hisxy[6][intBinX][intBinY]->Fill(pmt_pass2[6]);
-        if (intBinX>-1 && intBinY>-1) hisxy[7][intBinX][intBinY]->Fill(pmt_pass2[7]);
+        if (intBinX>-1 && intBinY>-1) hisxy[4][intBinX][intBinY]->Fill(t->ScintW.q1);
+        if (intBinX>-1 && intBinY>-1) hisxy[5][intBinX][intBinY]->Fill(t->ScintW.q2);
+        if (intBinX>-1 && intBinY>-1) hisxy[6][intBinX][intBinY]->Fill(t->ScintW.q3);
+        if (intBinX>-1 && intBinY>-1) hisxy[7][intBinX][intBinY]->Fill(t->ScintW.q4);
       }
 
 
     }
 
     // Close input ntuple
-    fileIn->Close();
+    delete t;
 
   }
 
@@ -308,7 +284,7 @@ int main(int argc, char *argv[])
         binCenterMax[p][i][j] = hisxy[p][i][j]->GetBinCenter(maxBin[p][i][j]);
 	
 	  
-	if (r<=50.)
+	if (r<=52.5)
 	      {
 		spec = new TSpectrum(20);
 		Int_t npeaks = spec->Search(hisxy[p][i][j],1.5,"",0.5);
@@ -430,7 +406,7 @@ int main(int argc, char *argv[])
 
 	double r = sqrt(xBinCenter[i]*xBinCenter[i]+yBinCenter[j]*yBinCenter[j]);
 
-        if (maxCounts[p][i][j] > 0. && r<=50.) {
+        if (maxCounts[p][i][j] > 0. && r<=52.5) {
           hisxy[p][i][j]->Fit(fitName, "LRQ");
           fitMean[p][i][j] = gaussian_fit[p][i][j]->GetParameter(1);
 	  //attempt at manual fix of fitting problem. Constrain p1 and p2

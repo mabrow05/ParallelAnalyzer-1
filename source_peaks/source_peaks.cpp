@@ -23,6 +23,7 @@
 #include "replay_pass2.h"
 #include "replay_pass3.h"
 #include "sourcePeaks.h"
+#include "DataTree.hh"
 
 using namespace std;
 
@@ -129,109 +130,101 @@ int main(int argc, char *argv[])
 
   // Open input ntuple
   char tempIn[500];
+  DataTree *t = new DataTree();
   sprintf(tempIn, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
-  TFile *fileIn = new TFile(tempIn, "READ");
-  TTree *Tin = (TTree*)(fileIn->Get("pass3"));
+  t->setupInputTree(std::string(tempIn),"pass3");
 
-  // Variables
-  Tin->SetBranchAddress("pmt0_pass3", &pmt_pass3[0]);
-  Tin->SetBranchAddress("pmt1_pass3", &pmt_pass3[1]);
-  Tin->SetBranchAddress("pmt2_pass3", &pmt_pass3[2]);
-  Tin->SetBranchAddress("pmt3_pass3", &pmt_pass3[3]);
-  Tin->SetBranchAddress("pmt4_pass3", &pmt_pass3[4]);
-  Tin->SetBranchAddress("pmt5_pass3", &pmt_pass3[5]);
-  Tin->SetBranchAddress("pmt6_pass3", &pmt_pass3[6]);
-  Tin->SetBranchAddress("pmt7_pass3", &pmt_pass3[7]);
-
-  Tin->SetBranchAddress("xE_pass3", &xE_pass3);
-  Tin->SetBranchAddress("yE_pass3", &yE_pass3);
-  Tin->SetBranchAddress("xW_pass3", &xW_pass3);
-  Tin->SetBranchAddress("yW_pass3", &yW_pass3);
-
-  Tin->SetBranchAddress("PID_pass3",  &PID_pass3);
-  Tin->SetBranchAddress("type_pass3", &type_pass3);
-  Tin->SetBranchAddress("side_pass3", &side_pass3);
-  Tin->SetBranchAddress("posError_pass3", &posError_pass3);
-
-  int nEvents = Tin->GetEntries();
+  int nEvents = t->getEntries();
   cout << "Processing " << argv[1] << " ... " << endl;
   cout << "... nEvents = " << nEvents << endl;
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
-    Tin->GetEvent(i);
+    t->getEvent(i);
 
     // Use Type 0 events
-    if (type_pass3 != 0) continue;
+    if (t->Type != 0 && t->PID!=1) continue;
 
     // First source (x,y)
     if (useSource[0]) {
 
-      if (side_pass3 == 0) {
-	if ( (xE_pass3 - xEast[0])*(xE_pass3 - xEast[0]) +
-	     (yE_pass3 - yEast[0])*(yE_pass3 - yEast[0]) <
+      if (t->Side == 0) {
+	if ( (t->xE.center - xEast[0])*(t->xE.center - xEast[0]) +
+	     (t->yE.center - yEast[0])*(t->yE.center - yEast[0]) <
 	     (2.*sigmaEast[0])*(2.*sigmaEast[0]) ) {
-	  for (int p=0; p<4; p++) {
-	    his[0][p]->Fill(pmt_pass3[p]);
-	  }
+	  his[0][0]->Fill(t->ScintE.q1);
+	  his[0][1]->Fill(t->ScintE.q2);
+	  his[0][2]->Fill(t->ScintE.q3);
+	  his[0][3]->Fill(t->ScintE.q4);
 	}
       }
-      if (side_pass3 == 1) {
-	if ( (xW_pass3 - xWest[0])*(xW_pass3 - xWest[0]) +
-	     (yW_pass3 - yWest[0])*(yW_pass3 - yWest[0]) <
+      if (t->Side == 1) {
+	if ( (t->xW.center - xWest[0])*(t->xW.center - xWest[0]) +
+	     (t->yW.center - yWest[0])*(t->yW.center - yWest[0]) <
 	     (2.*sigmaWest[0])*(2.*sigmaWest[0]) ) {
-	  for (int p=4; p<8; p++) {
-	    his[0][p]->Fill(pmt_pass3[p]);
-	  }
+	  his[0][4]->Fill(t->ScintW.q1);
+	  his[0][5]->Fill(t->ScintW.q2);
+	  his[0][6]->Fill(t->ScintW.q3);
+	  his[0][7]->Fill(t->ScintW.q4);
 	}
       }
+      
     }
 
     // Second source (x,y)
     if (nSources > 1 && useSource[1]) {
-      if (side_pass3 == 0) {
-	if ( (xE_pass3 - xEast[1])*(xE_pass3 - xEast[1]) +
-	     (yE_pass3 - yEast[1])*(yE_pass3 - yEast[1]) <
+
+      if (t->Side == 0) {
+	if ( (t->xE.center - xEast[1])*(t->xE.center - xEast[1]) +
+	     (t->yE.center - yEast[1])*(t->yE.center - yEast[1]) <
 	     (2.*sigmaEast[1])*(2.*sigmaEast[1]) ) {
-	  for (int p=0; p<4; p++) {
-	    his[1][p]->Fill(pmt_pass3[p]);
-	  }
+	  his[1][0]->Fill(t->ScintE.q1);
+	  his[1][1]->Fill(t->ScintE.q2);
+	  his[1][2]->Fill(t->ScintE.q3);
+	  his[1][3]->Fill(t->ScintE.q4);
 	}
       }
-      if (side_pass3 == 1) {
-	if ( (xW_pass3 - xWest[1])*(xW_pass3 - xWest[1]) +
-	     (yW_pass3 - yWest[1])*(yW_pass3 - yWest[1]) <
+      if (t->Side == 1) {
+	if ( (t->xW.center - xWest[1])*(t->xW.center - xWest[1]) +
+	     (t->yW.center - yWest[1])*(t->yW.center - yWest[1]) <
 	     (2.*sigmaWest[1])*(2.*sigmaWest[1]) ) {
-	  for (int p=4; p<8; p++) {
-	    his[1][p]->Fill(pmt_pass3[p]);
-	  }
+	  his[1][4]->Fill(t->ScintW.q1);
+	  his[1][5]->Fill(t->ScintW.q2);
+	  his[1][6]->Fill(t->ScintW.q3);
+	  his[1][7]->Fill(t->ScintW.q4);
 	}
       }
     }
 
     // Third source (x,y)
     if (nSources > 2 && useSource[2]) {
-      if (side_pass3 == 0) {
-	if ( (xE_pass3 - xEast[2])*(xE_pass3 - xEast[2]) +
-             (yE_pass3 - yEast[2])*(yE_pass3 - yEast[2]) <
-             (2.*sigmaEast[2])*(2.*sigmaEast[2]) ) {
-          for (int p=0; p<4; p++) {
-            his[2][p]->Fill(pmt_pass3[p]);
-          }
-        }
-      }
-      if (side_pass3 == 1) {
-	if ( (xW_pass3 - xWest[2])*(xW_pass3 - xWest[2]) +
-             (yW_pass3 - yWest[2])*(yW_pass3 - yWest[2]) <
-             (2.*sigmaWest[2])*(2.*sigmaWest[2]) ) {
-          for (int p=4; p<8; p++) {
-            his[2][p]->Fill(pmt_pass3[p]);
-          }
+
+      if (t->Side == 0) {
+	if ( (t->xE.center - xEast[2])*(t->xE.center - xEast[2]) +
+	     (t->yE.center - yEast[2])*(t->yE.center - yEast[2]) <
+	     (2.*sigmaEast[2])*(2.*sigmaEast[2]) ) {
+	  his[2][0]->Fill(t->ScintE.q1);
+	  his[2][1]->Fill(t->ScintE.q2);
+	  his[2][2]->Fill(t->ScintE.q3);
+	  his[2][3]->Fill(t->ScintE.q4);
 	}
       }
+      if (t->Side == 1) {
+	if ( (t->xW.center - xWest[2])*(t->xW.center - xWest[2]) +
+	     (t->yW.center - yWest[2])*(t->yW.center - yWest[2]) <
+	     (2.*sigmaWest[2])*(2.*sigmaWest[2]) ) {
+	  his[2][4]->Fill(t->ScintW.q1);
+	  his[2][5]->Fill(t->ScintW.q2);
+	  his[2][6]->Fill(t->ScintW.q3);
+	  his[2][7]->Fill(t->ScintW.q4);
+	}
+      }
+
     }
 
   }
+
+  delete t; //Closes input file
 
   // Find maximum bin
   double maxBin[3][8];

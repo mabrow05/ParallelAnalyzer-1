@@ -20,6 +20,7 @@
 #include "cuts.h"
 #include "basic_reconstruction.h"
 #include "runInfo.h"
+#include "DataTree.hh"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ int main(int argc, char *argv[])
 
   //First check that if the run isn't the reference run, the reference has been run at least
   unsigned int referenceRun = getGainReferenceRun(runNumber);
+  std::cout << "Reference Run = " << referenceRun << std::endl;
   char tempIn[500];
 
   if ((int)referenceRun!=runNumber) {
@@ -50,6 +52,9 @@ int main(int argc, char *argv[])
       exit(0);
     }
   }
+
+  //Struct to hold the scintillator information (struct is in DataTree.hh)
+  Scint ScintE, ScintW;
 
   // Open output ntuple
   char tempOut[500];
@@ -78,36 +83,30 @@ int main(int argc, char *argv[])
   cout << "Processing " << argv[1] << " ... " << endl;
   cout << "... nEvents = " << nEvents << endl;
 
+  // Input variables
+  Tin->SetBranchAddress("ScintE", &ScintE);
+  Tin->SetBranchAddress("ScintW", &ScintW);
+  
+  Tin->SetBranchAddress("PID", &PID);
+  Tin->SetBranchAddress("Type", &type);
+  Tin->SetBranchAddress("Side", &side);
+
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
-
-    // Input variables
-    Tin->SetBranchAddress("pmt0", &pmt[0]);
-    Tin->SetBranchAddress("pmt1", &pmt[1]);
-    Tin->SetBranchAddress("pmt2", &pmt[2]);
-    Tin->SetBranchAddress("pmt3", &pmt[3]);
-    Tin->SetBranchAddress("pmt4", &pmt[4]);
-    Tin->SetBranchAddress("pmt5", &pmt[5]);
-    Tin->SetBranchAddress("pmt6", &pmt[6]);
-    Tin->SetBranchAddress("pmt7", &pmt[7]);
-
-    Tin->SetBranchAddress("PID", &PID);
-    Tin->SetBranchAddress("type", &type);
-    Tin->SetBranchAddress("side", &side);
 
     // Select Bi pulser events
     if (PID != 4) continue;
 
     // Fill PMT histograms
-    his[0]->Fill(pmt[0]);
-    his[1]->Fill(pmt[1]);
-    his[2]->Fill(pmt[2]);
-    his[3]->Fill(pmt[3]);
-    his[4]->Fill(pmt[4]);
-    his[5]->Fill(pmt[5]);
-    his[6]->Fill(pmt[6]);
-    his[7]->Fill(pmt[7]);
+    his[0]->Fill(ScintE.q1);
+    his[1]->Fill(ScintE.q2);
+    his[2]->Fill(ScintE.q3);
+    his[3]->Fill(ScintE.q4);
+    his[4]->Fill(ScintW.q1);
+    his[5]->Fill(ScintW.q2);
+    his[6]->Fill(ScintW.q3);
+    his[7]->Fill(ScintW.q4);
 
   }
 

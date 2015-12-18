@@ -3,12 +3,12 @@
 {
   int iRunPeriod = 5;
   int pmt = 7; 
-  float xpos = 10.;
-  float ypos = -22.5;
+  float xpos = 5.;
+  float ypos = -40.;
 
   //open file
   Char_t temp[500];
-  sprintf(temp,"position_map_%i.root",iRunPeriod);
+  sprintf(temp,"position_map_%i_RC_123.root",iRunPeriod);
   TFile *f = new TFile(temp,"READ");
   
   //Load histogram
@@ -22,7 +22,7 @@
 
   TF1 *f1 = new TF1("f1","[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",200., 700.);
   f1->SetParameter(0,100.);
-  f1->SetParameter(1,250.);
+  f1->SetParameter(1,300.);
   f1->SetParameter(2,100.);
   f1->SetParLimits(0,0.,5000.);
   f1->SetParLimits(1,0.,500.);	

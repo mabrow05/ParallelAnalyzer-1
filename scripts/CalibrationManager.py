@@ -16,7 +16,7 @@ import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
 omittedRuns = [19232]
-omittedRanges = [(17925,18055)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
+omittedRanges = [(17942,18055)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
 
 for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -674,7 +674,7 @@ if __name__ == "__main__":
 
 
     if options.makeDirectories:
-        cal = CalibrationManager()
+        cal = CalReplayManager()
         cal.makeAllDirectories()
 
 
@@ -765,14 +765,14 @@ if __name__ == "__main__":
     if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [4]# [1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
             #rep.findPedestals(runPeriod)
-            rep.runReplayPass1(runPeriod)
+            #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
             rep.runReplayPass2(runPeriod)
-            #rep.runReplayPass3(runPeriod)
-            #cal.fitSourcePeaks(runPeriod)
+            rep.runReplayPass3(runPeriod)
+            cal.fitSourcePeaks(runPeriod)
             #rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
@@ -809,16 +809,16 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 1: 
-        runPeriods = [2,3,4,5,6,7]
+    if 0: 
+        runPeriods = [2,3,4,5,7]
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:           
-            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             

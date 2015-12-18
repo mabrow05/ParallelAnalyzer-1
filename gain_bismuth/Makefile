@@ -8,6 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
+VPATH = ./:../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -18,9 +19,15 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-gain_bismuth.exe: gain_bismuth.o
-	$(CXX) $(CXXFLAGS) -o gain_bismuth.exe gain_bismuth.o $(LIBS)
+objects = DataTree.o
+
+.PHONY: all
+all: gain_bismuth.exe 
+gain_bismuth.exe: gain_bismuth.o $(objects)
+	$(CXX) $(CXXFLAGS) -o gain_bismuth.exe gain_bismuth.o $(object) $(LIBS)
 	@echo "Done"
+
+DataTree.o: DataTree.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

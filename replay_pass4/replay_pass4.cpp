@@ -24,6 +24,7 @@
 #include "replay_pass3.h"
 #include "replay_pass4.h"
 #include "sourcePeaks.h"
+#include "DataTree.hh"
 
 using namespace std;
 
@@ -168,7 +169,206 @@ int main(int argc, char *argv[])
   // Open output ntuple
   char tempOut[500];
   sprintf(tempOut, "%s/replay_pass4_%s.root",getenv("REPLAY_PASS4"), argv[1]);
-  TFile *fileOut = new TFile(tempOut,"RECREATE");
+  //sprintf(tempOut, "replay_pass4_%s.root", argv[1]);
+  DataTree *t = new DataTree();
+  t->makeOutputTree(std::string(tempOut),"pass4");
+
+  char tempIn[500];
+  sprintf(tempIn, "%s/replay_pass3_%s.root", getenv("REPLAY_PASS3"),argv[1]);
+  //sprintf(tempIn, "../replay_pass3/replay_pass3_%s.root",argv[1]);
+  t->setupInputTree(std::string(tempIn),"pass3");
+  
+  
+  int nEvents = t->getEntries();
+  cout << "... Processing nEvents = " << nEvents << endl;
+
+  // Loop over events
+  for (int i=0; i<nEvents; i++) {
+    t->getEvent(i);
+    
+    //Calculate Evis for each event in each PMT using the linearity curve determined in calibration
+    if (t->ScintE.q1>linearityCurve[0][4]) {
+      t->ScintE.e1 = linearityCurve[0][0] + linearityCurve[0][1]*t->ScintE.q1 
+	+ linearityCurve[0][2]*t->ScintE.q1*t->ScintE.q1 + linearityCurve[0][3]*t->ScintE.q1*t->ScintE.q1*t->ScintE.q1;
+    }
+    else if (t->ScintE.q1>0.) t->ScintE.e1 = linearityCurve[0][5]*t->ScintE.q1;
+    else t->ScintE.e1=0.;
+
+    if (t->ScintE.q2>linearityCurve[1][4]) {
+      t->ScintE.e2 = linearityCurve[1][0] + linearityCurve[1][1]*t->ScintE.q2 
+	+ linearityCurve[1][2]*t->ScintE.q2*t->ScintE.q2 + linearityCurve[1][3]*t->ScintE.q2*t->ScintE.q2*t->ScintE.q2;
+    }
+    else if (t->ScintE.q2>0.) t->ScintE.e2 = linearityCurve[1][5]*t->ScintE.q2;
+    else t->ScintE.e2=0.;
+
+    if (t->ScintE.q3>linearityCurve[2][4]) {
+      t->ScintE.e3 = linearityCurve[2][0] + linearityCurve[2][1]*t->ScintE.q3 
+	+ linearityCurve[2][2]*t->ScintE.q3*t->ScintE.q3 + linearityCurve[2][3]*t->ScintE.q3*t->ScintE.q3*t->ScintE.q3;
+    }
+    else if (t->ScintE.q3>0.) t->ScintE.e3 = linearityCurve[2][5]*t->ScintE.q3;
+    else t->ScintE.e3=0.;
+
+    if (t->ScintE.q4>linearityCurve[3][4]) {
+      t->ScintE.e4 = linearityCurve[3][0] + linearityCurve[3][1]*t->ScintE.q4 
+	+ linearityCurve[3][2]*t->ScintE.q4*t->ScintE.q4 + linearityCurve[3][3]*t->ScintE.q4*t->ScintE.q4*t->ScintE.q4;
+    }
+    else if (t->ScintE.q4>0.) t->ScintE.e4 = linearityCurve[3][5]*t->ScintE.q4;
+    else t->ScintE.e4=0.;
+
+    if (t->ScintW.q1>linearityCurve[4][4]) {
+      t->ScintW.e1 = linearityCurve[4][0] + linearityCurve[4][1]*t->ScintW.q1 
+	+ linearityCurve[4][2]*t->ScintW.q1*t->ScintW.q1 + linearityCurve[4][3]*t->ScintW.q1*t->ScintW.q1*t->ScintW.q1;
+    }
+    else if (t->ScintW.q1>0.) t->ScintW.e1 = linearityCurve[4][5]*t->ScintW.q1;
+    else t->ScintW.e1=0.;
+
+    if (t->ScintW.q2>linearityCurve[5][4]) {
+      t->ScintW.e2 = linearityCurve[5][0] + linearityCurve[5][1]*t->ScintW.q2 
+	+ linearityCurve[5][2]*t->ScintW.q2*t->ScintW.q2 + linearityCurve[5][3]*t->ScintW.q2*t->ScintW.q2*t->ScintW.q2;
+    }
+    else if (t->ScintW.q2>0.) t->ScintW.e2 = linearityCurve[5][5]*t->ScintW.q2;
+    else t->ScintW.e2=0.;
+
+    if (t->ScintW.q3>linearityCurve[6][4]) {
+      t->ScintW.e3 = linearityCurve[6][0] + linearityCurve[6][1]*t->ScintW.q3 
+	+ linearityCurve[6][2]*t->ScintW.q3*t->ScintW.q3 + linearityCurve[6][3]*t->ScintW.q3*t->ScintW.q3*t->ScintW.q3;
+    }
+    else if (t->ScintW.q3>0.) t->ScintW.e3 = linearityCurve[6][5]*t->ScintW.q3;
+    else t->ScintW.e3=0.;
+
+    if (t->ScintW.q4>linearityCurve[7][4]) {
+      t->ScintW.e4 = linearityCurve[7][0] + linearityCurve[7][1]*t->ScintW.q4 
+	+ linearityCurve[7][2]*t->ScintW.q4*t->ScintW.q4 + linearityCurve[7][3]*t->ScintW.q4*t->ScintW.q4*t->ScintW.q4;
+    }
+    else if (t->ScintW.q4>0.) t->ScintW.e4 = linearityCurve[7][5]*t->ScintW.q4;
+    else t->ScintW.e4=0.;
+
+    //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
+    /*Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(t->ScintE.e1)+EQ2Etrue[0][2]*(t->ScintE.e1)*(t->ScintE.e1);
+    Etrue[1] = EQ2Etrue[1][0]+EQ2Etrue[1][1]*(t->ScintE.e2)+EQ2Etrue[1][2]*(t->ScintE.e2)*(t->ScintE.e2);
+    Etrue[2] = EQ2Etrue[2][0]+EQ2Etrue[2][1]*(t->ScintE.e3)+EQ2Etrue[2][2]*(t->ScintE.e3)*(t->ScintE.e3);
+    Etrue[3] = EQ2Etrue[3][0]+EQ2Etrue[3][1]*(t->ScintE.e4)+EQ2Etrue[3][2]*(t->ScintE.e4)*(t->ScintE.e4);
+    Etrue[4] = EQ2Etrue[4][0]+EQ2Etrue[4][1]*(t->ScintW.e1)+EQ2Etrue[4][2]*(t->ScintW.e1)*(t->ScintW.e1);
+    Etrue[5] = EQ2Etrue[5][0]+EQ2Etrue[5][1]*(t->ScintW.e2)+EQ2Etrue[5][2]*(t->ScintW.e2)*(t->ScintW.e2);
+    Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(t->ScintW.e3)+EQ2Etrue[6][2]*(t->ScintW.e3)*(t->ScintW.e3);
+    Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(t->ScintW.e4)+EQ2Etrue[7][2]*(t->ScintW.e4)*(t->ScintW.e4);
+    */
+    Double_t lowestPMTenergy = 0.001; //This is for setting an upper limit on the weight since
+                                        // at E=0, the weight goes to infiniti
+    Double_t lowestADC = 0.001;
+
+    if (pmtQuality[0]) { 
+      if (t->ScintE.e1>lowestPMTenergy && t->ScintE.q1>lowestADC) {
+	t->ScintE.nPE1 = t->ScintE.q1*nPE_per_channel[0];
+	t->ScintE.de1 = t->ScintE.e1/sqrt(t->ScintE.nPE1);
+	pmt_Evis.weight0 = t->ScintE.nPE1/(t->ScintE.e1*t->ScintE.e1);
+      }
+      else pmt_Evis.weight0 = lowestADC*nPE_per_channel[0]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight0=0.;}
+
+    if (pmtQuality[1]) { 
+      if (t->ScintE.e2>lowestPMTenergy && t->ScintE.q2>lowestADC) {
+	t->ScintE.nPE2 = t->ScintE.q2*nPE_per_channel[1];
+	t->ScintE.de2 = t->ScintE.e2/sqrt(t->ScintE.nPE2);
+	pmt_Evis.weight1 = t->ScintE.nPE2/(t->ScintE.e2*t->ScintE.e2);
+      }
+      else pmt_Evis.weight1 = lowestADC*nPE_per_channel[1]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight1=0.;}
+
+    if (pmtQuality[2]) { 
+      if (t->ScintE.e3>lowestPMTenergy && t->ScintE.q3>lowestADC) {
+	t->ScintE.nPE3 = t->ScintE.q3*nPE_per_channel[2];
+	t->ScintE.de3 = t->ScintE.e3/sqrt(t->ScintE.nPE3);
+	pmt_Evis.weight2 = t->ScintE.nPE3/(t->ScintE.e3*t->ScintE.e3);
+      }
+      else pmt_Evis.weight2 = lowestADC*nPE_per_channel[2]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight2=0.;}
+
+    if (pmtQuality[3]) { 
+      if (t->ScintE.e4>lowestPMTenergy && t->ScintE.q4>lowestADC) {
+	t->ScintE.nPE4 = t->ScintE.q4*nPE_per_channel[3];
+	t->ScintE.de4 = t->ScintE.e4/sqrt(t->ScintE.nPE4);
+	pmt_Evis.weight3 = t->ScintE.nPE4/(t->ScintE.e4*t->ScintE.e4);
+      }
+      else pmt_Evis.weight3 = lowestADC*nPE_per_channel[3]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight3=0.;}
+
+    if (pmtQuality[4]) { 
+      if (t->ScintW.e1>lowestPMTenergy && t->ScintW.q1>lowestADC) {
+	t->ScintW.nPE1 = t->ScintW.q1*nPE_per_channel[4];
+	t->ScintW.de1 = t->ScintW.e1/sqrt(t->ScintW.nPE1);
+	pmt_Evis.weight4 = t->ScintW.nPE1/(t->ScintW.e1*t->ScintW.e1);
+      }
+      else pmt_Evis.weight4 = lowestADC*nPE_per_channel[4]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight4=0.;}
+
+    if (pmtQuality[5]) {
+      if (t->ScintW.e2>lowestPMTenergy && t->ScintW.q2>lowestADC) {
+	t->ScintW.nPE2 = t->ScintW.q2*nPE_per_channel[5];
+	t->ScintW.de2 = t->ScintW.e2/sqrt(t->ScintW.nPE2);
+	pmt_Evis.weight5 = t->ScintW.nPE2/(t->ScintW.e2*t->ScintW.e2);
+      }
+      else pmt_Evis.weight5 = lowestADC*nPE_per_channel[5]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight5=0.;}
+
+    if (pmtQuality[6]) {
+      if (t->ScintW.e3>lowestPMTenergy && t->ScintW.q3>lowestADC) {
+	t->ScintW.nPE3 = t->ScintW.q3*nPE_per_channel[6];
+	t->ScintW.de3 = t->ScintW.e3/sqrt(t->ScintW.nPE3);
+	pmt_Evis.weight6 = t->ScintW.nPE3/(t->ScintW.e3*t->ScintW.e3);
+      }
+      else pmt_Evis.weight6 = lowestADC*nPE_per_channel[6]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight6=0.;}
+
+    if (pmtQuality[7]) {
+      if (t->ScintW.e4>lowestPMTenergy && t->ScintW.q4>lowestADC) {
+	t->ScintW.nPE4 = t->ScintW.q4*nPE_per_channel[7];
+	t->ScintW.de4 = t->ScintW.e4/sqrt(t->ScintW.nPE4);
+	pmt_Evis.weight7 = t->ScintW.nPE4/(t->ScintW.e4*t->ScintW.e4);
+      }
+      else pmt_Evis.weight7 = lowestADC*nPE_per_channel[7]/(lowestPMTenergy*lowestPMTenergy);
+    }
+    else {pmt_Evis.weight7=0.;}
+
+    //East side EvisE
+    //if (side_pass3==0 || type_pass3==1) {
+    t->ScintE.energy = t->EvisE = (pmt_Evis.weight0*t->ScintE.e1+pmt_Evis.weight1*t->ScintE.e2+pmt_Evis.weight2*t->ScintE.e3+pmt_Evis.weight3*t->ScintE.e4)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
+    t->ScintE.denergy = 1./sqrt(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
+//else EvisE=0.;
+    //West Side EvisW
+    //if (side_pass3==1 || type_pass3==1) {
+    t->ScintW.energy = t->EvisW = (pmt_Evis.weight4*t->ScintW.e1+pmt_Evis.weight5*t->ScintW.e2+pmt_Evis.weight6*t->ScintW.e3+pmt_Evis.weight7*t->ScintW.e4)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
+    t->ScintW.denergy = 1./sqrt(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
+      //else EvisW=0.;
+    
+    t->Erecon = t->EvisE+t->EvisW;
+    
+    if (i<20) {
+      cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
+    }
+    
+   
+    t->fillOutputTree();
+  }
+
+  // Write output ntuple
+  t->writeOutputFile();
+  delete t;
+  
+
+  return 0;
+}
+
+
+/////////// OLD INPUT OUTPUT METHOD /////////////////
+/*TFile *fileOut = new TFile(tempOut,"RECREATE");
   TTree *Tout = new TTree("pass4", "pass4");
 
   // Variables
@@ -292,174 +492,5 @@ int main(int argc, char *argv[])
   Tin2->SetBranchAddress("side_pass2", &side_pass2);
   Tin2->SetBranchAddress("posError_pass2", &posError_pass2);
 
-  int nEvents = Tin->GetEntriesFast();
-  cout << "... Processing nEvents = " << nEvents << endl;
 
-  // Loop over events
-  for (int i=0; i<nEvents; i++) {
-    Tin->GetEvent(i);
-    Tin2->GetEvent(i);
-
-    //Calculate Evis for each event in each PMT using the linearity curve determined in calibration
-    if (pmt_pass3[0]>linearityCurve[0][4]) {
-      pmt_Evis.Evis0 = linearityCurve[0][0] + linearityCurve[0][1]*pmt_pass3[0] 
-	+ linearityCurve[0][2]*pmt_pass3[0]*pmt_pass3[0] + linearityCurve[0][3]*pmt_pass3[0]*pmt_pass3[0]*pmt_pass3[0];
-    }
-    else if (pmt_pass3[0]>0.) pmt_Evis.Evis0 = linearityCurve[0][5]*pmt_pass3[0];
-    else pmt_Evis.Evis0=0.;
-
-    if (pmt_pass3[1]>linearityCurve[1][4]) {
-      pmt_Evis.Evis1 = linearityCurve[1][0] + linearityCurve[1][1]*pmt_pass3[1] 
-	+ linearityCurve[1][2]*pmt_pass3[1]*pmt_pass3[1] + linearityCurve[1][3]*pmt_pass3[1]*pmt_pass3[1]*pmt_pass3[1];
-    }
-    else if (pmt_pass3[1]>0.) pmt_Evis.Evis1 = linearityCurve[1][5]*pmt_pass3[1];
-    else pmt_Evis.Evis1=0.;
-
-    if (pmt_pass3[2]>linearityCurve[2][4]) {
-      pmt_Evis.Evis2 = linearityCurve[2][0] + linearityCurve[2][1]*pmt_pass3[2] 
-	+ linearityCurve[2][2]*pmt_pass3[2]*pmt_pass3[2] + linearityCurve[2][3]*pmt_pass3[2]*pmt_pass3[2]*pmt_pass3[2];
-    }
-    else if (pmt_pass3[2]>0.) pmt_Evis.Evis2 = linearityCurve[2][5]*pmt_pass3[2];
-    else pmt_Evis.Evis2=0.;
-
-    if (pmt_pass3[3]>linearityCurve[3][4]) {
-      pmt_Evis.Evis3 = linearityCurve[3][0] + linearityCurve[3][1]*pmt_pass3[3] 
-	+ linearityCurve[3][2]*pmt_pass3[3]*pmt_pass3[3] + linearityCurve[3][3]*pmt_pass3[3]*pmt_pass3[3]*pmt_pass3[3];
-    }
-    else if (pmt_pass3[3]>0.) pmt_Evis.Evis3 = linearityCurve[3][5]*pmt_pass3[3];
-    else pmt_Evis.Evis3=0.;
-
-    if (pmt_pass3[4]>linearityCurve[4][4]) {
-      pmt_Evis.Evis4 = linearityCurve[4][0] + linearityCurve[4][1]*pmt_pass3[4] 
-	+ linearityCurve[4][2]*pmt_pass3[4]*pmt_pass3[4] + linearityCurve[4][3]*pmt_pass3[4]*pmt_pass3[4]*pmt_pass3[4];
-    }
-    else if (pmt_pass3[4]>0.) pmt_Evis.Evis4 = linearityCurve[4][5]*pmt_pass3[4];
-    else pmt_Evis.Evis4=0.;
-
-    if (pmt_pass3[5]>linearityCurve[5][4]) {
-      pmt_Evis.Evis5 = linearityCurve[5][0] + linearityCurve[5][1]*pmt_pass3[5] 
-	+ linearityCurve[5][2]*pmt_pass3[5]*pmt_pass3[5] + linearityCurve[5][3]*pmt_pass3[5]*pmt_pass3[5]*pmt_pass3[5];
-    }
-    else if (pmt_pass3[5]>0.) pmt_Evis.Evis5 = linearityCurve[5][5]*pmt_pass3[5];
-    else pmt_Evis.Evis5=0.;
-
-    if (pmt_pass3[6]>linearityCurve[6][4]) {
-      pmt_Evis.Evis6 = linearityCurve[6][0] + linearityCurve[6][1]*pmt_pass3[6] 
-	+ linearityCurve[6][2]*pmt_pass3[6]*pmt_pass3[6] + linearityCurve[6][3]*pmt_pass3[6]*pmt_pass3[6]*pmt_pass3[6];
-    }
-    else if (pmt_pass3[6]>0.) pmt_Evis.Evis6 = linearityCurve[6][5]*pmt_pass3[6];
-    else pmt_Evis.Evis6=0.;
-
-    if (pmt_pass3[7]>linearityCurve[7][4]) {
-      pmt_Evis.Evis7 = linearityCurve[7][0] + linearityCurve[7][1]*pmt_pass3[7] 
-	+ linearityCurve[7][2]*pmt_pass3[7]*pmt_pass3[7] + linearityCurve[7][3]*pmt_pass3[7]*pmt_pass3[7]*pmt_pass3[7];
-    }
-    else if (pmt_pass3[7]>0.) pmt_Evis.Evis7 = linearityCurve[7][5]*pmt_pass3[7];
-    else pmt_Evis.Evis7=0.;
-
-    //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
-    /*Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(pmt_Evis.Evis0)+EQ2Etrue[0][2]*(pmt_Evis.Evis0)*(pmt_Evis.Evis0);
-    Etrue[1] = EQ2Etrue[1][0]+EQ2Etrue[1][1]*(pmt_Evis.Evis1)+EQ2Etrue[1][2]*(pmt_Evis.Evis1)*(pmt_Evis.Evis1);
-    Etrue[2] = EQ2Etrue[2][0]+EQ2Etrue[2][1]*(pmt_Evis.Evis2)+EQ2Etrue[2][2]*(pmt_Evis.Evis2)*(pmt_Evis.Evis2);
-    Etrue[3] = EQ2Etrue[3][0]+EQ2Etrue[3][1]*(pmt_Evis.Evis3)+EQ2Etrue[3][2]*(pmt_Evis.Evis3)*(pmt_Evis.Evis3);
-    Etrue[4] = EQ2Etrue[4][0]+EQ2Etrue[4][1]*(pmt_Evis.Evis4)+EQ2Etrue[4][2]*(pmt_Evis.Evis4)*(pmt_Evis.Evis4);
-    Etrue[5] = EQ2Etrue[5][0]+EQ2Etrue[5][1]*(pmt_Evis.Evis5)+EQ2Etrue[5][2]*(pmt_Evis.Evis5)*(pmt_Evis.Evis5);
-    Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(pmt_Evis.Evis6)+EQ2Etrue[6][2]*(pmt_Evis.Evis6)*(pmt_Evis.Evis6);
-    Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(pmt_Evis.Evis7)+EQ2Etrue[7][2]*(pmt_Evis.Evis7)*(pmt_Evis.Evis7);
-    */
-    Double_t lowestPMTenergy = 0.001; //This is for setting an upper limit on the weight since
-                                        // at E=0, the weight goes to infiniti
-    Double_t lowestADC = 0.001;
-
-    if (pmtQuality[0]) { // && pmt_Evis.Evis0>0.) { // && (side_pass3==0 || type_pass3==1)) {
-      if (pmt_Evis.Evis0>lowestPMTenergy && pmt_pass2[0]>lowestADC) pmt_Evis.weight0 = pmt_pass2[0]*nPE_per_channel[0]/(pmt_Evis.Evis0*pmt_Evis.Evis0);
-      else pmt_Evis.weight0 = lowestADC*nPE_per_channel[0]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight0=0.;}
-
-    if (pmtQuality[1]) { // && pmt_Evis.Evis1>0.) { //&& (side_pass3==0 || type_pass3==1)) {
-      if (pmt_Evis.Evis1>lowestPMTenergy && pmt_pass2[1]>lowestADC) pmt_Evis.weight1 = pmt_pass2[1]*nPE_per_channel[1]/(pmt_Evis.Evis1*pmt_Evis.Evis1);
-      else pmt_Evis.weight1 = lowestADC*nPE_per_channel[1]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight1=0.;}
-
-    if (pmtQuality[2]) { // && pmt_Evis.Evis2>0.) { //&& (side_pass3==0 || type_pass3==1)) {
-      if (pmt_Evis.Evis2>lowestPMTenergy && pmt_pass2[2]>lowestADC) pmt_Evis.weight2 = pmt_pass2[2]*nPE_per_channel[2]/(pmt_Evis.Evis2*pmt_Evis.Evis2);
-      else pmt_Evis.weight2 = lowestADC*nPE_per_channel[2]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight2=0.;}
-
-    if (pmtQuality[3]) { // && pmt_Evis.Evis3>0.) { //&& (side_pass3==0 || type_pass3==1)) {
-      if (pmt_Evis.Evis3>lowestPMTenergy && pmt_pass2[3]>lowestADC) pmt_Evis.weight3 = pmt_pass2[3]*nPE_per_channel[3]/(pmt_Evis.Evis3*pmt_Evis.Evis3);
-      else pmt_Evis.weight3 = lowestADC*nPE_per_channel[3]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight3=0.;}
-
-    if (pmtQuality[4]) { // && pmt_Evis.Evis4>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      if (pmt_Evis.Evis4>lowestPMTenergy && pmt_pass2[4]>lowestADC) pmt_Evis.weight4 = pmt_pass2[4]*nPE_per_channel[4]/(pmt_Evis.Evis4*pmt_Evis.Evis4);
-      else pmt_Evis.weight4 = lowestADC*nPE_per_channel[4]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight4=0.;}
-
-    if (pmtQuality[5]) { // && pmt_Evis.Evis5>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      if (pmt_Evis.Evis5>lowestPMTenergy && pmt_pass2[5]>lowestADC) pmt_Evis.weight5 = pmt_pass2[5]*nPE_per_channel[5]/(pmt_Evis.Evis5*pmt_Evis.Evis5);
-      else pmt_Evis.weight5 = lowestADC*nPE_per_channel[5]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight5=0.;}
-
-    if (pmtQuality[6]) { // && pmt_Evis.Evis6>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      if (pmt_Evis.Evis6>lowestPMTenergy && pmt_pass2[6]>lowestADC) pmt_Evis.weight6 = pmt_pass2[6]*nPE_per_channel[6]/(pmt_Evis.Evis6*pmt_Evis.Evis6);
-      else pmt_Evis.weight6 = lowestADC*nPE_per_channel[6]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight6=0.;}
-
-    if (pmtQuality[7]) { // && pmt_Evis.Evis7>0.) { //&& (side_pass3==1 || type_pass3==1)) {
-      if (pmt_Evis.Evis7>lowestPMTenergy && pmt_pass2[7]>lowestADC) pmt_Evis.weight7 = pmt_pass2[7]*nPE_per_channel[7]/(pmt_Evis.Evis7*pmt_Evis.Evis7);
-      else pmt_Evis.weight7 = lowestADC*nPE_per_channel[7]/(lowestPMTenergy*lowestPMTenergy);
-    }
-    else {pmt_Evis.weight7=0.;}
-
-    //East side EvisE
-    //if (side_pass3==0 || type_pass3==1) {
-    EvisE = (pmt_Evis.weight0*pmt_Evis.Evis0+pmt_Evis.weight1*pmt_Evis.Evis1+pmt_Evis.weight2*pmt_Evis.Evis2+pmt_Evis.weight3*pmt_Evis.Evis3)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
-    //else EvisE=0.;
-    //West Side EvisW
-    //if (side_pass3==1 || type_pass3==1) {
-    EvisW = (pmt_Evis.weight4*pmt_Evis.Evis4+pmt_Evis.weight5*pmt_Evis.Evis5+pmt_Evis.weight6*pmt_Evis.Evis6+pmt_Evis.weight7*pmt_Evis.Evis7)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
-      //else EvisW=0.;
-    
-    EvisTot = EvisE+EvisW;
-
-    if (i<20) {
-      cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
-    }
-    
-    // Pass other variables from pass3 to pass4
-    pmt_pass4[0] = pmt_pass3[0];
-    pmt_pass4[1] = pmt_pass3[1];
-    pmt_pass4[2] = pmt_pass3[2];
-    pmt_pass4[3] = pmt_pass3[3];
-    pmt_pass4[4] = pmt_pass3[4];
-    pmt_pass4[5] = pmt_pass3[5];
-    pmt_pass4[6] = pmt_pass3[6];
-    pmt_pass4[7] = pmt_pass3[7];
-
-    xE_pass4 = xE_pass3;
-    yE_pass4 = yE_pass3;
-    xW_pass4 = xW_pass3;
-    yW_pass4 = yW_pass3;
-
-    PID_pass4 = PID_pass3;
-    type_pass4 = type_pass3;
-    side_pass4 = side_pass3;
-    posError_pass4 = posError_pass3;
-
-    Tout->Fill();
-  }
-
-  // Write output ntuple
-  fileOut->Write();
-  fileOut->Close();
-
-  return 0;
-}
+*/

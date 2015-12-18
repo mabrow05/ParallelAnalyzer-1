@@ -69,7 +69,7 @@ unsigned int getGainReferenceRun(int runNumber) {
   refRun[1]=17238;
   refRun[2]=17370;
   refRun[3]=17521;
-  refRun[4]=17925;
+  refRun[4]=17892;
   refRun[5]=18361;
   refRun[6]=18621;
   refRun[7]=18749;

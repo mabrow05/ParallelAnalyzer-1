@@ -8,6 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
+VPATH = ./:../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -18,9 +19,16 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-replay_pass2.exe: replay_pass2.o
-	$(CXX) $(CXXFLAGS) -o replay_pass2.exe replay_pass2.o $(LIBS)
+objects = DataTree.o
+
+.PHONY: all
+all: replay_pass2.exe 
+
+replay_pass2.exe: replay_pass2.o $(objects)
+	$(CXX) $(CXXFLAGS) -o replay_pass2.exe replay_pass2.o $(objects) $(LIBS)
 	@echo "Done"
+
+DataTree.o: DataTree.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from
