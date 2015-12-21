@@ -34,7 +34,7 @@ void MB_errorEnvelope(Int_t calLow, Int_t calHigh, Int_t pmt, bool postReplayPas
   ofstream errEnv;
   Char_t tempfile[200];
   if (postReplayPass4) {
-    sprintf(tempfile,"../error_envelope/error_envelope_PostReplayPass4_calPeriods_%i-%i.dat",calPeriodLow,calPeriodHigh);}
+    sprintf(tempfile,"../error_envelope/error_envelope_PostReplayPass4_PMTbyPMT_calPeriods_%i-%i.dat",calPeriodLow,calPeriodHigh);}
   else if (calPeriodLow!=calPeriodHigh && !PMT) {
     sprintf(tempfile,"../error_envelope/error_envelope_calPeriods_%i-%i.dat",calPeriodLow,calPeriodHigh);}
   else if (calPeriodLow!=calPeriodHigh && PMT) {
