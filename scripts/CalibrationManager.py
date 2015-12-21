@@ -762,7 +762,7 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
         runPeriods = [4]# [1,2,3,4,5,6,7,8,9,10,11,12]
@@ -783,29 +783,29 @@ if __name__ == "__main__":
 
     ### Simulation reverse calibration procedure
     if 0: 
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [4]#[1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
-            rep.runReverseCalibration(runPeriod)
-            cal.fitSourcePeaksInEnergy(runPeriod, True, Simulation=True)
+            #rep.runReverseCalibration(runPeriod)
+            #cal.fitSourcePeaksInEnergy(runPeriod, True, Simulation=True)
             cal.makeSourceCalibrationFile(runPeriod, True, True, Simulation=True)
 
     ### Source Run Calibration Steps...
-    if 0: 
+    if 1: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
             #cal.LinearityCurves(runPeriod)
-            #rep.runReplayPass4(runPeriod)
-            #cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=False, Simulation=True)
-            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=False, Simulation=True)
-            cal.calculateResiduals(runPeriod, PMTbyPMT=False)
+            rep.runReplayPass4(runPeriod)
+            cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
+            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
+            cal.calculateResiduals(runPeriod, PMTbyPMT=True)
             
-        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=False)
+        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream

@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
   char tempIn[500];
   sprintf(tempIn, "%s/replay_pass4_%s.root",getenv("REPLAY_PASS4"), argv[1]);
   DataTree *t = new DataTree();
-  t->setupInputTree(std::string(tempIn),"pass3");
+  t->setupInputTree(std::string(tempIn),"pass4");
 
   int nEvents = t->getEntries();
   cout << "Processing " << argv[1] << " ... " << endl;
