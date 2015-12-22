@@ -352,8 +352,11 @@ int main(int argc, char *argv[])
 	  break;}
       }
       for (int i=maxBin; i>0; i--) {
-	if (his[BiPeakIndex][j]->GetBinContent(i-1)<0.5*maxBinContent) {
+	if (his[BiPeakIndex][j]->GetBinContent(i-1)<0.25*maxBinContent) {
 	  Xmin = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i-1); 
+	  break;}
+	if (his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i-1)<250.) {
+	  Xmin = 250.;
 	  break;}
       }
       //cout << Xmin << " " << Xmax << endl;

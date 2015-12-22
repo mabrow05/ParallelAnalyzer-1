@@ -170,10 +170,10 @@ void revCalSimulation (Int_t runNumber, string source)
   TFile *dataFile = new TFile(temp,"READ");
   TTree *data = (TTree*)(dataFile->Get("pass4"));
   if (source!="Beta") {
-    sprintf(tempE,"type_pass4<3 && PID_pass4==1 && side_pass4==0 && EvisE>0. && (xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
-    sprintf(tempW,"type_pass4<3 && PID_pass4==1 && side_pass4==1 && EvisW>0. && (xW_pass4>(%f-2.*%f) && xW_pass4<(%f+2.*%f) && yW_pass4>(%f-2.*%f) && yW_pass4<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
+    sprintf(tempE,"Type<3 && PID==1 && Side==0 && EvisE>0. && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
+    sprintf(tempW,"Type<3 && PID==1 && Side==1 && EvisW>0. && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
   }
-  else sprintf(temp,"type_pass4<3 && PID_pass4==1 && (EvisE>0. || EvisW>0.)");
+  else sprintf(temp,"Type<3 && PID==1 && (EvisE>0. || EvisW>0.)");
   UInt_t BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
   cout << "Electron Events in Data file: " << BetaEvents << endl;
   cout << "East: " << data->GetEntries(tempE) << "\tWest: " << data->GetEntries(tempW) << endl;
