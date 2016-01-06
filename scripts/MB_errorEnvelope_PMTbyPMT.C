@@ -55,7 +55,7 @@ void MB_errorEnvelope_PMTbyPMT(Int_t calLow, Int_t calHigh, Int_t pmt, bool post
   else if (calPeriodLow==calPeriodHigh && PMT) sprintf(tempEast,"../residuals/residuals_East_runPeriod_%i_PMTE%i.dat", calPeriodLow,PMT);
   ifstream fileEast(tempEast);
 
-  const size_t N = 500;
+  const size_t N = 1000;
   TString sourceEast[N];
   Int_t runEast[N];
   Double_t resEast[N];

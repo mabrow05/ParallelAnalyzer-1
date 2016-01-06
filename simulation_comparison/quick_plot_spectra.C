@@ -41,6 +41,7 @@ vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
 
 void quick_plot_spectra(Int_t runNumber, string src) {
   Char_t temp[500];
+  gStyle->SetOptStat(0);
   sprintf(temp,"/extern/UCNA/replay_pass4_MB/replay_pass4_%i.root",runNumber);
   TFile *data = new TFile(temp,"READ");
   TTree *TData = (TTree*)(data->Get("pass4"));
@@ -64,8 +65,8 @@ void quick_plot_spectra(Int_t runNumber, string src) {
   TH1D *data_E_all = new TH1D("data_E_all", "East All Evts", 400, 0., 1200.);
   TH1D *sim_E_all = new TH1D("sim_E_all", "East All Evts", 400, 0., 1200.);
   sim_E_all->SetLineColor(kRed);
-  TH1D *data_W_all = new TH1D("data_W_all", "West All Evts", 400, 0., 1200.);
-  TH1D *sim_W_all = new TH1D("sim_W_all", "West All Evts", 400, 0., 1200.);
+  TH1D *data_W_all = new TH1D("data_W_all", "^{113}Sn", 200, 0., 600.);
+  TH1D *sim_W_all = new TH1D("sim_W_all", "West All Evts", 200, 0., 600.);
   sim_W_all->SetLineColor(kRed);
   Char_t cuts[1000];
   
@@ -73,7 +74,7 @@ void quick_plot_spectra(Int_t runNumber, string src) {
 
   TCanvas *c1 = new TCanvas("c1");
 
-  sprintf(cuts,"PID_pass4==1 && type_pass4<3 && side_pass4==0 && EvisE>0. && xE_pass4>(%f-2.*%f) && xE_pass4<(%f+2.*%f) && yE_pass4>(%f-2.*%f) && yE_pass4<(%f+2.*%f)",srcPos[0][0],srcPos[0][2],srcPos[0][0],srcPos[0][2],srcPos[0][1],srcPos[0][2],srcPos[0][1],srcPos[0][2]);  
+  sprintf(cuts,"PID==1 && Type<3 && Side==0 && EvisE>0. && xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f)",srcPos[0][0],srcPos[0][2],srcPos[0][0],srcPos[0][2],srcPos[0][1],srcPos[0][2],srcPos[0][1],srcPos[0][2]);  
   TData->Draw("EvisE>>data_E_all", cuts);
   //data_E_all->GetXaxis()->SetRangeUser(0.,250.);
   Double_t integralE = data_E_all->Integral();
@@ -89,7 +90,7 @@ void quick_plot_spectra(Int_t runNumber, string src) {
 
   TCanvas *c2 = new TCanvas("c2");
   
-  sprintf(cuts,"PID_pass4==1 && type_pass4<3 && side_pass4==1 && EvisW>0. && xW_pass4>(%f-2.*%f) && xW_pass4<(%f+2.*%f) && yW_pass4>(%f-2.*%f) && yW_pass4<(%f+2.*%f)",srcPos[1][0],srcPos[1][2],srcPos[1][0],srcPos[1][2],srcPos[1][1],srcPos[1][2],srcPos[1][1],srcPos[1][2]);  
+  sprintf(cuts,"PID==1 && Type<3 && Side==1 && EvisW>0. && xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f)",srcPos[1][0],srcPos[1][2],srcPos[1][0],srcPos[1][2],srcPos[1][1],srcPos[1][2],srcPos[1][1],srcPos[1][2]);  
   TData->Draw("EvisW>>data_W_all", cuts);
   //data_W_all->GetXaxis()->SetRangeUser(0.,250.);
   Double_t integralW = data_W_all->Integral();

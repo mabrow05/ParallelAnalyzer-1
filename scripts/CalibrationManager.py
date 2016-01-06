@@ -782,7 +782,7 @@ if __name__ == "__main__":
         #cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
-    if 1: 
+    if 0: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
@@ -793,14 +793,14 @@ if __name__ == "__main__":
             cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
 
     ### Source Run Calibration Steps...
-    if 1: 
+    if 0: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
-            #cal.LinearityCurves(runPeriod)
-            #rep.runReplayPass4(runPeriod)
+            cal.LinearityCurves(runPeriod)
+            rep.runReplayPass4(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
             cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
             cal.calculateResiduals(runPeriod, PMTbyPMT=True)

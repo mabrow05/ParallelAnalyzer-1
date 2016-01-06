@@ -165,20 +165,20 @@ int main(int argc, char *argv[])
 	if ( (t->xE.center - xEast[0])*(t->xE.center - xEast[0]) +
 	     (t->yE.center - yEast[0])*(t->yE.center - yEast[0]) <
 	     (2.*sigmaEast[0])*(2.*sigmaEast[0]) ) {
-	  his[0][0]->Fill(t->ScintE.e1);
-	  his[0][1]->Fill(t->ScintE.e2);
-	  his[0][2]->Fill(t->ScintE.e3);
-	  his[0][3]->Fill(t->ScintE.e4);
+	  if (t->ScintE.e1>0.) his[0][0]->Fill(t->ScintE.e1);
+	  if (t->ScintE.e2>0.) his[0][1]->Fill(t->ScintE.e2);
+	  if (t->ScintE.e3>0.) his[0][2]->Fill(t->ScintE.e3);
+	  if (t->ScintE.e4>0.) his[0][3]->Fill(t->ScintE.e4);
 	}
       }
       if (t->Side == 1) {
 	if ( (t->xW.center - xWest[0])*(t->xW.center - xWest[0]) +
 	     (t->yW.center - yWest[0])*(t->yW.center - yWest[0]) <
 	     (2.*sigmaWest[0])*(2.*sigmaWest[0]) ) {
-	  his[0][4]->Fill(t->ScintW.e1);
-	  his[0][5]->Fill(t->ScintW.e2);
-	  his[0][6]->Fill(t->ScintW.e3);
-	  his[0][7]->Fill(t->ScintW.e4);
+	  if (t->ScintW.e1>0.) his[0][4]->Fill(t->ScintW.e1);
+	  if (t->ScintW.e2>0.) his[0][5]->Fill(t->ScintW.e2);
+	  if (t->ScintW.e3>0.) his[0][6]->Fill(t->ScintW.e3);
+	  if (t->ScintW.e4>0.) his[0][7]->Fill(t->ScintW.e4);
 	}
       }
       
@@ -191,20 +191,20 @@ int main(int argc, char *argv[])
 	if ( (t->xE.center - xEast[1])*(t->xE.center - xEast[1]) +
 	     (t->yE.center - yEast[1])*(t->yE.center - yEast[1]) <
 	     (2.*sigmaEast[1])*(2.*sigmaEast[1]) ) {
-	  his[1][0]->Fill(t->ScintE.e1);
-	  his[1][1]->Fill(t->ScintE.e2);
-	  his[1][2]->Fill(t->ScintE.e3);
-	  his[1][3]->Fill(t->ScintE.e4);
+	  if (t->ScintE.e1>0.) his[1][0]->Fill(t->ScintE.e1);
+	  if (t->ScintE.e2>0.) his[1][1]->Fill(t->ScintE.e2);
+	  if (t->ScintE.e3>0.) his[1][2]->Fill(t->ScintE.e3);
+	  if (t->ScintE.e4>0.) his[1][3]->Fill(t->ScintE.e4);
 	}
       }
       if (t->Side == 1) {
 	if ( (t->xW.center - xWest[1])*(t->xW.center - xWest[1]) +
 	     (t->yW.center - yWest[1])*(t->yW.center - yWest[1]) <
 	     (2.*sigmaWest[1])*(2.*sigmaWest[1]) ) {
-	  his[1][4]->Fill(t->ScintW.e1);
-	  his[1][5]->Fill(t->ScintW.e2);
-	  his[1][6]->Fill(t->ScintW.e3);
-	  his[1][7]->Fill(t->ScintW.e4);
+	  if (t->ScintW.e1>0.) his[1][4]->Fill(t->ScintW.e1);
+	  if (t->ScintW.e2>0.) his[1][5]->Fill(t->ScintW.e2);
+	  if (t->ScintW.e3>0.) his[1][6]->Fill(t->ScintW.e3);
+	  if (t->ScintW.e4>0.) his[1][7]->Fill(t->ScintW.e4);
 	}
       }
     }
@@ -216,20 +216,20 @@ int main(int argc, char *argv[])
 	if ( (t->xE.center - xEast[2])*(t->xE.center - xEast[2]) +
 	     (t->yE.center - yEast[2])*(t->yE.center - yEast[2]) <
 	     (2.*sigmaEast[2])*(2.*sigmaEast[2]) ) {
-	  his[2][0]->Fill(t->ScintE.e1);
-	  his[2][1]->Fill(t->ScintE.e2);
-	  his[2][2]->Fill(t->ScintE.e3);
-	  his[2][3]->Fill(t->ScintE.e4);
+	  if (t->ScintE.e1>0.) his[2][0]->Fill(t->ScintE.e1);
+	  if (t->ScintE.e2>0.) his[2][1]->Fill(t->ScintE.e2);
+	  if (t->ScintE.e3>0.) his[2][2]->Fill(t->ScintE.e3);
+	  if (t->ScintE.e4>0.) his[2][3]->Fill(t->ScintE.e4);
 	}
       }
       if (t->Side == 1) {
 	if ( (t->xW.center - xWest[2])*(t->xW.center - xWest[2]) +
 	     (t->yW.center - yWest[2])*(t->yW.center - yWest[2]) <
 	     (2.*sigmaWest[2])*(2.*sigmaWest[2]) ) {
-	  his[2][4]->Fill(t->ScintW.e1);
-	  his[2][5]->Fill(t->ScintW.e2);
-	  his[2][6]->Fill(t->ScintW.e3);
-	  his[2][7]->Fill(t->ScintW.e4);
+	  if (t->ScintW.e1>0.) his[2][4]->Fill(t->ScintW.e1);
+	  if (t->ScintW.e2>0.) his[2][5]->Fill(t->ScintW.e2);
+	  if (t->ScintW.e3>0.) his[2][6]->Fill(t->ScintW.e3);
+	  if (t->ScintW.e4>0.) his[2][7]->Fill(t->ScintW.e4);
 	}
       }
 
@@ -273,11 +273,12 @@ int main(int argc, char *argv[])
 
     for (int j=0; j<8; j++) {
       for (int i=maxBin[n][j]; i<nBin; i++) {
-        if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
+        if (his[n][j]->GetBinContent(i+1) < 0.33*maxCounts[n][j]) {
           xHigh[n][j] = his[n][j]->GetBinCenter(i+1);
 	  if ((i-maxBin[n][j])<5) xHigh[n][j] = binCenterMax[n][j]+50.; //In case the statistics cause a poor determination of FWHM, set one to capture the fit
           break;
         }
+	if (i==(nBin-1)) xHigh[n][j] = his[n][j]->GetBinCenter(i);
       }
       for (int i=maxBin[n][j]; i>0; i--) {
         if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
@@ -302,7 +303,7 @@ int main(int argc, char *argv[])
 	sprintf(fitName, "gaussian_fit_%i_%i", n, j);
 
 	gaussian_fit[n][j] = new TF1(fitName,
-				     "[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",
+				     "gaus",
 				     xLow[n][j], xHigh[n][j]);
 	gaussian_fit[n][j]->SetParameter(0,maxCounts[n][j]);
 	gaussian_fit[n][j]->SetParameter(1,binCenterMax[n][j]);
@@ -310,10 +311,12 @@ int main(int argc, char *argv[])
 	//gaussian_fit[n][j]->SetParLimits(1,xLow[n][j],xHigh[n][j]);
 
 	fitMean[n][j] = 0.;
+	double sigma = 0.;
 	Int_t ntries = 0;
-	while (fitMean[n][j]<xLow[n][j] || fitMean[n][j]>xHigh[n][j]) {
+	while (fitMean[n][j]<xLow[n][j] || fitMean[n][j]>xHigh[n][j] || sigma>225. || sigma<5.) {
 	  his[n][j]->Fit(fitName, "RQ");
 	  fitMean[n][j] = gaussian_fit[n][j]->GetParameter(1);	 
+	  sigma = gaussian_fit[n][j]->GetParameter(2);
 	  //cout << fitMean[n][j] << endl;
 	  gaussian_fit[n][j]->SetParameter(1,binCenterMax[n][j]-1.);
 	  ntries++;
@@ -345,10 +348,10 @@ int main(int argc, char *argv[])
       for (int i=maxBin; i<nbins; i++) {
 	if (his[BiPeakIndex][j]->GetBinContent(i+1)<0.5*maxBinContent) {
 	  Xmax = his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i+1); 
-	  if (Xmax>600.) Xmax=600.;
+	  if (Xmax>600.) Xmax=560.;
 	  break;}
 	if (his[BiPeakIndex][j]->GetXaxis()->GetBinCenter(i)>600.) {
-	  Xmax = 600.;
+	  Xmax = 560.;
 	  break;}
       }
       for (int i=maxBin; i>0; i--) {
@@ -362,7 +365,7 @@ int main(int argc, char *argv[])
       //cout << Xmin << " " << Xmax << endl;
 
       sprintf(fitName, "lowBiGauss%i",j);
-      lowBiGauss[j] = new TF1(fitName,"[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",
+      lowBiGauss[j] = new TF1(fitName,"gaus",
 				 Xmin, Xmax);
     
       lowBiGauss[j]->SetParameter(0,(float)maxBinContent);
@@ -371,11 +374,13 @@ int main(int argc, char *argv[])
       //lowBiGauss[j]->SetParLimits(1, Xmin, Xmax);
 
       lowBiFitMean[j] = 0.;
+      double sigma = 0.;
       Int_t ntries = 0;
-      while (lowBiFitMean[j]<Xmin || lowBiFitMean[j]>Xmax) {
+      while (lowBiFitMean[j]<Xmin || lowBiFitMean[j]>Xmax || sigma>225. || sigma<5.) {
 	
-	his[BiPeakIndex][j]->Fit(fitName, "LRQ+");
+	his[BiPeakIndex][j]->Fit(fitName, "RQ+");
 	lowBiFitMean[j] = lowBiGauss[j]->GetParameter(1);
+	sigma = lowBiGauss[j]->GetParameter(2);
 	lowBiGauss[j]->SetParameter(1,max-1.);
 	ntries++;
 	//cout << lowBiFitMean[j] << endl;
