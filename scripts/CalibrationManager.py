@@ -762,7 +762,7 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
         runPeriods = [4]# [1,2,3,4,5,6,7,8,9,10,11,12]
@@ -788,9 +788,9 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
-            rep.runReverseCalibration(runPeriod)
+            #rep.runReverseCalibration(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod, True, Simulation=True)
-            cal.makeSourceCalibrationFile(runPeriod, True, True, Simulation=True)
+            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
 
     ### Source Run Calibration Steps...
     if 0: 
@@ -799,18 +799,18 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
-            #cal.LinearityCurves(runPeriod)
-            #rep.runReplayPass4(runPeriod)
-            #cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=False, Simulation=True)
-            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=False, Simulation=True)
-            cal.calculateResiduals(runPeriod, PMTbyPMT=False)
+            cal.LinearityCurves(runPeriod)
+            rep.runReplayPass4(runPeriod)
+            cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
+            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
+            cal.calculateResiduals(runPeriod, PMTbyPMT=True)
             
-        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=False)
+        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [2,3,4,5,7]
+        runPeriods = [8,9,10]#[2,3,4,5,7] #### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)

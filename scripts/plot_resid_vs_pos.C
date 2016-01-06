@@ -85,39 +85,50 @@ void plot_resid_vs_pos(string SRC) {
     sprintf(tempfile,"%s/source_positions_%i.dat", getenv("SOURCE_POSITIONS"), runE[i]);
     positionFile.open(tempfile);
     
-    if (nsources==1) {
-      positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-    }
-    if (nsources==2) {
-      if (sourceE[i]=="Ce_East") {
+
+    if (sourceE[i]=="In_East") {
+      for (int j = 0; j<nsources; j++) {
 	positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-      }
-      if (sourceE[i]=="Sn_East") {
-	if (srchold[0]=="Sn") {
-	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-	}
-	else if (srchold[1]=="Sn") {
-	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-	}
-      }
-      if (sourceE[i]=="Bi1_East" || sourceE[i]=="Bi2_East") {
-	positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-	positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	if (srchold[j]=="In") break;
       }
     }
-    if (nsources==3) {
-      if (sourceE[i]=="Ce_East") {
+
+    else {
+    
+      if (nsources==1) {
 	positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
       }
-      if (sourceE[i]=="Sn_East") {
+      if (nsources==2) {
+	if (sourceE[i]=="Ce_East") {
+	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	}
+	if (sourceE[i]=="Sn_East") {
+	  if (srchold[0]=="Sn") {
+	    positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	  }
+	  else if (srchold[1]=="Sn") {
+	    positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	    positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	  }
+	}
+	if (sourceE[i]=="Bi1_East" || sourceE[i]=="Bi2_East") {
 	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
 	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	}
       }
-      if (sourceE[i]=="Bi1_East" || sourceE[i]=="Bi2_East") {
-	positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-	positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
-	positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+      if (nsources==3) {
+	if (sourceE[i]=="Ce_East") {
+	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	}
+	if (sourceE[i]=="Sn_East") {
+	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	}
+	if (sourceE[i]=="Bi1_East" || sourceE[i]=="Bi2_East") {
+	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	  positionFile >> xposE[i] >> yposE[i] >> stddevE >> xposW[i] >> yposW[i] >> stddevW;
+	}
       }
     }
     positionFile.close();

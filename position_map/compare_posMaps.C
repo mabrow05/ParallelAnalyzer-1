@@ -20,7 +20,7 @@ void compare_posMaps(int iRunPeriod)
   palette[7] = 13;
   palette[8] = 12;
   palette[9] = 1;
-  gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
+  //gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
   //gStyle->SetPalette(2);  // z-axis color scale for 2D histograms
   //gStyle->SetOptStat(11);
   gStyle->SetOptStat(0);
@@ -177,7 +177,7 @@ void compare_posMaps(int iRunPeriod)
   hisE3->GetXaxis()->CenterTitle();
   hisE3->GetYaxis()->CenterTitle();
   hisE3->GetYaxis()->CenterTitle();
-  hisE3->SetAxisRange(0.5,1.5,"Z");
+  hisE3->SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -209,7 +209,7 @@ void compare_posMaps(int iRunPeriod)
   hisE2->GetXaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
-  hisE2.SetAxisRange(0.5,1.5,"Z");
+  hisE2.SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -247,7 +247,7 @@ void compare_posMaps(int iRunPeriod)
   hisE0->GetXaxis()->CenterTitle();
   hisE0->GetYaxis()->CenterTitle();
   hisE0->GetYaxis()->CenterTitle();
-  hisE0->SetAxisRange(0.5,1.5,"Z");
+  hisE0->SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -279,7 +279,7 @@ void compare_posMaps(int iRunPeriod)
   hisE1->GetXaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
-  hisE1.SetAxisRange(0.5,1.5,"Z");
+  hisE1.SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -317,7 +317,7 @@ void compare_posMaps(int iRunPeriod)
   hisW1->GetXaxis()->CenterTitle();
   hisW1->GetYaxis()->CenterTitle();
   hisW1->GetYaxis()->CenterTitle();
-  hisW1->SetAxisRange(0.5,1.5,"Z");
+  hisW1->SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -349,7 +349,7 @@ void compare_posMaps(int iRunPeriod)
   hisW0->GetXaxis()->CenterTitle();
   hisW0->GetYaxis()->CenterTitle();
   hisW0->GetYaxis()->CenterTitle();
-  hisW0->SetAxisRange(0.5,1.5,"Z");
+  hisW0->SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -387,7 +387,7 @@ void compare_posMaps(int iRunPeriod)
   hisW2->GetXaxis()->CenterTitle();
   hisW2->GetYaxis()->CenterTitle();
   hisW2->GetYaxis()->CenterTitle();
-  hisW2->SetAxisRange(0.5,1.5,"Z");
+  hisW2->SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -419,7 +419,7 @@ void compare_posMaps(int iRunPeriod)
   hisW3->GetXaxis()->CenterTitle();
   hisW3->GetYaxis()->CenterTitle();
   hisW3->GetYaxis()->CenterTitle();
-  hisW3->SetAxisRange(0.5,1.5,"Z");
+  hisW3->SetAxisRange(0.8,1.2,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
