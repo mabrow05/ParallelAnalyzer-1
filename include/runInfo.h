@@ -34,6 +34,33 @@ unsigned int getSrcRunPeriod(int runNumber) {
   else if (runNumber <= 20000) {
     calibrationPeriod=11;
   }
+  else if (runNumber <= 20741) {
+    calibrationPeriod=13;
+  }
+  else if (runNumber <= 20837) {
+    calibrationPeriod=14;
+  }
+  else if (runNumber <= 21237) {
+    calibrationPeriod=16;
+  }
+  else if (runNumber <= 21605) {
+    calibrationPeriod=17;
+  }
+  else if (runNumber <= 21863) {
+    calibrationPeriod=18;
+  }
+  else if (runNumber <= 22118) {
+    calibrationPeriod=19;
+  }
+  else if (runNumber <= 22238) {
+    calibrationPeriod=20;
+  }
+  else if (runNumber <= 22630) {
+    calibrationPeriod=22;
+  }
+  else if (runNumber <= 23173) {
+    calibrationPeriod=23;
+  }
   return calibrationPeriod;
 }
 
@@ -57,6 +84,15 @@ unsigned int getXeRunPeriod(int runNumber) {
   else if (runNumber <= 20000) {
     calibrationPeriod=7;
   }
+  else if (runNumber <= 21605) {
+    calibrationPeriod=8;
+  }
+  else if (runNumber <= 22238) {
+    calibrationPeriod=9;
+  }
+  else if (runNumber <= 23173) {
+    calibrationPeriod=10;
+  }
   else {
     cout << "Bad run number\n";
     exit(0);}
@@ -78,6 +114,18 @@ unsigned int getGainReferenceRun(int runNumber) {
   refRun[10]=19511;
   refRun[11]=19857;
   refRun[12]=19899;
+  refRun[13]=20519;
+  refRun[14]=20820;
+  refRun[15]=20905;
+  refRun[16]=21091;
+  refRun[17]=21315;
+  refRun[18]=21683;
+  refRun[19]=21918;
+  refRun[20]=22219;
+  refRun[21]=22298;
+  refRun[22]=22441;
+  refRun[23]=22771;
+  refRun[24]=22925;
   unsigned int calPeriod = getSrcRunPeriod(runNumber);
   map <unsigned int, unsigned int>::iterator it = refRun.find(calPeriod);
   return it->second;

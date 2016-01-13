@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
   bool allResponseClasses = true;
   int numResponseClasses = 0;
   vector <int> responseClasses;
-  int nRuns;
+  int nRuns = 0;
   int runList[500];
   cout << "Enter Xenon run period: " << endl;
   cin  >> iXeRunPeriod;
@@ -80,12 +80,13 @@ int main(int argc, char *argv[])
 
 
   char temp[500];
-  sprintf(temp, "xenon_runs_%i.dat", iXeRunPeriod);
+  sprintf(temp, "../run_lists/Xenon_Calibration_Run_Period_%i.dat", iXeRunPeriod);
   ifstream fileRuns(temp);
 
-  fileRuns >> nRuns;
-  for (int i=0; i<nRuns; i++) {
-    fileRuns >> runList[i];
+  int ii = 0;
+  while (fileRuns >> runList[ii]) {
+    ii++;
+    nRuns++;
   }
 
   cout << "... Number of runs: " << nRuns << endl;

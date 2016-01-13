@@ -42,7 +42,7 @@ EPMT4_runRanges = [(17233,18055)]
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)]
 WPMT3_runRanges = []
-WPMT4_runRanges = [(18370,18386),(18745,18768),(19347,19960)]
+WPMT4_runRanges = [(18370,18386),(18745,18768),(19347,19960),(20000,23000)]
 
 for Range in EPMT1_runRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -205,6 +205,29 @@ class CalReplayManager:
         for run in runs:
             os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
             os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%run)
+        print "DONE"
+
+
+    def makeBasicHistograms(self, srcRunPeriod=1, sourceORxenon="source"):
+        print "Making Basic Histograms for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+        
+        for run in runs:
+            print "Making basic histograms for run %i"%run
+            os.system("cd ../basic_histograms/; ./basic_histograms.exe %i"%run)
+            os.system("root -l -b -q '../basic_histograms/plot_basic_histograms.C(\"%i\")'"%run)
+            
         print "DONE"
 
 
@@ -765,21 +788,22 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [4]# [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [13,14,15,16,17,18,19,20,21,22,23,24]# [1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
+            #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
             #rep.findPedestals(runPeriod)
             #rep.runReplayPass1(runPeriod)
-            #rep.runGainBismuth(runPeriod)
-            rep.runReplayPass2(runPeriod)
-            rep.runReplayPass3(runPeriod)
-            cal.fitSourcePeaks(runPeriod)
+            rep.runGainBismuth(runPeriod)
+            #rep.runReplayPass2(runPeriod)
+            #rep.runReplayPass3(runPeriod)
+            #cal.fitSourcePeaks(runPeriod)
             #rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
     if 0:
         cal = CalibrationManager()
-        cal.calc_nPE_per_PMT(writeNPEforAllRuns=True)
-        #cal.makePMTrunFile(master=True)
+        #cal.calc_nPE_per_PMT(writeNPEforAllRuns=True)
+        cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
     if 0: 
@@ -809,16 +833,18 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 0: 
+    if 1: 
         runPeriods = [8,9,10]#[2,3,4,5,7] #### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
-        for runPeriod in runPeriods:           
+        for runPeriod in runPeriods:    
+            #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
+            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
+            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             

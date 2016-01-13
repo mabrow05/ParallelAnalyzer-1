@@ -120,11 +120,11 @@ int main(int argc, char *argv[])
   double binCenter[8];
   double binCenterMax[8];
   double binCounts[8];
-  for (int i=0; i<nBin; i++) {
+  for (int i=nBin-1; i>0; i--) {
     for (int j=0; j<8; j++) {
-      binCenter[j] = his[j]->GetBinCenter(i+1);
-      binCounts[j] = his[j]->GetBinContent(i+1);
-      if (binCenter[j] > 500. && binCenter[j] < 3500. && binCounts[j] >= maxCounts[j]) {
+      binCenter[j] = his[j]->GetBinCenter(i);
+      binCounts[j] = his[j]->GetBinContent(i);
+      if (binCenter[j] > 2250. && binCenter[j] < 3500. && binCounts[j] >= maxCounts[j]) {
         maxCounts[j] = binCounts[j];
         maxBin[j] = i;
         binCenterMax[j] = binCenter[j];
@@ -142,8 +142,8 @@ int main(int argc, char *argv[])
       }
     }
     for (int i=maxBin[n]; i>0; i--) {
-      if (his[n]->GetBinContent(i+1) < 0.4*maxCounts[n]) {
-        xLow[n] = his[n]->GetBinCenter(i+1);
+      if (his[n]->GetBinContent(i-1) < 0.4*maxCounts[n]) {
+        xLow[n] = his[n]->GetBinCenter(i-1);
         break;
       }
     }
