@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
 
   // Write pedestals to file
   char tempPedFile[500];
-  sprintf(tempPedFile, "%s/pedestals_MB/pedestals_%s.dat", getenv("PEDESTALS"),argv[1]);
+  sprintf(tempPedFile, "%s/pedestals_%s.dat", getenv("PEDESTALS"),argv[1]);
   ofstream outPedFile(tempPedFile);
 
   for (int i=0; i<8; i++) {

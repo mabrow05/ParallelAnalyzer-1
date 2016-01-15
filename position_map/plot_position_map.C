@@ -193,7 +193,7 @@ void plot_position_map(int iRunPeriod)
   hisE2->GetXaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
-  hisE2.SetAxisRange(0.5,1.5,"Z");
+  hisE2->SetAxisRange(0.5,1.5,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -263,7 +263,7 @@ void plot_position_map(int iRunPeriod)
   hisE1->GetXaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
-  hisE1.SetAxisRange(0.5,1.5,"Z");
+  hisE1->SetAxisRange(0.5,1.5,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);

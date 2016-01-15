@@ -120,33 +120,72 @@ int main(int argc, char *argv[])
   double binCenter[8];
   double binCenterMax[8];
   double binCounts[8];
-  for (int i=nBin-1; i>0; i--) {
-    for (int j=0; j<8; j++) {
-      binCenter[j] = his[j]->GetBinCenter(i);
-      binCounts[j] = his[j]->GetBinContent(i);
-      if (binCenter[j] > 2250. && binCenter[j] < 3500. && binCounts[j] >= maxCounts[j]) {
-        maxCounts[j] = binCounts[j];
-        maxBin[j] = i;
-        binCenterMax[j] = binCenter[j];
+
+  if (runNumber<21274) {
+    for (int i=1; i<nBin-1; i++) {
+      for (int j=0; j<8; j++) {
+	binCenter[j] = his[j]->GetBinCenter(i);
+	binCounts[j] = his[j]->GetBinContent(i);
+	if (binCenter[j] > 500. && binCenter[j] < 3500. && binCounts[j] >= maxCounts[j]) {
+	  maxCounts[j] = binCounts[j];
+	  maxBin[j] = i;
+	  binCenterMax[j] = binCenter[j];
+	}
       }
     }
   }
 
+  else { // taking care of the odd Bi pulser shape in EPMT4
+    for (int i=nBin-1; i>0; i--) {
+      for (int j=0; j<8; j++) {
+	binCenter[j] = his[j]->GetBinCenter(i);
+	binCounts[j] = his[j]->GetBinContent(i);
+	if (binCenter[j] > 2250. && binCenter[j] < 3500. && binCounts[j] >= maxCounts[j]) {
+	  maxCounts[j] = binCounts[j];
+	  maxBin[j] = i;
+	  binCenterMax[j] = binCenter[j];
+	}
+      }
+    }
+  }
+
+  
+
   // Define histogram fit ranges
   double xLow[8], xHigh[8];
-  for (int n=0; n<8; n++) {
-    for (int i=maxBin[n]; i<nBin; i++) {
-      if (his[n]->GetBinContent(i+1) < 0.4*maxCounts[n]) {
-        xHigh[n] = his[n]->GetBinCenter(i+1);
-        break;
+  if (runNumber<21274) {
+    for (int n=0; n<8; n++) {
+      for (int i=maxBin[n]; i<nBin; i++) {
+	if (his[n]->GetBinContent(i+1) < 0.4*maxCounts[n]) {
+	  xHigh[n] = his[n]->GetBinCenter(i+1);
+	  break;
+	}
+      }
+      for (int i=maxBin[n]; i>0; i--) {
+	if (his[n]->GetBinContent(i-1) < 0.4*maxCounts[n]) {
+	  xLow[n] = his[n]->GetBinCenter(i-1);
+	  break;
+	}
       }
     }
-    for (int i=maxBin[n]; i>0; i--) {
-      if (his[n]->GetBinContent(i-1) < 0.4*maxCounts[n]) {
-        xLow[n] = his[n]->GetBinCenter(i-1);
-        break;
+  }
+  else { // taking care of the odd Bi pulser shape in EPMT4
+    for (int n=0; n<8; n++) {
+      for (int i=maxBin[n]; i<nBin; i++) {
+	if (his[n]->GetBinContent(i+1) < 0.4*maxCounts[n]) {
+	  xHigh[n] = his[n]->GetBinCenter(i+1);
+	  break;
+	}
+      }
+      for (int i=maxBin[n]; i>0; i--) {
+	if (his[n]->GetBinContent(i-1) < 0.4*maxCounts[n]) {
+	  xLow[n] = his[n]->GetBinCenter(i-1);
+	  break;
+	}
       }
     }
+    xHigh[3] = binCenterMax[3]+400.;
+    xLow[3] = binCenterMax[3]-300.;
   }
 
   // Fit parameters
