@@ -20,16 +20,6 @@
 #include <TF1.h>
 #include <TH1D.h>
 
-#include "fullTreeVariables.h"
-#include "MWPCGeometry.h"
-#include "pedestals.h"
-#include "cuts.h"
-#include "basic_reconstruction.h"
-
-#include "replay_pass2.h"
-#include "replay_pass3.h"
-#include "replay_pass4.h"
-
 #include "DataTree.hh"
 #include "DataTreeFLOAT.hh"
 
