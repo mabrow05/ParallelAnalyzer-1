@@ -8,6 +8,8 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <algorithm>
+#include <string>
 
 // ROOT libraries
 #include "TRandom3.h"
@@ -28,20 +30,10 @@
 #include "replay_pass3.h"
 #include "replay_pass4.h"
 
-using namespace std;
+#include "DataTree.hh"
+#include "DataTreeFLOAT.hh"
 
-struct mwpc {
-  float center;
-  float width;
-  float cathSum;
-  float maxValue;
-  int maxWire;
-  int mult;
-  int nClipped;
-  int err;
-  float rawCenter;
-  float height;
-};
+using namespace std;
 
 int main(int argc, char *argv[])
 {
@@ -51,117 +43,183 @@ int main(int argc, char *argv[])
   cout << "Run " << argv[1] << " ..." << endl;
   cout << "... Creating spec_" << argv[1] << ".root from replay_pass4 data ..." << endl;
 
-
   // Open output ntuple
   char tempOut[500];
   sprintf(tempOut, "%s/spec_%s.root",getenv("UK_SPEC_REPLAY"), argv[1]);
-  TFile *fileOut = new TFile(tempOut,"RECREATE");
-  TTree *Tout = new TTree("phys", "phys");
+  //sprintf(tempOut, "replay_pass3_%s.root", argv[1]);
 
-  // Variables
-  Int_t EvtN=0, TriggerNum=0;
-  mwpc xEmpm={}, yEmpm={}, xWmpm={}, yWmpm={}; //if i ever get the chance to add in other pieces of michaels position stuff these are to be used
-  Float_t UBtime_BB_float, AnodeE_float, AnodeW_float, EvisE_float, EvisW_float, EvisTot_float, timeE_float, timeW_float;
+  DataTreeFLOAT *spec = new DataTreeFLOAT();
+  spec->makeOutputTree(std::string(tempOut),"phys");
 
-  Tout->Branch("EvtN",&EvtN,"EvtN/I");
-  Tout->Branch("TriggerNum",&TriggerNum,"TriggerNum/I");
-  Tout->Branch("Tof",&UBtime_BB_float,"Tof/F");
-  
-  Tout->Branch("xEmpm",&xEmpm,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/I:height");
-  Tout->Branch("yEmpm",&yEmpm,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/I:height");
-  Tout->Branch("xWmpm",&xWmpm,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/I:height");
-  Tout->Branch("yWmpm",&yWmpm,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/I:height");
-
-  Tout->Branch("AnodeE", &AnodeE_float, "AnodeE/F");
-  Tout->Branch("EvisE", &EvisE_float, "EvisE/F");
-  Tout->Branch("AnodeW", &AnodeW_float, "AnodeW/F"); 
-  Tout->Branch("EvisW", &EvisW_float, "EvisW/F");
-  Tout->Branch("Erecon", &EvisTot_float, "Erecon/F");
-
-  Tout->Branch("TimeE", &timeE_float, "TimeE/F");
-  Tout->Branch("TimeW", &timeW_float, "TimeW/F");
-
-  Tout->Branch("PID",  &PID_pass4,  "PID/I");
-  Tout->Branch("Type", &type_pass4, "Type/I");
-  Tout->Branch("Side", &side_pass4, "Side/I");
-  //Tout->Branch("posError_pass2", &posError_pass2, "posError_pass2/I");
-  
-
-  // Open input ntuple
+  // Input ntuple
   char tempIn[500];
   sprintf(tempIn, "%s/replay_pass4_%s.root", getenv("REPLAY_PASS4"),argv[1]);
+  //sprintf(tempIn, "../replay_pass2/replay_pass2_%s.root",argv[1]);
 
-  TFile *fileIn = new TFile(tempIn, "READ");
-  TTree *Tin = (TTree*)(fileIn->Get("pass4"));
+  DataTree *UK = new DataTree();
+  UK->setupInputTree(std::string(tempIn),"pass4");
 
-  Tin->SetBranchAddress("AnodeE", &AnodeE);
-  Tin->SetBranchAddress("AnodeW", &AnodeW);
-
-  Tin->SetBranchAddress("timeE", &timeE);
-  Tin->SetBranchAddress("timeW", &timeW);
-  Tin->SetBranchAddress("timeE_BB", &timeE_BB);
-  Tin->SetBranchAddress("timeW_BB", &timeW_BB);
-  Tin->SetBranchAddress("UBtime", &UBtime);
-  Tin->SetBranchAddress("UBtime_BB", &UBtime_BB);
-  Tin->SetBranchAddress("twoFoldE", &twoFoldE);
-  Tin->SetBranchAddress("twoFoldW", &twoFoldW);
-
-  //SetBranchAddress with leaves to store the Evis and weights for all 8 PMTs
-  Tin->SetBranchAddress("pmt_Evis", &pmt_Evis);
-
-  Tin->SetBranchAddress("xE_pass4", &xE_pass4);
-  Tin->SetBranchAddress("yE_pass4", &yE_pass4);
-  Tin->SetBranchAddress("xW_pass4", &xW_pass4);
-  Tin->SetBranchAddress("yW_pass4", &yW_pass4);
-
-  Tin->SetBranchAddress("EvisTot", &EvisTot);
-  Tin->SetBranchAddress("EvisE", &EvisE);
-  Tin->SetBranchAddress("EvisW", &EvisW);
-  
-  //Tin->SetBranchAddress("EreconTot", &EreconTot, "EreconTot/D");
-  //Tin->SetBranchAddress("EreconE", &EreconE, "EreconE/D");
-  //Tin->SetBranchAddress("EreconW", &EreconW, "EreconW/D");
-
-  Tin->SetBranchAddress("PID_pass4",  &PID_pass4);
-  Tin->SetBranchAddress("type_pass4", &type_pass4);
-  Tin->SetBranchAddress("side_pass4", &side_pass4);
-  Tin->SetBranchAddress("posError_pass4", &posError_pass4);
-
-  
-  int nEvents = Tin->GetEntries();
+  int nEvents = UK->getEntries();
   cout << "... Processing nEvents = " << nEvents << endl;
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
-    Tin->GetEvent(i);
+    UK->getEvent(i);
 
-    if (type_pass4==-1) {
-      type_pass4=4;
-	}
+    spec->TriggerNum = UK->TriggerNum;
+    spec->Sis00 = UK->Sis00;
+    spec->DeltaT = (float)(UK->DeltaT);
+    spec->Tof = (float)UK->Tof;
+    spec->TimeE = (float)UK->TimeE;
+    spec->TimeW = (float)UK->TimeW;
+    spec->TDCE = (float)UK->TDCE;
+    spec->TDCW = (float)UK->TDCW;
+    spec->TDCE1 = (float)UK->TDCE1;
+    spec->TDCE2 = (float)UK->TDCE2;
+    spec->TDCE3 = (float)UK->TDCE3;
+    spec->TDCE4 = (float)UK->TDCE4;
+    spec->TDCW1 = (float)UK->TDCW1;
+    spec->TDCW2 = (float)UK->TDCW2;
+    spec->TDCW3 = (float)UK->TDCW3;
+    spec->TDCW4 = (float)UK->TDCW4;
+    spec->EvisE = (float)UK->EvisE;
+    spec->EvisW = (float)UK->EvisW;
+    spec->CathSumE = (float)UK->CathSumE;
+    spec->CathSumW = (float)UK->CathSumW;
+    spec->CathMaxE = (float)UK->CathMaxE;
+    spec->CathMaxW = (float)UK->CathMaxW;
+    spec->EMWPC_E = (float)UK->EMWPC_E;
+    spec->EMWPC_W = (float)UK->EMWPC_W;
+    spec->AnodeE = (float)UK->AnodeE;
+    spec->AnodeW = (float)UK->AnodeW;
+    spec->PassedAnoE = UK->PassedAnoE;
+    spec->PassedAnoW = UK->PassedAnoW;
+    spec->PassedCathE = UK->PassedCathE;
+    spec->PassedCathW = UK->PassedCathW;
+    spec->TaggedBackE = UK->TaggedBackE;
+    spec->TaggedBackW = UK->TaggedBackW;
+    spec->TaggedTopE = UK->TaggedTopE;
+    spec->TaggedTopW = UK->TaggedTopW;
+    spec->TaggedDriftE = UK->TaggedDriftE;
+    spec->TaggedDriftW = UK->TaggedDriftW;
+    spec->EastBackADC = (float)UK->EastBackADC;
+    spec->WestBackADC = (float)UK->WestBackADC;
+    spec->EastBackTDC = (float)UK->EastBackTDC;
+    spec->WestBackTDC = (float)UK->WestBackTDC;
+    spec->EastDriftVetoADC = (float)UK->EastDriftVetoADC;
+    spec->WestDriftVetoADC = (float)UK->WestDriftVetoADC;
+    spec->EastTopVetoADC = (float)UK->EastTopVetoADC;
+    spec->EastTopVetoTDC = (float)UK->EastTopVetoTDC;
+    spec->EvnbGood = UK->EvnbGood;
+    spec->BkhfGood = UK->BkhfGood;
+    spec->xeRC = UK->xeRC; 
+    spec->yeRC = UK->yeRC;
+    spec->xwRC = UK->xwRC;
+    spec->ywRC = UK->ywRC;
+    spec->PID = UK->PID; 
+    spec->Type = UK->Type;
+    spec->Side = UK->Side;
+    spec->ProbIII = (float)UK->ProbIII;
+    spec->Erecon = (float)UK->Erecon;
 
-    //Position Variables
-    xEmpm.center = (float)xE_pass4;
-    yEmpm.center = (float)yE_pass4;
-    xWmpm.center = (float)xW_pass4;
-    yWmpm.center = (float)yW_pass4;
-    
-    timeE_float = (float)timeE;
-    timeW_float = (float)timeW;
-    AnodeE_float = (float)AnodeE;
-    AnodeW_float = (float)AnodeW;
-    EvisE_float = (float)EvisE;
-    EvisW_float = (float)EvisW;
-    EvisTot_float = (float)EvisTot;
-    UBtime_BB_float = (float)UBtime_BB;
-    
-    
+    copy(UK->Cathodes_Ex,UK->Cathodes_Ex+16,spec->Cathodes_Ex);
+    copy(UK->Cathodes_Ey,UK->Cathodes_Ey+16,spec->Cathodes_Ey);
+    copy(UK->Cathodes_Wx,UK->Cathodes_Wx+16,spec->Cathodes_Wx);
+    copy(UK->Cathodes_Wy,UK->Cathodes_Wy+16,spec->Cathodes_Wy);
 
-    Tout->Fill();
+    spec->xE.center = (float)UK->xE.center;
+    spec->xE.width = (float)UK->xE.width;
+    spec->xE.cathSum = (float)UK->xE.cathSum;
+    spec->xE.maxValue = (float)UK->xE.maxValue;
+    spec->xE.maxWire = UK->xE.maxWire;
+    spec->xE.mult = UK->xE.mult;
+    spec->xE.nClipped = UK->xE.nClipped;
+    spec->xE.err = UK->xE.err;
+    spec->xE.rawCenter = (float)UK->xE.rawCenter;
+    spec->xE.height = (float)UK->xE.height;
+
+    spec->yE.center = (float)UK->yE.center;
+    spec->yE.width = (float)UK->yE.width;
+    spec->yE.cathSum = (float)UK->yE.cathSum;
+    spec->yE.maxValue = (float)UK->yE.maxValue;
+    spec->yE.maxWire = UK->yE.maxWire;
+    spec->yE.mult = UK->yE.mult;
+    spec->yE.nClipped = UK->yE.nClipped;
+    spec->yE.err = UK->yE.err;
+    spec->yE.rawCenter = (float)UK->yE.rawCenter;
+    spec->yE.height = (float)UK->yE.height;
+
+    spec->xW.center = (float)UK->xW.center;
+    spec->xW.width = (float)UK->xW.width;
+    spec->xW.cathSum = (float)UK->xW.cathSum;
+    spec->xW.maxValue = (float)UK->xW.maxValue;
+    spec->xW.maxWire = UK->xW.maxWire;
+    spec->xW.mult = UK->xW.mult;
+    spec->xW.nClipped = UK->xW.nClipped;
+    spec->xW.err = UK->xW.err;
+    spec->xW.rawCenter = (float)UK->xW.rawCenter;
+    spec->xW.height = (float)UK->xW.height;
+
+    spec->yW.center = (float)UK->yW.center;
+    spec->yW.width = (float)UK->yW.width;
+    spec->yW.cathSum = (float)UK->yW.cathSum;
+    spec->yW.maxValue = (float)UK->yW.maxValue;
+    spec->yW.maxWire = UK->yW.maxWire;
+    spec->yW.mult = UK->yW.mult;
+    spec->yW.nClipped = UK->yW.nClipped;
+    spec->yW.err = UK->yW.err;
+    spec->yW.rawCenter = (float)UK->yW.rawCenter;
+    spec->yW.height = (float)UK->yW.height;
+
+    spec->ScintE.q1 = (float)UK->ScintE.q1;
+    spec->ScintE.q2 = (float)UK->ScintE.q2;
+    spec->ScintE.q3 = (float)UK->ScintE.q3;
+    spec->ScintE.q4 = (float)UK->ScintE.q4;
+    spec->ScintE.e1 = (float)UK->ScintE.e1;
+    spec->ScintE.de1 = (float)UK->ScintE.de1;
+    spec->ScintE.e2 = (float)UK->ScintE.e2;
+    spec->ScintE.de2 = (float)UK->ScintE.de2;
+    spec->ScintE.e3 = (float)UK->ScintE.e3;
+    spec->ScintE.de3 = (float)UK->ScintE.de3;
+    spec->ScintE.e4 = (float)UK->ScintE.e4;
+    spec->ScintE.de4 = (float)UK->ScintE.de4;
+    spec->ScintE.energy = (float)UK->ScintE.energy;
+    spec->ScintE.denergy = (float)UK->ScintE.denergy;
+    spec->ScintE.nPE1 = (float)UK->ScintE.nPE1;
+    spec->ScintE.nPE2 = (float)UK->ScintE.nPE2;
+    spec->ScintE.nPE3 = (float)UK->ScintE.nPE3;
+    spec->ScintE.nPE4 = (float)UK->ScintE.nPE4;
+
+    spec->ScintW.q1 = (float)UK->ScintW.q1;
+    spec->ScintW.q2 = (float)UK->ScintW.q2;
+    spec->ScintW.q3 = (float)UK->ScintW.q3;
+    spec->ScintW.q4 = (float)UK->ScintW.q4;
+    spec->ScintW.e1 = (float)UK->ScintW.e1;
+    spec->ScintW.de1 = (float)UK->ScintW.de1;
+    spec->ScintW.e2 = (float)UK->ScintW.e2;
+    spec->ScintW.de2 = (float)UK->ScintW.de2;
+    spec->ScintW.e3 = (float)UK->ScintW.e3;
+    spec->ScintW.de3 = (float)UK->ScintW.de3;
+    spec->ScintW.e4 = (float)UK->ScintW.e4;
+    spec->ScintW.de4 = (float)UK->ScintW.de4;
+    spec->ScintW.energy = (float)UK->ScintW.energy;
+    spec->ScintW.denergy = (float)UK->ScintW.denergy;
+    spec->ScintW.nPE1 = (float)UK->ScintW.nPE1;
+    spec->ScintW.nPE2 = (float)UK->ScintW.nPE2;
+    spec->ScintW.nPE3 = (float)UK->ScintW.nPE3;
+    spec->ScintW.nPE4 = (float)UK->ScintW.nPE4;
+
+    spec->fillOutputTree();
   }
 
   // Write output ntuple
-  fileOut->Write();
-  fileOut->Close();
+  spec->writeOutputFile();
+  
+  delete spec; //Closes files
+  delete UK;
 
   return 0;
 }
+
+
+  

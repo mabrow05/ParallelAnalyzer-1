@@ -1,58 +1,58 @@
-#include "DataTree.hh"
+#include "DataTreeFLOAT.hh"
 
 
-DataTree::DataTree() : inputFile(NULL), outputFile(NULL), inputTree(NULL), outputTree(NULL) {
+DataTreeFLOAT::DataTreeFLOAT() : inputFile(NULL), outputFile(NULL), inputTree(NULL), outputTree(NULL) {
   
 };
 
-DataTree::~DataTree() {
+DataTreeFLOAT::~DataTreeFLOAT() {
   if (outputTree) delete outputTree;
   if (outputFile) {outputFile->Close();  delete outputFile;}
   if (inputTree) delete inputTree;
   if (inputFile) { inputFile->Close(); delete inputFile;}
 };
 
-void DataTree::makeOutputTree(std::string outputFileName, std::string outputTreeName) {
+void DataTreeFLOAT::makeOutputTree(std::string outputFileName, std::string outputTreeName) {
   outputFile = new TFile(outputFileName.c_str(),"RECREATE");
   outputTree = new TTree(outputTreeName.c_str(),outputTreeName.c_str());
 
   outputTree->Branch("TriggerNum",&TriggerNum, "TriggerNum/I");
   outputTree->Branch("EvtN",&EvtN, "EvtN/I");
   outputTree->Branch("Sis00",&Sis00, "Sis00/I");
-  outputTree->Branch("DeltaT",&DeltaT, "DeltaT/D");
-  outputTree->Branch("Tof",&Tof, "Tof/D");   
-  outputTree->Branch("TimeE",&TimeE, "TimeE/D");
-  outputTree->Branch("TimeW",&TimeW, "TimeW/D");
-  outputTree->Branch("TDCE",&TDCE,"TDCE/D");
-  outputTree->Branch("TDCW",&TDCW,"TDCW/D");
-  outputTree->Branch("TDCE1",&TDCE1,"TDCE1/D");
-  outputTree->Branch("TDCE2",&TDCE2,"TDCE2/D");
-  outputTree->Branch("TDCE3",&TDCE3,"TDCE3/D");
-  outputTree->Branch("TDCE4",&TDCE4,"TDCE4/D");
-  outputTree->Branch("TDCW1",&TDCW1,"TDCW1/D");
-  outputTree->Branch("TDCW2",&TDCW2,"TDCW2/D");
-  outputTree->Branch("TDCW3",&TDCW3,"TDCW3/D");
-  outputTree->Branch("TDCW4",&TDCW4,"TDCW4/D");
-  outputTree->Branch("xE",&xE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
-  outputTree->Branch("yE",&yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
-  outputTree->Branch("xW",&xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
-  outputTree->Branch("yW",&yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
-  outputTree->Branch("Cathodes_Ex",&Cathodes_Ex,"Cathodes_Ex/D");
-  outputTree->Branch("Cathodes_Ey",&Cathodes_Ey,"Cathodes_Ey/D");
-  outputTree->Branch("Cathodes_Wx",&Cathodes_Wx,"Cathodes_Wx/D");
-  outputTree->Branch("Cathodes_Wy",&Cathodes_Wy,"Cathodes_Wy/D");
-  outputTree->Branch("ScintE", &ScintE, "q1/D:q2:q3:q4:e1:de1:e2:de2:e3:de3:e4:de4:energy:denergy:nPE1:nPE2:nPE3:nPE4");
-  outputTree->Branch("ScintW", &ScintW, "q1/D:q2:q3:q4:e1:de1:e2:de2:e3:de3:e4:de4:energy:denergy:nPE1:nPE2:nPE3:nPE4");
-  outputTree->Branch("EvisE",&EvisE,"EvisE/D");
-  outputTree->Branch("EvisW",&EvisW,"EvisW/D");
-  outputTree->Branch("CathSumE",&CathSumE,"CathSumE/D");
-  outputTree->Branch("CathSumW",&CathSumW,"CathSumW/D"); 
-  outputTree->Branch("CathMaxE",&CathMaxE,"CathMaxE/D");
-  outputTree->Branch("CathMaxW",&CathMaxW,"CathMaxW/D"); 
-  outputTree->Branch("EMWPC_E",&EMWPC_E,"EMWPC_E/D");
-  outputTree->Branch("EMWPC_W",&EMWPC_W,"EMWPC_W/D"); 
-  outputTree->Branch("AnodeE",&AnodeE,"AnodeE/D");
-  outputTree->Branch("AnodeW",&AnodeW,"AnodeW/D"); 
+  outputTree->Branch("DeltaT",&DeltaT, "DeltaT/F");
+  outputTree->Branch("Tof",&Tof, "Tof/F");   
+  outputTree->Branch("TimeE",&TimeE, "TimeE/F");
+  outputTree->Branch("TimeW",&TimeW, "TimeW/F");
+  outputTree->Branch("TDCE",&TDCE,"TDCE/F");
+  outputTree->Branch("TDCW",&TDCW,"TDCW/F");
+  outputTree->Branch("TDCE1",&TDCE1,"TDCE1/F");
+  outputTree->Branch("TDCE2",&TDCE2,"TDCE2/F");
+  outputTree->Branch("TDCE3",&TDCE3,"TDCE3/F");
+  outputTree->Branch("TDCE4",&TDCE4,"TDCE4/F");
+  outputTree->Branch("TDCW1",&TDCW1,"TDCW1/F");
+  outputTree->Branch("TDCW2",&TDCW2,"TDCW2/F");
+  outputTree->Branch("TDCW3",&TDCW3,"TDCW3/F");
+  outputTree->Branch("TDCW4",&TDCW4,"TDCW4/F");
+  outputTree->Branch("xEmpm",&xE,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/F:height");
+  outputTree->Branch("yEmpm",&yE,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/F:height");
+  outputTree->Branch("xWmpm",&xW,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/F:height");
+  outputTree->Branch("yWmpm",&yW,"center/F:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/F:height");
+  outputTree->Branch("Cathodes_Ex",&Cathodes_Ex,"Cathodes_Ex/F");
+  outputTree->Branch("Cathodes_Ey",&Cathodes_Ey,"Cathodes_Ey/F");
+  outputTree->Branch("Cathodes_Wx",&Cathodes_Wx,"Cathodes_Wx/F");
+  outputTree->Branch("Cathodes_Wy",&Cathodes_Wy,"Cathodes_Wy/F");
+  outputTree->Branch("ScintE", &ScintE, "q1/F:q2:q3:q4:e1:de1:e2:de2:e3:de3:e4:de4:energy:denergy:nPE1:nPE2:nPE3:nPE4");
+  outputTree->Branch("ScintW", &ScintW, "q1/F:q2:q3:q4:e1:de1:e2:de2:e3:de3:e4:de4:energy:denergy:nPE1:nPE2:nPE3:nPE4");
+  outputTree->Branch("EvisE",&EvisE,"EvisE/F");
+  outputTree->Branch("EvisW",&EvisW,"EvisW/F");
+  outputTree->Branch("CathSumE",&CathSumE,"CathSumE/F");
+  outputTree->Branch("CathSumW",&CathSumW,"CathSumW/F"); 
+  outputTree->Branch("CathMaxE",&CathMaxE,"CathMaxE/F");
+  outputTree->Branch("CathMaxW",&CathMaxW,"CathMaxW/F"); 
+  outputTree->Branch("EMWPC_E",&EMWPC_E,"EMWPC_E/F");
+  outputTree->Branch("EMWPC_W",&EMWPC_W,"EMWPC_W/F"); 
+  outputTree->Branch("AnodeE",&AnodeE,"AnodeE/F");
+  outputTree->Branch("AnodeW",&AnodeW,"AnodeW/F"); 
   outputTree->Branch("PassedAnoE",&PassedAnoE,"PassedAnoE/O");
   outputTree->Branch("PassedAnoW",&PassedAnoW,"PassedAnoW/O");
   outputTree->Branch("PassedCathE",&PassedCathE,"PassedCathE/O");
@@ -63,14 +63,14 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   outputTree->Branch("TaggedTopW",&TaggedTopW,"TaggedTopW/O");
   outputTree->Branch("TaggedDriftE",&TaggedDriftE,"TaggedDriftE/O");
   outputTree->Branch("TaggedDriftW",&TaggedDriftW,"TaggedDriftW/O");
-  outputTree->Branch("EastBackADC",&EastBackADC,"EastBackADC/D");
-  outputTree->Branch("WestBackADC",&WestBackADC,"WestBackADC/D");
-  outputTree->Branch("EastBackTDC",&EastBackTDC,"EastBackTDC/D");
-  outputTree->Branch("WestBackTDC",&WestBackTDC,"WestBackTDC/D");
-  outputTree->Branch("EastDriftVetoADC",&EastDriftVetoADC,"EastDriftVetoADC/D");
-  outputTree->Branch("WestDriftVetoADC",&WestDriftVetoADC,"WestDriftVetoADC/D");
-  outputTree->Branch("EastTopVetoADC",&EastTopVetoADC,"EastTopVetoADC/D");
-  outputTree->Branch("EastTopVetoTDC",&EastTopVetoTDC,"EastTopVetoTDC/D");
+  outputTree->Branch("EastBackADC",&EastBackADC,"EastBackADC/F");
+  outputTree->Branch("WestBackADC",&WestBackADC,"WestBackADC/F");
+  outputTree->Branch("EastBackTDC",&EastBackTDC,"EastBackTDC/F");
+  outputTree->Branch("WestBackTDC",&WestBackTDC,"WestBackTDC/F");
+  outputTree->Branch("EastDriftVetoADC",&EastDriftVetoADC,"EastDriftVetoADC/F");
+  outputTree->Branch("WestDriftVetoADC",&WestDriftVetoADC,"WestDriftVetoADC/F");
+  outputTree->Branch("EastTopVetoADC",&EastTopVetoADC,"EastTopVetoADC/F");
+  outputTree->Branch("EastTopVetoTDC",&EastTopVetoTDC,"EastTopVetoTDC/F");
   outputTree->Branch("EvnbGood",&EvnbGood,"EvnbGood/O");
   outputTree->Branch("BkhfGood",&BkhfGood,"BkhfGood/O");
 
@@ -82,16 +82,15 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   outputTree->Branch("PID",&PID,"PID/I");
   outputTree->Branch("Side",&Side,"Side/I"); 
   outputTree->Branch("Type",&Type,"Type/I");
-  outputTree->Branch("ProbIII",&ProbIII,"ProbIII/D");
-  outputTree->Branch("Erecon",&Erecon,"Erecon/D");
+  outputTree->Branch("ProbIII",&ProbIII,"ProbIII/F");
+  outputTree->Branch("Erecon",&Erecon,"Erecon/F");
 
   std::cout << "Created output tree " << outputTreeName << " in " << outputFileName << "...\n";
 };
 
-void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeName) {
+void DataTreeFLOAT::setupInputTree(std::string inputFileName, std::string inputTreeName) {
   inputFile = new TFile(inputFileName.c_str(),"READ");
   inputTree = (TTree*)(inputFile->Get(inputTreeName.c_str()));
-  //inputTree = (TTree*)(gROOT->FindObject(inputTreeName.c_str()));
 
   inputTree->SetBranchAddress("TriggerNum",&TriggerNum);
   inputTree->SetBranchAddress("EvtN",&EvtN);
