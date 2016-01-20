@@ -63,13 +63,13 @@ void fit_source_positions(TString runNumber)
   TH2F *hiswxy = new TH2F("hiswxy", "", 100,-50.0,50.0, 100,-50.0,50.0);
 
   // Cuts
-  TCut *type = new TCut("(type_pass3 == 0)");
-  TCut *east = new TCut("(side_pass3 == 0)");
-  TCut *west = new TCut("(side_pass3 == 1)");
+  TCut *type = new TCut("(Type == 0)");
+  TCut *east = new TCut("(Side == 0)");
+  TCut *west = new TCut("(Side == 1)");
 
   // Project ntuple data into histograms
-  pass3->Draw("yE_pass3:xE_pass3 >> hisexy", *type && *east);
-  pass3->Draw("yW_pass3:xW_pass3 >> hiswxy", *type && *west);
+  pass3->Draw("yE.center:xE.center >> hisexy", *type && *east);
+  pass3->Draw("yW.center:xW.center >> hiswxy", *type && *west);
 
   // Find East peaks
   c1 = new TCanvas("c1","c1");
@@ -83,7 +83,7 @@ void fit_source_positions(TString runNumber)
   }
 
   // East peaks mean and sigma
-  double xEast[3], yEast[3], sigmaEast[3];
+  double xEast[3]={100.,100.,100.}, yEast[3]={100.,100.,100.}, sigmaEast[3];
   for (Int_t p=0; p<nFoundEast; p++) {
     TF2 *fit2DGauss = new TF2("fit2DGauss", "[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))*exp(-(y-[3])*(y-[3])/(2.*[4]*[4]))", xpeaksEast[p]-5., xpeaksEast[p]+5., ypeaksEast[p]-5., ypeaksEast[p]+5.);
     fit2DGauss->SetParameter(0, 100.0);
@@ -143,6 +143,7 @@ void fit_source_positions(TString runNumber)
 
   if (nSources == 2) {
     int pEastMin, pWestMin;
+    int pEastMax, pWestMax;
     if (xEast[0] < xEast[1]) {pEastMin = 0; pEastMax = 1;}
     else {pEastMin = 1; pEastMax = 0;}
     if (xWest[0] < xWest[1]) {pWestMin = 0; pWestMax = 1;}
