@@ -1,10 +1,10 @@
 
 
 {
-  int iRunPeriod = 5;
+  int iRunPeriod = 10;
   int pmt = 7; 
-  float xpos = 5.;
-  float ypos = -40.;
+  float xpos =7.5;
+  float ypos = 0.;
 
   //open file
   Char_t temp[500];
@@ -20,7 +20,7 @@
 
   h->Draw();
 
-  TF1 *f1 = new TF1("f1","[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",200., 700.);
+  TF1 *f1 = new TF1("f1","[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",100., 400.);
   f1->SetParameter(0,100.);
   f1->SetParameter(1,300.);
   f1->SetParameter(2,100.);

@@ -133,13 +133,17 @@ void plot_position_map(int iRunPeriod)
 
   // Output PDF file
   TString filenameOut;
-  if (iRunPeriod == 1) filenameOut  = "position_map_1_RC_123.pdf";
+  Char_t runPeriodString[10];
+  sprintf(runPeriodString,"%i",iRunPeriod);
+  filenameOut = "position_map_"+TString(runPeriodString)+"_RC_123.pdf";
+  
+  /*if (iRunPeriod == 1) filenameOut  = "position_map_1_RC_123.pdf";
   if (iRunPeriod == 2) filenameOut  = "position_map_2_RC_123.pdf";
   if (iRunPeriod == 3) filenameOut  = "position_map_3_RC_123.pdf";
   if (iRunPeriod == 4) filenameOut  = "position_map_4_RC_123.pdf";
   if (iRunPeriod == 5) filenameOut  = "position_map_5_RC_123.pdf";
   if (iRunPeriod == 6) filenameOut  = "position_map_6_RC_123.pdf";
-  if (iRunPeriod == 7) filenameOut  = "position_map_7_RC_123.pdf";
+  if (iRunPeriod == 7) filenameOut  = "position_map_7_RC_123.pdf";*/
 
   TString filenameOutFirst;
   filenameOutFirst  = filenameOut;
