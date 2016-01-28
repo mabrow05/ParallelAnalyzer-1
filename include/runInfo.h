@@ -2,6 +2,7 @@
 using namespace std;
 
 
+// Returns the calibration period to be used for this run
 unsigned int getSrcRunPeriod(int runNumber) {
   unsigned int calibrationPeriod=0;
   if (runNumber <= 17297) {

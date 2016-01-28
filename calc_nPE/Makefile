@@ -8,6 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
+VPATH = ./:../include
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -18,9 +19,11 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-calc_nPE.exe: calc_nPE.o
-	$(CXX) $(CXXFLAGS) -o calc_nPE.exe calc_nPE.o $(LIBS)
+calc_nPE.exe: calc_nPE.o DataTree.o
+	$(CXX) $(CXXFLAGS) -o calc_nPE.exe calc_nPE.o DataTree.o $(LIBS)
 	@echo "Done"
+
+DataTree.o: DataTree.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from
