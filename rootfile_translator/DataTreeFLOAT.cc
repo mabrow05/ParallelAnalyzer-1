@@ -53,16 +53,16 @@ void DataTreeFLOAT::makeOutputTree(std::string outputFileName, std::string outpu
   outputTree->Branch("EMWPC_W",&EMWPC_W,"EMWPC_W/F"); 
   outputTree->Branch("AnodeE",&AnodeE,"AnodeE/F");
   outputTree->Branch("AnodeW",&AnodeW,"AnodeW/F"); 
-  outputTree->Branch("PassedAnoE",&PassedAnoE,"PassedAnoE/O");
-  outputTree->Branch("PassedAnoW",&PassedAnoW,"PassedAnoW/O");
-  outputTree->Branch("PassedCathE",&PassedCathE,"PassedCathE/O");
-  outputTree->Branch("PassedCathW",&PassedCathW,"PassedCathW/O");
-  outputTree->Branch("TaggedBackE",&TaggedBackE,"TaggedBackE/O");
-  outputTree->Branch("TaggedBackW",&TaggedBackW,"TaggedBackW/O");
-  outputTree->Branch("TaggedTopE",&TaggedTopE,"TaggedTopE/O");
-  outputTree->Branch("TaggedTopW",&TaggedTopW,"TaggedTopW/O");
-  outputTree->Branch("TaggedDriftE",&TaggedDriftE,"TaggedDriftE/O");
-  outputTree->Branch("TaggedDriftW",&TaggedDriftW,"TaggedDriftW/O");
+  outputTree->Branch("PassedAnoE",&PassedAnoE,"PassedAnoE/I");
+  outputTree->Branch("PassedAnoW",&PassedAnoW,"PassedAnoW/I");
+  outputTree->Branch("PassedCathE",&PassedCathE,"PassedCathE/I");
+  outputTree->Branch("PassedCathW",&PassedCathW,"PassedCathW/I");
+  outputTree->Branch("TaggedBackE",&TaggedBackE,"TaggedBackE/I");
+  outputTree->Branch("TaggedBackW",&TaggedBackW,"TaggedBackW/I");
+  outputTree->Branch("TaggedTopE",&TaggedTopE,"TaggedTopE/I");
+  outputTree->Branch("TaggedTopW",&TaggedTopW,"TaggedTopW/I");
+  outputTree->Branch("TaggedDriftE",&TaggedDriftE,"TaggedDriftE/I");
+  outputTree->Branch("TaggedDriftW",&TaggedDriftW,"TaggedDriftW/I");
   outputTree->Branch("EastBackADC",&EastBackADC,"EastBackADC/F");
   outputTree->Branch("WestBackADC",&WestBackADC,"WestBackADC/F");
   outputTree->Branch("EastBackTDC",&EastBackTDC,"EastBackTDC/F");
@@ -71,8 +71,8 @@ void DataTreeFLOAT::makeOutputTree(std::string outputFileName, std::string outpu
   outputTree->Branch("WestDriftVetoADC",&WestDriftVetoADC,"WestDriftVetoADC/F");
   outputTree->Branch("EastTopVetoADC",&EastTopVetoADC,"EastTopVetoADC/F");
   outputTree->Branch("EastTopVetoTDC",&EastTopVetoTDC,"EastTopVetoTDC/F");
-  outputTree->Branch("EvnbGood",&EvnbGood,"EvnbGood/O");
-  outputTree->Branch("BkhfGood",&BkhfGood,"BkhfGood/O");
+  outputTree->Branch("EvnbGood",&EvnbGood,"EvnbGood/I");
+  outputTree->Branch("BkhfGood",&BkhfGood,"BkhfGood/I");
 
   outputTree->Branch("xeRC", &xeRC, "xeRC/I"); //x east response class. 
   outputTree->Branch("yeRC", &yeRC, "yeRC/I"); //y east response class... 
