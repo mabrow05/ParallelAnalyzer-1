@@ -133,7 +133,7 @@ void fit_source_positions(TString runNumber)
   TString filenameOut;
   filenameOut  = TString(getenv("SOURCE_POSITIONS"))+TString("/source_positions_");
   filenameOut += runNumber;
-  filenameOut += ".txt";
+  filenameOut += ".dat";
   ofstream outFit(filenameOut);
   cout << "Writing fitted (x,y) positions to ... " << filenameOut << endl;
 
