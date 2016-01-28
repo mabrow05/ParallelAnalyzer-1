@@ -8,6 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
+VPATH = ./:../include
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -21,6 +22,10 @@ LIBS         += -lSpectrum -lMinuit
 revCalSim.exe: revCalSim.o
 	$(CXX) $(CXXFLAGS) -o revCalSim.exe revCalSim.o $(LIBS)
 	@echo "Done"
+
+#posMapReader.o: posMapReader.h
+
+
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

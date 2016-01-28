@@ -166,14 +166,21 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //First get the number of total electron events around the source position from the data file
   Char_t temp[500],tempE[500],tempW[500];
-  sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
+  //sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
+  sprintf(temp,"%s/replay_pass3_%i.root",getenv("REPLAY_PASS3"),runNumber);
   TFile *dataFile = new TFile(temp,"READ");
-  TTree *data = (TTree*)(dataFile->Get("pass4"));
+  TTree *data = (TTree*)(dataFile->Get("pass3"));
+  string outputBase;
   if (source!="Beta") {
-    sprintf(tempE,"Type<3 && PID==1 && Side==0 && EvisE>0. && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
-    sprintf(tempW,"Type<3 && PID==1 && Side==1 && EvisW>0. && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
+    sprintf(tempE,"Type<3 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
+    sprintf(tempW,"Type<3 && PID==1 && Side==1 && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
+    outputBase = string(getenv("REVCALSIM")) + "sources/";
   }
-  else sprintf(temp,"Type<3 && PID==1 && (EvisE>0. || EvisW>0.)");
+  else if (source=="Beta") {
+    sprintf(tempE,"Type<3 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
+    sprintf(tempW,"Type<3 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
+    outputBase = string(getenv("REVCALSIM")) + "beta/";
+  }
   UInt_t BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
   cout << "Electron Events in Data file: " << BetaEvents << endl;
   cout << "East: " << data->GetEntries(tempE) << "\tWest: " << data->GetEntries(tempW) << endl;
@@ -182,7 +189,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Create simulation output file
   Char_t outputfile[500];
-  sprintf(outputfile,"%s/sources/revCalSim_%i_%s.root",getenv("REVCALSIM"),runNumber,source.c_str());
+  sprintf(outputfile,"%s/revCalSim_%i_%s.root",outputBase.c_str(),runNumber,source.c_str());
   //sprintf(outputfile,"revCalSim_%i.root",runNumber);
   TFile *outfile = new TFile(outputfile, "RECREATE")
 ;
@@ -206,11 +213,21 @@ void revCalSimulation (Int_t runNumber, string source)
   finalEn[4] = new TH1D("finalE23", "Simulated Weighted Sum East Type 2/3", 400, 0., 1200.);
   finalEn[5] = new TH1D("finalW23", "Simulated Weighted Sum West Type 2/3", 400, 0., 1200.);
 
+  //Decide which simulation to use...
+  std::string simLocation;
+  TChain *chain = new TChain("anaTree");
+  
+  if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
+  else if (runNumber>21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
+  else simLocation = string(getenv("SIM_2012_2013"));
+
+  std::cout << "Using simulation from " << simLocation << "...\n";
 
   //Read in simulated data and put in a TChain
-  TChain *chain = new TChain("anaTree");
-  for (int i=0; i<250; i++) {
-    sprintf(temp,"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/%s/analyzed_%i.root",source.c_str(),i);
+ 
+  int numFiles = source=="Beta"?400:250;
+  for (int i=0; i<numFiles; i++) {
+    sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),i);
     //sprintf(temp,"../../../data/analyzed_%i.root",i);
     chain->AddFile(temp);
   }
@@ -268,7 +285,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-  Double_t MWPCThreshold=0.0;
+  Double_t MWPCThreshold=0.001;
 
   //Set random number generator
   TRandom3 *rand = new TRandom3(0);
@@ -287,15 +304,18 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Read in events and determine evt type based on triggers
   while (evtTally<=BetaEvents) {
-    if (evt>nevents) evt=0; //Wrapping the events back to the beginning
+    if (evt>=nevents) evt=0; //Wrapping the events back to the beginning
     EastScintTrigger = WestScintTrigger = EMWPCTrigger = WMWPCTrigger = false; //Resetting triggers each event
 
     chain->GetEvent(evt);
+
     //Checking that the event occurs within the fiducial volume in the simulation to minimize
     // contamination from edge effects and interactions with detector walls
-    if (sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>45. 
-	|| sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>45.) {evt++; continue;}
-    
+    Double_t fidCut = 45.;
+    if (source=="Beta") fidCut=50.; //Since I cut at 50 when determining the number of beta events
+    if (sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>fidCut
+	|| sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>fidCut) {evt++; continue;}
+    //cout << "evt passed fiducial cut\n";
     //calculate adjusted event position by sampling a gaussian centered on source position. Do it for primary event side.
     /*Int_t primSide=0., primType=0;
     if (edep.EdepE>0. && edep.EdepW>0.) {
@@ -309,12 +329,14 @@ void revCalSimulation (Int_t runNumber, string source)
     //Double_t primX, primY;
     //primX = rand2->Gaus(srcPos[primSide][0],srcPos[primSide][2]);
     //primY = rand2->Gaus(srcPos[primSide][1],srcPos[primSide][2]);
-
-    scint_pos_adj.ScintPosAdjE[0] = rand2->Gaus(srcPos[0][0], fabs(srcPos[0][2]));
-    scint_pos_adj.ScintPosAdjE[1] = rand2->Gaus(srcPos[0][1], fabs(srcPos[0][2]));
-    scint_pos_adj.ScintPosAdjW[0] = rand2->Gaus(srcPos[1][0], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[0]+displacementX;
-    scint_pos_adj.ScintPosAdjW[1] = rand2->Gaus(srcPos[1][1], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[1]+displacementY;
     
+    scint_pos_adj.ScintPosAdjE[0] = source=="Beta"?scint_pos.ScintPosE[0]*sqrt(0.6)*10.:rand2->Gaus(srcPos[0][0], fabs(srcPos[0][2]));
+    scint_pos_adj.ScintPosAdjE[1] = source=="Beta"?scint_pos.ScintPosE[1]*sqrt(0.6)*10.:rand2->Gaus(srcPos[0][1], fabs(srcPos[0][2]));
+    scint_pos_adj.ScintPosAdjW[0] = source=="Beta"?scint_pos.ScintPosW[0]*sqrt(0.6)*10.:rand2->Gaus(srcPos[1][0], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[0]+displacementX;
+    scint_pos_adj.ScintPosAdjW[1] = source=="Beta"?scint_pos.ScintPosW[1]*sqrt(0.6)*10.:rand2->Gaus(srcPos[1][1], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[1]+displacementY;
+    scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2]*10.;
+    scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2]*10.;
+ 
     /*Double_t displacementX=0., displacementY=0.;
     if (primType==1) {
       if (primSide==0) {
@@ -343,8 +365,7 @@ void revCalSimulation (Int_t runNumber, string source)
       scint_pos_adj.ScintPosAdjE[1] = sqrt(0.6)*10.*scint_pos.ScintPosE[1]+displacementY;
       }*/
 
-    scint_pos_adj.ScintPosAdjE[2] = sqrt(0.6)*10.*scint_pos.ScintPosE[2];
-    scint_pos_adj.ScintPosAdjW[2] = sqrt(0.6)*10.*scint_pos.ScintPosW[2];
+    
       
     //retrieve point on grid for each side of detector [E/W][x/y]
     gridPoint = getGridPoint(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
@@ -357,7 +378,7 @@ void revCalSimulation (Int_t runNumber, string source)
     //MWPC triggers
     if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
     if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
-      
+    
     //East Side smeared PMT energies
     for (UInt_t p=0; p<4; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
@@ -434,7 +455,7 @@ void revCalSimulation (Int_t runNumber, string source)
     EvisTot = evis.EvisW+evis.EvisE+mwpcE.MWPCEnergyE+mwpcE.MWPCEnergyW;
       
     //Fill proper total event histogram based on event type
-      
+    PID=-1;
     //Type 0 East
     if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && !WMWPCTrigger) {
       PID=1;
@@ -465,6 +486,7 @@ void revCalSimulation (Int_t runNumber, string source)
 	side=1;
       }
     }
+    //Type 2/3 East
     else if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && WMWPCTrigger) {
       PID=1;
       type=2;
@@ -472,6 +494,7 @@ void revCalSimulation (Int_t runNumber, string source)
       finalEn[4]->Fill(totalEnE);
       //cout << "Type 2/3 East E = " << totalEnE << endl;
     }
+    //Type 2/3 West
     else if (!EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
       PID=1;
       type=2;
@@ -498,24 +521,29 @@ void revCalSimulation (Int_t runNumber, string source)
 	  if (Time.timeE<Time.timeW) {
 	    side=0;
 	  }
-	  else if (Time.timeE>Time.timeW) {
+	  else {
 	    side=1;
 	  }
 	}
+	else {
+	  PID=6;
+	  type=4;
+	  side=2;
+	}
       }
       else {
-	PID=6;
+	PID=1;
 	type=4;
-	side=2; //Unknown Side
+	side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
       }
     }
       
     // Increment the event tally if the event was PID = 1 (electron)
     if (PID==1) evtTally++;
     evt++;
-    tree->Fill();
-      
-    if (evt%10000==0) { cout << "*";}//cout << "filled event " << evt << endl;
+    if (PID>=0) tree->Fill();
+    //cout << evtTally << endl;
+    if (evtTally%1000==0) {cout << "*";}//cout << "filled event " << evt << endl;
   }
   cout << endl;
   delete chain;
