@@ -239,10 +239,10 @@ int main(int argc, char *argv[])
   double binCenterMax[3][8];
   double binCounts[3][8];
   for (int n=0; n<nSources; n++) {
-    for (int i=0; i<nBin; i++) {
+    for (int i=1; i<nBin; i++) { //Avoid underflow bins
       for (int j=0; j<8; j++) {
-        binCenter[n][j] = his[n][j]->GetBinCenter(i+1);
-        binCounts[n][j] = his[n][j]->GetBinContent(i+1);
+        binCenter[n][j] = his[n][j]->GetBinCenter(i);
+        binCounts[n][j] = his[n][j]->GetBinContent(i);
         if (binCounts[n][j] > maxCounts[n][j]) {
           maxCounts[n][j] = binCounts[n][j];
           maxBin[n][j] = i;
@@ -258,14 +258,17 @@ int main(int argc, char *argv[])
 
     for (int j=0; j<8; j++) {
       for (int i=maxBin[n][j]; i<nBin; i++) {
-        if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
+        if (his[n][j]->GetBinContent(i+1) < 0.33*maxCounts[n][j]) {
           xHigh[n][j] = his[n][j]->GetBinCenter(i+1);
-          break;
+          if ((i-maxBin[n][j])<5) xHigh[n][j] = binCenterMax[n][j]+250.;
+	  break;
         }
+	if (i==(nBin-1)) xHigh[n][j] = his[n][j]->GetBinCenter(i);
       }
       for (int i=maxBin[n][j]; i>0; i--) {
-        if (his[n][j]->GetBinContent(i+1) < 0.5*maxCounts[n][j]) {
-          xLow[n][j] = his[n][j]->GetBinCenter(i+1);
+        if (his[n][j]->GetBinContent(i-1) < 0.5*maxCounts[n][j]) {
+          xLow[n][j] = his[n][j]->GetBinCenter(i-1);
+	  //if ((maxBin[n][j]-i)<5) xLow[n][j] = binCenterMax[n][j]-200.;
           break;
         }
       }
@@ -283,17 +286,31 @@ int main(int argc, char *argv[])
       for (int j=0; j<8; j++) {
 	char fitName[500];
 	sprintf(fitName, "gaussian_fit_%i_%i", n, j);
-
+	//"[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))"
 	gaussian_fit[n][j] = new TF1(fitName,
-				     "[0]*exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))",
+				     "gaus",
 				     xLow[n][j], xHigh[n][j]);
 	gaussian_fit[n][j]->SetParameter(0,maxCounts[n][j]);
 	gaussian_fit[n][j]->SetParameter(1,binCenterMax[n][j]);
 	gaussian_fit[n][j]->SetParameter(2,100.0);
-	gaussian_fit[n][j]->SetParLimits(1,xLow[n][j],xHigh[n][j]);
+	//gaussian_fit[n][j]->SetParLimits(1,xLow[n][j],xHigh[n][j]);
 
-	his[n][j]->Fit(fitName, "LRQ");
-	fitMean[n][j] = gaussian_fit[n][j]->GetParameter(1);
+	fitMean[n][j] = 0.;
+	double sigma = 0.;
+	Int_t ntries = 0;
+	while (fitMean[n][j]<xLow[n][j] || fitMean[n][j]>xHigh[n][j] || sigma>425. || sigma<15.) {
+	  his[n][j]->Fit(fitName, "RQ");
+	  fitMean[n][j] = gaussian_fit[n][j]->GetParameter(1);	 
+	  sigma = gaussian_fit[n][j]->GetParameter(2);
+	  //cout << fitMean[n][j] << endl;
+	  gaussian_fit[n][j]->SetParameter(1,binCenterMax[n][j]-1.);
+	  ntries++;
+ 
+	  if (ntries>4) {
+	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << endl;
+	    break;
+	  }
+	}
       }
     }
   }
