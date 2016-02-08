@@ -15,8 +15,11 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [19232]
-omittedRanges = [(17942,18055)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
+omittedRuns = [19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
+# 20529 - very low statistics
+# 20530,20531,20823-20827 - lost West event triggers
+omittedRanges = [(17942,18055), (20901, 20917)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
+                                               # And also run period 15 which is useless
 
 for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -29,7 +32,7 @@ for Range in omittedRanges:
 EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
 EPMT2 = []
 EPMT3 = []
-EPMT4 = []
+EPMT4 = [20517,20519,20821,20822]
 WPMT1 = []
 WPMT2 = []
 WPMT3 = []
@@ -38,7 +41,7 @@ WPMT4 = []
 EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 EPMT2_runRanges = []
 EPMT3_runRanges = []
-EPMT4_runRanges = [(17233,18055)]
+EPMT4_runRanges = [(17233,18055), (20121,23173)]
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)]
 WPMT3_runRanges = []
@@ -331,32 +334,65 @@ class CalibrationManager:
             return 9
         elif runNumber <= 20000:
             return 11
-        
+        elif runNumber <= 20741:
+            return 13
+        elif runNumber <= 20837:
+            return 14
+        elif runNumber <= 21237:
+            return 16
+        elif runNumber <= 21605:
+            return 17
+        elif runNumber <= 21863:
+            return 18
+        elif runNumber <= 22118:
+            return 19
+        elif runNumber <= 22238:
+            return 20
+        elif runNumber <= 22630:
+            return 22
+        elif runNumber <= 23173:
+            return 23
+        else:
+            print "Bad Run Number!!! No Calibration Period..."
+            exit
 
-    def calc_nPE_per_PMT(self, runAllRefRun=False, run=19359, writeNPEforAllRuns=False):
 
-        srcRefRuns = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899]
+
+    def calc_nPE_per_PMT(self, runAllRefRun=False, run=19359, writeNPEforAllRuns=False, year="2011-2012"):
+
+        srcSn_nPE_Runs = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899,20520,20823,20905,21091,21315,21683,21918,22219,22298,22441,22771,22925] #These are runs for which the nPE per channel are calculated
+        # May or may not match the reference runs
+
+        srcRunPeriodRange = None
+        runRange = None
+
+        if year=="2011-2012":
+            srcRunPeriodRange = [1,12]
+            runRange = [16000,20000]
+
+        elif year=="2012-2013":
+            srcRunPeriodRange = [13,24]
+            runRange = [20000,23173]
 
         if runAllRefRun:
-            srcRunPeriod=1
             
-            for r in srcRefRuns:
+            for srcRunPeriod in range(srcRunPeriodRange[0],srcRunPeriodRange[1]+1,1):
+                r = srcSn_nPE_Runs[srcRunPeriod-1]
                 os.system("cd ../calc_nPE/; ./calc_nPE.exe %i"%r)
                 print "Ran calc_nPE.exe for run %i"%r
-                runs=[]
-                filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
-                infile = open(self.runListPath+filename,'r')
-                for line in infile:
-                    runs.append(int(line))
-                for rn in runs:
-                    os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,r,self.nPEcountPath,rn))
-                srcRunPeriod+=1
-                infile.close()
+                #runs=[]
+                #filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+                #infile = open(self.runListPath+filename,'r')
+                #for line in infile:
+                #    runs.append(int(line))
+                #for rn in runs:
+                #    os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,r,self.nPEcountPath,rn))
+                #infile.close()
 
         elif writeNPEforAllRuns:
-            for rn in range(16000,20000,1):
+            for rn in range(runRange[0],runRange[1]+1,1):
                 calPeriod = self.findCalibrationPeriod(rn)
-                os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,srcRefRuns[calPeriod-1],self.nPEcountPath,rn))
+                os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,srcSn_nPE_Runs[calPeriod-1],self.nPEcountPath,rn))
 
         else:
             os.system("cd ../calc_nPE/; ./calc_nPE.exe %i"%run)
@@ -444,8 +480,8 @@ class CalibrationManager:
                         lines = []
                         for line in srcList:
                             lines.append(line)
-                            if int(lines[0])>0:
-                                runList.append(int(run))
+                        if int(lines[0])>0:
+                            runList.append(int(run))
 
             outfile = open(outputFile,'w')
 
@@ -478,7 +514,7 @@ class CalibrationManager:
         if master:
             masterFile = open("../residuals/PMT_runQuality_master.dat",'w')
             
-            for run in range(16983,20000,1):
+            for run in range(16983,23174,1):
                 pmtList = [1,1,1,1,1,1,1,1]
                 if run in EPMT1:
                     pmtList[0]=0
@@ -729,7 +765,7 @@ if __name__ == "__main__":
         
     ### Makes a file with each run followed by a boolean (0,1) for whether each PMT should be used or not
     if options.makePMTrunFile:
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [13,14,15,16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]
         cal=CalibrationManager()
         for period in runPeriods:
             cal.makePMTrunFile(period)
@@ -753,7 +789,7 @@ if __name__ == "__main__":
 
     ### useful if you are going to look at the linearity curves and residuals by eye separately
     if options.makePeakFiles:
-        runPeriods = [2]#[1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [13,14,16,17,18,19,20,21,22,23]#[1,2,3,4,5,6,7,8,9,10,11,12]
         cal=CalibrationManager()
         for period in runPeriods:
             cal.makeSourceCalibrationFile(period, False)
@@ -788,52 +824,56 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [13,14,15,16,17,18,19,20,21,22,23,24]# [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [14]#[13,14,16,17,18,19,20,21,22,23,24]# [1,2,3,4,5,6,7,8,9,10,11,12]
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
             #rep.findPedestals(runPeriod)
             #rep.runReplayPass1(runPeriod)
-            rep.runGainBismuth(runPeriod)
+            #rep.runGainBismuth(runPeriod)
             #rep.runReplayPass2(runPeriod)
             #rep.runReplayPass3(runPeriod)
+            #cal.fitSourcePositions(runPeriod)
             #cal.fitSourcePeaks(runPeriod)
+            cal.makeSourceCalibrationFile(runPeriod, False)
             #rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
     if 0:
         cal = CalibrationManager()
-        #cal.calc_nPE_per_PMT(writeNPEforAllRuns=True)
+        #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True,year="2012-2013")
         cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
     if 0: 
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods =[13,14,16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
-            #rep.runReverseCalibration(runPeriod)
+            rep.runReverseCalibration(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod, True, Simulation=True)
             cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
 
     ### Source Run Calibration Steps...
-    if 0: 
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
+    if 1: 
+        runPeriods = [13,14,16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
-        for runPeriod in runPeriods:
-            cal.LinearityCurves(runPeriod)
-            rep.runReplayPass4(runPeriod)
-            cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
-            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
-            cal.calculateResiduals(runPeriod, PMTbyPMT=True)
+        #for runPeriod in runPeriods:
+            #cal.makeSourceCalibrationFile(period, False)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
+            #cal.LinearityCurves(runPeriod)
+            #rep.runReplayPass4(runPeriod)
+            #cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
+            #cal.calculateResiduals(runPeriod, PMTbyPMT=True)
             
         cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 1: 
+    if 0: 
         runPeriods = [8,9,10]#[2,3,4,5,7] #### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
@@ -842,10 +882,10 @@ if __name__ == "__main__":
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             
     

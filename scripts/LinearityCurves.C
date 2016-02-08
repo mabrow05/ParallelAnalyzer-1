@@ -86,7 +86,7 @@ void LinearityCurves(Int_t runPeriod)
       simFileIn >> run_hold >> sourceName_hold >> Eq_hold[0] >> Eq_hold[1] >> Eq_hold[2]
 		>> Eq_hold[3] >> Eq_hold[4] >> Eq_hold[5] >> Eq_hold[6] >> Eq_hold[7];
     }
-    cout << run_hold << " " << sourceName_hold << " ";
+    //cout << run_hold << " " << sourceName_hold << " ";
     if (run_hold==run[i] && sourceName_hold==sourceName[i]) { 
       EqE1[i] = Eq_hold[0];
       EqE2[i] = Eq_hold[1];
@@ -112,7 +112,7 @@ void LinearityCurves(Int_t runPeriod)
   Int_t num = i;
   cout << "Number of data points: " << num << endl;
 
-  // Load the smeared EQ values which are different for each PMT and source
+  /* // Load the smeared EQ values which are different for each PMT and source
   vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod,"EQ");
   for (int m=0; m<EQsmeared.size(); m++) {
     for (int mm=0; mm<EQsmeared[m].size(); mm++) {
@@ -128,7 +128,8 @@ void LinearityCurves(Int_t runPeriod)
       cout << EQ2Etrue[m][mm] << " ";
     }
     cout << endl;
-  }
+    }*/
+
   //Read in PMT quality file to save whether or not to use a PMT for each run
   vector<vector<int> > pmtQuality;
   vector <int> pmthold(8,0);
@@ -251,7 +252,7 @@ void LinearityCurves(Int_t runPeriod)
 
 
   //Resize res vectors
-ResE1.resize(runE1.size());
+  ResE1.resize(runE1.size());
   ResE2.resize(runE2.size());
   ResE3.resize(runE3.size());
   ResE4.resize(runE4.size());
@@ -1767,3 +1768,4 @@ ResE1.resize(runE1.size());
   //outfile->Close();
 
 }
+ 

@@ -204,6 +204,26 @@ class BetaReplayManager:
                 os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%run)
         print "DONE"
 
+    
+    def runReverseCalibration(self, runORoctet):
+        runs = []
+        if runORoctet > 16000:
+            print "Running reverse calibration for run %i"%runORoctet
+            os.system("./../simulation_comparison/revCalSim.exe %i %s"%(runORoctet, "Beta"))
+            print "Finished reverse calibration for run %i"%runORoctet
+        else: 
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
+        
+            for line in infile:      
+                words=line.split()
+                runs.append(int(words[1]))
+        
+            for run in runs:
+                print "Running reverse calibration for run %i"%run
+                os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, "Beta"))
+
+            print "Finished reverse calibration for octet %s"%runORoctet
         
     
 
@@ -293,7 +313,7 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
-    if 1:
+    if 0:
         octet_range = [0,2]#[10,14]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
@@ -303,5 +323,12 @@ if __name__ == "__main__":
             beta.runReplayPass2(octet)
             beta.runReplayPass3(octet)
             beta.runReplayPass4(octet)
-            
+
+
+    #Running reverse calibrations
+    if 1:
+        octet_range = [0,59];
+        beta = BetaReplayManager()
+        for octet in range(octet_range[0],octet_range[1]+1,1):
+            beta.runReverseCalibration(octet)
     
