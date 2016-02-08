@@ -25,6 +25,7 @@
 #include "replay_pass4.h"
 #include "sourcePeaks.h"
 #include "DataTree.hh"
+#include "runInfo.h"
 
 using namespace std;
 
@@ -43,49 +44,11 @@ int main(int argc, char *argv[])
   //istringstream ss(argv[1]);
   int runNumber = atoi(argv[1]);
   //ss >> runNumber;
-  int calibrationPeriod = 1;
+  unsigned int calibrationPeriod = getSrcRunPeriod(runNumber);
   // Determine linearity curve to use
   char tempFileLinearityCurve[500];
-  if (runNumber <= 17297) {
-    calibrationPeriod=1;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_1.dat");
-  }
-  else if (runNumber <= 17439) {
-    calibrationPeriod=2;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_2.dat");
-  }
-  else if (runNumber <= 17734) {
-    calibrationPeriod=3;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_3.dat");
-  }
-  else if (runNumber <= 17955) {
-    calibrationPeriod=4;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_4.dat");
-  }
-  else if (runNumber <= 18386) {
-    calibrationPeriod=5;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_5.dat");
-  }
-  else if (runNumber <= 18683) {
-    calibrationPeriod=6;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_6.dat");
-  }
-  else if (runNumber <= 18994) {
-    calibrationPeriod=7;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_7.dat");
-  }
-  else if (runNumber <= 19239) {
-    calibrationPeriod=8;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_8.dat");
-  }
-  else if (runNumber <= 19544) {
-    calibrationPeriod=9;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_9.dat");
-  }
-  else if (runNumber <= 20000) {
-    calibrationPeriod=11;
-    sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_11.dat");
-  }
+  
+  sprintf(tempFileLinearityCurve, "../linearity_curves/lin_curves_srcCal_Period_%i.dat",calibrationPeriod);
   cout << "... Reading: " << tempFileLinearityCurve << endl;
 
    //Setup array to hold linearity curves
@@ -182,6 +145,8 @@ int main(int argc, char *argv[])
   int nEvents = t->getEntries();
   cout << "... Processing nEvents = " << nEvents << endl;
 
+  int pp=0; // counter for events to print to screen
+
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     t->getEvent(i);
@@ -253,9 +218,9 @@ int main(int argc, char *argv[])
     Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(t->ScintW.e3)+EQ2Etrue[6][2]*(t->ScintW.e3)*(t->ScintW.e3);
     Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(t->ScintW.e4)+EQ2Etrue[7][2]*(t->ScintW.e4)*(t->ScintW.e4);
     */
-    Double_t lowestPMTenergy = 0.001; //This is for setting an upper limit on the weight since
+    Double_t lowestPMTenergy = 1.; //This is for setting an upper limit on the weight since
                                         // at E=0, the weight goes to infiniti
-    Double_t lowestADC = 0.001;
+    Double_t lowestADC = 0.001;//20.;
 
     if (pmtQuality[0]) { 
       if (t->ScintE.e1>lowestPMTenergy && t->ScintE.q1>lowestADC) {
@@ -349,9 +314,13 @@ int main(int argc, char *argv[])
       //else EvisW=0.;
     
     t->Erecon = t->EvisE+t->EvisW;
+
     
-    if (i<20) {
-      cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
+    if (t->ScintW.energy>0.) {
+      while (pp<20) {
+     	cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
+	pp++;
+      }
     }
     
    
