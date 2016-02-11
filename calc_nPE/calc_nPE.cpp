@@ -22,6 +22,8 @@
 
 #include "replay_pass2.h"
 #include "replay_pass3.h"
+#include "posMapReader.h"
+#include "runInfo.h"
 #include "DataTree.hh"
 
 using namespace std;
@@ -117,6 +119,16 @@ int main(int argc, char *argv[])
   his[2][6] = new TH1F("his3_W2", "", nBin,0.0,4000.0);
   his[2][7] = new TH1F("his3_W3", "", nBin,0.0,4000.0);*/
 
+  // We are also going to calculate the average value of the position correction from the 
+  // position map for every event. This will be needed later on when calculating an adjusted 
+  // number of photoelectrons per event in simulation
+  GetPositionMap(getXeRunPeriod(runNumber)); //Reads in the proper position map
+  Int_t numDataPoints[2] = {0.}; //Holds the number of data points for each side
+  Double_t aveEta[8] = {0.}; //Holds the average value of eta for the the data being read in
+  Int_t EastXgrid, EastYgrid, WestXgrid, WestYgrid; // holds the grid point of the data being read in
+  EastXgrid=EastYgrid=WestXgrid=WestYgrid=0;
+
+
   // Open input ntuple
   char tempIn[500];
   sprintf(tempIn, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
@@ -133,10 +145,16 @@ int main(int argc, char *argv[])
 
     // Use Type 0 events
     if (t->Type != 0) continue;
+    
 
     // First source (x,y)
     if (useSource[0]) {
-
+      vector < vector <int> > gridPoint = getGridPoint(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
+      EastXgrid = gridPoint[0][0];
+      EastYgrid = gridPoint[0][1];
+      WestXgrid = gridPoint[1][0];
+      WestYgrid = gridPoint[1][1];
+      //cout << EastXgrid << endl;
       if (t->Side == 0) {
 	if ( (t->xE.center - xEast[0])*(t->xE.center - xEast[0]) +
 	     (t->yE.center - yEast[0])*(t->yE.center - yEast[0]) <
@@ -146,6 +164,13 @@ int main(int argc, char *argv[])
 	  his[1]->Fill(t->ScintE.q2);
 	  his[2]->Fill(t->ScintE.q3);
 	  his[3]->Fill(t->ScintE.q4);
+
+	  numDataPoints[0]++;
+	  aveEta[0]+=positionMap[0][EastXgrid][EastYgrid];
+	  aveEta[1]+=positionMap[1][EastXgrid][EastYgrid];
+	  aveEta[2]+=positionMap[2][EastXgrid][EastYgrid];
+	  aveEta[3]+=positionMap[3][EastXgrid][EastYgrid];
+	  
 	}
       }
       if (t->Side == 1) {
@@ -157,12 +182,24 @@ int main(int argc, char *argv[])
 	  his[5]->Fill(t->ScintW.q2);
 	  his[6]->Fill(t->ScintW.q3);
 	  his[7]->Fill(t->ScintW.q4);
+
+	  numDataPoints[1]++;
+	  aveEta[4]+=positionMap[4][WestXgrid][WestYgrid];
+	  aveEta[5]+=positionMap[5][WestXgrid][WestYgrid];
+	  aveEta[6]+=positionMap[6][WestXgrid][WestYgrid];
+	  aveEta[7]+=positionMap[7][WestXgrid][WestYgrid];
 	}
       }
     }
 
     // Second source (x,y)
     if (nSources > 1 && useSource[1]) {
+      vector < vector <int> > gridPoint = getGridPoint(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
+      EastXgrid = gridPoint[0][0];
+      EastYgrid = gridPoint[0][1];
+      WestXgrid = gridPoint[1][0];
+      WestYgrid = gridPoint[1][1];
+      //cout << EastXgrid << endl;
       if (t->Side == 0) {
 	if ( (t->xE.center - xEast[1])*(t->xE.center - xEast[1]) +
 	     (t->yE.center - yEast[1])*(t->yE.center - yEast[1]) <
@@ -173,6 +210,11 @@ int main(int argc, char *argv[])
 	  his[2]->Fill(t->ScintE.q3);
 	  his[3]->Fill(t->ScintE.q4);
 	
+	  numDataPoints[0]++;
+	  aveEta[0]+=positionMap[0][EastXgrid][EastYgrid];
+	  aveEta[1]+=positionMap[1][EastXgrid][EastYgrid];
+	  aveEta[2]+=positionMap[2][EastXgrid][EastYgrid];
+	  aveEta[3]+=positionMap[3][EastXgrid][EastYgrid];
 	}
       }
       if (t->Side == 1) {
@@ -184,12 +226,24 @@ int main(int argc, char *argv[])
 	  his[5]->Fill(t->ScintW.q2);
 	  his[6]->Fill(t->ScintW.q3);
 	  his[7]->Fill(t->ScintW.q4);
+	  
+	  numDataPoints[1]++;
+	  aveEta[4]+=positionMap[4][WestXgrid][WestYgrid];
+	  aveEta[5]+=positionMap[5][WestXgrid][WestYgrid];
+	  aveEta[6]+=positionMap[6][WestXgrid][WestYgrid];
+	  aveEta[7]+=positionMap[7][WestXgrid][WestYgrid];
 	}
       }
     }
 
     // Third source (x,y)
     if (nSources > 2 && useSource[2]) {
+      vector < vector <int> > gridPoint = getGridPoint(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
+      EastXgrid = gridPoint[0][0];
+      EastYgrid = gridPoint[0][1];
+      WestXgrid = gridPoint[1][0];
+      WestYgrid = gridPoint[1][1];
+      //cout << EastXgrid << endl;
       if (t->Side == 0) {
 	if ( (t->xE.center - xEast[2])*(t->xE.center - xEast[2]) +
              (t->yE.center - yEast[2])*(t->yE.center - yEast[2]) <
@@ -199,6 +253,12 @@ int main(int argc, char *argv[])
 	  his[1]->Fill(t->ScintE.q2);
 	  his[2]->Fill(t->ScintE.q3);
 	  his[3]->Fill(t->ScintE.q4);
+
+	  numDataPoints[0]++;
+	  aveEta[0]+=positionMap[0][EastXgrid][EastYgrid];
+	  aveEta[1]+=positionMap[1][EastXgrid][EastYgrid];
+	  aveEta[2]+=positionMap[2][EastXgrid][EastYgrid];
+	  aveEta[3]+=positionMap[3][EastXgrid][EastYgrid];
         }
       }
       if (t->Side == 1) {
@@ -210,6 +270,12 @@ int main(int argc, char *argv[])
 	  his[5]->Fill(t->ScintW.q2);
 	  his[6]->Fill(t->ScintW.q3);
 	  his[7]->Fill(t->ScintW.q4);
+	  
+	  numDataPoints[1]++;
+	  aveEta[4]+=positionMap[4][WestXgrid][WestYgrid];
+	  aveEta[5]+=positionMap[5][WestXgrid][WestYgrid];
+	  aveEta[6]+=positionMap[6][WestXgrid][WestYgrid];
+	  aveEta[7]+=positionMap[7][WestXgrid][WestYgrid];
 	}
       }
     }
@@ -293,6 +359,18 @@ int main(int argc, char *argv[])
 	       << nPE[j] << " "
 	       << nPE_per_channel[j] << endl;
   }
+  outResults.close();
+
+  //Writing average eta values to file
+  sprintf(tempResults, "%s/nPE_meanEtaVal_%s.dat",getenv("NPE_WEIGHTS"), argv[1]);
+  outResults.open(tempResults);
+  for (int j=0; j<4; j++) {
+    outResults << aveEta[j]/(double)numDataPoints[0] << endl;
+  }
+  for (int j=4; j<8; j++) {
+    outResults << aveEta[j]/(double)numDataPoints[1] << endl;
+  }
+  outResults.close();
 
   // Write output ntuple
   fileOut->Write();

@@ -126,6 +126,21 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
   return alphas;
 }
 
+//Returns the average eta value from the position map for the Sn source used to calculate alpha
+vector < Double_t > getMeanEtaForAlpha(Int_t run) 
+{
+  Char_t temp[500];
+  vector < Double_t > eta (8,0.);
+  sprintf(temp,"%s/nPE_meanEtaVal_%i.dat",getenv("NPE_WEIGHTS"),run);
+  ifstream infile;
+  infile.open(temp);
+  Int_t i = 0;
+
+  while (infile >> eta[i]) i++;
+  return eta;
+}
+  
+
 void SetUpTree(TTree *tree) {
   tree->Branch("PID", &PID, "PID/I");
   tree->Branch("side", &side, "side/I");
@@ -198,6 +213,7 @@ void revCalSimulation (Int_t runNumber, string source)
   UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
   GetPositionMap(XePeriod);
   vector <Double_t> alphas = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
+  vector <Double_t> meanEta = getMeanEtaForAlpha(runNumber); // fill vector with the calculated mean position correction for the source used to calculate alpha
   vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,7); // 2D vector with trigger function for East side and West side in that order
 
   //Setup the output tree
@@ -378,19 +394,22 @@ void revCalSimulation (Int_t runNumber, string source)
     //MWPC triggers
     if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
     if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
+
+    Double_t pmtEnergyLowerLimit = 1.; //To put a hard cut on the weight
     
     //East Side smeared PMT energies
     for (UInt_t p=0; p<4; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
-	Double_t posCorrAlpha = alphas[p]*positionMap[p][intEastBinX][intEastBinY];
+	//cout << p << " " << positionMap[p][intEastBinX][intEastBinY] << endl;
+	Double_t posCorrAlpha = alphas[p]*positionMap[p][intEastBinX][intEastBinY]/meanEta[p];
 	pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
 	while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
 	  pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQE,sqrt(edepQ.EdepQE/posCorrAlpha));
 	}
-	if (pmt_Evis.Evis[p]>0.001) {
+	if (pmt_Evis.Evis[p]>pmtEnergyLowerLimit) {
 	  pmt_Evis.weight[p] = posCorrAlpha/pmt_Evis.Evis[p];
 	}
-	else {pmt_Evis.weight[p]=posCorrAlpha/0.001;} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
+	else {pmt_Evis.weight[p]=posCorrAlpha/pmtEnergyLowerLimit;} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
       }
       // If PMT quality failed, set the evis and the weight to zero for this PMT
       else {
@@ -419,15 +438,15 @@ void revCalSimulation (Int_t runNumber, string source)
     //West Side
     for (UInt_t p=4; p<8; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
-	Double_t posCorrAlpha = alphas[p]*positionMap[p][intWestBinX][intWestBinY];
+	Double_t posCorrAlpha = alphas[p]*positionMap[p][intWestBinX][intWestBinY]/meanEta[p];
 	pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
 	while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
 	  pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQW,sqrt(edepQ.EdepQW/posCorrAlpha));
 	}
-	if (pmt_Evis.Evis[p]>0.001) {
+	if (pmt_Evis.Evis[p]>pmtEnergyLowerLimit) {
 	  pmt_Evis.weight[p] = posCorrAlpha/pmt_Evis.Evis[p];
 	}
-	else {pmt_Evis.weight[p]=posCorrAlpha/0.001;} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
+	else {pmt_Evis.weight[p]=posCorrAlpha/pmtEnergyLowerLimit;} //This sets a hard cut on the weight of an event so that events with zero energy still carry weight.. Probably not the most effective way to do this, but it should address low energy behavior
       }
       // If PMT quality failed, set the evis and the weight to zero for this PMT
       else {

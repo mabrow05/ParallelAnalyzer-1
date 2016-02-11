@@ -6,6 +6,7 @@
 #include <TSQLRow.h>
 #include <TSQLResult.h>
 #include "../include/sourcePeaks.h"
+#include "../include/runInfo.h"
 
 unsigned int find_vec_location_int(std::vector<Int_t> vec, Int_t val)
 {
@@ -44,6 +45,20 @@ vector < double > returnPeaksOtherSource(int srcPeriod, string src) {
     peakfile >> peaks[pmt];
   }
   return peaks;
+}
+
+//Returns the average eta value from the position map for the Sn source used to calculate alpha
+vector < Double_t > getMeanEtaForAlpha(Int_t run) 
+{
+  Char_t temp[500];
+  vector < Double_t > eta (8,0.);
+  sprintf(temp,"%s/nPE_meanEtaVal_%i.dat",getenv("NPE_WEIGHTS"),run);
+  ifstream infile;
+  infile.open(temp);
+  Int_t i = 0;
+
+  while (infile >> eta[i]) i++;
+  return eta;
 }
 
 /*string getIndiumSide(int runNumber) {
@@ -766,8 +781,10 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     Double_t ResidualE1, ResidualE2, ResidualE3, ResidualE4; //These hold the residuals for the weighting method..
     UInt_t pmtVecLocation = find_vec_location_int(pmtRun,run[j]);
 
+    vector < Double_t > meanEta = getMeanEtaForAlpha(run[j]);
+
     if (pmtQuality[pmtVecLocation][0] && *E1==run[j] && *nmE1==sourceName[j]) {
-      Double_t N = EvisE1[j]*alphas[0];
+      Double_t N = EvisE1[j]*alphas[0]/meanEta[0];
       Double_t f = sqrt(N)/N;
       ResidualE1 = *RE1;
       //Energy1 = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(*E1_fitEQ)+EQ2Etrue[0][2]*(*E1_fitEQ)*(*E1_fitEQ);
@@ -782,7 +799,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else {weight1=0.; Energy1=0.; ResidualE1=0.;}
 
     if (pmtQuality[pmtVecLocation][1] && *E2==run[j] && *nmE2==sourceName[j]) {
-      Double_t N = EvisE2[j]*alphas[1];
+      Double_t N = EvisE2[j]*alphas[1]/meanEta[1];
       Double_t f = sqrt(N)/N;
       ResidualE2 = *RE2;
       //Energy2 = EQ2Etrue[1][0]+EQ2Etrue[1][1]*(*E2_fitEQ)+EQ2Etrue[1][2]*(*E2_fitEQ)*(*E2_fitEQ);
@@ -797,7 +814,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else {weight2=0.; Energy2=0.; ResidualE2=0.;}
 
     if (pmtQuality[pmtVecLocation][2] && *E3==run[j] && *nmE3==sourceName[j]) {
-      Double_t N = EvisE3[j]*alphas[2];
+      Double_t N = EvisE3[j]*alphas[2]/meanEta[2];
       Double_t f = sqrt(N)/N;
       ResidualE4 = *RE3;
       //Energy3 = EQ2Etrue[2][0]+EQ2Etrue[2][1]*(*E3_fitEQ)+EQ2Etrue[2][2]*(*E3_fitEQ)*(*E3_fitEQ);;
@@ -812,7 +829,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else {weight3=0.; Energy3=0.; ResidualE3=0.;}
 
     if (pmtQuality[pmtVecLocation][3] && *E4==run[j] && *nmE4==sourceName[j]) {
-      Double_t N = EvisE4[j]*alphas[3];
+      Double_t N = EvisE4[j]*alphas[3]/meanEta[3];
       Double_t f = sqrt(N)/N;
       ResidualE4 = *RE4;
       //Energy4 = EQ2Etrue[3][0]+EQ2Etrue[3][1]*(*E4_fitEQ)+EQ2Etrue[3][2]*(*E4_fitEQ)*(*E4_fitEQ);
@@ -1309,8 +1326,10 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     Double_t ResidualW1, ResidualW2, ResidualW3, ResidualW4;
     UInt_t pmtVecLocation = find_vec_location_int(pmtRun,run[j]);
 
+    vector < Double_t > meanEta = getMeanEtaForAlpha(run[j]);
+
     if (pmtQuality[pmtVecLocation][4] && *W1==run[j] && *nmW1==sourceName[j]) {
-      Double_t N = EvisW1[j]*alphas[4];
+      Double_t N = EvisW1[j]*alphas[4]/meanEta[4];
       Double_t f = sqrt(N)/N;
       ResidualW1 = *RW1;
       Energy1 = W1_EVIS;
@@ -1325,7 +1344,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else {weight1=0.; Energy1=0.; ResidualW1=0.;}
 
     if (pmtQuality[pmtVecLocation][5] && *W2==run[j] && *nmW2==sourceName[j]) {
-      Double_t N = EvisW2[j]*alphas[5];
+      Double_t N = EvisW2[j]*alphas[5]/meanEta[5];
       Double_t f = sqrt(N)/N;
       ResidualW2 = *RW2;
       Energy2 = W2_EVIS;
@@ -1340,7 +1359,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else {weight2=0.; Energy2=0.; ResidualW2=0.;}
 
     if (pmtQuality[pmtVecLocation][6] && *W3==run[j] && *nmW3==sourceName[j]) {
-      Double_t N = EvisW3[j]*alphas[6];
+      Double_t N = EvisW3[j]*alphas[6]/meanEta[6];
       Double_t f = sqrt(N)/N;
       ResidualW3 = *RW3;
       Energy3 = W3_EVIS;
@@ -1355,7 +1374,7 @@ void MB_calc_residuals_EvisPMTbyPMT(Int_t runPeriod)
     else {weight3=0.; Energy3=0.; ResidualW3=0.;}
 
     if (pmtQuality[pmtVecLocation][7] && *W4==run[j] && *nmW4==sourceName[j]) {
-      Double_t N = EvisW4[j]*alphas[7];
+      Double_t N = EvisW4[j]*alphas[7]/meanEta[7];
       Double_t f = sqrt(N)/N;
       ResidualW4 = *RW4;
       Energy4 = W4_EVIS;
