@@ -41,7 +41,7 @@ WPMT4 = []
 EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 EPMT2_runRanges = []
 EPMT3_runRanges = []
-EPMT4_runRanges = [(17233,18055), (20121,23173)]
+EPMT4_runRanges = [(17233,18055),(20121,23173)]
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)]
 WPMT3_runRanges = []
@@ -332,7 +332,7 @@ class CalibrationManager:
             return 8
         elif runNumber <= 19544:
             return 9
-        elif runNumber <= 20000:
+        elif runNumber < 20000:
             return 11
         elif runNumber <= 20741:
             return 13
@@ -360,7 +360,7 @@ class CalibrationManager:
 
     def calc_nPE_per_PMT(self, runAllRefRun=False, run=19359, writeNPEforAllRuns=False, year="2011-2012"):
 
-        srcSn_nPE_Runs = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899,20520,20823,20905,21091,21315,21683,21918,22219,22298,22441,22771,22925] #These are runs for which the nPE per channel are calculated
+        srcSn_nPE_Runs = [17238,17370,17521,17925,18361,18621,18749,19232,19359,19511,19857,19899,20520,20831,20905,21091,21315,21683,21918,22219,22298,22441,22771,22925] #These are runs for which the nPE per channel are calculated
         # May or may not match the reference runs
 
         srcRunPeriodRange = None
@@ -393,6 +393,7 @@ class CalibrationManager:
             for rn in range(runRange[0],runRange[1]+1,1):
                 calPeriod = self.findCalibrationPeriod(rn)
                 os.system("cp %s/nPE_weights_%i.dat %s/nPE_weights_%i.dat"%(self.nPEcountPath,srcSn_nPE_Runs[calPeriod-1],self.nPEcountPath,rn))
+                os.system("cp %s/nPE_meanEtaVal_%i.dat %s/nPE_meanEtaVal_%i.dat"%(self.nPEcountPath,srcSn_nPE_Runs[calPeriod-1],self.nPEcountPath,rn))
 
         else:
             os.system("cd ../calc_nPE/; ./calc_nPE.exe %i"%run)
@@ -840,12 +841,12 @@ if __name__ == "__main__":
     ### Making the files which hold the PMT quality
     if 0:
         cal = CalibrationManager()
-        #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True,year="2012-2013")
-        cal.makePMTrunFile(master=True)
+        cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True,year="2012-2013")
+        #cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
     if 0: 
-        runPeriods =[13,14,16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods =[13]#,16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]
         rep = CalReplayManager()
         cal = CalibrationManager()
         
@@ -860,14 +861,14 @@ if __name__ == "__main__":
         rep = CalReplayManager()
         cal = CalibrationManager()
         
-        #for runPeriod in runPeriods:
+        for runPeriod in runPeriods:
             #cal.makeSourceCalibrationFile(period, False)
             #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
             #cal.LinearityCurves(runPeriod)
             #rep.runReplayPass4(runPeriod)
             #cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
             #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
-            #cal.calculateResiduals(runPeriod, PMTbyPMT=True)
+            cal.calculateResiduals(runPeriod, PMTbyPMT=True)
             
         cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
