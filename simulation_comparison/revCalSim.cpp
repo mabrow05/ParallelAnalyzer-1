@@ -7,6 +7,8 @@ of the detector. Also applies the trigger functions */
 #include "sourcePeaks.h"
 #include "runInfo.h"
 
+#include "../Asymmetry/SQLinterface.hh"
+
 #include <vector>
 #include <cstdlib>
 #include <iostream>
@@ -26,6 +28,31 @@ of the detector. Also applies the trigger functions */
 
 
 using namespace std;
+
+
+int getPolarization(int run) {
+ 
+  std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
+  std::string dbname = std::string(getenv("UCNADB"));
+  std::string dbUser = std::string(getenv("UCNADBUSER"));
+  std::string dbPass = std::string(getenv("UCNADBPASS"));
+  
+  char cmd[200];
+  sprintf(cmd,"SELECT flipper FROM run WHERE run_number=%i;",run);
+
+  SQLdatabase *db = new SQLdatabase(dbname, dbAddress, dbUser, dbPass);
+  db->fetchQuery(cmd);
+  std::string flipperStatus = db->returnQueryEntry();
+  delete db;
+
+  std::cout << flipperStatus << std::endl;
+  if (flipperStatus=="On") return 1;
+  else if (flipperStatus=="Off") return -1;
+  else {
+    std::cout <<  "Polarization isn't applicaple or you chose a Depol Run";
+    return 0;
+  }
+};
 
 vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams) {
   Char_t file[500];
@@ -150,6 +177,8 @@ void SetUpTree(TTree *tree) {
   tree->Branch("Evis",&evis,"EvisE/D:EvisW");
   tree->Branch("Edep",&edep,"EdepE/D:EdepW");
   tree->Branch("EdepQ",&edepQ,"EdepQE/D:EdepQW");
+  tree->Branch("Eprim",&Eprim,"Eprim/D");
+  tree->Branch("AsymWeight",&AsymWeight,"AsymWeight/D");
   
   tree->Branch("time",&Time,"timeE/D:timeW");
   tree->Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
@@ -166,6 +195,9 @@ void revCalSimulation (Int_t runNumber, string source)
   cout << "Running reverse calibration for run " << runNumber << " and source " << source << endl;
   //Start by getting the source position if not a Beta decay run
   vector < vector <double> > srcPos;
+
+  //int polarization = getPolarization(runNumber); //Getting the polarization (returns 0 if not a beta run. Else it is +/-1
+
   if (source!="Beta") {
     string srcShort = source;
     srcShort.erase(2);
@@ -187,13 +219,13 @@ void revCalSimulation (Int_t runNumber, string source)
   TTree *data = (TTree*)(dataFile->Get("pass3"));
   string outputBase;
   if (source!="Beta") {
-    sprintf(tempE,"Type<3 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
-    sprintf(tempW,"Type<3 && PID==1 && Side==1 && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
+    sprintf(tempE,"Type<4 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
+    sprintf(tempW,"Type<4 && PID==1 && Side==1 && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
     outputBase = string(getenv("REVCALSIM")) + "sources/";
   }
   else if (source=="Beta") {
-    sprintf(tempE,"Type<3 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
-    sprintf(tempW,"Type<3 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
+    sprintf(tempE,"Type<4 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
+    sprintf(tempW,"Type<4 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
     outputBase = string(getenv("REVCALSIM")) + "beta/";
   }
   UInt_t BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
@@ -240,12 +272,16 @@ void revCalSimulation (Int_t runNumber, string source)
   std::cout << "Using simulation from " << simLocation << "...\n";
 
   //Read in simulated data and put in a TChain
- 
+  TRandom3 *randFile = new TRandom3(0);
   int numFiles = source=="Beta"?400:250;
+  int fileNum = source=="Beta" ? (int)(randFile->Rndm()*400) : 0;
+  delete randFile;
   for (int i=0; i<numFiles; i++) {
-    sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),i);
+    if (fileNum==numFiles) fileNum=0;
+    sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
     //sprintf(temp,"../../../data/analyzed_%i.root",i);
     chain->AddFile(temp);
+    fileNum++;
   }
 
   // Determine the center of the source in simulation in order to construct the displacement vector between
@@ -294,6 +330,7 @@ void revCalSimulation (Int_t runNumber, string source)
   chain->SetBranchAddress("EdepQ",&edepQ);
   chain->SetBranchAddress("MWPCPos",&mwpc_pos);
   chain->SetBranchAddress("ScintPos",&scint_pos);
+  chain->SetBranchAddress("primKE",&Eprim);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
   //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
@@ -329,9 +366,11 @@ void revCalSimulation (Int_t runNumber, string source)
     // contamination from edge effects and interactions with detector walls
     Double_t fidCut = 45.;
     if (source=="Beta") fidCut=50.; //Since I cut at 50 when determining the number of beta events
-    if (sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>fidCut
-	|| sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>fidCut) {evt++; continue;}
-    //cout << "evt passed fiducial cut\n";
+    else if (sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>fidCut
+	     || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>fidCut) {evt++; continue;} //For source events, 
+    // We don't want edge contamination, and I use a cut of 45 mm when selecting what sources are present in calibration runs.
+
+
     //calculate adjusted event position by sampling a gaussian centered on source position. Do it for primary event side.
     /*Int_t primSide=0., primType=0;
     if (edep.EdepE>0. && edep.EdepW>0.) {
@@ -385,7 +424,7 @@ void revCalSimulation (Int_t runNumber, string source)
       
     //retrieve point on grid for each side of detector [E/W][x/y]
     gridPoint = getGridPoint(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
-      
+
     Int_t intEastBinX = gridPoint[0][0];
     Int_t intEastBinY = gridPoint[0][1];
     Int_t intWestBinX = gridPoint[1][0];
@@ -397,15 +436,17 @@ void revCalSimulation (Int_t runNumber, string source)
 
     Double_t pmtEnergyLowerLimit = 1.; //To put a hard cut on the weight
     
+
     //East Side smeared PMT energies
     for (UInt_t p=0; p<4; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
 	//cout << p << " " << positionMap[p][intEastBinX][intEastBinY] << endl;
 	Double_t posCorrAlpha = alphas[p]*positionMap[p][intEastBinX][intEastBinY]/meanEta[p];
-	pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
-	while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
-	  pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQE,sqrt(edepQ.EdepQE/posCorrAlpha));
-	}
+	if (posCorrAlpha==0.) posCorrAlpha=1.; //This occurs when the event occurs outside the position map... This is to prevent the Gaussian from having inf sigma
+	//pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
+	//while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
+	pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQE,sqrt(edepQ.EdepQE/posCorrAlpha));
+	//}
 	if (pmt_Evis.Evis[p]>pmtEnergyLowerLimit) {
 	  pmt_Evis.weight[p] = posCorrAlpha/pmt_Evis.Evis[p];
 	}
@@ -439,10 +480,11 @@ void revCalSimulation (Int_t runNumber, string source)
     for (UInt_t p=4; p<8; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
 	Double_t posCorrAlpha = alphas[p]*positionMap[p][intWestBinX][intWestBinY]/meanEta[p];
-	pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
-	while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
-	  pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQW,sqrt(edepQ.EdepQW/posCorrAlpha));
-	}
+	if (posCorrAlpha==0.) posCorrAlpha=1.; //This occurs when the event occurs outside the position map... This is to prevent the Gaussian from having inf sigma
+	//pmt_Evis.Evis[p] = -1.; // set the Evis for the while loop to return positive first time
+	//while (pmt_Evis.Evis[p]<0.) { //Must have positive energies since we force the PMTs to intercept 0
+	pmt_Evis.Evis[p] = rand->Gaus(edepQ.EdepQW,sqrt(edepQ.EdepQW/posCorrAlpha));
+	//}
 	if (pmt_Evis.Evis[p]>pmtEnergyLowerLimit) {
 	  pmt_Evis.weight[p] = posCorrAlpha/pmt_Evis.Evis[p];
 	}
@@ -557,8 +599,9 @@ void revCalSimulation (Int_t runNumber, string source)
       }
     }
       
-    // Increment the event tally if the event was PID = 1 (electron)
-    if (PID==1) evtTally++;
+    // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
+    if (PID==1 && sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
+	&& sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut) evtTally++;
     evt++;
     if (PID>=0) tree->Fill();
     //cout << evtTally << endl;
@@ -566,6 +609,8 @@ void revCalSimulation (Int_t runNumber, string source)
   }
   cout << endl;
   delete chain;
+  delete rand;
+  delete rand2;
   outfile->Write();
   outfile->Close();
   

@@ -152,61 +152,61 @@ int main(int argc, char *argv[])
     t->getEvent(i);
     
     //Calculate Evis for each event in each PMT using the linearity curve determined in calibration
-    if (t->ScintE.q1>linearityCurve[0][4]) {
+    //if (t->ScintE.q1>linearityCurve[0][4]) {
       t->ScintE.e1 = linearityCurve[0][0] + linearityCurve[0][1]*t->ScintE.q1 
 	+ linearityCurve[0][2]*t->ScintE.q1*t->ScintE.q1 + linearityCurve[0][3]*t->ScintE.q1*t->ScintE.q1*t->ScintE.q1;
-    }
-    else if (t->ScintE.q1>0.) t->ScintE.e1 = linearityCurve[0][5]*t->ScintE.q1;
-    else t->ScintE.e1=0.;
+      //}
+      //else if (t->ScintE.q1>0.) t->ScintE.e1 = linearityCurve[0][5]*t->ScintE.q1;
+      //else t->ScintE.e1=0.;
 
-    if (t->ScintE.q2>linearityCurve[1][4]) {
+      //if (t->ScintE.q2>linearityCurve[1][4]) {
       t->ScintE.e2 = linearityCurve[1][0] + linearityCurve[1][1]*t->ScintE.q2 
 	+ linearityCurve[1][2]*t->ScintE.q2*t->ScintE.q2 + linearityCurve[1][3]*t->ScintE.q2*t->ScintE.q2*t->ScintE.q2;
-    }
-    else if (t->ScintE.q2>0.) t->ScintE.e2 = linearityCurve[1][5]*t->ScintE.q2;
-    else t->ScintE.e2=0.;
+      //}
+      //else if (t->ScintE.q2>0.) t->ScintE.e2 = linearityCurve[1][5]*t->ScintE.q2;
+      //else t->ScintE.e2=0.;
 
-    if (t->ScintE.q3>linearityCurve[2][4]) {
+      //if (t->ScintE.q3>linearityCurve[2][4]) {
       t->ScintE.e3 = linearityCurve[2][0] + linearityCurve[2][1]*t->ScintE.q3 
 	+ linearityCurve[2][2]*t->ScintE.q3*t->ScintE.q3 + linearityCurve[2][3]*t->ScintE.q3*t->ScintE.q3*t->ScintE.q3;
-    }
-    else if (t->ScintE.q3>0.) t->ScintE.e3 = linearityCurve[2][5]*t->ScintE.q3;
-    else t->ScintE.e3=0.;
+      //}
+    //else if (t->ScintE.q3>0.) t->ScintE.e3 = linearityCurve[2][5]*t->ScintE.q3;
+    //else t->ScintE.e3=0.;
 
-    if (t->ScintE.q4>linearityCurve[3][4]) {
+    //if (t->ScintE.q4>linearityCurve[3][4]) {
       t->ScintE.e4 = linearityCurve[3][0] + linearityCurve[3][1]*t->ScintE.q4 
 	+ linearityCurve[3][2]*t->ScintE.q4*t->ScintE.q4 + linearityCurve[3][3]*t->ScintE.q4*t->ScintE.q4*t->ScintE.q4;
-    }
-    else if (t->ScintE.q4>0.) t->ScintE.e4 = linearityCurve[3][5]*t->ScintE.q4;
-    else t->ScintE.e4=0.;
+      //}
+    //else if (t->ScintE.q4>0.) t->ScintE.e4 = linearityCurve[3][5]*t->ScintE.q4;
+    //else t->ScintE.e4=0.;
 
-    if (t->ScintW.q1>linearityCurve[4][4]) {
+    //if (t->ScintW.q1>linearityCurve[4][4]) {
       t->ScintW.e1 = linearityCurve[4][0] + linearityCurve[4][1]*t->ScintW.q1 
 	+ linearityCurve[4][2]*t->ScintW.q1*t->ScintW.q1 + linearityCurve[4][3]*t->ScintW.q1*t->ScintW.q1*t->ScintW.q1;
-    }
-    else if (t->ScintW.q1>0.) t->ScintW.e1 = linearityCurve[4][5]*t->ScintW.q1;
-    else t->ScintW.e1=0.;
+      //}
+    //else if (t->ScintW.q1>0.) t->ScintW.e1 = linearityCurve[4][5]*t->ScintW.q1;
+    //else t->ScintW.e1=0.;
 
-    if (t->ScintW.q2>linearityCurve[5][4]) {
+    //if (t->ScintW.q2>linearityCurve[5][4]) {
       t->ScintW.e2 = linearityCurve[5][0] + linearityCurve[5][1]*t->ScintW.q2 
 	+ linearityCurve[5][2]*t->ScintW.q2*t->ScintW.q2 + linearityCurve[5][3]*t->ScintW.q2*t->ScintW.q2*t->ScintW.q2;
-    }
-    else if (t->ScintW.q2>0.) t->ScintW.e2 = linearityCurve[5][5]*t->ScintW.q2;
-    else t->ScintW.e2=0.;
+      //}
+    //else if (t->ScintW.q2>0.) t->ScintW.e2 = linearityCurve[5][5]*t->ScintW.q2;
+    //else t->ScintW.e2=0.;
 
-    if (t->ScintW.q3>linearityCurve[6][4]) {
+    //if (t->ScintW.q3>linearityCurve[6][4]) {
       t->ScintW.e3 = linearityCurve[6][0] + linearityCurve[6][1]*t->ScintW.q3 
 	+ linearityCurve[6][2]*t->ScintW.q3*t->ScintW.q3 + linearityCurve[6][3]*t->ScintW.q3*t->ScintW.q3*t->ScintW.q3;
-    }
-    else if (t->ScintW.q3>0.) t->ScintW.e3 = linearityCurve[6][5]*t->ScintW.q3;
-    else t->ScintW.e3=0.;
+      //}
+    //else if (t->ScintW.q3>0.) t->ScintW.e3 = linearityCurve[6][5]*t->ScintW.q3;
+    //else t->ScintW.e3=0.;
 
-    if (t->ScintW.q4>linearityCurve[7][4]) {
+    //if (t->ScintW.q4>linearityCurve[7][4]) {
       t->ScintW.e4 = linearityCurve[7][0] + linearityCurve[7][1]*t->ScintW.q4 
 	+ linearityCurve[7][2]*t->ScintW.q4*t->ScintW.q4 + linearityCurve[7][3]*t->ScintW.q4*t->ScintW.q4*t->ScintW.q4;
-    }
-    else if (t->ScintW.q4>0.) t->ScintW.e4 = linearityCurve[7][5]*t->ScintW.q4;
-    else t->ScintW.e4=0.;
+      //}
+    //else if (t->ScintW.q4>0.) t->ScintW.e4 = linearityCurve[7][5]*t->ScintW.q4;
+    //else t->ScintW.e4=0.;
 
     //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
     /*Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(t->ScintE.e1)+EQ2Etrue[0][2]*(t->ScintE.e1)*(t->ScintE.e1);
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
                                         // at E=0, the weight goes to infiniti
     Double_t lowestADC = 0.001;//20.;
 
-    if (pmtQuality[0]) { 
+    if (pmtQuality[0]) { // && t->ScintE.e1>0.) { 
       if (t->ScintE.e1>lowestPMTenergy && t->ScintE.q1>lowestADC) {
 	t->ScintE.nPE1 = t->ScintE.q1*nPE_per_channel[0];
 	t->ScintE.de1 = t->ScintE.e1/sqrt(t->ScintE.nPE1);
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
     }
     else {pmt_Evis.weight0=0.;}
 
-    if (pmtQuality[1]) { 
+    if (pmtQuality[1]) { // && t->ScintE.e2>0.) { 
       if (t->ScintE.e2>lowestPMTenergy && t->ScintE.q2>lowestADC) {
 	t->ScintE.nPE2 = t->ScintE.q2*nPE_per_channel[1];
 	t->ScintE.de2 = t->ScintE.e2/sqrt(t->ScintE.nPE2);
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
     }
     else {pmt_Evis.weight1=0.;}
 
-    if (pmtQuality[2]) { 
+    if (pmtQuality[2]) { // && t->ScintE.e3>0.) { 
       if (t->ScintE.e3>lowestPMTenergy && t->ScintE.q3>lowestADC) {
 	t->ScintE.nPE3 = t->ScintE.q3*nPE_per_channel[2];
 	t->ScintE.de3 = t->ScintE.e3/sqrt(t->ScintE.nPE3);
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
     }
     else {pmt_Evis.weight2=0.;}
 
-    if (pmtQuality[3]) { 
+    if (pmtQuality[3]) { // && t->ScintE.e4>0.) { 
       if (t->ScintE.e4>lowestPMTenergy && t->ScintE.q4>lowestADC) {
 	t->ScintE.nPE4 = t->ScintE.q4*nPE_per_channel[3];
 	t->ScintE.de4 = t->ScintE.e4/sqrt(t->ScintE.nPE4);
@@ -262,7 +262,7 @@ int main(int argc, char *argv[])
     }
     else {pmt_Evis.weight3=0.;}
 
-    if (pmtQuality[4]) { 
+    if (pmtQuality[4]) { // && t->ScintW.e1>0.) { 
       if (t->ScintW.e1>lowestPMTenergy && t->ScintW.q1>lowestADC) {
 	t->ScintW.nPE1 = t->ScintW.q1*nPE_per_channel[4];
 	t->ScintW.de1 = t->ScintW.e1/sqrt(t->ScintW.nPE1);
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
     }
     else {pmt_Evis.weight4=0.;}
 
-    if (pmtQuality[5]) {
+    if (pmtQuality[5]) { // && t->ScintW.e2>0.) {
       if (t->ScintW.e2>lowestPMTenergy && t->ScintW.q2>lowestADC) {
 	t->ScintW.nPE2 = t->ScintW.q2*nPE_per_channel[5];
 	t->ScintW.de2 = t->ScintW.e2/sqrt(t->ScintW.nPE2);
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
     }
     else {pmt_Evis.weight5=0.;}
 
-    if (pmtQuality[6]) {
+    if (pmtQuality[6]) { // && t->ScintW.e3>0.) {
       if (t->ScintW.e3>lowestPMTenergy && t->ScintW.q3>lowestADC) {
 	t->ScintW.nPE3 = t->ScintW.q3*nPE_per_channel[6];
 	t->ScintW.de3 = t->ScintW.e3/sqrt(t->ScintW.nPE3);
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
     }
     else {pmt_Evis.weight6=0.;}
 
-    if (pmtQuality[7]) {
+    if (pmtQuality[7]) { // && t->ScintW.e4>0.) {
       if (t->ScintW.e4>lowestPMTenergy && t->ScintW.q4>lowestADC) {
 	t->ScintW.nPE4 = t->ScintW.q4*nPE_per_channel[7];
 	t->ScintW.de4 = t->ScintW.e4/sqrt(t->ScintW.nPE4);
@@ -303,28 +303,38 @@ int main(int argc, char *argv[])
     else {pmt_Evis.weight7=0.;}
 
     //East side EvisE
-    //if (side_pass3==0 || type_pass3==1) {
-    t->ScintE.energy = t->EvisE = (pmt_Evis.weight0*t->ScintE.e1+pmt_Evis.weight1*t->ScintE.e2+pmt_Evis.weight2*t->ScintE.e3+pmt_Evis.weight3*t->ScintE.e4)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
-    t->ScintE.denergy = 1./sqrt(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
+    //if (!(pmt_Evis.weight0==0. && pmt_Evis.weight1==0. && pmt_Evis.weight2==0. && pmt_Evis.weight3==0.)) {
+      t->ScintE.energy = t->EvisE = (pmt_Evis.weight0*t->ScintE.e1+pmt_Evis.weight1*t->ScintE.e2+pmt_Evis.weight2*t->ScintE.e3+pmt_Evis.weight3*t->ScintE.e4)/(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
+      t->ScintE.denergy = 1./sqrt(pmt_Evis.weight0+pmt_Evis.weight1+pmt_Evis.weight2+pmt_Evis.weight3);
+      //}
+      //else {
+      //t->ScintE.energy = t->EvisE = 0.;
+      //t->ScintE.denergy = 0.;
+      // }
 //else EvisE=0.;
     //West Side EvisW
-    //if (side_pass3==1 || type_pass3==1) {
-    t->ScintW.energy = t->EvisW = (pmt_Evis.weight4*t->ScintW.e1+pmt_Evis.weight5*t->ScintW.e2+pmt_Evis.weight6*t->ScintW.e3+pmt_Evis.weight7*t->ScintW.e4)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
-    t->ScintW.denergy = 1./sqrt(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
+    //if (!(pmt_Evis.weight4==0. && pmt_Evis.weight5==0. && pmt_Evis.weight6==0. && pmt_Evis.weight7==0.)) {
+      t->ScintW.energy = t->EvisW = (pmt_Evis.weight4*t->ScintW.e1+pmt_Evis.weight5*t->ScintW.e2+pmt_Evis.weight6*t->ScintW.e3+pmt_Evis.weight7*t->ScintW.e4)/(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
+      t->ScintW.denergy = 1./sqrt(pmt_Evis.weight4+pmt_Evis.weight5+pmt_Evis.weight6+pmt_Evis.weight7);
+      //}
+      //else {
+      //t->ScintW.energy = t->EvisW = 0.;
+      //t->ScintW.denergy = 0.;
+      // }
       //else EvisW=0.;
     
-    t->Erecon = t->EvisE+t->EvisW;
+      t->Erecon = (t->EvisW>0. && t->EvisE>0.) ? t->EvisE+t->EvisW : (t->EvisW>0. ? t->EvisW : (t->EvisE>0. ? t->EvisE : 0.));
 
     
-    if (t->ScintW.energy>0.) {
-      while (pp<20) {
-     	cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
-	pp++;
-      }
-    }
+    //if (t->Side==1) cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
+    //if (t->ScintW.energy>150.) {
+    // while (pp<20000) {
+    //	cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
+    //	pp++;
+    //}
+    //}
     
-   
-    t->fillOutputTree();
+    if (t->Erecon>0.) t->fillOutputTree();
   }
 
   // Write output ntuple

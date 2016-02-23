@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
   // position map for every event. This will be needed later on when calculating an adjusted 
   // number of photoelectrons per event in simulation
   GetPositionMap(getXeRunPeriod(runNumber)); //Reads in the proper position map
-  Int_t numDataPoints[2] = {0.}; //Holds the number of data points for each side
+  Int_t numDataPoints[2] = {0}; //Holds the number of data points for each side
   Double_t aveEta[8] = {0.}; //Holds the average value of eta for the the data being read in
   Int_t EastXgrid, EastYgrid, WestXgrid, WestYgrid; // holds the grid point of the data being read in
   EastXgrid=EastYgrid=WestXgrid=WestYgrid=0;

@@ -8,7 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
-VPATH = ./:../include
+VPATH = ./:../include:../Asymmetry
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -19,8 +19,8 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-revCalSim.exe: revCalSim.o
-	$(CXX) $(CXXFLAGS) -o revCalSim.exe revCalSim.o $(LIBS)
+revCalSim.exe: revCalSim.o SQLinterface.o
+	$(CXX) $(CXXFLAGS) -o revCalSim.exe revCalSim.o SQLinterface.o $(LIBS)
 	@echo "Done"
 
 #posMapReader.o: posMapReader.h
