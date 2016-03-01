@@ -1,13 +1,4 @@
-#ifndef MBUTILS_HH
-#define MBUTILS_HH
-
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <cmath>
-#include <cstdlib>
-#include <string>
-
+#include "MBUtils.hh"
 
 std::string itos(int val) {
   char temp[32];
@@ -34,14 +25,3 @@ double power(double num, int pow) {
   }
   else throw "Error in power somewhere";
 };
-
-
-
-
-
-
-
-
-
-
-#endif

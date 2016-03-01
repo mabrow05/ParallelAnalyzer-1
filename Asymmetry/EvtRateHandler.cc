@@ -125,16 +125,16 @@ void EvtRateHandler::dataReader() {
     input = new TFile(infile.c_str(), "READ");
     Tin = (TTree*)input->Get("pass4");
 
-    Tin->SetBranchAddress("PID_pass4", &PID);
-    Tin->SetBranchAddress("type_pass4", &Type);
-    Tin->SetBranchAddress("side_pass4", &Side); 
-    Tin->SetBranchAddress("EvisTot",&Erecon);
-    Tin->SetBranchAddress("timeE",&TimeE);
-    Tin->SetBranchAddress("timeW",&TimeW);
-    Tin->SetBranchAddress("xE_pass4",&EmwpcX);
-    Tin->SetBranchAddress("yE_pass4",&EmwpcY);
-    Tin->SetBranchAddress("xW_pass4",&WmwpcX);
-    Tin->SetBranchAddress("yW_pass4",&WmwpcY);
+    Tin->SetBranchAddress("PID", &PID);
+    Tin->SetBranchAddress("Type", &Type);
+    Tin->SetBranchAddress("Side", &Side); 
+    Tin->SetBranchAddress("Erecon",&Erecon);
+    Tin->SetBranchAddress("TimeE",&TimeE);
+    Tin->SetBranchAddress("TimeW",&TimeW);
+    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
   }
   else {
     sprintf(temp,"spec_%i.root",runNumber);

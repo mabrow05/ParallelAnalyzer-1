@@ -19,7 +19,7 @@
 class EvtRateHandler {
 public:
   EvtRateHandler(int run, const std::string& inDir, bool ukdata=true) : runNumber(run),inputDir(inDir),UKdata(ukdata) {}
-  ~EvtRateHandler();
+  virtual ~EvtRateHandler();
   int runNumber; //Run Number being read in
   std::string inputDir; //input data directory
   bool UKdata; //This is true if the tree format is UK style, False if it's official analyzer style
@@ -57,9 +57,9 @@ protected:
 class SimEvtRateHandler: public EvtRateHandler {
 public:
   SimEvtRateHandler(int run, const std::string& inDir): EvtRateHandler(run, inDir, true) {}
-  ~SimEvtRateHandler() {}
+
 protected:
-  virtual void dataReader(); //Different set of variables for reverse calibrated simulated data
+  void dataReader(); //Different set of variables for reverse calibrated simulated data
 };
 
 class BGSubtractedRate {

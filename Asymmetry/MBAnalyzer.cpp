@@ -84,8 +84,7 @@ int main()
     double totalEvts[4]={0.};
     OctetAsymmetry *oct;
     for (unsigned int octet=0; octet<60;octet++) {
-      oct = new OctetAsymmetry(octet,10.,50.);
-      oct->UKdata = true;
+      oct = new OctetAsymmetry(octet,10.,50.,true);
       oct->loadRates();
       oct->calcTotalAsymmetry(enWinLow,enWinHigh,7);
       std::cout<<std::endl;

@@ -15,13 +15,17 @@ LIBS		= $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS       += $(ROOTCFLAGS) -Iinclude
 LIBS	       += -lSpectrum -lMinuit
 
-objects = Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o #MBUtils.o
+objects = MBUtils.o Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o 
 
 .PHONY: all
 all: MBAnalyzer.exe 
 
 MBAnalyzer.exe: MBAnalyzer.o $(objects) 
 	$(CXX) $(CXXFLAGS) -o MBAnalyzer.exe MBAnalyzer.o $(objects) $(LIBS) 
+	@echo "Done"
+
+UK2MPMcomparison.exe: UK2MPMcomparison.o $(objects) 
+	$(CXX) $(CXXFLAGS) -o UK2MPMcomparison.exe UK2MPMcomparison.o $(objects) $(LIBS) 
 	@echo "Done"
 
 Asymmetries.o: Asymmetries.hh
@@ -32,7 +36,7 @@ SQLintercace.o: SQLinterface.hh
 
 SystematicCorrections.o: SystematicCorrections.hh
 
-#MBUtils.o: MBUtils.hh
+MBUtils.o: MBUtils.hh
 
 clean:
 		@rm -f *.o *~  core

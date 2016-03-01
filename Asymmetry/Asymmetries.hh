@@ -10,27 +10,32 @@
 // base class for loading octet information
 class AsymmetryBase {
 public:
-  AsymmetryBase(int oct, double enBinWidth=10., double fidCut=45.);
+  AsymmetryBase(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true);
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
   int getRunsInOctet() {return runsInOctet;}
   bool isFullOctet(); //Checks whether the octet has all the necessary beta runs
   void loadRates(int anaChoice=1); //Loads the BG subtracted rates for each run and side
-  bool checkIfBetaRun(std::string type);
-  void calcBGsubtractedEvts();
-  double getNumBGsubtrEvts(double enWinLow, double enWinHigh, int evtType);
+  bool checkIfBetaRun(std::string type); //Checks if run of type is a beta run or not
+  void calcBGsubtractedEvts(); // Simply calculates and fills numEvtsByTypeByBin vector
+  std::vector < double > getNumBGsubtrEvts(double enWinLow, double enWinHigh, int evtType); // returns the number of events summed over bin window
   void writeRatesToFile(); //For now this only uses type0 evts
   bool isAnaChoiceRateVectors() {return boolAnaChRtVecs;}
+  std::vector < std::vector < std::vector<double> > > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
+  std::vector < std::vector < std::vector<double> > > returnBGsubtractedRateError(std::string runType);
+  std::vector < double > returnRunLength(std::string runType); //Returns both beta and BG run length
 
-  bool UKdata;
-  bool Simulation; 
-  int octet;
+  
 
 protected:
   void makeAnalysisChoiceRateVectors(int anaChoice); //Makes new vectors based on the analysis choice (1-8)
-  std::vector< std::vector<double> > numEvtsByTypeByBin; //number of events for each evt type, each bin summed 
+  std::vector< std::vector<double> > numEvtsEastByTypeByBin; //number of events for each evt type, each bin summed 
+  std::vector< std::vector<double> > numEvtsWestByTypeByBin; //number of events for each evt type, each bin summed 
   
+  bool UKdata; //Boolean which is true for UK data and false if mpm
+  bool Simulation; //Boolean to use simulated data
+  int octet; // Holds the octet being analyzed
   
   double energyBinWidth;
   double fiducialCut;
@@ -41,7 +46,10 @@ protected:
   // The following vectors are bin by bin rates for each evt type on each side
   // for ecample, A2[type][side][bin] (A2[0-3][0-1][0-nBins])
   std::vector < std::vector < std::vector<double> > > A2, A5, A7, A10, B2, B5, B7, B10; //BG subtr rates for each beta run 
-  std::vector < std::vector < std::vector<double> > > A2err, A5err, A7err, A10err, B2err, B5err, B7err, B10err; //BG subtr rates for each beta run
+  std::vector < std::vector < std::vector<double> > > A2err, A5err, A7err, A10err, B2err, B5err, B7err, B10err; //BG subtr rate errors for each beta run
+
+  //The following vectors store the length of the runs where A2len[0][0]=A2East length and A2[1][0] = A2East BG run length(A1)
+  std::vector < std::vector < double > > A2len, A5len, A7len, A10len, B2len, B5len, B7len, B10len;
 
   // The following vectors sum over the appropriate event types for the analysisChoice [side][bin]
   std::vector < std::vector <double> > anaChoice_A2, anaChoice_A5, anaChoice_A7, anaChoice_A10, anaChoice_B2, anaChoice_B5, anaChoice_B7, anaChoice_B10; //BG subtr rates for each beta run 
@@ -54,7 +62,7 @@ protected:
 
 class OctetAsymmetry : public AsymmetryBase {
 public:
-  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45.);
+  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true);
   ~OctetAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();
