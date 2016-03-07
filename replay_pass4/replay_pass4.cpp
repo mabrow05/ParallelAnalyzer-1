@@ -29,6 +29,24 @@
 
 using namespace std;
 
+std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
+  ifstream infile;
+  if (runNumber<20000) infile.open("../simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
+  else infile.open("../simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat");
+  
+  std::vector < std::vector < std::vector < double > > > params;
+  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
+
+  char holdType[10];
+  int side=0, type=0;
+  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
+    cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << endl;
+    type+=1;
+    if (type==3) {type=0; side=1;}
+  }
+  return params;
+};
+
 int main(int argc, char *argv[])
 {
   cout.setf(ios::fixed, ios::floatfield);
@@ -69,14 +87,8 @@ int main(int argc, char *argv[])
   }
 
   //Load the simulated relationship between EQ and Etrue
-  vector < vector <double> > EQ2Etrue = EQ2EtrueFit(calibrationPeriod);
-  cout << "EQ to Etrue conversion quadratic:\n" << "const:\tlin:\tquad:\n";
-  for (unsigned int m=0; m<EQ2Etrue.size(); m++) {
-    for (unsigned int mm=0; mm<EQ2Etrue[m].size(); mm++) {
-      cout << EQ2Etrue[m][mm] << " ";
-    }
-    cout << endl;
-  }
+  vector < vector < vector < double > > > EQ2Etrue = getEQ2EtrueParams(runNumber);
+ 
   
   //Read in PMT quality file
   cout << "Reading in PMT Quality file ...\n";
@@ -323,9 +335,26 @@ int main(int argc, char *argv[])
       // }
       //else EvisW=0.;
     
-      t->Erecon = (t->EvisW>0. && t->EvisE>0.) ? t->EvisE+t->EvisW : (t->EvisW>0. ? t->EvisW : (t->EvisE>0. ? t->EvisE : 0.));
+      //t->Erecon = (t->EvisW>0. && t->EvisE>0.) ? t->EvisE+t->EvisW : (t->EvisW>0. ? t->EvisW : (t->EvisE>0. ? t->EvisE : 0.));
 
-    
+      int typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+      double totalEvis=0.;
+
+      if (t->Side==0) {
+	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisE;
+	if (totalEvis>0.) {
+	  t->Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
+	}
+	else t->Erecon=-1.;
+      }
+      if (t->Side==1) {
+	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisW;
+	if (totalEvis>0.) {
+	  t->Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
+	}
+	else t->Erecon=-1.;
+      }
+  
     //if (t->Side==1) cout << pmt_Evis.weight4 << " " << pmt_Evis.weight5 << " " << pmt_Evis.weight6 << " " << pmt_Evis.weight7 << endl;
     //if (t->ScintW.energy>150.) {
     // while (pp<20000) {
