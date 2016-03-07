@@ -143,11 +143,13 @@ int main(int argc, char *argv[])
       mpm->calcTotalAsymmetry(225.,675.,1);
       mpmAsym = mpm->returnTotalAsymmetry();
       mpmAsymError = mpm->returnTotalAsymmetryError();
+      std::cout << "MPM Asym " << mpmAsym << std::endl;
 
       UK->calcTotalAsymmetry(225.,675.,1);
       ukAsym = UK->returnTotalAsymmetry();
       ukAsymError = UK->returnTotalAsymmetryError();
-    
+      std::cout << "UK Asym " << ukAsym << std::endl;
+      exit(0);
       UK->calcBGsubtractedEvts();
       mpm->calcBGsubtractedEvts();
     
