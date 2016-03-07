@@ -76,17 +76,17 @@ int main()
     //Looking at octet evts and asymmetries
 
     //unsigned int octetNum = 1;
-    ofstream rawAsym("rawAsymmetryByOctet_0-59_AnaCh7_50mm.dat");
+    //ofstream rawAsym("rawAsymmetryByOctet_0-59_AnaCh7_50mm.dat");
     
-    double enWinLow = 170.; //170
-    double enWinHigh = 630.; //630
+    double enWinLow = 220.; //170
+    double enWinHigh = 680.; //630
     double evts[4]={0.};
     double totalEvts[4]={0.};
     OctetAsymmetry *oct;
-    for (unsigned int octet=0; octet<60;octet++) {
-      oct = new OctetAsymmetry(octet,10.,50.,true);
-      oct->loadRates();
-      oct->calcTotalAsymmetry(enWinLow,enWinHigh,7);
+    for (unsigned int octet=0; octet<1;octet++) {
+      oct = new OctetAsymmetry(octet,10.,50.,false);
+      
+      oct->calcTotalAsymmetry(enWinLow,enWinHigh,1);
       std::cout<<std::endl;
       //oct->calcAsymmetryBinByBin(1);
       std::cout<<std::endl;
@@ -96,11 +96,11 @@ int main()
       double AsymError = oct->returnTotalAsymmetryError();
       std::cout << "Asymmetry for Octet " << octet << ":\n";
       std::cout << Asym << " +- " << AsymError << std::endl;
-      rawAsym << Asym << " " << AsymError << "\n";
+      //rawAsym << Asym << " " << AsymError << "\n";
     
       delete oct;
     }
-    rawAsym.close();
+    //rawAsym.close();
 	
       /*oct->calcBGsubtractedEvts();
       for (unsigned int type=0;type<4;type++) {

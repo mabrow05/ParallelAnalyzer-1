@@ -2,12 +2,13 @@
 
 void EQ2EtrueFitter() {
   
+  ofstream params("2011-2012_EQ2EtrueFitParams.dat"); //Output file for fit parameters
   string fileName  = "HistMeans.dat";
   ifstream infile(fileName.c_str());
 
   int type0lowOffset = 5;
-  int type1lowOffset = 11;
-  int type23lowOffset = 12;
+  int type1lowOffset = 13;
+  int type23lowOffset = 13;
   
   int type0highOffset = 2;
   int type1highOffset = 4;
@@ -60,24 +61,28 @@ void EQ2EtrueFitter() {
 
     if (infile.eof()) break;
   }
+  infile.close();
 
   
   
   int numDataPoints = EtrueMin.size();
   //cout << numDataPoints << " " << EQtype3E.size() << " " <<EtrueMid.size() <<  endl;
 
-  TF1 *func0 = new TF1("func0","[0]+[1]*x+[2]/x+[3]/(x*x)",20.,1000.);
-  func0->SetParameters(0.,1.,1.,1.);
+  //TF1 *func0 = new TF1("func0","[0]+[1]*x+[2]/x+[3]/(x*x)",20.,1000.);
+  TF1 *func0 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",0.,1000.);
+  func0->SetParameters(100.,1.,1.,0.,1.,0.);
   //func0->FixParameter(0,0.);
   func0->SetLineColor(kBlue);
 
-  TF1 *func1 = new TF1("func1","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
-  func1->SetParameters(0.,1.5,1.,1.);
+  //TF1 *func1 = new TF1("func1","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
+  TF1 *func1 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",0.,1000.);
+  func1->SetParameters(100.,1.,1.,0.,1.,0.);
   //func1->FixParameter(0,0.);
   func1->SetLineColor(kRed);
 
-  TF1 *func23 = new TF1("func23","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
-  func23->SetParameters(0.,2.,1.,1.);
+  //TF1 *func23 = new TF1("func23","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
+  TF1 *func23 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",0.,1000.);
+  func23->SetParameters(100.,1.,1.,0.,1.,0.);
   //func23->FixParameter(0,0.);
   func23->SetLineColor(kGreen);
 
@@ -85,6 +90,7 @@ void EQ2EtrueFitter() {
   TGraph *t0E = new TGraph(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0E[type0lowOffset-1],&EtrueMid[type0lowOffset-1]); 
   t0E->SetMarkerColor(kBlue);
   t0E->SetMarkerStyle(21);
+  //t0E->SetMarkerSize(.8);
   TGraph *t1E = new TGraph(numDataPoints-(type1lowOffset+type1highOffset),&EQtype1E[type1lowOffset-1],&EtrueMid[type1lowOffset-1]);
   t1E->SetMarkerColor(kRed);
   t1E->SetMarkerStyle(20);
@@ -97,6 +103,13 @@ void EQ2EtrueFitter() {
   t0E->Fit(func0,"R");
   t1E->Fit(func1,"R");
   t23E->Fit(func23,"R");
+  
+  params << "Type0E: " << func0->GetParameter(0) << " " << func0->GetParameter(1) << " " << func0->GetParameter(2) << " " << func0->GetParameter(3) 
+	 << " " << func0->GetParameter(4) << " " << func0->GetParameter(5) << endl;
+  params << "Type1E: " << func1->GetParameter(0) << " " << func1->GetParameter(1) << " " << func1->GetParameter(2) << " " << func1->GetParameter(3) 
+	 << " " << func1->GetParameter(4) << " " << func1->GetParameter(5) << endl;
+  params << "Type23E: " << func23->GetParameter(0) << " " << func23->GetParameter(1) << " " << func23->GetParameter(2) << " " << func23->GetParameter(3) 
+	 << " " << func23->GetParameter(4) << " " << func23->GetParameter(5) << endl;
 
   TGraph *t0W = new TGraph(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0W[type0lowOffset-1],&EtrueMid[type0lowOffset-1]); 
   t0W->SetMarkerColor(kBlue);
@@ -113,6 +126,13 @@ void EQ2EtrueFitter() {
   t0W->Fit(func0,"R");
   t1W->Fit(func1,"R");
   t23W->Fit(func23,"R");
+
+   params << "Type0W: " << func0->GetParameter(0) << " " << func0->GetParameter(1) << " " << func0->GetParameter(2) << " " << func0->GetParameter(3) 
+	 << " " << func0->GetParameter(4) << " " << func0->GetParameter(5) << endl;
+  params << "Type1W: " << func1->GetParameter(0) << " " << func1->GetParameter(1) << " " << func1->GetParameter(2) << " " << func1->GetParameter(3) 
+	 << " " << func1->GetParameter(4) << " " << func1->GetParameter(5) << endl;
+  params << "Type23W: " << func23->GetParameter(0) << " " << func23->GetParameter(1) << " " << func23->GetParameter(2) << " " << func23->GetParameter(3) 
+	 << " " << func23->GetParameter(4) << " " << func23->GetParameter(5) << endl;
  
   TMultiGraph *east = new TMultiGraph();
   east->Add(t0E);
@@ -141,6 +161,12 @@ void EQ2EtrueFitter() {
   east->GetYaxis()->SetTitleOffset(1.4);
   east->Draw("AP");
 
+  TLegend *leg0 = new TLegend(0.55,0.25,0.85,0.375);
+  leg0->AddEntry(t0E,"  Type 0","p");
+  leg0->AddEntry(t1E,"  Type 1","p");
+  leg0->AddEntry(t23E,"  Type 2/3","p");
+  leg0->Draw();
+
   c1->cd(2);
   west->Draw("AP");
   west->SetMinimum(0.);
@@ -153,5 +179,9 @@ void EQ2EtrueFitter() {
   west->GetXaxis()->SetTitleOffset(1.4);
   west->GetYaxis()->SetTitleOffset(1.4);
   west->Draw("AP");
+
+  params.close();
+  
+  
 
 }
