@@ -16,7 +16,7 @@ public:
   void readOctetFile(); //populates the map runType
   int getRunsInOctet() {return runsInOctet;}
   bool isFullOctet(); //Checks whether the octet has all the necessary beta runs
-  void loadRates(int anaChoice=1); //Loads the BG subtracted rates for each run and side
+  void loadRates(); //Loads the BG subtracted rates for each run and side
   bool checkIfBetaRun(std::string type); //Checks if run of type is a beta run or not
   void calcBGsubtractedEvts(); // Simply calculates and fills numEvtsByTypeByBin vector
   std::vector < double > getNumBGsubtrEvts(double enWinLow, double enWinHigh, int evtType); // returns the number of events summed over bin window
