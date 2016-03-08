@@ -43,199 +43,210 @@ int main(int argc, char *argv[])
   double enWinHigh = atof(argv[4]);
   int enBinWidth = atoi(argv[5]);
 
-  OctetAsymmetry *UK;
-  OctetAsymmetry *mpm;
+  //OctetAsymmetry UK;
+  //OctetAsymmetry mpm;
 
-  TH1F *EvisEALL_mpm;
-  TH1F *EvisWALL_mpm;
-  TH1F *EvisEALL_uk;
-  TH1F *EvisWALL_uk;
+  TH1F EvisEALL_mpm;
+  TH1F EvisWALL_mpm;
+  TH1F EvisEALL_uk;
+  TH1F EvisWALL_uk;
 
-  TH1F *EvisE0_mpm;
-  TH1F *EvisW0_mpm;
-  TH1F *EvisE0_uk;
-  TH1F *EvisW0_uk;
+  TH1F EvisE0_mpm;
+  TH1F EvisW0_mpm;
+  TH1F EvisE0_uk;
+  TH1F EvisW0_uk;
 
-  TH1F *EvisE1_mpm;
-  TH1F *EvisW1_mpm;
-  TH1F *EvisE1_uk;
-  TH1F *EvisW1_uk;
+  TH1F EvisE1_mpm;
+  TH1F EvisW1_mpm;
+  TH1F EvisE1_uk;
+  TH1F EvisW1_uk;
 
-  TH1F *EvisE23_mpm;
-  TH1F *EvisW23_mpm;
-  TH1F *EvisE23_uk;
-  TH1F *EvisW23_uk;
+  TH1F EvisE23_mpm;
+  TH1F EvisW23_mpm;
+  TH1F EvisE23_uk;
+  TH1F EvisW23_uk;
 
-  TH1F *Type_mpm;
-  TH1F *Type_uk;
+  TH1F Type_mpm;
+  TH1F Type_uk;
 
   int numBins = 800/enBinWidth;
+
+  double mpmAsym2;
 
   for (int octetNum=octetNumStart; octetNum<octetNumEnd+1; octetNum++) {
  
     std::string pdfFileBase = "comparison_plots/calibrationRunComp_Octet"+itos(octetNum)+"_evis_"+itos((int)enWinLow)+"-"+itos((int)enWinHigh)+".pdf";
  
     //Making histograms for comparison  
-    EvisEALL_mpm = new TH1F("EvisEALL_mpm","EvisE Type ALL", numBins, 0., 800.);
-    EvisWALL_mpm = new TH1F("EvisWALL_mpm","EvisW Type ALL", numBins, 0., 800.);
-    EvisEALL_uk = new TH1F("EvisEALL_uk","EvisE Type ALL", numBins, 0., 800.);
-    EvisEALL_uk->GetXaxis()->SetTitle("Energy (keV)");
-    EvisWALL_uk = new TH1F("EvisWALL_uk","EvisW Type ALL", numBins, 0., 800.);
-    EvisWALL_uk->GetXaxis()->SetTitle("Energy (keV)");
+    EvisEALL_mpm = TH1F("EvisEALL_mpm","EvisE Type ALL", numBins, 0., 800.);
+    EvisWALL_mpm = TH1F("EvisWALL_mpm","EvisW Type ALL", numBins, 0., 800.);
+    EvisEALL_uk = TH1F("EvisEALL_uk","EvisE Type ALL", numBins, 0., 800.);
+    EvisEALL_uk.GetXaxis()->SetTitle("Energy (keV)");
+    EvisWALL_uk = TH1F("EvisWALL_uk","EvisW Type ALL", numBins, 0., 800.);
+    EvisWALL_uk.GetXaxis()->SetTitle("Energy (keV)");
 
-    EvisE0_mpm = new TH1F("EvisE0_mpm","EvisE Type 0", numBins, 0., 800.);
-    EvisW0_mpm = new TH1F("EvisW0_mpm","EvisW Type 0", numBins, 0., 800.);
-    EvisE0_uk = new TH1F("EvisE0_uk","EvisE Type 0", numBins, 0., 800.);
-    EvisE0_uk->GetXaxis()->SetTitle("Energy (keV)");
-    EvisW0_uk = new TH1F("EvisW0_uk","EvisW Type 0", numBins, 0., 800.);
-    EvisW0_uk->GetXaxis()->SetTitle("Energy (keV)");
+    EvisE0_mpm = TH1F("EvisE0_mpm","EvisE Type 0", numBins, 0., 800.);
+    EvisW0_mpm = TH1F("EvisW0_mpm","EvisW Type 0", numBins, 0., 800.);
+    EvisE0_uk = TH1F("EvisE0_uk","EvisE Type 0", numBins, 0., 800.);
+    EvisE0_uk.GetXaxis()->SetTitle("Energy (keV)");
+    EvisW0_uk = TH1F("EvisW0_uk","EvisW Type 0", numBins, 0., 800.);
+    EvisW0_uk.GetXaxis()->SetTitle("Energy (keV)");
 
-    EvisE1_mpm = new TH1F("EvisE1_mpm","EvisE Type 1", numBins, 0., 800.);
-    EvisW1_mpm = new TH1F("EvisW1_mpm","EvisW Type 1", numBins, 0., 800.);
-    EvisE1_uk = new TH1F("EvisE1_uk","EvisE Type 1", numBins, 0., 800.);
-    EvisE1_uk->GetXaxis()->SetTitle("Energy (keV)");
-    EvisW1_uk = new TH1F("EvisW1_uk","EvisW Type 1", numBins, 0., 800.);
-    EvisW1_uk->GetXaxis()->SetTitle("Energy (keV)");
+    EvisE1_mpm = TH1F("EvisE1_mpm","EvisE Type 1", numBins, 0., 800.);
+    EvisW1_mpm = TH1F("EvisW1_mpm","EvisW Type 1", numBins, 0., 800.);
+    EvisE1_uk = TH1F("EvisE1_uk","EvisE Type 1", numBins, 0., 800.);
+    EvisE1_uk.GetXaxis()->SetTitle("Energy (keV)");
+    EvisW1_uk = TH1F("EvisW1_uk","EvisW Type 1", numBins, 0., 800.);
+    EvisW1_uk.GetXaxis()->SetTitle("Energy (keV)");
 
-    EvisE23_mpm = new TH1F("EvisE23_mpm","EvisE Type 2/3", numBins, 0., 800.);
-    EvisW23_mpm = new TH1F("EvisW23_mpm","EvisW Type 2/3", numBins, 0., 800.);
-    EvisE23_uk = new TH1F("EvisE23_uk","EvisE Type 2/3", numBins, 0., 800.);
-    EvisE23_uk->GetXaxis()->SetTitle("Energy (keV)");
-    EvisW23_uk = new TH1F("EvisW23_uk","EvisW Type 2/3", numBins, 0., 800.); 
-    EvisW23_uk->GetXaxis()->SetTitle("Energy (keV)");
+    EvisE23_mpm = TH1F("EvisE23_mpm","EvisE Type 2/3", numBins, 0., 800.);
+    EvisW23_mpm = TH1F("EvisW23_mpm","EvisW Type 2/3", numBins, 0., 800.);
+    EvisE23_uk = TH1F("EvisE23_uk","EvisE Type 2/3", numBins, 0., 800.);
+    EvisE23_uk.GetXaxis()->SetTitle("Energy (keV)");
+    EvisW23_uk = TH1F("EvisW23_uk","EvisW Type 2/3", numBins, 0., 800.); 
+    EvisW23_uk.GetXaxis()->SetTitle("Energy (keV)");
 
-    Type_mpm = new TH1F("Type_mpm","Event Types", 4, 0., 4.);
-    Type_uk = new TH1F("Type_uk","Event Types", 4, 0., 4.);
+    Type_mpm = TH1F("Type_mpm","Event Types", 4, 0., 4.);
+    Type_uk = TH1F("Type_uk","Event Types", 4, 0., 4.);
   
 
-    EvisEALL_mpm->SetLineColor(kRed);
-    EvisWALL_mpm->SetLineColor(kRed);
-    EvisEALL_uk->SetLineColor(kBlue);
-    EvisWALL_uk->SetLineColor(kBlue);
+    EvisEALL_mpm.SetLineColor(kRed);
+    EvisWALL_mpm.SetLineColor(kRed);
+    EvisEALL_uk.SetLineColor(kBlue);
+    EvisWALL_uk.SetLineColor(kBlue);
   
-    EvisE0_mpm->SetLineColor(kRed);
-    EvisW0_mpm->SetLineColor(kRed);
-    EvisE0_uk->SetLineColor(kBlue);
-    EvisW0_uk->SetLineColor(kBlue);
+    EvisE0_mpm.SetLineColor(kRed);
+    EvisW0_mpm.SetLineColor(kRed);
+    EvisE0_uk.SetLineColor(kBlue);
+    EvisW0_uk.SetLineColor(kBlue);
 
-    EvisE1_mpm->SetLineColor(kRed);
-    EvisW1_mpm->SetLineColor(kRed);
-    EvisE1_uk->SetLineColor(kBlue);
-    EvisW1_uk->SetLineColor(kBlue);
+    EvisE1_mpm.SetLineColor(kRed);
+    EvisW1_mpm.SetLineColor(kRed);
+    EvisE1_uk.SetLineColor(kBlue);
+    EvisW1_uk.SetLineColor(kBlue);
 
-    EvisE23_mpm->SetLineColor(kRed);
-    EvisW23_mpm->SetLineColor(kRed);
-    EvisE23_uk->SetLineColor(kBlue);
-    EvisW23_uk->SetLineColor(kBlue);
+    EvisE23_mpm.SetLineColor(kRed);
+    EvisW23_mpm.SetLineColor(kRed);
+    EvisE23_uk.SetLineColor(kBlue);
+    EvisW23_uk.SetLineColor(kBlue);
 
-    Type_mpm->SetLineColor(kRed);
-    Type_uk->SetLineColor(kBlue);
+    Type_mpm.SetLineColor(kRed);
+    Type_uk.SetLineColor(kBlue);
 
     Int_t uk0E=0, mpm0E=0, uk1E=0, mpm1E=0, uk23E=0, mpm23E=0, ukTotE=0, mpmTotE=0, uk0W=0, mpm0W=0, uk1W=0, mpm1W=0, uk23W=0, mpm23W=0, ukTotW=0, mpmTotW=0; //Event totals
-    Double_t ukAsym = 0., mpmAsym=0., ukAsymError = 0., mpmAsymError=0.;
+    double ukAsym = 0., mpmAsym=0., ukAsymError = 0., mpmAsymError=0.;
     try {
     
-      UK = new OctetAsymmetry(octetNum, enBinWidth, 50., true);
-      mpm = new OctetAsymmetry(octetNum, enBinWidth, 50., false);
+      OctetAsymmetry UK(octetNum, enBinWidth, 50., true);
+      OctetAsymmetry mpm(octetNum, enBinWidth, 50., false);
 
       
+      UK.calcTotalAsymmetry(225.,675.,1);
+      ukAsym = UK.returnTotalAsymmetry();
+      ukAsymError = UK.returnTotalAsymmetryError();
+      std::cout << "UK Asym " << ukAsym << std::endl;
+      
 
-      mpm->calcTotalAsymmetry(225.,675.,1);
-      mpmAsym = mpm->returnTotalAsymmetry();
-      mpmAsymError = mpm->returnTotalAsymmetryError();
+      mpm.calcTotalAsymmetry(225.,675.,1);
+      mpmAsym = mpm.returnTotalAsymmetry();
+      mpmAsym2 = mpmAsym;
+      mpmAsymError = mpm.returnTotalAsymmetryError();
       std::cout << "MPM Asym " << mpmAsym << std::endl;
 
-      UK->calcTotalAsymmetry(225.,675.,1);
-      ukAsym = UK->returnTotalAsymmetry();
-      ukAsymError = UK->returnTotalAsymmetryError();
+      
+      UK.calcBGsubtractedEvts();
       std::cout << "UK Asym " << ukAsym << std::endl;
-      exit(0);
-      UK->calcBGsubtractedEvts();
-      mpm->calcBGsubtractedEvts();
+      //exit(0);
+      mpm.calcBGsubtractedEvts();
+      std::cout << "UK Asym " << ukAsym << std::endl;
+      //exit(0);
     
       std::vector <double> evts;
     
-      for (int bin=0; bin<numBins; bin++) {
+       for (int bin=0; bin<numBins; bin++) {
 	double aveBinEn = ((double)bin+.5)*(double)enBinWidth;
       
 	for (int i=0;i<3;i++) {
-	  evts = UK->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
-	  EvisEALL_uk->Fill(aveBinEn,evts[0]);
-	  EvisWALL_uk->Fill(aveBinEn,evts[1]);
+	  evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
+	  EvisEALL_uk.Fill(aveBinEn,evts[0]);
+	  EvisWALL_uk.Fill(aveBinEn,evts[1]);
 	
-	  evts = mpm->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
-	  EvisEALL_mpm->Fill(aveBinEn,evts[0]);
-	  EvisWALL_mpm->Fill(aveBinEn,evts[1]);
+	  evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
+	  EvisEALL_mpm.Fill(aveBinEn,evts[0]);
+	  EvisWALL_mpm.Fill(aveBinEn,evts[1]);
 	}
 
-	evts = UK->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
-	EvisE0_uk->Fill(aveBinEn,evts[0]);
-	EvisW0_uk->Fill(aveBinEn,evts[1]);
+	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
+	EvisE0_uk.Fill(aveBinEn,evts[0]);
+	EvisW0_uk.Fill(aveBinEn,evts[1]);
       
-	evts = mpm->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
-	EvisE0_mpm->Fill(aveBinEn,evts[0]);
-	EvisW0_mpm->Fill(aveBinEn,evts[1]);
+	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
+	EvisE0_mpm.Fill(aveBinEn,evts[0]);
+	EvisW0_mpm.Fill(aveBinEn,evts[1]);
 
-	evts = UK->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
-	EvisE1_uk->Fill(aveBinEn,evts[0]);
-	EvisW1_uk->Fill(aveBinEn,evts[1]);
+	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
+	EvisE1_uk.Fill(aveBinEn,evts[0]);
+	EvisW1_uk.Fill(aveBinEn,evts[1]);
       
-	evts = mpm->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
-	EvisE1_mpm->Fill(aveBinEn,evts[0]);
-	EvisW1_mpm->Fill(aveBinEn,evts[1]);
+	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
+	EvisE1_mpm.Fill(aveBinEn,evts[0]);
+	EvisW1_mpm.Fill(aveBinEn,evts[1]);
 
-	evts = UK->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
-	EvisE23_uk->Fill(aveBinEn,evts[0]);
-	EvisW23_uk->Fill(aveBinEn,evts[1]);
+	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
+	EvisE23_uk.Fill(aveBinEn,evts[0]);
+	EvisW23_uk.Fill(aveBinEn,evts[1]);
       
-	evts = mpm->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
-	EvisE23_mpm->Fill(aveBinEn,evts[0]);
-	EvisW23_mpm->Fill(aveBinEn,evts[1]);
+	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
+	EvisE23_mpm.Fill(aveBinEn,evts[0]);
+	EvisW23_mpm.Fill(aveBinEn,evts[1]);
 
-	evts = UK->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
-	EvisE23_uk->Fill(aveBinEn,evts[0]);
-	EvisW23_uk->Fill(aveBinEn,evts[1]);
+	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
+	EvisE23_uk.Fill(aveBinEn,evts[0]);
+	EvisW23_uk.Fill(aveBinEn,evts[1]);
       
-	evts = mpm->getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
-	EvisE23_mpm->Fill(aveBinEn,evts[0]);
-	EvisW23_mpm->Fill(aveBinEn,evts[1]);
+	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
+	EvisE23_mpm.Fill(aveBinEn,evts[0]);
+	EvisW23_mpm.Fill(aveBinEn,evts[1]);
 
       }
     
-      evts = UK->getNumBGsubtrEvts(enWinLow,enWinHigh,0);
+      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
       uk0E = (int)evts[0]; uk0W = (int)evts[1];
-      Type_uk->SetBinContent(1, (int)(evts[0]+evts[1]));
-      evts = UK->getNumBGsubtrEvts(enWinLow,enWinHigh,1);
+      Type_uk.SetBinContent(1, (int)(evts[0]+evts[1]));
+      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
       uk1E = (int)evts[0]; uk1W = (int)evts[1];
-      Type_uk->SetBinContent(2, (int)(evts[0]+evts[1]));
-      evts = UK->getNumBGsubtrEvts(enWinLow,enWinHigh,2);
+      Type_uk.SetBinContent(2, (int)(evts[0]+evts[1]));
+      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
       uk23E = (int)evts[0]; uk23W = (int)evts[1];
-      Type_uk->SetBinContent(3, (int)(evts[0]+evts[1]));
-      evts = UK->getNumBGsubtrEvts(enWinLow,enWinHigh,3);
+      Type_uk.SetBinContent(3, (int)(evts[0]+evts[1]));
+      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
       uk23E += (int)evts[0]; uk23W += (int)evts[1];
-      Type_uk->SetBinContent(4, (int)(evts[0]+evts[1]));
+      Type_uk.SetBinContent(4, (int)(evts[0]+evts[1]));
 
       ukTotE = uk0E+uk1E+uk23E;
       ukTotW = uk0W+uk1W+uk23W;
 
-      evts = mpm->getNumBGsubtrEvts(enWinLow,enWinHigh,0);
+      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
       mpm0E = (int)evts[0]; mpm0W = (int)evts[1];
-      Type_mpm->SetBinContent(1, (int)(evts[0]+evts[1]));
-      evts = mpm->getNumBGsubtrEvts(enWinLow,enWinHigh,1);
+      Type_mpm.SetBinContent(1, (int)(evts[0]+evts[1]));
+      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
       mpm1E = (int)evts[0]; mpm1W = (int)evts[1];
-      Type_mpm->SetBinContent(2, (int)(evts[0]+evts[1]));
-      evts = mpm->getNumBGsubtrEvts(enWinLow,enWinHigh,2);
+      Type_mpm.SetBinContent(2, (int)(evts[0]+evts[1]));
+      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
       mpm23E = (int)evts[0]; mpm23W = (int)evts[1];
-      Type_mpm->SetBinContent(3, (int)(evts[0]+evts[1]));
-      evts = mpm->getNumBGsubtrEvts(enWinLow,enWinHigh,3);
+      Type_mpm.SetBinContent(3, (int)(evts[0]+evts[1]));
+      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
       mpm23E += (int)evts[0]; mpm23W += (int)evts[1];
-      Type_mpm->SetBinContent(4, (int)(evts[0]+evts[1]));
+      Type_mpm.SetBinContent(4, (int)(evts[0]+evts[1]));
 
       mpmTotE = mpm0E+mpm1E+mpm23E;
       mpmTotW = mpm0W+mpm1W+mpm23W;
-
-      delete UK; delete mpm;
-    
+      
+      std::cout << "UK Asym " << ukAsym << std::endl;
+      
+      //delete UK; delete mpm;
+      std::cout << "mpm Asym " << mpmAsym2 << std::endl;
+      //exit(0);
 
     }
 
@@ -244,24 +255,25 @@ int main(int argc, char *argv[])
     }
     
 
-   
+    std::cout << "mpm Asym " << mpmAsym2 << std::endl;
+    exit(0);
       
     TCanvas *cEvisALL = new TCanvas("cEvisALL"," ", 1400., 600.);
     cEvisALL->Divide(2,1);
     cEvisALL->cd(1);
   
-    EvisEALL_uk->Draw();
-    EvisEALL_mpm->Draw("SAME");
+    EvisEALL_uk.Draw();
+    EvisEALL_mpm.Draw("SAME");
   
     TLegend *legALL = new TLegend(0.55,0.75,0.85,0.875);
-    legALL->AddEntry(EvisEALL_mpm,"  MPM","l");
-    legALL->AddEntry(EvisEALL_uk,"  UK","l");
+    legALL->AddEntry(&EvisEALL_mpm,"  MPM","l");
+    legALL->AddEntry(&EvisEALL_uk,"  UK","l");
     legALL->Draw();
   
     cEvisALL->cd(2);
   
-    EvisWALL_uk->Draw();
-    EvisWALL_mpm->Draw("SAME");
+    EvisWALL_uk.Draw();
+    EvisWALL_mpm.Draw("SAME");
   
     std::string pdfstart = pdfFileBase + "[";
     cEvisALL->Print(pdfstart.c_str());
@@ -272,18 +284,18 @@ int main(int argc, char *argv[])
     cEvis0->Divide(2,1);
     cEvis0->cd(1);
   
-    EvisE0_uk->Draw();
-    EvisE0_mpm->Draw("SAME");
+    EvisE0_uk.Draw();
+    EvisE0_mpm.Draw("SAME");
   
     TLegend *leg0 = new TLegend(0.55,0.75,0.85,0.875);
-    leg0->AddEntry(EvisE0_mpm,"  MPM","l");
-    leg0->AddEntry(EvisE0_uk,"  UK","l");
+    leg0->AddEntry(&EvisE0_mpm,"  MPM","l");
+    leg0->AddEntry(&EvisE0_uk,"  UK","l");
     leg0->Draw();
   
     cEvis0->cd(2);
   
-    EvisW0_uk->Draw();
-    EvisW0_mpm->Draw("SAME");
+    EvisW0_uk.Draw();
+    EvisW0_mpm.Draw("SAME");
   
     cEvis0->Print(pdfFileBase.c_str());
   
@@ -292,18 +304,18 @@ int main(int argc, char *argv[])
     cEvis1->Divide(2,1);
     cEvis1->cd(1);
   
-    EvisE1_uk->Draw();
-    EvisE1_mpm->Draw("SAME");
+    EvisE1_uk.Draw();
+    EvisE1_mpm.Draw("SAME");
   
     TLegend *leg1 = new TLegend(0.55,0.75,0.85,0.875);
-    leg1->AddEntry(EvisE1_mpm,"  MPM","l");
-    leg1->AddEntry(EvisE1_uk,"  UK","l");
+    leg1->AddEntry(&EvisE1_mpm,"  MPM","l");
+    leg1->AddEntry(&EvisE1_uk,"  UK","l");
     leg1->Draw();
   
     cEvis1->cd(2);
   
-    EvisW1_uk->Draw();
-    EvisW1_mpm->Draw("SAME");
+    EvisW1_uk.Draw();
+    EvisW1_mpm.Draw("SAME");
   
     cEvis1->Print(pdfFileBase.c_str());
     
@@ -312,18 +324,18 @@ int main(int argc, char *argv[])
     cEvis23->Divide(2,1);
     cEvis23->cd(1);
   
-    EvisE23_uk->Draw();
-    EvisE23_mpm->Draw("SAME");
+    EvisE23_uk.Draw();
+    EvisE23_mpm.Draw("SAME");
   
     TLegend *leg23 = new TLegend(0.55,0.75,0.85,0.875);
-    leg23->AddEntry(EvisE23_mpm,"  MPM","l");
-    leg23->AddEntry(EvisE23_uk,"  UK","l");
+    leg23->AddEntry(&EvisE23_mpm,"  MPM","l");
+    leg23->AddEntry(&EvisE23_uk,"  UK","l");
     leg23->Draw();
   
     cEvis23->cd(2);
   
-    EvisW23_uk->Draw();
-    EvisW23_mpm->Draw("SAME");
+    EvisW23_uk.Draw();
+    EvisW23_mpm.Draw("SAME");
   
     cEvis23->Print(pdfFileBase.c_str());
   
@@ -333,16 +345,18 @@ int main(int argc, char *argv[])
     cTypes->cd(1);
     gPad->SetLogy();
   
-    Type_uk->Draw();
-    Type_mpm->Draw("SAME");
+    Type_uk.Draw();
+    Type_mpm.Draw("SAME");
   
-    Type_uk->SetMinimum(1);
+    Type_uk.SetMinimum(1);
   
     TLegend *legTypes = new TLegend(0.55,0.75,0.85,0.875);
-    legTypes->AddEntry(Type_mpm,"  MPM","l");
-    legTypes->AddEntry(Type_uk,"  UK","l");
+    legTypes->AddEntry(&Type_mpm,"  MPM","l");
+    legTypes->AddEntry(&Type_uk,"  UK","l");
     legTypes->Draw();
   
+    std::cout << "UK Asym " << ukAsym << std::endl;
+
     cTypes->cd(2);
 
     TPaveText *ukTxt = new TPaveText(0.1, 0.25, 0.45, 0.75);
@@ -399,7 +413,7 @@ int main(int argc, char *argv[])
     cTypes->Print(pdfend.c_str());
 
 
-    delete EvisEALL_mpm;
+    /*    delete EvisEALL_mpm;
     delete EvisWALL_mpm;
     delete EvisEALL_uk;
     delete EvisWALL_uk;
@@ -424,7 +438,7 @@ int main(int argc, char *argv[])
 
     delete cEvisALL; delete cEvis0; delete cEvis1; delete cEvis23; delete cTypes;
     delete legALL; delete leg0; delete leg1; delete leg23; delete legTypes;
-    delete ukTxt; delete mpmTxt;
+    delete ukTxt; delete mpmTxt;*/
   }
 
 
