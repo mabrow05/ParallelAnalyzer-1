@@ -141,25 +141,12 @@ int main(int argc, char *argv[])
       OctetAsymmetry mpm(octetNum, enBinWidth, 50., false);
 
       
-      UK.calcTotalAsymmetry(225.,675.,1);
-      ukAsym = UK.returnTotalAsymmetry();
-      ukAsymError = UK.returnTotalAsymmetryError();
-      std::cout << "UK Asym " << ukAsym << std::endl;
-      
-
-      mpm.calcTotalAsymmetry(225.,675.,1);
-      mpmAsym = mpm.returnTotalAsymmetry();
-      mpmAsym2 = mpmAsym;
-      mpmAsymError = mpm.returnTotalAsymmetryError();
-      std::cout << "MPM Asym " << mpmAsym << std::endl;
-
-      
       UK.calcBGsubtractedEvts();
       std::cout << "UK Asym " << ukAsym << std::endl;
       //exit(0);
       mpm.calcBGsubtractedEvts();
       std::cout << "UK Asym " << ukAsym << std::endl;
-      exit(0);
+      
     
       std::vector <double> evts;
     
@@ -242,10 +229,23 @@ int main(int argc, char *argv[])
       mpmTotE = mpm0E+mpm1E+mpm23E;
       mpmTotW = mpm0W+mpm1W+mpm23W;
       
+      
+      UK.calcTotalAsymmetry(225.,675.,1);
+      ukAsym = UK.returnTotalAsymmetry();
+      ukAsymError = UK.returnTotalAsymmetryError();
+      std::cout << "UK Asym " << ukAsym << std::endl;
+      
+
+      mpm.calcTotalAsymmetry(225.,675.,1);
+      mpmAsym = mpm.returnTotalAsymmetry();
+      mpmAsymError = mpm.returnTotalAsymmetryError();
+      std::cout << "MPM Asym " << mpmAsym << std::endl;
+
+      
       std::cout << "UK Asym " << ukAsym << std::endl;
       
       //delete UK; delete mpm;
-      std::cout << "mpm Asym " << mpmAsym2 << std::endl;
+      std::cout << "mpm Asym " << mpmAsym << std::endl;
       //exit(0);
 
     }
