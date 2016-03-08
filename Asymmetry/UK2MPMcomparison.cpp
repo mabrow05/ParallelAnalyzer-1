@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
       //exit(0);
       mpm.calcBGsubtractedEvts();
       std::cout << "UK Asym " << ukAsym << std::endl;
-      //exit(0);
+      exit(0);
     
       std::vector <double> evts;
     
