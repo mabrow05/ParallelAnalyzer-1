@@ -4,263 +4,41 @@ import os
 import sys
 from optparse import OptionParser
 from math import *
-import MButils
-#import CalibrationManager
+import numpy as np
+#import ../scripts/MButils
 
-##### Set up list of runs which are to be omitted from the beta data sets
-omittedBetaRuns = [19232]
-omittedBetaRanges = [] 
-
-for Range in omittedBetaRanges:
-    for run in range(Range[0],Range[1]+1,1):
-        omittedBetaRuns.append(run)
+### This is the default error envelope as given by Michael M. (2008,2010) and Michael B. (2011,2012)
+envelope = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.025),(1200,1200*0.025)],
+            2010:[(0,2.5),(200,200*0.0125),(500,500*0.0125),(1000,500*0.0125)],
+            2011:[(0,0.025*130.3),(130.3,130.3*0.025),(368.4938,0.018*368.4938),(993.789,993.789*0.013),(1000,1000.*0.013)],
+            2012:[(0,2.5),(200,200*0.0125),(500,500*0.0125),(1000,500*0.0125)] }
 
 
-class BetaReplayManager:
-    
-    def __init__(self,AnalysisType="MB"):
-        self.AnalyzerPath = "../"
-        self.runListPath = self.AnalyzerPath + "run_lists/"
-        self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
-        self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
-        self.srcPeakPath = os.getenv("SOURCE_PEAKS")
-        self.replayPass1 = os.getenv("REPLAY_PASS1")
-        self.replayPass2 = os.getenv("REPLAY_PASS2")
-        self.replayPass3 = os.getenv("REPLAY_PASS3")
-        self.replayPass4 = os.getenv("REPLAY_PASS4")
-        self.srcListPath = os.getenv("SOURCE_LIST")
-        self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
-        self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
-        self.octetListPath = os.getenv("OCTET_LIST")
-        self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
-        self.revCalSimPath = os.getenv("REVCALSIM")
-        self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
-        self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
+##### Make linearity curve files for order n polynomial
 
-    def makeAllDirectories(self):
-        os.system("mkdir -p %s"%os.getenv("PEDESTALS"))
-        os.system("mkdir -p %s"%os.getenv("BASIC_HISTOGRAMS"))
-        os.system("mkdir -p %s"%self.srcPositionsPath)
-        os.system("mkdir -p %s"%self.srcPeakPath)
-        os.system("mkdir -p %s"%self.srcListPath)
-        os.system("mkdir -p %s"%self.replayPass1)
-        os.system("mkdir -p %s"%self.replayPass2)
-        os.system("mkdir -p %s"%self.replayPass3)
-        os.system("mkdir -p %s"%self.replayPass4)
-        os.system("mkdir -p %s"%self.gainBismuthPath)
-        os.system("mkdir -p %s"%self.nPEweightsPath)
-        os.system("mkdir -p %s"%self.octetListPath)
-        os.system("mkdir -p %s"%self.triggerFuncPath)
-        os.system("mkdir -p %s"%self.revCalSimPath)
-        os.system("mkdir -p %s"%self.UKspecReplayPath)
-        os.system("mkdir -p %s"%self.AnalysisResultsPath)
+polOrder = 3 # cubic polynomial is default
+params = {"p0":.0, "p1":0., "p2":0., "p3":0.}
+paramRanges = {"p0":(-5.,5.), "p1":(0.5,1.5), "p2":(-0.1,0.1), "p3":(-0.1,0.1)}
+paramInc = {"p0":1., "p1":0.2, "p2":0.01, "p3":0.01}
 
-    def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
-        octet=0
-	for year in ["20112012","20122013"]:
-            with open(self.octetListPath+"OctetList_%s.txt"%year) as fp:
-                for line in fp:
-                    if (line[:6]=="Octet:"):
-			with open(self.octetListPath+"%s-%s/octet_list_%i.dat"%(year[:4],year[4:],octet), "wt") as out:
-                            words=line.split()
-                            for idx, w in enumerate(words):
-                                if w[:1]=='A' or w[:1]=='B' and int(words[idx+2]) not in omittedBetaRuns:
-                                    out.write(words[idx] + ' ' + words[idx+2] + '\n')
-                        shutil.copy(self.octetListPath+"%s-%s/octet_list_%i.dat"%(year[:4],year[4:],octet),self.octetListPath+"All_Octets/octet_list_%i.dat"%(year[:4],year[4:],octet))
-                        octet+=1
-     
-    def makeBasicHistograms(self, runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Making basic histograms for run %i"%runORoctet
-            os.system("cd ../basic_histograms/; ./basic_histograms.exe %i"%runORoctet)
-            os.system("root -l -b -q '../basic_histograms/plot_basic_histograms.C(\"%i\")'"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:  
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Making basic histograms for run %i"%run
-                os.system("cd ../basic_histograms/; ./basic_histograms.exe %i"%run)
-                os.system("root -l -b -q '../basic_histograms/plot_basic_histograms.C(\"%i\")'"%run)
-        print "DONE"
-    
-    def findPedestals(self, runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Running pedestals for run %i"%runORoctet
-            os.system("cd ../pedestals/; ./pedestals.exe %i"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:  
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Running pedestals for run %i"%run
-                os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
-        print "DONE"
+paramFile = open("parameters_0.dat",'w');
 
+for p0 in np.arange(paramRanges["p0"][0],paramRanges["p0"][1]+paramInc["p0"], paramInc["p0"]):
+    for p1 in np.arange(paramRanges["p1"][0],paramRanges["p1"][1]+paramInc["p1"], paramInc["p1"]):
+        for p2 in np.arange(paramRanges["p2"][0],paramRanges["p2"][1]+paramInc["p2"], paramInc["p2"]):
+            for p3 in np.arange(paramRanges["p3"][0],paramRanges["p3"][1]+paramInc["p3"], paramInc["p3"]):
+                params["p0"] = p0;
+                params["p1"] = p1;
+                params["p2"] = p2;
+                params["p3"] = p3;
+                paramFile.write("%f\t%f\t%f\t%f\n"%(p0,p1,p2,p3))
 
-    def runGainBismuth(self,runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Running gain_bismuth for run %i"%runORoctet
-            os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%runORoctet)
-            os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:      
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Running gain_bismuth for run %i"%run
-                os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
-                os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%run)
-        print "DONE"
-    
-
-    def runReplayPass1(self,runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Running replay_pass1 for run %i"%runORoctet
-            os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:  
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Running replay_pass1 for run %i"%run
-                os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
-        print "DONE"
-
-        
-    def runReplayPass2(self,runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Running replay_pass2 for run %i"%runORoctet
-            os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:     
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Running replay_pass2 for run %i"%run
-                os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%run)
-        print "DONE"
-
-        
-    def runReplayPass3(self,runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Running replay_pass3 for run %i"%runORoctet
-            os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:      
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Running replay_pass3 for run %i"%run
-                os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
-        print "DONE"
-
-    
-    def runReplayPass4(self,runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Running replay_pass4 for run %i"%runORoctet
-            os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:      
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Running replay_pass4 for run %i"%run
-                os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%run)
-        print "DONE"
-
-    
-    def runReverseCalibration(self, runORoctet):
-        runs = []
-        if runORoctet > 16000:
-            print "Running reverse calibration for run %i"%runORoctet
-            os.system("./../simulation_comparison/revCalSim.exe %i %s"%(runORoctet, "Beta"))
-            print "Finished reverse calibration for run %i"%runORoctet
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
-        
-            for line in infile:      
-                words=line.split()
-                runs.append(int(words[1]))
-        
-            for run in runs:
-                print "Running reverse calibration for run %i"%run
-                os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, "Beta"))
-
-            print "Finished reverse calibration for octet %s"%runORoctet
-        
-    
+exit(0)
 
 
 
-class BetaAsymmetryManager:
-    def __init__(self):
-        self.AnalyzerPath = "../"
-        self.runListPath = self.AnalyzerPath + "run_lists/"
-        self.AnalysisDataPath = os.getenv("PARALLEL_DATA_PATH")
-        self.srcPositionsPath = os.getenv("SOURCE_POSITIONS")
-        self.srcPeakPath = os.getenv("SOURCE_PEAKS")
-        self.replayPass1 = os.getenv("REPLAY_PASS1")
-        self.replayPass2 = os.getenv("REPLAY_PASS2")
-        self.replayPass3 = os.getenv("REPLAY_PASS3")
-        self.replayPass4 = os.getenv("REPLAY_PASS4")
-        self.srcListPath = os.getenv("SOURCE_LIST")
-        self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
-        self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
-        self.octetListPath = os.getenv("OCTET_LIST")
-        self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
-        self.revCalSimPath = os.getenv("REVCALSIM")
-        self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
-        self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
 
-    def makeOctetAnalysisDirectories(self, AnalysisChoice=None):
-        for octet in range(0,122,1):
-            if not AnalysisChoice:
-                os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.AnalysisResultsPath,octet))
-                os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.AnalysisResultsPath,octet))
-                os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.AnalysisResultsPath,octet))
-            else:
-                os.system("mkdir -p %s/Octet_%i/OctetAsymmetry_%s"%(self.AnalysisResultsPath,octet,AnalysisChoice))
-                os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry_%s"%(self.AnalysisResultsPath,octet,AnalysisChoice))
-                os.system("mkdir -p %s/Octet_%i/PairAsymmetry_%s"%(self.AnalysisResultsPath,octet, AnalysisChoice))
-                           
-        print "Made all octet analysis directories"
+
 
 
 
