@@ -33,22 +33,21 @@ def makeLinearityParamFile():
                     paramDeltas["p3"] = p3;
                     paramFile.write("%f\t%f\t%f\t%f\n"%(p0,p1,p2,p3))
                     
-    exit(0)
 
 def runAllSourceSims(numEvents=100000):
     srcs = ["Sn113", "Ce139"]
     for src in srcs:
         os.system("rm passingParams_%s.dat"%src)
         infile = open("linCurves/parameters.dat",'r')
-        nlines=0
+        #nlines=0
         for line in infile:
             params = line.split()
             os.system("./SimulationAnalyzer %s %i true %s %s %s %s"%(src,numEvents,params[0],params[1],params[2],params[3]))
-            nlines = nlines+1
+            #nlines = nlines+1
         infile.close()
 
 
-makeLinearityParamFile()
+#makeLinearityParamFile()
 runAllSourceSims(50000)
 exit(0)
 

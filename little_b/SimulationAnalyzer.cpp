@@ -2,314 +2,37 @@
 weighted spectra which would be seen as a reconstructed energy on one side
 of the detector. Also applies the trigger functions */
 
-#include "SimulationAnalyzer.hh"
+#include "SimAnalyzerUtils.hh"
 #include "posMapReader.h"
-//#include "sourcePeaks.h"
-//#include "runInfo.h"
-
-#include <vector>
-#include <cstdlib>
-#include <iostream>
-#include <fstream>
-#include <utility>
-
-#include <TRandom3.h>
-#include <TTree.h>
-#include <TFile.h>
-#include <TH1F.h>
-#include <TF1.h>
-#include <TH1D.h>
-#include <TChain.h>
-#include <TMath.h>
-//#include <TSQLServer.h>
-//#include <TSQLResult.h>
-//#include <TSQLRow.h>
-
-
-//Setting global peak values for simulated sources
-/*std::map < std::string, std::pair < std::string, std::vector < Double_t > > > peaks;
-std::vector < Double_t > peak_hold(2,0.);
-
-peak_hold[0] = 0.;
-peak_hold[1] = 0.;
-peaks["2010"] = std::make_pair("Ce139",peak_hold);
-
-peak_hold[0] = 0.;
-peak_hold[1] = 0.;
-peaks["2010"] = std::make_pair("Sn113",peak_hold);
-
-peak_hold[0] = 0.;
-peak_hold[1] = 0.;
-peaks["2010"] = std::make_pair("Bi207",peak_hold);
-*/
-
-//Function to return the x value of the max bin in a histogram 
-Double_t GetXatMax(TH1D* hist)
-{
-  Double_t xBinAtMax = -1;
-  Int_t binValue = -1;
-  for(int i = 1; i < hist -> GetNbinsX(); i++)
-  {
-    if((hist -> GetBinContent(i)) > binValue)
-    {
-      binValue = hist -> GetBinContent(i);
-      xBinAtMax = i;
-    }
-  }
-  Double_t xAtMax = hist -> GetBinCenter(xBinAtMax);
-  return xAtMax;
-}
-
-//Function to return a 2 element vector holding the fit mean and sigma of a peak
-std::vector <Double_t> FitGaus(TH1D* histToFit, Double_t gausMean, Double_t min, Double_t max)
-{
-  TF1 *f1 = new TF1("Gaussian Fit", "gaus", min, max);
-  histToFit -> Fit("Gaussian Fit", "R");
-
-  std::vector <Double_t> functionFit;
-
-  functionFit.push_back(f1->GetParameter(1));	// mean
-  functionFit.push_back(f1->GetParameter(2));	// sigma
-
-  return functionFit;
-
-  // if you wanted to draw the lines or something.
-  histToFit -> GetFunction("Gaussian Fit") -> SetLineColor(4);
-  histToFit -> GetFunction("Gaussian Fit") -> SetLineStyle(1);
-  histToFit -> GetFunction("Gaussian Fit") -> SetLineWidth(4);
-  histToFit -> Draw();
-}
-
-bool CheckPeakValues2011(vector <int> parameters, std::string sourceName, std::string side)
-{
-  Double_t mean, sigma, diffMean, diffSigma;
-
-  if(sourceName == "113Sn")
-  {
-    if(side == "east")
-    {
-      mean = 365.629;	// keV for all
-      sigma = 33.7571;
-    }
-    else if(side == "west")
-    {
-      mean = 365.394;
-      sigma = 34.2878;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else if(sourceName == "139Ce")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else { 
-    std::cout << "Bad input for Src into CheckPeakValue\n";
-    exit(0);
-  }
-
-  // we enforce absolute value as a check
-  diffMean = abs(parameters[0]) - mean;
-  diffSigma = abs(parameters[1]) - sigma;
-
-  if(diffMean < 0 && diffSigma < 0)
-  {
-    cout << "Set of parameters are GOOD: difference in mean is " << abs(diffMean)
-    << ", difference in sigma is " << abs(diffSigma) << endl;
-
-
-    return true;
-  }
-  if(diffMean > 0)
-  {
-    cout << "Parameters BAD: mean is outside range." << endl;
-  }
-  if(diffSigma > 0)
-  {
-    cout << "Parameters BAD: sigma is outside range." << endl;
-  }
-
-  return false;
-}
-
-
-bool CheckPeakValues2010(std::vector <int> parameters, std::string sourceName, std::string side)
-{
-  Double_t mean, sigma, diffMean, diffSigma;
-
-  if(sourceName == "113Sn")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else if(sourceName == "139Ce")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else { 
-    std::cout << "Bad input for Src into CheckPeakValue\n";
-    exit(0);
-  }
   
-  // we enforce absolute value just as a check
-  diffMean = abs(parameters[0]) - mean;
-  diffSigma = abs(parameters[1]) - sigma;
 
-  if(diffMean < 0 && diffSigma < 0)
-  {
-    cout << "Set of parameters are GOOD: difference in mean is " << abs(diffMean)
-    << ", difference in sigma is " << abs(diffSigma) << endl;
+void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::vector <Double_t> params);
 
 
-    return true;
-  }
-  if(diffMean > 0)
-  {
-    cout << "Parameters BAD: mean is outside range." << endl;
-  }
-  if(diffSigma > 0)
-  {
-    cout << "Parameters BAD: sigma is outside range." << endl;
-  }
+int main(int argc, char *argv[]) {
 
-  return false;
-}
-
-
-//Function to return the trigger function for each side in a std::vector in the form vec[side][param]
-// where side==0 is East and side==1 is West
-std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams = 7) {
-  Char_t file[500];
-  sprintf(file,"trigger_functions/trigger_functions_XePeriod_%i.dat",XeRunPeriod);
-  ifstream infile(file);
-  std::vector < std::vector <Double_t> > func;
-  func.resize(2,std::vector <Double_t> (nParams,0.));
-  //cout << "made it here\n";
-  for (Int_t side = 0; side<2; side++) {
-    Int_t param = 0;
-    while (param<nParams) {
-      infile >> func[side][param];
-      //std::cout << func[side][param] << " ";
-      param++;
-    }
-    //cout << endl;
-  }
-  infile.close();
-  std::cout << "Loaded trigger functions.\n\n";
-  return func;
-}
-
-//Function which returns the trigger probability for an erf with 7 parameters.
-// These parameters are passed into the function with the quenched energy of the event
-Double_t triggerProbability(std::vector <Double_t> params, Double_t En) {
-  return params[0]+params[1]*TMath::Erf((En-params[2])/params[3])
-    + params[4]*TMath::Gaus(En,params[5],params[6]);
-}
-
-// Returns a vector which holds the alpha value (nPE/keV) for each PMT
-std::vector < Double_t > getAlphaValues(Int_t fileNum)
-{
-  Char_t temp[500];
-  std::vector < Double_t > alphas (8,0.);
-  sprintf(temp,"nPE_keV/nPE_keV_%i.dat",fileNum);
-  ifstream infile;
-  infile.open(temp);
-  Int_t i = 0;
-
-  while (infile >> alphas[i]) i++;
-  return alphas;
-}
-
-//Get the conversion from EQ2Etrue
-std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(std::string geometry) {
-  ifstream infile;
-  if (geometry=="2010") infile.open("../simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (geometry=="2011/2012") infile.open("../simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (geometry=="2012/2013") infile.open("../simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat");
-  else {
-    std::cout << "Bad geometry passed to getEQ2EtrueParams\n";
+  if (argc!=4 && argc!=8) {
+    std::cout << "Usage: ./SimulationAnalyzer [Source] [numEvents] [bool linCorrections] if linCorrections, [p0] [p1] [p2] [p3]\n";
     exit(0);
   }
-  std::vector < std::vector < std::vector < double > > > params;
-  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
 
-  char holdType[10];
-  int side=0, type=0;
-  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
-    cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << endl;
-    type+=1;
-    if (type==3) {type=0; side=1;}
+  std::string source = std::string(argv[1]); //Input source (Beta, Sn113, Bi207, Ce139)
+  UInt_t numEvents = (unsigned int)atoi(argv[2]); //Number of electrons to accumulate
+  std::string linCorrString = std::string(argv[3]); //False if you want no linearity corrections applied
+  bool linCorrBool = false;
+  std::vector <Double_t> params(4,0.);
+  if (linCorrString=="true" || linCorrString=="1") {
+    linCorrBool = true;
+    params[0]=atof(argv[4]);
+    params[1]=atof(argv[5]);
+    params[2]=atof(argv[6]);
+    params[3]=atof(argv[7]);
   }
-  return params;
-};
-  
-//Function to return the correction to linearity offset
-Double_t applyLinearityTwiddle (std::vector <Double_t> &params, Double_t EQ) {
-  return params[0]+(1+params[1])*EQ+params[2]*EQ*EQ+params[3]*EQ*EQ*EQ;
+ 
+  revCalSimulation(source, numEvents, linCorrBool, params);
+
 }
 
-// Sets up the output tree for the simulated data
-void SetUpOutputTree(TTree& tree) {
-  tree.Branch("PID", &PID, "PID/I");
-  tree.Branch("side", &side, "side/I");
-  tree.Branch("type", &type, "type/I");
-  tree.Branch("Erecon", &Erecon,"Erecon/D");
-  
-  tree.Branch("Evis",&evis,"EvisE/D:EvisW");
-  tree.Branch("Edep",&edep,"EdepE/D:EdepW");
-  tree.Branch("EdepQ",&edepQ,"EdepQE/D:EdepQW");
-  tree.Branch("Eprim",&Eprim,"Eprim/D");
-  tree.Branch("AsymWeight",&AsymWeight,"AsymWeight/D");
-  
-  tree.Branch("time",&Time,"timeE/D:timeW");
-  tree.Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
-  tree.Branch("MWPCPos",&mwpc_pos,"MWPCPosE[3]/D:MWPCPosW[3]");
-  tree.Branch("ScintPos",&scint_pos,"ScintPosE[3]/D:ScintPosW[3]");
-  tree.Branch("ScintPosAdjusted",&scint_pos_adj,"ScintPosAdjE[3]/D:ScintPosAdjW[3]");
-  tree.Branch("PMT_Evis",&pmt_Evis,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:weight0:weight1:weight2:weight3:weight4:weight5:weight6:weight7");
-  
-};
-  
 
 void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::vector <Double_t> params) 
 {
@@ -381,9 +104,7 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
   }
   
   // Set the addresses of the information read in from the simulation file
-  Int_t primaryID;
-  Double_t initialMomentum[3]; //For reconstructing which detector type 1s initially struck
-  // The rest of the variables are defined in SimulationAnalyzer.hh for no good reason (legacy)
+ 
   chain.SetBranchAddress("primaryParticleSpecies",&primaryID);
   chain.SetBranchAddress("primaryMomentum",&initialMomentum);
   chain.SetBranchAddress("mwpcEnergy",&mwpcE);
@@ -672,33 +393,4 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
   }
 }
 
-int main(int argc, char *argv[]) {
-  if (argc!=4 && argc!=8) {
-    std::cout << "Usage: ./SimulationAnalyzer [Source] [numEvents] [bool linCorrections] if linCorrections, [p0] [p1] [p2] [p3]\n";
-    exit(0);
-  }
-  std::string source = std::string(argv[1]); //Input source (Beta, Sn113, Bi207, Ce139)
-  UInt_t numEvents = (unsigned int)atoi(argv[2]); //Number of electrons to accumulate
-  std::string linCorrString = std::string(argv[3]); //False if you want no linearity corrections applied
-  bool linCorrBool = false;
-  std::vector <Double_t> params(4,0.);
-  if (linCorrString=="true" || linCorrString=="1") {
-    linCorrBool = true;
-    params[0]=atof(argv[4]);
-    params[1]=atof(argv[5]);
-    params[2]=atof(argv[6]);
-    params[3]=atof(argv[7]);
-  }
-  cout << "made it here\n";
-  revCalSimulation(source, numEvents, linCorrBool, params);
-
-  //tests
-  /*UInt_t XePeriod = getXeRunPeriod(atoi(argv[1]));
-  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,7);
-  Double_t triggProbE = triggerProbability(triggerFunc[0],25.);
-  Double_t triggProbW = triggerProbability(triggerFunc[1],25.);
-  cout << triggProbE << " " << triggProbW << endl;*/
-
-
-}
   

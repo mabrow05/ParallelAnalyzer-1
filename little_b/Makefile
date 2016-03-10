@@ -18,7 +18,7 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-SimulationAnalyzer: SimulationAnalyzer.o SQLinterface.o
+SimulationAnalyzer: SimulationAnalyzer.o
 	$(CXX) $(CXXFLAGS) -o SimulationAnalyzer SimulationAnalyzer.o $(LIBS)
 	@echo "Done"
 
