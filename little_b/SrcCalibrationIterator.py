@@ -18,8 +18,8 @@ envelope = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0
 def makeLinearityParamFile():
     polOrder = 3 # cubic polynomial is default
     paramDeltas = {"p0":.0, "p1":0., "p2":0., "p3":0.}
-    paramDeltaRanges = {"p0":(-0.,0.), "p1":(-0.2,0.2), "p2":(-0.0005,0.0005), "p3":(-0.000003,0.00003)}
-    paramNSteps = {"p0":1, "p1":5, "p2":11, "p3":15}
+    paramDeltaRanges = {"p0":(-0.,0.), "p1":(-0.0,0.0), "p2":(-0.0005,0.0005), "p3":(-0.000003,0.000003)} # for p1, -.2,.2
+    paramNSteps = {"p0":1, "p1":1, "p2":11, "p3":15}
     
     paramFile = open("linCurves/parameters.dat",'w');
     
@@ -36,16 +36,21 @@ def makeLinearityParamFile():
     exit(0)
 
 def runAllSourceSims(numEvents=100000):
-    srcs = ["Sn113"]
-
-    infile = open("linCurves/parameters.dat",'r')
-    for line in infile:
-        params = line.split()
-        for src in srcs:
+    srcs = ["Sn113", "Ce139"]
+    for src in srcs:
+        os.system("rm passingParams_%s.dat"%src)
+        infile = open("linCurves/parameters.dat",'r')
+        nlines=0
+        for line in infile:
+            params = line.split()
             os.system("./SimulationAnalyzer %s %i true %s %s %s %s"%(src,numEvents,params[0],params[1],params[2],params[3]))
-            exit(0)
+            nlines = nlines+1
+        infile.close()
 
-runAllSourceSims()
+
+makeLinearityParamFile()
+runAllSourceSims(50000)
+exit(0)
 
 
 

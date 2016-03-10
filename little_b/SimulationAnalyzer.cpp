@@ -317,7 +317,7 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
 
   UInt_t alphaFileIndex = 0; // the index on the nPE_keV file
   UInt_t XeMapPeriod = 2; // The xenon position map to be used
-  bool printTree = false; //Boolean to force printing of of TTree. The tree will be printed regardless if the source is Beta
+  bool printTree = true; //Boolean to force printing of of TTree. The tree will be printed regardless if the source is Beta
   UInt_t BetaEvents = numEvents;
   std::string geometry = "2010"; // "2010","2011/2012","2012/2013"
   bool doLinCorr = linCorr;
@@ -345,10 +345,10 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
   std::cout << "Using simulation from " << simLocation << "...\n";
 
   //Create simulation output file
-  Char_t outputfile[500];
-  sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
-  TFile outfile;
-  if (source=="Beta" || printTree) outfile.Open(outputfile, "RECREATE");
+  //Char_t outputfile[500];
+  //sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
+  //TFile outfile;
+  //if (source=="Beta" || printTree) outfile.Open(outputfile, "RECREATE");
 
 
   // Load information for applying detector effects
@@ -650,9 +650,26 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
 
     //bool printToFile= false;
     //if (geometry=="2010") printToFile = CheckPeakValues2010(
+    sprintf(temp,"passingParams_%s.dat",source.c_str());
+    ofstream ofile(temp,ios::app);
+    ofile << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	  << "\t" << EastMeanAndSig[0] << "\t" << EastMeanAndSig[1] << "\t" 
+	  << WestMeanAndSig[0] << "\t" << WestMeanAndSig[1] << std::endl;
+    ofile.close();
   }
-  
-  if (source=="Beta" || printTree)  {outfile.Write(); outfile.Close();}
+  TFile *outfile;
+
+  if (source=="Beta" || printTree)  {
+    //Create simulation output file
+    Char_t outputfile[500];
+    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
+    outfile = new TFile(outputfile, "RECREATE");
+    //outfile.Open(outputfile, "RECREATE");
+    finalEn[0].Write(); 
+    finalEn[1].Write();
+    tree.Write();
+    outfile->Close();
+  }
 }
 
 int main(int argc, char *argv[]) {
