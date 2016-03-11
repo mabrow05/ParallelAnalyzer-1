@@ -477,21 +477,22 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool doParamSets)
       Double_t width = source=="Bi207" ? 60. : (source=="Sn113" ? 45. : 30);
       if (source!="Bi207") {
 	Double_t mean = GetXatMax(&Etype0[i]);
-	std::vector <Double_t> EastMeanAndSig = FitGaus(&Etype0[i],mean, mean-width, mean+width);
-	std::cout << "East mean = " << EastMeanAndSig[0] << "    East sigma = " << EastMeanAndSig[1] << endl;
+	std::vector < std::vector < Double_t > > MeanAndSig;// (2, std::vector<Double_t>);
+	MeanAndSig.push_back(FitGaus(&Etype0[i],mean, mean-width, mean+width));
+	std::cout << "East mean = " << MeanAndSig[0][0] << "    East sigma = " << MeanAndSig[0][1] << endl;
 	
 	mean = GetXatMax(&Wtype0[i]);
-	std::vector <Double_t> WestMeanAndSig = FitGaus(&Wtype0[i],mean, mean-width, mean+width);
-	std::cout << "West mean = " << WestMeanAndSig[0] << "    West sigma = " << WestMeanAndSig[1] << endl;
+	MeanAndSig.push_back(FitGaus(&Wtype0[i],mean, mean-width, mean+width));
+	std::cout << "West mean = " << MeanAndSig[1][0] << "    West sigma = " << MeanAndSig[1][1] << endl;
 	
 	//bool printToFile= false;
 	//if (geometry=="2010") printToFile = CheckPeakValues2010(
 
-	if (checkPeakStatus(EastMeanAndSig,source.substr(0,2),geometry) && checkPeakStatus(WestMeanAndSig,source.substr(0,2),geometry)) {
+	if (checkPeakStatus(MeanAndSig,source.substr(0,2),geometry)) {
       
 	  ofile << i << "\t" << param0[i] << "\t" << param1[i] << "\t" << param2[i] << "\t" << param3[i]
-		<< "\t" << EastMeanAndSig[0] << "\t" << EastMeanAndSig[1] << "\t" 
-		<< WestMeanAndSig[0] << "\t" << WestMeanAndSig[1] << std::endl;
+		<< "\t" << MeanAndSig[0][0] << "\t" << MeanAndSig[0][1] << "\t" 
+		<< MeanAndSig[1][0] << "\t" << MeanAndSig[1][1] << std::endl;
 	}
       }
       else  {
