@@ -153,7 +153,6 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     EastScintTrigger = WestScintTrigger = EMWPCTrigger = WMWPCTrigger = false; //Resetting triggers each event
 
     chain.GetEvent(evt);
-    std::cout << edepQ.EdepQE << " " << edepQ.EdepQW << std::endl;
     if (primaryID!=11) {evt++;continue;}
     
     //Dividing out the weighted energy dependence which is currently in the position branch of input tree
@@ -262,7 +261,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     if (rand.Rndm(0)<triggProb && evis.EvisE>0.)  {/*std::cout << "East Trigger\n";*/EastScintTrigger=true;}
     //WEST Trigger
     triggProb = triggerProbability(triggerFunc[1],evis.EvisW);
-    if (rand.Rndm(0)<triggProb && evis.EvisW>0.) {std::cout << "West Trigger\n";WestScintTrigger = true;}     
+    if (rand.Rndm(0)<triggProb && evis.EvisW>0.) {WestScintTrigger = true;}     
 
     
       
