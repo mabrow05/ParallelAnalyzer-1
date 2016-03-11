@@ -30,7 +30,7 @@ void trigger_threshold(Int_t XeRunPeriod) {
   cout << "There are " << numRuns << " in this Xe run period\n";
 
   TChain *chain;
-  if (mpmData) chain = new TChain("anaTree");
+  if (mpmData) chain = new TChain("phys");
   else chain = new TChain("pass4");
 
   if (mpmData) {

@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
     }
     
 
-    std::cout << "mpm Asym " << mpmAsym2 << std::endl;
+    std::cout << "mpm Asym " << mpmAsym << std::endl;
     exit(0);
       
     TCanvas *cEvisALL = new TCanvas("cEvisALL"," ", 1400., 600.);

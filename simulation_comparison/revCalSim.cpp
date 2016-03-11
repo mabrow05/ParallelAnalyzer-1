@@ -276,10 +276,10 @@ void revCalSimulation (Int_t runNumber, string source)
   int numFiles = source=="Beta"?400:250;
   int fileNum = source=="Beta" ? (int)(randFile->Rndm()*400) : 0;
   delete randFile;
-  for (int i=0; i<numFiles; i++) {
-    if (fileNum==numFiles) fileNum=0;
-    sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
-    //sprintf(temp,"../../../data/analyzed_%i.root",i);
+  for (int i=0; i<1; i++) {
+    //    if (fileNum==numFiles) fileNum=0;
+    //sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
+    sprintf(temp,"/extern/mabrow05/ucna/XuanSim/%s/xuan_analyzed.root",source.c_str());
     chain->AddFile(temp);
     fileNum++;
   }
@@ -324,17 +324,28 @@ void revCalSimulation (Int_t runNumber, string source)
 
   
   // Set the addresses of the information read in from the simulation file
-  chain->SetBranchAddress("MWPCEnergy",&mwpcE);
+  /*  chain->SetBranchAddress("MWPCEnergy",&mwpcE);
   chain->SetBranchAddress("time",&Time);
   chain->SetBranchAddress("Edep",&edep);
   chain->SetBranchAddress("EdepQ",&edepQ);
   chain->SetBranchAddress("MWPCPos",&mwpc_pos);
   chain->SetBranchAddress("ScintPos",&scint_pos);
   chain->SetBranchAddress("primKE",&Eprim);
-  //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
+  *///chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
   //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
   //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
+
+  //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
+  //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
+  chain->SetBranchAddress("mwpcEnergy",&mwpcE);
+  chain->SetBranchAddress("scintTimeToHit",&Time);
+  chain->SetBranchAddress("scintillatorEdep",&edep);
+  chain->SetBranchAddress("scintillatorEdepQuenched",&edepQ);
+  chain->SetBranchAddress("MWPCPos",&mwpc_pos);
+  chain->SetBranchAddress("ScintPos",&scint_pos);
+  chain->SetBranchAddress("primaryKE",&Eprim);
+
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
