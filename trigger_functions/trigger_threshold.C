@@ -4,9 +4,11 @@
 
 void trigger_threshold(Int_t XeRunPeriod) {
 
+  bool mpmData=true;
   Char_t temp[500];
   //Create file to write parameters of fit.
-  sprintf(temp,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
+  if (mpmData) sprintf(temp,"%s/trigger_functions_XePeriod_MPM_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
+  else sprintf(temp,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
   ofstream triggFunc(temp);
 
   // Read in the Xe runs in this runPeriod
@@ -27,11 +29,21 @@ void trigger_threshold(Int_t XeRunPeriod) {
   XeRunList.close();
   cout << "There are " << numRuns << " in this Xe run period\n";
 
-  TChain *chain = new TChain("pass4");
+  TChain *chain;
+  if (mpmData) chain = new TChain("anaTree");
+  else chain = new TChain("pass4");
 
-  for (Int_t i=0; i<numRuns; i++) {
-    sprintf(temp,"/extern/UCNA/replay_pass4_MB/replay_pass4_%i.root",XeRuns[i]);
-    chain->AddFile(temp);
+  if (mpmData) {
+    for (Int_t i=0; i<numRuns; i++) {
+      sprintf(temp,"%s/hists/spec_%i.root",getenv("UCNAOUTPUTDIR"),XeRuns[i]);
+      chain->AddFile(temp);
+    }
+  }
+  else {
+    for (Int_t i=0; i<numRuns; i++) {
+      sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),XeRuns[i]);
+      chain->AddFile(temp);
+    }
   }
  
   //sprintf(temp,"/extern/UCNA/replay_pass4_MB/replay_pass4_%i.root",runNumber);
