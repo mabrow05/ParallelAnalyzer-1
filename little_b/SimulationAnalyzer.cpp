@@ -368,21 +368,19 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     
     if (source=="Beta") tree->Fill();
     
+    // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
+    if (PID==1) evtTally++;
+    evt++;
+    
+    if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
   }
-
-  // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
-  if (PID==1) evtTally++;
-  evt++;
-  
-  if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
-
   std::cout << endl;
   
   if (source!="Beta") {
     
     sprintf(temp,"passingParams_%s.dat",source.c_str());
     ofstream ofile(temp,ios::app);
-
+    
     //Fit the histograms
     Double_t width = source=="Bi207" ? 60. : (source=="Sn113" ? 45. : 30);
     if (source!="Bi207") {
