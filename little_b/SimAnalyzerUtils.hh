@@ -55,7 +55,9 @@ Double_t Erecon; // smeared, weighted, and trigger func corrected energy with th
 Double_t GetXatMax(TH1D* hist);
 
 //Function to make initial check on state of parameter set.. i.e. directly comparing against error envelope
-bool checkParamSetStatus(std::vector <Double_t> params); // TODO
+bool checkParamSetStatus(std::vector <Double_t> params,std::string source, std::string geometry); 
+
+bool checkPeakStatus(std::vector <Double_t> meanAndSig, std::string source, std::string geometry); 
 
 //Function to return a 2 element vector holding the fit mean and sigma of a peak
 std::vector <Double_t> FitGaus(TH1D* histToFit, Double_t gausMean, Double_t min, Double_t max);
@@ -180,7 +182,7 @@ std::vector <Double_t> FitGaus(TH1D* histToFit, Double_t gausMean, Double_t min,
 
 bool checkParamSetStatus(std::vector <Double_t> params, std::string source, std::string geometry) 
 {
-   std::map <std::string,std::pair<Double_t,Double_t> > peaks;
+  std::map <std::string,std::pair<Double_t,Double_t> > peaks;
   if (geometry=="2010") peaks = peaks2010;
   else if (geometry=="2011/2012") peaks = peaks2011;
   else if (geometry=="2012/2013") peaks = peaks2012;
@@ -200,6 +202,35 @@ bool checkParamSetStatus(std::vector <Double_t> params, std::string source, std:
   }
   
   Double_t resid = applyLinearityTwiddle(params,peaks.at(source).first) - peaks.at(source).first;
+  if (resid<(absSlope*peaks.at(source).first+absYIntercept) && resid>(-absSlope*peaks.at(source).first-absYIntercept)) return true;
+  else return false;
+
+}
+
+bool checkPeakStatus(std::vector <Double_t> meanAndSig, std::string source, std::string geometry) 
+{
+  if (meanAndSig[1]<(source=="Ce"?6.:20.)) return false; //Check that peak has real sigma
+
+  std::map <std::string,std::pair<Double_t,Double_t> > peaks;
+  if (geometry=="2010") peaks = peaks2010;
+  else if (geometry=="2011/2012") peaks = peaks2011;
+  else if (geometry=="2012/2013") peaks = peaks2012;
+  else {
+    std::cout << "Bad geometry given to checkPeakStatus!!!!\n";
+    exit(0);
+  }
+
+  Double_t absSlope=0., absYIntercept=0.; //These are for the error envelope at this point... 
+  for (auto it = envelopes.at(geometry).begin(); it!=envelopes.at(geometry).end(); it++) {
+    if (it->first > peaks.at(source).first) {
+      absSlope = (it->second-std::prev(it)->second)/(it->first-std::prev(it)->first);
+      absYIntercept = it->second-absSlope*(it->first);
+      //std::cout << "slope = " << absSlope << " y-intercept = " << absYIntercept << std::endl;
+      break;
+    }
+  }
+  
+  Double_t resid = meanAndSig[0] - peaks.at(source).first;
   if (resid<(absSlope*peaks.at(source).first+absYIntercept) && resid>(-absSlope*peaks.at(source).first-absYIntercept)) return true;
   else return false;
 

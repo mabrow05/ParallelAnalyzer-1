@@ -19,7 +19,7 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr);
 int main(int argc, char *argv[]) {
 
   if (argc!=4) {
-    std::cout << "Usage: ./SimulationAnalyzer [Source] [numEvents] [bool linCorrections]\n";
+    std::cout << "Usage: ./SimulationAnalyzer [Source] [numEvents] [bool runParameterSets]\n";
     exit(0);
   }
 
@@ -30,7 +30,9 @@ int main(int argc, char *argv[]) {
   if (linCorrString=="true" || linCorrString=="1") {
     linCorrBool = true;
   }
- 
+  //std::vector <Double_t> checker = {5., 0.2, 0.0005,-3.e-6};
+  //std::cout << checkParamSetStatus(checker,source.substr(0,2),"2010") << std::endl;
+  
   revCalSimulation(source, numEvents, linCorrBool);
 
 }
@@ -82,9 +84,6 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool doParamSets)
   GetPositionMap(XeMapPeriod); //Loads position map via posMapReader.h methods
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(geometry);
 
-  //Setup the output tree if the flag is set above, or we have beta decay source
-  TTree tree("SimAnalyzed","SimAnalyzed");
-  SetUpOutputTree(tree); //Setup the output tree and branches
   
   //Histograms of event types for quick checks
   /*std::vector <TH1D> finalEn;// (6,NULL);
@@ -95,30 +94,48 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool doParamSets)
   finalEn.push_back(TH1D("finalE23", "Simulated Weighted Sum East Type 2/3", 400, 0., 1200.));
   finalEn.push_back(TH1D("finalW23", "Simulated Weighted Sum West Type 2/3", 400, 0., 1200.));
   */
+
+
   // Setting the parameter sets. If sources, generate parameters. If beta, read in good parameters
-  std::map <std::string,Double_t> paramDeltas = {{"p0",0.}, {"p1",0.}, {"p2",0.}, {"p3",0.}};
+  //std::map <std::string,Double_t> paramDeltas = {{"p0",0.}, {"p1",0.}, {"p2",0.}, {"p3",0.}};
   std::map <std::string, std::pair <Double_t,Double_t> > paramDeltaRanges = {{"p0",std::make_pair(0.,0.)}, 
 								      {"p1",std::make_pair(0.,0.)}, 
-								      {"p2",std::make_pair(-0.000,0.000)}, 
-								      {"p3",std::make_pair(-0.000001,0.000001)}};
+								      {"p2",std::make_pair(-1.e-4,1.e-4)}, 
+								      {"p3",std::make_pair(-1.e-6,1.e-6)}};
 
-  std::map <std::string,Double_t> paramInc = {{"p0",0.1}, {"p1",0.1}, {"p2",0.00001}, {"p3",0.0000001}};
+  std::map <std::string,Double_t> paramInc = {{"p0",1.}, {"p1",0.1}, {"p2",1.e-7}, {"p3",1.e-9}};
+  std::map <std::string,Int_t> paramSteps = {{"p0",0}, {"p1",0}, {"p2",21}, {"p3",21}};
 
-  Int_t nParamSets = (int)((paramDeltaRanges.at("p0").second-paramDeltaRanges.at("p0").first)/paramInc.at("p0")+1.)*
+  /*Int_t nParamSets = (int)((paramDeltaRanges.at("p0").second-paramDeltaRanges.at("p0").first)/paramInc.at("p0")+1.)*
     ((paramDeltaRanges.at("p1").second-paramDeltaRanges.at("p1").first)/paramInc.at("p1")+1.)*
     ((paramDeltaRanges.at("p2").second-paramDeltaRanges.at("p2").first)/paramInc.at("p2")+1.)*
     ((paramDeltaRanges.at("p3").second-paramDeltaRanges.at("p3").first)/paramInc.at("p3")+1.);
+  */
 
   std::vector <Double_t> param0;
   std::vector <Double_t> param1;
   std::vector <Double_t> param2;
   std::vector <Double_t> param3;
   
-  if (source!="Beta" && runParamSets==true) {
-    for (Double_t p0 = paramDeltaRanges.at("p0").first; p0<=paramDeltaRanges.at("p0").second; p0+=paramInc.at("p0")) {
+  /*for (Double_t p0 = paramDeltaRanges.at("p0").first; p0<=paramDeltaRanges.at("p0").second; p0+=paramInc.at("p0")) {
       for (Double_t p1 = paramDeltaRanges.at("p1").first; p1<=paramDeltaRanges.at("p1").second; p1+=paramInc.at("p1")) {
 	for (Double_t p2 = paramDeltaRanges.at("p2").first; p2<=paramDeltaRanges.at("p2").second; p2+=paramInc.at("p2")) {
-	  for (Double_t p3 = paramDeltaRanges.at("p3").first; p3<=paramDeltaRanges.at("p3").second; p3+=paramInc.at("p3")) {
+	for (Double_t p3 = paramDeltaRanges.at("p3").first; p3<=paramDeltaRanges.at("p3").second; p3+=paramInc.at("p3")) {*/
+  Double_t p0,p1,p2,p3;
+  if (source!="Beta" && runParamSets==true) {
+
+    for (Int_t i0 = 0; i0<paramSteps.at("p0")+1; i0++) {
+      p0 = paramInc.at("p0")*(double)i0-paramInc.at("p0")*(double)paramSteps.at("p0")/2.;
+
+      for (Int_t i1 = 0; i1<paramSteps.at("p1")+1; i1++) {
+	p1 = paramInc.at("p1")*(double)i1-paramInc.at("p1")*(double)paramSteps.at("p1")/2.; 
+
+	for (Int_t i2 = 0; i2<paramSteps.at("p2")+1; i2++) {
+	  p2 = paramInc.at("p2")*(double)i2-paramInc.at("p2")*(double)paramSteps.at("p2")/2.;
+
+	  for (Int_t i3 = 0; i3<paramSteps.at("p3")+1; i3++) {
+	    p3 = paramInc.at("p3")*(double)i3-paramInc.at("p3")*(double)paramSteps.at("p3")/2.;
+	    
 	    std::cout << p0 << " " << p1 << " " <<  p2 << " " << p3 << std::endl; 
 	    std::vector < Double_t > p = {p0,p1,p2,p3};
 	    std::string src_hold = source.substr(0,2);
@@ -144,26 +161,39 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool doParamSets)
       }
     }
   }
+  else if (runParamSets==false) {
+    param0.push_back(0.);
+    param1.push_back(0.);
+    param2.push_back(0.);
+    param3.push_back(0.);
+  }
   else {
-
     //code later
   }
-  
+
+
+  //Vectors of histograms and trees for holding source plots for all parameter combinations  
   std::vector <TH1D> Etype0 (param0.size(), TH1D());
   std::vector <TH1D> Wtype0 (param0.size(), TH1D());
+  std::vector <TTree*> tree (param0.size(), NULL);
+
+  
+  
 
   Char_t temp[500];
   for (UInt_t i = 0; i<param0.size(); i++) {
+
+    sprintf(temp,"Tree%i",i);
+    //tree[i].SetObject(temp,"SimAnalyzed");
+    tree[i] = new TTree(temp,"SimAnalyzed");
+    SetUpOutputTree(*tree[i]); //Setup the output tree and branches
+
     sprintf(temp,"East p%i",i);
     Etype0[i] = TH1D(temp,temp,200,0.,1200.);
     sprintf(temp,"West p%i",i);
     Wtype0[i] = TH1D(temp,temp,200,0.,1200.);
     std::cout << param0[i] << " " << param1[i] << " " <<  param2[i] << " " << param3[i] << std::endl; 
   }
-  
-
-  //Vectors of histograms for holding source plots for all parameter combinations
-  
  
   
   //Read in simulated data and put in a TChain
@@ -312,6 +342,7 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool doParamSets)
 
 
     for (UInt_t i=0; i<param0.size(); i++) {
+
       //////////////////////////////////////////////////////////////////////////////////////////////  
       //Applying the twiddle from the linearity curves not being perfect
       std::vector <Double_t> paramHold = {param0[i],param1[i],param2[i],param3[i]};
@@ -422,54 +453,79 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool doParamSets)
 	else Erecon=-1.;
       }
       
-      // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
-      if (PID==1)
-	{evtTally++;}
+      if (source=="Beta") tree[i]->Fill();
       
-      evt++;
-      if (PID>=0 && source=="Beta") tree.Fill();
-      
-      if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
     }
+
+    // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
+    if (PID==1) evtTally++;
+    evt++;
+
+    if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
+
   }
+
   std::cout << endl;
   
-  for (UInt_t i=0;i<param0.size();i++) {
-    if (source!="Beta") {
+  if (source!="Beta") {
+
+    sprintf(temp,"passingParams_%s.dat",source.c_str());
+    ofstream ofile(temp);
+
+    for (UInt_t i=0;i<param0.size();i++) {
       //Fit the histograms
       Double_t width = source=="Bi207" ? 60. : (source=="Sn113" ? 45. : 30);
-      Double_t mean = GetXatMax(&Etype0[i]);
-      std::vector <Double_t> EastMeanAndSig = FitGaus(&Etype0[i],mean, mean-width, mean+width);
-      std::cout << "East mean = " << EastMeanAndSig[0] << "    East sigma = " << EastMeanAndSig[1] << endl;
+      if (source!="Bi207") {
+	Double_t mean = GetXatMax(&Etype0[i]);
+	std::vector <Double_t> EastMeanAndSig = FitGaus(&Etype0[i],mean, mean-width, mean+width);
+	std::cout << "East mean = " << EastMeanAndSig[0] << "    East sigma = " << EastMeanAndSig[1] << endl;
+	
+	mean = GetXatMax(&Wtype0[i]);
+	std::vector <Double_t> WestMeanAndSig = FitGaus(&Wtype0[i],mean, mean-width, mean+width);
+	std::cout << "West mean = " << WestMeanAndSig[0] << "    West sigma = " << WestMeanAndSig[1] << endl;
+	
+	//bool printToFile= false;
+	//if (geometry=="2010") printToFile = CheckPeakValues2010(
+
+	if (checkPeakStatus(EastMeanAndSig,source.substr(0,2),geometry) && checkPeakStatus(WestMeanAndSig,source.substr(0,2),geometry)) {
       
-      mean = GetXatMax(&Wtype0[i]);
-      std::vector <Double_t> WestMeanAndSig = FitGaus(&Wtype0[i],mean, mean-width, mean+width);
-      std::cout << "West mean = " << WestMeanAndSig[0] << "    West sigma = " << WestMeanAndSig[1] << endl;
-      
-      //bool printToFile= false;
-      //if (geometry=="2010") printToFile = CheckPeakValues2010(
-      sprintf(temp,"passingParams_%s.dat",source.c_str());
-      ofstream ofile(temp,ios::app);
-      ofile << param0[i] << "\t" << param1[i] << "\t" << param2[i] << "\t" << param3[i]
-	    << "\t" << EastMeanAndSig[0] << "\t" << EastMeanAndSig[1] << "\t" 
-	    << WestMeanAndSig[0] << "\t" << WestMeanAndSig[1] << std::endl;
-      ofile.close();
+	  ofile << i << "\t" << param0[i] << "\t" << param1[i] << "\t" << param2[i] << "\t" << param3[i]
+		<< "\t" << EastMeanAndSig[0] << "\t" << EastMeanAndSig[1] << "\t" 
+		<< WestMeanAndSig[0] << "\t" << WestMeanAndSig[1] << std::endl;
+	}
+      }
+      else  {
+	// CODE BISMUTH PEAK FITTERS
+      }
+    }
+
+    ofile.close();
+    
+  }
+
+  TFile *outfile;
+  Char_t outputfile[500];
+
+  if (printTree && source!="Beta") {
+    //Create simulation output file    
+    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
+    outfile = new TFile(outputfile, "RECREATE");
+    for (UInt_t i=0; i<param0.size();i++) {
+      Etype0[i].Write(); 
+      Wtype0[i].Write();
+    }
+    outfile->Close();
+  }
+  else if (source=="Beta")  {
+    //Create simulation output file
+    for (UInt_t i=0; i<param0.size();i++) {
+      sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%i.root",source.c_str(),i);
+      outfile = new TFile(outputfile, "RECREATE");
+      tree[i]->Write();
+      outfile->Close();
     }
   }
-    TFile *outfile;
-    
-    //if (source=="Beta" || printTree)  {
-      //Create simulation output file
-      Char_t outputfile[500];
-      sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
-      outfile = new TFile(outputfile, "RECREATE");
-      //outfile.Open(outputfile, "RECREATE");
-      Etype0[0].Write(); 
-      Wtype0[0].Write();
-      //tree.Write();
-      outfile->Close();
-      //}
-  
+ 
 }
 
   
