@@ -27,8 +27,8 @@ std::map <std::string, std::vector < std::pair<Double_t, Double_t> > > envelopes
 
 
 // These are the nominal peak values to compare against for each source
-std::map <std::string,std::pair<Double_t,Double_t> > peaks2010 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(0.,0.)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
-std::map <std::string,std::pair<Double_t,Double_t> > peaks2011 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(0.,0.)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
+std::map <std::string,std::pair<Double_t,Double_t> > peaks2010 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(125.173,123.539)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
+std::map <std::string,std::pair<Double_t,Double_t> > peaks2011 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(125.173,123.539)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
 std::map <std::string,std::pair<Double_t,Double_t> > peaks2012 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(0.,0.)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
 
 //std::map <std::string, std::vector < std::pair<Double_t, Double_t> > > nominalPeaks;
@@ -52,7 +52,7 @@ Double_t Erecon; // smeared, weighted, and trigger func corrected energy with th
 ///////// Function declarations /////////////////
 
 //Function to return the x value of the max bin in a histogram 
-Double_t GetXatMax(TH1D* hist);
+Double_t GetXatMax(TH1D* hist, Double_t xmin, Double_t xmax);
 
 //Function to make initial check on state of parameter set.. i.e. directly comparing against error envelope
 bool checkParamSetStatus(std::vector <Double_t> params,std::string source, std::string geometry); 
@@ -144,19 +144,23 @@ struct PMT_Evis {
 //////////////////////////////////////////////////////////////////////////////////
 
 //Function to return the x value of the max bin in a histogram 
-Double_t GetXatMax(TH1D* hist)
+Double_t GetXatMax(TH1D* hist, Double_t xmin = -1., Double_t xmax = -1.)
 {
   Double_t xBinAtMax = -1;
-  Int_t binValue = -1;
-  for(int i = 1; i < hist -> GetNbinsX(); i++)
+  //Int_t binValue = -1;
+
+  if (xmin>0. && xmax>0.)  hist->GetXaxis()->SetRangeUser(xmin,xmax);
+  xBinAtMax = hist->GetMaximumBin();
+  /*for(int i = 1; i < hist -> GetNbinsX(); i++)
   {
     if((hist -> GetBinContent(i)) > binValue)
     {
       binValue = hist -> GetBinContent(i);
       xBinAtMax = i;
     }
-  }
+    }*/
   Double_t xAtMax = hist -> GetBinCenter(xBinAtMax);
+  hist->GetXaxis()->SetRange(0,hist->GetNbinsX());
   return xAtMax;
 }
 
@@ -207,9 +211,9 @@ bool checkParamSetStatus(std::vector <Double_t> params, std::string source, std:
 
 }
 
-bool checkPeakStatus(std::vector <Double_t> meanAndSig, std::string source, std::string geometry) 
+bool checkPeakStatus(std::vector < std::vector < Double_t > > meanAndSig, std::string source, std::string geometry) 
 {
-  if (meanAndSig[1]<(source=="Ce"?6.:20.)) return false; //Check that peak has real sigma
+  if (meanAndSig[0][1]<(source=="Ce"?10.:20.) || meanAndSig[1][1]<(source=="Ce"?10.:20.)) return false; //Check that peak has real sigma
 
   std::map <std::string,std::pair<Double_t,Double_t> > peaks;
   if (geometry=="2010") peaks = peaks2010;
@@ -230,10 +234,12 @@ bool checkPeakStatus(std::vector <Double_t> meanAndSig, std::string source, std:
     }
   }
   
-  Double_t resid = meanAndSig[0] - peaks.at(source).first;
-  if (resid<(absSlope*peaks.at(source).first+absYIntercept) && resid>(-absSlope*peaks.at(source).first-absYIntercept)) return true;
+  Double_t residE = meanAndSig[0][0] - peaks.at(source).first;
+  Double_t residW = meanAndSig[1][0] - peaks.at(source).second;
+  if ((residE<(absSlope*peaks.at(source).first+absYIntercept) && residE>(-absSlope*peaks.at(source).first-absYIntercept)) && (residW<(absSlope*peaks.at(source).second+absYIntercept) && residW>(-absSlope*peaks.at(source).second-absYIntercept))) return true;
+  
   else return false;
-
+  
 }
 
 bool CheckPeakValues2011(std::vector <int> parameters, std::string sourceName, std::string side)
