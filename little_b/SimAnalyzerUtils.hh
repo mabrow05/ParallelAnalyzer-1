@@ -17,6 +17,25 @@
 #include <TMath.h>
 
 
+// This is the default error envelope as given by Michael M. (2008,2010) and Michael B. (2011,2012)
+
+std::vector < std::pair <Double_t,Double_t> > envelope2010 = {std::make_pair(0,2.5),std::make_pair(200,200*0.0125),std::make_pair(500,500*0.0125),std::make_pair(1000,500*0.0125)};
+std::vector < std::pair <Double_t,Double_t> > envelope2011 = {std::make_pair(0,0.025*130.3),std::make_pair(130.3,130.3*0.025),std::make_pair(368.4938,0.018*368.4938),std::make_pair(993.789,993.789*0.013),std::make_pair(1000,1000.*0.013)};
+std::vector < std::pair <Double_t,Double_t> > envelope2012 = {std::make_pair(0,0.025*130.3),std::make_pair(130.3,130.3*0.025),std::make_pair(368.4938,0.018*368.4938),std::make_pair(993.789,993.789*0.013),std::make_pair(1000,1000.*0.013)};
+
+std::map <std::string, std::vector < std::pair<Double_t, Double_t> > > envelopes = {{"2010",envelope2010},{"2011/2012",envelope2011},{"2012/2013",envelope2012}};
+
+
+// These are the nominal peak values to compare against for each source
+std::map <std::string,std::pair<Double_t,Double_t> > peaks2010 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(0.,0.)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
+std::map <std::string,std::pair<Double_t,Double_t> > peaks2011 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(0.,0.)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
+std::map <std::string,std::pair<Double_t,Double_t> > peaks2012 = {{"Sn",std::make_pair(365.629,365.394)},{"Ce",std::make_pair(0.,0.)},{"Bi1",std::make_pair(0.,0.)},{"Bi2",std::make_pair(0.,0.)}};
+
+//std::map <std::string, std::vector < std::pair<Double_t, Double_t> > > nominalPeaks;
+//envelope["2010"] = peaks2010;
+//envelope["2011"] = peaks2011;
+//envelope["2012"] = peaks2012;
+
 Int_t PID, type, side, primaryID; // basic analysis tags
 
 Double_t initialMomentum[3]; //For reconstructing which detector type 1 events initially struck
@@ -26,10 +45,17 @@ Double_t Eprim, AsymWeight; // initial energy from simulation, and weight of eve
 Double_t Erecon; // smeared, weighted, and trigger func corrected energy with the EQ2Etrue conversion applied
 
 
+//Nominal peak values for simulated data which has detector effects applied
+// TODO
+
+
 ///////// Function declarations /////////////////
 
 //Function to return the x value of the max bin in a histogram 
 Double_t GetXatMax(TH1D* hist);
+
+//Function to make initial check on state of parameter set.. i.e. directly comparing against error envelope
+bool checkParamSetStatus(std::vector <Double_t> params); // TODO
 
 //Function to return a 2 element vector holding the fit mean and sigma of a peak
 std::vector <Double_t> FitGaus(TH1D* histToFit, Double_t gausMean, Double_t min, Double_t max);
@@ -150,6 +176,33 @@ std::vector <Double_t> FitGaus(TH1D* histToFit, Double_t gausMean, Double_t min,
   histToFit -> GetFunction("Gaussian Fit") -> SetLineStyle(1);
   histToFit -> GetFunction("Gaussian Fit") -> SetLineWidth(4);
   histToFit -> Draw();
+}
+
+bool checkParamSetStatus(std::vector <Double_t> params, std::string source, std::string geometry) 
+{
+   std::map <std::string,std::pair<Double_t,Double_t> > peaks;
+  if (geometry=="2010") peaks = peaks2010;
+  else if (geometry=="2011/2012") peaks = peaks2011;
+  else if (geometry=="2012/2013") peaks = peaks2012;
+  else {
+    std::cout << "Bad geometry given to checkParamStatus!!!!\n";
+    exit(0);
+  }
+
+  Double_t absSlope=0., absYIntercept=0.; //These are for the error envelope at this point... 
+  for (auto it = envelopes.at(geometry).begin(); it!=envelopes.at(geometry).end(); it++) {
+    if (it->first > peaks.at(source).first) {
+      absSlope = (it->second-std::prev(it)->second)/(it->first-std::prev(it)->first);
+      absYIntercept = it->second-absSlope*(it->first);
+      //std::cout << "slope = " << absSlope << " y-intercept = " << absYIntercept << std::endl;
+      break;
+    }
+  }
+  
+  Double_t resid = applyLinearityTwiddle(params,peaks.at(source).first) - peaks.at(source).first;
+  if (resid<(absSlope*peaks.at(source).first+absYIntercept) && resid>(-absSlope*peaks.at(source).first-absYIntercept)) return true;
+  else return false;
+
 }
 
 bool CheckPeakValues2011(std::vector <int> parameters, std::string sourceName, std::string side)

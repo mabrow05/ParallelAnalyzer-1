@@ -1,18 +1,25 @@
-/* Code to take a run number, retrieve it's runperiod, and construct the 
-weighted spectra which would be seen as a reconstructed energy on one side
-of the detector. Also applies the trigger functions */
+/* Written by: Michael A. Brown (UKy)
+ Contributors: Xuan Sun (Caltech)
+
+This code takes source or beta simulation data, applies detector effects (nPE smearing, trigger functions),
+has the ability to twiddle non-linear terms in the calibration parameters, and fits source peaks.
+
+If the simulation is beta decay, it outputs a tree with spectra 
+*/
 
 #include "SimAnalyzerUtils.hh"
 #include "posMapReader.h"
+#include <map>
   
 
-void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::vector <Double_t> params);
+// This function holds all the meat
+void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr);
 
 
 int main(int argc, char *argv[]) {
 
-  if (argc!=4 && argc!=8) {
-    std::cout << "Usage: ./SimulationAnalyzer [Source] [numEvents] [bool linCorrections] if linCorrections, [p0] [p1] [p2] [p3]\n";
+  if (argc!=4) {
+    std::cout << "Usage: ./SimulationAnalyzer [Source] [numEvents] [bool linCorrections]\n";
     exit(0);
   }
 
@@ -20,21 +27,16 @@ int main(int argc, char *argv[]) {
   UInt_t numEvents = (unsigned int)atoi(argv[2]); //Number of electrons to accumulate
   std::string linCorrString = std::string(argv[3]); //False if you want no linearity corrections applied
   bool linCorrBool = false;
-  std::vector <Double_t> params(4,0.);
   if (linCorrString=="true" || linCorrString=="1") {
     linCorrBool = true;
-    params[0]=atof(argv[4]);
-    params[1]=atof(argv[5]);
-    params[2]=atof(argv[6]);
-    params[3]=atof(argv[7]);
   }
  
-  revCalSimulation(source, numEvents, linCorrBool, params);
+  revCalSimulation(source, numEvents, linCorrBool);
 
 }
 
 
-void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::vector <Double_t> params) 
+void revCalSimulation (std::string source, UInt_t numEvents, bool doParamSets) 
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
@@ -43,8 +45,8 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
   bool printTree = true; //Boolean to force printing of of TTree. The tree will be printed regardless if the source is Beta
   UInt_t BetaEvents = numEvents;
   std::string geometry = "2010"; // "2010","2011/2012","2012/2013"
-  bool doLinCorr = linCorr;
-  std::vector <Double_t> linCorrParams = params;
+  bool runParamSets = doParamSets;
+  //std::vector <Double_t> linCorrParams = params;
 
   // Set the location of the source and it's spread in mm. srcPos[0=east,1=west][0=x,1=y,2=sigma]
   bool moveSource = false; // If this is true, set the position of the source to the following location
@@ -85,18 +87,87 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
   SetUpOutputTree(tree); //Setup the output tree and branches
   
   //Histograms of event types for quick checks
-  std::vector <TH1D> finalEn;// (6,NULL);
+  /*std::vector <TH1D> finalEn;// (6,NULL);
   finalEn.push_back(TH1D("finalE0", "Simulated Weighted Sum East Type 0", 400, 0., 1200.));
   finalEn.push_back(TH1D("finalW0", "Simulated Weighted Sum West Type 0", 400, 0., 1200.));
   finalEn.push_back(TH1D("finalE1", "Simulated Weighted Sum East Type 1", 400, 0., 1200.));
   finalEn.push_back(TH1D("finalW1", "Simulated Weighted Sum West Type 1", 400, 0., 1200.));
   finalEn.push_back(TH1D("finalE23", "Simulated Weighted Sum East Type 2/3", 400, 0., 1200.));
   finalEn.push_back(TH1D("finalW23", "Simulated Weighted Sum West Type 2/3", 400, 0., 1200.));
+  */
+  // Setting the parameter sets. If sources, generate parameters. If beta, read in good parameters
+  std::map <std::string,Double_t> paramDeltas = {{"p0",0.}, {"p1",0.}, {"p2",0.}, {"p3",0.}};
+  std::map <std::string, std::pair <Double_t,Double_t> > paramDeltaRanges = {{"p0",std::make_pair(0.,0.)}, 
+								      {"p1",std::make_pair(0.,0.)}, 
+								      {"p2",std::make_pair(-0.000,0.000)}, 
+								      {"p3",std::make_pair(-0.000001,0.000001)}};
+
+  std::map <std::string,Double_t> paramInc = {{"p0",0.1}, {"p1",0.1}, {"p2",0.00001}, {"p3",0.0000001}};
+
+  Int_t nParamSets = (int)((paramDeltaRanges.at("p0").second-paramDeltaRanges.at("p0").first)/paramInc.at("p0")+1.)*
+    ((paramDeltaRanges.at("p1").second-paramDeltaRanges.at("p1").first)/paramInc.at("p1")+1.)*
+    ((paramDeltaRanges.at("p2").second-paramDeltaRanges.at("p2").first)/paramInc.at("p2")+1.)*
+    ((paramDeltaRanges.at("p3").second-paramDeltaRanges.at("p3").first)/paramInc.at("p3")+1.);
+
+  std::vector <Double_t> param0;
+  std::vector <Double_t> param1;
+  std::vector <Double_t> param2;
+  std::vector <Double_t> param3;
   
+  if (source!="Beta" && runParamSets==true) {
+    for (Double_t p0 = paramDeltaRanges.at("p0").first; p0<=paramDeltaRanges.at("p0").second; p0+=paramInc.at("p0")) {
+      for (Double_t p1 = paramDeltaRanges.at("p1").first; p1<=paramDeltaRanges.at("p1").second; p1+=paramInc.at("p1")) {
+	for (Double_t p2 = paramDeltaRanges.at("p2").first; p2<=paramDeltaRanges.at("p2").second; p2+=paramInc.at("p2")) {
+	  for (Double_t p3 = paramDeltaRanges.at("p3").first; p3<=paramDeltaRanges.at("p3").second; p3+=paramInc.at("p3")) {
+	    std::cout << p0 << " " << p1 << " " <<  p2 << " " << p3 << std::endl; 
+	    std::vector < Double_t > p = {p0,p1,p2,p3};
+	    std::string src_hold = source.substr(0,2);
+
+	    if (source=="Bi207") {
+	      if (checkParamSetStatus(p,src_hold+std::string("1"),geometry) && checkParamSetStatus(p,src_hold+std::string("2"),geometry)) {
+		param0.push_back(p0);
+		param1.push_back(p1);
+		param2.push_back(p2);
+		param3.push_back(p3);
+	      }
+	    }
+	    else {
+	      if (checkParamSetStatus(p,src_hold,geometry)) {
+		param0.push_back(p0);
+		param1.push_back(p1);
+		param2.push_back(p2);
+		param3.push_back(p3);
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+  else {
+
+    //code later
+  }
+  
+  std::vector <TH1D> Etype0 (param0.size(), TH1D());
+  std::vector <TH1D> Wtype0 (param0.size(), TH1D());
+
+  Char_t temp[500];
+  for (UInt_t i = 0; i<param0.size(); i++) {
+    sprintf(temp,"East p%i",i);
+    Etype0[i] = TH1D(temp,temp,200,0.,1200.);
+    sprintf(temp,"West p%i",i);
+    Wtype0[i] = TH1D(temp,temp,200,0.,1200.);
+    std::cout << param0[i] << " " << param1[i] << " " <<  param2[i] << " " << param3[i] << std::endl; 
+  }
+  
+
+  //Vectors of histograms for holding source plots for all parameter combinations
+  
+ 
   
   //Read in simulated data and put in a TChain
   int numFiles = 1; // This is for testing! can be more later depending on how Xuan formats his output of simulated data
-  Char_t temp[500];
   TChain chain("anaTree");
   for (int i=0; i<numFiles; i++) {
     sprintf(temp,"%s/%s/xuan_analyzed.root",simLocation.c_str(),source.c_str());
@@ -117,6 +188,7 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
   
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
+
   Double_t MWPCThreshold=0.001; // generic MWPC Threshold
 
   //Set random number generators for sampling of gaussians in smearing
@@ -237,160 +309,167 @@ void revCalSimulation (std::string source, UInt_t numEvents, bool linCorr, std::
     //Fill histograms if event passes trigger function
     if (rand.Rndm(0)<triggProb && evis.EvisW>0.) WestScintTrigger = true;     
 
-    //////////////////////////////////////////////////////////////////////////////////////////////  
-    //Applying the twiddle from the linearity curves not being perfect
-    if (doLinCorr) {
-      evis.EvisE = applyLinearityTwiddle(linCorrParams,evis.EvisE); //Applies the twiddle
-      evis.EvisW = applyLinearityTwiddle(linCorrParams,evis.EvisW); //Applies the twiddle
-    }
-    // std::cout << evis.EvisE << "\t" << evis.EvisW << std::endl;
-    //////////////////////////////////////////////////////////////////////////////////////////////
 
-   
-    // Do event ID selection on data (to mimic hardware and software event selection)
-    PID=-1;
 
-    //Type 0 East
-    if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && !WMWPCTrigger) {
-      PID=1;
-      type=0;
-      side=0;
-    }
-    //Type 0 West
-    else if (WestScintTrigger && WMWPCTrigger && !EastScintTrigger && !EMWPCTrigger) {
-      PID=1;
-      type=0;
-      side=1;
-    }
-    //Type 1 
-    else if (EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
-      PID=1;
-      type=1;
-      //East
-      if (initialMomentum[2]<0.) {//(Time.timeE<Time.timeW) {
+    for (UInt_t i=0; i<param0.size(); i++) {
+      //////////////////////////////////////////////////////////////////////////////////////////////  
+      //Applying the twiddle from the linearity curves not being perfect
+      std::vector <Double_t> paramHold = {param0[i],param1[i],param2[i],param3[i]};
+      evis.EvisE = applyLinearityTwiddle(paramHold,evis.EvisE); //Applies the twiddle
+      evis.EvisW = applyLinearityTwiddle(paramHold,evis.EvisW); //Applies the twiddle
+      
+      // std::cout << evis.EvisE << "\t" << evis.EvisW << std::endl;
+      //////////////////////////////////////////////////////////////////////////////////////////////
+      
+      
+      // Do event ID selection on data (to mimic hardware and software event selection)
+      PID=-1;
+      
+      //Type 0 East
+      if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && !WMWPCTrigger) {
+	PID=1;
+	type=0;
 	side=0;
       }
-      //West
-      else if (initialMomentum[2]>=0.) {//(Time.timeE>Time.timeW) {
+      //Type 0 West
+      else if (WestScintTrigger && WMWPCTrigger && !EastScintTrigger && !EMWPCTrigger) {
+	PID=1;
+	type=0;
 	side=1;
       }
-    }
-    //Type 2/3 East
-    else if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && WMWPCTrigger) {
-      PID=1;
-      type=2;
-      side=0;
-    }
-    //Type 2/3 West
-    else if (!EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
-      PID=1;
-      type=2;
-      side=1;
-    }   
-    //Gamma events and missed events (Type 4)
-    else {
-      if (!WMWPCTrigger && !EMWPCTrigger) {
-	if (EastScintTrigger && !WestScintTrigger) {
-	  PID=0;
-	  type=0;
+      //Type 1 
+      else if (EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
+	PID=1;
+	type=1;
+	//East
+	if (initialMomentum[2]<0.) {//(Time.timeE<Time.timeW) {
 	  side=0;
 	}
-	else if (!EastScintTrigger && WestScintTrigger) {
-	  PID=0;
-	  type=0;
+	//West
+	else if (initialMomentum[2]>=0.) {//(Time.timeE>Time.timeW) {
 	  side=1;
 	}
-	else if (EastScintTrigger && WestScintTrigger) {
-	  PID=0;
-	  type=1;
-	  if (Time.timeE<Time.timeW) {
+      }
+      //Type 2/3 East
+      else if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && WMWPCTrigger) {
+	PID=1;
+	type=2;
+	side=0;
+      }
+      //Type 2/3 West
+      else if (!EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
+	PID=1;
+	type=2;
+	side=1;
+      }   
+      //Gamma events and missed events (Type 4)
+      else {
+	if (!WMWPCTrigger && !EMWPCTrigger) {
+	  if (EastScintTrigger && !WestScintTrigger) {
+	    PID=0;
+	    type=0;
 	    side=0;
 	  }
-	  else {
+	  else if (!EastScintTrigger && WestScintTrigger) {
+	    PID=0;
+	    type=0;
 	    side=1;
+	  }
+	  else if (EastScintTrigger && WestScintTrigger) {
+	    PID=0;
+	    type=1;
+	    if (Time.timeE<Time.timeW) {
+	      side=0;
+	    }
+	    else {
+	      side=1;
+	    }
+	  }
+	  else {
+	    PID=6;
+	    type=4;
+	    side=2;
 	  }
 	}
 	else {
-	  PID=6;
+	  PID=1;
 	  type=4;
-	  side=2;
+	  side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
 	}
       }
-      else {
-	PID=1;
-	type=4;
-	side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
-      }
-    }
 
-    //Calculate Erecon
-    Int_t typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
-    if (side==0) {
-      Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
-      if (totalEvis>0.) {
-	Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
-	if (type==0) finalEn[0].Fill(Erecon); 
-	else if (type==1) finalEn[2].Fill(Erecon); 
-	else if(type==2 ||type==3) finalEn[4].Fill(Erecon);
+      //Calculate Erecon
+      Int_t typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+      if (side==0) {
+	Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
+	if (totalEvis>0.) {
+	  Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
+	  if (type==0) Etype0[i].Fill(Erecon); 
+	  //else if (type==1) finalEn[2].Fill(Erecon); 
+	  //else if(type==2 ||type==3) finalEn[4].Fill(Erecon);
+	}
+	else Erecon=-1.;
       }
-      else Erecon=-1.;
-    }
-    if (side==1) {
-      Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
-      if (totalEvis>0.) {
-	Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
-	
-	if (type==0) finalEn[1].Fill(Erecon); 
-	else if (type==1) finalEn[3].Fill(Erecon); 
-	else if(type==2 ||type==3) finalEn[5].Fill(Erecon);
+      if (side==1) {
+	Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
+	if (totalEvis>0.) {
+	  Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
+	  
+	  if (type==0) Wtype0[i].Fill(Erecon); 
+	  //else if (type==1) finalEn[3].Fill(Erecon); 
+	  //else if(type==2 ||type==3) finalEn[5].Fill(Erecon);
+	}
+	else Erecon=-1.;
       }
-      else Erecon=-1.;
-    }
       
-    // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
-    if (PID==1 && Erecon!=-1.)
-      {evtTally++;}
-
-    evt++;
-    if (PID>=0 && Erecon!=-1.) tree.Fill();
-   
-    if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
+      // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
+      if (PID==1)
+	{evtTally++;}
+      
+      evt++;
+      if (PID>=0 && source=="Beta") tree.Fill();
+      
+      if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
+    }
   }
   std::cout << endl;
-
-  if (source!="Beta") {
-    //Fit the histograms
-    Double_t width = source=="Bi207" ? 60. : (source=="Sn113" ? 45. : 30);
-    Double_t mean = GetXatMax(&finalEn[0]);
-    std::vector <Double_t> EastMeanAndSig = FitGaus(&finalEn[0],mean, mean-width, mean+width);
-    std::cout << "East mean = " << EastMeanAndSig[0] << "    East sigma = " << EastMeanAndSig[1] << endl;
+  
+  for (UInt_t i=0;i<param0.size();i++) {
+    if (source!="Beta") {
+      //Fit the histograms
+      Double_t width = source=="Bi207" ? 60. : (source=="Sn113" ? 45. : 30);
+      Double_t mean = GetXatMax(&Etype0[i]);
+      std::vector <Double_t> EastMeanAndSig = FitGaus(&Etype0[i],mean, mean-width, mean+width);
+      std::cout << "East mean = " << EastMeanAndSig[0] << "    East sigma = " << EastMeanAndSig[1] << endl;
+      
+      mean = GetXatMax(&Wtype0[i]);
+      std::vector <Double_t> WestMeanAndSig = FitGaus(&Wtype0[i],mean, mean-width, mean+width);
+      std::cout << "West mean = " << WestMeanAndSig[0] << "    West sigma = " << WestMeanAndSig[1] << endl;
+      
+      //bool printToFile= false;
+      //if (geometry=="2010") printToFile = CheckPeakValues2010(
+      sprintf(temp,"passingParams_%s.dat",source.c_str());
+      ofstream ofile(temp,ios::app);
+      ofile << param0[i] << "\t" << param1[i] << "\t" << param2[i] << "\t" << param3[i]
+	    << "\t" << EastMeanAndSig[0] << "\t" << EastMeanAndSig[1] << "\t" 
+	    << WestMeanAndSig[0] << "\t" << WestMeanAndSig[1] << std::endl;
+      ofile.close();
+    }
+  }
+    TFile *outfile;
     
-    mean = GetXatMax(&finalEn[1]);
-    std::vector <Double_t> WestMeanAndSig = FitGaus(&finalEn[1],mean, mean-width, mean+width);
-    std::cout << "West mean = " << WestMeanAndSig[0] << "    West sigma = " << WestMeanAndSig[1] << endl;
-
-    //bool printToFile= false;
-    //if (geometry=="2010") printToFile = CheckPeakValues2010(
-    sprintf(temp,"passingParams_%s.dat",source.c_str());
-    ofstream ofile(temp,ios::app);
-    ofile << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
-	  << "\t" << EastMeanAndSig[0] << "\t" << EastMeanAndSig[1] << "\t" 
-	  << WestMeanAndSig[0] << "\t" << WestMeanAndSig[1] << std::endl;
-    ofile.close();
-  }
-  TFile *outfile;
-
-  if (source=="Beta" || printTree)  {
-    //Create simulation output file
-    Char_t outputfile[500];
-    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
-    outfile = new TFile(outputfile, "RECREATE");
-    //outfile.Open(outputfile, "RECREATE");
-    finalEn[0].Write(); 
-    finalEn[1].Write();
-    tree.Write();
-    outfile->Close();
-  }
+    //if (source=="Beta" || printTree)  {
+      //Create simulation output file
+      Char_t outputfile[500];
+      sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
+      outfile = new TFile(outputfile, "RECREATE");
+      //outfile.Open(outputfile, "RECREATE");
+      Etype0[0].Write(); 
+      Wtype0[0].Write();
+      //tree.Write();
+      outfile->Close();
+      //}
+  
 }
 
   
