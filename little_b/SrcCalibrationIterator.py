@@ -18,8 +18,9 @@ envelope = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0
 def makeLinearityParamFile():
     polOrder = 3 # cubic polynomial is default
     paramDeltas = {"p0":.0, "p1":0., "p2":0., "p3":0.}
-    paramDeltaRanges = {"p0":(-0.,0.), "p1":(-0.0,0.0), "p2":(-0.0005,0.0005), "p3":(-0.000003,0.000003)} # for p1, -.2,.2
-    paramNSteps = {"p0":1, "p1":1, "p2":11, "p3":15}
+    # Ensure you use scientific notation
+    paramDeltaRanges = {"p0":(-0.,0.), "p1":(-0.0,0.0), "p2":(-5.e-5,5.e-5), "p3":(-3.e-7,3.e-7)} # for p1, -.2,.2
+    paramNSteps = {"p0":1, "p1":1, "p2":11, "p3":7}
     
     paramFile = open("linCurves/parameters.dat",'w');
     
@@ -27,14 +28,11 @@ def makeLinearityParamFile():
         for p1 in np.linspace(paramDeltaRanges["p1"][0],paramDeltaRanges["p1"][1], paramNSteps["p1"]):
             for p2 in np.linspace(paramDeltaRanges["p2"][0],paramDeltaRanges["p2"][1], paramNSteps["p2"]):
                 for p3 in np.linspace(paramDeltaRanges["p3"][0],paramDeltaRanges["p3"][1], paramNSteps["p3"]):
-                    paramDeltas["p0"] = p0;
-                    paramDeltas["p1"] = p1;
-                    paramDeltas["p2"] = p2;
-                    paramDeltas["p3"] = p3;
-                    paramFile.write("%f\t%f\t%f\t%f\n"%(p0,p1,p2,p3))
+                   
+                    paramFile.write("%e\t%e\t%e\t%e\n"%(p0,p1,p2,p3))
                     
 
-def runAllSourceSims(numEvents=100000):
+def runAllSourceSims(geometry="2010", numEvents=5000):
     srcs = ["Sn113", "Ce139"]
     for src in srcs:
         os.system("rm passingParams_%s.dat"%src)
@@ -42,13 +40,13 @@ def runAllSourceSims(numEvents=100000):
         #nlines=0
         for line in infile:
             params = line.split()
-            os.system("./SimulationAnalyzer %s %i true %s %s %s %s"%(src,numEvents,params[0],params[1],params[2],params[3]))
+            os.system("./SimulationAnalyzer %s %s %i true %s %s %s %s"%(src,geometry,numEvents,params[0],params[1],params[2],params[3]))
             #nlines = nlines+1
         infile.close()
 
 
-#makeLinearityParamFile()
-runAllSourceSims(50000)
+makeLinearityParamFile()
+runAllSourceSims(geometry="2010")
 exit(0)
 
 

@@ -69,12 +69,11 @@ bool CheckPeakValues2012(std::vector <int> parameters, std::string sourceName, s
 
 //Function to return the trigger function for each side in a std::vector in the form vec[side][param]
 // where side==0 is East and side==1 is West
-std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams = 7);
+std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams = 8);
 
 //Function to return the probability of a trigger at a given energy given the parameters
 Double_t triggerProbability(std::vector <Double_t> params, Double_t En) {
-  return params[0]+params[1]*TMath::Erf((En-params[2])/params[3])
-    + params[4]*TMath::Gaus(En,params[5],params[6]);
+  return params[0]+params[1]*TMath::Erf((En-params[2])/params[3])*TMath::TanH(params[7]*En) + params[4]*TMath::Gaus(En,params[5],params[6]);
 }
 
 //Get the conversion from EQ2Etrue
