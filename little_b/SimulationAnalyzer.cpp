@@ -13,22 +13,24 @@ If the simulation is beta decay, it outputs a tree with spectra
   
 
 // This function holds all the meat
-void revCalSimulation (std::string source, std::string geometry, UInt_t numEvents, bool linCorr, std::vector <Double_t> params);
+void revCalSimulation (std::string source, std::string geometry, UInt_t numEvents, bool linCorr, std::vector <Double_t> params, Double_t index);
 
 
 int main(int argc, char *argv[]) {
 
-  if (argc!=5 && argc!=9) {
-    std::cout << "Usage: ./SimulationAnalyzer [Source] [geometry] [numEvents] [bool doLinCorr] if doLinCorr [p0] [p1] [p2] [p3] [\n";
+  if (argc!=5 && argc!=9 && argc!=10) {
+    std::cout << "Usage: ./SimulationAnalyzer [Source] [geometry] [numEvents] [bool doLinCorr] if doLinCorr [p0] [p1] [p2] [p3]\n";
     exit(0);
   }
+  Int_t paramSetIndex = -1;
+  if (argc==10) paramSetIndex = atoi(argv[9])
 
   std::string source = std::string(argv[1]); //Input source (Beta, Sn113, Bi207, Ce139)
   UInt_t numEvents = (unsigned int)atoi(argv[3] ); //Number of electrons to accumulate
   std::string linCorrString = std::string(argv[4]); //False if you want no linearity corrections applied
   bool linCorrBool = false;
   std::vector <Double_t> params(4,0.);
-  if (linCorrString=="true" || linCorrString=="1") {
+  if (linCorrString=="True" || linCorrString=="true" || linCorrString=="1") {
     linCorrBool = true;
     params[0] = atof(argv[5]);
     params[1] = atof(argv[6]);
@@ -38,12 +40,12 @@ int main(int argc, char *argv[]) {
   //std::vector <Double_t> checker = {5., 0.2, 0.0005,-3.e-6};
   //std::cout << checkParamSetStatus(checker,source.substr(0,2),"2010") << std::endl;
   
-  revCalSimulation(source,std::string(argv[2]), numEvents, linCorrBool, params);
+  revCalSimulation(source,std::string(argv[2]), numEvents, linCorrBool, params, paramSetIndex);
 
 }
 
 
-void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, bool doParamSets, std::vector <Double_t> params) 
+void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, bool doParamSets, std::vector <Double_t> params, Int_t paramSetIndex) 
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
@@ -391,7 +393,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   
   if (source!="Beta") {
     
-    sprintf(temp,"passingParams_%s.dat",source.c_str());
+    sprintf(temp,"linCurves/passingParams_%s_%s.dat",geometry.c_str(),source.c_str());
     ofstream ofile(temp,ios::app);
     
     //Fit the histograms
@@ -409,9 +411,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       //bool printToFile= false;
       //if (geometry=="2010") printToFile = CheckPeakValues2010(
       
-      if (checkPeakStatus(MeanAndSig,source.substr(0,2),geometry)) {
+      if (paramSetIndex!=-1 && checkPeakStatus(MeanAndSig,source.substr(0,2),geometry)) {
 	
-	ofile << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	ofile << paramSetIndex << "\t" << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
 	      << "\t" << MeanAndSig[0][0] << "\t" << MeanAndSig[0][1] << "\t" 
 	      << MeanAndSig[1][0] << "\t" << MeanAndSig[1][1] << std::endl;
       }
@@ -437,9 +439,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       MeanAndSig2.push_back(FitGaus(&Wtype0,mean, mean-width, mean+width));
       std::cout << "West mean = " << MeanAndSig2[1][0] << "    West sigma = " << MeanAndSig2[1][1] << endl;
 
-      if (checkPeakStatus(MeanAndSig1,source.substr(0,2)+"1",geometry) && checkPeakStatus(MeanAndSig2,source.substr(0,2)+"2",geometry)) {
+      if (paramSetIndex!=-1 && checkPeakStatus(MeanAndSig1,source.substr(0,2)+"1",geometry) && checkPeakStatus(MeanAndSig2,source.substr(0,2)+"2",geometry)) {
 	
-	ofile << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	ofile << paramSetIndex << "\t" << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
 	      << "\t" << MeanAndSig1[0][0] << "\t" << MeanAndSig1[0][1] << "\t" 
 	      << MeanAndSig1[1][0] << "\t" << MeanAndSig1[1][1] 
 	      << "\t" << MeanAndSig2[0][0] << "\t" << MeanAndSig2[0][1] << "\t" 
