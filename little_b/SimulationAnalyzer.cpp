@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   }
 
   std::string source = std::string(argv[1]); //Input source (Beta, Sn113, Bi207, Ce139)
-  UInt_t numEvents = (unsigned int)atoi(argv[3]); //Number of electrons to accumulate
+  UInt_t numEvents = (unsigned int)atoi(argv[3] ); //Number of electrons to accumulate
   std::string linCorrString = std::string(argv[4]); //False if you want no linearity corrections applied
   bool linCorrBool = false;
   std::vector <Double_t> params(4,0.);
@@ -49,11 +49,25 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   UInt_t alphaFileIndex = 0; // the index on the nPE_keV file
   UInt_t XeMapPeriod = 2; // The xenon position map to be used
+  UInt_t triggerMap = -1;
   bool printTree = true; //Boolean to force printing of of TTree. The tree will be printed regardless if the source is Beta
   UInt_t BetaEvents = numEvents;
   std::string geometry = geom; // "2010","2011/2012","2012/2013"
-  bool runParamSets = doParamSets;
   std::vector <Double_t> linCorrParams = params;
+
+  //Checking that the parameters have a chance
+  if (source!="Beta") { 
+    if (source!="Bi207") {
+      if (!checkParamSetStatus(linCorrParams,source.substr(0,2),geometry)) {
+	std::cout << "Sn or Ce source parameters didn't pass envelope check!\n";
+	return;
+      }
+    }
+    else if (!checkParamSetStatus(linCorrParams,source.substr(0,2)+"2",geometry) || !checkParamSetStatus(linCorrParams,source.substr(0,2)+"1",geometry)) {
+      std::cout << "Bi source parameters didn't pass envelope check!\n";
+      return;
+    }
+  }
 
   // Set the location of the source and it's spread in mm. srcPos[0=east,1=west][0=x,1=y,2=sigma]
   bool moveSource = false; // If this is true, set the position of the source to the following location
@@ -65,9 +79,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   //Decide which simulation to use...
   std::string simLocation;
-  if (geometry=="2010") simLocation = "../../data/XuanSim/"; //This needs to be set to wherever you are storing your sims..
-  else if (geometry=="2011/2012") simLocation = string(getenv("SIM_2011_2012"));
-  else if (geometry=="2012/2013") simLocation = string(getenv("SIM_2012_2013"));
+  if (geometry=="2010") simLocation = "../../data/XuanSim/2010/"; //This needs to be set to wherever you are storing your sims..
+  else if (geometry=="2011/2012") simLocation = "../../data/XuanSim/2011-2012/";
+  else if (geometry=="2012/2013") simLocation = "../../data/XuanSim/2012-2013/";
   else if (geometry=="2012/2013_isobutane") simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
   else {
     std::cout << "The geometry is set to an invalid option\n\n";
@@ -85,7 +99,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   // Load information for applying detector effects
   std::vector <Double_t> alphas = getAlphaValues(alphaFileIndex); // fill vector with the alpha (nPE/keV) values
-  std::vector < std::vector <Double_t> > triggerFunc = getTriggerFunctionParams(XeMapPeriod,7); // 2D vector with trigger function for East side and West side in that order
+  std::vector < std::vector <Double_t> > triggerFunc = getTriggerFunctionParams(triggerMap,7); // 2D vector with trigger function for East side and West side in that order
   GetPositionMap(XeMapPeriod); //Loads position map via posMapReader.h methods
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(geometry);
 
@@ -404,6 +418,33 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     }
     else  {
       // CODE BISMUTH PEAK FITTERS
+      Double_t mean = GetXatMax(&Etype0);
+      std::vector < std::vector < Double_t > > MeanAndSig1;// (2, std::vector<Double_t>);
+      MeanAndSig1.push_back(FitGaus(&Etype0,mean, mean-width, mean+width));
+      std::cout << "East mean = " << MeanAndSig1[0][0] << "    East sigma = " << MeanAndSig1[0][1] << endl;
+      
+      mean = GetXatMax(&Wtype0);
+      MeanAndSig1.push_back(FitGaus(&Wtype0,mean, mean-width, mean+width));
+      std::cout << "West mean = " << MeanAndSig1[1][0] << "    West sigma = " << MeanAndSig1[1][1] << endl;
+      
+      
+      mean = GetXatMax(&Etype0, 400., 650.);
+      std::vector < std::vector < Double_t > > MeanAndSig2;// (2, std::vector<Double_t>);
+      MeanAndSig2.push_back(FitGaus(&Etype0,mean, mean-width, mean+width));
+      std::cout << "East mean = " << MeanAndSig2[0][0] << "    East sigma = " << MeanAndSig2[0][1] << endl;
+      
+      mean = GetXatMax(&Wtype0);
+      MeanAndSig2.push_back(FitGaus(&Wtype0,mean, mean-width, mean+width));
+      std::cout << "West mean = " << MeanAndSig2[1][0] << "    West sigma = " << MeanAndSig2[1][1] << endl;
+
+      if (checkPeakStatus(MeanAndSig1,source.substr(0,2)+"1",geometry) && checkPeakStatus(MeanAndSig2,source.substr(0,2)+"2",geometry)) {
+	
+	ofile << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	      << "\t" << MeanAndSig1[0][0] << "\t" << MeanAndSig1[0][1] << "\t" 
+	      << MeanAndSig1[1][0] << "\t" << MeanAndSig1[1][1] 
+	      << "\t" << MeanAndSig2[0][0] << "\t" << MeanAndSig2[0][1] << "\t" 
+	      << MeanAndSig2[1][0] << "\t" << MeanAndSig2[1][1] << std::endl;
+      }
     }
     ofile.close();
   }  
