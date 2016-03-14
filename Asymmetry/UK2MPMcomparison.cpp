@@ -136,117 +136,120 @@ int main(int argc, char *argv[])
     Int_t uk0E=0, mpm0E=0, uk1E=0, mpm1E=0, uk23E=0, mpm23E=0, ukTotE=0, mpmTotE=0, uk0W=0, mpm0W=0, uk1W=0, mpm1W=0, uk23W=0, mpm23W=0, ukTotW=0, mpmTotW=0; //Event totals
     double ukAsym = 0., mpmAsym=0., ukAsymError = 0., mpmAsymError=0.;
     try {
-    
-      OctetAsymmetry UK(octetNum, enBinWidth, 50., true);
-      OctetAsymmetry mpm(octetNum, enBinWidth, 50., false);
 
-      
-      UK.calcBGsubtractedEvts();
-      std::cout << "UK Asym " << ukAsym << std::endl;
-      //exit(0);
-      mpm.calcBGsubtractedEvts();
-      std::cout << "UK Asym " << ukAsym << std::endl;
-      
-    
-      std::vector <double> evts;
-    
-       for (int bin=0; bin<numBins; bin++) {
-	double aveBinEn = ((double)bin+.5)*(double)enBinWidth;
-      
-	for (int i=0;i<3;i++) {
-	  evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
-	  EvisEALL_uk.Fill(aveBinEn,evts[0]);
-	  EvisWALL_uk.Fill(aveBinEn,evts[1]);
+      { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
+	OctetAsymmetry UK(octetNum, enBinWidth, 50., true);
 	
-	  evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
-	  EvisEALL_mpm.Fill(aveBinEn,evts[0]);
-	  EvisWALL_mpm.Fill(aveBinEn,evts[1]);
+	UK.calcTotalAsymmetry(225.,675.,1);
+	ukAsym = UK.returnTotalAsymmetry();
+	ukAsymError = UK.returnTotalAsymmetryError();
+	std::cout << "UK Asym " << ukAsym << std::endl;
+      
+	UK.calcBGsubtractedEvts();
+	
+	std::vector <double> evts;
+    
+	for (int bin=0; bin<numBins; bin++) {
+	  double aveBinEn = ((double)bin+.5)*(double)enBinWidth;
+      
+	  for (int i=0;i<3;i++) {
+	    evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
+	    EvisEALL_uk.Fill(aveBinEn,evts[0]);
+	    EvisWALL_uk.Fill(aveBinEn,evts[1]);
+	  }
+
+	  evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
+	  EvisE0_uk.Fill(aveBinEn,evts[0]);
+	  EvisW0_uk.Fill(aveBinEn,evts[1]);
+      
+	  evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
+	  EvisE1_uk.Fill(aveBinEn,evts[0]);
+	  EvisW1_uk.Fill(aveBinEn,evts[1]);
+      
+	  evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
+	  EvisE23_uk.Fill(aveBinEn,evts[0]);
+	  EvisW23_uk.Fill(aveBinEn,evts[1]);
+      
+	  evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
+	  EvisE23_uk.Fill(aveBinEn,evts[0]);
+	  EvisW23_uk.Fill(aveBinEn,evts[1]);
+   
 	}
-
-	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
-	EvisE0_uk.Fill(aveBinEn,evts[0]);
-	EvisW0_uk.Fill(aveBinEn,evts[1]);
+    
+	evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
+	uk0E = (int)evts[0]; uk0W = (int)evts[1];
+	Type_uk.SetBinContent(1, (int)(evts[0]+evts[1]));
+	evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
+	uk1E = (int)evts[0]; uk1W = (int)evts[1];
+	Type_uk.SetBinContent(2, (int)(evts[0]+evts[1]));
+	evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
+	uk23E = (int)evts[0]; uk23W = (int)evts[1];
+	Type_uk.SetBinContent(3, (int)(evts[0]+evts[1]));
+	evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
+	uk23E += (int)evts[0]; uk23W += (int)evts[1];
+	Type_uk.SetBinContent(4, (int)(evts[0]+evts[1]));
       
-	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
-	EvisE0_mpm.Fill(aveBinEn,evts[0]);
-	EvisW0_mpm.Fill(aveBinEn,evts[1]);
-
-	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
-	EvisE1_uk.Fill(aveBinEn,evts[0]);
-	EvisW1_uk.Fill(aveBinEn,evts[1]);
-      
-	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
-	EvisE1_mpm.Fill(aveBinEn,evts[0]);
-	EvisW1_mpm.Fill(aveBinEn,evts[1]);
-
-	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
-	EvisE23_uk.Fill(aveBinEn,evts[0]);
-	EvisW23_uk.Fill(aveBinEn,evts[1]);
-      
-	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
-	EvisE23_mpm.Fill(aveBinEn,evts[0]);
-	EvisW23_mpm.Fill(aveBinEn,evts[1]);
-
-	evts = UK.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
-	EvisE23_uk.Fill(aveBinEn,evts[0]);
-	EvisW23_uk.Fill(aveBinEn,evts[1]);
-      
-	evts = mpm.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
-	EvisE23_mpm.Fill(aveBinEn,evts[0]);
-	EvisW23_mpm.Fill(aveBinEn,evts[1]);
+	ukTotE = uk0E+uk1E+uk23E;
+	ukTotW = uk0W+uk1W+uk23W;
 
       }
+
+      { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
+	OctetAsymmetry MPM(octetNum, enBinWidth, 50., true);
+	
+	MPM.calcTotalAsymmetry(225.,675.,1);
+	mpmAsym = MPM.returnTotalAsymmetry();
+	mpmAsymError = MPM.returnTotalAsymmetryError();
+	std::cout << "mpm Asym " << mpmAsym << std::endl;
+      
+	MPM.calcBGsubtractedEvts();
+	
+	std::vector <double> evts;
     
-      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
-      uk0E = (int)evts[0]; uk0W = (int)evts[1];
-      Type_uk.SetBinContent(1, (int)(evts[0]+evts[1]));
-      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
-      uk1E = (int)evts[0]; uk1W = (int)evts[1];
-      Type_uk.SetBinContent(2, (int)(evts[0]+evts[1]));
-      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
-      uk23E = (int)evts[0]; uk23W = (int)evts[1];
-      Type_uk.SetBinContent(3, (int)(evts[0]+evts[1]));
-      evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
-      uk23E += (int)evts[0]; uk23W += (int)evts[1];
-      Type_uk.SetBinContent(4, (int)(evts[0]+evts[1]));
-
-      ukTotE = uk0E+uk1E+uk23E;
-      ukTotW = uk0W+uk1W+uk23W;
-
-      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
-      mpm0E = (int)evts[0]; mpm0W = (int)evts[1];
-      Type_mpm.SetBinContent(1, (int)(evts[0]+evts[1]));
-      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
-      mpm1E = (int)evts[0]; mpm1W = (int)evts[1];
-      Type_mpm.SetBinContent(2, (int)(evts[0]+evts[1]));
-      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
-      mpm23E = (int)evts[0]; mpm23W = (int)evts[1];
-      Type_mpm.SetBinContent(3, (int)(evts[0]+evts[1]));
-      evts = mpm.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
-      mpm23E += (int)evts[0]; mpm23W += (int)evts[1];
-      Type_mpm.SetBinContent(4, (int)(evts[0]+evts[1]));
-
-      mpmTotE = mpm0E+mpm1E+mpm23E;
-      mpmTotW = mpm0W+mpm1W+mpm23W;
+	for (int bin=0; bin<numBins; bin++) {
+	  double aveBinEn = ((double)bin+.5)*(double)enBinWidth;
       
-      
-      UK.calcTotalAsymmetry(225.,675.,1);
-      ukAsym = UK.returnTotalAsymmetry();
-      ukAsymError = UK.returnTotalAsymmetryError();
-      std::cout << "UK Asym " << ukAsym << std::endl;
-      
+	  for (int i=0;i<3;i++) {
+	    evts = MPM.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,i);
+	    EvisEALL_mpm.Fill(aveBinEn,evts[0]);
+	    EvisWALL_mpm.Fill(aveBinEn,evts[1]);
+	  }
 
-      mpm.calcTotalAsymmetry(225.,675.,1);
-      mpmAsym = mpm.returnTotalAsymmetry();
-      mpmAsymError = mpm.returnTotalAsymmetryError();
-      std::cout << "MPM Asym " << mpmAsym << std::endl;
+	  evts = MPM.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,0);
+	  EvisE0_mpm.Fill(aveBinEn,evts[0]);
+	  EvisW0_mpm.Fill(aveBinEn,evts[1]);
+      
+	  evts = MPM.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,1);
+	  EvisE1_mpm.Fill(aveBinEn,evts[0]);
+	  EvisW1_mpm.Fill(aveBinEn,evts[1]);
+      
+	  evts = MPM.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,2);
+	  EvisE23_mpm.Fill(aveBinEn,evts[0]);
+	  EvisW23_mpm.Fill(aveBinEn,evts[1]);
+      
+	  evts = MPM.getNumBGsubtrEvts(bin*enBinWidth,(bin+1)*enBinWidth,3);
+	  EvisE23_mpm.Fill(aveBinEn,evts[0]);
+	  EvisW23_mpm.Fill(aveBinEn,evts[1]);
+   
+	}
+    
+	evts = MPM.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
+	mpm0E = (int)evts[0]; mpm0W = (int)evts[1];
+	Type_mpm.SetBinContent(1, (int)(evts[0]+evts[1]));
+	evts = MPM.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
+	mpm1E = (int)evts[0]; mpm1W = (int)evts[1];
+	Type_mpm.SetBinContent(2, (int)(evts[0]+evts[1]));
+	evts = MPM.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
+	mpm23E = (int)evts[0]; mpm23W = (int)evts[1];
+	Type_mpm.SetBinContent(3, (int)(evts[0]+evts[1]));
+	evts = MPM.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
+	mpm23E += (int)evts[0]; mpm23W += (int)evts[1];
+	Type_mpm.SetBinContent(4, (int)(evts[0]+evts[1]));
+      
+	mpmTotE = mpm0E+mpm1E+mpm23E;
+	mpmTotW = mpm0W+mpm1W+mpm23W;
 
-      
-      std::cout << "UK Asym " << ukAsym << std::endl;
-      
-      //delete UK; delete mpm;
-      std::cout << "mpm Asym " << mpmAsym << std::endl;
-      //exit(0);
+      }
 
     }
 
@@ -254,7 +257,7 @@ int main(int argc, char *argv[])
       std::cerr << "Error: " << ex << std::endl;
     }
     
-
+    std::cout << "uk Asym " << ukAsym << std::endl;
     std::cout << "mpm Asym " << mpmAsym << std::endl;
     exit(0);
       
