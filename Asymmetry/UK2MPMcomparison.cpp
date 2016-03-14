@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
       }
 
       { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry MPM(octetNum, enBinWidth, 50., true);
+	OctetAsymmetry MPM(octetNum, enBinWidth, 50., false);
 	
 	MPM.calcTotalAsymmetry(225.,675.,1);
 	mpmAsym = MPM.returnTotalAsymmetry();
@@ -259,7 +259,6 @@ int main(int argc, char *argv[])
     
     std::cout << "uk Asym " << ukAsym << std::endl;
     std::cout << "mpm Asym " << mpmAsym << std::endl;
-    exit(0);
       
     TCanvas *cEvisALL = new TCanvas("cEvisALL"," ", 1400., 600.);
     cEvisALL->Divide(2,1);
