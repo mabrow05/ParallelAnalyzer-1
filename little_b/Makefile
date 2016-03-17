@@ -18,8 +18,8 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     +=  $(ROOTCFLAGS) -I../include 
 LIBS         += -lSpectrum -lMinuit
 
-SimulationAnalyzer: SimulationAnalyzer.o SimAnalyzerUtils.hh
-	$(CXX) $(CXXFLAGS) -o SimulationAnalyzer SimulationAnalyzer.o $(LIBS)
+SimulationProcessor: SimulationProcessor.o SimProcessorUtils.hh
+	$(CXX) $(CXXFLAGS) -o SimulationProcessor SimulationProcessor.o $(LIBS)
 	@echo "Done"
 
 #SimAnalyzerUtils.o: SimAnalyzerUtils.hh
