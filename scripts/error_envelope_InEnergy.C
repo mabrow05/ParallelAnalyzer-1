@@ -87,8 +87,8 @@
   Int_t nn = 5;
   Double_t perc1=0.025;
   Double_t perc2=0.018;
-  Double_t perc3=0.013;
-  Double_t perc4=0.013;
+  Double_t perc3=0.011;
+  Double_t perc4=0.011;
   Double_t x2[nn] = {0., peakCe_EQ, peakSn_EQ, peakBiHigh_EQ, 1000.};
   Double_t percent[nn] = {1., perc1, perc2, perc3, perc4};
   Double_t y_upper[nn], y_lower[nn];
