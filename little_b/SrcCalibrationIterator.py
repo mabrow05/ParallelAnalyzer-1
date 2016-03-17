@@ -18,6 +18,20 @@ os.system("mkdir -p linCurves/")
 os.system("mkdir -p analyzed_files/")
 
 
+def binary_search_bool(arr,val,low=0,high=None): #Put in to check if parameter sets are good for the different sources
+    high = high if high is not None else len(arr)
+    comp = high/2
+    
+    if arr[comp]==val
+        return True 
+    else:
+        if val<arr[comp]:
+            binary_search_bool(arr[:(comp/2),val,
+        comp = comp/2 if val<arr[comp] else (len(arr)+comp)/2
+        binary_search_bool(arr[
+
+            
+
 ##### Make linearity param file 
 def makeLinearityParamFile():
     paramDeltaRanges = {"p0":(-0.,0.), "p1":(-0.0,0.0), "p2":(-5.e-5,5.e-5), "p3":(-3.e-7,3.e-7)} 
