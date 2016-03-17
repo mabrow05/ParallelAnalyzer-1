@@ -2,13 +2,11 @@
 #include <vector>
 #include <cstdlib>
 
-void trigger_threshold(Int_t XeRunPeriod) {
-
-  bool mpmData=true;
+void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
+  
   Char_t temp[500];
   //Create file to write parameters of fit.
-  if (mpmData) sprintf(temp,"%s/trigger_functions_XePeriod_MPM_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
-  else sprintf(temp,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
+  sprintf(temp,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
   ofstream triggFunc(temp);
 
   // Read in the Xe runs in this runPeriod
@@ -68,19 +66,18 @@ void trigger_threshold(Int_t XeRunPeriod) {
 
   //TF1 *erf = new TF1("erf","([5]*TMath::Erf((x-[0])/[1])+0.5)+[2]*TMath::Gaus(x,[3],[4])",0.,150.);
   //TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))+[4]*TMath::Gaus(x,[5],[6])",0.,150.);
-  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3])*TMath::TanH([7]*x)+[4]*TMath::Gaus(x,[5],[6]))",0.,150.);
-  //TF1 *erf = new TF1("erf","([0]+[1]*TMath::TanH([2]*x-[3])+[4]*TMath::Gaus(x,[5],[6]))",0.,150.);
+  //TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3])*TMath::TanH([7]*x)+[4]*TMath::Gaus(x,[5],[6]))",0.,150.);
+
+  // Best fit function. This is a shifted erf which goes into a shifted tanh, where the smooth transition is done via application of another shifted tanh
+  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",0.,150.);
   erf->SetParameter(0,0.5); //Constant offset of erf
   erf->SetParameter(1,0.5); //Scaling of erf
   erf->SetParameter(2,30.); //Mean of gaussian integrated for erf
-  erf->SetParameter(3,12.); //std. dev. of gaussian integrated for erf
-  erf->SetParameter(4,-0.1); //Scaling of additional gaussian for cancellation of erf overshooting distribution
-  erf->SetParameter(5,40.); //Mean of additional gaussian
-  //erf->SetParLimits(5,35.,40.);
-  erf->SetParameter(6,12.); //Std. dev of additional gaussian
-  //erf->SetParLimits(6,9.,13.);
-  erf->SetParameter(7,35.);
-  //erf->SetParLimits(7,30.,45.);
+  erf->SetParameter(3,7..); //std. dev. of gaussian integrated for erf
+  erf->SetParameter(4,6.); //severity of transition function "turn on"
+  erf->SetParameter(5,0.5); //constant offset of second tanh
+  erf->SetParameter(6,0.5); //Scaling of second tanh
+  erf->SetParameter(7,13.); // stretching factor of second tanh
 
   //Working Parameters of the east trigger function for erf*tanh+gaus
   /*erf->SetParameter(0,0.5); //Constant offset of erf
@@ -112,7 +109,7 @@ void trigger_threshold(Int_t XeRunPeriod) {
   Etrigg->Fit("erf","","",0.,East_upper_limit);
   
   Etrigg->Draw("P");
-  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " <<  endl; //erf->GetParameter(6) << endl;
+  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " << erf->GetParameter(6) << " " << erf->GetParameter(7) << endl;
 
 
   TCanvas *c2 = new TCanvas("c2"," ",1200.,1600.);
@@ -131,15 +128,14 @@ void trigger_threshold(Int_t XeRunPeriod) {
 
   erf->SetParameter(0,0.5); //Constant offset of erf
   erf->SetParameter(1,0.5); //Scaling of erf
-  erf->SetParameter(2,25.); //Mean of gaussian integrated for erf
+  erf->SetParameter(2,32.); //Mean of gaussian integrated for erf
   erf->SetParameter(3,13.); //std. dev. of gaussian integrated for erf
-  erf->SetParameter(4,-0.1); //Scaling of additional gaussian for cancellation of erf overshooting distribution
-  erf->SetParameter(5,33.); //Mean of additional gaussian
-  erf->SetParameter(6,19.); //Std. dev of additional gaussian
-  erf->SetParameter(7,25.);
-  //erf->SetParameter(7,0.036);
-  //erf->SetParameter(8,25.);
+  erf->SetParameter(4,18.); //severity of transition function "turn on"
+  erf->SetParameter(5,0.5); //constant offset of second tanh
+  erf->SetParameter(6,0.5); //Scaling of second tanh
+  erf->SetParameter(7,15.); // stretching factor of second tanh
 
+  //Old Parameters
   //erf->SetParameter(0,0.5); //Constant offset of erf
   //erf->SetParameter(1,0.5); //Scaling of erf
   //erf->SetParameter(2,10.); //Mean of gaussian integrated for erf
@@ -157,7 +153,7 @@ void trigger_threshold(Int_t XeRunPeriod) {
 
   Wtrigg->Draw("P");
 
-  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " << endl;// erf->GetParameter(6);
+  triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " << erf->GetParameter(6) << " " << erf->GetParameter(7) << endl;
 
   triggFunc.close();
   
