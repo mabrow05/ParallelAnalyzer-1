@@ -62,7 +62,7 @@ def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
 
             for line in infile:
                 params = line.split()
-                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[0],))
+                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[0]))
     
             infile.close()
         else:
@@ -96,7 +96,13 @@ def makeFinalParamsFile(geometry):
     SnFile.close()
     BiFile.close()
 
-    finalFile = open("linCurves/matchingParams_%s.dat"%geometry,'w')
+    num=0
+    fileName = "linCurves/matchingParams_%s_%i.dat"%(geometry,num)
+    if (os.path.isfile(fileName)):
+        num+=1
+        fileName = "linCurves/matchingParams_%s_%i.dat"%(geometry,num)
+
+    finalFile = open(fileName,'w')
 
     for i,el in enumerate(Bi):
         print i,el 
@@ -108,20 +114,21 @@ def makeFinalParamsFile(geometry):
     print "DONE writing final parameter file for %s"%geometry
 
 
+def runBetaSims(geometry="2010", numEvents=5000,linCorr=True,paramSet=0):
+    srcs = ["Beta","Beta_fierz"]
+    for src in srcs:
+        if linCorr:
+            infile = open("linCurves/mathchingParams_%s_%i.dat"%(geometry,paramSet),'r')
         
+            for line in infile:
+                params = line.split()
+                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4]))
+    
+            infile.close()
+        else:
+            os.system("./SimulationProcessor %s %s %i %i"%(src,geometry,numEvents,linCorr))
 
 
-makeFinalParamsFile(2010)
-exit(0)
-
-makeLinearityParamFile()
-runAllSourceSims(geometry="2010", numEvents=50000)
-exit(0)
-
-
-
-
-makeLinearityParamFile()
 
 
 
@@ -137,19 +144,18 @@ if __name__ == "__main__":
                       help="Run sources through analyzer applying corrections from parameters.dat")
     parser.add_option("--makeGoodParamFile",dest="makeGoodParamFile",action="store_true",default=False,
                       help="Crosschecks linearity twiddles which are good for all source peaks and creates file")
-    parser.add_option("--runBetaBase",dest="runBetaBase",action="store_true",default=False,
+    parser.add_option("--runBetaBaseline",dest="runBetaBaseline",action="store_true",default=False,
                       help="Runs the betas (both little b on and off) without Linearity twiddles")
     parser.add_option("--runBetaLinCorr",dest="runBetaLinCorr",action="store_true",default=False,
                       help="Runs the betas for all sets of parameters deemed \"good\"")
-    #Option to tell whatever you are running how many events to pass
-    #Option to set geometry
-    #option to set which set of "good" parameters to use
-    
-    parser.add_option("--runGainBismuth",dest="runGainBismuth",action="store_true",default=False,
-                      help="Calculate and plot the Bi pulser spectra and track the gain relative to the reference run")
-    parser.add_option("--makeDirectories",dest="makeDirectories",action="store_true",default=False,
-                      help="Makes all the analysis directories.")
-                      
+    parser.add_option("--nEvents","-n",type="int", action="store",dest="nEvents",default=5000,
+                      help="Set the number of events to be run through the processor");
+    parser.add_option("--geometry","-g", action="store",dest="geometry",default="2010",
+                      help="Set the geometry of the simulation to be used in the processor");
+    parser.add_option("--betaParamFile","-p",type="int", action="store",dest="paramSet",default=0,
+                      help="Set the parameter set to be used for processing the betas");
+
+
 
     options, args = parser.parse_args()
 
@@ -157,43 +163,22 @@ if __name__ == "__main__":
     if options.makeLinCorrFile:
         makeLinearityParamFile()
 
+    if options.runSourcesBaseline:
+        runAllSourceSims(geometry=options.geometry,numEvents=options.nEvents,linCorr=False)
 
- 
-    if options.createOctetLists:
-        beta = BetaReplayManager()
-        beta.createOctetLists()
+    if options.runSourcesLinCorr:
+        runAllSourceSims(geometry=options.geometry,numEvents=options.nEvents,linCorr=True)
+
+    if options.makeGoodParamFile:
+        makeFinalParamsFile(geometry=options.geometry)
+
+    if options.runBetaBaseline:
+        runBetaSims(geometry=options.geometry,numEvents=options.nEvents,linCorr=False)
+
+    if options.runBetaLinCorr:
+        runBetaSims(geometry=options.geometry,numEvents=options.nEvents,linCorr=True,paramSet=options.paramSet)
+
+
     
-    if options.findPedestals:
-        beta = BetaReplayManager()
-        #for octet in range(0,60,1):
-        beta.findPedestals(5)
-
-    if 0: 
-        asymm = BetaAsymmetryManager()
-        asymm.makeOctetAnalysisDirectories()
-
-    if 0:
-        beta = BetaReplayManager()
-        for octet in range(0,59,1):
-            beta.makeBasicHistograms(octet)
-
-
-    if 1:
-        octet_range = [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
-        beta = BetaReplayManager()
-        for octet in range(octet_range[0],octet_range[1]+1,1):
-            #beta.findPedestals(octet)
-            #beta.runReplayPass1(octet)
-            #beta.runGainBismuth(octet)
-            #beta.runReplayPass2(octet)
-            #beta.runReplayPass3(octet)
-            beta.runReplayPass4(octet)
-
-
-    #Running reverse calibrations
-    if 0:
-        octet_range = [0,2];
-        beta = BetaReplayManager()
-        for octet in range(octet_range[0],octet_range[1]+1,1):
-            beta.runReverseCalibration(octet)
+ 
     
