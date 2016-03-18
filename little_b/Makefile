@@ -18,11 +18,14 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     +=  $(ROOTCFLAGS) -I../include 
 LIBS         += -lSpectrum -lMinuit
 
-SimulationProcessor: SimulationProcessor.o SimProcessorUtils.hh
-	$(CXX) $(CXXFLAGS) -o SimulationProcessor SimulationProcessor.o $(LIBS)
+objects = SimulationProcessor.o
+
+SimulationProcessor: $(objects)
+	$(CXX) $(CXXFLAGS) -o $@ $(objects) $(LIBS)
 	@echo "Done"
 
-#SimAnalyzerUtils.o: SimAnalyzerUtils.hh
+SimulationProcessor.o: SimulationProcessor.hh posMapReader.h
+
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from
@@ -32,5 +35,6 @@ SimulationProcessor: SimulationProcessor.o SimProcessorUtils.hh
 #	$(CXX) $(CXXFLAGS) -o $@ $< $(LIBS)
 #	@echo "$@ done"
 
+.PHONY : clean
 clean:
-		@rm -f *.o *~  core
+		rm -f *.o *~ SimulationProcessor
