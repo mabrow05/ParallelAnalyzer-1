@@ -19,18 +19,23 @@ os.system("mkdir -p analyzed_files/")
 
 
 def binary_search_bool(arr,val,low=0,high=None): #Put in to check if parameter sets are good for the different sources
-    high = high if high is not None else len(arr)
-    comp = high/2
-    
-    if arr[comp]==val
-        return True 
-    else:
-        if val<arr[comp]:
-            binary_search_bool(arr[:(comp/2),val,
-        comp = comp/2 if val<arr[comp] else (len(arr)+comp)/2
-        binary_search_bool(arr[
+    high = high if high is not None and high<len(arr) else len(arr)-1
 
-            
+    if high==-1:
+        return False
+
+    comp = (high)/2
+    if arr[comp]==val:
+        return True 
+    elif high>0:
+        if val<arr[comp]:
+            return binary_search_bool(arr[:comp],val)
+        else:
+            return binary_search_bool(arr[comp+1:],val)
+    else: 
+        return False
+
+
 
 ##### Make linearity param file 
 def makeLinearityParamFile():
@@ -49,7 +54,7 @@ def makeLinearityParamFile():
 
 
 def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
-    srcs = ["Sn113", "Ce139", "Bi207"]
+    srcs = ["Bi207"] #"Sn113", "Ce139", 
     for src in srcs:
         if linCorr:
             os.system("rm linCurves/passingParams_%s_%s.dat"%(geometry,src))
@@ -57,27 +62,60 @@ def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
 
             for line in infile:
                 params = line.split()
-                os.system("./SimulationAnalyzer %s %s %i %b %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[0],))
+                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[0],))
     
             infile.close()
         else:
-            os.system("./SimulationAnalyzer %s %s %i %b"%(src,geometry,numEvents,linCorr))
+            os.system("./SimulationProcessor %s %s %i %i"%(src,geometry,numEvents,linCorr))
 
 
+##### NEEDS TO BE TESTED
 def makeFinalParamsFile(geometry):
     CeFile = open("linCurves/passingParams_%s_Ce139.dat"%geometry, 'r')
     SnFile = open("linCurves/passingParams_%s_Sn113.dat"%geometry, 'r')
     BiFile = open("linCurves/passingParams_%s_Bi207.dat"%geometry, 'r')
 
-    for line1 in CeFile:
-        CeParams = line1.split()
-        for line2 in SnFile:
-            SnParams = line2.split()
-            for line3 in BiFile:
-                SnParams = line2.split()
+    Ce = []
+    Sn = []
+    Bi = []
+    BiParamsList = []
+    goodParams = []
+
+    for line in CeFile:
+        CeParams = line.split() 
+        Ce.append(int(CeParams[0]))
+    for line in SnFile:
+        SnParams = line.split() 
+        Sn.append(int(SnParams[0]))
+    for line in BiFile:
+        BiParams = line.split()
+        BiParamsList.append(line)
+        Bi.append(int(BiParams[0]))
+        
+    CeFile.close()
+    SnFile.close()
+    BiFile.close()
+
+    finalFile = open("linCurves/matchingParams_%s.dat"%geometry,'w')
+
+    for i,el in enumerate(Bi):
+        print i,el 
+        if binary_search_bool(Sn,el):
+            if binary_search_bool(Ce,el):
+                print BiParamsList[i]
+                finalFile.write("%s\n"%BiParamsList[i])
+
+    print "DONE writing final parameter file for %s"%geometry
+
+
+        
+
+
+makeFinalParamsFile(2010)
+exit(0)
 
 makeLinearityParamFile()
-runAllSourceSims(geometry="2010")
+runAllSourceSims(geometry="2010", numEvents=50000)
 exit(0)
 
 

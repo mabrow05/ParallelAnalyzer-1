@@ -47,8 +47,8 @@ const std::map <std::string, std::vector < std::pair<Double_t, Double_t> > > env
 // These are the nominal peak values to compare against for each source
 const std::map <std::string,std::pair<Double_t,Double_t> > peaks2010 = {{"Sn",std::make_pair(365.629,365.394)},
 									{"Ce",std::make_pair(125.173,123.539)},
-									{"Bi1",std::make_pair(0.,0.)},
-									{"Bi2",std::make_pair(0.,0.)}};
+									{"Bi1",std::make_pair(988.766,988.476)},
+									{"Bi2",std::make_pair(492.094,497.781)}};
 
 const std::map <std::string,std::pair<Double_t,Double_t> > peaks2011 = {{"Sn",std::make_pair(365.629,365.394)},
 									{"Ce",std::make_pair(125.173,123.539)},

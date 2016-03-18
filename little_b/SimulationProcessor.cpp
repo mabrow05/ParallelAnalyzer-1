@@ -391,7 +391,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   
   if (source!="Beta") {
     
-    sprintf(temp,"linCurves/passingParams_%s_%s.dat",geometry.c_str(),source.c_str());
+    sprintf(temp,"linCurves/passingParams_%s_%s.dat",geometry.substr(0,4).c_str(),source.c_str());
     ofstream ofile(temp,ios::app);
     
     //Fit the histograms
@@ -433,7 +433,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       MeanAndSig2.push_back(FitGaus(&Etype0,mean, mean-width, mean+width));
       std::cout << "East mean = " << MeanAndSig2[0][0] << "    East sigma = " << MeanAndSig2[0][1] << endl;
       
-      mean = GetXatMax(&Wtype0);
+      mean = GetXatMax(&Wtype0, 400., 650.);
       MeanAndSig2.push_back(FitGaus(&Wtype0,mean, mean-width, mean+width));
       std::cout << "West mean = " << MeanAndSig2[1][0] << "    West sigma = " << MeanAndSig2[1][1] << endl;
 
