@@ -95,7 +95,7 @@ bool CheckPeakValues2012(std::vector <int> parameters, std::string sourceName, s
 
 //Function to return the trigger function for each side in a std::vector in the form vec[side][param]
 // where side==0 is East and side==1 is West
-std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams = 8);
+std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams);
 
 //Return the (nPE/keV) values for each PMT
 std::vector < Double_t > getAlphaValues(Int_t fileNum);

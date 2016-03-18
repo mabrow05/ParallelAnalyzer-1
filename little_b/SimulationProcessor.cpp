@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   Int_t paramSetIndex = -1;
   if (argc==10) paramSetIndex = atoi(argv[9]);
 
-  std::string source = std::string(argv[1]); //Input source (Beta, Sn113, Bi207, Ce139)
+  std::string source = std::string(argv[1]); //Input source (Beta, Beta_fierz, Sn113, Bi207, Ce139)
   UInt_t numEvents = (unsigned int)atoi(argv[3] ); //Number of electrons to accumulate
   std::string linCorrString = std::string(argv[4]); //False if you want no linearity corrections applied
   bool linCorrBool = false;
@@ -56,7 +56,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   std::vector <Double_t> linCorrParams = params;
 
   //Checking that the parameters have a chance
-  if (source!="Beta") { 
+  if (source.substr(0,4)!="Beta") { 
     if (source!="Bi207") {
       if (!checkParamSetStatus(linCorrParams,source.substr(0,2),geometry)) {
 	std::cout << "Sn or Ce source parameters didn't pass envelope check!\n";
@@ -90,12 +90,6 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   std::cout << "Using simulation from " << simLocation << "...\n";
 
-  //Create simulation output file
-  //Char_t outputfile[500];
-  //sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
-  //TFile outfile;
-  //if (source=="Beta" || printTree) outfile.Open(outputfile, "RECREATE");
-
 
   // Load information for applying detector effects
   std::vector <Double_t> alphas = getAlphaValues(alphaFileIndex); // fill vector with the alpha (nPE/keV) values
@@ -103,19 +97,10 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   GetPositionMap(XeMapPeriod); //Loads position map via posMapReader.h methods
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(geometry);
 
-  
-  //Histograms of event types for quick checks
-  /*std::vector <TH1D> finalEn;// (6,NULL);
-  finalEn.push_back(TH1D("finalE0", "Simulated Weighted Sum East Type 0", 400, 0., 1200.));
-  finalEn.push_back(TH1D("finalW0", "Simulated Weighted Sum West Type 0", 400, 0., 1200.));
-  finalEn.push_back(TH1D("finalE1", "Simulated Weighted Sum East Type 1", 400, 0., 1200.));
-  finalEn.push_back(TH1D("finalW1", "Simulated Weighted Sum West Type 1", 400, 0., 1200.));
-  finalEn.push_back(TH1D("finalE23", "Simulated Weighted Sum East Type 2/3", 400, 0., 1200.));
-  finalEn.push_back(TH1D("finalW23", "Simulated Weighted Sum West Type 2/3", 400, 0., 1200.));
-  */
-
+  // Histograms for plotting the peaks to fit
   TH1D Etype0("Etype0","East type 0",200,0.,1200.);
   TH1D Wtype0("Wtype0","West type 0",200,0.,1200.);
+
   TTree *tree = new TTree("SimAnalyzed","SimAnalyzed");
   SetUpOutputTree(*tree); //Setup the output tree and branches
   
@@ -125,7 +110,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   int numFiles = 1; // This is for testing! can be more later depending on how Xuan formats his output of simulated data
   TChain chain("anaTree");
   for (int i=0; i<numFiles; i++) {
-    sprintf(temp,"%s/%s/xuan_analyzed.root",simLocation.c_str(),source.c_str());
+    if (source.substr(0,4)!="Beta") sprintf(temp,"%s/%s/xuan_analyzed.root",simLocation.c_str(),source.c_str());
+    else if (source.length()>4) sprintf(temp,"%s/%s/%s/xuan_analyzed.root",simLocation.c_str(),source.substr(0,4).c_str(),"fierz");
+    else sprintf(temp,"%s/%s/%s/xuan_analyzed.root",simLocation.c_str(),source.substr(0,4).c_str(),"base");
     chain.AddFile(temp);
   }
   
@@ -379,7 +366,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       else Erecon=-1.;
     }
     
-    if (source=="Beta") tree->Fill();
+    if (source.substr(0,4)=="Beta") tree->Fill();
     
     // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
     if (PID==1) evtTally++;
@@ -389,7 +376,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   }
   std::cout << endl;
   
-  if (source!="Beta") {
+  if (source.substr(0,4)!="Beta") {
     
     sprintf(temp,"linCurves/passingParams_%s_%s.dat",geometry.substr(0,4).c_str(),source.c_str());
     ofstream ofile(temp,ios::app);
@@ -451,16 +438,16 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   TFile *outfile;
   Char_t outputfile[500];
   
-  if (printTree && source!="Beta") {
+  if (printTree && source.substr(0,4)!="Beta") {
     //Create simulation output file    
-    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
+    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%s.root",source.c_str(),geometry.c_str());
     outfile = new TFile(outputfile, "RECREATE");
     Etype0.Write(); 
     Wtype0.Write();
     
     outfile->Close();
   }
-  else if (source=="Beta")  {
+  else if (source.substr(0,4)=="Beta")  {
     //Create simulation output file
     sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
     outfile = new TFile(outputfile, "RECREATE");
@@ -707,7 +694,7 @@ bool CheckPeakValues2010(std::vector <int> parameters, std::string sourceName, s
 
 //Function to return the trigger function for each side in a std::vector in the form vec[side][param]
 // where side==0 is East and side==1 is West
-std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams) {
+std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams=8) {
   Char_t file[500];
   sprintf(file,"trigger_functions/trigger_functions_XePeriod_%i.dat",XeRunPeriod);
   ifstream infile(file);
@@ -744,8 +731,11 @@ std::vector < Double_t > getAlphaValues(Int_t fileNum)
 }
 
 Double_t triggerProbability(std::vector <Double_t> params, Double_t En) {
-  return params[0]+params[1]*TMath::Erf((En-params[2])/params[3])*TMath::TanH(params[7]*En) + params[4]*TMath::Gaus(En,params[5],params[6]);
+  //return params[0]+params[1]*TMath::Erf((En-params[2])/params[3])*TMath::TanH(params[7]*En) + params[4]*TMath::Gaus(En,params[5],params[6]);
+  return (params[0]+params[1]*TMath::Erf((En-params[2])/params[3]))*(0.5-0.5*TMath::TanH((En-params[2])/params[4])) + 
+    (0.5+0.5*TMath::TanH((En-params[2])/params[4]))*(params[5]+params[6]*TMath::TanH((En-params[2])/params[7]));
 }
+
 
 //Get the conversion from EQ2Etrue
 std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(std::string geometry) {
