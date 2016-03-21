@@ -1,11 +1,22 @@
 #!/usr/bin/python
 
+#######################################################################
+# This script, as is, is meant to manage the process for producing sets of 
+# of linearity twiddles, running Ce, Sn, and Bi simulations through 
+# the processor with these twiddles, testing whether the set of parameters
+# was good or bad (peaks fit in calibration envelope), saving the good sets
+# for each source, compiling a list of the parameters which work for all sources
+# into one file, and also running the beta events through the processor using
+# this final set of "good" parameters.
+####################################################################### 
+
 import os
 import sys
 from optparse import OptionParser
+
 from math import *
 import numpy as np
-#import ../scripts/MButils
+
 
 ### This is the default error envelope as given by Michael M. (2008,2010) and Michael B. (2011,2012)
 envelope = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.025),(1200,1200*0.025)],
@@ -13,7 +24,7 @@ envelope = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0
             2011:[(0,0.025*130.3),(130.3,130.3*0.025),(368.4938,0.018*368.4938),(993.789,993.789*0.013),(1000,1000.*0.013)],
             2012:[(0,2.5),(200,200*0.0125),(500,500*0.0125),(1000,500*0.0125)] }
 
-### make sure proper directories exits directory exists to store trees and stuff
+### make sure proper directories exist to store trees and stuff
 os.system("mkdir -p linCurves/")
 os.system("mkdir -p analyzed_files/")
 
@@ -39,11 +50,12 @@ def binary_search_bool(arr,val,low=0,high=None): #Put in to check if parameter s
 
 ##### Make linearity param file 
 def makeLinearityParamFile():
-    paramDeltaRanges = {"p0":(-0.,0.), "p1":(-0.0,0.0), "p2":(-5.e-5,5.e-5), "p3":(-3.e-7,3.e-7)} 
-    paramNSteps = {"p0":1, "p1":1, "p2":11, "p3":7}
-    
+    paramDeltaRanges = {"p0":(-0.,0.), "p1":(-0.0,0.0), "p2":(-5.e-5,5.e-5), "p3":(-3.e-7,3.e-7)} #Range of parameter space one wants to cover for cubic linearity twiddle
+    paramNSteps = {"p0":1, "p1":1, "p2":11, "p3":7} # number of steps over the parameter range
+
     paramFile = open("linCurves/parameters.dat",'w');
     paramSetIndex = 0
+
     for p0 in np.linspace(paramDeltaRanges["p0"][0],paramDeltaRanges["p0"][1], paramNSteps["p0"]):
         for p1 in np.linspace(paramDeltaRanges["p1"][0],paramDeltaRanges["p1"][1], paramNSteps["p1"]):
             for p2 in np.linspace(paramDeltaRanges["p2"][0],paramDeltaRanges["p2"][1], paramNSteps["p2"]):
@@ -53,8 +65,11 @@ def makeLinearityParamFile():
                     paramSetIndex+=1
 
 
+# This will run all the source simulations through the Simulation Processor. If linCorr is true, it applies the twiddles in parameters.dat 
+# and creates a file with the passing parameters for that source called passingParams_{geometry}_{src}.dat. Else, it runs the 
+# simulation processor for that source with no corrections as a baseline
 def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
-    srcs = ["Bi207"] #"Sn113", "Ce139", 
+    srcs = ["Bi207","Sn113", "Ce139"] 
     for src in srcs:
         if linCorr:
             os.system("rm linCurves/passingParams_%s_%s.dat"%(geometry,src))
@@ -69,7 +84,10 @@ def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
             os.system("./SimulationProcessor %s %s %i %i"%(src,geometry,numEvents,linCorr))
 
 
-##### NEEDS TO BE TESTED
+##### NEEDS TO BE TESTED ############
+# This will check the existing passingParams files for each source for common parameter sets and create a new file
+# with these sets listed. It will not overwrite previous "good" sets, but it's the users job to keep them straight
+# as they are simply numbered sequentially
 def makeFinalParamsFile(geometry):
     CeFile = open("linCurves/passingParams_%s_Ce139.dat"%geometry, 'r')
     SnFile = open("linCurves/passingParams_%s_Sn113.dat"%geometry, 'r')
@@ -113,7 +131,9 @@ def makeFinalParamsFile(geometry):
 
     print "DONE writing final parameter file for %s"%geometry
 
-
+# Function to run the beta decay simulations (both normal betas and fierz betas) through the processor.
+# if linCorr is true, they will be run for every set of "good" parameters in the paramSet given. Else
+# they will just be run with no twiddles as a baseline.
 def runBetaSims(geometry="2010", numEvents=5000,linCorr=True,paramSet=0):
     srcs = ["Beta","Beta_fierz"]
     for src in srcs:
