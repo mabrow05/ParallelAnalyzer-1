@@ -18,7 +18,7 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   while (XeRunList >> run) {
     XeRuns.push_back(run);
     numRuns++;
-    if (numRuns>30) break;
+    //if (numRuns>30) break;
   }
 
   if (numRuns!=XeRuns.size()) {
@@ -51,7 +51,7 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   //TTree *t = (TTree*)file->Get("pass4");
 
   //Int_t nbins = 75;
-  Int_t binWidth = 2.;
+  Int_t binWidth = 1;
   Double_t East_upper_limit = 150.;
   Double_t West_upper_limit = 150.;
   Int_t nbinsE = (int)(East_upper_limit/binWidth);
@@ -79,6 +79,7 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   erf->SetParameter(2,30.); //Mean of gaussian integrated for erf
   erf->SetParameter(3,7..); //std. dev. of gaussian integrated for erf
   erf->SetParameter(4,6.); //severity of transition function "turn on"
+  erf->SetParLimits(4,1.,25.);
   erf->SetParameter(5,0.5); //constant offset of second tanh
   erf->SetParameter(6,0.5); //Scaling of second tanh
   erf->SetParameter(7,13.); // stretching factor of second tanh
@@ -99,9 +100,9 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   TCanvas *c1 = new TCanvas("c1"," ",1200.,1600.);
   c1->Divide(2,2);
   c1->cd(1);
-  chain->Draw("EvisE>>Etype1","Type==1 && Side==1 && PID==1 && EvisE>0.");
+  chain->Draw("EvisE>>Etype1","Type==1 && Side==1 && PID==1");
   c1->cd(2);  
-  chain->Draw("EvisE>>Etype23","Type==2 && Side==1 && PID==1 && EvisE>0.");
+  chain->Draw("EvisE>>Etype23","Type==2 && Side==1 && PID==1");
   c1->cd(3);
   Etotal->Add(Etype1,Etype23);
   Etotal->Draw();
@@ -119,9 +120,9 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   TCanvas *c2 = new TCanvas("c2"," ",1200.,1600.);
   c2->Divide(2,2);
   c2->cd(1);
-  chain->Draw("EvisW>>Wtype1","Type==1 && Side==0 && PID==1 && EvisW>0.");
+  chain->Draw("EvisW>>Wtype1","Type==1 && Side==0 && PID==1");
   c2->cd(2);  
-  chain->Draw("EvisW>>Wtype23","Type==2 && Side==0 && PID==1 && EvisW>0.");
+  chain->Draw("EvisW>>Wtype23","Type==2 && Side==0 && PID==1");
   c2->cd(3);
   Wtotal->Add(Wtype1,Wtype23);
   Wtotal->Draw();
