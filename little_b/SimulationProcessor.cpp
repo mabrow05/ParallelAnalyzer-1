@@ -47,12 +47,13 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
+  std::string geometry = geom; // "2010","2011/2012","2012/2013"
   UInt_t alphaFileIndex = 0; // the index on the nPE_keV file
   UInt_t XeMapPeriod = 2; // The xenon position map to be used
-  UInt_t triggerMap = -1;
+  UInt_t triggerMap = geometry=="2010"?-1:(geometry=="2011/2012"?2:10);
   bool printTree = true; //Boolean to force printing of of TTree. The tree will be printed regardless if the source is Beta
   UInt_t BetaEvents = numEvents;
-  std::string geometry = geom; // "2010","2011/2012","2012/2013"
+  
   std::vector <Double_t> linCorrParams = params;
 
   //Checking that the parameters have a chance
@@ -79,10 +80,10 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   //Decide which simulation to use...
   std::string simLocation;
-  if (geometry=="2010") simLocation = "../../data/XuanSim/2010/"; //This needs to be set to wherever you are storing your sims..
-  else if (geometry=="2011/2012") simLocation = "../../data/XuanSim/2011-2012/";
-  else if (geometry=="2012/2013") simLocation = "../../data/XuanSim/2012-2013/";
-  else if (geometry=="2012/2013_isobutane") simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
+  if (geometry=="2010") simLocation = std::string(getenv("CALTECH_SIMS"))+"2010/"; //This needs to be set to wherever you are storing your sims..
+  else if (geometry=="2011/2012") simLocation = std::string(getenv("CALTECH_SIMS"))+"2011-2012/";
+  else if (geometry=="2012/2013") simLocation = std::string(getenv("CALTECH_SIMS"))+"2012-2013/";
+  else if (geometry=="2012/2013_isobutane") simLocation = std::string(getenv("CALTECH_SIMS"))+"2012-2013_ISOBUTANE";
   else {
     std::cout << "The geometry is set to an invalid option\n\n";
     exit(0);
