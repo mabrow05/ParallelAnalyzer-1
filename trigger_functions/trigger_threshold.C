@@ -18,6 +18,7 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   while (XeRunList >> run) {
     XeRuns.push_back(run);
     numRuns++;
+    if (numRuns>30) break;
   }
 
   if (numRuns!=XeRuns.size()) {
@@ -49,19 +50,22 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
 
   //TTree *t = (TTree*)file->Get("pass4");
 
-  Int_t nbins = 75;
-  Double_t East_upper_limit = 100.;
-  Double_t West_upper_limit = 100.;
-  TH1F *Etype1 = new TH1F("Etype1","West Type 1: EvisE",nbins,0.,East_upper_limit);
-  TH1F *Etype23 = new TH1F("Etype23","West Type 2/3: EvisE",nbins,0.,East_upper_limit);
-  TH1F *Etotal = new TH1F("Etotal","West Type 1,2/3: EvisE",nbins,0.,East_upper_limit);
-  TH1F *Etrigg = new TH1F("Etrigg","East Trigger Probability",nbins,0.,East_upper_limit);
+  //Int_t nbins = 75;
+  Int_t binWidth = 2.;
+  Double_t East_upper_limit = 150.;
+  Double_t West_upper_limit = 150.;
+  Int_t nbinsE = (int)(East_upper_limit/binWidth);
+  Int_t nbinsW = (int)(West_upper_limit/binWidth);
+  TH1F *Etype1 = new TH1F("Etype1","West Type 1: EvisE",nbinsE,0.,East_upper_limit);
+  TH1F *Etype23 = new TH1F("Etype23","West Type 2/3: EvisE",nbinsE,0.,East_upper_limit);
+  TH1F *Etotal = new TH1F("Etotal","West Type 1,2/3: EvisE",nbinsE,0.,East_upper_limit);
+  TH1F *Etrigg = new TH1F("Etrigg","East Trigger Probability",nbinsE,0.,East_upper_limit);
   Etrigg->SetMarkerStyle(20);
 
-  TH1F *Wtype1 = new TH1F("Wtype1","East Type 1: EvisW",nbins,0.,West_upper_limit);
-  TH1F *Wtype23 = new TH1F("Wtype23","East Type 2/3: EvisW",nbins,0.,West_upper_limit);
-  TH1F *Wtotal = new TH1F("Wtotal","East Type 1,2/3: EvisW",nbins,0.,West_upper_limit);
-  TH1F *Wtrigg = new TH1F("Wtrigg","West Trigger Probability",nbins,0.,West_upper_limit);
+  TH1F *Wtype1 = new TH1F("Wtype1","East Type 1: EvisW",nbinsW,0.,West_upper_limit);
+  TH1F *Wtype23 = new TH1F("Wtype23","East Type 2/3: EvisW",nbinsW,0.,West_upper_limit);
+  TH1F *Wtotal = new TH1F("Wtotal","East Type 1,2/3: EvisW",nbinsW,0.,West_upper_limit);
+  TH1F *Wtrigg = new TH1F("Wtrigg","West Trigger Probability",nbinsW,0.,West_upper_limit);
   Wtrigg->SetMarkerStyle(20);
 
   //TF1 *erf = new TF1("erf","([5]*TMath::Erf((x-[0])/[1])+0.5)+[2]*TMath::Gaus(x,[3],[4])",0.,150.);

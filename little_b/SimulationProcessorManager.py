@@ -72,7 +72,7 @@ def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
     srcs = ["Bi207","Sn113", "Ce139"] 
     for src in srcs:
         if linCorr:
-            os.system("rm linCurves/passingParams_%s_%s.dat"%(geometry,src))
+            os.system("rm linCurves/passingParams_%s_%s.dat"%(geometry[0:4],src))
             infile = open("linCurves/parameters.dat",'r')
 
             for line in infile:
@@ -89,9 +89,9 @@ def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
 # with these sets listed. It will not overwrite previous "good" sets, but it's the users job to keep them straight
 # as they are simply numbered sequentially
 def makeFinalParamsFile(geometry):
-    CeFile = open("linCurves/passingParams_%s_Ce139.dat"%geometry, 'r')
-    SnFile = open("linCurves/passingParams_%s_Sn113.dat"%geometry, 'r')
-    BiFile = open("linCurves/passingParams_%s_Bi207.dat"%geometry, 'r')
+    CeFile = open("linCurves/passingParams_%s_Ce139.dat"%geometry[:4], 'r')
+    SnFile = open("linCurves/passingParams_%s_Sn113.dat"%geometry[:4], 'r')
+    BiFile = open("linCurves/passingParams_%s_Bi207.dat"%geometry[:4], 'r')
 
     Ce = []
     Sn = []
@@ -115,10 +115,10 @@ def makeFinalParamsFile(geometry):
     BiFile.close()
 
     num=0
-    fileName = "linCurves/matchingParams_%s_%i.dat"%(geometry,num)
+    fileName = "linCurves/matchingParams_%s_%i.dat"%(geometry[:4],num)
     if (os.path.isfile(fileName)):
         num+=1
-        fileName = "linCurves/matchingParams_%s_%i.dat"%(geometry,num)
+        fileName = "linCurves/matchingParams_%s_%i.dat"%(geometry[:4],num)
 
     finalFile = open(fileName,'w')
 
@@ -138,7 +138,7 @@ def runBetaSims(geometry="2010", numEvents=5000,linCorr=True,paramSet=0):
     srcs = ["Beta","Beta_fierz"]
     for src in srcs:
         if linCorr:
-            infile = open("linCurves/mathchingParams_%s_%i.dat"%(geometry,paramSet),'r')
+            infile = open("linCurves/mathchingParams_%s_%i.dat"%(geometry[:4],paramSet),'r')
         
             for line in infile:
                 params = line.split()
