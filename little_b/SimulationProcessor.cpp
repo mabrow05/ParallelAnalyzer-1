@@ -57,7 +57,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   std::vector <Double_t> linCorrParams = params;
 
   //Checking that the parameters have a chance
-  if (source.substr(0,4)!="Beta") { 
+  if (source.substr(0,4)!="Beta" && paramSetIndex!=-1) { 
     if (source!="Bi207") {
       if (!checkParamSetStatus(linCorrParams,source.substr(0,2),geometry)) {
 	std::cout << "Sn or Ce source parameters didn't pass envelope check!\n";
