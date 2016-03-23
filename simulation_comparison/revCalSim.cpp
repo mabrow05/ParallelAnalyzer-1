@@ -54,7 +54,7 @@ int getPolarization(int run) {
   }
 };
 
-vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams) {
+vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams=8) {
   Char_t file[500];
   sprintf(file,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
   ifstream infile(file);
@@ -75,9 +75,10 @@ vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t
 }
 
 Double_t triggerProbability(vector <Double_t> params, Double_t En) {
-  Double_t prob = params[0]+params[1]*TMath::Erf((En-params[2])/params[3])
-    + params[4]*TMath::Gaus(En,params[5],params[6]);
-  return prob;
+  //Double_t prob = params[0]+params[1]*TMath::Erf((En-params[2])/params[3])
+  //+ params[4]*TMath::Gaus(En,params[5],params[6]);
+  return (params[0]+params[1]*TMath::Erf((En-params[2])/params[3]))*(0.5-0.5*TMath::TanH((En-params[2])/params[4])) + 
+    (0.5+0.5*TMath::TanH((En-params[2])/params[4]))*(params[5]+params[6]*TMath::TanH((En-params[2])/params[7]));
 }
 
 vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
@@ -167,12 +168,35 @@ vector < Double_t > getMeanEtaForAlpha(Int_t run)
   return eta;
 }
   
+//Get the conversion from EQ2Etrue
+std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
+  ifstream infile;
+  if (runNumber<16000) infile.open("../simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
+  else if (runNumber<20000) infile.open("../simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
+  else if (runNumber<24000) infile.open("../simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat");
+  else {
+    std::cout << "Bad runNumber passed to getEQ2EtrueParams\n";
+    exit(0);
+  }
+  std::vector < std::vector < std::vector < double > > > params;
+  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
+
+  char holdType[10];
+  int side=0, type=0;
+  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
+    std::cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << std::endl;
+    type+=1;
+    if (type==3) {type=0; side=1;}
+  }
+  return params;
+}
+
 
 void SetUpTree(TTree *tree) {
   tree->Branch("PID", &PID, "PID/I");
   tree->Branch("side", &side, "side/I");
   tree->Branch("type", &type, "type/I");
-  tree->Branch("EvisTot", &EvisTot,"EvisTot/D");
+  tree->Branch("Erecon", &Erecon,"Erecon/D");
   
   tree->Branch("Evis",&evis,"EvisE/D:EvisW");
   tree->Branch("Edep",&edep,"EdepE/D:EdepW");
@@ -246,7 +270,9 @@ void revCalSimulation (Int_t runNumber, string source)
   GetPositionMap(XePeriod);
   vector <Double_t> alphas = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
   vector <Double_t> meanEta = getMeanEtaForAlpha(runNumber); // fill vector with the calculated mean position correction for the source used to calculate alpha
-  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,7); // 2D vector with trigger function for East side and West side in that order
+  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
+  std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
+  Int_t pol = getPolarization(runNumber);
 
   //Setup the output tree
   TTree *tree = new TTree("revCalSim", "revCalSim");
@@ -276,10 +302,10 @@ void revCalSimulation (Int_t runNumber, string source)
   int numFiles = source=="Beta"?400:250;
   int fileNum = source=="Beta" ? (int)(randFile->Rndm()*400) : 0;
   delete randFile;
-  for (int i=0; i<1; i++) {
-    //    if (fileNum==numFiles) fileNum=0;
-    //sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
-    sprintf(temp,"/extern/mabrow05/ucna/XuanSim/%s/xuan_analyzed.root",source.c_str());
+  for (int i=0; i<numFiles; i++) {
+    if (fileNum==numFiles) fileNum=0;
+    sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
+    //sprintf(temp,"/extern/mabrow05/ucna/XuanSim/%s/xuan_analyzed.root",source.c_str());
     chain->AddFile(temp);
     fileNum++;
   }
@@ -324,28 +350,32 @@ void revCalSimulation (Int_t runNumber, string source)
 
   
   // Set the addresses of the information read in from the simulation file
-  /*  chain->SetBranchAddress("MWPCEnergy",&mwpcE);
+  chain->SetBranchAddress("MWPCEnergy",&mwpcE);
   chain->SetBranchAddress("time",&Time);
   chain->SetBranchAddress("Edep",&edep);
   chain->SetBranchAddress("EdepQ",&edepQ);
   chain->SetBranchAddress("MWPCPos",&mwpc_pos);
   chain->SetBranchAddress("ScintPos",&scint_pos);
   chain->SetBranchAddress("primKE",&Eprim);
-  *///chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
+  chain->SetBranchAddress("primTheta",&primTheta);
+  //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
   //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
   //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 
+  //These are for feeding in Xuan's simulations... this needs to be updated so that I can pass a flag and change these on the fly
   //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
   //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
-  chain->SetBranchAddress("mwpcEnergy",&mwpcE);
-  chain->SetBranchAddress("scintTimeToHit",&Time);
-  chain->SetBranchAddress("scintillatorEdep",&edep);
-  chain->SetBranchAddress("scintillatorEdepQuenched",&edepQ);
-  chain->SetBranchAddress("MWPCPos",&mwpc_pos);
-  chain->SetBranchAddress("ScintPos",&scint_pos);
-  chain->SetBranchAddress("primaryKE",&Eprim);
+  //chain->SetBranchAddress("mwpcEnergy",&mwpcE);
+  //chain->SetBranchAddress("scintTimeToHit",&Time);
+  //chain->SetBranchAddress("scintillatorEdep",&edep);
+  //chain->SetBranchAddress("scintillatorEdepQuenched",&edepQ);
+  //chain->SetBranchAddress("MWPCPos",&mwpc_pos);
+  //chain->SetBranchAddress("ScintPos",&scint_pos);
+  //chain->SetBranchAddress("primaryKE",&Eprim);
 
+
+  
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
@@ -381,6 +411,11 @@ void revCalSimulation (Int_t runNumber, string source)
 	     || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>fidCut) {evt++; continue;} //For source events, 
     // We don't want edge contamination, and I use a cut of 45 mm when selecting what sources are present in calibration runs.
 
+
+    //Calculate event weight
+
+    AsymWeight = 1+(-0.12)*pol*sqrt(1-(1/((Eprim/511.+1.)*(Eprim/511.+1.))))*cos(primTheta);
+   
 
     //calculate adjusted event position by sampling a gaussian centered on source position. Do it for primary event side.
     /*Int_t primSide=0., primType=0;
@@ -522,10 +557,7 @@ void revCalSimulation (Int_t runNumber, string source)
     if (rand->Rndm(0)<triggProb && evis.EvisW>0.) {
       WestScintTrigger = true;      
     }
-      
-    //Fill total Energy loss
-    EvisTot = evis.EvisW+evis.EvisE+mwpcE.MWPCEnergyE+mwpcE.MWPCEnergyW;
-      
+            
     //Fill proper total event histogram based on event type
     PID=-1;
     //Type 0 East
@@ -533,7 +565,7 @@ void revCalSimulation (Int_t runNumber, string source)
       PID=1;
       type=0;
       side=0;
-      finalEn[0]->Fill(evis.EvisE);
+      //finalEn[0]->Fill(evis.EvisE);
       //cout << "Type 0 East E = " << totalEnE << endl;
     }
     //Type 0 West
@@ -541,7 +573,7 @@ void revCalSimulation (Int_t runNumber, string source)
       PID=1;
       type=0;
       side=1;
-      finalEn[1]->Fill(totalEnW);
+      //finalEn[1]->Fill(totalEnW);
     }
     //Type 1 
     else if (EastScintTrigger && EMWPCTrigger && WestScintTrigger && WMWPCTrigger) {
@@ -549,12 +581,12 @@ void revCalSimulation (Int_t runNumber, string source)
       type=1;
       //East
       if (Time.timeE<Time.timeW) {
-	finalEn[2]->Fill(totalEnE);
+	//finalEn[2]->Fill(totalEnE);
 	side=0;
       }
       //West
       else if (Time.timeE>Time.timeW) {
-	finalEn[3]->Fill(totalEnW);
+	//finalEn[3]->Fill(totalEnW);
 	side=1;
       }
     }
@@ -563,7 +595,7 @@ void revCalSimulation (Int_t runNumber, string source)
       PID=1;
       type=2;
       side=0;
-      finalEn[4]->Fill(totalEnE);
+      //finalEn[4]->Fill(totalEnE);
       //cout << "Type 2/3 East E = " << totalEnE << endl;
     }
     //Type 2/3 West
@@ -571,7 +603,7 @@ void revCalSimulation (Int_t runNumber, string source)
       PID=1;
       type=2;
       side=1;
-      finalEn[5]->Fill(totalEnW);
+      //finalEn[5]->Fill(totalEnW);
       //cout << "Type 2/3 East W = " << totalEnW << endl;
     }   
     //Gamma events and missed events (Type 4)
@@ -609,14 +641,38 @@ void revCalSimulation (Int_t runNumber, string source)
 	side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
       }
     }
-      
+    
+    //Calculate Erecon
+    Int_t typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+    if (side==0) {
+      Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
+      if (totalEvis>0.) {
+	Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
+	if (type==0) finalEn[0]->Fill(Erecon); 
+	else if (type==1) finalEn[2]->Fill(Erecon); 
+	else if(type==2 ||type==3) finalEn[4]->Fill(Erecon);
+      }
+      else Erecon=-1.;
+    }
+    if (side==1) {
+      Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
+      if (totalEvis>0.) {
+	Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
+	
+	if (type==0) finalEn[1]->Fill(Erecon); 
+	else if (type==1) finalEn[3]->Fill(Erecon); 
+	else if(type==2 ||type==3) finalEn[5]->Fill(Erecon);
+      }
+      else Erecon=-1.;
+    }    
+  
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
     if (PID==1 && sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
 	&& sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut) evtTally++;
     evt++;
     if (PID>=0) tree->Fill();
     //cout << evtTally << endl;
-    if (evtTally%1000==0) {cout << "*";}//cout << "filled event " << evt << endl;
+    if (evtTally%1000==0) {cout << evtTally << endl;}//cout << "filled event " << evt << endl;
   }
   cout << endl;
   delete chain;

@@ -1,9 +1,9 @@
 
 int PID, type, side; // basic analysis tags
 
-double Eprim, AsymWeight; // initial energy from simulation
+double Eprim, AsymWeight, primTheta; // initial energy from simulation
 
-double EvisTot; // smeared, weighted, and trigger func corrected energy summed over two sides scint and MWPC energy
+double Erecon; // smeared, weighted, and trigger func corrected energy summed over two sides scint and MWPC energy
 
 struct Evis {
   double EvisE;
