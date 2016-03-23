@@ -10,7 +10,7 @@
 // base class for loading octet information
 class AsymmetryBase {
 public:
-  AsymmetryBase(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true);
+  AsymmetryBase(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false);
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
@@ -62,7 +62,7 @@ protected:
 
 class OctetAsymmetry : public AsymmetryBase {
 public:
-  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true);
+  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false);
   ~OctetAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();

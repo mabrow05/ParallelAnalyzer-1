@@ -214,18 +214,24 @@ void EvtRateHandler::dataReader() {
 
 void SimEvtRateHandler::dataReader() {
   char temp[100];
-  sprintf(temp,"%i_sim.root",runNumber);
+  sprintf(temp,"/beta/revCalSim_%i_Beta.root",runNumber);
   std::string infile = inputDir+"/"+std::string(temp);
   TFile *input = new TFile(infile.c_str(), "READ");
-  TTree *Tin = (TTree*)input->Get("SimOut"); //TODO: make sure this is the correct tree name
-  double mwpcPos[2][3]; //holds the position of the event in the MWPC for simulated data
-  double EreconSim; //This is double whereas data comes in as float
+  TTree *Tin = (TTree*)input->Get("revCalSim"); //TODO: make sure this is the correct tree name
+  
+  mwpcPos.resize(2,std::vector <double> (3,0.));
+  
   //Set branch addresses
-  Tin->GetBranch("RevCalSimData")->GetLeaf("PID")->SetAddress(&PID);
-  Tin->GetBranch("RevCalSimData")->GetLeaf("type")->SetAddress(&Type);
-  Tin->GetBranch("RevCalSimData")->GetLeaf("side")->SetAddress(&Side);
-  Tin->GetBranch("RevCalSimData")->GetLeaf("Erecon")->SetAddress(&EreconSim);
-  Tin->GetBranch("SimData")->GetLeaf("mwpcPos")->SetAddress(mwpcPos);
+
+  Tin->SetBranchAddress("PID", &PID);
+  Tin->SetBranchAddress("type", &Type);
+  Tin->SetBranchAddress("side", &Side); 
+  Tin->SetBranchAddress("Erecon",&Erecon);
+  Tin->GetBranch("time")->GetLeaf("TimeE")->SetAddress(&TimeE);
+  Tin->GetBranch("time")->GetLeaf("TimeW")->SetAddress(&TimeW);
+  Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(&mwpcPos[0][0]);
+  Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(&mwpcPos[1][0]);
+  Tin->SetBranchAddress("AsymWeight",&AsymWeight);
 
   unsigned int nevents = Tin->GetEntriesFast();
   //std::cout << nevents << std::endl;
@@ -245,7 +251,7 @@ void SimEvtRateHandler::dataReader() {
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateE[Type]->Fill(EreconSim);
+		  rateE[Type]->Fill(Erecon,AsymWeight);
 		  //std::cout << EreconSim << std::endl;
 		}
 	    }
@@ -255,7 +261,7 @@ void SimEvtRateHandler::dataReader() {
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateW[Type]->Fill(EreconSim);
+		  rateW[Type]->Fill(Erecon,AsymWeight);
 		  //std::cout << EreconSim << std::endl;
 		}
 	    }
@@ -289,12 +295,18 @@ void BGSubtractedRate::calcBGSubtRates() {
 
   if (Simulation) //We don't save the histograms for simulations because they are just the histograms on file
     {
-      std::string indir = std::string(getenv("UCNA_REVCAL_DIR"));
+      std::string indir = std::string(getenv("REVCALSIM"));
       SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir);
       evt->CalcRates(EnergyBinWidth,fiducialCut);
       FinalRateE = evt->getRateVectors(0);
       FinalRateW = evt->getRateVectors(1);
       delete evt;
+      for (unsigned int t=0;t<FinalRateE.size();t++) {
+	for (unsigned int i=0;i<FinalRateE[0].size();i++) {
+	  FinalRateErrorE[t][i] = sqrt(FinalRateE[t][i]);
+	  FinalRateErrorW[t][i] = sqrt(FinalRateW[t][i]);
+	}
+      }
     }
   else 
     {

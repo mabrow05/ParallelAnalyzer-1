@@ -53,15 +53,20 @@ protected:
   float EmwpcX_f, EmwpcY_f, WmwpcX_f, WmwpcY_f, TimeE_f, TimeW_f, Erecon_f; // For reading in data from MPM replays
   int PID, Side, Type;
 };
-  
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+ 
 class SimEvtRateHandler: public EvtRateHandler {
 public:
   SimEvtRateHandler(int run, const std::string& inDir): EvtRateHandler(run, inDir, true) {}
 
 protected:
   void dataReader(); //Different set of variables for reverse calibrated simulated data
+  double AsymWeight;
+  std::vector < std::vector < double > >  mwpcPos; //holds the position of the event in the MWPC for simulated data
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class BGSubtractedRate {
 public:
   BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata=true, bool sim=false);

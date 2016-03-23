@@ -10,7 +10,7 @@ ppair, quartet, octet
 #include <cstdlib>
 #include <cmath>
 
-AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata) : UKdata(ukdata), Simulation(false), octet(oct), energyBinWidth(enBinWidth), fiducialCut(fidCut), boolAnaChRtVecs(false) {
+AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation) : UKdata(ukdata), Simulation(simulation), octet(oct), energyBinWidth(enBinWidth), fiducialCut(fidCut), boolAnaChRtVecs(false) {
   unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   A2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
   B2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
@@ -191,18 +191,31 @@ void AsymmetryBase::calcBGsubtractedEvts() {
 		<< bg->getBackgroundRun(it->second) << ") \n";
 
       bg->calcBGSubtRates();
-      std::vector<double> runLengthBeta = bg->returnRunLengths(true);
-      std::vector<double> runLengthBG = bg->returnRunLengths(false);
-      std::cout << "RunLength: \tE\tW\n\t\t" 
-      << runLengthBeta[0] << "\t" << runLengthBeta[1] << std::endl
-      << "\t\t" << runLengthBG[0] << "\t" << runLengthBG[1] << std::endl;
-
-      for (int type=0;type<4;type++) {
-	std::vector <double> evecbg = bg->returnBGSubtRate(0,type);
-	std::vector <double> wvecbg = bg->returnBGSubtRate(1,type);
-	for (unsigned int bin=0; bin<evecbg.size(); bin++) {
-	  numEvtsEastByTypeByBin[type][bin]+=runLengthBeta[0]*evecbg[bin];
-	  numEvtsWestByTypeByBin[type][bin]+=runLengthBeta[1]*wvecbg[bin];
+      
+      if (!Simulation) {
+	std::vector<double> runLengthBeta = bg->returnRunLengths(true);
+	std::vector<double> runLengthBG = bg->returnRunLengths(false);
+	std::cout << "RunLength: \tE\tW\n\t\t" 
+		  << runLengthBeta[0] << "\t" << runLengthBeta[1] << std::endl
+		  << "\t\t" << runLengthBG[0] << "\t" << runLengthBG[1] << std::endl;
+	
+	for (int type=0;type<4;type++) {
+	  std::vector <double> evecbg = bg->returnBGSubtRate(0,type);
+	  std::vector <double> wvecbg = bg->returnBGSubtRate(1,type);
+	  for (unsigned int bin=0; bin<evecbg.size(); bin++) {
+	    numEvtsEastByTypeByBin[type][bin]+=runLengthBeta[0]*evecbg[bin];
+	    numEvtsWestByTypeByBin[type][bin]+=runLengthBeta[1]*wvecbg[bin];
+	  }
+	}
+      }
+      else {
+	for (int type=0;type<4;type++) {
+	  std::vector <double> evecbg = bg->returnBGSubtRate(0,type);
+	  std::vector <double> wvecbg = bg->returnBGSubtRate(1,type);
+	  for (unsigned int bin=0; bin<evecbg.size(); bin++) {
+	    numEvtsEastByTypeByBin[type][bin]+=evecbg[bin];
+	    numEvtsWestByTypeByBin[type][bin]+=wvecbg[bin];
+	  }
 	}
       }
       delete bg;
@@ -304,7 +317,7 @@ std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtr
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata), totalAsymmetry(0.), totalAsymmetryError(0.) {
+OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation), totalAsymmetry(0.), totalAsymmetryError(0.) {
   unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   asymmetry.resize(numBins,0.);
   asymmetryError.resize(numBins,0.);
