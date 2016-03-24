@@ -122,7 +122,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   chain.SetBranchAddress("primaryParticleSpecies",&primaryID);
   chain.SetBranchAddress("primaryMomentum",&initialMomentum);
   chain.SetBranchAddress("mwpcEnergy",&mwpcE);
-  //chain.SetBranchAddress("scintTimeToHit",&Time);
+//  chain.SetBranchAddress("scintTimeToHit",&Time);
+  chain.SetBranchAddress("scintTimeToHit",&Time);	// we can save this variable, Xuan sim has it
   chain.SetBranchAddress("scintillatorEdep",&edep);
   chain.SetBranchAddress("scintillatorEdepQuenched",&edepQ);
   chain.SetBranchAddress("MWPCPos",&mwpc_pos);
@@ -158,12 +159,14 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     if (primaryID!=11) {evt++;continue;}
     
     //Dividing out the weighted energy dependence which is currently in the position branch of input tree
+/*    // this is no longer needed since Xuan explicitly divided out the energy dependence in simulation
     scint_pos.ScintPosE[0] /= edepQ.EdepQE>0. ? edepQ.EdepQE : 1.;
     scint_pos.ScintPosW[0] /= edepQ.EdepQW>0. ? edepQ.EdepQW : 1.;
     scint_pos.ScintPosE[1] /= edepQ.EdepQE>0. ? edepQ.EdepQE : 1.;
     scint_pos.ScintPosW[1] /= edepQ.EdepQW>0. ? edepQ.EdepQW : 1.;
     scint_pos.ScintPosE[2] /= edepQ.EdepQE>0. ? edepQ.EdepQE : 1.;
     scint_pos.ScintPosW[2] /= edepQ.EdepQW>0. ? edepQ.EdepQW : 1.;
+*/
    
     //Setting adjusted positions when we are simulating a source and move source flag is set to true
     if (moveSource && source!="Beta") {
