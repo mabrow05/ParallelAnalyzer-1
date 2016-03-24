@@ -63,7 +63,7 @@ public:
 protected:
   void dataReader(); //Different set of variables for reverse calibrated simulated data
   double AsymWeight;
-  std::vector < std::vector < double > >  mwpcPos; //holds the position of the event in the MWPC for simulated data
+  double mwpcPosE[3], mwpcPosW[3]; //holds the position of the event in the MWPC for simulated data
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -217,21 +217,20 @@ void SimEvtRateHandler::dataReader() {
   sprintf(temp,"/beta/revCalSim_%i_Beta.root",runNumber);
   std::string infile = inputDir+"/"+std::string(temp);
   TFile *input = new TFile(infile.c_str(), "READ");
-  TTree *Tin = (TTree*)input->Get("revCalSim"); //TODO: make sure this is the correct tree name
-  
-  mwpcPos.resize(2,std::vector <double> (3,0.));
-  
+  TTree *Tin = (TTree*)input->Get("revCalSim");
+  std::cout << "made it here in dataReader\n";
   //Set branch addresses
 
   Tin->SetBranchAddress("PID", &PID);
   Tin->SetBranchAddress("type", &Type);
   Tin->SetBranchAddress("side", &Side); 
   Tin->SetBranchAddress("Erecon",&Erecon);
-  Tin->GetBranch("time")->GetLeaf("TimeE")->SetAddress(&TimeE);
-  Tin->GetBranch("time")->GetLeaf("TimeW")->SetAddress(&TimeW);
-  Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(&mwpcPos[0][0]);
-  Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(&mwpcPos[1][0]);
+  Tin->GetBranch("time")->GetLeaf("timeE")->SetAddress(&TimeE);
+  Tin->GetBranch("time")->GetLeaf("timeW")->SetAddress(&TimeW);
+  Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcPosE);
+  Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcPosW);
   Tin->SetBranchAddress("AsymWeight",&AsymWeight);
+
 
   unsigned int nevents = Tin->GetEntriesFast();
   //std::cout << nevents << std::endl;
@@ -243,11 +242,12 @@ void SimEvtRateHandler::dataReader() {
   for (unsigned int i=0; i<nevents; i++)
     {
       Tin->GetEvent(i);
+      //AsymWeight=1.;
       if (Type<4 && PID==1) 
 	{
 	  if (Side==0)
 	    {
-	      r2=mwpcPos[0][0]*mwpcPos[0][0]+mwpcPos[0][1]*mwpcPos[0][1];
+	      r2=mwpcPosE[0]*mwpcPosE[0]+mwpcPosE[1]*mwpcPosE[1];
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
@@ -257,7 +257,7 @@ void SimEvtRateHandler::dataReader() {
 	    }
 	  else if (Side==1)
 	    {
-	      r2=mwpcPos[1][0]*mwpcPos[1][0]+mwpcPos[1][1]*mwpcPos[1][1]; 
+	      r2=mwpcPosW[0]*mwpcPosW[0]+mwpcPosW[1]*mwpcPosW[1]; 
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
@@ -293,7 +293,7 @@ BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool uk
 
 void BGSubtractedRate::calcBGSubtRates() {
 
-  if (Simulation) //We don't save the histograms for simulations because they are just the histograms on file
+  if (Simulation) 
     {
       std::string indir = std::string(getenv("REVCALSIM"));
       SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir);
