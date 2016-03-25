@@ -8,7 +8,7 @@ ROOTCFLAGS	= $(shell root-config --cflags)
 
 
 CXX		= g++
-CXXFLAGS	= -O2 -Wall -fPIC -std=c++11
+CXXFLAGS	= -O2 -Wall -fPIC -std=c++11 -g
 LD		= g++
 SOFLAGS		= -shared
 LIBS		= $(ROOTLIBS) $(ROOTGLIBS)

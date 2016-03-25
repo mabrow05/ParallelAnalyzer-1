@@ -11,6 +11,19 @@ simulation data
 #include "EvtRateHandler.hh"
 #include <cstdio>
 
+EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWidth, double fidCut, bool ukdata) : runNumber(run),inputDir(inDir),fiducialCut(fidCut),UKdata(ukdata), pol(0) {
+  rateE.resize(4,NULL);
+  rateW.resize(4,NULL);
+
+  numEnergyBins = (int)(1200./enBinWidth);
+
+  rateEvec.resize(4, std::vector<double> (numEnergyBins,0.)); 
+  rateWvec.resize(4,std::vector <double> (numEnergyBins,0.));
+  rateEerr.resize(4, std::vector<double> (numEnergyBins,0.)); 
+  rateWerr.resize(4,std::vector <double> (numEnergyBins,0.));
+  
+}
+
 EvtRateHandler::~EvtRateHandler() {
   for (unsigned int i = 0; i<4; i++) {
     if (rateE[i]) delete rateE[i];
@@ -32,18 +45,16 @@ int EvtRateHandler::polarization(int run) {
   db->fetchQuery(cmd);
   std::string flipperStatus = db->returnQueryEntry();
   std::cout << flipperStatus << std::endl;
+  delete db;
   if (flipperStatus=="On") return 1;
   else if (flipperStatus=="Off") return -1;
   else throw "Polarization isn't applicaple or you chose a Depol Run";
-  delete db;
+  
 };
 
-void EvtRateHandler::CalcRates(double enBinWidth, double fidCut) {
+void EvtRateHandler::CalcRates() {
   char temp1[200], temp2[200], temp3[100], temp4[100];
-  rateE.resize(4,NULL);
-  rateW.resize(4,NULL);
-  fiducialCut = fidCut;
-  numEnergyBins = int(1200./enBinWidth);
+  
   for (unsigned int evtType = 0; evtType<4; evtType++) {
  
     sprintf(temp1,"East Type %i event rate",evtType);
@@ -57,15 +68,11 @@ void EvtRateHandler::CalcRates(double enBinWidth, double fidCut) {
     rateE[evtType] = new TH1D(temp2,temp1,numEnergyBins,0.,1200.);
     rateW[evtType] = new TH1D(temp4,temp3,numEnergyBins,0.,1200.);
   }
-  dataReader();
+  this->dataReader();
       
 };
 
 std::vector< std::vector<double> > EvtRateHandler::getRateVectors(int side) {
-  rateEvec.resize(4, std::vector<double> (numEnergyBins,0.)); 
-  rateWvec.resize(4,std::vector <double> (numEnergyBins,0.));
-  rateEerr.resize(4, std::vector<double> (numEnergyBins,0.)); 
-  rateWerr.resize(4,std::vector <double> (numEnergyBins,0.));
 
   if (side==0)
     {
@@ -117,6 +124,11 @@ void EvtRateHandler::dataReader() {
   std::string infile;
   TFile *input;
   TTree *Tin;
+
+  double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0.; //Branch Variables being read in
+  double EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0.; // For reading in data from MPM replays
+
+  int PID, Side, Type;
   
   //Set branch addresses
   if (UKdata) {
@@ -214,11 +226,19 @@ void EvtRateHandler::dataReader() {
 
 void SimEvtRateHandler::dataReader() {
   char temp[100];
+
+  double TimeE=0., TimeW=0., Erecon=0.; //Branch Variables being read in
+  int PID, Side, Type;
+
+  double AsymWeight=1.;
+  double mwpcPosE[3]={0.};
+  double mwpcPosW[3]={0.}; //holds the position of the event in the MWPC for simulated data
+
   sprintf(temp,"/beta/revCalSim_%i_Beta.root",runNumber);
   std::string infile = inputDir+"/"+std::string(temp);
   TFile *input = new TFile(infile.c_str(), "READ");
   TTree *Tin = (TTree*)input->Get("revCalSim");
-  std::cout << "made it here in dataReader\n";
+  //std::cout << "made it here in dataReader\n";
   //Set branch addresses
 
   Tin->SetBranchAddress("PID", &PID);
@@ -288,6 +308,9 @@ BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool uk
   BetaRateErrorW.resize(4, std::vector <double> (numBins,0.));
   BGRateErrorW.resize(4, std::vector <double> (numBins,0.));
   FinalRateErrorW.resize(4, std::vector <double> (numBins,0.));
+
+  runLengthBeta.resize(2,0.);
+  runLengthBG.resize(2,0.);
 };
 
 
@@ -296,8 +319,8 @@ void BGSubtractedRate::calcBGSubtRates() {
   if (Simulation) 
     {
       std::string indir = std::string(getenv("REVCALSIM"));
-      SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir);
-      evt->CalcRates(EnergyBinWidth,fiducialCut);
+      SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir, EnergyBinWidth,fiducialCut);
+      evt->CalcRates();
       FinalRateE = evt->getRateVectors(0);
       FinalRateW = evt->getRateVectors(1);
       delete evt;
@@ -386,8 +409,8 @@ void BGSubtractedRate::LoadRatesByBin() {
   if (UKdata) indir = std::string(getenv("REPLAY_PASS4"));
   else indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
 
-  EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir, UKdata);
-  evtBG->CalcRates(EnergyBinWidth,fiducialCut);
+  EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir, EnergyBinWidth, fiducialCut, UKdata);
+  evtBG->CalcRates();
   BGRateE = evtBG->getRateVectors(0);
   BGRateErrorE = evtBG->getRateErrors(0);
   BGRateW = evtBG->getRateVectors(1);
@@ -396,8 +419,8 @@ void BGSubtractedRate::LoadRatesByBin() {
   runLengthBG[1] = evtBG->returnRunLength(1);
   delete evtBG;
     
-  EvtRateHandler *evt = new EvtRateHandler(runNumber, indir, UKdata);
-  evt->CalcRates(EnergyBinWidth,fiducialCut);
+  EvtRateHandler *evt = new EvtRateHandler(runNumber, indir, EnergyBinWidth, fiducialCut, UKdata);
+  evt->CalcRates();
   BetaRateE = evt->getRateVectors(0);
   BetaRateErrorE = evt->getRateErrors(0);
   BetaRateW = evt->getRateVectors(1);
@@ -409,16 +432,8 @@ void BGSubtractedRate::LoadRatesByBin() {
 };
 
 std::vector<double> BGSubtractedRate::returnRunLengths(bool beta) {
-  std::vector<double> lengths;
-  if (beta) {
-    lengths.push_back(runLengthBeta[0]);
-    lengths.push_back(runLengthBeta[1]);
-  }
-  else {
-    lengths.push_back(runLengthBG[0]);
-    lengths.push_back(runLengthBG[1]);
-  }
-  return lengths;
+  if (beta) return runLengthBeta;
+  else return runLengthBG;
 }
 
 void BGSubtractedRate::CalcFinalRate()  {

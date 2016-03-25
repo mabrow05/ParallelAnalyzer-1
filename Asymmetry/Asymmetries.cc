@@ -10,7 +10,7 @@ ppair, quartet, octet
 #include <cstdlib>
 #include <cmath>
 
-AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation) : UKdata(ukdata), Simulation(simulation), octet(oct), energyBinWidth(enBinWidth), fiducialCut(fidCut), boolAnaChRtVecs(false) {
+AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation) : UKdata(ukdata), Simulation(simulation), octet(oct), energyBinWidth(enBinWidth), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0) {
   unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   A2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
   B2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
@@ -329,14 +329,16 @@ OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool u
 void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
   if (!isAnaChoiceRateVectors()) makeAnalysisChoiceRateVectors(anaChoice);
 
-  double sfON[2], sfOFF[2];
-  double sfON_err[2], sfOFF_err[2];
-  double weightsum;
+  double sfON[2]={0.};
+  double sfOFF[2]={0.};
+  double sfON_err[2]={0.};
+  double sfOFF_err[2]={0.};
+
   for (unsigned int bin=0; bin<asymmetry.size(); bin++) {
     double R = 0.;
     double deltaR = 0.;
     for (unsigned int side=0; side<2; side++) {
-      weightsum=0.;
+      double weightsum=0.;
       sfOFF[side] = (power(1./anaChoice_A2err[side][bin],2)*anaChoice_A2[side][bin]+power(1./anaChoice_A10err[side][bin],2)*anaChoice_A10[side][bin]
 		     +power(1./anaChoice_B5err[side][bin],2)*anaChoice_B5[side][bin]+power(1./anaChoice_B7err[side][bin],2)*anaChoice_B7[side][bin]);
       weightsum = power(1./anaChoice_A2err[side][bin],2)+power(1./anaChoice_A10err[side][bin],2)
@@ -376,11 +378,10 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int a
   unsigned int binLow = (unsigned int)(enWinLow/energyBinWidth);
   unsigned int binHigh = (unsigned int)(enWinHigh/energyBinWidth)-1;
 
-  double sf_ON[2], sf_OFF[2];
-  double sf_ON_err[2], sf_OFF_err[2];
-  double sumA2[2], sumA5[2], sumA7[2], sumA10[2], sumB2[2], sumB5[2], sumB7[2], sumB10[2];
-  double sumA2_err[2], sumA5_err[2], sumA7_err[2], sumA10_err[2], sumB2_err[2], sumB5_err[2], sumB7_err[2], sumB10_err[2];
-  double weightsum;
+  double sf_ON[2]={0.}, sf_OFF[2]={0.};
+  double sf_ON_err[2]={0.}, sf_OFF_err[2]={0.};
+  double sumA2[2]={0.}, sumA5[2]={0.}, sumA7[2]={0.}, sumA10[2]={0.}, sumB2[2]={0.}, sumB5[2]={0.}, sumB7[2]={0.}, sumB10[2]={0.};
+  double sumA2_err[2]={0.}, sumA5_err[2]={0.}, sumA7_err[2]={0.}, sumA10_err[2]={0.}, sumB2_err[2]={0.}, sumB5_err[2]={0.}, sumB7_err[2]={0.}, sumB10_err[2]={0.};
 
   double R = 0.;
   double deltaR = 0.;
@@ -431,7 +432,7 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int a
     		   
   for (unsigned int side=0; side<2; side++) {
   
-    weightsum=0.;
+    double weightsum=0.;
     sf_OFF[side] = (power(1./sumA2_err[side],2)*sumA2[side]+power(1./sumA10_err[side],2)*sumA10[side]
 		   +power(1./sumB5_err[side],2)*sumB5[side]+power(1./sumB7_err[side],2)*sumB7[side]);
     weightsum = power(1./sumA2_err[side],2)+power(1./sumA10_err[side],2)
