@@ -846,7 +846,7 @@ if __name__ == "__main__":
 
     ### Simulation reverse calibration procedure
     if 0: 
-        runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]#[13]#,16,17,18,19,20,21,22,23,24]#
+        runPeriods =[3]#[1,2,3,4,5,6,7,8,9,10,11,12]#[13]#,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
@@ -857,7 +857,7 @@ if __name__ == "__main__":
 
     ### Source Run Calibration Steps...
     if 1: 
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [3]#[1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
@@ -874,7 +874,7 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 1: 
+    if 0: 
         runPeriods = [2,3,4,5]#7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
