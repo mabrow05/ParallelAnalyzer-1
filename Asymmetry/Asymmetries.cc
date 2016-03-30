@@ -64,7 +64,6 @@ AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukd
   }  
 
   readOctetFile();
-  loadRates(); // load the rates in the rate vectors for each run
  
 };
 
@@ -318,12 +317,15 @@ std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtr
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation), totalAsymmetry(0.), totalAsymmetryError(0.) {
-  unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-  asymmetry.resize(numBins,0.);
-  asymmetryError.resize(numBins,0.);
-  //loadRates(); // load the rates in the rate vectors for each run
-  std::cout <<"//////////////////////////////////////////////////////////////////\n"
-	    <<"Initialized OctetAsymmetry for octet " << octet << std::endl;
+  if (isFullOctet()) {
+    unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+    asymmetry.resize(numBins,0.);
+    asymmetryError.resize(numBins,0.);
+    loadRates(); // load the rates in the rate vectors for each run
+    std::cout <<"//////////////////////////////////////////////////////////////////\n"
+	      <<"Initialized OctetAsymmetry for octet " << octet << std::endl;
+  }
+  else throw "OCTET NOT A COMPLETE OCTET";
 };
 
 void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {

@@ -327,7 +327,7 @@ if __name__ == "__main__":
 
     #Running reverse calibrations
     if 1:
-        octet_range = [1,59];
+        octet_range = [0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             beta.runReverseCalibration(octet)

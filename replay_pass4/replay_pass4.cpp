@@ -86,6 +86,8 @@ int main(int argc, char *argv[])
     if (fileLinearityCurve.fail()) break;                       
   }
 
+  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", 0., 2500.0);
+
   //Load the simulated relationship between EQ and Etrue
   vector < vector < vector < double > > > EQ2Etrue = getEQ2EtrueParams(runNumber);
  
@@ -164,72 +166,26 @@ int main(int argc, char *argv[])
     t->getEvent(i);
     
     //Calculate Evis for each event in each PMT using the linearity curve determined in calibration
-    //if (t->ScintE.q1>linearityCurve[0][4]) {
-      t->ScintE.e1 = linearityCurve[0][0] + linearityCurve[0][1]*t->ScintE.q1 
-	+ linearityCurve[0][2]*t->ScintE.q1*t->ScintE.q1 + linearityCurve[0][3]*t->ScintE.q1*t->ScintE.q1*t->ScintE.q1;
-      //}
-      //else if (t->ScintE.q1>0.) t->ScintE.e1 = linearityCurve[0][5]*t->ScintE.q1;
-      //else t->ScintE.e1=0.;
+    Double_t x[1];
 
-      //if (t->ScintE.q2>linearityCurve[1][4]) {
-      t->ScintE.e2 = linearityCurve[1][0] + linearityCurve[1][1]*t->ScintE.q2 
-	+ linearityCurve[1][2]*t->ScintE.q2*t->ScintE.q2 + linearityCurve[1][3]*t->ScintE.q2*t->ScintE.q2*t->ScintE.q2;
-      //}
-      //else if (t->ScintE.q2>0.) t->ScintE.e2 = linearityCurve[1][5]*t->ScintE.q2;
-      //else t->ScintE.e2=0.;
+    x[0] = t->ScintE.q1;
+    t->ScintE.e1 = fitADC->EvalPar(x,linearityCurve[0]);
+    x[0] = t->ScintE.q2;
+    t->ScintE.e2 = fitADC->EvalPar(x,linearityCurve[1]);
+    x[0] = t->ScintE.q3;
+    t->ScintE.e3 = fitADC->EvalPar(x,linearityCurve[2]);
+    x[0] = t->ScintE.q4;
+    t->ScintE.e4 = fitADC->EvalPar(x,linearityCurve[3]);
 
-      //if (t->ScintE.q3>linearityCurve[2][4]) {
-      t->ScintE.e3 = linearityCurve[2][0] + linearityCurve[2][1]*t->ScintE.q3 
-	+ linearityCurve[2][2]*t->ScintE.q3*t->ScintE.q3 + linearityCurve[2][3]*t->ScintE.q3*t->ScintE.q3*t->ScintE.q3;
-      //}
-    //else if (t->ScintE.q3>0.) t->ScintE.e3 = linearityCurve[2][5]*t->ScintE.q3;
-    //else t->ScintE.e3=0.;
-
-    //if (t->ScintE.q4>linearityCurve[3][4]) {
-      t->ScintE.e4 = linearityCurve[3][0] + linearityCurve[3][1]*t->ScintE.q4 
-	+ linearityCurve[3][2]*t->ScintE.q4*t->ScintE.q4 + linearityCurve[3][3]*t->ScintE.q4*t->ScintE.q4*t->ScintE.q4;
-      //}
-    //else if (t->ScintE.q4>0.) t->ScintE.e4 = linearityCurve[3][5]*t->ScintE.q4;
-    //else t->ScintE.e4=0.;
-
-    //if (t->ScintW.q1>linearityCurve[4][4]) {
-      t->ScintW.e1 = linearityCurve[4][0] + linearityCurve[4][1]*t->ScintW.q1 
-	+ linearityCurve[4][2]*t->ScintW.q1*t->ScintW.q1 + linearityCurve[4][3]*t->ScintW.q1*t->ScintW.q1*t->ScintW.q1;
-      //}
-    //else if (t->ScintW.q1>0.) t->ScintW.e1 = linearityCurve[4][5]*t->ScintW.q1;
-    //else t->ScintW.e1=0.;
-
-    //if (t->ScintW.q2>linearityCurve[5][4]) {
-      t->ScintW.e2 = linearityCurve[5][0] + linearityCurve[5][1]*t->ScintW.q2 
-	+ linearityCurve[5][2]*t->ScintW.q2*t->ScintW.q2 + linearityCurve[5][3]*t->ScintW.q2*t->ScintW.q2*t->ScintW.q2;
-      //}
-    //else if (t->ScintW.q2>0.) t->ScintW.e2 = linearityCurve[5][5]*t->ScintW.q2;
-    //else t->ScintW.e2=0.;
-
-    //if (t->ScintW.q3>linearityCurve[6][4]) {
-      t->ScintW.e3 = linearityCurve[6][0] + linearityCurve[6][1]*t->ScintW.q3 
-	+ linearityCurve[6][2]*t->ScintW.q3*t->ScintW.q3 + linearityCurve[6][3]*t->ScintW.q3*t->ScintW.q3*t->ScintW.q3;
-      //}
-    //else if (t->ScintW.q3>0.) t->ScintW.e3 = linearityCurve[6][5]*t->ScintW.q3;
-    //else t->ScintW.e3=0.;
-
-    //if (t->ScintW.q4>linearityCurve[7][4]) {
-      t->ScintW.e4 = linearityCurve[7][0] + linearityCurve[7][1]*t->ScintW.q4 
-	+ linearityCurve[7][2]*t->ScintW.q4*t->ScintW.q4 + linearityCurve[7][3]*t->ScintW.q4*t->ScintW.q4*t->ScintW.q4;
-      //}
-    //else if (t->ScintW.q4>0.) t->ScintW.e4 = linearityCurve[7][5]*t->ScintW.q4;
-    //else t->ScintW.e4=0.;
-
-    //Now map each Evis value to a true value using EQ2Etrue relationship as was determined in simulation
-    /*Etrue[0] = EQ2Etrue[0][0]+EQ2Etrue[0][1]*(t->ScintE.e1)+EQ2Etrue[0][2]*(t->ScintE.e1)*(t->ScintE.e1);
-    Etrue[1] = EQ2Etrue[1][0]+EQ2Etrue[1][1]*(t->ScintE.e2)+EQ2Etrue[1][2]*(t->ScintE.e2)*(t->ScintE.e2);
-    Etrue[2] = EQ2Etrue[2][0]+EQ2Etrue[2][1]*(t->ScintE.e3)+EQ2Etrue[2][2]*(t->ScintE.e3)*(t->ScintE.e3);
-    Etrue[3] = EQ2Etrue[3][0]+EQ2Etrue[3][1]*(t->ScintE.e4)+EQ2Etrue[3][2]*(t->ScintE.e4)*(t->ScintE.e4);
-    Etrue[4] = EQ2Etrue[4][0]+EQ2Etrue[4][1]*(t->ScintW.e1)+EQ2Etrue[4][2]*(t->ScintW.e1)*(t->ScintW.e1);
-    Etrue[5] = EQ2Etrue[5][0]+EQ2Etrue[5][1]*(t->ScintW.e2)+EQ2Etrue[5][2]*(t->ScintW.e2)*(t->ScintW.e2);
-    Etrue[6] = EQ2Etrue[6][0]+EQ2Etrue[6][1]*(t->ScintW.e3)+EQ2Etrue[6][2]*(t->ScintW.e3)*(t->ScintW.e3);
-    Etrue[7] = EQ2Etrue[7][0]+EQ2Etrue[7][1]*(t->ScintW.e4)+EQ2Etrue[7][2]*(t->ScintW.e4)*(t->ScintW.e4);
-    */
+    x[0] = t->ScintW.q1;
+    t->ScintW.e1 = fitADC->EvalPar(x,linearityCurve[4]);
+    x[0] = t->ScintW.q2;
+    t->ScintW.e2 = fitADC->EvalPar(x,linearityCurve[5]);
+    x[0] = t->ScintW.q3;
+    t->ScintW.e3 = fitADC->EvalPar(x,linearityCurve[6]);
+    x[0] = t->ScintW.q4;
+    t->ScintW.e4 = fitADC->EvalPar(x,linearityCurve[7]);
+   
     Double_t lowestPMTenergy = 1.; //This is for setting an upper limit on the weight since
                                         // at E=0, the weight goes to infiniti
     Double_t lowestADC = 0.001;//20.;
