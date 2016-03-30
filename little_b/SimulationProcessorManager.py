@@ -138,7 +138,7 @@ def runBetaSims(geometry="2010", numEvents=5000,linCorr=True,paramSet=0):
     srcs = ["Beta","Beta_fierz"]
     for src in srcs:
         if linCorr:
-            infile = open("linCurves/mathchingParams_%s_%i.dat"%(geometry[:4],paramSet),'r')
+            infile = open("linCurves/matchingParams_%s_%i.dat"%(geometry[:4],paramSet),'r')
         
             for line in infile:
                 params = line.split()
