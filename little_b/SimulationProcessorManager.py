@@ -56,13 +56,18 @@ def makeLinearityParamFile():
     paramFile = open("linCurves/parameters.dat",'w');
     paramSetIndex = 0
 
-    for p0 in np.linspace(paramDeltaRanges["p0"][0],paramDeltaRanges["p0"][1], paramNSteps["p0"]):
-        for p1 in np.linspace(paramDeltaRanges["p1"][0],paramDeltaRanges["p1"][1], paramNSteps["p1"]):
-            for p2 in np.linspace(paramDeltaRanges["p2"][0],paramDeltaRanges["p2"][1], paramNSteps["p2"]):
-                for p3 in np.linspace(paramDeltaRanges["p3"][0],paramDeltaRanges["p3"][1], paramNSteps["p3"]):
+    #Gererates all combinations of parameters in the ranges above for each detector
+    for Ep0 in np.linspace(paramDeltaRanges["p0"][0],paramDeltaRanges["p0"][1], paramNSteps["p0"]):
+        for Ep1 in np.linspace(paramDeltaRanges["p1"][0],paramDeltaRanges["p1"][1], paramNSteps["p1"]):
+            for Ep2 in np.linspace(paramDeltaRanges["p2"][0],paramDeltaRanges["p2"][1], paramNSteps["p2"]):
+                for Ep3 in np.linspace(paramDeltaRanges["p3"][0],paramDeltaRanges["p3"][1], paramNSteps["p3"]):
+                    for Wp0 in np.linspace(paramDeltaRanges["p0"][0],paramDeltaRanges["p0"][1], paramNSteps["p0"]):
+                        for Wp1 in np.linspace(paramDeltaRanges["p1"][0],paramDeltaRanges["p1"][1], paramNSteps["p1"]):
+                            for Wp2 in np.linspace(paramDeltaRanges["p2"][0],paramDeltaRanges["p2"][1], paramNSteps["p2"]):
+                                for Wp3 in np.linspace(paramDeltaRanges["p3"][0],paramDeltaRanges["p3"][1], paramNSteps["p3"]):
                    
-                    paramFile.write("%i\t%e\t%e\t%e\t%e\n"%(paramSetIndex,p0,p1,p2,p3))
-                    paramSetIndex+=1
+                                    paramFile.write("%i\t%e\t%e\t%e\t%e\t%e\t%e\t%e\t%e\n"%(paramSetIndex,Ep0,Ep1,Ep2,Ep3,Wp0,Wp1,Wp2,Wp3))
+                                    paramSetIndex+=1
 
 
 # This will run all the source simulations through the Simulation Processor. If linCorr is true, it applies the twiddles in parameters.dat 
@@ -77,7 +82,7 @@ def runAllSourceSims(geometry="2010", numEvents=5000,linCorr=True):
 
             for line in infile:
                 params = line.split()
-                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[0]))
+                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[5],params[6],params[7],params[8],params[0]))
     
             infile.close()
         else:
@@ -142,7 +147,7 @@ def runBetaSims(geometry="2010", numEvents=5000,linCorr=True,paramSet=0):
         
             for line in infile:
                 params = line.split()
-                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4]))
+                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[5],params[6],params[7],params[8]))
     
             infile.close()
         else:

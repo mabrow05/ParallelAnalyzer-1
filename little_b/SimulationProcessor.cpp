@@ -16,8 +16,8 @@ If the simulation is beta decay, it outputs a tree with spectra
 
 int main(int argc, char *argv[]) {
 
-  if (argc!=5 && argc!=9 && argc!=10) {
-    std::cout << "Usage: ./SimulationAnalyzer [Source] [geometry] [numEvents] [bool doLinCorr] if doLinCorr [p0] [p1] [p2] [p3]\n";
+  if (argc!=5 && argc!=13 && argc!=14) {
+    std::cout << "Usage: ./SimulationAnalyzer [Source] [geometry] [numEvents] [bool doLinCorr] if doLinCorr [Ep0] [Ep1] [Ep2] [Ep3] [Wp0] [Wp1] [Wp2] [Wp3]\n";
     exit(0);
   }
   Int_t paramSetIndex = -1;
@@ -27,13 +27,17 @@ int main(int argc, char *argv[]) {
   UInt_t numEvents = (unsigned int)atoi(argv[3] ); //Number of electrons to accumulate
   std::string linCorrString = std::string(argv[4]); //False if you want no linearity corrections applied
   bool linCorrBool = false;
-  std::vector <Double_t> params(4,0.);
+  std::vector < std::vector <Double_t> > params(2, std::vector <Double_t>(4,0.));
   if (linCorrString=="True" || linCorrString=="true" || linCorrString=="1") {
     linCorrBool = true;
-    params[0] = atof(argv[5]);
-    params[1] = atof(argv[6]);
-    params[2] = atof(argv[7]);
-    params[3] = atof(argv[8]);
+    params[0][0] = atof(argv[5]);
+    params[0][1] = atof(argv[6]);
+    params[0][2] = atof(argv[7]);
+    params[0][3] = atof(argv[8]);
+    params[1][0] = atof(argv[9]);
+    params[1][1] = atof(argv[10]);
+    params[1][2] = atof(argv[11]);
+    params[1][3] = atof(argv[12]);
   }
   //std::vector <Double_t> checker = {5., 0.2, 0.0005,-3.e-6};
   //std::cout << checkParamSetStatus(checker,source.substr(0,2),"2010") << std::endl;
@@ -43,7 +47,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, bool doParamSets, std::vector <Double_t> params, Int_t paramSetIndex) 
+void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, bool doParamSets, std::vector < std::vector <Double_t> > params, Int_t paramSetIndex) 
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
@@ -54,8 +58,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   bool printTree = true; //Boolean to force printing of of TTree. The tree will be printed regardless if the source is Beta
   UInt_t BetaEvents = numEvents;
   
-  std::vector <Double_t> linCorrParams = params;
+  std::vector < std::vector <Double_t> > linCorrParams = params;
 
+  /*
   //Checking that the parameters have a chance
   if (source.substr(0,4)!="Beta" && paramSetIndex!=-1) { 
     if (source!="Bi207") {
@@ -69,6 +74,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       return;
     }
   }
+  */
 
   // Set the location of the source and it's spread in mm. srcPos[0=east,1=west][0=x,1=y,2=sigma]
   bool moveSource = false; // If this is true, set the position of the source to the following location
@@ -251,8 +257,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
     //////////////////////////////////////////////////////////////////////////////////////////////  
     //Applying the twiddle from the linearity curves not being perfect
-    std::vector <Double_t> paramHold = {linCorrParams[0],linCorrParams[1],linCorrParams[2],linCorrParams[3]};
+    std::vector <Double_t> paramHold = {linCorrParams[0][0],linCorrParams[0][1],linCorrParams[0][2],linCorrParams[0][3]}; //East parameters
     evis.EvisE = applyLinearityTwiddle(paramHold,evis.EvisE); //Applies the twiddle
+    paramHold = {linCorrParams[1][0],linCorrParams[1][1],linCorrParams[1][2],linCorrParams[1][3]}; //West parameters
     evis.EvisW = applyLinearityTwiddle(paramHold,evis.EvisW); //Applies the twiddle
     
     // std::cout << evis.EvisE << "\t" << evis.EvisW << std::endl;
@@ -290,11 +297,11 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       PID=1;
       type=1;
       //East
-      if (initialMomentum[2]<0.) {//(Time.timeE<Time.timeW) {//
+      if (Time.timeE<Time.timeW) {
 	side=0;
       }
       //West
-      else if (initialMomentum[2]>=0.) {//(Time.timeE>Time.timeW) { 
+      else if (Time.timeE>Time.timeW) { 
 	side=1;
       }
     }
@@ -402,7 +409,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       
       if (paramSetIndex!=-1 && checkPeakStatus(MeanAndSig,source.substr(0,2),geometry)) {
 	
-	ofile << paramSetIndex << "\t" << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	ofile << paramSetIndex << "\t" << linCorrParams[0][0] << "\t" << linCorrParams[0][1] << "\t" << linCorrParams[0][2] << "\t" << linCorrParams[0][3]
+	      << "\t" << linCorrParams[1][0] << "\t" << linCorrParams[1][1] << "\t" << linCorrParams[1][2] << "\t" << linCorrParams[1][3]
 	      << "\t" << MeanAndSig[0][0] << "\t" << MeanAndSig[0][1] << "\t" 
 	      << MeanAndSig[1][0] << "\t" << MeanAndSig[1][1] << std::endl;
       }
@@ -430,7 +438,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
       if (paramSetIndex!=-1 && checkPeakStatus(MeanAndSig1,source.substr(0,2)+"1",geometry) && checkPeakStatus(MeanAndSig2,source.substr(0,2)+"2",geometry)) {
 	
-	ofile << paramSetIndex << "\t" << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	ofile << paramSetIndex << "\t" << linCorrParams[0][0] << "\t" << linCorrParams[0][1] << "\t" << linCorrParams[0][2] << "\t" << linCorrParams[0][3]
+	      << "\t" << linCorrParams[1][0] << "\t" << linCorrParams[1][1] << "\t" << linCorrParams[1][2] << "\t" << linCorrParams[1][3]
 	      << "\t" << MeanAndSig1[0][0] << "\t" << MeanAndSig1[0][1] << "\t" 
 	      << MeanAndSig1[1][0] << "\t" << MeanAndSig1[1][1] 
 	      << "\t" << MeanAndSig2[0][0] << "\t" << MeanAndSig2[0][1] << "\t" 

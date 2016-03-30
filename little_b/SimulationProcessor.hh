@@ -75,7 +75,7 @@ Double_t Erecon; // smeared, weighted, and trigger func corrected energy with th
 ///////// Function declarations /////////////////
 
 // This function holds all the meat
-void revCalSimulation (std::string source, std::string geometry, UInt_t numEvents, bool linCorr, std::vector <Double_t> params, Int_t index);
+void revCalSimulation (std::string source, std::string geometry, UInt_t numEvents, bool linCorr, std::vector < std::vector <Double_t> > params, Int_t index);
 
 //Function to return the x value of the max bin in a histogram 
 Double_t GetXatMax(TH1D* hist, Double_t xmin=-1., Double_t xmax=-1.);
