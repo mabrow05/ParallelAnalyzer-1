@@ -88,11 +88,6 @@ bool checkPeakStatus(std::vector < std::vector < Double_t> > meanAndSig, std::st
 //Function to return a 2 element vector holding the fit mean and sigma of a peak
 std::vector <Double_t> FitGaus(TH1D* histToFit, Double_t gausMean, Double_t min, Double_t max);
 
-//Function to check if the peak value for a source falls within the error envelope
-bool CheckPeakValues2010(std::vector <int> parameters, std::string sourceName, std::string side);
-bool CheckPeakValues2011(std::vector <int> parameters, std::string sourceName, std::string side);
-bool CheckPeakValues2012(std::vector <int> parameters, std::string sourceName, std::string side);
-
 //Function to return the trigger function for each side in a std::vector in the form vec[side][param]
 // where side==0 is East and side==1 is West
 std::vector < std::vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams);

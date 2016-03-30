@@ -27,8 +27,8 @@ int main(int argc, char *argv[]) {
   UInt_t numEvents = (unsigned int)atoi(argv[3] ); //Number of electrons to accumulate
   std::string linCorrString = std::string(argv[4]); //False if you want no linearity corrections applied
   bool linCorrBool = false;
-  std::vector < std::vector <Double_t> > params(2, std::vector <Double_t>(4,0.));
-  if (linCorrString=="True" || linCorrString=="true" || linCorrString=="1") {
+  std::vector < std::vector <Double_t> > params(2, std::vector <Double_t>(4,0.));	// a 2-vector of 4-vector where
+  if (linCorrString=="True" || linCorrString=="true" || linCorrString=="1") {		// the 4-vector is a vec of polynomial coeff
     linCorrBool = true;
     params[0][0] = atof(argv[5]);
     params[0][1] = atof(argv[6]);
@@ -128,7 +128,6 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   chain.SetBranchAddress("primaryParticleSpecies",&primaryID);
   chain.SetBranchAddress("primaryMomentum",&initialMomentum);
   chain.SetBranchAddress("mwpcEnergy",&mwpcE);
-//  chain.SetBranchAddress("scintTimeToHit",&Time);
   chain.SetBranchAddress("scintTimeToHit",&Time);	// we can save this variable, Xuan sim has it
   chain.SetBranchAddress("scintillatorEdep",&edep);
   chain.SetBranchAddress("scintillatorEdepQuenched",&edepQ);
@@ -405,7 +404,6 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       std::cout << "West mean = " << MeanAndSig[1][0] << "    West sigma = " << MeanAndSig[1][1] << endl;
       
       //bool printToFile= false;
-      //if (geometry=="2010") printToFile = CheckPeakValues2010(
       
       if (paramSetIndex!=-1 && checkPeakStatus(MeanAndSig,source.substr(0,2),geometry)) {
 	
@@ -568,142 +566,6 @@ bool checkPeakStatus(std::vector < std::vector < Double_t > > meanAndSig, std::s
   else return false;
   
 }
-
-bool CheckPeakValues2011(std::vector <int> parameters, std::string sourceName, std::string side)
-{
-  Double_t mean, sigma, diffMean, diffSigma;
-
-  if(sourceName == "113Sn")
-  {
-    if(side == "east")
-    {
-      mean = 365.629;	// keV for all
-      sigma = 33.7571;
-    }
-    else if(side == "west")
-    {
-      mean = 365.394;
-      sigma = 34.2878;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else if(sourceName == "139Ce")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else { 
-    std::cout << "Bad input for Src into CheckPeakValue\n";
-    exit(0);
-  }
-
-  // we enforce absolute value as a check
-  diffMean = abs(parameters[0]) - mean;
-  diffSigma = abs(parameters[1]) - sigma;
-
-  if(diffMean < 0 && diffSigma < 0)
-  {
-    std::cout << "Set of parameters are GOOD: difference in mean is " << abs(diffMean)
-    << ", difference in sigma is " << abs(diffSigma) << std::endl;
-
-
-    return true;
-  }
-  if(diffMean > 0)
-  {
-    std::cout << "Parameters BAD: mean is outside range." << std::endl;
-  }
-  if(diffSigma > 0)
-  {
-    std::cout << "Parameters BAD: sigma is outside range." << std::endl;
-  }
-
-  return false;
-}
-
-
-bool CheckPeakValues2010(std::vector <int> parameters, std::string sourceName, std::string side)
-{
-  Double_t mean, sigma, diffMean, diffSigma;
-
-  if(sourceName == "113Sn")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else if(sourceName == "139Ce")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else { 
-    std::cout << "Bad input for Src into CheckPeakValue\n";
-    exit(0);
-  }
-  
-  // we enforce absolute value just as a check
-  diffMean = abs(parameters[0]) - mean;
-  diffSigma = abs(parameters[1]) - sigma;
-
-  if(diffMean < 0 && diffSigma < 0)
-  {
-    std::cout << "Set of parameters are GOOD: difference in mean is " << abs(diffMean)
-    << ", difference in sigma is " << abs(diffSigma) << std::endl;
-
-
-    return true;
-  }
-  if(diffMean > 0)
-  {
-    std::cout << "Parameters BAD: mean is outside range." << std::endl;
-  }
-  if(diffSigma > 0)
-  {
-    std::cout << "Parameters BAD: sigma is outside range." << std::endl;
-  }
-
-  return false;
-}
-
 
 //Function to return the trigger function for each side in a std::vector in the form vec[side][param]
 // where side==0 is East and side==1 is West
