@@ -321,6 +321,8 @@ OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool u
     unsigned int numBins = (unsigned int)(1200./energyBinWidth);
     asymmetry.resize(numBins,0.);
     asymmetryError.resize(numBins,0.);
+    superSum.resize(numBins,0.);
+    superSumError.resize(numBins,0.);
     loadRates(); // load the rates in the rate vectors for each run
     std::cout <<"//////////////////////////////////////////////////////////////////\n"
 	      <<"Initialized OctetAsymmetry for octet " << octet << std::endl;
