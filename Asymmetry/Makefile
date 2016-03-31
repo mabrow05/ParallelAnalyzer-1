@@ -8,7 +8,7 @@ ROOTCFLAGS	= $(shell root-config --cflags)
 
 
 CXX		= g++
-CXXFLAGS	= -O2 -Wall -fPIC -std=c++11
+CXXFLAGS	= -O2 -Wall -fPIC -std=c++11 -g
 LD		= g++
 SOFLAGS		= -shared
 LIBS		= $(ROOTLIBS) $(ROOTGLIBS)
@@ -28,11 +28,15 @@ UK2MPMcomparison.exe: UK2MPMcomparison.o $(objects)
 	$(CXX) $(CXXFLAGS) -o UK2MPMcomparison.exe UK2MPMcomparison.o $(objects) $(LIBS) 
 	@echo "Done"
 
+UK2SIMcomparison.exe: UK2SIMcomparison.o $(objects) 
+	$(CXX) $(CXXFLAGS) -o UK2SIMcomparison.exe UK2SIMcomparison.o $(objects) $(LIBS) 
+	@echo "Done"
+
 Asymmetries.o: Asymmetries.hh
 
 EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh
 
-SQLintercace.o: SQLinterface.hh
+SQLinterface.o: SQLinterface.hh
 
 SystematicCorrections.o: SystematicCorrections.hh
 

@@ -18,21 +18,22 @@
 
 class EvtRateHandler {
 public:
-  EvtRateHandler(int run, const std::string& inDir, bool ukdata=true) : runNumber(run),inputDir(inDir),UKdata(ukdata) {}
+  EvtRateHandler(int run, const std::string& inDir, double enBinWidth=10., double fidCut=100., bool ukdata=true);
   virtual ~EvtRateHandler();
   int runNumber; //Run Number being read in
   std::string inputDir; //input data directory
+  double fiducialCut; //definition of a fiducial volume
   bool UKdata; //This is true if the tree format is UK style, False if it's official analyzer style
   double pol;  //Polarization of run as determined from number of events on each side
                
-  double fiducialCut; //definition of a fiducial volume
+ 
 
   int polarization(int run); // determines the polarization. Assigns value to pol and returns polarization
                              // This comes from the database. Flipper on -> 1, Flipper Off -> -1
 
   double returnRunLength(int side) {return runLength[side];} // Return the length of the run (s)
 
-  void CalcRates(double enBinWidth=10., double fidCut=45.); //evtType (0,1,2,3) for now. This returns a histogram of
+  void CalcRates(); //evtType (0,1,2,3) for now. This returns a histogram of
                                                                             // rates
   std::vector< std::vector<double> > getRateVectors(int side);
   std::vector< std::vector<double> > getRateErrors(int side);
@@ -49,19 +50,21 @@ protected:
   std::vector< std::vector<double> > rateWvec;
   std::vector< std::vector<double> > rateEerr; //Stores the statistical error for each Bin
   std::vector< std::vector<double> > rateWerr;
-  double EmwpcX, EmwpcY, WmwpcX, WmwpcY, TimeE, TimeW, Erecon; //Branch Variables being read in
-  float EmwpcX_f, EmwpcY_f, WmwpcX_f, WmwpcY_f, TimeE_f, TimeW_f, Erecon_f; // For reading in data from MPM replays
-  int PID, Side, Type;
-};
   
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+ 
 class SimEvtRateHandler: public EvtRateHandler {
 public:
-  SimEvtRateHandler(int run, const std::string& inDir): EvtRateHandler(run, inDir, true) {}
+  SimEvtRateHandler(int run, const std::string& inDir, double enBinWidth=10., double fidCut=100.): EvtRateHandler(run, inDir, enBinWidth, fidCut, true) {}
 
 protected:
   void dataReader(); //Different set of variables for reverse calibrated simulated data
+  
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class BGSubtractedRate {
 public:
   BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata=true, bool sim=false);
@@ -98,8 +101,8 @@ private:
   std::vector< std::vector<double> > FinalRateW; //This is the difference in the rates
   std::vector< std::vector<double> > FinalRateErrorW; //This is the statistical error in the difference in the rates
 
-  double runLengthBG[2]; // E/W
-  double runLengthBeta[2];
+  std::vector <double> runLengthBG; // E/W
+  std::vector <double> runLengthBeta;
   
   void LoadRatesByBin(); // Load rates and save them to vectors
   void CalcFinalRate();

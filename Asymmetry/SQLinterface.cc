@@ -7,7 +7,7 @@ SQLdatabase::SQLdatabase(const std::string& name,
 			 const std::string& dbUser,
 			 const std::string& dbPass,
 			 unsigned int port,
-			 unsigned int ntries): db(NULL),res(NULL),dbname(name) {
+			 unsigned int ntries): numFields(0), db(NULL),res(NULL),dbname(name) {
 
   char temp[10];
   sprintf(temp,"%i",port);
@@ -69,7 +69,7 @@ std::string SQLdatabase::returnQueryEntry(int* field, TSQLResult* r) {
     if (*field>=numFields) throw "Chose field outside number of fields in query";
     result += std::string(row->GetField(*field));
   }
- 
+  delete row;
   return result;
 }
   

@@ -77,8 +77,9 @@ vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t
 Double_t triggerProbability(vector <Double_t> params, Double_t En) {
   //Double_t prob = params[0]+params[1]*TMath::Erf((En-params[2])/params[3])
   //+ params[4]*TMath::Gaus(En,params[5],params[6]);
-  return (params[0]+params[1]*TMath::Erf((En-params[2])/params[3]))*(0.5-0.5*TMath::TanH((En-params[2])/params[4])) + 
+  if (En<100.) return (params[0]+params[1]*TMath::Erf((En-params[2])/params[3]))*(0.5-0.5*TMath::TanH((En-params[2])/params[4])) + 
     (0.5+0.5*TMath::TanH((En-params[2])/params[4]))*(params[5]+params[6]*TMath::TanH((En-params[2])/params[7]));
+  else return 1.;
 }
 
 vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {

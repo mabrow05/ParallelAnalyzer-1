@@ -277,17 +277,18 @@ void LinearityCurves(Int_t runPeriod)
   ofstream linCurves(temp);
 
   // Fit function
-  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x + [3]*x*x*x)", 0., 2500.0);
+  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", 0., 2500.0);
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-  fitADC->SetParameter(3, 0.0);
-  //fitADC->FixParameter(2,0.0);
-  //fitADC->FixParameter(0,0.0);
-  //fitADC->SetParLimits(0,0., 20.);
-  fitADC->SetParLimits(2, -0.004, 0.004);
-  //fitADC->SetParLimits(3, -0.0000001, 0.0000001);
-  fitADC->FixParameter(3,0.0);
+  fitADC->SetParameter(3, 1.0);
+  fitADC->SetParameter(4, 50.);
+  fitADC->SetParameter(5, 1.);
+  fitADC->FixParameter(5, 75.0);
+  //fitADC->SetParLimits(5, 1., 20.);
+  
+  fitADC->SetParLimits(2, -0.0004, 0.0004);
+  fitADC->SetParLimits(3, 0.1, 2.);
 
   fitADC->SetNpx(100000);
   fitADC->SetLineColor(2);
@@ -297,6 +298,7 @@ void LinearityCurves(Int_t runPeriod)
   Double_t lowFitThreshold = 0.; //This is the low end of the quadratic fit region defined to be 
                                  // (1/2)*(Average Ce Peak in ADC).
   Double_t highFitThreshold = 0.; // This is the upper end of the quadratic fit
+  Double_t lowEnSlope = 0., shiftOfTanH = 0., spreadOfTanH = 0.;
 
   // East 1
 
@@ -307,20 +309,26 @@ void LinearityCurves(Int_t runPeriod)
   if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
  
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
     Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runE1.size(); ii++) {
       if (nameE1[ii]=="Ce") {
-	sum1+=ADCE1[ii];
+	sumADC_Ce+=ADCE1[ii];
+	sumEQ_Ce+=EQE1[ii];
 	entries1++;
       }
       if (nameE1[ii]=="Bi1") {
-	sum2+=ADCE1[ii];
+	sumADC_Bi+=ADCE1[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+    
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
     //cout << lowFitThreshold << endl;
     //cout << highFitThreshold << endl;
 
@@ -344,14 +352,16 @@ void LinearityCurves(Int_t runPeriod)
     grE1->SetMaximum(1000.0);
     grE1->Draw("AP");
 
-    grE1->Fit("fitADC", "Q","", lowFitThreshold, highFitThreshold);
+    grE1->Fit("fitADC", "","", 0., highFitThreshold);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
   
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -370,7 +380,7 @@ void LinearityCurves(Int_t runPeriod)
     
     for (int j=0; j<runE1.size(); j++) {
     
-      fitEQ_E1[j]    = offset + slope*ADCE1[j] + quad*ADCE1[j]*ADCE1[j] + cubic*ADCE1[j]*ADCE1[j]*ADCE1[j];
+      fitEQ_E1[j]    = fitADC->Eval(ADCE1[j]);//offset + slope*ADCE1[j] + quad*ADCE1[j]*ADCE1[j] + cubic*ADCE1[j]*ADCE1[j]*ADCE1[j];
       if (nameE1[j]=="Ce") {
 	ResE1[j] = fitEQ_E1[j] - EQE1[j];
 	oFileE1 << "Ce_East" << " " << runE1[j] << " " << ResE1[j] << endl;
@@ -450,20 +460,29 @@ void LinearityCurves(Int_t runPeriod)
   if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
-    Int_t entries1 = 0, entries2 = 0;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
+    Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runE2.size(); ii++) {
       if (nameE2[ii]=="Ce") {
-	sum1+=ADCE2[ii];
+	sumADC_Ce+=ADCE2[ii];
+	sumEQ_Ce+=EQE2[ii];
 	entries1++;
       }
       if (nameE2[ii]=="Bi1") {
-	sum2+=ADCE2[ii];
+	sumADC_Bi+=ADCE2[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+    
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
+    //cout << lowFitThreshold << endl;
+    //cout << highFitThreshold << endl;
+    
 
     c2 = new TCanvas("c2", "c2");
     c2->SetLogy(0);
@@ -485,14 +504,16 @@ void LinearityCurves(Int_t runPeriod)
     grE2->SetMaximum(1000.0);
     grE2->Draw("AP");
 
-    grE2->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grE2->Fit("fitADC", "Q","",0.,highFitThreshold);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -510,7 +531,7 @@ void LinearityCurves(Int_t runPeriod)
     // Calculate residuals in [keV]
     
     for (int j=0; j<runE2.size(); j++) {
-      fitEQ_E2[j]    = offset + slope*ADCE2[j] + quad*ADCE2[j]*ADCE2[j] + cubic*ADCE2[j]*ADCE2[j]*ADCE2[j];
+      fitEQ_E2[j]    = fitADC->Eval(ADCE2[j]);//offset + slope*ADCE2[j] + quad*ADCE2[j]*ADCE2[j] + cubic*ADCE2[j]*ADCE2[j]*ADCE2[j];
       if (nameE2[j]=="Ce") {
 	ResE2[j] = fitEQ_E2[j] - EQE2[j];
 	//ResE2[j] = (fitEQ - peakCe)/peakCe * 100.;
@@ -589,20 +610,28 @@ void LinearityCurves(Int_t runPeriod)
   if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
     Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runE3.size(); ii++) {
       if (nameE3[ii]=="Ce") {
-	sum1+=ADCE3[ii];
+	sumADC_Ce+=ADCE3[ii];
+	sumEQ_Ce+=EQE3[ii];
 	entries1++;
       }
       if (nameE3[ii]=="Bi1") {
-	sum2+=ADCE3[ii];
+	sumADC_Bi+=ADCE3[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+    
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
+    //cout << lowFitThreshold << endl;
+    //cout << highFitThreshold << endl;
 
     c3 = new TCanvas("c3", "c3");
     c3->SetLogy(0);
@@ -624,14 +653,16 @@ void LinearityCurves(Int_t runPeriod)
     grE3->SetMaximum(1000.0);
     grE3->Draw("AP");
 
-    grE3->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grE3->Fit("fitADC", "","",0.,highFitThreshold);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -649,7 +680,7 @@ void LinearityCurves(Int_t runPeriod)
     // Calculate residuals in [keV]
     
     for (int j=0; j<runE3.size(); j++) {
-      fitEQ_E3[j]    = offset + slope*ADCE3[j] + quad*ADCE3[j]*ADCE3[j] + cubic*ADCE3[j]*ADCE3[j]*ADCE3[j];
+      fitEQ_E3[j]    = fitADC->Eval(ADCE3[j]);//offset + slope*ADCE3[j] + quad*ADCE3[j]*ADCE3[j] + cubic*ADCE3[j]*ADCE3[j]*ADCE3[j];
       if (nameE3[j]=="Ce") {
 	ResE3[j] = fitEQ_E3[j] - EQE3[j];
 	//ResE3[j] = (fitEQ - peakCe)/peakCe * 100.;
@@ -728,20 +759,28 @@ void LinearityCurves(Int_t runPeriod)
   if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
     Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runE4.size(); ii++) {
       if (nameE4[ii]=="Ce") {
-	sum1+=ADCE4[ii];
+	sumADC_Ce+=ADCE4[ii];
+	sumEQ_Ce+=EQE4[ii];
 	entries1++;
       }
       if (nameE4[ii]=="Bi1") {
-	sum2+=ADCE4[ii];
+	sumADC_Bi+=ADCE4[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+    
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
+    //cout << lowFitThreshold << endl;
+    //cout << highFitThreshold << endl;
 
     c4 = new TCanvas("c4", "c4");
     c4->SetLogy(0);
@@ -763,15 +802,17 @@ void LinearityCurves(Int_t runPeriod)
     grE4->SetMaximum(1000.0);
     grE4->Draw("AP");
 
-    grE4->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grE4->Fit("fitADC", "","",0.,highFitThreshold);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
-
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
@@ -788,7 +829,7 @@ void LinearityCurves(Int_t runPeriod)
     // Calculate residuals in [keV]
     
     for (int j=0; j<runE4.size(); j++) {
-      fitEQ_E4[j]    = offset + slope*ADCE4[j] + quad*ADCE4[j]*ADCE4[j] + cubic*ADCE4[j]*ADCE4[j]*ADCE4[j];
+      fitEQ_E4[j]    = fitADC->Eval(ADCE4[j]);//offset + slope*ADCE4[j] + quad*ADCE4[j]*ADCE4[j] + cubic*ADCE4[j]*ADCE4[j]*ADCE4[j];
       if (nameE4[j]=="Ce") {
 	ResE4[j] = fitEQ_E4[j] - EQE4[j];
 	//ResE4[j] = (fitEQ - peakCe)/peakCe * 100.;
@@ -1044,20 +1085,28 @@ void LinearityCurves(Int_t runPeriod)
   if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
     Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runW1.size(); ii++) {
       if (nameW1[ii]=="Ce") {
-	sum1+=ADCW1[ii];
+	sumADC_Ce+=ADCW1[ii];
+	sumEQ_Ce+=EQW1[ii];
 	entries1++;
       }
       if (nameW1[ii]=="Bi1") {
-	sum2+=ADCW1[ii];
+	sumADC_Bi+=ADCW1[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+    
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
+    //cout << lowFitThreshold << endl;
+    //cout << highFitThreshold << endl;
 
     cW1 = new TCanvas("cW1", "cW1");
     cW1->SetLogy(0);
@@ -1079,14 +1128,16 @@ void LinearityCurves(Int_t runPeriod)
     grW1->SetMaximum(1000.0);
     grW1->Draw("AP");
 
-    grW1->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grW1->Fit("fitADC", "","",0.,highFitThreshold);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1104,7 +1155,7 @@ void LinearityCurves(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W1[num];
     for (int j=0; j<runW1.size(); j++) {
-      fitEQ_W1[j]    = offset + slope*ADCW1[j] + quad*ADCW1[j]*ADCW1[j] + cubic*ADCW1[j]*ADCW1[j]*ADCW1[j];
+      fitEQ_W1[j]    = fitADC->Eval(ADCW1[j]);//offset + slope*ADCW1[j] + quad*ADCW1[j]*ADCW1[j] + cubic*ADCW1[j]*ADCW1[j]*ADCW1[j];
       if (nameW1[j]=="Ce") {
 	ResW1[j] = fitEQ_W1[j] - EQW1[j];
 	oFileW1 << "Ce_West" << " " << runW1[j] << " " << ResW1[j] << endl;
@@ -1178,22 +1229,29 @@ void LinearityCurves(Int_t runPeriod)
   vector <Double_t> fitEQ_W2(runW2.size(),0);
 
   if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
-
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
     Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runW2.size(); ii++) {
       if (nameW2[ii]=="Ce") {
-	sum1+=ADCW2[ii];
+	sumADC_Ce+=ADCW2[ii];
+	sumEQ_Ce+=EQW2[ii];
 	entries1++;
       }
       if (nameW2[ii]=="Bi1") {
-	sum2+=ADCW2[ii];
+	sumADC_Bi+=ADCW2[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
+    //cout << lowFitThreshold << endl;
+    //cout << highFitThreshold << endl;
 
 
     cW2 = new TCanvas("cW2", "cW2");
@@ -1216,14 +1274,16 @@ void LinearityCurves(Int_t runPeriod)
     grW2->SetMaximum(1000.0);
     grW2->Draw("AP");
 
-    grW2->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grW2->Fit("fitADC", "","",0.,highFitThreshold);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1241,7 +1301,7 @@ void LinearityCurves(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W2[num];
     for (int j=0; j<runW2.size(); j++) {
-      fitEQ_W2[j]    = offset + slope*ADCW2[j] + quad*ADCW2[j]*ADCW2[j] + cubic*ADCW2[j]*ADCW2[j]*ADCW2[j];
+      fitEQ_W2[j]    = fitADC->Eval(ADCW2[j]);//offset + slope*ADCW2[j] + quad*ADCW2[j]*ADCW2[j] + cubic*ADCW2[j]*ADCW2[j]*ADCW2[j];
       if (nameW2[j]=="Ce") {
 	ResW2[j] = fitEQ_W2[j] - EQW2[j];
 	oFileW2 << "Ce_West" << " " << runW2[j] << " " << ResW2[j] << endl;
@@ -1315,22 +1375,29 @@ void LinearityCurves(Int_t runPeriod)
   vector <Double_t> fitEQ_W3(runW3.size(),0);
 
   if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
-
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
     Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runW3.size(); ii++) {
       if (nameW3[ii]=="Ce") {
-	sum1+=ADCW3[ii];
+	sumADC_Ce+=ADCW3[ii];
+	sumEQ_Ce+=EQW3[ii];
 	entries1++;
       }
       if (nameW3[ii]=="Bi1") {
-	sum2+=ADCW3[ii];
+	sumADC_Bi+=ADCW3[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
+    //cout << lowFitThreshold << endl;
+    //cout << highFitThreshold << endl;
 
     
     cW3 = new TCanvas("cW3", "cW3");
@@ -1353,15 +1420,17 @@ void LinearityCurves(Int_t runPeriod)
     grW3->SetMaximum(1000.0);
     grW3->Draw("AP");
 
-    grW3->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grW3->Fit("fitADC", "","",0.,highFitThreshold);
   
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
-
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
@@ -1378,7 +1447,7 @@ void LinearityCurves(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W3[num];
     for (int j=0; j<runW3.size(); j++) {
-      fitEQ_W3[j]    = offset + slope*ADCW3[j] + quad*ADCW3[j]*ADCW3[j] + cubic*ADCW3[j]*ADCW3[j]*ADCW3[j];
+      fitEQ_W3[j]    = fitADC->Eval(ADCW3[j]);//offset + slope*ADCW3[j] + quad*ADCW3[j]*ADCW3[j] + cubic*ADCW3[j]*ADCW3[j]*ADCW3[j];
       if (nameW3[j]=="Ce") {
 	ResW3[j] = fitEQ_W3[j] - EQW3[j];
 	oFileW3 << "Ce_West" << " " << runW3[j] << " " << ResW3[j] << endl;
@@ -1452,24 +1521,30 @@ void LinearityCurves(Int_t runPeriod)
   vector <Double_t> fitEQ_W4(runW4.size(),0);
   highFitThreshold=0.;
   if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
-
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sum1 = 0., sum2 = 0.;
+    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
     Int_t entries1 = 0, entries2 = 0;;
     for (UInt_t ii=0; ii<runW4.size(); ii++) {
       if (nameW4[ii]=="Ce") {
-	sum1+=ADCW4[ii];
+	sumADC_Ce+=ADCW4[ii];
+	sumEQ_Ce+=EQW4[ii];
 	entries1++;
       }
       if (nameW4[ii]=="Bi1") {
-	//cout << ADCW4[ii] << endl;
-	sum2+=ADCW4[ii];
+	sumADC_Bi+=ADCW4[ii];
 	entries2++;
       }
     }
-    lowFitThreshold = 0.5*sum1/entries1;
-    highFitThreshold = 1.5*sum2/entries2;
+
+    //Calculating the slope of a line from the origin to the mean of the Ce peaks
+    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
+    fitADC->FixParameter(3,linSlope);
+    fitADC->FixParameter(4,sumADC_Ce/entries1);
+    //lowFitThreshold = sumADC_Ce/entries1;
+    highFitThreshold = 1.5*sumADC_Bi/entries2;
+    //cout << lowFitThreshold << endl;
     //cout << highFitThreshold << endl;
+
     cW4 = new TCanvas("cW4", "cW4");
     cW4->SetLogy(0);
 
@@ -1491,14 +1566,16 @@ void LinearityCurves(Int_t runPeriod)
     grW4->Draw("AP");
 
     //fitADC->SetRange(0., 3500.);
-    grW4->Fit("fitADC", "Q","",lowFitThreshold,highFitThreshold);
+    grW4->Fit("fitADC", "","",0.,highFitThreshold);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    cubic = fitADC->GetParameter(3);
+    lowEnSlope = fitADC->GetParameter(3);
+    shiftOfTanH = fitADC->GetParameter(4);
+    spreadOfTanH = fitADC->GetParameter(5);
     slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
-    linCurves << offset << " " << slope << " " << quad << " " << cubic << " " << lowFitThreshold << " " << slopeToOrigin << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     linCurves.close();
   
@@ -1518,7 +1595,7 @@ void LinearityCurves(Int_t runPeriod)
     // Calculate residuals in [keV]
     //Double_t fitEQ_W4[num];
     for (int j=0; j<runW4.size(); j++) {
-      fitEQ_W4[j]    = offset + slope*ADCW4[j] + quad*ADCW4[j]*ADCW4[j] + cubic*ADCW4[j]*ADCW4[j]*ADCW4[j];
+      fitEQ_W4[j]    = fitADC->Eval(ADCW4[j]);//offset + slope*ADCW4[j] + quad*ADCW4[j]*ADCW4[j] + cubic*ADCW4[j]*ADCW4[j]*ADCW4[j];
       if (nameW4[j]=="Ce") {
 	ResW4[j] = fitEQ_W4[j] - EQW4[j];
 	oFileW4 << "Ce_West" << " " << runW4[j] << " " << ResW4[j] << endl;

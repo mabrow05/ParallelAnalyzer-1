@@ -5,3 +5,4 @@
 *cxx*
 *.pyc
 residuals/.*
+little_b/xuanSimData/*

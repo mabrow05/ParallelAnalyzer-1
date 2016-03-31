@@ -16,8 +16,8 @@ If the simulation is beta decay, it outputs a tree with spectra
 
 int main(int argc, char *argv[]) {
 
-  if (argc!=5 && argc!=9 && argc!=10) {
-    std::cout << "Usage: ./SimulationAnalyzer [Source] [geometry] [numEvents] [bool doLinCorr] if doLinCorr [p0] [p1] [p2] [p3]\n";
+  if (argc!=5 && argc!=13 && argc!=14) {
+    std::cout << "Usage: ./SimulationAnalyzer [Source] [geometry] [numEvents] [bool doLinCorr] if doLinCorr [Ep0] [Ep1] [Ep2] [Ep3] [Wp0] [Wp1] [Wp2] [Wp3]\n";
     exit(0);
   }
   Int_t paramSetIndex = -1;
@@ -27,13 +27,17 @@ int main(int argc, char *argv[]) {
   UInt_t numEvents = (unsigned int)atoi(argv[3] ); //Number of electrons to accumulate
   std::string linCorrString = std::string(argv[4]); //False if you want no linearity corrections applied
   bool linCorrBool = false;
-  std::vector <Double_t> params(4,0.);
-  if (linCorrString=="True" || linCorrString=="true" || linCorrString=="1") {
+  std::vector < std::vector <Double_t> > params(2, std::vector <Double_t>(4,0.));	// a 2-vector of 4-vector where
+  if (linCorrString=="True" || linCorrString=="true" || linCorrString=="1") {		// the 4-vector is a vec of polynomial coeff
     linCorrBool = true;
-    params[0] = atof(argv[5]);
-    params[1] = atof(argv[6]);
-    params[2] = atof(argv[7]);
-    params[3] = atof(argv[8]);
+    params[0][0] = atof(argv[5]);
+    params[0][1] = atof(argv[6]);
+    params[0][2] = atof(argv[7]);
+    params[0][3] = atof(argv[8]);
+    params[1][0] = atof(argv[9]);
+    params[1][1] = atof(argv[10]);
+    params[1][2] = atof(argv[11]);
+    params[1][3] = atof(argv[12]);
   }
   //std::vector <Double_t> checker = {5., 0.2, 0.0005,-3.e-6};
   //std::cout << checkParamSetStatus(checker,source.substr(0,2),"2010") << std::endl;
@@ -43,7 +47,7 @@ int main(int argc, char *argv[]) {
 }
 
 
-void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, bool doParamSets, std::vector <Double_t> params, Int_t paramSetIndex) 
+void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, bool doParamSets, std::vector < std::vector <Double_t> > params, Int_t paramSetIndex) 
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
@@ -54,8 +58,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   bool printTree = true; //Boolean to force printing of of TTree. The tree will be printed regardless if the source is Beta
   UInt_t BetaEvents = numEvents;
   
-  std::vector <Double_t> linCorrParams = params;
+  std::vector < std::vector <Double_t> > linCorrParams = params;
 
+  /*
   //Checking that the parameters have a chance
   if (source.substr(0,4)!="Beta" && paramSetIndex!=-1) { 
     if (source!="Bi207") {
@@ -69,6 +74,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       return;
     }
   }
+  */
 
   // Set the location of the source and it's spread in mm. srcPos[0=east,1=west][0=x,1=y,2=sigma]
   bool moveSource = false; // If this is true, set the position of the source to the following location
@@ -122,7 +128,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   chain.SetBranchAddress("primaryParticleSpecies",&primaryID);
   chain.SetBranchAddress("primaryMomentum",&initialMomentum);
   chain.SetBranchAddress("mwpcEnergy",&mwpcE);
-  //chain.SetBranchAddress("scintTimeToHit",&Time);
+  chain.SetBranchAddress("scintTimeToHit",&Time);	// we can save this variable, Xuan sim has it
   chain.SetBranchAddress("scintillatorEdep",&edep);
   chain.SetBranchAddress("scintillatorEdepQuenched",&edepQ);
   chain.SetBranchAddress("MWPCPos",&mwpc_pos);
@@ -158,12 +164,14 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     if (primaryID!=11) {evt++;continue;}
     
     //Dividing out the weighted energy dependence which is currently in the position branch of input tree
+/*    // this is no longer needed since Xuan explicitly divided out the energy dependence in simulation
     scint_pos.ScintPosE[0] /= edepQ.EdepQE>0. ? edepQ.EdepQE : 1.;
     scint_pos.ScintPosW[0] /= edepQ.EdepQW>0. ? edepQ.EdepQW : 1.;
     scint_pos.ScintPosE[1] /= edepQ.EdepQE>0. ? edepQ.EdepQE : 1.;
     scint_pos.ScintPosW[1] /= edepQ.EdepQW>0. ? edepQ.EdepQW : 1.;
     scint_pos.ScintPosE[2] /= edepQ.EdepQE>0. ? edepQ.EdepQE : 1.;
     scint_pos.ScintPosW[2] /= edepQ.EdepQW>0. ? edepQ.EdepQW : 1.;
+*/
    
     //Setting adjusted positions when we are simulating a source and move source flag is set to true
     if (moveSource && source!="Beta") {
@@ -248,8 +256,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
     //////////////////////////////////////////////////////////////////////////////////////////////  
     //Applying the twiddle from the linearity curves not being perfect
-    std::vector <Double_t> paramHold = {linCorrParams[0],linCorrParams[1],linCorrParams[2],linCorrParams[3]};
+    std::vector <Double_t> paramHold = {linCorrParams[0][0],linCorrParams[0][1],linCorrParams[0][2],linCorrParams[0][3]}; //East parameters
     evis.EvisE = applyLinearityTwiddle(paramHold,evis.EvisE); //Applies the twiddle
+    paramHold = {linCorrParams[1][0],linCorrParams[1][1],linCorrParams[1][2],linCorrParams[1][3]}; //West parameters
     evis.EvisW = applyLinearityTwiddle(paramHold,evis.EvisW); //Applies the twiddle
     
     // std::cout << evis.EvisE << "\t" << evis.EvisW << std::endl;
@@ -287,11 +296,11 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       PID=1;
       type=1;
       //East
-      if (initialMomentum[2]<0.) {//(Time.timeE<Time.timeW) {//
+      if (Time.timeE<Time.timeW) {
 	side=0;
       }
       //West
-      else if (initialMomentum[2]>=0.) {//(Time.timeE>Time.timeW) { 
+      else if (Time.timeE>Time.timeW) { 
 	side=1;
       }
     }
@@ -395,11 +404,11 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       std::cout << "West mean = " << MeanAndSig[1][0] << "    West sigma = " << MeanAndSig[1][1] << endl;
       
       //bool printToFile= false;
-      //if (geometry=="2010") printToFile = CheckPeakValues2010(
       
       if (paramSetIndex!=-1 && checkPeakStatus(MeanAndSig,source.substr(0,2),geometry)) {
 	
-	ofile << paramSetIndex << "\t" << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	ofile << paramSetIndex << "\t" << linCorrParams[0][0] << "\t" << linCorrParams[0][1] << "\t" << linCorrParams[0][2] << "\t" << linCorrParams[0][3]
+	      << "\t" << linCorrParams[1][0] << "\t" << linCorrParams[1][1] << "\t" << linCorrParams[1][2] << "\t" << linCorrParams[1][3]
 	      << "\t" << MeanAndSig[0][0] << "\t" << MeanAndSig[0][1] << "\t" 
 	      << MeanAndSig[1][0] << "\t" << MeanAndSig[1][1] << std::endl;
       }
@@ -427,7 +436,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
       if (paramSetIndex!=-1 && checkPeakStatus(MeanAndSig1,source.substr(0,2)+"1",geometry) && checkPeakStatus(MeanAndSig2,source.substr(0,2)+"2",geometry)) {
 	
-	ofile << paramSetIndex << "\t" << linCorrParams[0] << "\t" << linCorrParams[1] << "\t" << linCorrParams[2] << "\t" << linCorrParams[3]
+	ofile << paramSetIndex << "\t" << linCorrParams[0][0] << "\t" << linCorrParams[0][1] << "\t" << linCorrParams[0][2] << "\t" << linCorrParams[0][3]
+	      << "\t" << linCorrParams[1][0] << "\t" << linCorrParams[1][1] << "\t" << linCorrParams[1][2] << "\t" << linCorrParams[1][3]
 	      << "\t" << MeanAndSig1[0][0] << "\t" << MeanAndSig1[0][1] << "\t" 
 	      << MeanAndSig1[1][0] << "\t" << MeanAndSig1[1][1] 
 	      << "\t" << MeanAndSig2[0][0] << "\t" << MeanAndSig2[0][1] << "\t" 
@@ -556,142 +566,6 @@ bool checkPeakStatus(std::vector < std::vector < Double_t > > meanAndSig, std::s
   else return false;
   
 }
-
-bool CheckPeakValues2011(std::vector <int> parameters, std::string sourceName, std::string side)
-{
-  Double_t mean, sigma, diffMean, diffSigma;
-
-  if(sourceName == "113Sn")
-  {
-    if(side == "east")
-    {
-      mean = 365.629;	// keV for all
-      sigma = 33.7571;
-    }
-    else if(side == "west")
-    {
-      mean = 365.394;
-      sigma = 34.2878;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else if(sourceName == "139Ce")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else { 
-    std::cout << "Bad input for Src into CheckPeakValue\n";
-    exit(0);
-  }
-
-  // we enforce absolute value as a check
-  diffMean = abs(parameters[0]) - mean;
-  diffSigma = abs(parameters[1]) - sigma;
-
-  if(diffMean < 0 && diffSigma < 0)
-  {
-    std::cout << "Set of parameters are GOOD: difference in mean is " << abs(diffMean)
-    << ", difference in sigma is " << abs(diffSigma) << std::endl;
-
-
-    return true;
-  }
-  if(diffMean > 0)
-  {
-    std::cout << "Parameters BAD: mean is outside range." << std::endl;
-  }
-  if(diffSigma > 0)
-  {
-    std::cout << "Parameters BAD: sigma is outside range." << std::endl;
-  }
-
-  return false;
-}
-
-
-bool CheckPeakValues2010(std::vector <int> parameters, std::string sourceName, std::string side)
-{
-  Double_t mean, sigma, diffMean, diffSigma;
-
-  if(sourceName == "113Sn")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else if(sourceName == "139Ce")
-  {
-    if(side == "east")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else if(side == "west")
-    {
-      mean = 0;
-      sigma = 0;
-    }
-    else { 
-    std::cout << "Bad input for side into CheckPeakValue\n";
-    exit(0);
-    }
-  }
-  else { 
-    std::cout << "Bad input for Src into CheckPeakValue\n";
-    exit(0);
-  }
-  
-  // we enforce absolute value just as a check
-  diffMean = abs(parameters[0]) - mean;
-  diffSigma = abs(parameters[1]) - sigma;
-
-  if(diffMean < 0 && diffSigma < 0)
-  {
-    std::cout << "Set of parameters are GOOD: difference in mean is " << abs(diffMean)
-    << ", difference in sigma is " << abs(diffSigma) << std::endl;
-
-
-    return true;
-  }
-  if(diffMean > 0)
-  {
-    std::cout << "Parameters BAD: mean is outside range." << std::endl;
-  }
-  if(diffSigma > 0)
-  {
-    std::cout << "Parameters BAD: sigma is outside range." << std::endl;
-  }
-
-  return false;
-}
-
 
 //Function to return the trigger function for each side in a std::vector in the form vec[side][param]
 // where side==0 is East and side==1 is West
