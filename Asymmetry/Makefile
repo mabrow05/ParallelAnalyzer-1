@@ -32,6 +32,10 @@ UK2SIMcomparison.exe: UK2SIMcomparison.o $(objects)
 	$(CXX) $(CXXFLAGS) -o UK2SIMcomparison.exe UK2SIMcomparison.o $(objects) $(LIBS) 
 	@echo "Done"
 
+SuperSumComparison.exe: SuperSumComparison.o $(objects) 
+	$(CXX) $(CXXFLAGS) -o SuperSumComparison.exe SuperSumComparison.o $(objects) $(LIBS) 
+	@echo "Done"
+
 Asymmetries.o: Asymmetries.hh
 
 EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh

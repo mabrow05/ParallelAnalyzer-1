@@ -10,7 +10,7 @@ ppair, quartet, octet
 #include <cstdlib>
 #include <cmath>
 
-AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation) : UKdata(ukdata), Simulation(simulation), octet(oct), energyBinWidth(enBinWidth), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0) {
+AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation) : UKdata(ukdata), Simulation(simulation), octet(oct), energyBinWidth(enBinWidth), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0), analysisChoice(1) {
   unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   A2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
   B2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
@@ -240,6 +240,26 @@ std::vector <double> AsymmetryBase::getNumBGsubtrEvts(double enWinLow, double en
 };
 
 void AsymmetryBase::makeAnalysisChoiceRateVectors(int anaChoice) {
+  if (isAnaChoiceRateVectors()) {
+    unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+    anaChoice_A2.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B2.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_A5.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B5.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_A7.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B7.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_A10.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B10.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_A2err.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B2err.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_A5err.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B5err.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_A7err.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B7err.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_A10err.resize(2,std::vector <double> (numBins,0.));
+    anaChoice_B10err.resize(2,std::vector <double> (numBins,0.));
+  }
+  analysisChoice = anaChoice;
   unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   unsigned int type_low=0, type_high=0;
   if (anaChoice==1 || anaChoice==3 || anaChoice==5) { type_low=0; type_high=3;}
@@ -331,7 +351,9 @@ OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool u
 };
 
 void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
-  if (!isAnaChoiceRateVectors()) makeAnalysisChoiceRateVectors(anaChoice);
+  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
+    makeAnalysisChoiceRateVectors(anaChoice);
+  }
 
   double sfON[2]={0.};
   double sfOFF[2]={0.};
@@ -378,7 +400,9 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 };
 
 void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice) {
-  if (!isAnaChoiceRateVectors()) makeAnalysisChoiceRateVectors(anaChoice);
+  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
+    makeAnalysisChoiceRateVectors(anaChoice);
+  }
   unsigned int binLow = (unsigned int)(enWinLow/energyBinWidth);
   unsigned int binHigh = (unsigned int)(enWinHigh/energyBinWidth)-1;
 
@@ -467,7 +491,9 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int a
 
 
 void OctetAsymmetry::calcSuperSum(int anaChoice) {
-  if (!isAnaChoiceRateVectors()) makeAnalysisChoiceRateVectors(anaChoice);
+  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
+    makeAnalysisChoiceRateVectors(anaChoice);
+  }
 
   double sfON[2]={0.};
   double sfOFF[2]={0.};

@@ -22,6 +22,7 @@ public:
   std::vector < double > getNumBGsubtrEvts(double enWinLow, double enWinHigh, int evtType); // returns the number of events summed over bin window
   void writeRatesToFile(); //For now this only uses type0 evts
   bool isAnaChoiceRateVectors() {return boolAnaChRtVecs;}
+  int getCurrentAnaChoice() {return analysisChoice;}
   std::vector < std::vector < std::vector<double> > > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
   std::vector < std::vector < std::vector<double> > > returnBGsubtractedRateError(std::string runType);
   std::vector < double > returnRunLength(std::string runType); //Returns both beta and BG run length
@@ -41,6 +42,7 @@ protected:
   double fiducialCut;
   bool boolAnaChRtVecs;
   int runsInOctet;
+  int analysisChoice;
   std::map <std::string,int> runType; // the key is the run type, mapped val is run number
 
   // The following vectors are bin by bin rates for each evt type on each side
@@ -59,6 +61,7 @@ protected:
   std::vector<double> binUpperEdge; //Hold the Energy of the upper and lower bin edges
 };
 
+/////////////////////////////////////////////////////////////////////////////////
 
 class OctetAsymmetry : public AsymmetryBase {
 public:
