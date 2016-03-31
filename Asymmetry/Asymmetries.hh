@@ -68,15 +68,20 @@ public:
   void makePlots();
   void calcAsymmetryBinByBin(int anaChoice=1); //Calculates the raw asymmetry bin by bin to be written to file and plotted
   void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
+  void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
   void writeAsymToFile(int anaChoice);
   double returnTotalAsymmetry() {return totalAsymmetry;}
   double returnTotalAsymmetryError() {return totalAsymmetryError;}
-  
+
+  std::vector <double> returnSuperSum() {return superSum;}
+  std::vector <double> returnSuperSumError() {return superSumError;}
 
 private:
   
   std::vector <double> asymmetry; //Raw asymmetry in bins
   std::vector <double> asymmetryError; //Raw Asymmetry error in bins
+  std::vector <double> superSum; //Raw asymmetry in bins
+  std::vector <double> superSumError; //Raw Asymmetry error in bins
   double totalAsymmetry; //Bin summed asymmetry
   double totalAsymmetryError;
 };

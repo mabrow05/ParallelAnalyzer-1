@@ -464,6 +464,50 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int a
 };
 
 
+void OctetAsymmetry::calcSuperSum(int anaChoice) {
+  if (!isAnaChoiceRateVectors()) makeAnalysisChoiceRateVectors(anaChoice);
+
+  double sfON[2]={0.};
+  double sfOFF[2]={0.};
+  double sfON_err[2]={0.};
+  double sfOFF_err[2]={0.};
+
+  for (unsigned int bin=0; bin<superSum.size(); bin++) {
+ 
+    for (unsigned int side=0; side<2; side++) {
+      double weightsum=0.;
+      sfOFF[side] = (power(1./anaChoice_A2err[side][bin],2)*anaChoice_A2[side][bin]+power(1./anaChoice_A10err[side][bin],2)*anaChoice_A10[side][bin]
+		     +power(1./anaChoice_B5err[side][bin],2)*anaChoice_B5[side][bin]+power(1./anaChoice_B7err[side][bin],2)*anaChoice_B7[side][bin]);
+      weightsum = power(1./anaChoice_A2err[side][bin],2)+power(1./anaChoice_A10err[side][bin],2)
+	+power(1./anaChoice_B5err[side][bin],2)+power(1./anaChoice_B7err[side][bin],2);
+
+      sfOFF[side] = sfOFF[side]/weightsum;
+      sfOFF_err[side] = 1./sqrt(weightsum);
+
+      weightsum=0.;
+      sfON[side] = (power(1./anaChoice_A5err[side][bin],2)*anaChoice_A5[side][bin]+power(1./anaChoice_A7err[side][bin],2)*anaChoice_A7[side][bin]
+		    +power(1./anaChoice_B2err[side][bin],2)*anaChoice_B2[side][bin]+power(1./anaChoice_B10err[side][bin],2)*anaChoice_B10[side][bin]);
+      weightsum = power(1./anaChoice_A5err[side][bin],2)+power(1./anaChoice_A7err[side][bin],2)
+	+power(1./anaChoice_B2err[side][bin],2)+power(1./anaChoice_B10err[side][bin],2);
+
+      sfON[side] = sfON[side]/weightsum;
+      sfON_err[side] = 1./sqrt(weightsum);
+      
+      //if (bin==73 || bin==74) std::cout << sfOFF[side] << " " << sfON[side] << std::endl;
+      //if (side==1) {
+      //std::cout << anaChoice_A10[side][bin] << " " << anaChoice_A10err[side][bin] << std::endl;
+      //}
+    }
+
+    superSum[bin] = 0.5*sqrt(sfOFF[0]*sfON[1])+0.5*sqrt(sfON[0]*sfOFF[1]);
+    superSumError[bin] = sqrt(0.5*(sfOFF[1]*sfON_err[0]+sfON[0]*sfOFF_err[1])/sqrt(sfON[0]*sfOFF[1])
+			      + (sfON[1]*sfOFF_err[0]+sfOFF[0]*sfON_err[1])/sqrt(sfON[0]*sfOFF[1]));
+    
+  } 
+ 
+  //writeAsymToFile(anaChoice);
+};
+
 void OctetAsymmetry::writeAsymToFile(int anaChoice) {
   std::string outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/rawAsymmetry_Octet" + itos(octet)+".dat";
   std::ofstream outfile(outpath.c_str());

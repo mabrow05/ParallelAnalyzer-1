@@ -18,7 +18,7 @@ LIBS	       += -lSpectrum -lMinuit
 objects = MBUtils.o Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o 
 
 .PHONY: all
-all: MBAnalyzer.exe 
+all: MBAnalyzer.exe UK2SIMcomparison.exe
 
 MBAnalyzer.exe: MBAnalyzer.o $(objects) 
 	$(CXX) $(CXXFLAGS) -o MBAnalyzer.exe MBAnalyzer.o $(objects) $(LIBS) 
