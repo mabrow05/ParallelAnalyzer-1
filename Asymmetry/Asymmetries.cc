@@ -573,7 +573,7 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
     }
 
     superSum[bin] = 0.5*sqrt(sfOFF[0]*sfON[1])+0.5*sqrt(sfON[0]*sfOFF[1]);
-    superSumError[bin] = sqrt(0.5*
+    superSumError[bin] = 0.5*sqrt(
 			      (sfON[0]>0. && sfOFF[1]>0.)?(sfOFF[1]*sfON_err[0]+sfON[0]*sfOFF_err[1])/sqrt(sfON[0]*sfOFF[1]):0.
 			      + (sfON[1]>0. && sfOFF[0]>0.)?(sfON[1]*sfOFF_err[0]+sfOFF[0]*sfON_err[1])/sqrt(sfON[1]*sfOFF[0]):0.);
     
