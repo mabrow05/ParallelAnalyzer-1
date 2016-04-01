@@ -643,6 +643,7 @@ Double_t applyLinearityTwiddle (std::vector <Double_t> &params, Double_t EQ) {
 // Sets up the output tree for the simulated data
 void SetUpOutputTree(TTree& tree) {
   tree.Branch("PID", &PID, "PID/I");
+  tree.Branch("primMomentum", &initialMomentum, "primMo[3]/D");
   tree.Branch("side", &side, "side/I");
   tree.Branch("type", &type, "type/I");
   tree.Branch("Erecon", &Erecon,"Erecon/D");
