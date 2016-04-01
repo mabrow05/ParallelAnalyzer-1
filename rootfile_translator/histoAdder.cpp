@@ -188,22 +188,23 @@ int main(int argc, char *argv[]) {
   float time = S83028*scalerCountsToTime;
   std::cout << "TotalTime = " << time << std::endl;
   //Histograms to hold UCNMonRate
-  int nbins = (int)((time+10.)/10.);
-  TH1F *UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., nbins*10.);
-  TH1F *UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., nbins*10.);
-  TH1F *UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., nbins*10.);
-  TH1F *UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., nbins*10.);
+  int binWidth = 10;
+  int nbins = (int)(time+20.)/binWidth;
+  TH1F *UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., (double)nbins*binWidth);
+  TH1F *UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., (double)nbins*binWidth);
+  TH1F *UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., (double)nbins*binWidth);
+  TH1F *UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., (double)nbins*binWidth);
   
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
     Int_t iSis00 = (int) Sis00;
     time = S83028*scalerCountsToTime;
-    if (iSis00==260) UCN_Mon_1_Rate->Fill(time);
-    else if (iSis00==516) UCN_Mon_2_Rate->Fill(time);
-    else if (iSis00==1028) UCN_Mon_3_Rate->Fill(time);
-    else if (iSis00==2052) UCN_Mon_4_Rate->Fill(time);
-    if (i%1000==0) std::cout << i << std::endl;
+    if (iSis00==260) UCN_Mon_1_Rate->Fill(time,1./binWidth);
+    else if (iSis00==516) UCN_Mon_2_Rate->Fill(time,1./binWidth);
+    else if (iSis00==1028) UCN_Mon_3_Rate->Fill(time,1./binWidth);
+    else if (iSis00==2052) UCN_Mon_4_Rate->Fill(time,1./binWidth);
+    if (i%10000==0) std::cout << i << std::endl;
   }
 
   fileIn->Close();
