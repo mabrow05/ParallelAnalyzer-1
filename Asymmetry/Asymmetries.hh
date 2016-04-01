@@ -73,6 +73,7 @@ public:
   void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
   void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
   void writeAsymToFile(int anaChoice);
+  void writeSuperSumToFile(int anaChoice);
   double returnTotalAsymmetry() {return totalAsymmetry;}
   double returnTotalAsymmetryError() {return totalAsymmetryError;}
 
