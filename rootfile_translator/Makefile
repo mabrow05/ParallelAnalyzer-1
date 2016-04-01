@@ -25,6 +25,10 @@ rootfile_translator: rootfile_translator.o $(objects)
 	$(CXX) $(CXXFLAGS) -o rootfile_translator rootfile_translator.o $(objects) $(LIBS)
 	@echo "Done"
 
+histoAdder: histoAdder.o
+	$(CXX) $(CXXFLAGS) -o histoAdder histoAdder.o $(LIBS)
+	@echo "Done"
+
 DataTree.o: DataTree.hh
 
 DataTreeFLOAT.o: DataTreeFLOAT.hh
