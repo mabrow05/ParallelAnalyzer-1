@@ -583,13 +583,14 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
 };
 
 void OctetAsymmetry::writeAsymToFile(int anaChoice) {
-  std::string outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/rawAsymmetry_Octet" + itos(octet)+".dat";
+  std::string outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
   std::ofstream outfile(outpath.c_str());
   
   for (unsigned int i=0; i<asymmetry.size(); i++) {
     outfile << binLowerEdge[i] << " " << asymmetry[i] << " " << asymmetryError[i] << std::endl;
   }
-  outfile.close(); 
+  outfile.close();
+  std::cout << "Wrote Asymmetry to file for " << anaChoice << "\n";
 };
 
 

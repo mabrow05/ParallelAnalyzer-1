@@ -103,7 +103,8 @@ int main(int argc, char *argv[])
 
       { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
 	OctetAsymmetry UK(octetNum, enBinWidth, 50., true, false);
-	
+	UK.calcAsymmetryBinByBin(1);
+	exit(0);
 	/*UK.calcTotalAsymmetry(225.,675.,1);
 	ukAsym = UK.returnTotalAsymmetry();
 	ukAsymError = UK.returnTotalAsymmetryError();
