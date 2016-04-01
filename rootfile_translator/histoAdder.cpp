@@ -37,13 +37,13 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
   
-  int runNumber = atoi(argv[0]);
+  int runNumber = atoi(argv[1]);
   std::cout << "Running histoAdder on run " << runNumber << std::endl;
 
   //For adding the UCN monitor rates, we need to open the raw data files.
   // Open input ntuple
   char tempIn[500];
-  sprintf(tempIn, "/extern/mabrow05/ucna/rawdata/full%s.root", argv[1]);
+  sprintf(tempIn, "/extern/mabrow05/ucna/rawdata/full%s.root", runNumber);
 
   TFile *fileIn = new TFile(tempIn, "READ");
   TTree *Tin = (TTree*)(fileIn->Get("h1"));
@@ -202,6 +202,7 @@ int main(int argc, char *argv[]) {
     else if (Sis00==516) UCN_Mon_2_Rate->Fill(time);
     else if (Sis00==1028) UCN_Mon_3_Rate->Fill(time);
     else if (Sis00==2052) UCN_Mon_4_Rate->Fill(time);
+    if (i%1000=0) std::cout << i << std::endl;
   }
 
   fileIn->Close();
