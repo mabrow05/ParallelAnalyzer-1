@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
 
 
   int nEvents = Tin->GetEntries();
-  cout << "... Processing nEvents = " << nEvents << endl;
+  std::cout << "... Processing nEvents = " << nEvents << std::endl;
 
     //Get length of run from UNBLINDED TIME
   Tin->GetEvent(nEvents-1);
@@ -198,11 +198,10 @@ int main(int argc, char *argv[]) {
     Tin->GetEvent(i);
     Int_t iSis00 = (int) Sis00;
     time = S83028*scalerCountsToTime;
-    if (Sis00==260) UCN_Mon_1_Rate->Fill(time);
-    else if (Sis00==516) UCN_Mon_2_Rate->Fill(time);
-    else if (Sis00==1028) UCN_Mon_3_Rate->Fill(time);
-    else if (Sis00==2052) UCN_Mon_4_Rate->Fill(time);
-    if (i%1000=0) std::cout << i << std::endl;
+    if (iSis00==260) UCN_Mon_1_Rate->Fill(time);
+    else if (iSis00==516) UCN_Mon_2_Rate->Fill(time);
+    else if (iSis00==1028) UCN_Mon_3_Rate->Fill(time);
+    else if (iSis00==2052) UCN_Mon_4_Rate->Fill(time);
   }
 
   fileIn->Close();
@@ -223,14 +222,17 @@ int main(int argc, char *argv[]) {
   sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"), runNumber);
   TFile *rep4 = new TFile(temp,"UPDATE");
   rep4->cd();
-  UCN_Mon_1_rate->Write();
-  UCN_Mon_2_rate->Write();
-  UCN_Mon_3_rate->Write();
-  UCN_Mon_4_rate->Write();
+  UCN_Mon_1_Rate->Write();
+  UCN_Mon_2_Rate->Write();
+  UCN_Mon_3_Rate->Write();
+  UCN_Mon_4_Rate->Write();
 
   rep4->Close();
 
-  delete UCN_Mon_1_Rate, UCN_Mon_2_Rate, UCN_Mon_3_Rate, UCN_Mon_4_Rate;
+  delete UCN_Mon_1_Rate;
+  delete UCN_Mon_2_Rate;
+  delete UCN_Mon_3_Rate;
+  delete UCN_Mon_4_Rate;
 
   return 0;
 }
