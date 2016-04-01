@@ -375,8 +375,8 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 		   + anaChoice_B5[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.
 		   + anaChoice_B7[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
 
-      sfOFF[side] = sfOFF[side]/weightsum;
-      sfOFF_err[side] = 1./sqrt(weightsum);
+      sfOFF[side] = weightSum>0. ? sfOFF[side]/weightsum : 0.;
+      sfOFF_err[side] = weightSum>0. ? 1./sqrt(weightsum) : 0.;
 
       weightsum=0.;
       sfON[side] = (anaChoice_A5[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2)*anaChoice_A5[side][bin]:0.
@@ -393,20 +393,24 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
       //weightsum = power(1./anaChoice_A5err[side][bin],2)+power(1./anaChoice_A7err[side][bin],2)
       //+power(1./anaChoice_B2err[side][bin],2)+power(1./anaChoice_B10err[side][bin],2);
 
-      sfON[side] = sfON[side]/weightsum;
-      sfON_err[side] = 1./sqrt(weightsum);
+      sfON[side] = weightSum>0. ? sfON[side]/weightsum : 0.;
+      sfON_err[side] = weightSum>0. ? 1./sqrt(weightsum) : 0.;
       
       //if (bin==73 || bin==74) std::cout << sfOFF[side] << " " << sfON[side] << std::endl;
       //if (side==1) {
       //std::cout << anaChoice_A10[side][bin] << " " << anaChoice_A10err[side][bin] << std::endl;
       //}
     }
-
-    R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
-    deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-    asymmetry[bin] = (1.-sqrt(R))/(1+sqrt(R));
-    asymmetryError[bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
-    //asymmetryError[bin] = (deltaR)/(power(R*R,1./4.)*power((power(R*R,1./4.)+1.),2));
+    if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
+      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+      asymmetry[bin] = (1.-sqrt(R))/(1+sqrt(R));
+      asymmetryError[bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
+    }
+    else {
+      asymmetry[bin] = 0.;
+      asymmetryError[bin] = 0.;
+    }
 
   } 
  
@@ -528,9 +532,9 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
 		   + anaChoice_B5[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.
 		   + anaChoice_B7[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
 
-      sfOFF[side] = sfOFF[side]/weightsum;
-      sfOFF_err[side] = 1./sqrt(weightsum);
-
+      sfOFF[side] = weightSum>0. ? sfON[side]/weightsum : 0.;
+      sfOFF_err[side] = weightSum>0. ? 1./sqrt(weightsum) : 0.;
+      
       weightsum=0.;
       sfON[side] = (anaChoice_A5[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2)*anaChoice_A5[side][bin]:0.
 		     + anaChoice_A7[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2)*anaChoice_A7[side][bin]:0.
@@ -542,8 +546,9 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
 		   + anaChoice_B10[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2):0.);
 
 
-      sfON[side] = sfON[side]/weightsum;
-      sfON_err[side] = 1./sqrt(weightsum);
+      sfON[side] = weightSum>0. ? sfON[side]/weightsum : 0.;
+      sfON_err[side] = weightSum>0. ? 1./sqrt(weightsum) : 0.;
+
       /*sfOFF[side] = (power(1./anaChoice_A2err[side][bin],2)*anaChoice_A2[side][bin]+power(1./anaChoice_A10err[side][bin],2)*anaChoice_A10[side][bin]
 		     +power(1./anaChoice_B5err[side][bin],2)*anaChoice_B5[side][bin]+power(1./anaChoice_B7err[side][bin],2)*anaChoice_B7[side][bin]);
       weightsum = power(1./anaChoice_A2err[side][bin],2)+power(1./anaChoice_A10err[side][bin],2)
@@ -568,8 +573,9 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
     }
 
     superSum[bin] = 0.5*sqrt(sfOFF[0]*sfON[1])+0.5*sqrt(sfON[0]*sfOFF[1]);
-    superSumError[bin] = sqrt(0.5*(sfOFF[1]*sfON_err[0]+sfON[0]*sfOFF_err[1])/sqrt(sfON[0]*sfOFF[1])
-			      + (sfON[1]*sfOFF_err[0]+sfOFF[0]*sfON_err[1])/sqrt(sfON[0]*sfOFF[1]));
+    superSumError[bin] = sqrt(0.5*
+			      (sfON[0]>0. && sfOFF[1]>0.)?(sfOFF[1]*sfON_err[0]+sfON[0]*sfOFF_err[1])/sqrt(sfON[0]*sfOFF[1]):0.
+			      + (sfON[1]>0. && sfOFF[0]>0.)?(sfON[1]*sfOFF_err[0]+sfOFF[0]*sfON_err[1])/sqrt(sfON[1]*sfOFF[0]):0.);
     
   } 
  
