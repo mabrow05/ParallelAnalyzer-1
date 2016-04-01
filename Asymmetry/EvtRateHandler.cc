@@ -98,7 +98,7 @@ std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
     for (unsigned int j=0; j<4; j++) {
       for (unsigned int i=0; i<numEnergyBins; i++) {
 	rateEerr[j][i]=sqrt(rateE[j]->GetBinContent(i)/runLength[0]);
-	if (rateEerr[j][i]==0.) rateEerr[j][i]=1./runLength[0]; //This accounts for 0 entries giving error of zero for now...
+	//	if (rateEerr[j][i]==0.) rateEerr[j][i]=1./runLength[0]; //This accounts for 0 entries giving error of zero for now...
       }
     }
     return rateEerr;
@@ -107,7 +107,7 @@ std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
     for (unsigned int j=0; j<4; j++) {
       for (unsigned int i=0; i<numEnergyBins; i++) {
 	rateWerr[j][i]=sqrt(rateW[j]->GetBinContent(i)/runLength[1]);
-	if (rateEerr[j][i]==0.) rateEerr[j][i]=1./runLength[0]; //This accounts for 0 entries giving error of zero for now...
+	//if (rateEerr[j][i]==0.) rateEerr[j][i]=1./runLength[0]; //This accounts for 0 entries giving error of zero for now...
       }
     }
     return rateWerr;
@@ -332,8 +332,8 @@ void BGSubtractedRate::calcBGSubtRates() {
       delete evt;
       for (unsigned int t=0;t<FinalRateE.size();t++) {
 	for (unsigned int i=0;i<FinalRateE[0].size();i++) {
-	  FinalRateErrorE[t][i] = FinalRateE[t][i]>0.?sqrt(FinalRateE[t][i]):1.;
-	  FinalRateErrorW[t][i] = FinalRateW[t][i]>0.?sqrt(FinalRateW[t][i]):1.;
+	  FinalRateErrorE[t][i] = sqrt(FinalRateE[t][i]);
+	  FinalRateErrorW[t][i] = sqrt(FinalRateW[t][i]);
 	}
       }
     }
