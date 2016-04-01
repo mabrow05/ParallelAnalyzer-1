@@ -36,14 +36,14 @@ int main(int argc, char *argv[]) {
     std::cout << "Usage: ./histoAdder runNumber\n";
     exit(0);
   }
-  
+  TH1::AddDirectory(kFALSE);
   int runNumber = atoi(argv[1]);
   std::cout << "Running histoAdder on run " << runNumber << std::endl;
 
   //For adding the UCN monitor rates, we need to open the raw data files.
   // Open input ntuple
   char tempIn[500];
-  sprintf(tempIn, "/extern/mabrow05/ucna/rawdata/full%s.root", runNumber);
+  sprintf(tempIn, "/extern/mabrow05/ucna/rawdata/full%i.root", runNumber);
 
   TFile *fileIn = new TFile(tempIn, "READ");
   TTree *Tin = (TTree*)(fileIn->Get("h1"));
@@ -186,13 +186,14 @@ int main(int argc, char *argv[]) {
     //Get length of run from UNBLINDED TIME
   Tin->GetEvent(nEvents-1);
   float time = S83028*scalerCountsToTime;
+  std::cout << "TotalTime = " << time << std::endl;
   //Histograms to hold UCNMonRate
   int nbins = (int)((time+10.)/10.);
   TH1F *UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., nbins*10.);
   TH1F *UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., nbins*10.);
   TH1F *UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., nbins*10.);
   TH1F *UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., nbins*10.);
-
+  
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
@@ -202,6 +203,7 @@ int main(int argc, char *argv[]) {
     else if (iSis00==516) UCN_Mon_2_Rate->Fill(time);
     else if (iSis00==1028) UCN_Mon_3_Rate->Fill(time);
     else if (iSis00==2052) UCN_Mon_4_Rate->Fill(time);
+    if (i%1000==0) std::cout << i << std::endl;
   }
 
   fileIn->Close();
@@ -211,7 +213,7 @@ int main(int argc, char *argv[]) {
   char temp[500];
   sprintf(temp,"%s/spec_%i.root",getenv("UK_SPEC_REPLAY"), runNumber);
   TFile *spec = new TFile(temp,"UPDATE");
-  spec->cd();
+  //spec->cd();
   UCN_Mon_1_Rate->Write();
   UCN_Mon_2_Rate->Write();
   UCN_Mon_3_Rate->Write();
@@ -221,7 +223,7 @@ int main(int argc, char *argv[]) {
 
   sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"), runNumber);
   TFile *rep4 = new TFile(temp,"UPDATE");
-  rep4->cd();
+  //rep4->cd();
   UCN_Mon_1_Rate->Write();
   UCN_Mon_2_Rate->Write();
   UCN_Mon_3_Rate->Write();
