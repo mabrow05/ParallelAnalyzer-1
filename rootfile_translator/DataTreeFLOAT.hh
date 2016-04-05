@@ -3,6 +3,7 @@
 
 #include <TTree.h>
 #include <TFile.h>
+#include <TH1F.h>
 #include <string>
 #include <iostream>
 
@@ -37,7 +38,7 @@ public:
 
   void makeOutputTree(std::string outputFile, std::string outputTree); 
   void fillOutputTree() {if (outputTree) outputTree->Fill();};
-  void writeOutputFile() {if (outputFile) outputFile->Write();}
+  void writeOutputFile();
   void setupInputTree(std::string inputFile, std::string inputTree);
   void getEvent(UInt_t N) {inputTree->GetEvent(N);}
   Int_t getEntries() {return inputTree->GetEntriesFast();}
@@ -83,7 +84,8 @@ public:
   Float_t ProbIII; //Probability of type 3 event
   Float_t Erecon; //Final reconstructed energy of an event
 
- 
+  TH1F *UCN_Mon_1_Rate, *UCN_Mon_2_Rate, *UCN_Mon_3_Rate, *UCN_Mon_4_Rate;
+
   //std::string inputTreeName, outputTreeName; 
 };
   

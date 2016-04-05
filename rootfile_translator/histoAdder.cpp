@@ -3,7 +3,6 @@ This code appends certain histograms to the final replay file. Michael
 used these histograms for parts of his analysis and they weren't initially 
 included in the UK analysis. 
 
-Through the translator, these will be added to the spec files as well
 */////////////////////////////////////////////////////////////////////
 
 #include <iostream>
@@ -215,20 +214,20 @@ int main(int argc, char *argv[]) {
   sprintf(temp,"%s/spec_%i.root",getenv("UK_SPEC_REPLAY"), runNumber);
   TFile *spec = new TFile(temp,"UPDATE");
   //spec->cd();
-  UCN_Mon_1_Rate->Write();
-  UCN_Mon_2_Rate->Write();
-  UCN_Mon_3_Rate->Write();
-  UCN_Mon_4_Rate->Write();
+  UCN_Mon_1_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_2_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_3_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_4_Rate->Write("",TObject::kOverwrite);
 
   spec->Close();
 
   sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"), runNumber);
   TFile *rep4 = new TFile(temp,"UPDATE");
   //rep4->cd();
-  UCN_Mon_1_Rate->Write();
-  UCN_Mon_2_Rate->Write();
-  UCN_Mon_3_Rate->Write();
-  UCN_Mon_4_Rate->Write();
+  UCN_Mon_1_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_2_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_3_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_4_Rate->Write("",TObject::kOverwrite);
 
   rep4->Close();
 

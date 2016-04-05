@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
+  TH1::AddDirectory(kFALSE);
 
   cout << "Run " << argv[1] << " ..." << endl;
 
@@ -80,6 +81,8 @@ int main(int argc, char *argv[])
   cout << "... East Backing Veto TDC Cut: " << cutEastBackingVetoTDC << endl;
   cout << "... West Backing Veto QADC Cut: " << cutWestBackingVetoQADC << endl;
   cout << "... West Backing Veto TDC Cut: " << cutWestBackingVetoTDC << endl;
+
+  
 
   // Read pedestals file
   char tempFilePed[500];
@@ -321,6 +324,23 @@ int main(int argc, char *argv[])
   int nEvents = Tin->GetEntries();
   cout << "... Processing nEvents = " << nEvents << endl;
 
+  //Get length of run from UNBLINDED TIME
+  float runLengthBlind[2] = {0.};
+  float runLengthTrue = 0.;
+  Tin->GetEvent(nEvents-1);
+  runLengthTrue = S83028*scalerCountsToTime;
+  runLengthBlind[0] = Clk0*scalerCountsToTime;
+  runLengthBlind[1] = Clk1*scalerCountsToTime;
+  
+  //Histograms to hold UCNMonRate
+  int binWidth = 10;
+  int nbins = (int)(runLengthTrue+20.)/binWidth;
+  t.UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., (float)nbins*binWidth);
+  t.UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., (float)nbins*binWidth);
+  t.UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., (float)nbins*binWidth);
+  t.UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., (float)nbins*binWidth);
+  
+
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
@@ -345,9 +365,13 @@ int main(int argc, char *argv[])
 
     // UCN monitor events
     bool UCNMonitorTrigger = false;
-    if ( (iSis00 == 260) || (iSis00 == 516) || (iSis00 == 1028) || (iSis00 == 2052) ) {
-      UCNMonitorTrigger = true;
-    }
+    UCNMonitorTrigger = true;
+    float time = S83028*scalerCountsToTime;
+    if (iSis00==260) {t.UCN_Mon_1_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    else if (iSis00==516) {t.UCN_Mon_2_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    else if (iSis00==1028) {t.UCN_Mon_3_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    else if (iSis00==2052) {t.UCN_Mon_4_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    
 
     // Events with a muon hit
     bool muonHitEast = false;
@@ -593,6 +617,7 @@ int main(int argc, char *argv[])
     t.Tof = (double) S8200;
     t.TimeE = Clk0*scalerCountsToTime;
     t.TimeW = Clk1*scalerCountsToTime;
+    t.Time = S83028*scalerCountsToTime;
     t.TDCE = (double) Tdc016;
     t.TDCW = (double) Tdc017;
     t.TDCE1 = (double) Tdc00;
@@ -680,7 +705,7 @@ int main(int argc, char *argv[])
     
     t.PassedCathE = t.PassedCathW = PID==1?true:false; //temporary holder for this
     
-    t.EvnbGood = t.EvnbGood = true;
+    t.EvnbGood = t.BkhfGood = true;
     for (Int_t i = 0; i<5; i++) {
       if ((int)Evnb[i]-t.TriggerNum) t.EvnbGood = false;
       if ((int)Bkhf[i]!=17) t.BkhfGood = false;
@@ -708,7 +733,21 @@ int main(int argc, char *argv[])
     t.fillOutputTree();
     
   }
+  
+  fileIn->Close();
 
+  //Now I want to create and store a few pertinent values in a file for later...
+  char tempFile[200];
+  sprintf(tempFile,"%s/runInfo_%s.dat",getenv("RUN_INFO_FILES"),argv[1]);
+  ofstream runInfo(tempFile);
+  std::cout << "Writing Info to " << tempFile << std::endl;
+
+  runInfo << "RunLengthEast\t" << runLengthBlind[0] << std::endl;
+  runInfo << "RunLengthWest\t" << runLengthBlind[1] << std::endl;
+  runInfo << "RunLengthTrue\t" << runLengthTrue << std::endl;
+  runInfo << "UCNMon4Integral\t" << t.UCN_Mon_4_Rate->Integral("width");
+
+  runInfo.close();
   // Write output ntuple
   t.writeOutputFile();
   //fileOut->Close();
