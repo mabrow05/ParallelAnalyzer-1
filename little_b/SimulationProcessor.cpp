@@ -300,7 +300,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 	side=0;
       }
       //West
-      else if (Time.timeE>Time.timeW) { 
+      else {//if (Time.timeE>Time.timeW) { 
 	side=1;
       }
     }
@@ -347,8 +347,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       }
       else {
 	PID=1;
-	  type=4;
-	  side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
+	type=4;
+	side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
       }
     }
   
