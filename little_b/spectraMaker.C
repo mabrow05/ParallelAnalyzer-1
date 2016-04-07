@@ -9,6 +9,7 @@ creates energy spectra from which b can be extracted
 
 void spectraMaker(std::string file)
 {
+  Double_t fidCut = 50.;
   
   std::string filePath = "analyzed_files/"+file;
 
@@ -29,11 +30,14 @@ void spectraMaker(std::string file)
   //variables to be read in
   Int_t PID, side, type;
   Double_t Erecon;
+  Double_t mwpcPosW[3], mwpcPosE[3];
   
   tin->SetBranchAddress("PID",&PID);
   tin->SetBranchAddress("side",&side);
   tin->SetBranchAddress("type",&type);
   tin->SetBranchAddress("Erecon",&Erecon);
+  tin->GetBranch("MWPCPosAdjusted")->GetLeaf("MWPCPosAdjE")->SetAddress(mwpcPosE);
+  tin->GetBranch("MWPCPosAdjusted")->GetLeaf("MWPCPosAdjW")->SetAddress(mwpcPosW);
 
   UInt_t nevents = tin->GetEntriesFast();
 
@@ -41,7 +45,9 @@ void spectraMaker(std::string file)
     tin->GetEvent(evt);
 
     if (PID!=1) continue;
+    if ((mwpcPosW[0]*mwpcPosW[0]+mwpcPosW[1]*mwpcPosW[1]>fidCut*fidCut) || (mwpcPosE[0]*mwpcPosE[0]+mwpcPosE[1]*mwpcPosE[1]>fidCut*fidCut)) continue;
 
+    //Fill appropriate histograms if cuts are passed.
     if (type<4) hEreconALL->Fill(Erecon);
     if (type==0) hErecon0->Fill(Erecon);
     else if (type==1) hErecon1->Fill(Erecon);
