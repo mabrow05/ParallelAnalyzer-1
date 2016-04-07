@@ -42,7 +42,7 @@ void spectraMaker(std::string file)
 
     if (PID!=1) continue;
 
-    hEreconALL->Fill(Erecon);
+    if (type<4) hEreconALL->Fill(Erecon);
     if (type==0) hErecon0->Fill(Erecon);
     else if (type==1) hErecon1->Fill(Erecon);
     else if (type==2 || type==3) hErecon23->Fill(Erecon);  

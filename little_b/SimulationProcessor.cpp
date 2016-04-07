@@ -100,7 +100,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   // Load information for applying detector effects
   std::vector <Double_t> alphas = getAlphaValues(alphaFileIndex); // fill vector with the alpha (nPE/keV) values
-  std::vector < std::vector <Double_t> > triggerFunc = getTriggerFunctionParams(triggerMap,7); // 2D vector with trigger function for East side and West side in that order
+  std::vector < std::vector <Double_t> > triggerFunc = getTriggerFunctionParams(triggerMap,8); // 2D vector with trigger function for East side and West side in that order
   GetPositionMap(XeMapPeriod); //Loads position map via posMapReader.h methods
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(geometry);
 
@@ -181,17 +181,17 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       scint_pos_adj.ScintPosAdjW[1] = rand2.Gaus(srcPos[1][1], fabs(srcPos[1][2]));
     }
     else {
-      scint_pos_adj.ScintPosAdjE[0] = scint_pos.ScintPosE[0]*sqrt(0.6);
-      scint_pos_adj.ScintPosAdjE[1] = scint_pos.ScintPosE[1]*sqrt(0.6);
-      scint_pos_adj.ScintPosAdjW[0] = scint_pos.ScintPosW[0]*sqrt(0.6);
-      scint_pos_adj.ScintPosAdjW[1] = scint_pos.ScintPosW[1]*sqrt(0.6);
+      scint_pos_adj.ScintPosAdjE[0] = scint_pos.ScintPosE[0]*sqrt(0.6)*1000.;
+      scint_pos_adj.ScintPosAdjE[1] = scint_pos.ScintPosE[1]*sqrt(0.6)*1000.;
+      scint_pos_adj.ScintPosAdjW[0] = scint_pos.ScintPosW[0]*sqrt(0.6)*1000.;
+      scint_pos_adj.ScintPosAdjW[1] = scint_pos.ScintPosW[1]*sqrt(0.6)*1000.;
     }
-    scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2];
-    scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2];
+    scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2]*1000.;
+    scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2]*1000.;
     
     
     //retrieve point on grid for each side of detector [E/W][x/y] to implement position map
-    gridPoint = getGridPoint(scint_pos.ScintPosE[0],scint_pos.ScintPosE[1],scint_pos.ScintPosW[0],scint_pos.ScintPosW[1]);
+    gridPoint = getGridPoint(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
 
     Int_t intEastBinX = gridPoint[0][0];
     Int_t intEastBinY = gridPoint[0][1];
