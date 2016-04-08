@@ -8,6 +8,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <iomanip>
 
 // ROOT libraries
 #include "TRandom3.h"
@@ -365,7 +366,7 @@ int main(int argc, char *argv[])
 
     // UCN monitor events
     bool UCNMonitorTrigger = false;
-    UCNMonitorTrigger = true;
+    
     float time = S83028*scalerCountsToTime;
     if (iSis00==260) {t.UCN_Mon_1_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
     else if (iSis00==516) {t.UCN_Mon_2_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
@@ -742,10 +743,10 @@ int main(int argc, char *argv[])
   ofstream runInfo(tempFile);
   std::cout << "Writing Info to " << tempFile << std::endl;
 
-  runInfo << "RunLengthEast\t" << runLengthBlind[0] << std::endl;
-  runInfo << "RunLengthWest\t" << runLengthBlind[1] << std::endl;
-  runInfo << "RunLengthTrue\t" << runLengthTrue << std::endl;
-  runInfo << "UCNMon4Integral\t" << t.UCN_Mon_4_Rate->Integral("width");
+  runInfo << "RunLengthEast\t" << std::setprecision(9) << runLengthBlind[0] << std::endl;
+  runInfo << "RunLengthWest\t" << std::setprecision(9) << runLengthBlind[1] << std::endl;
+  runInfo << "RunLengthTrue\t" << std::setprecision(9) << runLengthTrue << std::endl;
+  runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t.UCN_Mon_4_Rate->Integral("width");
 
   runInfo.close();
   // Write output ntuple

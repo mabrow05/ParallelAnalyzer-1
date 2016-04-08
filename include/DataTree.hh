@@ -5,6 +5,7 @@
 #include <TFile.h>
 #include <string>
 #include <iostream>
+#include <TH1F.h>
 
 struct MWPC {
   Double_t center;
@@ -37,7 +38,7 @@ public:
 
   void makeOutputTree(std::string outputFile, std::string outputTree); 
   void fillOutputTree() {if (outputTree) outputTree->Fill();};
-  void writeOutputFile() {if (outputFile) outputFile->Write();}
+  void writeOutputFile(); 
   void setupInputTree(std::string inputFile, std::string inputTree);
   void getEvent(UInt_t N) {inputTree->GetEvent(N);}
   Int_t getEntries() {return inputTree->GetEntriesFast();}
@@ -50,6 +51,7 @@ public:
   Double_t Tof;     // time since last beam burst
   Double_t TimeE;   // blinded time East
   Double_t TimeW;   // blinded time West
+  Double_t Time;    // UNBLINDED time
   Double_t TDCE, TDCW; // Trigger TDC by side
   Double_t TDCE1, TDCE2, TDCE3, TDCE4; //East ind PMT trigger TDC
   Double_t TDCW1, TDCW2, TDCW3, TDCW4; //West ind PMT trigger TDC
@@ -82,6 +84,8 @@ public:
   Int_t Side; //Earlier Trigger side
   Double_t ProbIII; //Probability of type 3 event
   Double_t Erecon; //Final reconstructed energy of an event
+
+  TH1F *UCN_Mon_1_Rate, *UCN_Mon_2_Rate, *UCN_Mon_3_Rate, *UCN_Mon_4_Rate;
 
  
   //std::string inputTreeName, outputTreeName; 
