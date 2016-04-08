@@ -18,7 +18,7 @@
 
 class EvtRateHandler {
 public:
-  EvtRateHandler(int run, const std::string& inDir, double enBinWidth=10., double fidCut=100., bool ukdata=true);
+  EvtRateHandler(int run, const std::string& inDir, double enBinWidth=10., double fidCut=100., bool ukdata=true, bool unblind=false);
   virtual ~EvtRateHandler();
   int runNumber; //Run Number being read in
   std::string inputDir; //input data directory
@@ -41,9 +41,12 @@ public:
 
 protected:
   virtual void dataReader(); //Read in data and fill histograms
+  
+  bool unblinded; //Holds whether the result should be unblinded
  
   unsigned int numEnergyBins;
   double runLength[2]; // E/W
+  double UCNMonIntegral;
   std::vector <TH1D*> rateE;
   std::vector <TH1D*> rateW; // Rate histograms 
   std::vector< std::vector<double> > rateEvec;
@@ -57,17 +60,18 @@ protected:
  
 class SimEvtRateHandler: public EvtRateHandler {
 public:
-  SimEvtRateHandler(int run, const std::string& inDir, double enBinWidth=10., double fidCut=100.): EvtRateHandler(run, inDir, enBinWidth, fidCut, true) {}
+  SimEvtRateHandler(int run, const std::string& inDir, double enBinWidth=10., double fidCut=100., bool applyAsymm=true): EvtRateHandler(run, inDir, enBinWidth, fidCut, true),applyAsymmetry(applyAsymm) {}
 
 protected:
   void dataReader(); //Different set of variables for reverse calibrated simulated data
+  bool applyAsymmetry;
   
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class BGSubtractedRate {
 public:
-  BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata=true, bool sim=false);
+  BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata=true, bool sim=false, bool applyAsym=true);
   ~BGSubtractedRate() {}
 
   int runNumber;
@@ -76,6 +80,7 @@ public:
   //int evtType; //either 0, 1, or 23
   bool UKdata; //Whether the replay was done using UK code or MPM code
   bool Simulation; //Whether the rate is from simulation or not, in which case there is no background run
+  bool applyAsymmetry; //if rate is from simulation, whether or not to apply the event weight from A
 
   std::vector<double> returnRunLengths(bool beta=true); // for BG do beta=false
   void calcBGSubtRates(); //Loads the rates and calculates BG subtr rates and errors

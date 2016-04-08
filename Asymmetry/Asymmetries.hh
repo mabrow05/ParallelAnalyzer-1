@@ -10,7 +10,7 @@
 // base class for loading octet information
 class AsymmetryBase {
 public:
-  AsymmetryBase(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false);
+  AsymmetryBase(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true);
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
@@ -36,6 +36,8 @@ protected:
   
   bool UKdata; //Boolean which is true for UK data and false if mpm
   bool Simulation; //Boolean to use simulated data
+  bool applyAsymmetry; //Whether or not to apply the asymmetry weight to the simulated data.
+                       // Should be false when using super-sum, true when using super-ratio.
   int octet; // Holds the octet being analyzed
   
   double energyBinWidth;
@@ -65,7 +67,7 @@ protected:
 
 class OctetAsymmetry : public AsymmetryBase {
 public:
-  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false);
+  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true);
   ~OctetAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();

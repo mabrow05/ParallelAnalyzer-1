@@ -10,6 +10,7 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 
 #include <TFile.h>
 #include <TCanvas.h>
@@ -99,18 +100,20 @@ int main(int argc, char *argv[])
 
       int uk0E=0, sim0E=0, uk1E=0, sim1E=0, uk23E=0, sim23E=0, ukTotE=0, simTotE=0, uk0W=0, sim0W=0, uk1W=0, sim1W=0, uk23W=0, sim23W=0, ukTotW=0, simTotW=0; //Event totals
       double ukAsym = 0., simAsym=0., ukAsymError = 0., simAsymError=0.;
-   
+      
+      double normFactor = 0., ukIntegral=0., simIntegral=0.;
+
 
       { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
 	OctetAsymmetry UK(octetNum, enBinWidth, 50., true, false);
-	UK.calcAsymmetryBinByBin(1);
+	//UK.calcAsymmetryBinByBin(1);
 	
 	/*UK.calcTotalAsymmetry(225.,675.,1);
 	ukAsym = UK.returnTotalAsymmetry();
 	ukAsymError = UK.returnTotalAsymmetryError();
 	std::cout << "UK Asym " << ukAsym << std::endl;
-      
-	UK.calcBGsubtractedEvts();*/
+	*/
+	//UK.calcBGsubtractedEvts();
 
 
 	std::vector <double> evts;
@@ -120,14 +123,17 @@ int main(int argc, char *argv[])
 	std::vector <double> xErr(numBins,0.);
 
 	
-
+	
 	//All event types
-	UK.calcSuperSum(1);
+	UK.calcSuperSum(4);
 	superSum = UK.returnSuperSum();
 	superSumError = UK.returnSuperSumError();
+
 	for (int n=0; n<numBins;n++) {
 	  std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
+	  ukIntegral+=superSum[n];
 	}
+
 	f->cd();
 	TGraphErrors *EreconALL_uk = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
 	EreconALL_uk->SetMarkerColor(kBlue);
@@ -141,6 +147,7 @@ int main(int argc, char *argv[])
 	//f->Write();
 	//f->Close();
 	delete EreconALL_uk;
+	//std::cout << ukIntegral << std::endl;
 	//exit(0);
 
 	
@@ -165,7 +172,7 @@ int main(int argc, char *argv[])
       }
 
       { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true);
+	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true, false);
 	/*std::cout << "Made it here\n";
 	SIM.calcTotalAsymmetry(225.,675.,1);
 	simAsym = SIM.returnTotalAsymmetry();
@@ -185,11 +192,18 @@ int main(int argc, char *argv[])
 	
 
 	//All event types
-	SIM.calcSuperSum(1);
+	SIM.calcSuperSum(4);
 	superSum = SIM.returnSuperSum();
 	superSumError = SIM.returnSuperSumError();
 	for (int n=0; n<numBins;n++) {
-	  std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
+	  simIntegral+=superSum[n];
+	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 	  
+	}
+	normFactor = ukIntegral/simIntegral;
+	for (int n=0; n<numBins;n++) {
+	  superSum[n] = normFactor*superSum[n];
+	  superSumError[n] = normFactor*superSumError[n];
+	  std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 	  
 	}
 	f->cd();
 	TGraphErrors *EreconALL_sim = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);

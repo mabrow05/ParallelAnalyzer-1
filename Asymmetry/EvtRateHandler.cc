@@ -9,9 +9,11 @@ simulation data
 */
 
 #include "EvtRateHandler.hh"
+#include "MBUtils.hh"
 #include <cstdio>
+#include <fstream>
 
-EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWidth, double fidCut, bool ukdata) : runNumber(run),inputDir(inDir),fiducialCut(fidCut),UKdata(ukdata), pol(0) {
+EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWidth, double fidCut, bool ukdata, bool ub) : runNumber(run),inputDir(inDir),fiducialCut(fidCut),UKdata(ukdata), pol(0), unblinded(ub) {
   rateE.resize(4,NULL);
   rateW.resize(4,NULL);
 
@@ -21,7 +23,31 @@ EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWi
   rateWvec.resize(4,std::vector <double> (numEnergyBins,0.));
   rateEerr.resize(4, std::vector<double> (numEnergyBins,0.)); 
   rateWerr.resize(4,std::vector <double> (numEnergyBins,0.));
-  
+
+  //Loading information from log file
+  std::string logFilePath = std::string(getenv("RUN_INFO_FILES"))+"runInfo_"+itos(runNumber)+".dat";
+  ifstream logFile(logFilePath.c_str());
+  std::vector <std::string> title(4);
+   std::vector <double> value(4);
+  for (int i=0; i<4; i++) {
+    logFile >> title[i] >> value[i];
+  }
+  logFile.close();
+
+  if (unblinded) {
+    runLength[0] = value[2];
+    runLength[1] = value[2];
+  }
+  else {
+    runLength[0] = value[0];
+    runLength[1] = value[1];
+  }
+  UCNMonIntegral = value[3];
+ 
+  std::cout << title[0] << "\t" << runLength[0] << std::endl;
+  std::cout << title[1] << "\t" << runLength[1] << std::endl;
+  std::cout << title[3] << "\t" << UCNMonIntegral << std::endl;
+  //std::cout << holdTitle << "\t" << runLength[0] << std::endl;
 }
 
 EvtRateHandler::~EvtRateHandler() {
@@ -172,19 +198,12 @@ void EvtRateHandler::dataReader() {
     Tin->GetBranch("yWmpm")->GetLeaf("center")->SetAddress(&WmwpcY_f);
   }
   unsigned int nevents = Tin->GetEntriesFast();
-  std::cout << nevents << std::endl;
-  //Determine total time on each side
-  Tin->GetEvent(nevents-1);
- 
-  if (!UKdata) {
-    TimeE = (double) TimeE_f;
-    TimeW = (double) TimeW_f;
-  }
-
-  runLength[0] = TimeE;
+  std::cout << "Number of Events: " << nevents << std::endl;
+  
   double EastWeight = 1./runLength[0];
-  runLength[1] = TimeW;
   double WestWeight = 1./runLength[1];
+  
+  std::cout << EastWeight << std::endl;
 
   //Run over all events in file, fill output histogram with rate
   
@@ -201,8 +220,8 @@ void EvtRateHandler::dataReader() {
 	WmwpcX = (double) WmwpcX_f;
 	WmwpcY = (double) WmwpcY_f;
 	Erecon = (double) Erecon_f;
-	//TimeE = (double) TimeE_f;
-	//TimeW = (double) TimeW_f;
+	TimeE = (double) TimeE_f;
+	TimeW = (double) TimeW_f;
       }
       if (PID==1) 
 	{
@@ -261,6 +280,11 @@ void SimEvtRateHandler::dataReader() {
   unsigned int nevents = Tin->GetEntriesFast();
   //std::cout << nevents << std::endl;
 
+  double EastWeight = 1./runLength[0];
+  double WestWeight = 1./runLength[1];
+  
+  if (!applyAsymmetry) AsymWeight=1.;
+
   //Run over all events in file, fill output histogram with rate
   
   double r2 = 0.; //position of event squared
@@ -277,7 +301,7 @@ void SimEvtRateHandler::dataReader() {
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateE[Type]->Fill(Erecon,AsymWeight);
+		  rateE[Type]->Fill(Erecon,AsymWeight*EastWeight);
 		  //std::cout << EreconSim << std::endl;
 		}
 	    }
@@ -287,7 +311,7 @@ void SimEvtRateHandler::dataReader() {
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateW[Type]->Fill(Erecon,AsymWeight);
+		  rateW[Type]->Fill(Erecon,AsymWeight*WestWeight);
 		  //std::cout << EreconSim << std::endl;
 		}
 	    }
@@ -300,7 +324,7 @@ void SimEvtRateHandler::dataReader() {
 };
 
 
-BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata, bool sim): runNumber(run), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim) {
+BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata, bool sim, bool applyAsym): runNumber(run), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim), applyAsymmetry(applyAsym) {
   int numBins = int(1200./double(EnergyBinWidth));
   BetaRateE.resize(4, std::vector <double> (numBins,0.));
   BGRateE.resize(4, std::vector <double> (numBins,0.));
@@ -325,17 +349,19 @@ void BGSubtractedRate::calcBGSubtRates() {
   if (Simulation) 
     {
       std::string indir = std::string(getenv("REVCALSIM"));
-      SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir, EnergyBinWidth,fiducialCut);
+      SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir, EnergyBinWidth,fiducialCut,applyAsymmetry);
       evt->CalcRates();
       FinalRateE = evt->getRateVectors(0);
       FinalRateW = evt->getRateVectors(1);
+      FinalRateErrorE = evt->getRateErrors(0);
+      FinalRateErrorW = evt->getRateErrors(1);
       delete evt;
-      for (unsigned int t=0;t<FinalRateE.size();t++) {
-	for (unsigned int i=0;i<FinalRateE[0].size();i++) {
-	  FinalRateErrorE[t][i] = sqrt(FinalRateE[t][i]);
-	  FinalRateErrorW[t][i] = sqrt(FinalRateW[t][i]);
-	}
-      }
+      //for (unsigned int t=0;t<FinalRateE.size();t++) {
+      //for (unsigned int i=0;i<FinalRateE[0].size();i++) {
+      //  FinalRateErrorE[t][i] = sqrt(FinalRateE[t][i]);
+      //  FinalRateErrorW[t][i] = sqrt(FinalRateW[t][i]);
+      //}
+      //}
     }
   else 
     {
