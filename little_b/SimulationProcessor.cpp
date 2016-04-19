@@ -408,7 +408,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     
     if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
     
-    if (source.substr(0,4)=="Beta" && evtTally%nEvtsPerTTree==0 && !sameEvtTally)  {
+    if ((source.substr(0,4)=="Beta" && evtTally%nEvtsPerTTree==0 && !sameEvtTally) || evtTally==BetaEvents )  {
       
       needNewTree=true;
       //Create simulation output file
@@ -495,13 +495,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     
     outfile->Close();
   }
-  else if (source.substr(0,4)=="Beta")  {
-    //Create simulation output file
-    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
-    outfile = new TFile(outputfile, "RECREATE");
-    tree->Write();
-    outfile->Close();
-  } 
+  
 }
 
   
