@@ -51,6 +51,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
+  UInt_t nEvtsPerTTree = 10000; //Number of electron events to be stored in each output TTree
+
   std::string geometry = geom; // "2010","2011/2012","2012/2013"
   UInt_t alphaFileIndex = 0; // the index on the nPE_keV file
   UInt_t XeMapPeriod = 2; // The xenon position map to be used
@@ -103,13 +105,6 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   std::vector < std::vector <Double_t> > triggerFunc = getTriggerFunctionParams(triggerMap,8); // 2D vector with trigger function for East side and West side in that order
   GetPositionMap(XeMapPeriod); //Loads position map via posMapReader.h methods
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(geometry);
-
-  // Histograms for plotting the peaks to fit
-  TH1D Etype0("Etype0","East type 0",200,0.,1200.);
-  TH1D Wtype0("Wtype0","West type 0",200,0.,1200.);
-
-  TTree *tree = new TTree("SimAnalyzed","SimAnalyzed");
-  SetUpOutputTree(*tree); //Setup the output tree and branches
   
   
   //Read in simulated data and put in a TChain
@@ -117,9 +112,9 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   int numFiles = 1; // This is for testing! can be more later depending on how Xuan formats his output of simulated data
   TChain chain("anaTree");
   for (int i=0; i<numFiles; i++) {
-    if (source.substr(0,4)!="Beta") sprintf(temp,"%s/%s/xuan_analyzed.root",simLocation.c_str(),source.c_str());
-    else if (source.length()>4) sprintf(temp,"%s/%s/%s/xuan_analyzed.root",simLocation.c_str(),source.substr(0,4).c_str(),"fierz");
-    else sprintf(temp,"%s/%s/%s/xuan_analyzed.root",simLocation.c_str(),source.substr(0,4).c_str(),"base");
+    if (source.substr(0,4)!="Beta") sprintf(temp,"%s/%s/xuan_analyzed_%i.root",simLocation.c_str(),source.c_str(),i);
+    else if (source.length()>4) sprintf(temp,"%s/%s/%s/xuan_analyzed_%i.root",simLocation.c_str(),source.substr(0,4).c_str(),"fierz",i);
+    else sprintf(temp,"%s/%s/%s/xuan_analyzed_%i.root",simLocation.c_str(),source.substr(0,4).c_str(),"base",i);
     chain.AddFile(temp);
   }
   
@@ -135,6 +130,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   chain.SetBranchAddress("ScintPos",&scint_pos);
   chain.SetBranchAddress("primaryKE",&Eprim);
   
+
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
 
@@ -155,9 +151,29 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   std::vector < std::vector <Int_t> > gridPoint; // Will hold the grid location for the position map
 
+  // Histograms for plotting the peaks to fit
+  TH1D Etype0("Etype0","East type 0",200,0.,1200.);
+  TH1D Wtype0("Wtype0","West type 0",200,0.,1200.);
+
+  TTree *tree  = new TTree("SimAnalyzed","SimAnalyzed");
+  SetUpOutputTree(*tree); //Setup the initial output tree and branches; 
+  
+  UInt_t treeNum = 0; //keep track of the number Tree we are on
+  bool needNewTree = false; //Whether or not a new three is needed
+  bool sameEvtTally = true; //Whether or not an evt has been added to the tally
+
   //Read in events and determine evt type based on triggers
   while (evtTally<BetaEvents) {
     if (evt>=nevents) evt=0; //Wrapping the events back to the beginning
+    
+    //Creates new Tree when the old one was deemed full
+    if (needNewTree)  {
+      tree = new TTree("SimAnalyzed","SimAnalyzed");
+      SetUpOutputTree(*tree);
+      treeNum++;
+      needNewTree=false;
+    }
+
     EastScintTrigger = WestScintTrigger = EMWPCTrigger = WMWPCTrigger = false; //Resetting triggers each event
 
     chain.GetEvent(evt);
@@ -386,10 +402,24 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     if (source.substr(0,4)=="Beta") tree->Fill();
     
     // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
-    if (PID==1) evtTally++;
+    if (PID==1) {evtTally++; sameEvtTally=false;}
+    else  sameEvtTally=true;
     evt++;
     
     if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
+    
+    if (source.substr(0,4)=="Beta" && evtTally%nEvtsPerTTree==0 && !sameEvtTally)  {
+      
+      needNewTree=true;
+      //Create simulation output file
+      Char_t outputfile[500];
+      sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%i.root",source.c_str(), treeNum);
+      TFile *outfile = new TFile(outputfile, "RECREATE");
+      tree->Write();
+      outfile->Close();
+      delete tree;
+    } 
+    
   }
   std::cout << endl;
   
