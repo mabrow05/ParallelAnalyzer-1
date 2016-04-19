@@ -415,9 +415,8 @@ void revCalSimulation (Int_t runNumber, string source)
 
 
     //Calculate event weight
-
-    AsymWeight = 1+(-0.12)*pol*sqrt(1-(1/((Eprim/511.+1.)*(Eprim/511.+1.))))*cos(primTheta);
-   
+    if (source=="Beta") AsymWeight = 1+(-0.12)*pol*sqrt(1-(1/((Eprim/511.+1.)*(Eprim/511.+1.))))*cos(primTheta);
+    else AsymWeight = 1.;
 
     //calculate adjusted event position by sampling a gaussian centered on source position. Do it for primary event side.
     /*Int_t primSide=0., primType=0;

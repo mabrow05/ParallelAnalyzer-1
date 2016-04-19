@@ -25,7 +25,7 @@
   gStyle->SetPadBottomMargin(0.12);
 
   // East residuals
-  double EQ[4];
+  double EQ[5];
   EQ[0] = peakCe_EQ;//98.2;
   EQ[1] = peakIn_EQ;
   EQ[2] = peakSn_EQ;//331.2;
@@ -35,18 +35,18 @@
   double dEQ[5] = {0.};
 
   double resEast[5];
-  resEast[0] = -.85;
-  resEast[1] = 1.85;
-  resEast[2] =  2.56;
-  resEast[3] = 1.69;
-  resEast[4] = .69;
+  resEast[0] = -1.97293;
+  resEast[1] = -.9;
+  resEast[2] =  2.9;
+  resEast[3] = 2.1;
+  resEast[4] = -.8;
 
   double sigEast[5];
-  sigEast[0] = 1.85;
-  sigEast[1] = 1.88;
-  sigEast[2] = 3.22;
-  sigEast[3] = 8.27;
-  sigEast[4] = 8.5;
+  sigEast[0] = 2.1;
+  sigEast[1] = 4.1;
+  sigEast[2] = 3.7;
+  sigEast[3] = 5.85;
+  sigEast[4] = 8.4;
 
   // Plot
   c1 = new TCanvas("c1", "canvas");

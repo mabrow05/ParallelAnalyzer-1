@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
        }
  
   double FidRad = 50.0;
-  char path[] = "/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/Beta/"; 
+  char path[] = "/extern/mabrow05/ucna/geant4work/output/bigSim/flatField_2011-2012/F0/";//"/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/Beta/"; 
   for (int nF = 0; nF<nFile; nF++) 
       {
        DataTree Tin;

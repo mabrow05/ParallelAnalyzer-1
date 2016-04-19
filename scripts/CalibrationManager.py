@@ -825,17 +825,17 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [14]#[13,14,16,17,18,19,20,21,22,23,24]# [1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
             #rep.findPedestals(runPeriod)
-            #rep.runReplayPass1(runPeriod)
+            rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            #rep.runReplayPass2(runPeriod)
-            #rep.runReplayPass3(runPeriod)
+            rep.runReplayPass2(runPeriod)
+            rep.runReplayPass3(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             #cal.fitSourcePeaks(runPeriod)
-            cal.makeSourceCalibrationFile(runPeriod, False)
+            #cal.makeSourceCalibrationFile(runPeriod, False)
             #rep.runReplayPass4(runPeriod)
 
     ### Making the files which hold the PMT quality
@@ -846,7 +846,7 @@ if __name__ == "__main__":
 
     ### Simulation reverse calibration procedure
     if 0: 
-        runPeriods =[3]#[1,2,3,4,5,6,7,8,9,10,11,12]#[13]#,16,17,18,19,20,21,22,23,24]#
+        runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]#[13]#,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
@@ -857,7 +857,7 @@ if __name__ == "__main__":
 
     ### Source Run Calibration Steps...
     if 1: 
-        runPeriods = [3]#[1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
