@@ -7,9 +7,9 @@
 
 #include <TString.h>
 
-triggerMap::triggerMap(int bin_width) : binWidth(bin_width), nParams(8); {
+TriggerMap::TriggerMap(double bin_width) : binWidth(bin_width), nParams(8); {
   
-  int nBinsHold = 120./binWidth;
+  int nBinsHold = (int)(120./binWidth);
   nBinsXY = ((int)nBinsHold%2)==0 ? (int)nBinsHold : (int)nBinsHold+1;
   nBinsTotal = nBinsXY*nBinsXY;
 
@@ -26,11 +26,11 @@ triggerMap::triggerMap(int bin_width) : binWidth(bin_width), nParams(8); {
 
 };
 
-triggerMap::~triggerMap() {
+TriggerMap::~TriggerMap() {
   
 };
 
-void triggerMap::setBinValues() {
+void TriggerMap::setBinValues() {
   for (int k=0; k<nBinsXY; k++) {
     xyBinLower[k]     = -(double)nBinsXY*binWidth/2. + ((double) k)*binWidth;
     xyBinUpper[k]     = -(double)nBinsXY*binWidth/2. + ((double) k)*binWidth + binWidth;
@@ -40,7 +40,7 @@ void triggerMap::setBinValues() {
   }
 };
 
-void triggerMap::readTriggerMap(int XeRunPeriod) {
+void TriggerMap::readTriggerMap(int XeRunPeriod) {
   XePeriod = XeRunPeriod;
   std::string file = getenv("TRIGGER_FUNCTIONS") + "/trigger_functions_XePeriod_"+itos(XePeriod) + ".dat";
   ifstream infile(file);
@@ -56,13 +56,13 @@ void triggerMap::readTriggerMap(int XeRunPeriod) {
   std::cout << "Read in Trigger Map from Xe Period " << XePeriod << std::endl;
 };
 
-int getBinNumber(double pos) {
+int TriggerMap::getBinNumber(double pos) {
   for (int m=0; m<nBinsXY; m++) {
     if ( (pos >= xyBinLower[m]) && (pos < xyBinUpper[m]) )  return = m;
   }
 };
 
-void triggerMap::setTriggerMapParams(int xBin, int yBin, std::vector <double> params) {
+void TriggerMap::setTriggerMapPoint(int xBin, int yBin, std::vector <double> params) {
   triggMap[xBin][yBin] = params;
 };
 

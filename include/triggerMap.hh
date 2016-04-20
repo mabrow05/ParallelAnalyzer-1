@@ -1,12 +1,12 @@
 //
 #include <vector>
 
-class triggerMap {
+class TriggerMap {
 
 public:
 
-  triggerMap(int bin_width); //Constructor
-  ~triggerMap();
+  TriggerMap(int bin_width); //Constructor
+  ~TriggerMap();
 
   void readTriggerMap(int XeRunPeriod); //Read in a trigger map
   double returnTriggerProbability(double x, double y, double En);
@@ -16,8 +16,9 @@ public:
 
   int getBinNumber(double pos); //returns bin number for position
 
-  int getBinWidth() {return binWidth;}
+  double getBinWidth() {return binWidth;}
   int getNbins() {return nBinsTotal;}
+  int getNbinsXY() {return nBinsXY;}
   double getBinUpper(int bin) {return xyBinUpper[bin];}
   double getBinLower(int bin) {return xyBinLower[bin];}
   double getBinCenter(int bin) {return xyBinCenter[bin];}
@@ -27,7 +28,7 @@ private:
 
   void setBinValues();
 
-  int binWidth; //x and y width of position bins
+  double binWidth; //x and y width of position bins
   int nBinsXY, nBinsTotal;
   int XePeriod;
   int nParams;
