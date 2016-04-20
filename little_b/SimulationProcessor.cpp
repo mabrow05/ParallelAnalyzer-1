@@ -160,7 +160,6 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   
   UInt_t treeNum = 0; //keep track of the number Tree we are on
   bool needNewTree = false; //Whether or not a new three is needed
-  bool sameEvtTally = true; //Whether or not an evt has been added to the tally
 
   //Read in events and determine evt type based on triggers
   while (evtTally<BetaEvents) {
@@ -399,16 +398,15 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       else Erecon=-1.;
     }
     
+     
     if (source.substr(0,4)=="Beta") tree->Fill();
-    
-    // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
-    if (PID==1) {evtTally++; sameEvtTally=false;}
-    else  sameEvtTally=true;
+   
+    evtTally++;
     evt++;
     
     if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
     
-    if ((source.substr(0,4)=="Beta" && evtTally%nEvtsPerTTree==0 && !sameEvtTally) || evtTally==BetaEvents )  {
+    if ((source.substr(0,4)=="Beta" && evtTally%nEvtsPerTTree==0) || evtTally==BetaEvents )  {
       
       needNewTree=true;
       //Create simulation output file
