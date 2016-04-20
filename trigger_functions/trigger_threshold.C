@@ -56,17 +56,17 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   Double_t West_upper_limit = 150.;
   Int_t nbinsE = (int)(East_upper_limit/binWidth);
   Int_t nbinsW = (int)(West_upper_limit/binWidth);
-  TH1F *Etype1 = new TH1F("Etype1","West Type 1: EvisE",nbinsE,0.,East_upper_limit);
-  TH1F *Etype23 = new TH1F("Etype23","West Type 2/3: EvisE",nbinsE,0.,East_upper_limit);
+  TH1F *Etrigg = new TH1F("Etrigg","West Type 1: EvisE",nbinsE,0.,East_upper_limit);
+  TH1F *EnoTrigg = new TH1F("EnoTrigg","West Type 2/3: EvisE",nbinsE,0.,East_upper_limit);
   TH1F *Etotal = new TH1F("Etotal","West Type 1,2/3: EvisE",nbinsE,0.,East_upper_limit);
-  TH1F *Etrigg = new TH1F("Etrigg","East Trigger Probability",nbinsE,0.,East_upper_limit);
-  Etrigg->SetMarkerStyle(20);
+  TH1F *EtriggFunc = new TH1F("EtriggFunc","East Trigger Probability",nbinsE,0.,East_upper_limit);
+  EtriggFunc->SetMarkerStyle(20);
 
-  TH1F *Wtype1 = new TH1F("Wtype1","East Type 1: EvisW",nbinsW,0.,West_upper_limit);
-  TH1F *Wtype23 = new TH1F("Wtype23","East Type 2/3: EvisW",nbinsW,0.,West_upper_limit);
+  TH1F *Wtrigg = new TH1F("Wtrigg","East Type 1: EvisW",nbinsW,0.,West_upper_limit);
+  TH1F *WnoTrigg = new TH1F("WnoTrigg","East Type 2/3: EvisW",nbinsW,0.,West_upper_limit);
   TH1F *Wtotal = new TH1F("Wtotal","East Type 1,2/3: EvisW",nbinsW,0.,West_upper_limit);
-  TH1F *Wtrigg = new TH1F("Wtrigg","West Trigger Probability",nbinsW,0.,West_upper_limit);
-  Wtrigg->SetMarkerStyle(20);
+  TH1F *WtriggFunc = new TH1F("WtriggFunc","West Trigger Probability",nbinsW,0.,West_upper_limit);
+  WtriggFunc->SetMarkerStyle(20);
 
   //TF1 *erf = new TF1("erf","([5]*TMath::Erf((x-[0])/[1])+0.5)+[2]*TMath::Gaus(x,[3],[4])",0.,150.);
   //TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))+[4]*TMath::Gaus(x,[5],[6])",0.,150.);
@@ -100,35 +100,35 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   TCanvas *c1 = new TCanvas("c1"," ",1200.,1600.);
   c1->Divide(2,2);
   c1->cd(1);
-  chain->Draw("EvisE>>Etype1","Type==1 && Side==1 && PID==1");
+  chain->Draw("EvisE>>Etrigg","(Type==1 && Side==1) || (Type==0 && Side==0) && PID==1");
   c1->cd(2);  
-  chain->Draw("EvisE>>Etype23","Type==2 && Side==1 && PID==1");
+  chain->Draw("EvisE>>EnoTrigg","Type==2 && Side==1 && PID==1");
   c1->cd(3);
-  Etotal->Add(Etype1,Etype23);
+  Etotal->Add(Etrigg,EnoTrigg);
   Etotal->Draw();
   c1->cd(4);
-  Etrigg->Divide(Etype1,Etotal);
-  Etrigg->SetStats(0);
+  EtriggFunc->Divide(Etrigg,Etotal);
+  EtriggFunc->SetStats(0);
   //Etrigg->Draw("P");
 
-  Etrigg->Fit("erf","","",0.,East_upper_limit);
+  EtriggFunc->Fit("erf","","",0.,East_upper_limit);
   
-  Etrigg->Draw("P");
+  EtriggFunc->Draw("P");
   triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " << erf->GetParameter(6) << " " << erf->GetParameter(7) << endl;
 
 
   TCanvas *c2 = new TCanvas("c2"," ",1200.,1600.);
   c2->Divide(2,2);
   c2->cd(1);
-  chain->Draw("EvisW>>Wtype1","Type==1 && Side==0 && PID==1");
+  chain->Draw("EvisW>>Wtrigg","(Type==1 && Side==0) || (Type==0 && Side==1) && PID==1");
   c2->cd(2);  
-  chain->Draw("EvisW>>Wtype23","Type==2 && Side==0 && PID==1");
+  chain->Draw("EvisW>>WnoTrigg","Type==2 && Side==0 && PID==1");
   c2->cd(3);
-  Wtotal->Add(Wtype1,Wtype23);
+  Wtotal->Add(Wtrigg,WnoTrigg);
   Wtotal->Draw();
   c2->cd(4);
-  Wtrigg->Divide(Wtype1,Wtotal);
-  Wtrigg->SetStats(0);
+  WtriggFunc->Divide(Wtrigg,Wtotal);
+  WtriggFunc->SetStats(0);
   //Wtrigg->Draw("P");
 
   erf->SetParameter(0,0.5); //Constant offset of erf
@@ -153,10 +153,10 @@ void trigger_threshold(Int_t XeRunPeriod, bool mpmData=false) {
   //erf->SetParameter(8,25.);
 
 
-  Wtrigg->Fit("erf","","",0.,West_upper_limit);
-  //Wtrigg->Fit("erf","R");
+  WtriggFunc->Fit("erf","","",0.,West_upper_limit);
+  //WtriggFunc->Fit("erf","R");
 
-  Wtrigg->Draw("P");
+  WtriggFunc->Draw("P");
 
   triggFunc << erf->GetParameter(0) << " " << erf->GetParameter(1) << " " << erf->GetParameter(2) << " " << erf->GetParameter(3) << " " << erf->GetParameter(4) << " " << erf->GetParameter(5) << " " << erf->GetParameter(6) << " " << erf->GetParameter(7) << endl;
 
