@@ -6,6 +6,7 @@ DataTreeFLOAT::DataTreeFLOAT() : inputFile(NULL), outputFile(NULL), inputTree(NU
 };
 
 DataTreeFLOAT::~DataTreeFLOAT() {
+  delete UCN_Mon_1_Rate; delete UCN_Mon_2_Rate; delete UCN_Mon_3_Rate; delete UCN_Mon_4_Rate; 
   if (outputTree) delete outputTree;
   if (outputFile) {outputFile->Close();  delete outputFile;}
   if (inputTree) delete inputTree;
@@ -88,9 +89,26 @@ void DataTreeFLOAT::makeOutputTree(std::string outputFileName, std::string outpu
   std::cout << "Created output tree " << outputTreeName << " in " << outputFileName << "...\n";
 };
 
+void DataTreeFLOAT::writeOutputFile() {
+  
+  if (outputFile) {
+    outputFile->cd();
+    UCN_Mon_1_Rate->Write("",TObject::kOverwrite);
+    UCN_Mon_2_Rate->Write("",TObject::kOverwrite);
+    UCN_Mon_3_Rate->Write("",TObject::kOverwrite);
+    UCN_Mon_4_Rate->Write("",TObject::kOverwrite);
+    outputTree->Write();
+  }
+};
+
 void DataTreeFLOAT::setupInputTree(std::string inputFileName, std::string inputTreeName) {
   inputFile = new TFile(inputFileName.c_str(),"READ");
   inputTree = (TTree*)(inputFile->Get(inputTreeName.c_str()));
+
+  UCN_Mon_1_Rate = (TH1F*)(inputFile->Get("UCN_Mon_1_Rate"));
+  UCN_Mon_2_Rate = (TH1F*)(inputFile->Get("UCN_Mon_2_Rate"));
+  UCN_Mon_3_Rate = (TH1F*)(inputFile->Get("UCN_Mon_3_Rate"));
+  UCN_Mon_4_Rate = (TH1F*)(inputFile->Get("UCN_Mon_4_Rate"));
 
   inputTree->SetBranchAddress("TriggerNum",&TriggerNum);
   inputTree->SetBranchAddress("EvtN",&EvtN);

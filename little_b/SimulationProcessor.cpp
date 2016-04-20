@@ -51,6 +51,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
+  UInt_t nEvtsPerTTree = 10000; //Number of electron events to be stored in each output TTree
+
   std::string geometry = geom; // "2010","2011/2012","2012/2013"
   UInt_t alphaFileIndex = 0; // the index on the nPE_keV file
   UInt_t XeMapPeriod = 2; // The xenon position map to be used
@@ -96,20 +98,13 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   }
 
   std::cout << "Using simulation from " << simLocation << "...\n";
-
+  
 
   // Load information for applying detector effects
   std::vector <Double_t> alphas = getAlphaValues(alphaFileIndex); // fill vector with the alpha (nPE/keV) values
-  std::vector < std::vector <Double_t> > triggerFunc = getTriggerFunctionParams(triggerMap,7); // 2D vector with trigger function for East side and West side in that order
+  std::vector < std::vector <Double_t> > triggerFunc = getTriggerFunctionParams(triggerMap,8); // 2D vector with trigger function for East side and West side in that order
   GetPositionMap(XeMapPeriod); //Loads position map via posMapReader.h methods
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(geometry);
-
-  // Histograms for plotting the peaks to fit
-  TH1D Etype0("Etype0","East type 0",200,0.,1200.);
-  TH1D Wtype0("Wtype0","West type 0",200,0.,1200.);
-
-  TTree *tree = new TTree("SimAnalyzed","SimAnalyzed");
-  SetUpOutputTree(*tree); //Setup the output tree and branches
   
   
   //Read in simulated data and put in a TChain
@@ -135,6 +130,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   chain.SetBranchAddress("ScintPos",&scint_pos);
   chain.SetBranchAddress("primaryKE",&Eprim);
   
+
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
 
@@ -155,9 +151,29 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 
   std::vector < std::vector <Int_t> > gridPoint; // Will hold the grid location for the position map
 
+  // Histograms for plotting the peaks to fit
+  TH1D Etype0("Etype0","East type 0",200,0.,1200.);
+  TH1D Wtype0("Wtype0","West type 0",200,0.,1200.);
+
+  TTree *tree  = new TTree("SimAnalyzed","SimAnalyzed");
+  SetUpOutputTree(*tree); //Setup the initial output tree and branches; 
+  
+  UInt_t treeNum = 0; //keep track of the number Tree we are on
+  bool needNewTree = false; //Whether or not a new three is needed
+  bool sameEvtTally = true; //Whether or not an evt has been added to the tally
+
   //Read in events and determine evt type based on triggers
   while (evtTally<BetaEvents) {
     if (evt>=nevents) evt=0; //Wrapping the events back to the beginning
+    
+    //Creates new Tree when the old one was deemed full
+    if (needNewTree)  {
+      tree = new TTree("SimAnalyzed","SimAnalyzed");
+      SetUpOutputTree(*tree);
+      treeNum++;
+      needNewTree=false;
+    }
+
     EastScintTrigger = WestScintTrigger = EMWPCTrigger = WMWPCTrigger = false; //Resetting triggers each event
 
     chain.GetEvent(evt);
@@ -173,25 +189,32 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     scint_pos.ScintPosW[2] /= edepQ.EdepQW>0. ? edepQ.EdepQW : 1.;
 */
    
-    //Setting adjusted positions when we are simulating a source and move source flag is set to true
+    //Setting adjusted positions to coordinates in the 1T non-expanded field
+    // of the decay trap
     if (moveSource && source!="Beta") {
-      scint_pos_adj.ScintPosAdjE[0] = rand2.Gaus(srcPos[0][0], fabs(srcPos[0][2]));
-      scint_pos_adj.ScintPosAdjE[1] = rand2.Gaus(srcPos[0][1], fabs(srcPos[0][2]));
-      scint_pos_adj.ScintPosAdjW[0] = rand2.Gaus(srcPos[1][0], fabs(srcPos[1][2]));
-      scint_pos_adj.ScintPosAdjW[1] = rand2.Gaus(srcPos[1][1], fabs(srcPos[1][2]));
+      mwpc_pos_adj.east[0] = rand2.Gaus(srcPos[0][0], fabs(srcPos[0][2]));
+      mwpc_pos_adj.east[1] = rand2.Gaus(srcPos[0][1], fabs(srcPos[0][2]));
+      mwpc_pos_adj.west[0] = rand2.Gaus(srcPos[1][0], fabs(srcPos[1][2]));
+      mwpc_pos_adj.west[1] = rand2.Gaus(srcPos[1][1], fabs(srcPos[1][2]));
     }
     else {
-      scint_pos_adj.ScintPosAdjE[0] = scint_pos.ScintPosE[0]*sqrt(0.6)*1000.;
-      scint_pos_adj.ScintPosAdjE[1] = scint_pos.ScintPosE[1]*sqrt(0.6)*1000.;
-      scint_pos_adj.ScintPosAdjW[0] = scint_pos.ScintPosW[0]*sqrt(0.6)*1000.;
-      scint_pos_adj.ScintPosAdjW[1] = scint_pos.ScintPosW[1]*sqrt(0.6)*1000.;
+      scint_pos_adj.east[0] = scint_pos.east[0]*sqrt(0.6)*1000.;
+      scint_pos_adj.east[1] = scint_pos.east[1]*sqrt(0.6)*1000.;
+      scint_pos_adj.west[0] = scint_pos.west[0]*sqrt(0.6)*1000.;
+      scint_pos_adj.west[1] = scint_pos.west[1]*sqrt(0.6)*1000.;
+      mwpc_pos_adj.east[0] = mwpc_pos.east[0]*sqrt(0.6)*1000.;
+      mwpc_pos_adj.east[1] = mwpc_pos.east[1]*sqrt(0.6)*1000.;
+      mwpc_pos_adj.west[0] = mwpc_pos.west[0]*sqrt(0.6)*1000.;
+      mwpc_pos_adj.west[1] = mwpc_pos.west[1]*sqrt(0.6)*1000.;
     }
-    scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2]*1000.;
-    scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2]*1000.;
+    scint_pos_adj.east[2] = scint_pos.east[2]*1000.;
+    scint_pos_adj.west[2] = scint_pos.west[2]*1000.;
+    mwpc_pos_adj.east[2] = mwpc_pos.east[2]*1000.;
+    mwpc_pos_adj.west[2] = mwpc_pos.west[2]*1000.;
     
     
     //retrieve point on grid for each side of detector [E/W][x/y] to implement position map
-    gridPoint = getGridPoint(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
+    gridPoint = getGridPoint(mwpc_pos_adj.east[0],mwpc_pos_adj.east[1],mwpc_pos_adj.west[0],mwpc_pos_adj.west[1]);
 
     Int_t intEastBinX = gridPoint[0][0];
     Int_t intEastBinY = gridPoint[0][1];
@@ -199,8 +222,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     Int_t intWestBinY = gridPoint[1][1];
       
     //MWPC triggers checked against threshold set above
-    if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
-    if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
+    if (mwpcE.east>MWPCThreshold) EMWPCTrigger=true;
+    if (mwpcE.west>MWPCThreshold) WMWPCTrigger=true;
 
     Double_t pmtEnergyLowerLimit = 1.; //To put a hard cut on the weight to avoid dividing by zero
     
@@ -210,7 +233,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       Double_t posCorrAlpha = alphas[p]*positionMap[p][intEastBinX][intEastBinY];
       if (posCorrAlpha==0.) posCorrAlpha=1.; //This occurs when the event occurs outside the position map... This is to prevent the Gaussian from having inf sigma
       //Sample a gaussian centered on the EQ of the event with a spread related to alpha
-      pmt_Evis.Evis[p] = rand.Gaus(edepQ.EdepQE,sqrt(edepQ.EdepQE/posCorrAlpha));
+      pmt_Evis.Evis[p] = rand.Gaus(edepQ.east,sqrt(edepQ.east/posCorrAlpha));
       //Set the weight of the event based on the number of photoelectrons as seen in the detector
       if (pmt_Evis.Evis[p]>pmtEnergyLowerLimit) {
 	pmt_Evis.weight[p] = posCorrAlpha/pmt_Evis.Evis[p];
@@ -225,7 +248,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       denom+=pmt_Evis.weight[p];
     }
     Double_t totalEnE = numer/denom;
-    evis.EvisE = totalEnE;
+    evis.east = totalEnE;
     
       
     //West Side
@@ -233,7 +256,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       Double_t posCorrAlpha = alphas[p]*positionMap[p][intWestBinX][intWestBinY];
       //std::cout << posCorrAlpha << std::endl;
       if (posCorrAlpha==0.) posCorrAlpha=1.; //This occurs when the event occurs outside the position map... This is to prevent the Gaussian from having inf sigma
-      pmt_Evis.Evis[p] = rand.Gaus(edepQ.EdepQW,sqrt(edepQ.EdepQW/posCorrAlpha));
+      pmt_Evis.Evis[p] = rand.Gaus(edepQ.west,sqrt(edepQ.west/posCorrAlpha));
       
       //std::cout << edepQ.EdepQW << " " << pmt_Evis.Evis[p] << std::endl;
 
@@ -251,15 +274,15 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     }
     //std::cout << numer << std::endl;
     Double_t totalEnW = numer/denom;
-    evis.EvisW = totalEnW;
+    evis.west = totalEnW;
     
 
     //////////////////////////////////////////////////////////////////////////////////////////////  
     //Applying the twiddle from the linearity curves not being perfect
     std::vector <Double_t> paramHold = {linCorrParams[0][0],linCorrParams[0][1],linCorrParams[0][2],linCorrParams[0][3]}; //East parameters
-    evis.EvisE = applyLinearityTwiddle(paramHold,evis.EvisE); //Applies the twiddle
+    evis.east = applyLinearityTwiddle(paramHold,evis.east); //Applies the twiddle
     paramHold = {linCorrParams[1][0],linCorrParams[1][1],linCorrParams[1][2],linCorrParams[1][3]}; //West parameters
-    evis.EvisW = applyLinearityTwiddle(paramHold,evis.EvisW); //Applies the twiddle
+    evis.west = applyLinearityTwiddle(paramHold,evis.west); //Applies the twiddle
     
     // std::cout << evis.EvisE << "\t" << evis.EvisW << std::endl;
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -268,11 +291,11 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     // Now we can apply the trigger probability
 
     //EAST Trigger
-    Double_t triggProb = triggerProbability(triggerFunc[0],evis.EvisE);
-    if (rand.Rndm(0)<triggProb && evis.EvisE>0.)  {/*std::cout << "East Trigger\n";*/EastScintTrigger=true;}
+    Double_t triggProb = triggerProbability(triggerFunc[0],evis.east);
+    if (rand.Rndm(0)<triggProb && evis.east>0.)  {/*std::cout << "East Trigger\n";*/EastScintTrigger=true;}
     //WEST Trigger
-    triggProb = triggerProbability(triggerFunc[1],evis.EvisW);
-    if (rand.Rndm(0)<triggProb && evis.EvisW>0.) {WestScintTrigger = true;}     
+    triggProb = triggerProbability(triggerFunc[1],evis.west);
+    if (rand.Rndm(0)<triggProb && evis.west>0.) {WestScintTrigger = true;}     
 
     
       
@@ -347,15 +370,15 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       }
       else {
 	PID=1;
-	  type=4;
-	  side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
+	type=4;
+	side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
       }
     }
   
     //Calculate Erecon
     Int_t typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
     if (side==0) {
-      Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
+      Double_t totalEvis = type==1 ? (evis.east+evis.west):evis.east;
       if (totalEvis>0.) {
 	Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
 	if (type==0) Etype0.Fill(Erecon); 
@@ -365,7 +388,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       else Erecon=-1.;
     }
     if (side==1) {
-      Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
+      Double_t totalEvis = type==1 ? (evis.east+evis.west):evis.west;
       if (totalEvis>0.) {
 	Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
 	
@@ -379,10 +402,24 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     if (source.substr(0,4)=="Beta") tree->Fill();
     
     // Increment the event tally if the event was PID = 1 (electron) and the Erecon was valid
-    if (PID==1) evtTally++;
+    if (PID==1) {evtTally++; sameEvtTally=false;}
+    else  sameEvtTally=true;
     evt++;
     
     if (evtTally%1000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
+    
+    if ((source.substr(0,4)=="Beta" && evtTally%nEvtsPerTTree==0 && !sameEvtTally) || evtTally==BetaEvents )  {
+      
+      needNewTree=true;
+      //Create simulation output file
+      Char_t outputfile[500];
+      sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%i.root",source.c_str(), treeNum);
+      TFile *outfile = new TFile(outputfile, "RECREATE");
+      tree->Write();
+      outfile->Close();
+      delete tree;
+    } 
+    
   }
   std::cout << endl;
   
@@ -458,13 +495,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
     
     outfile->Close();
   }
-  else if (source.substr(0,4)=="Beta")  {
-    //Create simulation output file
-    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s.root",source.c_str());
-    outfile = new TFile(outputfile, "RECREATE");
-    tree->Write();
-    outfile->Close();
-  } 
+  
 }
 
   
@@ -657,6 +688,7 @@ void SetUpOutputTree(TTree& tree) {
   tree.Branch("time",&Time,"timeE/D:timeW");
   tree.Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
   tree.Branch("MWPCPos",&mwpc_pos,"MWPCPosE[3]/D:MWPCPosW[3]");
+  tree.Branch("MWPCPosAdjusted",&mwpc_pos_adj,"MWPCPosAdjE[3]/D:MWPCPosAdjW[3]");
   tree.Branch("ScintPos",&scint_pos,"ScintPosE[3]/D:ScintPosW[3]");
   tree.Branch("ScintPosAdjusted",&scint_pos_adj,"ScintPosAdjE[3]/D:ScintPosAdjW[3]");
   tree.Branch("PMT_Evis",&pmt_Evis,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:weight0:weight1:weight2:weight3:weight4:weight5:weight6:weight7");

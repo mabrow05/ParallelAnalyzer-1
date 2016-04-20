@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
     //}
     //}
     
-    if (t->Erecon>0.) t->fillOutputTree();
+      if (t->Erecon>0.){ t->fillOutputTree();}
   }
 
   // Write output ntuple

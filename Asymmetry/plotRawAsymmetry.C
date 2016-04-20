@@ -2,27 +2,46 @@
   //#include <vector>
   gStyle->SetOptFit(1111);
 
-  ifstream infile("rawAsymmetryByOctet_0-59_AnaCh7_50mm.dat");
+  ifstream infile("rawAsymmetryByOctet_0-59_AnaCh1_50mm.dat");
   char in1[10], in2[10];
+  double A, err;
   vector <double> octet;
   vector <double> asym; 
   vector <double> errorY;
   vector <double> errorX;
   double Octet = 0.;
 
-  while (infile >> in1 >> in2) {
-    if (in1[0]=='0') {
+  double weightSum = 0.;
+  double aveSum = 0.;
+
+  while (infile >> Octet >> in1 >> in2) {
+    A=atof(in1);
+    err=atof(in2);
+
+    cout << Octet << " " << A << " " << err << endl;
+
+    if (TMath::IsNaN(A)) {continue;}
+    
+    else {
+      
       octet.push_back(Octet);
-      asym.push_back(atof(in1));
-      errorY.push_back(atof(in2));  
+      asym.push_back(A);
+      errorY.push_back(err); 
+      aveSum += 1./(err*err)*A;
+      weightSum+=1./(err*err);
       errorX.push_back(0.);
+      
+      Octet = Octet+1.;
     }
-    Octet = Octet+1.;
   }
+  double finalAsym = aveSum/weightSum;
+  double totalError = 1./TMath::Sqrt(weightSum);
 
   for (int i=0; i<octet.size(); i++) {
     cout << octet[i] << " " << asym[i] << " " << errorY[i] << endl;
   }
+
+  
 
   TGraphErrors *g = new TGraphErrors(octet.size(), &octet[0],&asym[0],&errorX[0], &errorY[0]);
   g->SetTitle("Raw Measured Asymmetry");
@@ -39,4 +58,6 @@
   
   g->Draw("AP");
 
+
+  cout << "final Asym = " << finalAsym << " +/- " << totalError << endl;
 } 

@@ -60,6 +60,57 @@ const std::map <std::string,std::pair<Double_t,Double_t> > peaks2012 = {{"Sn",st
 									{"Bi1",std::make_pair(0.,0.)},
 									{"Bi2",std::make_pair(0.,0.)}};
 
+//////////////////////// Data Structures /////////////////////////
+
+struct Evis {
+  double east;
+  double west;
+}; 
+
+struct Edep {
+  double east;
+  double west;
+}; 
+
+struct EdepQ {
+  double east;
+  double west;
+}; 
+
+struct simTime {
+  double timeE;
+  double timeW;
+}; 
+
+struct MWPCEnergy {
+  double east; 
+  double west;
+}; 
+
+struct MWPCPos {
+  double east[3];
+  double west[3];
+}; 
+
+struct ScintPos {
+  double east[3];
+  double west[3];
+}; 
+
+struct PMT_Evis {
+  double Evis[8];
+  double weight[8]; 
+}; 
+
+//Analysis variables
+Evis evis; //weighted visible energy from all 4 PMTs combined 
+Edep edep, edepQ; //Energy deposited in scint directly from sim
+simTime Time; //Time since creation of event when it deposits energy in scint
+MWPCEnergy mwpcE; //energy deposited in MWPC
+MWPCPos mwpc_pos, mwpc_pos_adj; //pos in MWPC, where the adj var has been
+                                // put in mm and mapped back to the 1T field
+ScintPos scint_pos, scint_pos_adj; //pos in scint
+PMT_Evis pmt_Evis; //struct for holding the Evis in each PMT
 
 
 Int_t PID, type, side, primaryID; // basic analysis tags
@@ -107,53 +158,6 @@ Double_t applyLinearityTwiddle (std::vector <Double_t> &params, Double_t EQ);
 // Sets up the output tree for the simulated data
 void SetUpOutputTree(TTree& tree);
   
-
-//////////////////////// Data Structures /////////////////////////
-
-struct Evis {
-  double EvisE;
-  double EvisW;
-} evis;
-
-struct Edep {
-  double EdepE;
-  double EdepW;
-} edep;
-
-struct EdepQ {
-  double EdepQE;
-  double EdepQW;
-} edepQ;
-
-struct time {
-  double timeE;
-  double timeW;
-} Time;
-
-struct MWPCEnergy {
-  double MWPCEnergyE; 
-  double MWPCEnergyW;
-} mwpcE;
-
-struct MWPCPos {
-  double MWPCPosE[3];
-  double MWPCPosW[3];
-} mwpc_pos;
-
-struct ScintPos {
-  double ScintPosE[3];
-  double ScintPosW[3];
-} scint_pos;
-
-struct ScintPosAdjusted {
-  double ScintPosAdjE[3];
-  double ScintPosAdjW[3];
-} scint_pos_adj;
-
-struct PMT_Evis {
-  double Evis[8];
-  double weight[8]; 
-} pmt_Evis;
 
 
 #endif

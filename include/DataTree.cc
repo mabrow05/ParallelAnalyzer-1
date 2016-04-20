@@ -6,6 +6,7 @@ DataTree::DataTree() : inputFile(NULL), outputFile(NULL), inputTree(NULL), outpu
 };
 
 DataTree::~DataTree() {
+  delete UCN_Mon_1_Rate; delete UCN_Mon_2_Rate; delete UCN_Mon_3_Rate; delete UCN_Mon_4_Rate; 
   if (outputTree) delete outputTree;
   if (outputFile) {outputFile->Close();  delete outputFile;}
   if (inputTree) delete inputTree;
@@ -23,6 +24,7 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   outputTree->Branch("Tof",&Tof, "Tof/D");   
   outputTree->Branch("TimeE",&TimeE, "TimeE/D");
   outputTree->Branch("TimeW",&TimeW, "TimeW/D");
+  outputTree->Branch("Time",&Time, "Time/D");
   outputTree->Branch("TDCE",&TDCE,"TDCE/D");
   outputTree->Branch("TDCW",&TDCW,"TDCW/D");
   outputTree->Branch("TDCE1",&TDCE1,"TDCE1/D");
@@ -88,10 +90,27 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   std::cout << "Created output tree " << outputTreeName << " in " << outputFileName << "...\n";
 };
 
+void DataTree::writeOutputFile() {
+  
+  if (outputFile) {
+    outputFile->cd();
+    UCN_Mon_1_Rate->Write("",TObject::kOverwrite);
+    UCN_Mon_2_Rate->Write("",TObject::kOverwrite);
+    UCN_Mon_3_Rate->Write("",TObject::kOverwrite);
+    UCN_Mon_4_Rate->Write("",TObject::kOverwrite);
+    outputTree->Write();
+  }
+};
+
 void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeName) {
   inputFile = new TFile(inputFileName.c_str(),"READ");
   inputTree = (TTree*)(inputFile->Get(inputTreeName.c_str()));
   //inputTree = (TTree*)(gROOT->FindObject(inputTreeName.c_str()));
+
+  UCN_Mon_1_Rate = (TH1F*)(inputFile->Get("UCN_Mon_1_Rate"));
+  UCN_Mon_2_Rate = (TH1F*)(inputFile->Get("UCN_Mon_2_Rate"));
+  UCN_Mon_3_Rate = (TH1F*)(inputFile->Get("UCN_Mon_3_Rate"));
+  UCN_Mon_4_Rate = (TH1F*)(inputFile->Get("UCN_Mon_4_Rate"));
 
   inputTree->SetBranchAddress("TriggerNum",&TriggerNum);
   inputTree->SetBranchAddress("EvtN",&EvtN);
@@ -100,6 +119,7 @@ void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeNa
   inputTree->SetBranchAddress("Tof",&Tof);   
   inputTree->SetBranchAddress("TimeE",&TimeE);
   inputTree->SetBranchAddress("TimeW",&TimeW);
+  inputTree->SetBranchAddress("Time",&Time);
   inputTree->SetBranchAddress("TDCE",&TDCE);
   inputTree->SetBranchAddress("TDCW",&TDCW);
   inputTree->SetBranchAddress("TDCE1",&TDCE1);

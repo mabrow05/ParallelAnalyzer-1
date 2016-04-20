@@ -10,7 +10,10 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 
+#include <TMath.h>
+#include <TString.h>
 #include <TFile.h>
 #include <TCanvas.h>
 #include <TStyle.h>
@@ -37,191 +40,249 @@ int main(int argc, char *argv[])
   double enWinHigh = (double) atof(argv[4]);
   int enBinWidth = atoi(argv[5]);
 
-  int numBins = 800/enBinWidth;
+  int numBins = 1000/enBinWidth;
 
-  double normFactor=0.;
+  //set up energy binning vector
+  std::vector <double> enBins(numBins,0.);
+  
+  for (int bin=0; bin<numBins; bin++) {
+    enBins[bin] = ((double)bin+.5)*(double)enBinWidth;
+  }
+  
+  std::vector <std::vector <double> > superSumTotal_uk(4, std::vector <double>(numBins,0.)); //type0=0, type1=1, type23=2, ALL=3
+  std::vector <std::vector <double> > superSumTotalError_uk(4, std::vector <double>(numBins,0.));
+  std::vector <std::vector <double> > superSumTotal_sim(4, std::vector <double>(numBins,0.));
+  std::vector <std::vector <double> > superSumTotalError_sim(4, std::vector <double>(numBins,0.));
+  std::vector <double> xErr(numBins,0.);
 
- 
   for (int octetNum=octetNumStart; octetNum<octetNumEnd+1; octetNum++) {
  
     try {
       //std::string pdfFileBase = "comparison_plots/SimulationComp_Octet"+itos(octetNum)+"_evis_"+itos((int)enWinLow)+"-"+itos((int)enWinHigh)+".pdf";
- 
-      TFile *f = new TFile("test.root","RECREATE");
+      std::string file1 = "superSumPlots/octet_"+itos(octetNum)+".root";
+      TFile *f = new TFile(file1.c_str(),"RECREATE");
       
-      /*//Making graphs for comparison  
-      TGraphErrors EreconALL_sim;
-      //TGraphErrors EreconALL_uk;
-      //EreconALL_uk.GetXaxis()->SetTitle("Energy (keV)");
-      //EreconALL_uk.SetTitle("All Types Super-Sum");
-
-      TGraphErrors Erecon0_sim;
-      TGraphErrors Erecon0_uk;
-      Erecon0_uk.GetXaxis()->SetTitle("Energy (keV)");
-      Erecon0_uk.SetTitle("Type 0 Super-Sum");
-
-      TGraphErrors Erecon1_sim;
-      TGraphErrors Erecon1_uk;
-      Erecon1_uk.GetXaxis()->SetTitle("Energy (keV)");
-      Erecon1_uk.SetTitle("Type 1 Super-Sum");
-
-      TGraphErrors Erecon23_sim;
-      TGraphErrors Erecon23_uk;
-      Erecon23_uk.GetXaxis()->SetTitle("Energy (keV)");
-      Erecon23_uk.SetTitle("Type 2/3 Super-Sum");
-    
-      */
-      TH1D Type_sim("Type_sim","Event Types", 4, 0., 4.);
-      TH1D Type_uk("Type_uk","Event Types", 4, 0., 4.);
       
 
-      /*EreconALL_sim.SetMarkerColor(kRed);
-      EreconALL_uk.SetMarkerColor(kBlue);
-     
-      Erecon0_sim.SetMarkerColor(kRed);    
-      Erecon0_uk.SetMarkerColor(kBlue);
-
-      Erecon1_sim.SetMarkerColor(kRed); 
-      Erecon1_uk.SetMarkerColor(kBlue);
-
-      Erecon23_sim.SetMarkerColor(kRed);    
-      Erecon23_uk.SetMarkerColor(kBlue);    
-
-      Type_sim.SetLineColor(kRed);
-      Type_uk.SetLineColor(kBlue);*/
-
-      //set up energy binning vector
-      std::vector <double> enBins(numBins,0.);
+      //int uk0E=0, sim0E=0, uk1E=0, sim1E=0, uk23E=0, sim23E=0, ukTotE=0, simTotE=0, uk0W=0, sim0W=0, uk1W=0, sim1W=0, uk23W=0, sim23W=0, ukTotW=0, simTotW=0; //Event totals
+      //double ukAsym = 0., simAsym=0., ukAsymError = 0., simAsymError=0.;
       
-      for (int bin=0; bin<numBins; bin++) {
-	enBins[bin] = ((double)bin+.5)*(double)enBinWidth;
-      }
+      double normFactor = 0., ukIntegral=0., simIntegral=0.;
 
-      int uk0E=0, sim0E=0, uk1E=0, sim1E=0, uk23E=0, sim23E=0, ukTotE=0, simTotE=0, uk0W=0, sim0W=0, uk1W=0, sim1W=0, uk23W=0, sim23W=0, ukTotW=0, simTotW=0; //Event totals
-      double ukAsym = 0., simAsym=0., ukAsymError = 0., simAsymError=0.;
-   
 
       { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
 	OctetAsymmetry UK(octetNum, enBinWidth, 50., true, false);
-	UK.calcAsymmetryBinByBin(1);
-	
-	/*UK.calcTotalAsymmetry(225.,675.,1);
-	ukAsym = UK.returnTotalAsymmetry();
-	ukAsymError = UK.returnTotalAsymmetryError();
-	std::cout << "UK Asym " << ukAsym << std::endl;
-      
-	UK.calcBGsubtractedEvts();*/
 
-
-	std::vector <double> evts;
+	//std::vector <double> evts;
 
 	std::vector <double> superSum;
 	std::vector <double> superSumError;
-	std::vector <double> xErr(numBins,0.);
-
 	
+
+	f->cd();
+	
+	//Type 0 events
+	UK.calcSuperSum(4);
+	superSum = UK.returnSuperSum();
+	superSumError = UK.returnSuperSumError();
+
+	for (int n=0; n<numBins;n++) {
+	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
+	  superSumTotal_uk[0][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_uk[0][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
+	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) ukIntegral+=superSum[n];
+	}
+	
+	TGraphErrors *Erecon0_uk = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
+	Erecon0_uk->SetMarkerColor(kBlue);
+	Erecon0_uk->SetMarkerStyle(21);
+	Erecon0_uk->GetXaxis()->SetTitle("Energy (keV)");
+	Erecon0_uk->SetTitle("Type 0 Super-Sum");
+	Erecon0_uk->Draw("AP");
+	
+	Erecon0_uk->Write("Erecon0_uk");
+	
+	delete Erecon0_uk;
+
+	//Type 1 events
+	UK.calcSuperSum(6);
+	superSum = UK.returnSuperSum();
+	superSumError = UK.returnSuperSumError();
+
+	for (int n=0; n<numBins;n++) {
+	  superSumTotal_uk[1][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_uk[1][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
+	}
+	
+	TGraphErrors *Erecon1_uk = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
+	Erecon1_uk->SetMarkerColor(kBlue);
+	Erecon1_uk->SetMarkerStyle(21);
+	Erecon1_uk->GetXaxis()->SetTitle("Energy (keV)");
+	Erecon1_uk->SetTitle("Type 1 Super-Sum");
+	Erecon1_uk->Draw("AP");
+	
+	Erecon1_uk->Write("Erecon1_uk");
+	
+	delete Erecon1_uk;
+
+	//Type 2/3 events
+	UK.calcSuperSum(7);
+	superSum = UK.returnSuperSum();
+	superSumError = UK.returnSuperSumError();
+
+	for (int n=0; n<numBins;n++) {
+	  superSumTotal_uk[2][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_uk[2][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
+	}
+	
+	TGraphErrors *Erecon23_uk = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
+	Erecon23_uk->SetMarkerColor(kBlue);
+	Erecon23_uk->SetMarkerStyle(21);
+	Erecon23_uk->GetXaxis()->SetTitle("Energy (keV)");
+	Erecon23_uk->SetTitle("All Types Super-Sum");
+	Erecon23_uk->Draw("AP");
+	
+	Erecon23_uk->Write("Erecon23_uk");
+	
+	delete Erecon23_uk;
 
 	//All event types
 	UK.calcSuperSum(1);
 	superSum = UK.returnSuperSum();
 	superSumError = UK.returnSuperSumError();
+
 	for (int n=0; n<numBins;n++) {
-	  std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
+	  superSumTotal_uk[3][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_uk[3][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
 	}
-	f->cd();
+	
 	TGraphErrors *EreconALL_uk = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
 	EreconALL_uk->SetMarkerColor(kBlue);
 	EreconALL_uk->SetMarkerStyle(21);
 	EreconALL_uk->GetXaxis()->SetTitle("Energy (keV)");
 	EreconALL_uk->SetTitle("All Types Super-Sum");
 	EreconALL_uk->Draw("AP");
-	//EreconALL_uk->SetDirectory(f);
 	
 	EreconALL_uk->Write("EreconALL_uk");
-	//f->Write();
-	//f->Close();
-	delete EreconALL_uk;
-	//exit(0);
-
 	
-       
-    
-	/*evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
-	uk0E = (int)evts[0]; uk0W = (int)evts[1];
-	Type_uk.SetBinContent(1, (int)(evts[0]+evts[1]));
-	evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
-	uk1E = (int)evts[0]; uk1W = (int)evts[1];
-	Type_uk.SetBinContent(2, (int)(evts[0]+evts[1]));
-	evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
-	uk23E = (int)evts[0]; uk23W = (int)evts[1];
-	Type_uk.SetBinContent(3, (int)(evts[0]+evts[1]));
-	evts = UK.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
-	uk23E += (int)evts[0]; uk23W += (int)evts[1];
-	Type_uk.SetBinContent(4, (int)(evts[0]+evts[1]));
-      
-	ukTotE = uk0E+uk1E+uk23E;
-	ukTotW = uk0W+uk1W+uk23W;
-	*/
+	delete EreconALL_uk;
       }
 
+      // SIMULATION
+
       { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true);
-	/*std::cout << "Made it here\n";
-	SIM.calcTotalAsymmetry(225.,675.,1);
-	simAsym = SIM.returnTotalAsymmetry();
-	simAsymError = SIM.returnTotalAsymmetryError();
-	std::cout << "sim Asym " << simAsym << std::endl;
-      
-	SIM.calcBGsubtractedEvts();
+	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true, false);
 	
-	std::vector <double> evts;
-	evts = SIM.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
-	normFactor = (uk0E+uk0W)/(evts[0]+evts[1]);
-	*/
 	std::vector <double> superSum;
 	std::vector <double> superSumError;
 	std::vector <double> xErr(numBins,0.);
 
+	f->cd();
+
+	//Type 0 events
+	SIM.calcSuperSum(4);
+	superSum = SIM.returnSuperSum();
+	superSumError = SIM.returnSuperSumError();
+
+	for (int n=0; n<numBins;n++) {
+	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum[n];
+	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 	  
+	}
+	normFactor = ukIntegral/simIntegral;
+	for (int n=0; n<numBins;n++) {
+	  superSum[n] = normFactor*superSum[n];
+	  superSumError[n] = normFactor*superSumError[n];
+	  superSumTotal_sim[0][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_sim[0][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
+	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 	  
+	}
 	
+	TGraphErrors *Erecon0_sim = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
+	Erecon0_sim->SetMarkerColor(kBlue);
+	Erecon0_sim->SetMarkerStyle(21);
+	Erecon0_sim->GetXaxis()->SetTitle("Energy (keV)");
+	Erecon0_sim->SetTitle("All Types Super-Sum");
+	Erecon0_sim->Draw("AP");
+	//Erecon0_uk->SetDirectory(f);
+	
+	Erecon0_sim->Write("Erecon0_sim");
+	//f->Write();
+
+	delete Erecon0_sim;
+	
+       
+	//Type 1 events
+	SIM.calcSuperSum(6);
+	superSum = SIM.returnSuperSum();
+	superSumError = SIM.returnSuperSumError();
+
+	for (int n=0; n<numBins;n++) {
+	  superSum[n] = normFactor*superSum[n];
+	  superSumError[n] = normFactor*superSumError[n];
+	  superSumTotal_sim[1][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_sim[1][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
+	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 	  
+	}
+	
+	TGraphErrors *Erecon1_sim = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
+	Erecon1_sim->SetMarkerColor(kBlue);
+	Erecon1_sim->SetMarkerStyle(21);
+	Erecon1_sim->GetXaxis()->SetTitle("Energy (keV)");
+	Erecon1_sim->SetTitle("All Types Super-Sum");
+	Erecon1_sim->Draw("AP");
+	
+	Erecon1_sim->Write("Erecon1_sim");
+	
+	delete Erecon1_sim;
+
+	//Type 2/3 events
+	SIM.calcSuperSum(7);
+	superSum = SIM.returnSuperSum();
+	superSumError = SIM.returnSuperSumError();
+	for (int n=0; n<numBins;n++) {
+	  superSum[n] = normFactor*superSum[n];
+	  superSumError[n] = normFactor*superSumError[n];
+	  superSumTotal_sim[2][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_sim[2][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
+	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 	  
+	}
+	
+	TGraphErrors *Erecon23_sim = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
+	Erecon23_sim->SetMarkerColor(kBlue);
+	Erecon23_sim->SetMarkerStyle(21);
+	Erecon23_sim->GetXaxis()->SetTitle("Energy (keV)");
+	Erecon23_sim->SetTitle("All Types Super-Sum");
+	Erecon23_sim->Draw("AP");
+	
+	Erecon23_sim->Write("Erecon23_sim");
+	
+	delete Erecon23_sim;
 
 	//All event types
 	SIM.calcSuperSum(1);
 	superSum = SIM.returnSuperSum();
 	superSumError = SIM.returnSuperSumError();
+
 	for (int n=0; n<numBins;n++) {
-	  std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
+	  superSum[n] = normFactor*superSum[n];
+	  superSumError[n] = normFactor*superSumError[n];
+	  superSumTotal_sim[3][n]+=superSumError[n]>0.?(1./power(superSumError[n],2))*superSum[n]:0.;
+	  superSumTotalError_sim[3][n]+=superSumError[n]>0.?(1./power(superSumError[n],2)):0.;
+	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 	  
 	}
-	f->cd();
+	
 	TGraphErrors *EreconALL_sim = new TGraphErrors(numBins,&enBins[0],&superSum[0],&xErr[0],&superSumError[0]);
 	EreconALL_sim->SetMarkerColor(kBlue);
 	EreconALL_sim->SetMarkerStyle(21);
 	EreconALL_sim->GetXaxis()->SetTitle("Energy (keV)");
 	EreconALL_sim->SetTitle("All Types Super-Sum");
 	EreconALL_sim->Draw("AP");
-	//EreconALL_uk->SetDirectory(f);
 	
 	EreconALL_sim->Write("EreconALL_sim");
-	//f->Write();
-	f->Close();
-	delete EreconALL_sim;
-	exit(0);
 	
-    
-	/*evts = SIM.getNumBGsubtrEvts(enWinLow,enWinHigh,0);
-	sim0E = (int)(evts[0]*normFactor); sim0W = (int)(evts[1]*normFactor);
-	Type_sim.SetBinContent(1, (int)((evts[0]*normFactor)+(evts[1]*normFactor)));
-	evts = SIM.getNumBGsubtrEvts(enWinLow,enWinHigh,1);
-	sim1E = (int)(evts[0]*normFactor); sim1W = (int)(evts[1]*normFactor);
-	Type_sim.SetBinContent(2, (int)((evts[0]*normFactor)+(evts[1]*normFactor)));
-	evts = SIM.getNumBGsubtrEvts(enWinLow,enWinHigh,2);
-	sim23E = (int)(evts[0]*normFactor); sim23W = (int)(evts[1]*normFactor);
-	Type_sim.SetBinContent(3, (int)((evts[0]*normFactor)+(evts[1]*normFactor)));
-	evts = SIM.getNumBGsubtrEvts(enWinLow,enWinHigh,3);
-	sim23E += (int)(evts[0]*normFactor); sim23W += (int)(evts[1]*normFactor);
-	Type_sim.SetBinContent(4, (int)((evts[0]*normFactor)+(evts[1]*normFactor)));
-      
-	simTotE = sim0E+sim1E+sim23E;
-	simTotW = sim0W+sim1W+sim23W;*/
+	delete EreconALL_sim;
+
+	f->Close();
 
       }
 
@@ -232,6 +293,57 @@ int main(int argc, char *argv[])
     }
   }
 
+  //Creating file which is summed over all octets in range
+  TString fileName = "superSumPlots/SuperSum_octets_";
+  fileName+= octetNumStart;
+  fileName+= "-";
+  fileName+= octetNumEnd;
+  fileName+= ".root";
+  TFile *f2 = new TFile(fileName,"RECREATE");
+  f2->cd();
+  for (int t=0; t<4; t++) {
+    for (int bin=0; bin<numBins; bin++) {
+      superSumTotal_uk[t][bin] = superSumTotalError_uk[t][bin]>0.? superSumTotal_uk[t][bin]/superSumTotalError_uk[t][bin] : 0.;
+      superSumTotalError_uk[t][bin] = superSumTotalError_uk[t][bin]>0.? (1./TMath::Sqrt(superSumTotalError_uk[t][bin])) : 0.;
+      //std::cout << enBins[bin] << " " << superSumTotal_uk[0][bin] << " " << superSumTotalError_uk[0][bin] << std::endl;
+      
+      superSumTotal_sim[t][bin] = superSumTotalError_sim[t][bin]>0.? superSumTotal_sim[t][bin]/superSumTotalError_sim[t][bin] : 0.;
+      superSumTotalError_sim[t][bin] = superSumTotalError_sim[t][bin]>0.? (1./TMath::Sqrt(superSumTotalError_sim[t][bin])) : 0.;
+    }
+  }
+
+  TGraphErrors *Erecon_uk, *Erecon_sim;
+  
+  for (int t=0;t<4;t++) {
+    Erecon_uk = new TGraphErrors(numBins,&enBins[0],&superSumTotal_uk[t][0],&xErr[0],&superSumTotalError_uk[t][0]);
+    Erecon_uk->SetMarkerColor(kBlue);
+    Erecon_uk->SetMarkerStyle(21);
+    Erecon_uk->GetXaxis()->SetTitle("Energy (keV)");
+    //std::string title = std::string("Type ") + (t<2)?itos(t):(t==2?std::string("2/3"):std::string("ALL")) + std::string(" Super-Sum");
+    TString title = TString("Type ") + ((t<2) ? itos(t) : (t==2 ? TString("23") : TString("ALL"))) + TString(" Super-Sum");
+    Erecon_uk->SetTitle(title);
+    //Erecon0_uk->Draw("AP");
+    title = TString("Erecon") + ((t<2)? itos(t) :(t==2?TString("23"):TString("ALL"))) + TString("_uk");
+    Erecon_uk->Write(title);
+	
+    delete Erecon_uk;
+
+    Erecon_sim = new TGraphErrors(numBins,&enBins[0],&superSumTotal_sim[t][0],&xErr[0],&superSumTotalError_sim[t][0]);
+    Erecon_sim->SetMarkerColor(kBlue);
+    Erecon_sim->SetMarkerStyle(21);
+    Erecon_sim->GetXaxis()->SetTitle("Energy (keV)");
+    title = TString("Type ") + ((t<2) ? itos(t) : (t==2 ? TString("23") : TString("ALL"))) + TString(" Super-Sum");
+    Erecon_sim->SetTitle(title);
+    //Erecon0_sim->Draw("AP");
+    title = TString("Erecon") + ((t<2)? itos(t) : (t==2?TString("23"):TString("ALL"))) + TString("_sim");
+    Erecon_sim->Write(title);
+	
+    delete Erecon_sim;
+  }
+
+  f2->Close();
+  
+  
   return 0;
 
 }

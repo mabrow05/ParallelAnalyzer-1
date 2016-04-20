@@ -32,6 +32,7 @@ export REVCALSIM="${PARALLEL_DATA_PATH}/reverse_cal_sim${ext}/"
 export CUTS="${PARALLEL_DATA_PATH}/CUTS${ext}/"	
 export ANALYSIS_RESULTS="${PARALLEL_DATA_PATH}/analysis_results${ext}/"
 export UK_SPEC_REPLAY="${PARALLEL_DATA_PATH}/spec_replay_files${ext}/"
+export RUN_INFO_FILES="${PARALLEL_DATA_PATH}/run_info_files${ext}/"
 
 # Below you put in the directory where your simulations live for the 
 # different geometries
@@ -39,3 +40,6 @@ export SIM_BASE_DIR="/extern/mabrow05/ucna/geant4work/output/"
 export SIM_2011_2012="${SIM_BASE_DIR}/10mil_2011-2012/"
 export SIM_2012_2013="${SIM_BASE_DIR}/10mil_2012-2013/"
 export SIM_2012_2013_ISOBUTANE="${SIM_BASE_DIR}/10mil_2012-2013_isobutane/"
+
+### For little_b simulation processor use
+export CALTECH_SIMS="/extern/mabrow05/ucna/geant4work/XuanSim/"

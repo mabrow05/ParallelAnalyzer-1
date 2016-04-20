@@ -285,6 +285,7 @@ void LinearityCurves(Int_t runPeriod)
   fitADC->SetParameter(4, 50.);
   fitADC->SetParameter(5, 1.);
   fitADC->FixParameter(5, 75.0);
+  //fitADC->FixParameter(2, 0.);
   //fitADC->SetParLimits(5, 1., 20.);
   
   fitADC->SetParLimits(2, -0.0004, 0.0004);

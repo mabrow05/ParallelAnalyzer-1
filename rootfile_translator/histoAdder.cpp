@@ -3,7 +3,6 @@ This code appends certain histograms to the final replay file. Michael
 used these histograms for parts of his analysis and they weren't initially 
 included in the UK analysis. 
 
-Through the translator, these will be added to the spec files as well
 */////////////////////////////////////////////////////////////////////
 
 #include <iostream>
@@ -188,22 +187,23 @@ int main(int argc, char *argv[]) {
   float time = S83028*scalerCountsToTime;
   std::cout << "TotalTime = " << time << std::endl;
   //Histograms to hold UCNMonRate
-  int nbins = (int)((time+10.)/10.);
-  TH1F *UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., nbins*10.);
-  TH1F *UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., nbins*10.);
-  TH1F *UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., nbins*10.);
-  TH1F *UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., nbins*10.);
+  int binWidth = 10;
+  int nbins = (int)(time+20.)/binWidth;
+  TH1F *UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., (double)nbins*binWidth);
+  TH1F *UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., (double)nbins*binWidth);
+  TH1F *UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., (double)nbins*binWidth);
+  TH1F *UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., (double)nbins*binWidth);
   
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
     Int_t iSis00 = (int) Sis00;
     time = S83028*scalerCountsToTime;
-    if (iSis00==260) UCN_Mon_1_Rate->Fill(time);
-    else if (iSis00==516) UCN_Mon_2_Rate->Fill(time);
-    else if (iSis00==1028) UCN_Mon_3_Rate->Fill(time);
-    else if (iSis00==2052) UCN_Mon_4_Rate->Fill(time);
-    if (i%1000==0) std::cout << i << std::endl;
+    if (iSis00==260) UCN_Mon_1_Rate->Fill(time,1./binWidth);
+    else if (iSis00==516) UCN_Mon_2_Rate->Fill(time,1./binWidth);
+    else if (iSis00==1028) UCN_Mon_3_Rate->Fill(time,1./binWidth);
+    else if (iSis00==2052) UCN_Mon_4_Rate->Fill(time,1./binWidth);
+    if (i%10000==0) std::cout << i << std::endl;
   }
 
   fileIn->Close();
@@ -214,20 +214,20 @@ int main(int argc, char *argv[]) {
   sprintf(temp,"%s/spec_%i.root",getenv("UK_SPEC_REPLAY"), runNumber);
   TFile *spec = new TFile(temp,"UPDATE");
   //spec->cd();
-  UCN_Mon_1_Rate->Write();
-  UCN_Mon_2_Rate->Write();
-  UCN_Mon_3_Rate->Write();
-  UCN_Mon_4_Rate->Write();
+  UCN_Mon_1_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_2_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_3_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_4_Rate->Write("",TObject::kOverwrite);
 
   spec->Close();
 
   sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"), runNumber);
   TFile *rep4 = new TFile(temp,"UPDATE");
   //rep4->cd();
-  UCN_Mon_1_Rate->Write();
-  UCN_Mon_2_Rate->Write();
-  UCN_Mon_3_Rate->Write();
-  UCN_Mon_4_Rate->Write();
+  UCN_Mon_1_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_2_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_3_Rate->Write("",TObject::kOverwrite);
+  UCN_Mon_4_Rate->Write("",TObject::kOverwrite);
 
   rep4->Close();
 
