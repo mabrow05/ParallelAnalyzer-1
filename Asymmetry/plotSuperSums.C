@@ -8,11 +8,11 @@
   
   //TString fileBase = "superSumPlots/SuperSum_octets_0-59";
   //TString::Format("%s.root",fileBase)
-  TFile *f = new TFile("superSumPlots/SuperSum_octets_0-59_norm_60.000000-450.000000.root","READ");
+  TFile *f = new TFile("superSumPlots/SuperSum_octets_0-59_norm_60.0-450.0.root","READ");
 
   //TString pdfFile_base = TString::Format("%s.pdf",fileBase);
-  TH1D *ukALL = (TH1D*)f->Get("Erecon0_uk");
-  TH1D *simALL = (TH1D*)f->Get("Erecon0_sim");
+  TH1D *ukALL = (TH1D*)f->Get("EreconALL_uk");
+  TH1D *simALL = (TH1D*)f->Get("EreconALL_sim");
 
   //Residuals...
   TCanvas *r = new TCanvas("r");
@@ -25,18 +25,21 @@
   resid->GetYaxis()->SetTitle("event rate (mHz/keV)");
   resid->Draw();
   r->Update();
-  TLine *l = new TLine(min, 0., max, 0.);
+  TLine *l = new TLine(min, 0., 800., 0.);
   l->SetLineStyle(8);
   l->Draw();
 
   TCanvas *c1 = new TCanvas("c1");
   
-  //ukALL->SetMarkerColor(kBlue);
-  //ukALL->SetMarkerStyle
-  //ukALL->SetLineColor(kBlue);
+  ukALL->SetMarkerColor(kBlue);
+  ukALL->SetMarkerStyle(22)
+  ukALL->SetLineColor(kBlue);
   //ukALL->SetFillStyle(3002);
-  ukALL->SetFillColor(kBlue);
+  //ukALL->SetFillColor(kBlue);
+  //ukALL->SetLineWidth(3);
   simALL->SetMarkerColor(kRed);
+  simALL->SetLineColor(kRed);
+  //simALL->SetLineWidth(3);
   //sim->SetMarkerSize(1);
   simALL->SetMarkerStyle(20);
   ukALL->GetXaxis()->SetRangeUser(0., 800.);
@@ -44,9 +47,9 @@
   ukALL->Scale(100.);
   simALL->Scale(100.);
   simALL->GetXaxis()->SetRangeUser(0., 800.);
-  ukALL->Draw("LF2");
+  ukALL->Draw("");
   simALL->Draw("SAME");
-
+  
   TH1D *uk0 = (TH1D*)f->Get("Erecon0_uk");
   TH1D *sim0 = (TH1D*)f->Get("Erecon0_sim");
   TCanvas *c2 = new TCanvas("c2");

@@ -77,6 +77,17 @@ int main(int argc, char *argv[])
       { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
 	OctetAsymmetry UK(octetNum, enBinWidth, 50., true, false);
 	
+	//All event types
+	UK.calcSuperSum(1);
+	superSum_uk[3] = UK.returnSuperSum();
+	superSumError_uk[3] = UK.returnSuperSumError();
+
+	for (int n=0; n<numBins;n++) {
+	  superSumTotal_uk[3][n]+=superSumError_uk[3][n]>0.?(1./power(superSumError_uk[3][n],2))*superSum_uk[3][n]:0.;
+	  superSumTotalError_uk[3][n]+=superSumError_uk[3][n]>0.?(1./power(superSumError_uk[3][n],2)):0.;
+	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) ukIntegral+=superSum_uk[3][n];
+	}
+
 	//Type 0 events
 	UK.calcSuperSum(4);
 	superSum_uk[0] = UK.returnSuperSum();
@@ -86,7 +97,7 @@ int main(int argc, char *argv[])
 	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
 	  superSumTotal_uk[0][n]+=superSumError_uk[0][n]>0.?(1./power(superSumError_uk[0][n],2))*superSum_uk[0][n]:0.;
 	  superSumTotalError_uk[0][n]+=superSumError_uk[0][n]>0.?(1./power(superSumError_uk[0][n],2)):0.;
-	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) ukIntegral+=superSum_uk[0][n];
+	  //if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) ukIntegral+=superSum_uk[0][n];
 	}
        
 
@@ -112,15 +123,7 @@ int main(int argc, char *argv[])
 	}
 	
 
-	//All event types
-	UK.calcSuperSum(1);
-	superSum_uk[3] = UK.returnSuperSum();
-	superSumError_uk[3] = UK.returnSuperSumError();
-
-	for (int n=0; n<numBins;n++) {
-	  superSumTotal_uk[3][n]+=superSumError_uk[3][n]>0.?(1./power(superSumError_uk[3][n],2))*superSum_uk[3][n]:0.;
-	  superSumTotalError_uk[3][n]+=superSumError_uk[3][n]>0.?(1./power(superSumError_uk[3][n],2)):0.;
-	}
+	
 	
       }
 
@@ -129,15 +132,32 @@ int main(int argc, char *argv[])
       { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
 	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true, false);
 
+	//All event types
+	SIM.calcSuperSum(1);
+	superSum_sim[3] = SIM.returnSuperSum();
+	superSumError_sim[3] = SIM.returnSuperSumError();
+
+	for (int n=0; n<numBins; n++) {
+	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum_sim[3][n];
+	}
+	normFactor = ukIntegral/simIntegral;
+
+	for (int n=0; n<numBins;n++) {
+	  superSum_sim[3][n] = normFactor*superSum_sim[3][n];
+	  superSumError_sim[3][n] = normFactor*superSumError_sim[3][n];
+	  superSumTotal_sim[3][n]+=superSumError_sim[3][n]>0.?(1./power(superSumError_sim[3][n],2))*superSum_sim[3][n]:0.;
+	  superSumTotalError_sim[3][n]+=superSumError_sim[3][n]>0.?(1./power(superSumError_sim[3][n],2)):0.;
+	}
+
 	//Type 0 events
 	SIM.calcSuperSum(4);
 	superSum_sim[0] = SIM.returnSuperSum();
 	superSumError_sim[0] = SIM.returnSuperSumError();
 
-	for (int n=0; n<numBins; n++) {
+	/*for (int n=0; n<numBins; n++) {
 	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum_sim[0][n];
 	}
-	normFactor = ukIntegral/simIntegral;
+	normFactor = ukIntegral/simIntegral;*/
 
 	for (int n=0; n<numBins;n++) {
 	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
@@ -145,7 +165,6 @@ int main(int argc, char *argv[])
 	  superSumError_sim[0][n] = normFactor*superSumError_sim[0][n];
 	  superSumTotal_sim[0][n]+=superSumError_sim[0][n]>0.?(1./power(superSumError_sim[0][n],2))*superSum_sim[0][n]:0.;
 	  superSumTotalError_sim[0][n]+=superSumError_sim[0][n]>0.?(1./power(superSumError_sim[0][n],2)):0.;
-	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum_sim[0][n];
 	}
        
 
@@ -175,17 +194,7 @@ int main(int argc, char *argv[])
 	}
 	
 
-	//All event types
-	SIM.calcSuperSum(1);
-	superSum_sim[3] = SIM.returnSuperSum();
-	superSumError_sim[3] = SIM.returnSuperSumError();
-
-	for (int n=0; n<numBins;n++) {
-	  superSum_sim[3][n] = normFactor*superSum_sim[3][n];
-	  superSumError_sim[3][n] = normFactor*superSumError_sim[3][n];
-	  superSumTotal_sim[3][n]+=superSumError_sim[3][n]>0.?(1./power(superSumError_sim[3][n],2))*superSum_sim[3][n]:0.;
-	  superSumTotalError_sim[3][n]+=superSumError_sim[3][n]>0.?(1./power(superSumError_sim[3][n],2)):0.;
-	}
+	
 
 	
 

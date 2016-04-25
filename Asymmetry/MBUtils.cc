@@ -8,7 +8,7 @@ std::string itos(int val) {
 
 std::string ftos(double val) {
   char temp[32];
-  sprintf(temp,"%f",val);
+  sprintf(temp,"%.1f",val);
   return std::string(temp);
 };
 
