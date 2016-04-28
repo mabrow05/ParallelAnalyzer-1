@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
    
 
       { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry UK(octetNum, enBinWidth, 50., true);
+	OctetAsymmetry UK(octetNum, enBinWidth, 50., true, false, true);
 	
 	UK.calcTotalAsymmetry(225.,675.,1);
 	ukAsym = UK.returnTotalAsymmetry();
@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
       }
 
       { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true);
+	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true, true);
 	std::cout << "Made it here\n";
 	SIM.calcTotalAsymmetry(225.,675.,1);
 	simAsym = SIM.returnTotalAsymmetry();

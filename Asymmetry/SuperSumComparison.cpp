@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   double enWinHigh = (double) atof(argv[4]);
   int enBinWidth = atoi(argv[5]);
 
-  int numBins = 1000/enBinWidth;
+  int numBins = 1200/enBinWidth;
 
   //set up energy binning vector
   std::vector <double> enBins(numBins,0.);
@@ -203,31 +203,31 @@ int main(int argc, char *argv[])
       std::string file1 = "superSumPlots/octet_"+itos(octetNum)+"_norm_"+ftos(enWinLow)+"-"+ftos(enWinHigh)+".root";
       TFile *f = new TFile(file1.c_str(),"RECREATE");
       
-      TH1D Erecon0_uk("Erecon0_uk","Type 0 Super-Sum",numBins,0.,1000.);
+      TH1D Erecon0_uk("Erecon0_uk","Type 0 Super-Sum",numBins,0.,1200.);
       Erecon0_uk.SetLineColor(kBlue);
       //Erecon0_uk.SetMarkerStyle(21);
       Erecon0_uk.GetXaxis()->SetTitle("Energy (keV)");
-      TH1D Erecon1_uk("Erecon1_uk","Type 1 Super-Sum",numBins,0.,1000.);
+      TH1D Erecon1_uk("Erecon1_uk","Type 1 Super-Sum",numBins,0.,1200.);
       Erecon1_uk.SetLineColor(kBlue);
       Erecon1_uk.GetXaxis()->SetTitle("Energy (keV)");
-      TH1D Erecon23_uk("Erecon23_uk","Type 23 Super-Sum",numBins,0.,1000.);
+      TH1D Erecon23_uk("Erecon23_uk","Type 23 Super-Sum",numBins,0.,1200.);
       Erecon23_uk.SetLineColor(kBlue);
       Erecon23_uk.GetXaxis()->SetTitle("Energy (keV)");
-      TH1D EreconALL_uk("EreconALL_uk","Type ALL Super-Sum",numBins,0.,1000.);
+      TH1D EreconALL_uk("EreconALL_uk","Type ALL Super-Sum",numBins,0.,1200.);
       EreconALL_uk.SetLineColor(kBlue);
       EreconALL_uk.GetXaxis()->SetTitle("Energy (keV)");
 
-      TH1D Erecon0_sim("Erecon0_sim","Type 0 Super-Sum",numBins,0.,1000.);
+      TH1D Erecon0_sim("Erecon0_sim","Type 0 Super-Sum",numBins,0.,1200.);
       Erecon0_sim.SetLineColor(kBlue);
       //Erecon0_sim.SetMarkerStyle(21);
       Erecon0_sim.GetXaxis()->SetTitle("Energy (keV)");
-      TH1D Erecon1_sim("Erecon1_sim","Type 1 Super-Sum",numBins,0.,1000.);
+      TH1D Erecon1_sim("Erecon1_sim","Type 1 Super-Sum",numBins,0.,1200.);
       Erecon1_sim.SetLineColor(kBlue);
       Erecon1_sim.GetXaxis()->SetTitle("Energy (keV)");
-      TH1D Erecon23_sim("Erecon23_sim","Type 23 Super-Sum",numBins,0.,1000.);
+      TH1D Erecon23_sim("Erecon23_sim","Type 23 Super-Sum",numBins,0.,1200.);
       Erecon23_sim.SetLineColor(kBlue);
       Erecon23_sim.GetXaxis()->SetTitle("Energy (keV)");
-      TH1D EreconALL_sim("EreconALL_sim","Type ALL Super-Sum",numBins,0.,1000.);
+      TH1D EreconALL_sim("EreconALL_sim","Type ALL Super-Sum",numBins,0.,1200.);
       EreconALL_sim.SetLineColor(kBlue);
       EreconALL_sim.GetXaxis()->SetTitle("Energy (keV)");
      
@@ -282,32 +282,22 @@ int main(int argc, char *argv[])
       }
     }
     
-    TH1D Erecon0_uk("Erecon0_uk","Type 0 Super-Sum",numBins,0.,1000.);
-    Erecon0_uk.SetLineColor(kBlue);
-    //Erecon0_uk.SetMarkerStyle(21);
+    TH1D Erecon0_uk("Erecon0_uk","Type 0 Super-Sum",numBins,0.,1200.);
     Erecon0_uk.GetXaxis()->SetTitle("Energy (keV)");
-    TH1D Erecon1_uk("Erecon1_uk","Type 1 Super-Sum",numBins,0.,1000.);
-    Erecon1_uk.SetLineColor(kBlue);
+    TH1D Erecon1_uk("Erecon1_uk","Type 1 Super-Sum",numBins,0.,1200.);
     Erecon1_uk.GetXaxis()->SetTitle("Energy (keV)");
-    TH1D Erecon23_uk("Erecon23_uk","Type 23 Super-Sum",numBins,0.,1000.);
-    Erecon23_uk.SetLineColor(kBlue);
+    TH1D Erecon23_uk("Erecon23_uk","Type 23 Super-Sum",numBins,0.,1200.);
     Erecon23_uk.GetXaxis()->SetTitle("Energy (keV)");
-    TH1D EreconALL_uk("EreconALL_uk","Type ALL Super-Sum",numBins,0.,1000.);
-    EreconALL_uk.SetLineColor(kBlue);
+    TH1D EreconALL_uk("EreconALL_uk","Type ALL Super-Sum",numBins,0.,1200.);
     EreconALL_uk.GetXaxis()->SetTitle("Energy (keV)");
     
-    TH1D Erecon0_sim("Erecon0_sim","Type 0 Super-Sum",numBins,0.,1000.);
-    Erecon0_sim.SetLineColor(kBlue);
-    //Erecon0_sim.SetMarkerStyle(21);
+    TH1D Erecon0_sim("Erecon0_sim","Type 0 Super-Sum",numBins,0.,1200.);
     Erecon0_sim.GetXaxis()->SetTitle("Energy (keV)");
-    TH1D Erecon1_sim("Erecon1_sim","Type 1 Super-Sum",numBins,0.,1000.);
-    Erecon1_sim.SetLineColor(kBlue);
+    TH1D Erecon1_sim("Erecon1_sim","Type 1 Super-Sum",numBins,0.,1200.);
     Erecon1_sim.GetXaxis()->SetTitle("Energy (keV)");
-    TH1D Erecon23_sim("Erecon23_sim","Type 23 Super-Sum",numBins,0.,1000.);
-    Erecon23_sim.SetLineColor(kBlue);
+    TH1D Erecon23_sim("Erecon23_sim","Type 23 Super-Sum",numBins,0.,1200.);
     Erecon23_sim.GetXaxis()->SetTitle("Energy (keV)");
-    TH1D EreconALL_sim("EreconALL_sim","Type ALL Super-Sum",numBins,0.,1000.);
-    EreconALL_sim.SetLineColor(kBlue);
+    TH1D EreconALL_sim("EreconALL_sim","Type ALL Super-Sum",numBins,0.,1200.);
     EreconALL_sim.GetXaxis()->SetTitle("Energy (keV)");
     
     for (int bin=0; bin<numBins; bin++) {

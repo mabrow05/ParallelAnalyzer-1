@@ -123,8 +123,7 @@ std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
   if (side==0) {
     for (unsigned int j=0; j<4; j++) {
       for (unsigned int i=0; i<numEnergyBins; i++) {
-	rateEerr[j][i]=sqrt(rateE[j]->GetBinContent(i)/runLength[0]);
-	//	if (rateEerr[j][i]==0.) rateEerr[j][i]=1./runLength[0]; //This accounts for 0 entries giving error of zero for now...
+	rateEerr[j][i]=rateE[j]->GetBinContent(i)*runLength[0]>1. ? sqrt(rateE[j]->GetBinContent(i)/runLength[0]): 1./runLength[0];
       }
     }
     return rateEerr;
@@ -132,8 +131,7 @@ std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
   else if (side==1) {
     for (unsigned int j=0; j<4; j++) {
       for (unsigned int i=0; i<numEnergyBins; i++) {
-	rateWerr[j][i]=sqrt(rateW[j]->GetBinContent(i)/runLength[1]);
-	//if (rateEerr[j][i]==0.) rateEerr[j][i]=1./runLength[0]; //This accounts for 0 entries giving error of zero for now...
+	rateWerr[j][i]=rateW[j]->GetBinContent(i)*runLength[1]>1. ? sqrt(rateW[j]->GetBinContent(i)/runLength[1]): 1./runLength[1];
       }
     }
     return rateWerr;
@@ -158,7 +156,7 @@ void EvtRateHandler::dataReader() {
   TTree *Tin;
 
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0.; //Branch Variables being read in
-  double EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0.; // For reading in data from MPM replays
+  float EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0.; // For reading in data from MPM replays
 
   int PID, Side, Type;
   

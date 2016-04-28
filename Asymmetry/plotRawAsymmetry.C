@@ -41,7 +41,7 @@
     cout << octet[i] << " " << asym[i] << " " << errorY[i] << endl;
   }
 
-  
+  TCanvas *c1 = new TCanvas("c1");
 
   TGraphErrors *g = new TGraphErrors(octet.size(), &octet[0],&asym[0],&errorX[0], &errorY[0]);
   g->SetTitle("Raw Measured Asymmetry");
@@ -49,6 +49,7 @@
   g->SetLineWidth(2);
   g->GetXaxis()->SetLimits(-2., octet[octet.size()-1]+2.);
   
+
   TF1 *fit = new TF1("fit","[0]",octet[0], octet[octet.size()-1]);
   fit->SetLineColor(kRed);
   fit->SetLineWidth(3);
@@ -57,7 +58,9 @@
 
   
   g->Draw("AP");
-
+  g->SetMinimum(0.03);
+  g->SetMaximum(0.07);
+  c1->Update();
 
   cout << "final Asym = " << finalAsym << " +/- " << totalError << endl;
 } 

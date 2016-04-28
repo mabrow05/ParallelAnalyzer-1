@@ -18,9 +18,102 @@ Maybe even add in writing the final answer to the database if the user wants to
 #include <cmath>
 #include <fstream>
 
+void OctetProcessor(Int_t octBegin, Int_t octEnd, Double_t enBinWidth, bool simulation, bool UKdata);
+void QuartetProcessor(Int_t octBegin, Int_t octEnd, Double_t enBinWidth, bool simulation, bool UKdata);
+void PairProcessor(Int_t octBegin, Int_t octEnd, Double_t enBinWidth, bool simulation, bool UKdata);
+
+void OctetRawAsymmetry(Int_t octBegin, Int_t octEnd, Double_t enBinWidth, bool simulation, bool UKdata);
+void QuartetRawAsymmetry(Int_t octBegin, Int_t octEnd, Double_t enBinWidth, bool simulation, bool UKdata);
+void PairRawAsymmetry(Int_t octBegin, Int_t octEnd, Double_t enBinWidth, bool simulation, bool UKdata);
+
 int main()
 {
+  double enWinLow = 220.; //170
+  double enWinHigh = 680.; //630
+  
+  PairAsymmetry *pair;
+  for (unsigned int octet=0; octet<=0;octet++) {
+   
+    try {
+      pair = new PairAsymmetry(octet,10.,50.,true, false);
+      
+      pair->calcTotalAsymmetry(enWinLow,enWinHigh,1);
+      std::cout<< "Finished Total Asymmetry"<<std::endl;
+      pair->calcAsymmetryBinByBin(1);
+      std::cout<<std::endl;
+      pair->calcSuperSum(1);
+      std::cout<<std::endl;
+      //oct->calcTotalAsymmetry(170.,630.,1);
+      
+      double AsymA0 = pair->returnTotalAsymmetry_PairA0();
+      double AsymErrorA0 = pair->returnTotalAsymmetryError_PairA0();
+      std::cout << "Asymmetry for Pair A0 in " << octet << ":\n";
+      std::cout << AsymA0 << " +- " << AsymErrorA0 << std::endl;
+      
+      double AsymA1 = pair->returnTotalAsymmetry_PairA1();
+      double AsymErrorA1 = pair->returnTotalAsymmetryError_PairA1();
+      std::cout << "Asymmetry for Pair A1 in " << octet << ":\n";
+      std::cout << AsymA1 << " +- " << AsymErrorA1 << std::endl;
 
+      double AsymB0 = pair->returnTotalAsymmetry_PairB0();
+      double AsymErrorB0 = pair->returnTotalAsymmetryError_PairB0();
+      std::cout << "Asymmetry for Pair B0 in " << octet << ":\n";
+      std::cout << AsymB0 << " +- " << AsymErrorB0 << std::endl;
+      
+      double AsymB1 = pair->returnTotalAsymmetry_PairB1();
+      double AsymErrorB1 = pair->returnTotalAsymmetryError_PairB1();
+      std::cout << "Asymmetry for Pair B1 in " << octet << ":\n";
+      std::cout << AsymB1 << " +- " << AsymErrorB1 << std::endl;
+     
+      delete pair;
+    }
+    catch(const char* ex){
+      std::cerr << "Error: " << ex << std::endl;
+    }
+  }
+ 
+  return 0;
+}
+
+
+void OctetProcessor(Int_t octBegin, Int_t octEnd, Double_t enBinWidth=10., bool simulation=false, bool UKdata=true) {
+  
+
+};
+
+void QuartetProcessor(Int_t octBegin, Int_t octEnd, Double_t enBinWidth=10., bool simulation=false, bool UKdata=true) {
+  double enWinLow = 220.; //170
+  double enWinHigh = 680.; //630
+  
+  QuartetAsymmetry *quart;
+  for (unsigned int octet=0; octet<=0;octet++) {
+      quart = new QuartetAsymmetry(octet,10.,50.,true, true);
+      
+      quart->calcTotalAsymmetry(enWinLow,enWinHigh,1);
+      std::cout<< "Finished Total Asymmetry"<<std::endl;
+      quart->calcAsymmetryBinByBin(1);
+      std::cout<<std::endl;
+      quart->calcSuperSum(1);
+      std::cout<<std::endl;
+      //oct->calcTotalAsymmetry(170.,630.,1);
+      
+      double AsymA = quart->returnTotalAsymmetry_QuartetA();
+      double AsymErrorA = quart->returnTotalAsymmetryError_QuartetA();
+      std::cout << "Asymmetry for Quartet A in " << octet << ":\n";
+      std::cout << AsymA << " +- " << AsymErrorA << std::endl;
+
+      double AsymB = quart->returnTotalAsymmetry_QuartetB();
+      double AsymErrorB = quart->returnTotalAsymmetryError_QuartetB();
+      std::cout << "Asymmetry for Quaret B in " << octet << ":\n";
+      std::cout << AsymB << " +- " << AsymErrorB << std::endl;
+      
+      delete quart;
+  }
+  
+};
+
+
+void OctetRawAsymmetry() {
   std::string inDir = std::string(getenv("REPLAY_PASS4"));
  
     
@@ -53,22 +146,6 @@ int main()
       std::cout << Asym << " +- " << AsymError << std::endl;
       rawAsym << Asym << " " << AsymError << "\n";
       
-      //delete oct;*/
-      
-      
-      
-      /* oct->calcBGsubtractedEvts();
-      for (unsigned int type=0;type<4;type++) {
-	evtVecHold = oct->getNumBGsubtrEvts(enWinLow,enWinHigh,type);
-	evts[type] = evtVecHold[0]+evtVecHold[1];
-	totalEvts[type]+=evts[type];
-      }
-      
-      std::cout << "Type0: " << evts[0] 
-		<<"\nType1: " << evts[1]
-		<<"\nType2: " << evts[2]
-		<<"\nType3: " << evts[3]
-		<< std::endl;*/
       delete oct;
     }
     catch(const char* ex){
@@ -86,35 +163,7 @@ int main()
 	    << std::endl; 
 
    rawAsym.close();
-  return 0;
+
+};
   
-  /*std::string dbAddress = "localhost";
-    std::string dbname = "UCNADB_full_quad1";
-    std::string port = "3306";
-    std::string dbAddressFull = "mysql://"+dbAddress+":"+port+"/"+dbname;
-    std::string dbUser = "ucn";
-    std::string dbPass = "T1td4ctc";
-    try {
-    SQLdatabase *db = new SQLdatabase(dbname,dbAddress,dbUser,dbPass);
-    db->query = "Select * from posmap_set where posmap_set_id=283";
-    db->fetchQuery();
-    std::string result = db->returnQueryEntry();
-    std::cout << result << std::endl;
-    }
-    catch(const char* ex){
-    std::cerr << "Error: " << ex << std::endl;
-    }*/
-
   
-}
-
-///// Snippet for output of rate histograms   
-/*
-  char temp[200];
-  if (!outputFile) {
-    outputFile = std::string(getenv("groupAnaDir"))+"/"+std::string(sprintf(temp,"%i_rawRate.root",runNumber));
-  }
-  file = new TFile(outputFile.c_str(),"RECREATE");
-*/
-
-
