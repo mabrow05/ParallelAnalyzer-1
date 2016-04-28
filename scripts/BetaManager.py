@@ -36,6 +36,7 @@ class BetaReplayManager:
         self.revCalSimPath = os.getenv("REVCALSIM")
         self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
         self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
+        self.SimAnalysisResultsPath = os.getenv("SIM_ANALYSIS_RESULTS")
 
     def makeAllDirectories(self):
         os.system("mkdir -p %s"%os.getenv("PEDESTALS"))
@@ -54,6 +55,7 @@ class BetaReplayManager:
         os.system("mkdir -p %s"%self.revCalSimPath)
         os.system("mkdir -p %s"%self.UKspecReplayPath)
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
+        os.system("mkdir -p %s"%self.SimAnalysisResultsPath)
 
     def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
         octet=0
@@ -248,17 +250,18 @@ class BetaAsymmetryManager:
         self.revCalSimPath = os.getenv("REVCALSIM")
         self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
         self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
+        self.SimAnalysisResultsPath = os.getenv("SIM_ANALYSIS_RESULTS")
 
-    def makeOctetAnalysisDirectories(self, AnalysisChoice=None):
+    def makeOctetAnalysisDirectories(self):
         for octet in range(0,122,1):
-            if not AnalysisChoice:
-                os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.AnalysisResultsPath,octet))
-                os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.AnalysisResultsPath,octet))
-                os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.AnalysisResultsPath,octet))
-            else:
-                os.system("mkdir -p %s/Octet_%i/OctetAsymmetry_%s"%(self.AnalysisResultsPath,octet,AnalysisChoice))
-                os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry_%s"%(self.AnalysisResultsPath,octet,AnalysisChoice))
-                os.system("mkdir -p %s/Octet_%i/PairAsymmetry_%s"%(self.AnalysisResultsPath,octet, AnalysisChoice))
+            os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.AnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.AnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.AnalysisResultsPath,octet))
+
+            os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.SimAnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.SimAnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.SimAnalysisResultsPath,octet))
+            
                            
         print "Made all octet analysis directories"
 
@@ -290,8 +293,9 @@ if __name__ == "__main__":
 
     if options.makeDirectories:
         beta = BetaReplayManager()
-        cal.makeAllDirectories()
-
+        beta.makeAllDirectories()
+        asymm = BetaAsymmetryManager()
+        asymm.makeOctetAnalysisDirectories()
 
  
     if options.createOctetLists:
@@ -303,17 +307,13 @@ if __name__ == "__main__":
         #for octet in range(0,60,1):
         beta.findPedestals(5)
 
-    if 0: 
-        asymm = BetaAsymmetryManager()
-        asymm.makeOctetAnalysisDirectories()
-
     if 0:
         beta = BetaReplayManager()
         for octet in range(0,59,1):
             beta.makeBasicHistograms(octet)
 
 
-    if 0:
+    if 1:
         octet_range = [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
@@ -326,7 +326,7 @@ if __name__ == "__main__":
 
 
     #Running reverse calibrations
-    if 1:
+    if 0:
         octet_range = [0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):

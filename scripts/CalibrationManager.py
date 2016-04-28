@@ -857,14 +857,14 @@ if __name__ == "__main__":
 
     ### Source Run Calibration Steps...
     if 1: 
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[5,6,7,8,9,10,11]#[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
             #cal.makeSourceCalibrationFile(period, False)
             #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
-            cal.LinearityCurves(runPeriod)
+            #cal.LinearityCurves(runPeriod)
             rep.runReplayPass4(runPeriod)
             cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
             cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
