@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     exit(0);
   }
   Int_t paramSetIndex = -1;
-  if (argc==10) paramSetIndex = atoi(argv[9]);
+  if (argc==14) paramSetIndex = atoi(argv[13]);
 
   std::string source = std::string(argv[1]); //Input source (Beta, Beta_fierz, Sn113, Bi207, Ce139)
   UInt_t numEvents = (unsigned int)atoi(argv[3] ); //Number of electrons to accumulate
@@ -411,7 +411,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
       needNewTree=true;
       //Create simulation output file
       Char_t outputfile[500];
-      sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%i.root",source.c_str(), treeNum);
+      if (paramSetIndex==-1) sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%s_%i.root",geometry.c_str(), source.c_str(), treeNum);
+      else sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%s_paramSet_%i_%i.root", geometry.c_str(), source.c_str(), paramSetIndex, treeNum);
       TFile *outfile = new TFile(outputfile, "RECREATE");
       tree->Write();
       outfile->Close();
@@ -486,7 +487,8 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   
   if (printTree && source.substr(0,4)!="Beta") {
     //Create simulation output file    
-    sprintf(outputfile,"analyzed_files/SimAnalyzed_%s_%s.root",source.c_str(),geometry.c_str());
+    if (paramSetIndex==-1) sprintf(outputfile,"analyzed_files/SourceHistos_%s_%s.root",geometry.c_str(), source.c_str());
+    else sprintf(outputfile,"analyzed_files/SourceHistos_%s_%s_paramSet_%i.root", geometry.c_str(), source.c_str(), paramSetIndex);
     outfile = new TFile(outputfile, "RECREATE");
     Etype0.Write(); 
     Wtype0.Write();
