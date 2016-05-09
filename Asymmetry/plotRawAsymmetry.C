@@ -1,6 +1,8 @@
 {
   //#include <vector>
   gStyle->SetOptFit(1111);
+  gStyle->SetTitleStyle(0000);
+  gStyle->SetTitleX(.25);
 
   ifstream infile("rawAsymmetryByOctet_0-59_AnaCh1_50mm.dat");
   char in1[10], in2[10];
@@ -45,6 +47,7 @@
 
   TGraphErrors *g = new TGraphErrors(octet.size(), &octet[0],&asym[0],&errorX[0], &errorY[0]);
   g->SetTitle("Raw Measured Asymmetry");
+ 
   g->SetMarkerStyle(20);
   g->SetLineWidth(2);
   g->GetXaxis()->SetLimits(-2., octet[octet.size()-1]+2.);

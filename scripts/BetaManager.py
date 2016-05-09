@@ -37,6 +37,7 @@ class BetaReplayManager:
         self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
         self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
         self.SimAnalysisResultsPath = os.getenv("SIM_ANALYSIS_RESULTS")
+        self.MPMAnalysisResultsPath = os.getenv("MPM_ANALYSIS_RESULTS")
 
     def makeAllDirectories(self):
         os.system("mkdir -p %s"%os.getenv("PEDESTALS"))
@@ -56,6 +57,7 @@ class BetaReplayManager:
         os.system("mkdir -p %s"%self.UKspecReplayPath)
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
         os.system("mkdir -p %s"%self.SimAnalysisResultsPath)
+        os.system("mkdir -p %s"%self.MPMAnalysisResultsPath)
 
     def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
         octet=0
@@ -251,7 +253,8 @@ class BetaAsymmetryManager:
         self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
         self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
         self.SimAnalysisResultsPath = os.getenv("SIM_ANALYSIS_RESULTS")
-
+        self.MPMAnalysisResultsPath = os.getenv("MPM_ANALYSIS_RESULTS")
+                
     def makeOctetAnalysisDirectories(self):
         for octet in range(0,122,1):
             os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.AnalysisResultsPath,octet))
@@ -262,7 +265,14 @@ class BetaAsymmetryManager:
             os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.SimAnalysisResultsPath,octet))
             os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.SimAnalysisResultsPath,octet))
             
-                           
+            os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.MPMAnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.MPMAnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.MPMAnalysisResultsPath,octet))
+            
+        
+        os.system("mkdir -p %s/Asymmetries"%(self.AnalysisResultsPath))
+        os.system("mkdir -p %s/Asymmetries"%(self.SimAnalysisResultsPath))
+        os.system("mkdir -p %s/Asymmetries"%(self.MPMAnalysisResultsPath))
         print "Made all octet analysis directories"
 
 
@@ -313,7 +323,7 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
-    if 1:
+    if 0:
         octet_range = [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):

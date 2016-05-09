@@ -10,7 +10,7 @@
 // base class for loading octet information
 class AsymmetryBase {
 public:
-  AsymmetryBase(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true);
+  AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym);
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
@@ -76,10 +76,12 @@ public:
   void calcAsymmetryBinByBin(int anaChoice=1); //Calculates the raw asymmetry bin by bin to be written to file and plotted
   void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
   void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
-  void writeAsymToFile(int anaChoice);
-  void writeSuperSumToFile(int anaChoice);
+  void writeAsymToFile();
+  void writeSuperSumToFile();
   double returnTotalAsymmetry() {return totalAsymmetry;}
   double returnTotalAsymmetryError() {return totalAsymmetryError;}
+  bool isSuperSum() {return boolSuperSum;}
+  bool isAsymmetry() {return boolAsymmetry;}
 
   std::vector <double> returnSuperSum() {return superSum;}
   std::vector <double> returnSuperSumError() {return superSumError;}
@@ -92,6 +94,8 @@ private:
   std::vector <double> superSumError; //Raw Asymmetry error in bins
   double totalAsymmetry; //Bin summed asymmetry
   double totalAsymmetryError;
+  bool boolSuperSum;
+  bool boolAsymmetry;
 };
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -105,12 +109,15 @@ public:
   void calcAsymmetryBinByBin(int anaChoice=1); //Calculates the raw asymmetry bin by bin to be written to file and plotted
   void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
   void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
-  void writeAsymToFile(int anaChoice);
-  void writeSuperSumToFile(int anaChoice);
+  void writeAsymToFile();
+  void writeSuperSumToFile();
   double returnTotalAsymmetry_QuartetA() {return totalAsymmetryA;}
   double returnTotalAsymmetryError_QuartetA() {return totalAsymmetryErrorA;}
   double returnTotalAsymmetry_QuartetB() {return totalAsymmetryB;}
   double returnTotalAsymmetryError_QuartetB() {return totalAsymmetryErrorB;}
+  bool boolGoodQuartet(Int_t quart) {return isGoodQuartet[quart];}
+  bool isSuperSum() {return boolSuperSum;}
+  bool isAsymmetry() {return boolAsymmetry;}
 
   std::vector < std::vector <double> > returnSuperSum() {return superSum;}
   std::vector < std::vector <double> > returnSuperSumError() {return superSumError;}
@@ -126,6 +133,8 @@ private:
   double totalAsymmetryB; //Bin summed asymmetry for Btype
   double totalAsymmetryErrorB;
   std::vector <bool> isGoodQuartet;
+  bool boolSuperSum;
+  bool boolAsymmetry;
 };
 
 
@@ -139,8 +148,8 @@ public:
   void calcAsymmetryBinByBin(int anaChoice=1); //Calculates the raw asymmetry bin by bin to be written to file and plotted
   void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
   void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
-  void writeAsymToFile(int anaChoice);
-  void writeSuperSumToFile(int anaChoice);
+  void writeAsymToFile();
+  void writeSuperSumToFile();
   double returnTotalAsymmetry_PairA0() {return totalAsymmetryA0;}
   double returnTotalAsymmetryError_PairA0() {return totalAsymmetryErrorA0;}
   double returnTotalAsymmetry_PairB0() {return totalAsymmetryB0;}
@@ -149,7 +158,10 @@ public:
   double returnTotalAsymmetryError_PairA1() {return totalAsymmetryErrorA1;}
   double returnTotalAsymmetry_PairB1() {return totalAsymmetryB1;}
   double returnTotalAsymmetryError_PairB1() {return totalAsymmetryErrorB1;}
-
+  bool boolGoodPair(Int_t quart, Int_t pair) {return isGoodPair[quart][pair];}
+  bool isSuperSum() {return boolSuperSum;}
+  bool isAsymmetry() {return boolAsymmetry;}
+  
   std::vector < std::vector < std::vector <double> > > returnSuperSum() {return superSum;}
   std::vector < std::vector < std::vector <double> > > returnSuperSumError() {return superSumError;}
 
@@ -168,6 +180,8 @@ private:
   double totalAsymmetryB1; //Bin summed asymmetry for Btype pair 1
   double totalAsymmetryErrorB1;
   std::vector < std::vector < bool > > isGoodPair;
+  bool boolSuperSum;
+  bool boolAsymmetry;
 };
 
 #endif

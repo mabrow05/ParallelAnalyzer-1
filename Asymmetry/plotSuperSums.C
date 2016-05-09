@@ -5,14 +5,22 @@
 
   int octetStart=0;
   int octetEnd=59;
+
+  Double_t normLow = 0.;
+  Double_t normHigh = 1200.;
   
-  TString fileBase = "superSumPlots/SuperSum_octets_0-59_norm_0.0-1200.0";
+  TString fileBase = "superSumPlots/SuperSum_octets_0-59_AsymOff";
   TString fileName = TString::Format("%s.root",fileBase.Data());
   TFile *f = new TFile(fileName,"READ");
 
   
   TH1D *ukALL = (TH1D*)f->Get("EreconALL_uk");
   TH1D *simALL = (TH1D*)f->Get("EreconALL_sim");
+
+  //Normalize
+  Double_t normFactor = ukALL->Integral(ukALL->GetXaxis()->FindFixBin(normLow),ukALL->GetXaxis()->FindFixBin(normHigh))/simALL->Integral(simALL->GetXaxis()->FindFixBin(normLow),simALL->GetXaxis()->FindFixBin(normHigh));
+  
+  simALL->Scale(normFactor);
 
   //Residuals...
   TCanvas *c1 = new TCanvas("c1","c1", 1600., 600.);
@@ -71,7 +79,7 @@
   uk0->GetXaxis()->SetRangeUser(0., 1200.);
   uk0->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk0->Scale(100.);
-  sim0->Scale(100.);
+  sim0->Scale(100.*normFactor);
   sim0->GetXaxis()->SetRangeUser(0., 1200.);
   uk0->Draw("BARE0");
   sim0->Draw("SAMEE0");
@@ -92,7 +100,7 @@
   uk1->GetXaxis()->SetRangeUser(0., 1200.);
   uk1->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk1->Scale(100.);
-  sim1->Scale(100.);
+  sim1->Scale(100.*normFactor);
   sim1->GetXaxis()->SetRangeUser(0., 1200.);
   uk1->Draw("BARE0");
   sim1->Draw("SAMEE0");
@@ -115,14 +123,18 @@
   uk23->GetXaxis()->SetRangeUser(0., 1200.);
   uk23->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk23->Scale(100.);
-  sim23->Scale(100.);
+  sim23->Scale(100.*normFactor);
   sim23->GetXaxis()->SetRangeUser(0., 1200.);
   uk23->Draw("BARE0");
   sim23->Draw("SAMEE0");
 
 
-  TString pdfFile = TString::Format("%s.pdf",fileBase.Data());
+  TString pdfFile = TString::Format("%s_norm_%0.1f-%0.1f.pdf",fileBase.Data(), normLow, normHigh);
+  //TString pdfFileStart = pdfFile + TString("(");
+  //TString pdfFileEnd = pdfFile + TString
+  c1->Print(TString::Format("%s[",pdfFile.Data()));
   c1->Print(pdfFile);
-  c1->Print(pdfFile);
+  c2->Print(pdfFile);
+  c2->Print(TString::Format("%s]",pdfFile.Data()));
   
 }

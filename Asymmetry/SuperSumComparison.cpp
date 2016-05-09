@@ -27,8 +27,8 @@
 
 int main(int argc, char *argv[])
 {
-  if (argc!=6) {
-    std::cout << "Usage: ./SuperSumComparison.exe [octet start] [octet end] [norm window low] [norm window high] [energy bin width]\n";
+  if (argc!=5) {
+    std::cout << "Usage: ./SuperSumComparison.exe [octet start] [octet end] [energy bin width] [BOOL Sim Asymmetry Weight On]\n";
     std::cout << "The code will produce comparisons for every octet in the range given, on an octet-by-octet basis,\nand as a whole, using the Super-Sum";
     exit(0);
   }
@@ -37,10 +37,14 @@ int main(int argc, char *argv[])
 
   int octetNumStart = atoi(argv[1]);
   int octetNumEnd = atoi(argv[2]);
-  double enWinLow = (double) atof(argv[3]);
-  double enWinHigh = (double) atof(argv[4]);
-  int enBinWidth = atoi(argv[5]);
-
+  //double enWinLow = (double) atof(argv[3]);
+  //double enWinHigh = (double) atof(argv[4]);
+  int enBinWidth = atoi(argv[3]);
+  
+  bool asymOn = false;
+  
+  if (std::string(argv[4])=="true" || std::string(argv[4])=="1") asymOn=true;
+  
   int numBins = 1200/enBinWidth;
 
   //set up energy binning vector
@@ -65,13 +69,8 @@ int main(int argc, char *argv[])
    
  
     try {
-      //std::string pdfFileBase = "comparison_plots/SimulationComp_Octet"+itos(octetNum)+"_evis_"+itos((int)enWinLow)+"-"+itos((int)enWinHigh)+".pdf";
       
-
-      //int uk0E=0, sim0E=0, uk1E=0, sim1E=0, uk23E=0, sim23E=0, ukTotE=0, simTotE=0, uk0W=0, sim0W=0, uk1W=0, sim1W=0, uk23W=0, sim23W=0, ukTotW=0, simTotW=0; //Event totals
-      //double ukAsym = 0., simAsym=0., ukAsymError = 0., simAsymError=0.;
-      
-      double normFactor = 0., ukIntegral=0., simIntegral=0.;
+      //double normFactor = 0., ukIntegral=0., simIntegral=0.;
 
 
       { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
@@ -85,7 +84,7 @@ int main(int argc, char *argv[])
 	for (int n=0; n<numBins;n++) {
 	  superSumTotal_uk[3][n]+=superSumError_uk[3][n]>0.?(1./power(superSumError_uk[3][n],2))*superSum_uk[3][n]:0.;
 	  superSumTotalError_uk[3][n]+=superSumError_uk[3][n]>0.?(1./power(superSumError_uk[3][n],2)):0.;
-	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) ukIntegral+=superSum_uk[3][n];
+	  //if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) ukIntegral+=superSum_uk[3][n];
 	}
 
 	//Type 0 events
@@ -130,21 +129,21 @@ int main(int argc, char *argv[])
       // SIMULATION
 
       { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true, false);
+	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true, asymOn);
 
 	//All event types
 	SIM.calcSuperSum(1);
 	superSum_sim[3] = SIM.returnSuperSum();
 	superSumError_sim[3] = SIM.returnSuperSumError();
 
-	for (int n=0; n<numBins; n++) {
-	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum_sim[3][n];
-	}
-	normFactor = ukIntegral/simIntegral;
+	//for (int n=0; n<numBins; n++) {
+	// if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum_sim[3][n];
+	//}
+	//normFactor = ukIntegral/simIntegral;
 
 	for (int n=0; n<numBins;n++) {
-	  superSum_sim[3][n] = normFactor*superSum_sim[3][n];
-	  superSumError_sim[3][n] = normFactor*superSumError_sim[3][n];
+	  //superSum_sim[3][n] = normFactor*superSum_sim[3][n];
+	  //superSumError_sim[3][n] = normFactor*superSumError_sim[3][n];
 	  superSumTotal_sim[3][n]+=superSumError_sim[3][n]>0.?(1./power(superSumError_sim[3][n],2))*superSum_sim[3][n]:0.;
 	  superSumTotalError_sim[3][n]+=superSumError_sim[3][n]>0.?(1./power(superSumError_sim[3][n],2)):0.;
 	}
@@ -161,8 +160,8 @@ int main(int argc, char *argv[])
 
 	for (int n=0; n<numBins;n++) {
 	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
-	  superSum_sim[0][n] = normFactor*superSum_sim[0][n];
-	  superSumError_sim[0][n] = normFactor*superSumError_sim[0][n];
+	  //superSum_sim[0][n] = normFactor*superSum_sim[0][n];
+	  //superSumError_sim[0][n] = normFactor*superSumError_sim[0][n];
 	  superSumTotal_sim[0][n]+=superSumError_sim[0][n]>0.?(1./power(superSumError_sim[0][n],2))*superSum_sim[0][n]:0.;
 	  superSumTotalError_sim[0][n]+=superSumError_sim[0][n]>0.?(1./power(superSumError_sim[0][n],2)):0.;
 	}
@@ -174,8 +173,8 @@ int main(int argc, char *argv[])
 	superSumError_sim[1] = SIM.returnSuperSumError();
 
 	for (int n=0; n<numBins;n++) {
-	  superSum_sim[1][n] = normFactor*superSum_sim[1][n];
-	  superSumError_sim[1][n] = normFactor*superSumError_sim[1][n];
+	  //superSum_sim[1][n] = normFactor*superSum_sim[1][n];
+	  //superSumError_sim[1][n] = normFactor*superSumError_sim[1][n];
 	  superSumTotal_sim[1][n]+=superSumError_sim[1][n]>0.?(1./power(superSumError_sim[1][n],2))*superSum_sim[1][n]:0.;
 	  superSumTotalError_sim[1][n]+=superSumError_sim[1][n]>0.?(1./power(superSumError_sim[1][n],2)):0.;
 	}
@@ -187,8 +186,8 @@ int main(int argc, char *argv[])
 	superSumError_sim[2] = SIM.returnSuperSumError();
 
 	for (int n=0; n<numBins;n++) {
-	  superSum_sim[2][n] = normFactor*superSum_sim[2][n];
-	  superSumError_sim[2][n] = normFactor*superSumError_sim[2][n];
+	  //superSum_sim[2][n] = normFactor*superSum_sim[2][n];
+	  //superSumError_sim[2][n] = normFactor*superSumError_sim[2][n];
 	  superSumTotal_sim[2][n]+=superSumError_sim[2][n]>0.?(1./power(superSumError_sim[2][n],2))*superSum_sim[2][n]:0.;
 	  superSumTotalError_sim[2][n]+=superSumError_sim[2][n]>0.?(1./power(superSumError_sim[2][n],2)):0.;
 	}
@@ -200,7 +199,7 @@ int main(int argc, char *argv[])
 
       }
       
-      std::string file1 = "superSumPlots/octet_"+itos(octetNum)+"_norm_"+ftos(enWinLow)+"-"+ftos(enWinHigh)+".root";
+      std::string file1 = asymOn ? "superSumPlots/octet_"+itos(octetNum)+"_AsymOn.root" : "superSumPlots/octet_"+itos(octetNum)+"_AsymOff.root";
       TFile *f = new TFile(file1.c_str(),"RECREATE");
       
       TH1D Erecon0_uk("Erecon0_uk","Type 0 Super-Sum",numBins,0.,1200.);
@@ -263,7 +262,7 @@ int main(int argc, char *argv[])
 
   //Creating file which is summed over all octets in range
   if (octetNumStart!=octetNumEnd) {
-    TString fileName = "superSumPlots/SuperSum_octets_"+itos(octetNumStart)+"-"+itos(octetNumEnd)+"_norm_"+ftos(enWinLow)+"-"+ftos(enWinHigh)+".root";
+    TString fileName = asymOn ? "superSumPlots/SuperSum_octets_"+itos(octetNumStart)+"-"+itos(octetNumEnd)+"_AsymOn.root" : "superSumPlots/SuperSum_octets_"+itos(octetNumStart)+"-"+itos(octetNumEnd)+"_AsymOff.root";
     //fileName+= octetNumStart;
     //fileName+= "-";
     //fileName+= octetNumEnd;
@@ -273,6 +272,7 @@ int main(int argc, char *argv[])
     
     for (int t=0; t<4; t++) {
       for (int bin=0; bin<numBins; bin++) {
+
 	superSumTotal_uk[t][bin] = superSumTotalError_uk[t][bin]>0.? superSumTotal_uk[t][bin]/superSumTotalError_uk[t][bin] : 0.;
 	superSumTotalError_uk[t][bin] = superSumTotalError_uk[t][bin]>0.? (1./TMath::Sqrt(superSumTotalError_uk[t][bin])) : 0.;
 	//std::cout << enBins[bin] << " " << superSumTotal_uk[0][bin] << " " << superSumTotalError_uk[0][bin] << std::endl;

@@ -280,8 +280,6 @@ void SimEvtRateHandler::dataReader() {
 
   double EastWeight = 1./runLength[0];
   double WestWeight = 1./runLength[1];
-  
-  if (!applyAsymmetry) AsymWeight=1.;
 
   //Run over all events in file, fill output histogram with rate
   
@@ -290,7 +288,9 @@ void SimEvtRateHandler::dataReader() {
   for (unsigned int i=0; i<nevents; i++)
     {
       Tin->GetEvent(i);
-      //AsymWeight=1.;
+
+      if (!applyAsymmetry) AsymWeight=1.;
+   
       if (Type<4 && PID==1) 
 	{
 	  if (Side==0)
