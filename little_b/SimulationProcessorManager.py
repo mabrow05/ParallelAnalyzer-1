@@ -147,7 +147,7 @@ def runBetaSims(geometry="2010", numEvents=5000,linCorr=True,paramSet=0):
         
             for line in infile:
                 params = line.split()
-                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[5],params[6],params[7],params[8]),params[0])
+                os.system("./SimulationProcessor %s %s %i %i %s %s %s %s %s %s %s %s %s"%(src,geometry,numEvents,linCorr,params[1],params[2],params[3],params[4],params[5],params[6],params[7],params[8],params[0]))
     
             infile.close()
         else:

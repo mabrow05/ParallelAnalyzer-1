@@ -51,7 +51,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
 {
   std::cout << "Running reverse calibration for " << source << std::endl;
 
-  UInt_t nEvtsPerTTree = 10000; //Number of electron events to be stored in each output TTree
+  UInt_t nEvtsPerTTree = 1000000; //Number of electron events to be stored in each output TTree
 
   std::string geometry = geom; // "2010","2011/2012","2012/2013"
   UInt_t alphaFileIndex = 0; // the index on the nPE_keV file
@@ -109,7 +109,7 @@ void revCalSimulation (std::string source, std::string geom, UInt_t numEvents, b
   
   //Read in simulated data and put in a TChain
   Char_t temp[500];
-  int numFiles = 10; // This is for testing! can be more later depending on how Xuan formats his output of simulated data
+  int numFiles = 100; // This is for testing! can be more later depending on how Xuan formats his output of simulated data
   TChain chain("anaTree");
   for (int i=0; i<numFiles; i++) {
     if (source.substr(0,4)!="Beta") sprintf(temp,"%s/%s/xuan_analyzed_%i.root",simLocation.c_str(),source.c_str(), i);
