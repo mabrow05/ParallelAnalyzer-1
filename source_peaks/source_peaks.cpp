@@ -25,6 +25,8 @@
 #include "sourcePeaks.h"
 #include "DataTree.hh"
 
+#include "peaks.hh"
+
 using namespace std;
 
 int main(int argc, char *argv[])
@@ -50,6 +52,17 @@ int main(int argc, char *argv[])
   for (int n=0; n<nSources; n++) {
     fileList >> sourceName[n];
     cout << "  " << sourceName[n] << endl;
+  }
+
+  //Checking if one of the sources is Bi so we can add in that we will fit the second Bi peak as well
+  bool useLowBiPeak=false;
+  int BiPeakIndex = 0;
+  for (int n=0; n<nSources; n++) {
+    if (sourceName[n]=="Bi") {
+      useLowBiPeak=true;
+      BiPeakIndex=n;
+      continue;
+    }
   }
 
   //Adding in here that we are only looking for runs with Ce, Sn, or Bi in them
@@ -98,41 +111,41 @@ int main(int argc, char *argv[])
   }
 
   // Output histograms
-  int nBin = 400;
+  int nBin = 420;
 
-  TH1F *his[3][8];
-  his[0][0] = new TH1F("his1_E0", "", nBin,0.0,4000.0);
-  his[0][1] = new TH1F("his1_E1", "", nBin,0.0,4000.0);
-  his[0][2] = new TH1F("his1_E2", "", nBin,0.0,4000.0);
-  his[0][3] = new TH1F("his1_E3", "", nBin,0.0,4000.0);
-  his[0][4] = new TH1F("his1_W0", "", nBin,0.0,4000.0);
-  his[0][5] = new TH1F("his1_W1", "", nBin,0.0,4000.0);
-  his[0][6] = new TH1F("his1_W2", "", nBin,0.0,4000.0);
-  his[0][7] = new TH1F("his1_W3", "", nBin,0.0,4000.0);
+  TH1D *his[3][8];
+  his[0][0] = new TH1D("his1_E0", "", nBin,-200.,4000.0);
+  his[0][1] = new TH1D("his1_E1", "", nBin,-200.,4000.0);
+  his[0][2] = new TH1D("his1_E2", "", nBin,-200.,4000.0);
+  his[0][3] = new TH1D("his1_E3", "", nBin,-200.,4000.0);
+  his[0][4] = new TH1D("his1_W0", "", nBin,-200.,4000.0);
+  his[0][5] = new TH1D("his1_W1", "", nBin,-200.,4000.0);
+  his[0][6] = new TH1D("his1_W2", "", nBin,-200.,4000.0);
+  his[0][7] = new TH1D("his1_W3", "", nBin,-200.,4000.0);
 
-  his[1][0] = new TH1F("his2_E0", "", nBin,0.0,4000.0);
-  his[1][1] = new TH1F("his2_E1", "", nBin,0.0,4000.0);
-  his[1][2] = new TH1F("his2_E2", "", nBin,0.0,4000.0);
-  his[1][3] = new TH1F("his2_E3", "", nBin,0.0,4000.0);
-  his[1][4] = new TH1F("his2_W0", "", nBin,0.0,4000.0);
-  his[1][5] = new TH1F("his2_W1", "", nBin,0.0,4000.0);
-  his[1][6] = new TH1F("his2_W2", "", nBin,0.0,4000.0);
-  his[1][7] = new TH1F("his2_W3", "", nBin,0.0,4000.0);
+  his[1][0] = new TH1D("his2_E0", "", nBin,-200.,4000.0);
+  his[1][1] = new TH1D("his2_E1", "", nBin,-200.,4000.0);
+  his[1][2] = new TH1D("his2_E2", "", nBin,-200.,4000.0);
+  his[1][3] = new TH1D("his2_E3", "", nBin,-200.,4000.0);
+  his[1][4] = new TH1D("his2_W0", "", nBin,-200.,4000.0);
+  his[1][5] = new TH1D("his2_W1", "", nBin,-200.,4000.0);
+  his[1][6] = new TH1D("his2_W2", "", nBin,-200.,4000.0);
+  his[1][7] = new TH1D("his2_W3", "", nBin,-200.,4000.0);
 
-  his[2][0] = new TH1F("his3_E0", "", nBin,0.0,4000.0);
-  his[2][1] = new TH1F("his3_E1", "", nBin,0.0,4000.0);
-  his[2][2] = new TH1F("his3_E2", "", nBin,0.0,4000.0);
-  his[2][3] = new TH1F("his3_E3", "", nBin,0.0,4000.0);
-  his[2][4] = new TH1F("his3_W0", "", nBin,0.0,4000.0);
-  his[2][5] = new TH1F("his3_W1", "", nBin,0.0,4000.0);
-  his[2][6] = new TH1F("his3_W2", "", nBin,0.0,4000.0);
-  his[2][7] = new TH1F("his3_W3", "", nBin,0.0,4000.0);
+  his[2][0] = new TH1D("his3_E0", "", nBin,-200.,4000.0);
+  his[2][1] = new TH1D("his3_E1", "", nBin,-200.,4000.0);
+  his[2][2] = new TH1D("his3_E2", "", nBin,-200.,4000.0);
+  his[2][3] = new TH1D("his3_E3", "", nBin,-200.,4000.0);
+  his[2][4] = new TH1D("his3_W0", "", nBin,-200.,4000.0);
+  his[2][5] = new TH1D("his3_W1", "", nBin,-200.,4000.0);
+  his[2][6] = new TH1D("his3_W2", "", nBin,-200.,4000.0);
+  his[2][7] = new TH1D("his3_W3", "", nBin,-200.,4000.0);
 
   // Open input ntuple
   char tempIn[500];
   DataTree *t = new DataTree();
-  sprintf(tempIn, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
-  t->setupInputTree(std::string(tempIn),"pass3");
+  sprintf(tempIn, "%s/replay_pass2_%s.root",getenv("REPLAY_PASS2"), argv[1]);
+  t->setupInputTree(std::string(tempIn),"pass2");
 
   int nEvents = t->getEntries();
   cout << "Processing " << argv[1] << " ... " << endl;
@@ -226,6 +239,7 @@ int main(int argc, char *argv[])
 
   delete t; //Closes input file
 
+  /*
   // Find maximum bin
   double maxBin[3][8];
   double maxCounts[3][8];
@@ -314,27 +328,181 @@ int main(int argc, char *argv[])
       }
     }
   }
+  */
+  
+  double maxBin[3][8]={0.};
+  double maxCounts[3][8]={0.};
+  for (int n=0; n<nSources; n++) {
+    for (int j=0; j<8; j++) {
+      
+      maxBin[n][j] = his[n][j]->GetMaximumBin();
+      maxCounts[n][j] = his[n][j]->GetBinContent(maxBin[n][j]);
+
+    }
+  }
+
+  // Define histogram fit ranges
+  double xLow[3][8]={0.}, xHigh[3][8]={0.};
+  for (int n=0; n<nSources; n++) {
+    
+    for (int j=0; j<8; j++) {
+      for (int i=maxBin[n][j]; i<nBin; i++) {
+        if (his[n][j]->GetBinContent(i+1) < 0.33*maxCounts[n][j]) {
+          xHigh[n][j] = his[n][j]->GetBinCenter(i+1);
+	  //Check to make sure the value isn't too close to the maximum bin...
+          if ((i-maxBin[n][j])<5) xHigh[n][j] = his[n][j]->GetXaxis()->GetBinCenter(maxBin[n][j])+250.;
+	  break;
+        }
+	if (i==(nBin-1)) xHigh[n][j] = his[n][j]->GetBinCenter(i);
+      }
+      if (sourceName[n]!="Bi") {
+	for (int i=maxBin[n][j]; i>0; i--) {
+	  if (his[n][j]->GetBinContent(i-1) < 0.33*maxCounts[n][j]) {
+	    xLow[n][j] = his[n][j]->GetBinCenter(i-1);
+	    //if ((maxBin[n][j]-i)<5) xLow[n][j] = binCenterMax[n][j]-200.;
+	    break;
+	  }
+	}
+      }
+      else {
+	for (int i=maxBin[n][j]*0.5; i>0; i--) {
+	  if (his[n][j]->GetBinContent(i-1) < 0.33*0.5*maxCounts[n][j]) {
+	    xLow[n][j] = his[n][j]->GetBinCenter(i-1);
+	    //if ((maxBin[n][j]-i)<5) xLow[n][j] = binCenterMax[n][j]-200.;
+	    break;
+	  }
+	}
+      }
+    }
+    
+  }
+
+  double fitMean[3][8]={0.};
+  double lowBiFitMean[8]={0.};
+  double fitSigma[3][8]={0.};
+  double lowBiFitSigma[8]={0.};
+
+  for (int n=0; n<nSources; n++) {
+
+    if (useSource[n]) {
+
+      for (int j=0; j<8; j++) {
+
+	if (sourceName[n]!="Bi") {
+
+	  //Double_t rangeLow = 5.;
+	  //Double_t rangeHigh = 4096.;
+	  SinglePeakHist sing(his[n][j], xLow[n][j], xHigh[n][j]);
+
+	  if (sing.isGoodFit()) {
+	    fitMean[n][j] = sing.ReturnMean();
+	    fitSigma[n][j] = sing.ReturnSigma();
+	  }
+
+	  else  {
+	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << ". Trying one more time......" << endl;
+	    sing.FitHist(maxBin[n][j], 40., his[n][j]->GetBinContent(maxBin[n][j]));
+
+	    if (sing.isGoodFit()) { 
+	      fitMean[n][j] = sing.ReturnMean();
+	      fitSigma[n][j] = sing.ReturnSigma();
+	    }
+
+	    else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " PEAK IN PMT " << j  << endl;
+	  }
+	}
+
+	else {
+
+	  //Double_t rangeLow = 5.;
+	  //Double_t rangeHigh = 4096.;
+	  DoublePeakHist doub(his[n][j], xLow[n][j], xHigh[n][j]);
+
+	  if (doub.isGoodFit()) {	    
+	    fitMean[n][j] = doub.ReturnMean1();
+	    lowBiFitMean[j] = doub.ReturnMean2();
+	    fitSigma[n][j] = doub.ReturnSigma1();
+	    lowBiFitSigma[j] = doub.ReturnSigma2();
+	  }
+
+	  else  {
+	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << ". Trying one more time......" << endl;
+	    doub.FitHist(maxBin[n][j], 40., his[n][j]->GetBinContent(maxBin[n][j]), 0.5*maxBin[n][j], 40., 0.5*his[n][j]->GetBinContent(maxBin[n][j]));
+
+	    if (doub.isGoodFit()) {
+	      fitMean[n][j] = doub.ReturnMean1();
+	      lowBiFitMean[j] = doub.ReturnMean2();
+	      fitSigma[n][j] = doub.ReturnSigma1();
+	      lowBiFitSigma[j] = doub.ReturnSigma2();
+	    }
+
+	    else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " PEAK IN PMT " << j  << endl;
+	    
+	  }
+	}
+
+      }
+    }
+  }
+	
 
   // Write results to file
   char tempResults[500];
   sprintf(tempResults, "%s/source_peaks_%s.dat",getenv("SOURCE_PEAKS"), argv[1]);
-  ofstream outResults(tempResults);
+  ofstream outResultsMean(tempResults);
+  sprintf(tempResults, "%s/source_widths_%s.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  ofstream outResultsSigma(tempResults);
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
       if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
-      outResults << runNumber << " "
-		 << sourceName[n] << " "
-		 << fitMean[n][0] << " "
-		 << fitMean[n][1] << " "
-		 << fitMean[n][2] << " "
-		 << fitMean[n][3] << " "
-		 << fitMean[n][4] << " "
-		 << fitMean[n][5] << " "
-		 << fitMean[n][6] << " "
-		 << fitMean[n][7] << endl;
+      outResultsMean << runNumber << " "
+		     << sourceName[n] << " "
+		     << fitMean[n][0] << " "
+		     << fitMean[n][1] << " "
+		     << fitMean[n][2] << " "
+		     << fitMean[n][3] << " "
+		     << fitMean[n][4] << " "
+		     << fitMean[n][5] << " "
+		     << fitMean[n][6] << " "
+		     << fitMean[n][7] << endl;
+      outResultsSigma << runNumber << " "
+		     << sourceName[n] << " "
+		     << fitSigma[n][0] << " "
+		     << fitSigma[n][1] << " "
+		     << fitSigma[n][2] << " "
+		     << fitSigma[n][3] << " "
+		     << fitSigma[n][4] << " "
+		     << fitSigma[n][5] << " "
+		     << fitSigma[n][6] << " "
+		     << fitSigma[n][7] << endl;
     }
   }
+
+  if (useLowBiPeak) {
+    outResultsMean << runNumber << " "
+		   << "Bi2" << " "
+		   << lowBiFitMean[0] << " "
+		   << lowBiFitMean[1] << " "
+		   << lowBiFitMean[2] << " "
+		   << lowBiFitMean[3] << " "
+		   << lowBiFitMean[4] << " "
+		   << lowBiFitMean[5] << " "
+		   << lowBiFitMean[6] << " "
+		   << lowBiFitMean[7] << endl;
+    outResultsSigma << runNumber << " "
+		   << "Bi2" << " "
+		   << lowBiFitSigma[0] << " "
+		   << lowBiFitSigma[1] << " "
+		   << lowBiFitSigma[2] << " "
+		   << lowBiFitSigma[3] << " "
+		   << lowBiFitSigma[4] << " "
+		   << lowBiFitSigma[5] << " "
+		   << lowBiFitSigma[6] << " "
+		   << lowBiFitSigma[7] << endl;
+  }
+  outResultsMean.close();
+  outResultsSigma.close();
 
   // Write output ntuple
   fileOut->Write();

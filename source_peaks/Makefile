@@ -19,7 +19,7 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o
+objects = DataTree.o peaks.o
 
 .PHONY: all
 all: source_peaks.exe source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.exe 
@@ -43,7 +43,9 @@ source_peaks_EnergyPeak.exe: source_peaks_EnergyPeak.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.o $(objects) $(LIBS)
 	@echo "Done"
 
-DataTree.o: DataTree.hh
+DataTree.o: DataTree.hh 
+
+peaks.o: peaks.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

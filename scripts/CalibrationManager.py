@@ -822,19 +822,20 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
             #rep.findPedestals(runPeriod)
-            rep.runReplayPass1(runPeriod)
+            #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            rep.runReplayPass2(runPeriod)
-            rep.runReplayPass3(runPeriod)
+            #rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
-            #cal.fitSourcePeaks(runPeriod)
+            cal.fitSourcePeaks(runPeriod)
+            #rep.runReplayPass3(runPeriod)
+            
             #cal.makeSourceCalibrationFile(runPeriod, False)
             #rep.runReplayPass4(runPeriod)
 

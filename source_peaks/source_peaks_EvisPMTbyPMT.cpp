@@ -425,7 +425,7 @@ int main(int argc, char *argv[])
 	       << lowBiFitMean[5] << " "
 	       << lowBiFitMean[6] << " "
 	       << lowBiFitMean[7] << endl;
-    }
+  }
   outResults.close();
 
   // Write output ntuple
