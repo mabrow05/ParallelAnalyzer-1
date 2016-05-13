@@ -92,7 +92,7 @@ void plot_position_map(int iRunPeriod)
 
   // Read position map
   char tempIn[500];
-  sprintf(tempIn, "position_map_%i_RC_123.dat", iRunPeriod);
+  sprintf(tempIn, "%s/position_map_%i_RC_123.dat", getenv("POSITION_MAPS"), iRunPeriod);
   cout << "Processing ... " << tempIn << endl;
   ifstream fileIn(tempIn);
 
@@ -135,7 +135,7 @@ void plot_position_map(int iRunPeriod)
   TString filenameOut;
   Char_t runPeriodString[10];
   sprintf(runPeriodString,"%i",iRunPeriod);
-  filenameOut = "position_map_"+TString(runPeriodString)+"_RC_123.pdf";
+  filenameOut = TString(getenv("POSITION_MAPS")) + "position_map_"+TString(runPeriodString)+"_RC_123.pdf";
   
   /*if (iRunPeriod == 1) filenameOut  = "position_map_1_RC_123.pdf";
   if (iRunPeriod == 2) filenameOut  = "position_map_2_RC_123.pdf";

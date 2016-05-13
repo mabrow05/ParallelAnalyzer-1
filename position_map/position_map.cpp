@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
 
   char temp[500];
-  sprintf(temp, "../run_lists/Xenon_Calibration_Run_Period_%i.dat", iXeRunPeriod);
+  sprintf(temp, "%s/run_lists/Xenon_Calibration_Run_Period_%i.dat", getenv("ANALYSIS_CODE"),iXeRunPeriod);
   ifstream fileRuns(temp);
 
   int ii = 0;
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
       tempOutBase+=itos(responseClasses[i]);
     }
   }
-  tempOut = tempOutBase+".root";
+  tempOut =  getenv("POSITION_MAPS")+tempOutBase+".root";
   TFile *fileOut = new TFile(tempOut.c_str(),"RECREATE");
 
   // Output histograms
@@ -482,7 +482,7 @@ int main(int argc, char *argv[])
 
   // Write position maps to file
   string tempMap;
-  tempMap = tempOutBase + ".dat";
+  tempMap =  getenv("POSITION_MAPS") + tempOutBase + ".dat";
   ofstream outMap(tempMap.c_str());
 
   for (int i=0; i<nPosBinsX; i++) {
@@ -503,7 +503,7 @@ int main(int argc, char *argv[])
 
   // Write norms to file
   string tempNorm;
-  tempNorm = "norm_"+tempMap;
+  tempNorm =  getenv("POSITION_MAPS") + std::string("norm_") + tempOutBase + ".dat";
   ofstream outNorm(tempNorm.c_str());
 
   for (int p=0; p<nPMT; p++) {
