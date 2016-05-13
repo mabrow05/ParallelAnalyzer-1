@@ -45,7 +45,11 @@ struct ScintPosAdjusted {
   double ScintPosAdjW[3];
 } scint_pos_adj;
 
-struct PMT_Evis {
+struct PMT {
   double Evis[8];
-  double weight[8]; 
-} pmt_Evis;
+  double etaEvis[8];
+  double nPE[8];
+  //double weight[8]; 
+} pmt;
+
+

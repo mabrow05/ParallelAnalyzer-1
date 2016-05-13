@@ -109,7 +109,9 @@ class CalReplayManager:
         os.system("mkdir -p %s"%self.nPEweightsPath)
         os.system("mkdir -p %s"%self.octetListPath)
         os.system("mkdir -p %s"%self.triggerFuncPath)
-        os.system("mkdir -p %s"%self.revCalSimPath)
+        os.system("mkdir -p %s/sources/"%self.revCalSimPath)
+        os.system("mkdir -p %s/beta/"%self.revCalSimPath)
+        os.system("mkdir -p %s/source_peaks/"%self.revCalSimPath)
         os.system("mkdir -p %s"%self.UKspecReplayPath)
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
 
@@ -293,7 +295,7 @@ class CalReplayManager:
                 elif source == "Cs":
                     source = source+"137"
 
-                os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, source))
+                os.system("cd ../simulation_comparison/;./revCalSim.exe %i %s"%(run, source))
                 #print "./../simulation_comparison/revCalSim.exe %i %s"%(run, source)
 
         print "Finished reverse calibration for " + sourceORxenon + "run period %i"%srcRunPeriod
@@ -420,7 +422,7 @@ class CalibrationManager:
             print "Running fit_source_positions.C on run %i"%run
         
 
-    def fitSourcePeaks(self,srcRunPeriod=1, overwrite=True):
+    def fitSourcePeaks(self,srcRunPeriod=1, Simulation=False, overwrite=True):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
@@ -432,9 +434,14 @@ class CalibrationManager:
                 runs.append(int(line))
 
         for run in runs:
-            os.system("cd ../source_peaks; ./source_peaks.exe %i"%run)
-            os.system("root -b -q '../source_peaks/plot_source_peaks.C(\"%i\")'"%run)
-            print "Ran fit_source_peaks.C on run %i"%run
+            if not Simulation:
+                os.system("cd ../source_peaks; ./source_peaks.exe %i"%run)
+                os.system("root -b -q '../source_peaks/plot_source_peaks.C(\"%i\")'"%run)
+                print "Ran fit_source_peaks.C on run %i"%run
+            else:
+                os.system("cd ../source_peaks; ./sim_source_peaks.exe %i"%run)
+                os.system("root -b -q '../source_peaks/plot_sim_source_peaks.C(\"%i\")'"%run)
+                print "Ran fit_source_peaks.C on run %i"%run
 
 
     def fitSourcePeaksInEnergy(self,srcRunPeriod=1, PMTbyPMT=False, Simulation=False, overwrite=True):
@@ -822,7 +829,7 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,18,19,20,21,22,23,24]# 
@@ -846,15 +853,15 @@ if __name__ == "__main__":
         #cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
-    if 0: 
-        runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]#[13]#,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods =[2,3,4,5,6,7,8,9,10,11,12, 13,14,15,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
             rep.runReverseCalibration(runPeriod)
-            cal.fitSourcePeaksInEnergy(runPeriod, True, Simulation=True)
-            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
+            cal.fitSourcePeaks(runPeriod, Simulation=True)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
 
     ### Source Run Calibration Steps...
     if 0: 

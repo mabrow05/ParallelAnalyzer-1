@@ -27,6 +27,10 @@ source_peaks.exe: source_peaks.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks.exe source_peaks.o $(objects) $(LIBS)
 	@echo "Done"
 
+sim_source_peaks.exe: sim_source_peaks.o $(objects)
+	$(CXX) $(CXXFLAGS) -o sim_source_peaks.exe sim_source_peaks.o $(objects) $(LIBS)
+	@echo "Done"
+
 source_peaks_EvisPMTbyPMT.exe: source_peaks_EvisPMTbyPMT.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks_EvisPMTbyPMT.exe source_peaks_EvisPMTbyPMT.o $(objects) $(LIBS)
 	@echo "Done"

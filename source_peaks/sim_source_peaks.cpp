@@ -14,20 +14,17 @@
 #include <TF1.h>
 #include <TH1D.h>
 
-#include "fullTreeVariables.h"
-#include "MWPCGeometry.h"
-#include "pedestals.h"
-#include "cuts.h"
-#include "basic_reconstruction.h"
-
-#include "replay_pass2.h"
-#include "replay_pass3.h"
 #include "sourcePeaks.h"
-#include "DataTree.hh"
 
 #include "peaks.hh"
 
 using namespace std;
+
+struct PMT {
+  double Evis[8];
+  double etaEvis[8];
+  double nPE[8]; 
+};
 
 int main(int argc, char *argv[])
 {
@@ -43,6 +40,7 @@ int main(int argc, char *argv[])
   // Read source list
   int nSources = 0;
   string sourceName[3];
+  string sourceNameLong[3];
   char tempList[500];
   sprintf(tempList, "%s/source_list_%s.dat",getenv("SOURCE_LIST"), argv[1]);
   //cout << tempList << endl;
@@ -64,12 +62,35 @@ int main(int argc, char *argv[])
       continue;
     }
   }
+      
 
-  //Adding in here that we are only looking for runs with Ce, Sn, or Bi in them
+  //Adding in here that we are only looking for runs with Ce, Sn, In, or Bi in them
   bool correctSource = false;
   bool useSource[3] = {false,false,false};
   for (int n=0; n<nSources; n++) {
-    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi") {
+    if (sourceName[n]=="Ce") {
+      sourceNameLong[n] = "Ce139";
+      correctSource = true;
+      useSource[n]=true;
+      continue;
+    }
+    if (sourceName[n]=="Sn") {
+      sourceNameLong[n] = "Sn113";
+      correctSource = true;
+      useSource[n]=true;
+      continue;
+    }
+    if (sourceName[n]=="Bi") {
+      sourceNameLong[n] = "Bi207";
+      correctSource = true;
+      useSource[n]=true;
+      continue;
+    }
+    if (sourceName[n]=="In") {
+      string side = getIndiumSide(runNumber);
+      if (side=="West") sourceNameLong[n] = "In114W";
+      else if (side=="East") sourceNameLong[n] = "In114E";
+      else {cout << "No Indium side determined\n"; continue;}
       correctSource = true;
       useSource[n]=true;
       continue; 
@@ -77,161 +98,97 @@ int main(int argc, char *argv[])
   }
   
   if (!correctSource) {
-    cout << "Source run with no Ce, Sn, or Bi\n";
+    cout << "Source run with no Ce, Sn, In, or Bi\n";
     exit(0);
   }
 
+
   // Open output ntuple
   char tempOut[500];
-  sprintf(tempOut, "%s/source_peaks_%s.root",getenv("SOURCE_PEAKS"), argv[1]);
+  sprintf(tempOut, "%s/source_peaks/source_peaks_%s.root",getenv("REVCALSIM"), argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
 
-
-  // Read source positions
-  double xEast[3], yEast[3], sigmaEast[3];
-  double xWest[3], yWest[3], sigmaWest[3];
-  char tempPos[500];
-  sprintf(tempPos, "%s/source_positions_%s.dat",getenv("SOURCE_POSITIONS"), argv[1]);
-  ifstream filePos(tempPos);
-  cout << " ... Reading source positions" << endl;
-  for (int n=0; n<nSources; n++) {
-    filePos >> xEast[n] >> yEast[n] >> sigmaEast[n]
-            >> xWest[n] >> yWest[n] >> sigmaWest[n];
-    cout << xEast[n] << " " << yEast[n] << " " << sigmaEast[n] << " "
-         << xWest[n] << " " << yWest[n] << " " << sigmaWest[n] << endl;
-  }
-
   // Output histograms
-  int nBin = 420;
+  int nBin = 406;
 
   TH1D *his[3][8];
-  his[0][0] = new TH1D("his1_E0", "", nBin,-200.,4000.0);
-  his[0][1] = new TH1D("his1_E1", "", nBin,-200.,4000.0);
-  his[0][2] = new TH1D("his1_E2", "", nBin,-200.,4000.0);
-  his[0][3] = new TH1D("his1_E3", "", nBin,-200.,4000.0);
-  his[0][4] = new TH1D("his1_W0", "", nBin,-200.,4000.0);
-  his[0][5] = new TH1D("his1_W1", "", nBin,-200.,4000.0);
-  his[0][6] = new TH1D("his1_W2", "", nBin,-200.,4000.0);
-  his[0][7] = new TH1D("his1_W3", "", nBin,-200.,4000.0);
+  his[0][0] = new TH1D("his1_E0", "", nBin,-30.0,2000.0);
+  his[0][1] = new TH1D("his1_E1", "", nBin,-30.0,2000.0);
+  his[0][2] = new TH1D("his1_E2", "", nBin,-30.0,2000.0);
+  his[0][3] = new TH1D("his1_E3", "", nBin,-30.0,2000.0);
+  his[0][4] = new TH1D("his1_W0", "", nBin,-30.0,2000.0);
+  his[0][5] = new TH1D("his1_W1", "", nBin,-30.0,2000.0);
+  his[0][6] = new TH1D("his1_W2", "", nBin,-30.0,2000.0);
+  his[0][7] = new TH1D("his1_W3", "", nBin,-30.0,2000.0);
 
-  his[1][0] = new TH1D("his2_E0", "", nBin,-200.,4000.0);
-  his[1][1] = new TH1D("his2_E1", "", nBin,-200.,4000.0);
-  his[1][2] = new TH1D("his2_E2", "", nBin,-200.,4000.0);
-  his[1][3] = new TH1D("his2_E3", "", nBin,-200.,4000.0);
-  his[1][4] = new TH1D("his2_W0", "", nBin,-200.,4000.0);
-  his[1][5] = new TH1D("his2_W1", "", nBin,-200.,4000.0);
-  his[1][6] = new TH1D("his2_W2", "", nBin,-200.,4000.0);
-  his[1][7] = new TH1D("his2_W3", "", nBin,-200.,4000.0);
+  his[1][0] = new TH1D("his2_E0", "", nBin,-30.0,2000.0);
+  his[1][1] = new TH1D("his2_E1", "", nBin,-30.0,2000.0);
+  his[1][2] = new TH1D("his2_E2", "", nBin,-30.0,2000.0);
+  his[1][3] = new TH1D("his2_E3", "", nBin,-30.0,2000.0);
+  his[1][4] = new TH1D("his2_W0", "", nBin,-30.0,2000.0);
+  his[1][5] = new TH1D("his2_W1", "", nBin,-30.0,2000.0);
+  his[1][6] = new TH1D("his2_W2", "", nBin,-30.0,2000.0);
+  his[1][7] = new TH1D("his2_W3", "", nBin,-30.0,2000.0);
 
-  his[2][0] = new TH1D("his3_E0", "", nBin,-200.,4000.0);
-  his[2][1] = new TH1D("his3_E1", "", nBin,-200.,4000.0);
-  his[2][2] = new TH1D("his3_E2", "", nBin,-200.,4000.0);
-  his[2][3] = new TH1D("his3_E3", "", nBin,-200.,4000.0);
-  his[2][4] = new TH1D("his3_W0", "", nBin,-200.,4000.0);
-  his[2][5] = new TH1D("his3_W1", "", nBin,-200.,4000.0);
-  his[2][6] = new TH1D("his3_W2", "", nBin,-200.,4000.0);
-  his[2][7] = new TH1D("his3_W3", "", nBin,-200.,4000.0);
+  his[2][0] = new TH1D("his3_E0", "", nBin,-30.0,2000.0);
+  his[2][1] = new TH1D("his3_E1", "", nBin,-30.0,2000.0);
+  his[2][2] = new TH1D("his3_E2", "", nBin,-30.0,2000.0);
+  his[2][3] = new TH1D("his3_E3", "", nBin,-30.0,2000.0);
+  his[2][4] = new TH1D("his3_W0", "", nBin,-30.0,2000.0);
+  his[2][5] = new TH1D("his3_W1", "", nBin,-30.0,2000.0);
+  his[2][6] = new TH1D("his3_W2", "", nBin,-30.0,2000.0);
+  his[2][7] = new TH1D("his3_W3", "", nBin,-30.0,2000.0);
 
-  // Open input ntuple
-  char tempIn[500];
-  DataTree *t = new DataTree();
-  sprintf(tempIn, "%s/replay_pass2_%s.root",getenv("REPLAY_PASS2"), argv[1]);
-  t->setupInputTree(std::string(tempIn),"pass2");
 
-  int nEvents = t->getEntries();
-  cout << "Processing " << argv[1] << " ... " << endl;
-  cout << "... nEvents = " << nEvents << endl;
+  for (Int_t src=0; src<nSources; src++) {
+    if (!useSource[src]) continue;
+    
+    // Open input ntuple
+    char tempIn[500];
+    sprintf(tempIn, "%s/sources/revCalSim_%i_%s.root",getenv("REVCALSIM"), runNumber,sourceNameLong[src].c_str() );
+    cout << tempIn << endl;
+    TFile *fileIn = new TFile(tempIn, "READ");
+    TTree *Tin = (TTree*)(fileIn->Get("revCalSim"));
+
+    PMT pmt;
+    Int_t PID, type, side;
+    // Variables
+    Tin->SetBranchAddress("PMT",&pmt);
+
+    //Tin->SetBranchAddress("EvisE", &EvisE);
+    //Tin->SetBranchAddress("EvisW", &EvisW);
+
+    Tin->SetBranchAddress("PID",  &PID);
+    Tin->SetBranchAddress("type", &type);
+    Tin->SetBranchAddress("side", &side);
+
+    int nEvents = Tin->GetEntries();
+    cout << "Processing " << argv[1] << " ... " << endl;
+    cout << "... nEvents = " << nEvents << endl;
 
   // Loop over events
-  for (int i=0; i<nEvents; i++) {
-    t->getEvent(i);
+    for (int i=0; i<nEvents; i++) {
+      Tin->GetEvent(i);
 
-    // Use Type 0 events
-    if (t->Type != 0 && t->PID!=1) continue;
-
-    // First source (x,y)
-    if (useSource[0]) {
-
-      if (t->Side == 0) {
-	if ( (t->xE.center - xEast[0])*(t->xE.center - xEast[0]) +
-	     (t->yE.center - yEast[0])*(t->yE.center - yEast[0]) <
-	     (2.*sigmaEast[0])*(2.*sigmaEast[0]) ) {
-	  his[0][0]->Fill(t->ScintE.q1);
-	  his[0][1]->Fill(t->ScintE.q2);
-	  his[0][2]->Fill(t->ScintE.q3);
-	  his[0][3]->Fill(t->ScintE.q4);
-	}
-      }
-      if (t->Side == 1) {
-	if ( (t->xW.center - xWest[0])*(t->xW.center - xWest[0]) +
-	     (t->yW.center - yWest[0])*(t->yW.center - yWest[0]) <
-	     (2.*sigmaWest[0])*(2.*sigmaWest[0]) ) {
-	  his[0][4]->Fill(t->ScintW.q1);
-	  his[0][5]->Fill(t->ScintW.q2);
-	  his[0][6]->Fill(t->ScintW.q3);
-	  his[0][7]->Fill(t->ScintW.q4);
-	}
-      }
+      // Use Type 0 events
+      if (type != 0 || PID!=1) continue;
       
-    }
-
-    // Second source (x,y)
-    if (nSources > 1 && useSource[1]) {
-
-      if (t->Side == 0) {
-	if ( (t->xE.center - xEast[1])*(t->xE.center - xEast[1]) +
-	     (t->yE.center - yEast[1])*(t->yE.center - yEast[1]) <
-	     (2.*sigmaEast[1])*(2.*sigmaEast[1]) ) {
-	  his[1][0]->Fill(t->ScintE.q1);
-	  his[1][1]->Fill(t->ScintE.q2);
-	  his[1][2]->Fill(t->ScintE.q3);
-	  his[1][3]->Fill(t->ScintE.q4);
+      if (side == 0) {
+	for (int p=0; p<4; p++) {
+	  his[src][p]->Fill(pmt.etaEvis[p]);
 	}
       }
-      if (t->Side == 1) {
-	if ( (t->xW.center - xWest[1])*(t->xW.center - xWest[1]) +
-	     (t->yW.center - yWest[1])*(t->yW.center - yWest[1]) <
-	     (2.*sigmaWest[1])*(2.*sigmaWest[1]) ) {
-	  his[1][4]->Fill(t->ScintW.q1);
-	  his[1][5]->Fill(t->ScintW.q2);
-	  his[1][6]->Fill(t->ScintW.q3);
-	  his[1][7]->Fill(t->ScintW.q4);
-	}
+      if (side == 1) {
+	for (int p=4; p<8; p++) {
+	  his[src][p]->Fill(pmt.etaEvis[p]);
+	}	
       }
-    }
-
-    // Third source (x,y)
-    if (nSources > 2 && useSource[2]) {
-
-      if (t->Side == 0) {
-	if ( (t->xE.center - xEast[2])*(t->xE.center - xEast[2]) +
-	     (t->yE.center - yEast[2])*(t->yE.center - yEast[2]) <
-	     (2.*sigmaEast[2])*(2.*sigmaEast[2]) ) {
-	  his[2][0]->Fill(t->ScintE.q1);
-	  his[2][1]->Fill(t->ScintE.q2);
-	  his[2][2]->Fill(t->ScintE.q3);
-	  his[2][3]->Fill(t->ScintE.q4);
-	}
-      }
-      if (t->Side == 1) {
-	if ( (t->xW.center - xWest[2])*(t->xW.center - xWest[2]) +
-	     (t->yW.center - yWest[2])*(t->yW.center - yWest[2]) <
-	     (2.*sigmaWest[2])*(2.*sigmaWest[2]) ) {
-	  his[2][4]->Fill(t->ScintW.q1);
-	  his[2][5]->Fill(t->ScintW.q2);
-	  his[2][6]->Fill(t->ScintW.q3);
-	  his[2][7]->Fill(t->ScintW.q4);
-	}
-      }
-
-    }
-
+    } 
+    fileIn->Close();
   }
-
-  delete t; //Closes input file
-
   
-  
+
+  // Find maximum bin
   double maxBin[3][8]={0.};
   double maxCounts[3][8]={0.};
   for (int n=0; n<nSources; n++) {
@@ -346,13 +303,13 @@ int main(int argc, char *argv[])
       }
     }
   }
-	
+
 
   // Write results to file
   char tempResults[500];
-  sprintf(tempResults, "%s/source_peaks_%s.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  sprintf(tempResults, "%s/source_peaks/source_peaks_%s.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsMean(tempResults);
-  sprintf(tempResults, "%s/source_widths_%s.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  sprintf(tempResults, "%s/source_peaks/source_widths_%s.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsSigma(tempResults);
 
   for (int n=0; n<nSources; n++) {

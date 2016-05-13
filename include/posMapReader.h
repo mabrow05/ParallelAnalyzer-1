@@ -42,7 +42,7 @@ void GetPositionMap(int XePeriod) {
   
   // Determine position map to use
   char tempFileXePositionMap[500];
-  sprintf(tempFileXePositionMap, "../position_map/position_map_%i_RC_123.dat",XePeriod);
+  sprintf(tempFileXePositionMap, "%s/position_map/position_map_%i_RC_123.dat",getenv("ANALYSIS_CODE"),XePeriod);
   
   cout << "... Reading: " << tempFileXePositionMap << endl;
 
