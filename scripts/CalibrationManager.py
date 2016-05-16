@@ -859,7 +859,7 @@ if __name__ == "__main__":
         #cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
-    if 1: 
+    if 0: 
         runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]#, 13,14,15,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()

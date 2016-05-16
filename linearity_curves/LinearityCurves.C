@@ -42,6 +42,7 @@ void LinearityCurves(Int_t runPeriod)
   gStyle->SetOptFit(0); // 1111
   gStyle->SetOptTitle(1);
   gStyle->SetTitleFontSize(0.05);
+  //gStyle->SetTitleSize(0.04,"XY");
   //gStyle->SetTitleX(0.17);
   //gStyle->SetTitleAlign(13);
   gStyle->SetTitleOffset(1.20, "x");
@@ -279,11 +280,43 @@ void LinearityCurves(Int_t runPeriod)
   fitADC->SetLineColor(2);
 
   Double_t offset=0., slope=0., quad=0., cubic=0.; //Fit Parameters
-  Double_t slopeToOrigin = 0.; //This is the slope calculated from the low end of the fit range to the origin
-  Double_t lowFitThreshold = 0.; //This is the low end of the quadratic fit region defined to be 
-                                 // (1/2)*(Average Ce Peak in ADC).
-  Double_t highFitThreshold = 0.; // This is the upper end of the quadratic fit
-  Double_t lowEnSlope = 0., shiftOfTanH = 0., spreadOfTanH = 0.;
+
+  //Creating canvases and TPads for all of the calibrations curves
+  TCanvas *c1 = new TCanvas("c1", "c1", 1400, 1000);
+
+  TPad *E1 = new TPad("E1","East 1", 0.0, 0.65, 0.25, 1.0);
+  TPad *E1res = new TPad("E1res","East 1 residuals", 0.0, 0.5, 0.25, 0.65);
+  TPad *E2 = new TPad("E2","East 2", 0.25, 0.65, 0.5, 1.0);
+  TPad *E2res = new TPad("E2res","East 2 residuals", 0.25, 0.5, 0.5, 0.65);
+  TPad *E3 = new TPad("E3","East 3", 0.5, 0.65, 0.75, 1.0);
+  TPad *E3res = new TPad("E3res","East 3 residuals", 0.5, 0.5, 0.75, 0.65);
+  TPad *E4 = new TPad("E1","East 1", 0.75, 0.65, 1.0, 1.0);
+  TPad *E4res = new TPad("E4res","East 4 residuals", 0.75, 0.5, 1.0, 0.65);
+  E1->Draw();
+  E1res->Draw();
+  E2->Draw();
+  E2res->Draw();
+  E3->Draw();
+  E3res->Draw();
+  E4->Draw();
+  E4res->Draw();
+
+  TPad *W1 = new TPad("W1","West 1", 0.0, 0.15, 0.25, 0.5);
+  TPad *W1res = new TPad("W1res","West 1 residuals", 0.0, 0.0, 0.25, 0.15);
+  TPad *W2 = new TPad("W2","West 2", 0.25, 0.15, 0.5, 0.5);
+  TPad *W2res = new TPad("W2res","West 2 residuals", 0.25, 0.0, 0.5, 0.15);
+  TPad *W3 = new TPad("W3","West 3", 0.5, 0.15, 0.75, 0.5);
+  TPad *W3res = new TPad("W3res","West 3 residuals", 0.5, 0.0, 0.75, 0.15);
+  TPad *W4 = new TPad("W1","West 1", 0.75, 0.15, 1.0, 0.5);
+  TPad *W4res = new TPad("W4res","West 4 residuals", 0.75, 0.0, 1.0, 0.15);
+  W1->Draw();
+  W1res->Draw();
+  W2->Draw();
+  W2res->Draw();
+  W3->Draw();
+  W3res->Draw();
+  W4->Draw();
+  W4res->Draw();
 
   // East 1
 
@@ -291,37 +324,21 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileE1(temp);
   vector <Double_t> fitEQ_E1(runE1.size(),0);
 
+  
+
   if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
  
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runE1.size(); ii++) {
-      if (nameE1[ii]=="Ce") {
-	sumADC_Ce+=ADCE1[ii];
-	sumEQ_Ce+=EQE1[ii];
-	entries1++;
-      }
-      if (nameE1[ii]=="Bi1") {
-	sumADC_Bi+=ADCE1[ii];
-	entries2++;
-      }
+      if (ADCE1[ii]>maxADC) maxADC = ADCE1[ii];
+      if (EQE1[ii]>maxEQ) maxEQ = EQE1[ii];
     }
-    
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
 
-    c1 = new TCanvas("c1", "c1");
-    c1->SetLogy(0);
+    E1->cd();
 
     TGraphErrors *grE1 = new TGraphErrors(runE1.size(),&ADCE1[0],&EQE1[0],err,err);
-    grE1->SetTitle("");
+    grE1->SetTitle("East PMT 1");
     grE1->SetMarkerColor(1);
     grE1->SetLineColor(1);
     grE1->SetMarkerStyle(20);
@@ -332,26 +349,23 @@ void LinearityCurves(Int_t runPeriod)
     grE1->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grE1->GetYaxis()->SetTitleOffset(1.6);
     grE1->GetYaxis()->CenterTitle();
-    grE1->GetXaxis()->SetLimits(0.0,2400.);
+    grE1->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grE1->SetMinimum(0.0);
-    grE1->SetMaximum(1000.0);
+    grE1->SetMaximum(maxEQ+40.);
     grE1->Draw("AP");
 
-    grE1->Fit("fitADC", "","", 0., highFitThreshold);
+    grE1->Fit("fitADC", "","", 0., maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    lowEnSlope = fitADC->GetParameter(3);
-    shiftOfTanH = fitADC->GetParameter(4);
-    spreadOfTanH = fitADC->GetParameter(5);
-    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad  << endl; //<< " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
   
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -359,7 +373,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
 
     // Calculate residuals in [keV]
     
@@ -394,9 +408,7 @@ void LinearityCurves(Int_t runPeriod)
     }
   
 
-    // East 1 Residuals
-    c1r = new TCanvas("c1r", "c1r");
-    c1r->SetLogy(0);
+    E1res->cd();
 
     TGraphErrors *grE1r = new TGraphErrors(runE1.size(),&ADCE1[0],&ResE1[0],err,err);
     grE1r->SetTitle("");
@@ -404,19 +416,22 @@ void LinearityCurves(Int_t runPeriod)
     grE1r->SetLineColor(1);
     grE1r->SetMarkerStyle(20);
     grE1r->SetMarkerSize(0.75);
-    grE1r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grE1r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grE1r->GetXaxis()->SetTitleOffset(1.2);
     grE1r->GetXaxis()->CenterTitle();
-    grE1r->GetYaxis()->SetTitle("Residuals [keV]");
-    grE1r->GetYaxis()->SetTitleOffset(1.2);
+    grE1r->GetYaxis()->SetTitle("% Residuals");
+    grE1r->GetYaxis()->SetTitleSize(0.1);
+    grE1r->GetYaxis()->SetLabelSize(0.07);
+    grE1r->GetXaxis()->SetLabelSize(0);
+    grE1r->GetYaxis()->SetTitleOffset(0.6);
     grE1r->GetYaxis()->CenterTitle();
-    grE1r->GetXaxis()->SetLimits(0.0,2400.);
-    grE1r->SetMinimum(-5.0);
-    grE1r->SetMaximum( 5.0);
+    grE1r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grE1r->SetMinimum(-10.0);
+    grE1r->SetMaximum( 10.0);
     grE1r->Draw("AP");
 
     const Int_t n = 2;
-    Double_t x[n] = {0, 2400};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -428,7 +443,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -436,7 +451,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
 
   else { linCurves << 0. << " " << 0. << " " << 0. << endl;//" " << 0. << " " << 0. << " " << 0. << endl;
@@ -452,35 +467,17 @@ void LinearityCurves(Int_t runPeriod)
   if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ=0.;
     for (UInt_t ii=0; ii<runE2.size(); ii++) {
-      if (nameE2[ii]=="Ce") {
-	sumADC_Ce+=ADCE2[ii];
-	sumEQ_Ce+=EQE2[ii];
-	entries1++;
-      }
-      if (nameE2[ii]=="Bi1") {
-	sumADC_Bi+=ADCE2[ii];
-	entries2++;
-      }
+      if (ADCE2[ii]>maxADC) maxADC = ADCE2[ii];
+      if (EQE2[ii]>maxEQ) maxEQ = EQE2[ii];
     }
     
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
-    
 
-    c2 = new TCanvas("c2", "c2");
-    c2->SetLogy(0);
+    E2->cd();
 
     TGraphErrors *grE2 = new TGraphErrors(runE2.size(),&ADCE2[0],&EQE2[0],err,err);
-    grE2->SetTitle("");
+    grE2->SetTitle("East PMT 2");
     grE2->SetMarkerColor(1);
     grE2->SetLineColor(1);
     grE2->SetMarkerStyle(20);
@@ -491,26 +488,23 @@ void LinearityCurves(Int_t runPeriod)
     grE2->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grE2->GetYaxis()->SetTitleOffset(1.6);
     grE2->GetYaxis()->CenterTitle();
-    grE2->GetXaxis()->SetLimits(0.0,2400.);
+    grE2->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grE2->SetMinimum(0.0);
-    grE2->SetMaximum(1000.0);
+    grE2->SetMaximum(maxEQ+40.);
     grE2->Draw("AP");
 
-    grE2->Fit("fitADC", "Q","",0.,highFitThreshold);
+    grE2->Fit("fitADC", "Q","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    //lowEnSlope = fitADC->GetParameter(3);
-    //shiftOfTanH = fitADC->GetParameter(4);
-    //spreadOfTanH = fitADC->GetParameter(5);
-    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad << endl;// " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -518,7 +512,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
 
     // Calculate residuals in [keV]
     
@@ -551,8 +545,7 @@ void LinearityCurves(Int_t runPeriod)
     }
 
     // East 2 residuals
-    c2r = new TCanvas("c2r", "c2r");
-    c2r->SetLogy(0);
+    E2res->cd();
 
     TGraphErrors *grE2r = new TGraphErrors(runE2.size(),&ADCE2[0],&ResE2[0],err,err);
     grE2r->SetTitle("");
@@ -560,19 +553,22 @@ void LinearityCurves(Int_t runPeriod)
     grE2r->SetLineColor(1);
     grE2r->SetMarkerStyle(20);
     grE2r->SetMarkerSize(0.75);
-    grE2r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grE2r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grE2r->GetXaxis()->SetTitleOffset(1.2);
     grE2r->GetXaxis()->CenterTitle();
-    grE2r->GetYaxis()->SetTitle("Residuals [keV]");
-    grE2r->GetYaxis()->SetTitleOffset(1.2);
+    grE2r->GetYaxis()->SetTitle("% Residuals");
+    grE2r->GetYaxis()->SetTitleSize(0.1);
+    grE2r->GetYaxis()->SetLabelSize(0.07);
+    grE2r->GetXaxis()->SetLabelSize(0);
+    grE2r->GetYaxis()->SetTitleOffset(0.6);
     grE2r->GetYaxis()->CenterTitle();
-    grE2r->GetXaxis()->SetLimits(0.0,2400.);
-    grE2r->SetMinimum(-5.0);
-    grE2r->SetMaximum( 5.0);
+    grE2r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grE2r->SetMinimum(-10.0);
+    grE2r->SetMaximum( 10.0);
     grE2r->Draw("AP");
 
     Int_t n = 2;
-    Double_t x[n] = {0, 2400};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -584,7 +580,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -592,7 +588,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
 
   else { linCurves << 0. << " " << 0. << " " << 0. << endl;//<< " " << 0. << " " << 0. << " " << 0. << endl;
@@ -608,34 +604,16 @@ void LinearityCurves(Int_t runPeriod)
   if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runE3.size(); ii++) {
-      if (nameE3[ii]=="Ce") {
-	sumADC_Ce+=ADCE3[ii];
-	sumEQ_Ce+=EQE3[ii];
-	entries1++;
-      }
-      if (nameE3[ii]=="Bi1") {
-	sumADC_Bi+=ADCE3[ii];
-	entries2++;
-      }
+      if (ADCE3[ii]>maxADC) maxADC = ADCE3[ii];
+      if (EQE3[ii]>maxEQ) maxEQ = EQE3[ii];
     }
-    
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
 
-    c3 = new TCanvas("c3", "c3");
-    c3->SetLogy(0);
+    E3->cd();
 
     TGraphErrors *grE3 = new TGraphErrors(runE3.size(),&ADCE3[0],&EQE3[0],err,err);
-    grE3->SetTitle("");
+    grE3->SetTitle("East PMT 3");
     grE3->SetMarkerColor(1);
     grE3->SetLineColor(1);
     grE3->SetMarkerStyle(20);
@@ -646,26 +624,23 @@ void LinearityCurves(Int_t runPeriod)
     grE3->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grE3->GetYaxis()->SetTitleOffset(1.6);
     grE3->GetYaxis()->CenterTitle();
-    grE3->GetXaxis()->SetLimits(0.0,2000.0);
+    grE3->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grE3->SetMinimum(0.0);
-    grE3->SetMaximum(1000.0);
+    grE3->SetMaximum(maxEQ+40.);
     grE3->Draw("AP");
 
-    grE3->Fit("fitADC", "","",0.,highFitThreshold);
+    grE3->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    //lowEnSlope = fitADC->GetParameter(3);
-    //shiftOfTanH = fitADC->GetParameter(4);
-    //spreadOfTanH = fitADC->GetParameter(5);
-    slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad << endl;//<< " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -673,7 +648,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
 
     // Calculate residuals in [keV]
     
@@ -706,8 +681,7 @@ void LinearityCurves(Int_t runPeriod)
     }
 
     // East 3 residuals
-    c3r = new TCanvas("c3r", "c3r");
-    c3r->SetLogy(0);
+    E3res->cd();
 
     TGraphErrors *grE3r = new TGraphErrors(runE3.size(),&ADCE3[0],&ResE3[0],err,err);
     grE3r->SetTitle("");
@@ -715,19 +689,22 @@ void LinearityCurves(Int_t runPeriod)
     grE3r->SetLineColor(1);
     grE3r->SetMarkerStyle(20);
     grE3r->SetMarkerSize(0.75);
-    grE3r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grE3r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grE3r->GetXaxis()->SetTitleOffset(1.2);
     grE3r->GetXaxis()->CenterTitle();
-    grE3r->GetYaxis()->SetTitle("Residuals [keV]");
-    grE3r->GetYaxis()->SetTitleOffset(1.2);
+    grE3r->GetYaxis()->SetTitle("% Residuals");
+    grE3r->GetYaxis()->SetTitleSize(0.1);
+    grE3r->GetYaxis()->SetLabelSize(0.07);
+    grE3r->GetXaxis()->SetLabelSize(0);
+    grE3r->GetYaxis()->SetTitleOffset(0.6);
     grE3r->GetYaxis()->CenterTitle();
-    grE3r->GetXaxis()->SetLimits(0.0,2400.);
-    grE3r->SetMinimum(-5.0);
-    grE3r->SetMaximum( 5.0);
+    grE3r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grE3r->SetMinimum(-10.0);
+    grE3r->SetMaximum( 10.0);
     grE3r->Draw("AP");
 
     Int_t n = 2;
-    Double_t x[n] = {0, 2400};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -739,7 +716,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -747,7 +724,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
 
   else { linCurves << 0. << " " << 0. << " " << 0. << endl; //<< " " << 0. << " " << 0. << " " << 0. << endl;
@@ -763,34 +740,16 @@ void LinearityCurves(Int_t runPeriod)
   if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runE4.size(); ii++) {
-      if (nameE4[ii]=="Ce") {
-	sumADC_Ce+=ADCE4[ii];
-	sumEQ_Ce+=EQE4[ii];
-	entries1++;
-      }
-      if (nameE4[ii]=="Bi1") {
-	sumADC_Bi+=ADCE4[ii];
-	entries2++;
-      }
+      if (ADCE4[ii]>maxADC) maxADC = ADCE4[ii];
+      if (EQE4[ii]>maxEQ) maxEQ = EQE4[ii];
     }
-    
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
 
-    c4 = new TCanvas("c4", "c4");
-    c4->SetLogy(0);
+    E4->cd();
 
     TGraphErrors *grE4 = new TGraphErrors(runE4.size(),&ADCE4[0],&EQE4[0],err,err);
-    grE4->SetTitle("");
+    grE4->SetTitle("East PMT 4");
     grE4->SetMarkerColor(1);
     grE4->SetLineColor(1);
     grE4->SetMarkerStyle(20);
@@ -801,26 +760,23 @@ void LinearityCurves(Int_t runPeriod)
     grE4->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grE4->GetYaxis()->SetTitleOffset(1.6);
     grE4->GetYaxis()->CenterTitle();
-    grE4->GetXaxis()->SetLimits(0.0,2400.);
+    grE4->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grE4->SetMinimum(0.0);
-    grE4->SetMaximum(1000.0);
+    grE4->SetMaximum(maxEQ+40.);
     grE4->Draw("AP");
 
-    grE4->Fit("fitADC", "","",0.,highFitThreshold);
+    grE4->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    //lowEnSlope = fitADC->GetParameter(3);
-    //shiftOfTanH = fitADC->GetParameter(4);
-    //spreadOfTanH = fitADC->GetParameter(5);
-    //slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad << endl; //" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -828,7 +784,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
 
     // Calculate residuals in [keV]
     
@@ -861,8 +817,7 @@ void LinearityCurves(Int_t runPeriod)
     }
 
     // East 4 residuals
-    c4r = new TCanvas("c4r", "c4r");
-    c4r->SetLogy(0);
+    E4res->cd();
 
     TGraphErrors *grE4r = new TGraphErrors(runE4.size(),&ADCE4[0],&ResE4[0],err,err);
     grE4r->SetTitle("");
@@ -870,19 +825,22 @@ void LinearityCurves(Int_t runPeriod)
     grE4r->SetLineColor(1);
     grE4r->SetMarkerStyle(20);
     grE4r->SetMarkerSize(0.75);
-    grE4r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grE4r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grE4r->GetXaxis()->SetTitleOffset(1.2);
     grE4r->GetXaxis()->CenterTitle();
-    grE4r->GetYaxis()->SetTitle("Residuals [keV]");
-    grE4r->GetYaxis()->SetTitleOffset(1.2);
+    grE4r->GetYaxis()->SetTitle("% Residuals");
+    grE4r->GetYaxis()->SetTitleSize(0.1);
+    grE4r->GetYaxis()->SetLabelSize(0.07);
+    grE4r->GetXaxis()->SetLabelSize(0);
+    grE4r->GetYaxis()->SetTitleOffset(0.6);
     grE4r->GetYaxis()->CenterTitle();
-    grE4r->GetXaxis()->SetLimits(0.0,2400.);
-    grE4r->SetMinimum(-5.0);
-    grE4r->SetMaximum( 5.0);
+    grE4r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grE4r->SetMinimum(-10.0);
+    grE4r->SetMaximum( 10.0);
     grE4r->Draw("AP");
 
     Int_t n = 2;
-    Double_t x[n] = {0, 2400};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -894,7 +852,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -902,7 +860,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
 
   else { linCurves << 0. << " " << 0. << " " << 0. << endl;// " " << 0. << " " << 0. << " " << 0. << endl;
@@ -921,34 +879,16 @@ void LinearityCurves(Int_t runPeriod)
   if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW1.size(); ii++) {
-      if (nameW1[ii]=="Ce") {
-	sumADC_Ce+=ADCW1[ii];
-	sumEQ_Ce+=EQW1[ii];
-	entries1++;
-      }
-      if (nameW1[ii]=="Bi1") {
-	sumADC_Bi+=ADCW1[ii];
-	entries2++;
-      }
+      if (ADCW1[ii]>maxADC) maxADC = ADCW1[ii];
+      if (EQW1[ii]>maxEQ) maxEQ = EQW1[ii];
     }
-    
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
 
-    cW1 = new TCanvas("cW1", "cW1");
-    cW1->SetLogy(0);
+    W1->cd();
 
     TGraphErrors *grW1 = new TGraphErrors(runW1.size(),&ADCW1[0],&EQW1[0],err,err);
-    grW1->SetTitle("");
+    grW1->SetTitle("West PMT 1");
     grW1->SetMarkerColor(1);
     grW1->SetLineColor(1);
     grW1->SetMarkerStyle(20);
@@ -959,26 +899,23 @@ void LinearityCurves(Int_t runPeriod)
     grW1->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grW1->GetYaxis()->SetTitleOffset(1.6);
     grW1->GetYaxis()->CenterTitle();
-    grW1->GetXaxis()->SetLimits(0.0,2400.);
+    grW1->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grW1->SetMinimum(0.0);
-    grW1->SetMaximum(1000.0);
+    grW1->SetMaximum(maxEQ+40.);
     grW1->Draw("AP");
 
-    grW1->Fit("fitADC", "","",0.,highFitThreshold);
+    grW1->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    //lowEnSlope = fitADC->GetParameter(3);
-    //shiftOfTanH = fitADC->GetParameter(4);
-    //spreadOfTanH = fitADC->GetParameter(5);
-    //slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad << endl;// " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -986,7 +923,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   
     // Calculate residuals in [keV]
     //Double_t fitEQ_W1[num];
@@ -1015,8 +952,7 @@ void LinearityCurves(Int_t runPeriod)
     }
 
     // West 1 residuals
-    cW1r = new TCanvas("cW1r", "cW1r");
-    cW1r->SetLogy(0);
+    W1res->cd();
 
     TGraphErrors *grW1r = new TGraphErrors(runW1.size(),&ADCW1[0],&ResW1[0],err,err);
     grW1r->SetTitle("");
@@ -1024,19 +960,22 @@ void LinearityCurves(Int_t runPeriod)
     grW1r->SetLineColor(1);
     grW1r->SetMarkerStyle(20);
     grW1r->SetMarkerSize(0.75);
-    grW1r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grW1r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grW1r->GetXaxis()->SetTitleOffset(1.2);
     grW1r->GetXaxis()->CenterTitle();
-    grW1r->GetYaxis()->SetTitle("Residuals [keV]");
-    grW1r->GetYaxis()->SetTitleOffset(1.2);
+    grW1r->GetYaxis()->SetTitle("% Residuals");
+    grW1r->GetYaxis()->SetTitleSize(0.1);
+    grW1r->GetYaxis()->SetLabelSize(0.07);
+    grW1r->GetXaxis()->SetLabelSize(0);
+    grW1r->GetYaxis()->SetTitleOffset(0.6);
     grW1r->GetYaxis()->CenterTitle();
-    grW1r->GetXaxis()->SetLimits(0.0,2400.);
-    grW1r->SetMinimum(-5.0);
-    grW1r->SetMaximum( 5.0);
+    grW1r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grW1r->SetMinimum(-10.0);
+    grW1r->SetMaximum( 10.0);
     grW1r->Draw("AP");
 
     Int_t n = 2;
-    Double_t x[n] = {0, 2400};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -1048,7 +987,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -1056,7 +995,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
 
   else { linCurves << 0. << " " << 0. << " " << 0. << endl;// " " << 0. << " " << 0. << " " << 0. << endl;
@@ -1071,35 +1010,16 @@ void LinearityCurves(Int_t runPeriod)
 
   if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW2.size(); ii++) {
-      if (nameW2[ii]=="Ce") {
-	sumADC_Ce+=ADCW2[ii];
-	sumEQ_Ce+=EQW2[ii];
-	entries1++;
-      }
-      if (nameW2[ii]=="Bi1") {
-	sumADC_Bi+=ADCW2[ii];
-	entries2++;
-      }
+      if (ADCW2[ii]>maxADC) maxADC = ADCW2[ii];
+      if (EQW2[ii]>maxEQ) maxEQ = EQW2[ii];
     }
 
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
-
-
-    cW2 = new TCanvas("cW2", "cW2");
-    cW2->SetLogy(0);
+    W2->cd();
 
     TGraphErrors *grW2 = new TGraphErrors(runW2.size(),&ADCW2[0],&EQW2[0],err,err);
-    grW2->SetTitle("");
+    grW2->SetTitle("West PMT 2");
     grW2->SetMarkerColor(1);
     grW2->SetLineColor(1);
     grW2->SetMarkerStyle(20);
@@ -1110,26 +1030,23 @@ void LinearityCurves(Int_t runPeriod)
     grW2->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grW2->GetYaxis()->SetTitleOffset(1.6);
     grW2->GetYaxis()->CenterTitle();
-    grW2->GetXaxis()->SetLimits(0.0,2400.);
+    grW2->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grW2->SetMinimum(0.0);
-    grW2->SetMaximum(1000.0);
+    grW2->SetMaximum(maxEQ+40.);
     grW2->Draw("AP");
 
-    grW2->Fit("fitADC", "","",0.,highFitThreshold);
+    grW2->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    //lowEnSlope = fitADC->GetParameter(3);
-    //shiftOfTanH = fitADC->GetParameter(4);
-    //spreadOfTanH = fitADC->GetParameter(5);
-    //slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad << endl; //" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -1137,7 +1054,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
 
     // Calculate residuals in [keV]
     //Double_t fitEQ_W2[num];
@@ -1166,8 +1083,7 @@ void LinearityCurves(Int_t runPeriod)
     }
 
     // West 2 residuals
-    cW2r = new TCanvas("cW2r", "cW2r");
-    cW2r->SetLogy(0);
+    W2res->cd();
 
     TGraphErrors *grW2r = new TGraphErrors(runW2.size(),&ADCW2[0],&ResW2[0],err,err);
     grW2r->SetTitle("");
@@ -1175,19 +1091,22 @@ void LinearityCurves(Int_t runPeriod)
     grW2r->SetLineColor(1);
     grW2r->SetMarkerStyle(20);
     grW2r->SetMarkerSize(0.75);
-    grW2r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grW2r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grW2r->GetXaxis()->SetTitleOffset(1.2);
     grW2r->GetXaxis()->CenterTitle();
-    grW2r->GetYaxis()->SetTitle("Residuals [keV]");
-    grW2r->GetYaxis()->SetTitleOffset(1.2);
+    grW2r->GetYaxis()->SetTitle("% Residuals");
+    grW2r->GetYaxis()->SetTitleSize(0.1);
+    grW2r->GetYaxis()->SetLabelSize(0.07);
+    grW2r->GetXaxis()->SetLabelSize(0);
+    grW2r->GetYaxis()->SetTitleOffset(0.6);
     grW2r->GetYaxis()->CenterTitle();
-    grW2r->GetXaxis()->SetLimits(0.0,2400.);
-    grW2r->SetMinimum(-5.0);
-    grW2r->SetMaximum( 5.0);
+    grW2r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grW2r->SetMinimum(-10.0);
+    grW2r->SetMaximum( 10.0);
     grW2r->Draw("AP");
 
     Int_t n = 2;
-    Double_t x[n] = {0, 2400};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -1199,7 +1118,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -1207,7 +1126,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
 
   else { linCurves << 0. << " " << 0. << " " << 0. << endl; //" " << 0. << " " << 0. << " " << 0. << endl;
@@ -1222,35 +1141,16 @@ void LinearityCurves(Int_t runPeriod)
 
   if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW3.size(); ii++) {
-      if (nameW3[ii]=="Ce") {
-	sumADC_Ce+=ADCW3[ii];
-	sumEQ_Ce+=EQW3[ii];
-	entries1++;
-      }
-      if (nameW3[ii]=="Bi1") {
-	sumADC_Bi+=ADCW3[ii];
-	entries2++;
-      }
+      if (ADCW3[ii]>maxADC) maxADC = ADCW3[ii];
+      if (EQW3[ii]>maxEQ) maxEQ = EQW3[ii];
     }
-
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
-
     
-    cW3 = new TCanvas("cW3", "cW3");
-    cW3->SetLogy(0);
+    W3->cd();
 
     TGraphErrors *grW3 = new TGraphErrors(runW3.size(),&ADCW3[0],&EQW3[0],err,err);
-    grW3->SetTitle("");
+    grW3->SetTitle("West PMT 3");
     grW3->SetMarkerColor(1);
     grW3->SetLineColor(1);
     grW3->SetMarkerStyle(20);
@@ -1261,26 +1161,23 @@ void LinearityCurves(Int_t runPeriod)
     grW3->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grW3->GetYaxis()->SetTitleOffset(1.6);
     grW3->GetYaxis()->CenterTitle();
-    grW3->GetXaxis()->SetLimits(0.0,2400.);
+    grW3->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grW3->SetMinimum(0.0);
-    grW3->SetMaximum(1000.0);
+    grW3->SetMaximum(maxEQ+40.);
     grW3->Draw("AP");
 
-    grW3->Fit("fitADC", "","",0.,highFitThreshold);
+    grW3->Fit("fitADC", "","",0.,maxADC+40.);
   
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    //lowEnSlope = fitADC->GetParameter(3);
-    //shiftOfTanH = fitADC->GetParameter(4);
-    //spreadOfTanH = fitADC->GetParameter(5);
-    //slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad << endl; //" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -1288,7 +1185,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
 
     // Calculate residuals in [keV]
     //Double_t fitEQ_W3[num];
@@ -1317,8 +1214,7 @@ void LinearityCurves(Int_t runPeriod)
     }
 
     // West 3 residuals
-    cW3r = new TCanvas("cW3r", "cW3r");
-    cW3r->SetLogy(0);
+    W3res->cd();
 
     TGraphErrors *grW3r = new TGraphErrors(runW3.size(),&ADCW3[0],&ResW3[0],err,err);
     grW3r->SetTitle("");
@@ -1326,19 +1222,22 @@ void LinearityCurves(Int_t runPeriod)
     grW3r->SetLineColor(1);
     grW3r->SetMarkerStyle(20);
     grW3r->SetMarkerSize(0.75);
-    grW3r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grW3r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grW3r->GetXaxis()->SetTitleOffset(1.2);
     grW3r->GetXaxis()->CenterTitle();
-    grW3r->GetYaxis()->SetTitle("Residuals [keV]");
-    grW3r->GetYaxis()->SetTitleOffset(1.2);
+    grW3r->GetYaxis()->SetTitle("% Residuals");
+    grW3r->GetYaxis()->SetTitleSize(0.1);
+    grW3r->GetYaxis()->SetLabelSize(0.07);
+    grW3r->GetXaxis()->SetLabelSize(0);
+    grW3r->GetYaxis()->SetTitleOffset(0.6);
     grW3r->GetYaxis()->CenterTitle();
-    grW3r->GetXaxis()->SetLimits(0.0,2400.);
-    grW3r->SetMinimum(-5.0);
-    grW3r->SetMaximum( 5.0);
+    grW3r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grW3r->SetMinimum(-10.0);
+    grW3r->SetMaximum( 10.0);
     grW3r->Draw("AP");
 
     Int_t n = 2;
-    Double_t x[n] = {0, 2400};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -1350,7 +1249,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -1358,7 +1257,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
 
   else { linCurves << 0. << " " << 0. << " " << 0. << endl; //" " << 0. << " " << 0. << " " << 0. << endl;
@@ -1370,37 +1269,20 @@ void LinearityCurves(Int_t runPeriod)
   sprintf(temp,"%s/residuals/residuals_West_runPeriod_%i_PMTW4.dat",getenv("ANALYSIS_CODE"),calibrationPeriod);
   ofstream oFileW4(temp);
   vector <Double_t> fitEQ_W4(runW4.size(),0);
-  highFitThreshold=0.;
+
   if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
-    Double_t sumADC_Ce = 0., sumADC_Bi = 0., sumEQ_Ce=0.; 
-    Int_t entries1 = 0, entries2 = 0;;
+    Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW4.size(); ii++) {
-      if (nameW4[ii]=="Ce") {
-	sumADC_Ce+=ADCW4[ii];
-	sumEQ_Ce+=EQW4[ii];
-	entries1++;
-      }
-      if (nameW4[ii]=="Bi1") {
-	sumADC_Bi+=ADCW4[ii];
-	entries2++;
-      }
+      if (ADCW4[ii]>maxADC) maxADC = ADCW4[ii];
+      if (EQW4[ii]>maxEQ) maxEQ = EQW4[ii];
     }
 
-    //Calculating the slope of a line from the origin to the mean of the Ce peaks
-    Double_t linSlope = (sumEQ_Ce/sumADC_Ce);
-    //fitADC->FixParameter(3,linSlope);
-    //fitADC->FixParameter(4,sumADC_Ce/entries1);
-    //lowFitThreshold = sumADC_Ce/entries1;
-    highFitThreshold = 1.5*sumADC_Bi/entries2;
-    //cout << lowFitThreshold << endl;
-    //cout << highFitThreshold << endl;
 
-    cW4 = new TCanvas("cW4", "cW4");
-    cW4->SetLogy(0);
+    W4->cd();
 
     TGraphErrors *grW4 = new TGraphErrors(runW4.size(),&ADCW4[0],&EQW4[0],err,err);
-    grW4->SetTitle("");
+    grW4->SetTitle("West PMT 4");
     grW4->SetMarkerColor(1);
     grW4->SetLineColor(1);
     grW4->SetMarkerStyle(20);
@@ -1411,21 +1293,18 @@ void LinearityCurves(Int_t runPeriod)
     grW4->GetYaxis()->SetTitle("#eta(x,y)#upointE_{Q} [keV]");
     grW4->GetYaxis()->SetTitleOffset(1.6);
     grW4->GetYaxis()->CenterTitle();
-    grW4->GetXaxis()->SetLimits(0.0,4096.0);
+    grW4->GetXaxis()->SetLimits(0.0,maxADC+40.);
     grW4->SetMinimum(0.0);
-    grW4->SetMaximum(1000.0);
+    grW4->SetMaximum(maxEQ+40.);
     grW4->Draw("AP");
 
     //fitADC->SetRange(0., 3500.);
-    grW4->Fit("fitADC", "","",0.,highFitThreshold);
+    grW4->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    //lowEnSlope = fitADC->GetParameter(3);
-    //shiftOfTanH = fitADC->GetParameter(4);
-    //spreadOfTanH = fitADC->GetParameter(5);
-    //slopeToOrigin = (offset + slope*lowFitThreshold + quad*lowFitThreshold*lowFitThreshold + cubic*lowFitThreshold*lowFitThreshold*lowFitThreshold)/lowFitThreshold;
+    
     linCurves << offset << " " << slope << " " << quad << endl;//" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
 
     linCurves.close();
@@ -1433,7 +1312,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -1441,7 +1320,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
 
     // Calculate residuals in [keV]
     //Double_t fitEQ_W4[num];
@@ -1470,8 +1349,7 @@ void LinearityCurves(Int_t runPeriod)
     }
 
     // West 4 residuals
-    cW4r = new TCanvas("cW4r", "cW4r");
-    cW4r->SetLogy(0);
+    W4res->cd();
 
     TGraphErrors *grW4r = new TGraphErrors(runW4.size(),&ADCW4[0],&ResW4[0],err,err);
     grW4r->SetTitle("");
@@ -1479,19 +1357,22 @@ void LinearityCurves(Int_t runPeriod)
     grW4r->SetLineColor(1);
     grW4r->SetMarkerStyle(20);
     grW4r->SetMarkerSize(0.75);
-    grW4r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
+    //grW4r->GetXaxis()->SetTitle("g(t)#upointADC [channels]");
     grW4r->GetXaxis()->SetTitleOffset(1.2);
     grW4r->GetXaxis()->CenterTitle();
-    grW4r->GetYaxis()->SetTitle("Residuals [keV]");
-    grW4r->GetYaxis()->SetTitleOffset(1.2);
+    grW4r->GetYaxis()->SetTitle("% Residuals");
+    grW4r->GetYaxis()->SetTitleSize(0.1);
+    grW4r->GetYaxis()->SetLabelSize(0.07);
+    grW4r->GetXaxis()->SetLabelSize(0);
+    grW4r->GetYaxis()->SetTitleOffset(0.6);
     grW4r->GetYaxis()->CenterTitle();
-    grW4r->GetXaxis()->SetLimits(0.0,4000.);
-    grW4r->SetMinimum(-5.0);
-    grW4r->SetMaximum( 5.0);
+    grW4r->GetXaxis()->SetLimits(0.0,maxADC+40.);
+    grW4r->SetMinimum(-10.0);
+    grW4r->SetMaximum( 10.0);
     grW4r->Draw("AP");
 
     Int_t n = 2;
-    Double_t x[n] = {0, 4000.};
+    Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
     TGraph *gr1 = new TGraph(n,x,y);
@@ -1503,7 +1384,7 @@ void LinearityCurves(Int_t runPeriod)
     Double_t x1_text = 1200;
     Double_t y1_text = -40;
 
-    TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+    /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
     pt1->SetTextColor(1);
     pt1->SetTextAlign(12);
@@ -1511,7 +1392,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
     pt1->SetFillColor(0);
-    pt1->Draw();
+    pt1->Draw();*/
   }
   
   else { 
@@ -1520,6 +1401,9 @@ void LinearityCurves(Int_t runPeriod)
   }
   oFileW4.close();
   linCurves.close();
+
+  TString pdfFile = TString::Format("linCurves_SrcPeriod_%i.pdf",runPeriod);
+  c1->Print(pdfFile);
 
 
 }
