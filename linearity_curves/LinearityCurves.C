@@ -278,6 +278,8 @@ void LinearityCurves(Int_t runPeriod)
 
   fitADC->SetNpx(100000);
   fitADC->SetLineColor(2);
+  fitADC->SetLineWidth(1);
+  //fitADC->SetLineStyle(10);
 
   Double_t offset=0., slope=0., quad=0., cubic=0.; //Fit Parameters
 

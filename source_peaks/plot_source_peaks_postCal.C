@@ -1,6 +1,6 @@
 // Usage: root[0] .x plot_source_peaks.C("runNumber")
 
-void plot_source_peaks_Energy(TString runNumber)
+void plot_source_peaks_postCal(TString runNumber)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -33,10 +33,8 @@ void plot_source_peaks_Energy(TString runNumber)
   gStyle->SetErrorX(0);
 
   // Open input ntuple
-  TString filenameIn;
-  filenameIn  = TString(getenv("SOURCE_PEAKS"))+TString("/source_peaks_EnergyPeak_");
-  filenameIn += runNumber;
-  filenameIn += ".root";
+  TString filenameIn = TString::Format("%s/source_peaks_%s_Erecon.root",getenv("SOURCE_PEAKS"),runNumber.Data());
+
   cout << "Processing ... " << filenameIn << endl;
   TFile *filein = new TFile(filenameIn);
 
@@ -53,14 +51,11 @@ void plot_source_peaks_Energy(TString runNumber)
   cout << "... nSources: " << nSources << endl;
   for (int n=0; n<nSources;n++) {
     fileList >> sourceName[n];
-    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi") useSource[n]=true;
+    if (sourceName[n]=="Ce" || sourceName[n]=="Sn" || sourceName[n]=="Bi" || sourceName[n]=="In") useSource[n]=true;
   }
 
   // Output file
-  TString filenameOut;
-  filenameOut  = TString(getenv("SOURCE_PEAKS"))+TString("/source_peaks_EnergyPeak_");
-  filenameOut += runNumber;
-  filenameOut += ".pdf";
+  TString filenameOut = TString::Format("%s/source_peaks_%s_Erecon.pdf",getenv("SOURCE_PEAKS"),runNumber.Data());
 
   TString filenameOutFirst;
   filenameOutFirst  = filenameOut;
@@ -70,28 +65,53 @@ void plot_source_peaks_Energy(TString runNumber)
   filenameOutLast  = filenameOut;
   filenameOutLast += ")";
 
+  //Erecon Spectra
+  TCanvas *cErecon = new TCanvas("cErecon","cErecon");
+  cErecon->Divide(1,3);
+ 
+  cErecon->cd(1);
+  his1->SetXTitle("Source 1");
+  his1->GetXaxis()->CenterTitle();
+  //his1->GetXaxis()->SetRangeUser(0.0,upperRange);
+  his1->Draw();
+
+  cErecon->cd(2);
+  his2->SetXTitle("Source 2");
+  his2->GetXaxis()->CenterTitle();
+  //his2->GetXaxis()->SetRangeUser(0.0,upperRange);
+  his2->Draw();
+
+  cErecon->cd(3);
+  his3->SetXTitle("Source 3");
+  his3->GetXaxis()->CenterTitle();
+  //his3->GetXaxis()->SetRangeUser(0.0,upperRange);
+  his3->Draw();
+  
+  cErecon->Print(filenameOutFirst);
+
+
   // Source #1: East
   if (useSource[0]) {
     double upperRange = 600.;
     if (sourceName[0]=="Bi") upperRange = 1200.;
     c1 = new TCanvas("c1","c1");
-    c1->Divide(1,2);
+    c1->Divide(2,2);
 
     c1_1->cd();
     c1_1->SetLogy(0);
-    his1_E->SetXTitle("East");
-    his1_E->GetXaxis()->CenterTitle();
-    his1_E->GetXaxis()->SetRangeUser(0.0,upperRange);
-    his1_E->Draw();
+    his1_E0->SetXTitle("East PMT 1");
+    his1_E0->GetXaxis()->CenterTitle();
+    his1_E0->GetXaxis()->SetRangeUser(0.0,upperRange);
+    his1_E0->Draw();
     
     c1_2->cd();
     c1_2->SetLogy(0);
-    his1_W->SetXTitle("West");
-    his1_W ->GetXaxis()->CenterTitle();
-    his1_W->GetXaxis()->SetRangeUser(0.0,upperRange);
-    his1_W->Draw();
+    his1_E1->SetXTitle("East PMT 2");
+    his1_E1 ->GetXaxis()->CenterTitle();
+    his1_E1->GetXaxis()->SetRangeUser(0.0,upperRange);
+    his1_E1->Draw();
     
-    /*c1_3->cd();
+    c1_3->cd();
     c1_3->SetLogy(0);
     his1_E2->SetXTitle("East PMT 3");
     his1_E2->GetXaxis()->CenterTitle();
@@ -104,12 +124,12 @@ void plot_source_peaks_Energy(TString runNumber)
     his1_E3->GetXaxis()->CenterTitle();
     his1_E3->GetXaxis()->SetRangeUser(0.0,upperRange);
     his1_E3->Draw();
-    */
-    //c1->Print(filenameOutFirst);
+    
+    c1->Print(filenameOut);
 
-    if (nSources > 1 && (useSource[1] || useSource[2])) c1->Print(filenameOutFirst);
-    else c1->Print(filenameOut);
-    /* 
+    //if (nSources > 1 && (useSource[1] || useSource[2])) c1->Print(filenameOutFirst);
+    //else c1->Print(filenameOut);
+     
     // Source #1: West
     c2 = new TCanvas("c2","c2");
     c2->Divide(2,2);
@@ -140,8 +160,10 @@ void plot_source_peaks_Energy(TString runNumber)
     his1_W3->SetXTitle("West PMT 4");
     his1_W3->GetXaxis()->CenterTitle();
     his1_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
-    his1_W3->Draw();*/
+    his1_W3->Draw();
     
+    if (nSources > 1 && (useSource[1] || useSource[2])) c1->Print(filenameOut);
+    else c1->Print(filenameOutLast);
     
   }
   if (nSources > 1 && useSource[1]) {
@@ -150,23 +172,23 @@ void plot_source_peaks_Energy(TString runNumber)
       
     // Source #2: East
     c3 = new TCanvas("c3","c3");
-    c3->Divide(1,2);
+    c3->Divide(2,2);
     
     c3_1->cd();
     c3_1->SetLogy(0);
-    his2_E->SetXTitle("East");
-    his2_E->GetXaxis()->CenterTitle();
-    his2_E->GetXaxis()->SetRangeUser(0.0,upperRange);
-    his2_E->Draw();
+    his2_E0->SetXTitle("East 1");
+    his2_E0->GetXaxis()->CenterTitle();
+    his2_E0->GetXaxis()->SetRangeUser(0.0,upperRange);
+    his2_E0->Draw();
     
     c3_2->cd();
     c3_2->SetLogy(0);
-    his2_W->SetXTitle("West");
-    his2_W->GetXaxis()->CenterTitle();
-    his2_W->GetXaxis()->SetRangeUser(0.0,upperRange);
-    his2_W->Draw();
+    his2_E1->SetXTitle("East 2");
+    his2_E1->GetXaxis()->CenterTitle();
+    his2_E1->GetXaxis()->SetRangeUser(0.0,upperRange);
+    his2_E1->Draw();
     
-    /*c3_3->cd();
+    c3_3->cd();
     c3_3->SetLogy(0);
     his2_E2->SetXTitle("East PMT 3");
     his2_E2->GetXaxis()->CenterTitle();
@@ -179,13 +201,12 @@ void plot_source_peaks_Energy(TString runNumber)
     his2_E3->GetXaxis()->CenterTitle();
     his2_E3->GetXaxis()->SetRangeUser(0.0,upperRange);
     his2_E3->Draw();
-    */
-    if ((nSources==1 && useSource[1]) || (nSources > 2 && useSource[2])) c3->Print(filenameOut);
-    else if (nSources==2 && useSource[0]) c3->Print(filenameOutLast);
-    else if (nSources==2 && useSource[2]) c3->Print(filenameOutFirst);
+    
+    c3->Print(filenameOut);
+    
     
     // Source #2: West
-    /*c4 = new TCanvas("c4","c4");
+    c4 = new TCanvas("c4","c4");
     c4->Divide(2,2);
     
     c4_1->cd();
@@ -215,10 +236,10 @@ void plot_source_peaks_Energy(TString runNumber)
     his2_W3->GetXaxis()->CenterTitle();
     his2_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
     his2_W3->Draw();
-    
+
     if (nSources > 2 && useSource[2]) c4->Print(filenameOut);
     else c4->Print(filenameOutLast);
-    */
+    
   }
 
   if (nSources > 2 && useSource[2]) {
@@ -227,23 +248,23 @@ void plot_source_peaks_Energy(TString runNumber)
 
     // Source #3: East
     c5 = new TCanvas("c5","c5");
-    c5->Divide(1,2);
+    c5->Divide(2,2);
     
     c5_1->cd();
     c5_1->SetLogy(0);
-    his3_E->SetXTitle("East");
-    his3_E->GetXaxis()->CenterTitle();
-    his3_E->GetXaxis()->SetRangeUser(0.0,upperRange);
-    his3_E->Draw();
+    his3_E0->SetXTitle("East PMT 1");
+    his3_E0->GetXaxis()->CenterTitle();
+    his3_E0->GetXaxis()->SetRangeUser(0.0,upperRange);
+    his3_E0->Draw();
     
     c5_2->cd();
     c5_2->SetLogy(0);
-    his3_W->SetXTitle("West");
-    his3_W->GetXaxis()->CenterTitle();
-    his3_W->GetXaxis()->SetRangeUser(0.0,upperRange);
-    his3_W->Draw();
+    his3_E1->SetXTitle("East PMT 2");
+    his3_E1->GetXaxis()->CenterTitle();
+    his3_E1->GetXaxis()->SetRangeUser(0.0,upperRange);
+    his3_E1->Draw();
     
-    /*c5_3->cd();
+    c5_3->cd();
     c5_3->SetLogy(0);
     his3_E2->SetXTitle("East PMT 3");
     his3_E2->GetXaxis()->CenterTitle();
@@ -256,12 +277,11 @@ void plot_source_peaks_Energy(TString runNumber)
     his3_E3->GetXaxis()->CenterTitle();
     his3_E3->GetXaxis()->SetRangeUser(0.0,upperRange);
     his3_E3->Draw();
-    */
-
-    if (nSources==1) c5->Print(filenameOut);
-    else if (nSources > 1) c5->Print(filenameOutLast);
     
-    /*
+    c5->Print(filenameOut);
+
+    
+   
     // Source #3: West
     c6 = new TCanvas("c6","c6");
     c6->Divide(2,2);
@@ -295,7 +315,7 @@ void plot_source_peaks_Energy(TString runNumber)
     his3_W3->Draw();
     
     c6->Print(filenameOutLast);
-    */
+    
   }
 
 }

@@ -21,9 +21,73 @@
 #include "basic_reconstruction.h"
 #include "runInfo.h"
 #include "DataTree.hh"
+#include "posMapReader.h"
 
 #include "replay_pass2.h"
 #include "replay_pass3.h"
+
+std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
+  ifstream infile;
+  Char_t temp[200];
+  if (runNumber<20000) {
+    sprintf(temp,"%s/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat", getenv("ANALYSIS_CODE"));
+    infile.open(temp);
+  }
+  else {
+    sprintf(temp,"%s/simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat", getenv("ANALYSIS_CODE"));
+    infile.open(temp);
+  }
+  
+  std::vector < std::vector < std::vector < double > > > params;
+  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
+
+  char holdType[10];
+  int side=0, type=0;
+  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
+    cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << endl;
+    type+=1;
+    if (type==3) {type=0; side=1;}
+  }
+  return params;
+};
+
+vector < Double_t > GetAlphaValues(Int_t runPeriod)
+{
+  Char_t temp[500];
+  vector < Double_t > alphas (8,0.);
+  sprintf(temp,"%s/simulation_comparison/nPE_per_keV/nPE_per_keV_%i.dat",getenv("ANALYSIS_CODE"),runPeriod);
+  ifstream infile;
+  infile.open(temp);
+  Int_t i = 0;
+
+  while (infile >> alphas[i]) { std::cout << alphas[i] << std::endl; i++; }
+  return alphas;
+};
+
+vector <Int_t> getPMTQuality(Int_t runNumber) {
+  //Read in PMT quality file
+  cout << "Reading in PMT Quality file ...\n";
+  vector <Int_t>  pmtQuality (8,0);
+  Char_t temp[200];
+  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  ifstream pmt;
+  std::cout << temp << std::endl;
+  pmt.open(temp);
+  Int_t run_hold;
+  while (pmt >> run_hold >> pmtQuality[0] >> pmtQuality[1] >> pmtQuality[2]
+	 >> pmtQuality[3] >> pmtQuality[4] >> pmtQuality[5]
+	 >> pmtQuality[6] >> pmtQuality[7]) {
+    if (run_hold==runNumber) break;
+    if (pmt.fail()) break;
+  }
+  pmt.close();
+  if (run_hold!=runNumber) {
+    cout << "Run not found in PMT quality file!" << endl;
+    exit(0);
+  }
+  return pmtQuality;
+};
+
 
 using namespace std;
 
@@ -31,87 +95,55 @@ int main(int argc, char *argv[])
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
-
-  // Position bins
-  int nPMT = 8;
-  int nPosBinsX = 43;
-  int nPosBinsY = 43;  
-  double xBinWidth = 2.5;
-  double yBinWidth = 2.5;
-  double xBinLower[nPosBinsX];
-  double xBinUpper[nPosBinsX];
-  double xBinCenter[nPosBinsX];
-  double yBinLower[nPosBinsY];
-  double yBinUpper[nPosBinsY];
-  double yBinCenter[nPosBinsY];
-  int intXBinCenter[nPosBinsX];
-  int intYBinCenter[nPosBinsY];
-
-  for (int k=0; k<nPosBinsX; k++) {
-    xBinLower[k]     = -(double)nPosBinsX*xBinWidth/2. + ((double) k)*xBinWidth;
-    xBinUpper[k]     = -(double)nPosBinsX*xBinWidth/2. + ((double) k)*xBinWidth + xBinWidth;
-    xBinCenter[k]    = (xBinLower[k] + xBinUpper[k])/2.;
-    intXBinCenter[k] = (int) xBinCenter[k];
-    //cout << xBinLower[k] << " " << intXBinCenter[k] << " " << xBinUpper[k] << endl;
-  }
-
-  for (int k=0; k<nPosBinsY; k++) {
-    yBinLower[k]     = -(double)nPosBinsY*yBinWidth/2. + ((double) k)*yBinWidth;
-    yBinUpper[k]     = -(double)nPosBinsY*yBinWidth/2. + ((double) k)*yBinWidth + yBinWidth;
-    yBinCenter[k]    = (yBinLower[k] + yBinUpper[k])/2.;
-    intYBinCenter[k] = (int) yBinCenter[k];
-    //cout << yBinLower[k] << " " << intYBinCenter[k] << " " << yBinUpper[k] << endl;
-  }
-
   
+  int runNumber = atoi(argv[1]);
+  int nPMT = 8;
+  int nParams = 3; //takes a quadratic (but quadratic term set to zero)
 
   // Run number integer
-  cout << "Run " << argv[1] << " ..." << endl;
-  cout << "... Applying Xe position map ..." << endl;
-  istringstream ss(argv[1]);
-  int runNumber;
-  ss >> runNumber;
+  cout << "Run " << runNumber << " ..." << endl;
+  cout << "... Applying Calibration ..." << endl;
 
-  // Determine position map to use
-  char tempFileXePositionMap[500];
-
-  unsigned int XePeriod = getXeRunPeriod(runNumber);
-  sprintf(tempFileXePositionMap, "../position_map/position_map_%i_RC_123.dat",XePeriod);
+  unsigned int calibrationPeriod = getSrcRunPeriod(runNumber);
+  // Determine linearity curve to use
+  char tempFileLinearityCurve[500];
   
-  cout << "... Reading: " << tempFileXePositionMap << endl;
+  sprintf(tempFileLinearityCurve, "%s/lin_curves_srcCal_Period_%i.dat",getenv("LINEARITY_CURVES"),calibrationPeriod);
+  cout << "... Reading: " << tempFileLinearityCurve << endl;
 
-  // Read position map
-  double x, y;
-  double positionMap[nPMT][nPosBinsX][nPosBinsY];
-  ifstream fileXePositionMap(tempFileXePositionMap);
-  for (int i=0; i<nPosBinsX; i++) {
-    for (int j=0; j<nPosBinsY; j++) {
-      fileXePositionMap >> x >> y
-                        >> positionMap[0][i][j]
-			>> positionMap[1][i][j]
-			>> positionMap[2][i][j]
-			>> positionMap[3][i][j]
-			>> positionMap[4][i][j]
-			>> positionMap[5][i][j]
-			>> positionMap[6][i][j]
-			>> positionMap[7][i][j];
-    }
+  //Setup array to hold linearity curves
+  Double_t linearityCurve[nPMT][nParams];
+
+  // Read linearity curve
+  cout << "Reading in linearity curve:\n";
+  cout << "p0\tp1\tp2\tp3\tp4\tp5\n";
+  ifstream fileLinearityCurve(tempFileLinearityCurve);
+  Double_t p[3];//p0,p1,p2;
+  Int_t i=0;
+  while (fileLinearityCurve >> p[0] >> p[1] >> p[2]) {
+    Int_t ii=0;
+    while(ii<nParams) {linearityCurve[i][ii] = p[ii]; ii++;}
+    i++;
+    cout << p[0] << " " << p[1] << " " << p[2] << endl;
+    if (fileLinearityCurve.fail()) break;                       
   }
 
-  // Calculate (x,y) correction factor: eta = 1/positionMap
-  double eta[nPMT][nPosBinsX][nPosBinsY];
-  for (int i=0; i<nPosBinsX; i++) {
-    for (int j=0; j<nPosBinsY; j++) {
-      eta[0][i][j] = 1. / positionMap[0][i][j];
-      eta[1][i][j] = 1. / positionMap[1][i][j];
-      eta[2][i][j] = 1. / positionMap[2][i][j];
-      eta[3][i][j] = 1. / positionMap[3][i][j];
-      eta[4][i][j] = 1. / positionMap[4][i][j];
-      eta[5][i][j] = 1. / positionMap[5][i][j];
-      eta[6][i][j] = 1. / positionMap[6][i][j];
-      eta[7][i][j] = 1. / positionMap[7][i][j];
-    }
-  }
+  //Fit Function
+  TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)", 0., 4096.0);
+
+  //Load the simulated relationship between EQ and Etrue
+  vector < vector < vector < double > > > EQ2Etrue = getEQ2EtrueParams(runNumber);
+ 
+  //Read in PMT quality file
+  std::vector <Int_t> pmtQuality = getPMTQuality(runNumber);
+
+  //Get values for nPE/keV...
+  std::vector <Double_t> alpha = GetAlphaValues(calibrationPeriod);
+  
+  //Reading position map...
+  UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
+  GetPositionMap(XePeriod);
+  
 
   // DataTree structure
   DataTree *t = new DataTree();
@@ -131,43 +163,110 @@ int main(int argc, char *argv[])
   int nEvents = t->getEntries();
   cout << "... Processing nEvents = " << nEvents << endl;
 
+  vector < vector <Int_t> > gridPoint;
+
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     t->getEvent(i);
 
-    // Determine (x,y) bin
-    int intEastBinX = -1;
-    int intEastBinY = -1;
-    int intWestBinX = -1;
-    int intWestBinY = -1;
+    //retrieve point on grid for each side of detector [E/W][x/y]
+    gridPoint = getGridPoint(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
 
-    for (int m=0; m<nPosBinsX; m++) {
-      if ( (t->xE.center >= xBinLower[m]) && (t->xE.center < xBinUpper[m]) ) intEastBinX = m;
-      if ( (t->xW.center >= xBinLower[m]) && (t->xW.center < xBinUpper[m]) ) intWestBinX = m;
-    }
+    Int_t intEastBinX = gridPoint[0][0];
+    Int_t intEastBinY = gridPoint[0][1];
+    Int_t intWestBinX = gridPoint[1][0];
+    Int_t intWestBinY = gridPoint[1][1];
 
-    for (int m=0; m<nPosBinsY; m++) {
-      if ( (t->yE.center >= yBinLower[m]) && (t->yE.center < yBinUpper[m]) ) intEastBinY = m;
-      if ( (t->yW.center >= yBinLower[m]) && (t->yW.center < yBinUpper[m]) ) intWestBinY = m;
-    }
-
-    // Apply (x,y) correction factor
-    if (intEastBinX > -1 && intEastBinY > -1) {
-      t->ScintE.q1 = t->ScintE.q1 * eta[0][intEastBinX][intEastBinY];
-      t->ScintE.q2 = t->ScintE.q2 * eta[1][intEastBinX][intEastBinY];
-      t->ScintE.q3 = t->ScintE.q3 * eta[2][intEastBinX][intEastBinY];
-      t->ScintE.q4 = t->ScintE.q4 * eta[3][intEastBinX][intEastBinY];
-    }
     
+
+    if (intEastBinX > -1 && intEastBinY > -1) { 
+      t->ScintE.e1 = positionMap[0][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q1),linearityCurve[0]) / positionMap[0][intEastBinX][intEastBinY] : 0.;
+      t->ScintE.e2 = positionMap[1][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q2),linearityCurve[1]) / positionMap[1][intEastBinX][intEastBinY] : 0.;
+      t->ScintE.e3 = positionMap[2][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q3),linearityCurve[2]) / positionMap[2][intEastBinX][intEastBinY] : 0.;
+      t->ScintE.e4 = positionMap[3][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q4),linearityCurve[3]) / positionMap[3][intEastBinX][intEastBinY] : 0.;
+      
+      t->ScintE.nPE1 = fitADC->EvalPar(&(t->ScintE.q1),linearityCurve[0]) * alpha[0];
+      t->ScintE.nPE2 = fitADC->EvalPar(&(t->ScintE.q2),linearityCurve[1]) * alpha[1];
+      t->ScintE.nPE3 = fitADC->EvalPar(&(t->ScintE.q3),linearityCurve[2]) * alpha[2];
+      t->ScintE.nPE4 = fitADC->EvalPar(&(t->ScintE.q4),linearityCurve[3]) * alpha[3];
+      
+      t->ScintE.de1 = t->ScintE.e1/sqrt(t->ScintE.nPE1);
+      t->ScintE.de2 = t->ScintE.e2/sqrt(t->ScintE.nPE2);
+      t->ScintE.de3 = t->ScintE.e3/sqrt(t->ScintE.nPE3);
+      t->ScintE.de4 = t->ScintE.e4/sqrt(t->ScintE.nPE4);
+
+    }
+
+    else {
+      t->ScintE.e1 = t->ScintE.e2 = t->ScintE.e3 = t->ScintE.e4 = 0.;
+      t->ScintE.de1 = t->ScintE.de2 = t->ScintE.de3 = t->ScintE.de4 = 0.;
+      t->ScintE.nPE1 = t->ScintE.nPE2 = t->ScintE.nPE3 = t->ScintE.nPE4 = 0.;
+    }
+
+
     if (intWestBinX > -1 && intWestBinY > -1) {
-      t->ScintW.q1 = t->ScintW.q1 * eta[4][intWestBinX][intWestBinY];
-      t->ScintW.q2 = t->ScintW.q2 * eta[5][intWestBinX][intWestBinY];
-      t->ScintW.q3 = t->ScintW.q3 * eta[6][intWestBinX][intWestBinY];
-      t->ScintW.q4 = t->ScintW.q4 * eta[7][intWestBinX][intWestBinY];
+      t->ScintW.e1 = positionMap[4][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q1),linearityCurve[4]) / positionMap[4][intWestBinX][intWestBinY] : 0.;
+      t->ScintW.e2 = positionMap[5][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q2),linearityCurve[5]) / positionMap[5][intWestBinX][intWestBinY] : 0.;
+      t->ScintW.e3 = positionMap[6][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q3),linearityCurve[6]) / positionMap[6][intWestBinX][intWestBinY] : 0.;
+      t->ScintW.e4 = positionMap[7][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q4),linearityCurve[7]) / positionMap[7][intWestBinX][intWestBinY] : 0.;
+
+      t->ScintW.nPE1 = fitADC->EvalPar(&(t->ScintW.q1),linearityCurve[4]) * alpha[4];
+      t->ScintW.nPE2 = fitADC->EvalPar(&(t->ScintW.q2),linearityCurve[5]) * alpha[5];
+      t->ScintW.nPE3 = fitADC->EvalPar(&(t->ScintW.q3),linearityCurve[6]) * alpha[6];
+      t->ScintW.nPE4 = fitADC->EvalPar(&(t->ScintW.q4),linearityCurve[7]) * alpha[7];
+
+      t->ScintW.de1 = t->ScintW.e1/sqrt(t->ScintW.nPE1);
+      t->ScintW.de2 = t->ScintW.e2/sqrt(t->ScintW.nPE2);
+      t->ScintW.de3 = t->ScintW.e3/sqrt(t->ScintW.nPE3);
+      t->ScintW.de4 = t->ScintW.e4/sqrt(t->ScintW.nPE4);
+    }
+    else {
+      t->ScintW.e1 = t->ScintW.e2 = t->ScintW.e3 = t->ScintW.e4 = 0.;
+      t->ScintW.de1 = t->ScintW.de2 = t->ScintW.de3 = t->ScintW.de4 = 0.;
+      t->ScintW.nPE1 = t->ScintW.nPE2 = t->ScintW.nPE3 = t->ScintW.nPE4 = 0.;
     }
 
+    //Calculate the weighted energy on a side
+
+    //EAST
+    Double_t numer = (pmtQuality[0] ? t->ScintE.nPE1 : 0.) + (pmtQuality[1] ? t->ScintE.nPE2 : 0.) + (pmtQuality[2] ? t->ScintE.nPE3 : 0.) + (pmtQuality[3] ? t->ScintE.nPE4 : 0.);
+    Double_t denom = 0.;
+    for (int i=0; i<4; i++) denom += (pmtQuality[i] ? alpha[i] * positionMap[i][intEastBinX][intEastBinY] : 0.); 
+
+    t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
+    t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
+
+    //WEST
+    numer = (pmtQuality[4] ? t->ScintW.nPE1 : 0.) + (pmtQuality[5] ? t->ScintW.nPE2 : 0.) + (pmtQuality[6] ? t->ScintW.nPE3 : 0.) + (pmtQuality[7] ? t->ScintW.nPE4 : 0.);
+    denom = 0.;
+    for (int i=4; i<8; i++) denom += (pmtQuality[i] ? alpha[i] * positionMap[i][intWestBinX][intWestBinY] : 0.); 
+
+    t->ScintW.energy = t->EvisW = (denom!=0. ? numer/denom : 0.);
+    t->ScintW.denergy = (denom!=0. ? sqrt(t->ScintW.energy/denom) : 0.);
+
+
+    // Determine the reconstructed energy
+
+    int typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+    double totalEvis=0.;
     
-    t->fillOutputTree();
+    if (t->Side==0) {
+      totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisE;
+      if (totalEvis>0.) {
+	t->Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
+      }
+      else t->Erecon=-1.;
+    }
+    if (t->Side==1) {
+      totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisW;
+      if (totalEvis>0.) {
+	t->Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
+      }
+      else t->Erecon=-1.;
+    }
+    
+    if (t->Erecon>0.){ t->fillOutputTree();}
+    
   }
 
   // Write output ntuple
@@ -178,91 +277,3 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-//////////// OLD INPUT OUTPUT FILE METHOD /////////////////
-/*
-TFile *fileOut = new TFile(tempOut,"RECREATE");
-  TTree *Tout = new TTree("pass3", "pass3");
-
-  // Variables
-  Tout->Branch("pmt0_pass3", &pmt_pass3[0], "pmt0_pass3/D");
-  Tout->Branch("pmt1_pass3", &pmt_pass3[1], "pmt1_pass3/D");
-  Tout->Branch("pmt2_pass3", &pmt_pass3[2], "pmt2_pass3/D");
-  Tout->Branch("pmt3_pass3", &pmt_pass3[3], "pmt3_pass3/D");
-  Tout->Branch("pmt4_pass3", &pmt_pass3[4], "pmt4_pass3/D");
-  Tout->Branch("pmt5_pass3", &pmt_pass3[5], "pmt5_pass3/D");
-  Tout->Branch("pmt6_pass3", &pmt_pass3[6], "pmt6_pass3/D");
-  Tout->Branch("pmt7_pass3", &pmt_pass3[7], "pmt7_pass3/D");
-
-  Tout->Branch("AnodeE", &AnodeE, "AnodeE/D");
-  Tout->Branch("AnodeW", &AnodeW, "AnodeW/D");
-
-  Tout->Branch("timeE", &timeE, "timeE/D");
-  Tout->Branch("timeW", &timeW, "timeW/D");
-  Tout->Branch("timeE_BB", &timeE_BB, "timeE_BB/D");
-  Tout->Branch("timeW_BB", &timeW_BB, "timeW_BB/D");
-  Tout->Branch("UBtime", &UBtime, "UBtime/D");
-  Tout->Branch("UBtime_BB", &UBtime_BB, "UBtime_BB/D");
-  Tout->Branch("twoFoldE", &twoFoldE, "twoFoldE/D");
-  Tout->Branch("twoFoldW", &twoFoldW, "twoFoldW/D");
-
-  Tout->Branch("xE_pass3", &xE_pass3, "xE_pass3/D");
-  Tout->Branch("yE_pass3", &yE_pass3, "yE_pass3/D");
-  Tout->Branch("xW_pass3", &xW_pass3, "xW_pass3/D");
-  Tout->Branch("yW_pass3", &yW_pass3, "yW_pass3/D");
-  
-  int xeRC,yeRC,xwRC,ywRC;	
-  Tout->Branch("xeRC", &xeRC, "xeRC/I"); //x east response class. 
-  Tout->Branch("yeRC", &yeRC, "yeRC/I"); //y east response class... 
-  Tout->Branch("xwRC", &xwRC, "xwRC/I");
-  Tout->Branch("ywRC", &ywRC, "ywRC/I");
-
-  Tout->Branch("PID_pass3",  &PID_pass3,  "PID_pass3/I");
-  Tout->Branch("type_pass3", &type_pass3, "type_pass3/I");
-  Tout->Branch("side_pass3", &side_pass3, "side_pass3/I");
-  Tout->Branch("posError_pass3", &posError_pass3, "posError_pass3/I");
-
-  // Open input ntuple
-  char tempIn[500];
-  sprintf(tempIn, "%s/replay_pass2_%s.root", getenv("REPLAY_PASS2"),argv[1]);
-
-  TFile *fileIn = new TFile(tempIn, "READ");
-  TTree *Tin = (TTree*)(fileIn->Get("pass2"));
-
-  // Variables
-  Tin->SetBranchAddress("pmt0_pass2", &pmt_pass2[0]);
-  Tin->SetBranchAddress("pmt1_pass2", &pmt_pass2[1]);
-  Tin->SetBranchAddress("pmt2_pass2", &pmt_pass2[2]);
-  Tin->SetBranchAddress("pmt3_pass2", &pmt_pass2[3]);
-  Tin->SetBranchAddress("pmt4_pass2", &pmt_pass2[4]);
-  Tin->SetBranchAddress("pmt5_pass2", &pmt_pass2[5]);
-  Tin->SetBranchAddress("pmt6_pass2", &pmt_pass2[6]);
-  Tin->SetBranchAddress("pmt7_pass2", &pmt_pass2[7]);
-
-  Tin->SetBranchAddress("AnodeE", &AnodeE);
-  Tin->SetBranchAddress("AnodeW", &AnodeW);
-  
-  Tin->SetBranchAddress("timeE", &timeE);
-  Tin->SetBranchAddress("timeW", &timeW);
-  Tin->SetBranchAddress("timeE_BB", &timeE_BB);
-  Tin->SetBranchAddress("timeW_BB", &timeW_BB);
-  Tin->SetBranchAddress("UBtime", &UBtime);
-  Tin->SetBranchAddress("UBtime_BB", &UBtime_BB);
-  Tin->SetBranchAddress("twoFoldE", &twoFoldE);
-  Tin->SetBranchAddress("twoFoldW", &twoFoldW);
-
-  Tin->SetBranchAddress("xE_pass2", &xE_pass2);
-  Tin->SetBranchAddress("yE_pass2", &yE_pass2);
-  Tin->SetBranchAddress("xW_pass2", &xW_pass2);
-  Tin->SetBranchAddress("yW_pass2", &yW_pass2);
-
-  //Adding in wirechamber class variable
-  Tin->SetBranchAddress("xeRC",&xeRC);
-  Tin->SetBranchAddress("yeRC",&yeRC);
-  Tin->SetBranchAddress("xwRC",&xwRC);
-  Tin->SetBranchAddress("ywRC",&ywRC);
-
-  Tin->SetBranchAddress("PID_pass2",  &PID_pass2);
-  Tin->SetBranchAddress("type_pass2", &type_pass2);
-  Tin->SetBranchAddress("side_pass2", &side_pass2);
-  Tin->SetBranchAddress("posError_pass2", &posError_pass2);
-*/

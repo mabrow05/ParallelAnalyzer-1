@@ -444,35 +444,27 @@ class CalibrationManager:
                 print "Ran fit_source_peaks.C on run %i"%run
 
 
-    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, PMTbyPMT=False, Simulation=False, overwrite=True):
+    def fitSourcePeaksInEnergy(self,srcRunPeriod=1, Simulation=False, overwrite=True):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:       
             #checking if peaks have already been fit
-            filepath = self.srcPeakPath +"source_peaks_EvisPMTbyPMT_%i.dat"%int(line)
-            if not PMTbyPMT:
-                filepath = self.srcPeakPath +"source_peaks_EnergyPeak_%i.dat"%int(line)
-            
+            filepath = self.srcPeakPath +"source_peaks_%i_Evis.dat"%int(line)
+                
             print filepath
             if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
                 runs.append(int(line))
 
         for run in runs:
-            if PMTbyPMT:
-                if Simulation:
-                     os.system("cd ../source_peaks; ./sim_source_peaks_EvisPMTbyPMT.exe %i"%run)
-                     os.system("root -b -q '../source_peaks/plot_sim_source_peaks_Evis.C(\"%i\")'"%run)
-                else:   
-                    os.system("cd ../source_peaks; ./source_peaks_EvisPMTbyPMT.exe %i"%run)
-                    os.system("root -b -q '../source_peaks/plot_source_peaks_Evis.C(\"%i\")'"%run)
+            
+            if Simulation:
+                #os.system("cd %s/source_peaks; ./sim_source_peaks_postCal.exe %i"%(os.getenv("ANALYSIS_CODE"),run))
+                os.system("root -b -q '%s/source_peaks/plot_sim_source_peaks_postCal.C(\"%i\")'"%(os.getenv("ANALYSIS_CODE"),run))
             else:
-                if Simulation:
-                    os.system("cd ../source_peaks; ./sim_source_peaks_EnergyPeak.exe %i"%run)
-                    #os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
-                else:
-                    os.system("cd ../source_peaks; ./source_peaks_EnergyPeak.exe %i"%run)
-                    os.system("root -b -q '../source_peaks/plot_source_peaks_Energy.C(\"%i\")'"%run)
+                #os.system("cd %s/source_peaks; ./source_peaks_postCal.exe %i"%(os.getenv("ANALYSIS_CODE"),run))
+                os.system("root -b -q '%s/source_peaks/plot_source_peaks_postCal.C(\"%i\")'"%(os.getenv("ANALYSIS_CODE"),run))
+                                
             print "Ran plot_source_peaks.C on run %i"%run
 
 
@@ -867,11 +859,12 @@ if __name__ == "__main__":
         for runPeriod in runPeriods:
             #rep.runReverseCalibration(runPeriod)
             #cal.fitSourcePeaks(runPeriod, Simulation=True)
-            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=False, PMTbyPMT=True, Simulation=False)
-            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=False, PMTbyPMT=True, Simulation=True)
+            cal.fitSourcePeaksInEnergy(runPeriod, Simulation=True)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=False, PMTbyPMT=True, Simulation=False)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=False, PMTbyPMT=True, Simulation=True)
 
     ### Source Run Calibration Steps...
-    if 0: 
+    if 1: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
@@ -880,12 +873,13 @@ if __name__ == "__main__":
             #cal.makeSourceCalibrationFile(period, False)
             #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
             #cal.LinearityCurves(runPeriod)
-            rep.runReplayPass4(runPeriod)
-            cal.fitSourcePeaksInEnergy(runPeriod, PMTbyPMT=True, Simulation=False)
-            cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
-            cal.calculateResiduals(runPeriod, PMTbyPMT=True)
+            #rep.runReplayPass3(runPeriod)
+            cal.fitSourcePeaksInEnergy(runPeriod, Simulation=False)
+            cal.fitSourcePeaksInEnergy(runPeriod, Simulation=True)
+            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=False)
+            #cal.calculateResiduals(runPeriod, PMTbyPMT=True)
             
-        cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
+        #cal.makeGlobalResiduals(runPeriods,PMT=0,Side="Both",InEnergy=True, PMTbyPMT=True)
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream

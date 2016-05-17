@@ -23,12 +23,21 @@ objects = DataTree.o peaks.o
 
 .PHONY: all
 all: source_peaks.exe source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.exe 
+
 source_peaks.exe: source_peaks.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks.exe source_peaks.o $(objects) $(LIBS)
 	@echo "Done"
 
+source_peaks_postCal.exe: source_peaks_postCal.o $(objects)
+	$(CXX) $(CXXFLAGS) -o source_peaks_postCal.exe source_peaks_postCal.o $(objects) $(LIBS)
+	@echo "Done"
+
 sim_source_peaks.exe: sim_source_peaks.o $(objects)
 	$(CXX) $(CXXFLAGS) -o sim_source_peaks.exe sim_source_peaks.o $(objects) $(LIBS)
+	@echo "Done"
+
+sim_source_peaks_postCal.exe: sim_source_peaks_postCal.o $(objects)
+	$(CXX) $(CXXFLAGS) -o sim_source_peaks_postCal.exe sim_source_peaks_postCal.o $(objects) $(LIBS)
 	@echo "Done"
 
 source_peaks_EvisPMTbyPMT.exe: source_peaks_EvisPMTbyPMT.o $(objects)
