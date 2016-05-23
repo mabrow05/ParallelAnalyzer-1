@@ -162,10 +162,10 @@ void EvtRateHandler::dataReader() {
   
   //Set branch addresses
   if (UKdata) {
-    sprintf(temp,"replay_pass4_%i.root",runNumber);
+    sprintf(temp,"replay_pass3_%i.root",runNumber);
     std::string infile = inputDir+"/"+std::string(temp);
     input = new TFile(infile.c_str(), "READ");
-    Tin = (TTree*)input->Get("pass4");
+    Tin = (TTree*)input->Get("pass3");
 
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("Type", &Type);
@@ -436,7 +436,7 @@ void BGSubtractedRate::LoadRatesByBin() {
   int bgRun = getBackgroundRun(runNumber);
   std::string indir;
 
-  if (UKdata) indir = std::string(getenv("REPLAY_PASS4"));
+  if (UKdata) indir = std::string(getenv("REPLAY_PASS3"));
   else indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
 
   EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir, EnergyBinWidth, fiducialCut, UKdata);

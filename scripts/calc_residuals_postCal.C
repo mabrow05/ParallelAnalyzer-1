@@ -70,14 +70,15 @@ void calc_residuals_postCal(Int_t runPeriod)
   Int_t i = 0;
   Int_t run[500], simRun=0; 
   string sourceName[500], simSourceName="";
-  Double_t dataErecon[500], dataSigma[500], simErecon[500], simSigma[500];
+  Double_t dataEreconE[500], dataSigmaE[500], simEreconE[500], simSigmaE[500];
+  Double_t dataEreconW[500], dataSigmaW[500], simEreconW[500], simSigmaW[500];
   //Double_t res[500];
   //Double_t err[500];
   while (filein_data >> run[i] >> sourceName[i]
-	 >> dataErecon[i] >> dataSigma[i]) {
+	 >> dataEreconE[i] >> dataSigmaE[i] >> dataEreconW[i] >> dataSigmaW[i]) {
     filein_sim >> simRun >> simSourceName;
     if (simRun==run[i] && simSourceName==sourceName[i]) {
-      filein_sim >> simErecon[i] >> simSigma[i]; 
+      filein_sim >> simEreconE[i] >> simSigmaE[i] >> simEreconW[i] >> simSigmaW[i]; 
     }
     else {
       cout << "Data and sim files don't match. Rerun MakeSourceCalibrationFiles!\n"; 
@@ -98,35 +99,36 @@ void calc_residuals_postCal(Int_t runPeriod)
   sprintf(temp,"%s/residuals/residuals_Erecon_runPeriod_%i.dat",getenv("ANALYSIS_CODE"),calibrationPeriod);
   ofstream oFile(temp);
 
-  vector <double> res(num,0);
+  vector <double> resE(num,0);
+  vector <double> resW(num,0);
   vector <double> x(num,0);
   
   for (int j=0; j<num; j++) {
   
     if (sourceName[j]=="Ce") {
-      res[j] = dataErecon[j] - simErecon[j];
-      x[j] = simErecon[j];//simPeaks[0][0];//peakCe;
-      oFile << "Ce" << " " << (int) run[j] << " " << res[j] << endl;
+      resE[j] = dataEreconE[j] - simEreconE[j];
+      resW[j] = dataEreconW[j] - simEreconW[j];
+      oFile << "Ce" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     if (sourceName[j]=="In") {
-      res[j] = dataErecon[j] - simErecon[j];
-      x[j] = simErecon[j];//peakIn;
-      oFile << "In" << " " << (int) run[j] << " " << res[j] << endl;
+      resE[j] = dataEreconE[j] - simEreconE[j];
+      resW[j] = dataEreconW[j] - simEreconW[j];
+      oFile << "In" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
-      res[j] = dataErecon[j] - simErecon[j];
-      x[j] = simErecon[j];//simPeaks[1][0];//peakSn;
-      oFile << "Sn" << " " << (int) run[j] << " " << res[j] << endl;
+      resE[j] = dataEreconE[j] - simEreconE[j];
+      resW[j] = dataEreconW[j] - simEreconW[j];
+      oFile << "Sn" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     else if (sourceName[j]=="Bi2") {
-      res[j] = dataErecon[j] - simErecon[j];
-      x[j] = simErecon[j];//simPeaks[2][0];//peakBiLow;
-      oFile << "Bi2" << " " << (int) run[j] << " " << res[j] << endl;
+      resE[j] = dataEreconE[j] - simEreconE[j];
+      resW[j] = dataEreconW[j] - simEreconW[j];
+      oFile << "Bi2" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     else if (sourceName[j]=="Bi1") {
-      res[j] = dataErecon[j] - simErecon[j];
-      x[j] = simErecon[j];//simPeaks[3][0];//peakBiHigh;
-      oFile << "Bi1" << " " << (int) run[j] << " " << res[j] << endl;
+      resE[j] = dataEreconE[j] - simEreconE[j];
+      resW[j] = dataEreconW[j] - simEreconW[j];
+      oFile << "Bi1" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
    }
 
   }

@@ -7,9 +7,23 @@ void width_fitter(Int_t calPeriod)
 
   std::vector < std::vector < Double_t > > simWidths(8,std::vector <Double_t> (500, 0.));
   std::vector < std::vector < Double_t > > dataWidths(8,std::vector <Double_t> (500, 0.));
-
+  std::vector < Double_t > old_k(8,0.);
+  std::vector < Double_t > new_k(8,0.);
+  std::vector < Double_t > slope(8,0.);
 
   Char_t tempfile[200];
+  sprintf(tempfile, "%s/simulation_comparison/nPE_per_keV/nPE_per_keV_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
+  ifstream kfilein(tempfile);
+ 
+  Int_t k=0;
+  std::cout << "OLD k VALUES:\n";
+  while (kfilein >> old_k[k]) {
+    std::cout << old_k[k] << std::endl;
+    k++;
+  } 
+  kfilein.close();
+
+
   sprintf(tempfile,"%s/residuals/source_runs_EvisWidth_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
   //sprintf(tempfile,"../residuals/source_runs_EvisWidth_RunPeriod_%i.dat",calPeriod);
   
@@ -87,6 +101,7 @@ void width_fitter(Int_t calPeriod)
   pmt0->Draw("AP");
   
   pmt0->Fit("f1");
+  slope[0] = f1->GetParameter(0);
 
   p1->cd();
 
@@ -101,6 +116,7 @@ void width_fitter(Int_t calPeriod)
   pmt1->Draw("AP");
   
   pmt1->Fit("f1");
+  slope[1] = f1->GetParameter(0);
 
 
   p2->cd();
@@ -116,6 +132,7 @@ void width_fitter(Int_t calPeriod)
   pmt2->Draw("AP");
   
   pmt2->Fit("f1");
+  slope[2] = f1->GetParameter(0);
 
   p3->cd();
 
@@ -130,6 +147,7 @@ void width_fitter(Int_t calPeriod)
   pmt3->Draw("AP");
   
   pmt3->Fit("f1");
+  slope[3] = f1->GetParameter(0);
 
   
   p4->cd();
@@ -145,6 +163,7 @@ void width_fitter(Int_t calPeriod)
   pmt4->Draw("AP");
   
   pmt4->Fit("f1");
+  slope[4] = f1->GetParameter(0);
 
 
   p5->cd();
@@ -160,6 +179,7 @@ void width_fitter(Int_t calPeriod)
   pmt5->Draw("AP");
   
   pmt5->Fit("f1");
+  slope[5] = f1->GetParameter(0);
 
 
   p6->cd();
@@ -175,6 +195,7 @@ void width_fitter(Int_t calPeriod)
   pmt6->Draw("AP");
   
   pmt6->Fit("f1");
+  slope[6] = f1->GetParameter(0);
 
 
   p7->cd();
@@ -190,4 +211,32 @@ void width_fitter(Int_t calPeriod)
   pmt7->Draw("AP");
   
   pmt7->Fit("f1");
+  slope[7] = f1->GetParameter(0);
+
+  TString pdffile = TString::Format("%s/simulation_comparison/nPE_per_keV/width_comp_%i.pdf",getenv("ANALYSIS_CODE"),calPeriod);
+  c1->Print(pdffile);
+
+
+  //Calculate new k 
+
+  sprintf(tempfile,"%s/simulation_comparison/nPE_per_keV/nPE_per_keV_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
+  ofstream new_k_fileout(tempfile);
+
+  sprintf(tempfile,"%s/simulation_comparison/nPE_per_keV/prev_nPE_per_keV_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
+  ofstream old_k_fileout(tempfile);
+
+  for (UInt_t j=0; j<8; j++) {
+    if (j!=0) {
+      new_k_fileout << std::endl;
+      old_k_fileout << std::endl;
+    }
+    std::cout << old_k[j] << " " << slope[j] << std::endl;
+
+    new_k[j] = old_k[j]/(slope[j]*slope[j]);
+    new_k_fileout << new_k[j];
+    old_k_fileout << old_k[j];
+  }
+  old_k_fileout.close();
+  new_k_fileout.close();
+  
 }

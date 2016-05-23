@@ -96,10 +96,13 @@ int main(int argc, char *argv[])
   // Output histograms
   int nBin = 200;
 
-  TH1D *hisErecon[3];
-  hisErecon[0] = new TH1D("his1", "source1", nBin,0.0,1200.0);
-  hisErecon[1] = new TH1D("his2", "source2", nBin,0.0,1200.0);
-  hisErecon[2] = new TH1D("his3", "source3", nBin,0.0,1200.0);
+  TH1D *hisErecon[3][2];
+  hisErecon[0][0] = new TH1D("his1E", "source1 East", nBin,0.0,1200.0);
+  hisErecon[0][1] = new TH1D("his1W", "source1 West", nBin,0.0,1200.0);
+  hisErecon[1][0] = new TH1D("his2E", "source2 East", nBin,0.0,1200.0);
+  hisErecon[1][1] = new TH1D("his2W", "source2 West", nBin,0.0,1200.0);
+  hisErecon[2][0] = new TH1D("his3E", "source3 East", nBin,0.0,1200.0);
+  hisErecon[2][1] = new TH1D("his3W", "source3 West", nBin,0.0,1200.0);
 
   TH1D *his[3][8];
   his[0][0] = new TH1D("his1_E0", "", nBin,0.0,1200.0);
@@ -154,7 +157,7 @@ int main(int argc, char *argv[])
 	     (t->yE.center - yEast[0])*(t->yE.center - yEast[0]) <
 	     (2.*sigmaEast[0])*(2.*sigmaEast[0]) ) {
 	  
-	  hisErecon[0]->Fill(t->Erecon);
+	  hisErecon[0][0]->Fill(t->Erecon);
 
 	  his[0][0]->Fill(t->ScintE.e1);
 	  his[0][1]->Fill(t->ScintE.e2);
@@ -169,7 +172,7 @@ int main(int argc, char *argv[])
 	     (t->yW.center - yWest[0])*(t->yW.center - yWest[0]) <
 	     (2.*sigmaWest[0])*(2.*sigmaWest[0]) ) {
 	  
-	  hisErecon[0]->Fill(t->Erecon);
+	  hisErecon[0][1]->Fill(t->Erecon);
 
 	  his[0][4]->Fill(t->ScintW.e1);
 	  his[0][5]->Fill(t->ScintW.e2);
@@ -190,7 +193,7 @@ int main(int argc, char *argv[])
 	     (t->yE.center - yEast[1])*(t->yE.center - yEast[1]) <
 	     (2.*sigmaEast[1])*(2.*sigmaEast[1]) ) {
 
-	  hisErecon[1]->Fill(t->Erecon);
+	  hisErecon[1][0]->Fill(t->Erecon);
 	  
 	  his[1][0]->Fill(t->ScintE.e1);
 	  his[1][1]->Fill(t->ScintE.e2);
@@ -204,7 +207,7 @@ int main(int argc, char *argv[])
 	     (t->yW.center - yWest[1])*(t->yW.center - yWest[1]) <
 	     (2.*sigmaWest[1])*(2.*sigmaWest[1]) ) {
 	 
-	  hisErecon[1]->Fill(t->Erecon);
+	  hisErecon[1][1]->Fill(t->Erecon);
 
 	  his[1][4]->Fill(t->ScintW.e1);
 	  his[1][5]->Fill(t->ScintW.e2);
@@ -223,7 +226,7 @@ int main(int argc, char *argv[])
 	     (t->yE.center - yEast[2])*(t->yE.center - yEast[2]) <
 	     (2.*sigmaEast[2])*(2.*sigmaEast[2]) ) {
 	  
-	  hisErecon[2]->Fill(t->Erecon);
+	  hisErecon[2][0]->Fill(t->Erecon);
 
 	  his[2][0]->Fill(t->ScintE.e1);
 	  his[2][1]->Fill(t->ScintE.e2);
@@ -237,7 +240,7 @@ int main(int argc, char *argv[])
 	     (t->yW.center - yWest[2])*(t->yW.center - yWest[2]) <
 	     (2.*sigmaWest[2])*(2.*sigmaWest[2]) ) {	  
 
-	  hisErecon[2]->Fill(t->Erecon);
+	  hisErecon[2][1]->Fill(t->Erecon);
 
 	  his[2][4]->Fill(t->ScintW.e1);
 	  his[2][5]->Fill(t->ScintW.e2);
@@ -432,118 +435,125 @@ int main(int argc, char *argv[])
   //Now for the Erecon peaks and widths
 
   // Find maximum bin
-  double maxBinErecon[3]={0.};
-  double maxCountsErecon[3]={0.};
-  for (int n=0; n<nSources; n++) {     
-      maxBinErecon[n] = hisErecon[n]->GetMaximumBin();
-      maxCountsErecon[n] = hisErecon[n]->GetBinContent(maxBinErecon[n]);
+  double maxBinErecon[3][2]={0.};
+  double maxCountsErecon[3][2]={0.};
+  for (int n=0; n<nSources; n++) {
+    for (int j=0; j<2; j++) {
+      maxBinErecon[n][j] = hisErecon[n][j]->GetMaximumBin();
+      maxCountsErecon[n][j] = hisErecon[n][j]->GetBinContent(maxBinErecon[n][j]);
+    }
   }
 
 
   // Define histogram fit ranges
-  double xLowErecon[3]={0.}, xHighErecon[3]={0.};
+  double xLowErecon[3][2]={0.}, xHighErecon[3][2]={0.};
   for (int n=0; n<nSources; n++) { 
-    for (int i=maxBinErecon[n]; i<nBin; i++) {
-      if (hisErecon[n]->GetBinContent(i+1) < 0.33*maxCountsErecon[n]) {
-	xHighErecon[n] = hisErecon[n]->GetBinCenter(i+1);
-	//Check to make sure the value isn't too close to the maximum bin...
-	if ((i-maxBinErecon[n])<5) xHighErecon[n] = hisErecon[n]->GetXaxis()->GetBinCenter(maxBinErecon[n])+250.;
-	break;
-      }
-      if (i==(nBin-1)) xHighErecon[n] = hisErecon[n]->GetBinCenter(i);
-    }
-    if (sourceName[n].substr(0,2)!="Bi") {
-      for (int i=maxBinErecon[n]; i>0; i--) {
-	if (hisErecon[n]->GetBinContent(i-1) < 0.33*maxCountsErecon[n]) {
-	  xLowErecon[n] = hisErecon[n]->GetBinCenter(i-1);
-	  //if ((maxBinErecon[n]-i)<5) xLowErecon[n] = binCenterMax[n]-200.;
+    for (int j=0; j<2; j++) {
+      for (int i=maxBinErecon[n][j]; i<nBin; i++) {
+	if (hisErecon[n][j]->GetBinContent(i+1) < 0.33*maxCountsErecon[n][j]) {
+	  xHighErecon[n][j] = hisErecon[n][j]->GetBinCenter(i+1);
+	  //Check to make sure the value isn't too close to the maximum bin...
+	  if ((i-maxBinErecon[n][j])<5) xHighErecon[n][j] = hisErecon[n][j]->GetXaxis()->GetBinCenter(maxBinErecon[n][j])+250.;
 	  break;
 	}
+	if (i==(nBin-1)) xHighErecon[n][j] = hisErecon[n][j]->GetBinCenter(i);
       }
-    }
-    else {
-      for (int i=maxBinErecon[n]*0.5; i>0; i--) {
-	if (hisErecon[n]->GetBinContent(i-1) < 0.33*0.5*maxCountsErecon[n]) {
-	  xLowErecon[n] = hisErecon[n]->GetBinCenter(i-1);
-	  //if ((maxBinErecon[n]-i)<5) xLowErecon[n] = binCenterMax[n]-200.;
-	  break;
+      if (sourceName[n].substr(0,2)!="Bi") {
+	for (int i=maxBinErecon[n][j]; i>0; i--) {
+	  if (hisErecon[n][j]->GetBinContent(i-1) < 0.33*maxCountsErecon[n][j]) {
+	    xLowErecon[n][j] = hisErecon[n][j]->GetBinCenter(i-1);
+	    //if ((maxBinErecon[n][j]-i)<5) xLowErecon[n][j] = binCenterMax[n][j]-200.;
+	    break;
+	  }
+	}
+      }
+      else {
+	for (int i=maxBinErecon[n][j]*0.5; i>0; i--) {
+	  if (hisErecon[n][j]->GetBinContent(i-1) < 0.33*0.5*maxCountsErecon[n][j]) {
+	    xLowErecon[n][j] = hisErecon[n][j]->GetBinCenter(i-1);
+	    //if ((maxBinErecon[n][j]-i)<5) xLowErecon[n][j] = binCenterMax[n][j]-200.;
+	    break;
+	  }
 	}
       }
     }
   }
 
-  double fitMeanErecon[3]={0.};
-  double lowBiFitMeanErecon=0.;
-  double fitSigmaErecon[3]={0.};
-  double lowBiFitSigmaErecon=0.;
+  double fitMeanErecon[3][2]={0.};
+  double lowBiFitMeanErecon[2]={0.};
+  double fitSigmaErecon[3][2]={0.};
+  double lowBiFitSigmaErecon[2]={0.};
 
   for (int n=0; n<nSources; n++) {
 
     if (useSource[n]) {
+      
+      for (int j=0; j<2; j++) {
 
-      if (sourceName[n].substr(0,2)!="Bi") {
+	if (sourceName[n].substr(0,2)!="Bi") {
 	
-	//Double_t rangeLowErecon = 5.;
-	//Double_t rangeHighErecon = 4096.;
-	SinglePeakHist sing(hisErecon[n], xLowErecon[n], xHighErecon[n]);
-	
-	if (sing.isGoodFit()) {
-	  fitMeanErecon[n] = sing.ReturnMean();
-	  fitSigmaErecon[n] = sing.ReturnSigma();
-	}
-	
-	else  {
-	  cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " Erecon peak.... Trying one more time......" << endl;
-	  sing.FitHist(maxBinErecon[n], 40., hisErecon[n]->GetBinContent(maxBinErecon[n]));
 	  
-	  if (sing.isGoodFit()) { 
-	    fitMeanErecon[n] = sing.ReturnMean();
-	    fitSigmaErecon[n] = sing.ReturnSigma();
+	  //Double_t rangeLowErecon = 5.;
+	  //Double_t rangeHighErecon = 4096.;
+	  SinglePeakHist sing(hisErecon[n][j], xLowErecon[n][j], xHighErecon[n][j]);
+	  
+	  if (sing.isGoodFit()) {
+	    fitMeanErecon[n][j] = sing.ReturnMean();
+	    fitSigmaErecon[n][j] = sing.ReturnSigma();
 	  }
 	  
-	  else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " Erecon PEAK "<<  endl;
+	  else  {
+	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " Erecon peak.... Trying one more time......" << endl;
+	    sing.FitHist(maxBinErecon[n][j], 40., hisErecon[n][j]->GetBinContent(maxBinErecon[n][j]));
+	    
+	    if (sing.isGoodFit()) { 
+	      fitMeanErecon[n][j] = sing.ReturnMean();
+	      fitSigmaErecon[n][j] = sing.ReturnSigma();
+	    }
+	    
+	    else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " Erecon PEAK "<<  endl;
+	  }
 	}
-      }
-
-      else {
 	
-	
-	//DoublePeakHist doub(hisErecon[n], xLowErecon[n], xHighErecon[n]);
-	SinglePeakHist singBi1(hisErecon[n], 800., xHighErecon[n]);
-	SinglePeakHist singBi2(hisErecon[n], 350., 600.);
+	else {
 	  
-	if (singBi1.isGoodFit()) {	    
-	  fitMeanErecon[n] = singBi1.ReturnMean();	 
-	  fitSigmaErecon[n] = singBi1.ReturnSigma();
-	}
-	else  {
-	  cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " Erecon peak.... Trying one more time......" << endl;
-	  singBi1.FitHist(960., 40., hisErecon[n]->GetBinContent(maxBinErecon[n]));
 	  
-	  if (singBi1.isGoodFit()) {
-	    fitMeanErecon[n] = singBi1.ReturnMean();
-	    fitSigmaErecon[n] = singBi1.ReturnSigma();
+	  //DoublePeakHist doub(hisErecon[n][j], xLowErecon[n][j], xHighErecon[n][j]);
+	  SinglePeakHist singBi1(hisErecon[n][j], 800., xHighErecon[n][j]);
+	  SinglePeakHist singBi2(hisErecon[n][j], 350., 600.);
+	  
+	  if (singBi1.isGoodFit()) {	    
+	    fitMeanErecon[n][j] = singBi1.ReturnMean();	 
+	    fitSigmaErecon[n][j] = singBi1.ReturnSigma();
+	  }
+	  else  {
+	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " Erecon peak.... Trying one more time......" << endl;
+	    singBi1.FitHist(960., 40., hisErecon[n][j]->GetBinContent(maxBinErecon[n][j]));
+	    
+	    if (singBi1.isGoodFit()) {
+	      fitMeanErecon[n][j] = singBi1.ReturnMean();
+	      fitSigmaErecon[n][j] = singBi1.ReturnSigma();
+	    }
+	    
+	    else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " Erecon PEAK " << endl;
+	    
 	  }
 	  
-	  else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " Erecon PEAK " << endl;
-	  
-	}
-	
-	if (singBi2.isGoodFit()) {	    
-	  lowBiFitMeanErecon = singBi2.ReturnMean();	 
-	  lowBiFitSigmaErecon = singBi2.ReturnSigma();
-	}
-	else  {
-	  cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " Erecon peak.... Trying one more time......" << endl;
-	  singBi2.FitHist(480., 40., 0.4*hisErecon[n]->GetBinContent(maxBinErecon[n]));
-	  
-	  if (singBi2.isGoodFit()) {
-	    lowBiFitMeanErecon = singBi2.ReturnMean();
-	    lowBiFitSigmaErecon = singBi2.ReturnSigma();
+	  if (singBi2.isGoodFit()) {	    
+	    lowBiFitMeanErecon[j] = singBi2.ReturnMean();	 
+	    lowBiFitSigmaErecon[j] = singBi2.ReturnSigma();
 	  }
-	  
-	  else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " Erecon PEAK " << endl;
-	  
+	  else  {
+	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " Erecon peak.... Trying one more time......" << endl;
+	    singBi2.FitHist(480., 40., 0.4*hisErecon[n][j]->GetBinContent(maxBinErecon[n][j]));
+	    
+	    if (singBi2.isGoodFit()) {
+	      lowBiFitMeanErecon[j] = singBi2.ReturnMean();
+	      lowBiFitSigmaErecon[j] = singBi2.ReturnSigma();
+	    }
+	    
+	    else cout << "RUN " << runNumber << " CAN'T CONVERGE ON " << sourceName[n] << " Erecon PEAK " << endl;
+	  }
 	}
       }
       
@@ -557,25 +567,31 @@ int main(int argc, char *argv[])
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
       if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
+     
       outResultsErecon << runNumber << " "
 		       << sourceName[n] << " "
-		       << fitMeanErecon[n] << " "
-		       << fitSigmaErecon[n] << endl;
+		       << fitMeanErecon[n][0] << " "
+		       << fitSigmaErecon[n][0] << " "
+		       << fitMeanErecon[n][1] << " " 
+		       << fitSigmaErecon[n][1] << std::endl;
+      
     }
   }
   
   if (useLowBiPeak) {
     outResultsErecon << runNumber << " "
 		     << "Bi2" << " "
-		     << lowBiFitMeanErecon << " "
-		     << lowBiFitSigmaErecon << endl;
+		     << lowBiFitMeanErecon[0] << " "
+		     << lowBiFitSigmaErecon[0] << " "
+		     << lowBiFitMeanErecon[1] << " " 
+		     << lowBiFitSigmaErecon[1] << std::endl;
   }
   outResultsErecon.close();
-
-
+  
+  
   // Write output ntuple
   fileOut->Write();
   fileOut->Close();
-
+  
   return 0;
 }

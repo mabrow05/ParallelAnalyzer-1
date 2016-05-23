@@ -457,11 +457,10 @@ void revCalSimulation (Int_t runNumber, string source)
     //West Side
     for (UInt_t p=4; p<8; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
-	//cout << p << " " << positionMap[p][intEastBinX][intEastBinY] << endl;
 	
 	if (positionMap[p][intWestBinX][intWestBinY]>0.) {
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*positionMap[p][intWestBinX][intWestBinY]*edepQ.EdepQW));
-	  pmt.Evis[p] = pmt.etaEvis[p]/positionMap[p][intEastBinX][intEastBinY];
+	  pmt.Evis[p] = pmt.etaEvis[p]/positionMap[p][intWestBinX][intWestBinY];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQW));
@@ -482,7 +481,7 @@ void revCalSimulation (Int_t runNumber, string source)
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
       numer+=pmt.nPE[p];
-      denom += pmt.nPE[p]>0. ? positionMap[p][intEastBinX][intEastBinY]*alpha[p] : 0.;
+      denom += pmt.nPE[p]>0. ? positionMap[p][intWestBinX][intWestBinY]*alpha[p] : 0.;
     }
     //Now we apply the trigger probability
     Double_t totalEnW = numer>0. ? numer/denom : 0.;

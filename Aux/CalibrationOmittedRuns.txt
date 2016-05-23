@@ -9,3 +9,15 @@ Removing PMTW4 from run period 7...
 
 For Run period 4, I am only using runs 17871-17922 as these were normal calibration run. After 
 	17922 the runs become long runs with the sources not being moved.
+
+17874 - removed from EPMT2 due to Ce peak being too low to distinguish
+17877 - removed from EPMT2 due to Ce peak being too low to distinguish
+17893 - removed from EPMT2 due to Ce peak being too low to distinguish
+17903 - removed from EPMT2 due to Ce peak being too low to distinguish
+17904 - removed from EPMT2 due to Ce peak being too low to distinguish
+17917 - removed from EPMT2 due to Ce peak being too low to distinguish
+17892 - removed from EPMT2 due to Ce peak being too low to distinguish
+17918 - removed from EPMT2 due to Ce peak being too low to distinguish
+
+
+

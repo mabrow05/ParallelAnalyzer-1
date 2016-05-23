@@ -18,7 +18,7 @@ import MButils
 omittedRuns = [19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
 # 20529 - very low statistics
 # 20530,20531,20823-20827 - lost West event triggers
-omittedRanges = [(17942,18055), (20901, 20917)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
+omittedRanges = [(17923,18055), (20901, 20917)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
                                                # And also run period 15 which is useless
 
 for Range in omittedRanges:
@@ -30,7 +30,7 @@ for Range in omittedRanges:
 #### is set to 0 or 1 to represent false (don't use) and true (do use)
 
 EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
-EPMT2 = []
+EPMT2 = [17874,17877,17893,17903,17904,17917,17892,17918]
 EPMT3 = []
 EPMT4 = [20517,20519,20821,20822]
 WPMT1 = []
@@ -93,6 +93,7 @@ class CalReplayManager:
         self.revCalSimPath = os.getenv("REVCALSIM")
         self.UKspecReplayPath = os.getenv("UK_SPEC_REPLAY")
         self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
+        self.runInfoPath = os.getenv("RUN_INFO_FILES")
 
     def makeAllDirectories(self):
         #os.system("mkdir -p %s"%self.AnalysisDataPath)
@@ -114,6 +115,7 @@ class CalReplayManager:
         os.system("mkdir -p %s/source_peaks/"%self.revCalSimPath)
         os.system("mkdir -p %s"%self.UKspecReplayPath)
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
+        os.system("mkdir -p %s"%self.runInfoPath)
 
     def runReplayPass1(self,srcRunPeriod=1, sourceORxenon="source"):
         print "Running replay_pass1 for %s run period %i"%(sourceORxenon,srcRunPeriod)
@@ -512,7 +514,7 @@ class CalibrationManager:
 
         #Update the master list of PMT quality
         if master:
-            masterFile = open("../residuals/PMT_runQuality_master.dat",'w')
+            masterFile = open("%s/residuals/PMT_runQuality_master.dat"%(os.getenv("ANALYSIS_CODE")),'w')
             
             for run in range(16983,23174,1):
                 pmtList = [1,1,1,1,1,1,1,1]
@@ -540,70 +542,112 @@ class CalibrationManager:
 
 
 
-    def makeSourceCalibrationFile(self,CalibrationPeriod=1, Simulation=False):
+    def makeSourceCalibrationFile(self,CalibrationPeriod=1, Simulation=False, InEnergy=False):
         #This utilizes the omittedRuns and removes them from the calibration. Any time you make a change
         # to the runs which are to be omitted, you shoud rerun this!
 
-        EvisFile = None
-        EvisWidthFile = None
-        EreconFile = None
-        src_file_base = None
+        if not InEnergy:
 
-        if Simulation: 
-            src_file_base = self.revCalSimPath + "/source_peaks/"
-            EvisFile = "%s/residuals/SIM_source_runs_Evis_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
-            EvisWidthFile = "%s/residuals/SIM_source_runs_EvisWidth_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
-            EreconFile = "%s/residuals/SIM_source_runs_Erecon_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+            src_file_base = None
+            peak_file = None
+            
+            if Simulation:
+                peak_file = "%s/residuals/SIM_source_runs_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                src_file_base = self.revCalSimPath + "/source_peaks/source_peaks_"
+
+            else:
+                peak_file = "%s/residuals/source_runs_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                src_file_base = self.srcPeakPath + "source_peaks_"
+
+                
+            runList = []
+
+            with open("%s/run_lists/Source_Calibration_Run_Period_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)) as runlist:
+                for run in runlist:
+                    if os.path.isfile(self.srcListPath+"source_list_%i.dat"%int(run)):
+                        srcList = open(self.srcListPath+"source_list_%i.dat"%int(run))
+                        lines = []
+                        for line in srcList:
+                            lines.append(line)
+                        if int(lines[0])>0:
+                            runList.append(int(run))
+
+            #print runList
+
+            outfile = open(peak_file,'w')
+
+            for run in runList:
+                src_file = src_file_base+"%i.dat"%run
+                if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
+                    infile = open(src_file,'r')
+                    for line in infile:
+                        outfile.write(line)
+                    infile.close()
+
+            outfile.close()
+
         else:
-            src_file_base = self.srcPeakPath
-            EvisFile = "%s/residuals/source_runs_Evis_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
-            EvisWidthFile = "%s/residuals/source_runs_EvisWidth_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
-            EreconFile = "%s/residuals/source_runs_Erecon_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+
+            EvisFile = None
+            EvisWidthFile = None
+            EreconFile = None
+            src_file_base = None
+
+            if Simulation: 
+                src_file_base = self.revCalSimPath + "/source_peaks/"
+                EvisFile = "%s/residuals/SIM_source_runs_Evis_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                EvisWidthFile = "%s/residuals/SIM_source_runs_EvisWidth_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                EreconFile = "%s/residuals/SIM_source_runs_Erecon_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+            else:
+                src_file_base = self.srcPeakPath
+                EvisFile = "%s/residuals/source_runs_Evis_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                EvisWidthFile = "%s/residuals/source_runs_EvisWidth_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                EreconFile = "%s/residuals/source_runs_Erecon_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
         
 
-        runList = []
+            runList = []
 
-        with open("%s/run_lists/Source_Calibration_Run_Period_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)) as runlist:
-            for run in runlist:
-                if os.path.isfile(self.srcListPath+"source_list_%i.dat"%int(run)):
-                    srcList = open(self.srcListPath+"source_list_%i.dat"%int(run))
-                    lines = []
-                    for line in srcList:
-                        lines.append(line)
-                    if int(lines[0])>0:
-                        runList.append(int(run))
+            with open("%s/run_lists/Source_Calibration_Run_Period_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)) as runlist:
+                for run in runlist:
+                    if os.path.isfile(self.srcListPath+"source_list_%i.dat"%int(run)):
+                        srcList = open(self.srcListPath+"source_list_%i.dat"%int(run))
+                        lines = []
+                        for line in srcList:
+                            lines.append(line)
+                        if int(lines[0])>0:
+                            runList.append(int(run))
 
-        #print runList
+            #print runList
 
-        EvisOutfile = open(EvisFile,'w')
-        EvisWidthOutfile = open(EvisWidthFile,'w')
-        EreconOutfile = open(EreconFile,'w')
+            EvisOutfile = open(EvisFile,'w')
+            EvisWidthOutfile = open(EvisWidthFile,'w')
+            EreconOutfile = open(EreconFile,'w')
 
-        for run in runList:
-            src_file = src_file_base+"/source_peaks_%i_Evis.dat"%run
-            if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
-                infile = open(src_file,'r')
-                for line in infile:
-                    EvisOutfile.write(line)
-                infile.close()
+            for run in runList:
+                src_file = src_file_base+"/source_peaks_%i_Evis.dat"%run
+                if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
+                    infile = open(src_file,'r')
+                    for line in infile:
+                        EvisOutfile.write(line)
+                    infile.close()
 
-            src_file = src_file_base + "/source_widths_%i_Evis.dat"%run
-            if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
-                infile = open(src_file,'r')
-                for line in infile:
-                    EvisWidthOutfile.write(line)
-                infile.close()
+                src_file = src_file_base + "/source_widths_%i_Evis.dat"%run
+                if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
+                    infile = open(src_file,'r')
+                    for line in infile:
+                        EvisWidthOutfile.write(line)
+                    infile.close()
 
-            src_file = src_file_base + "/source_peaks_%i_Erecon.dat"%run
-            if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
-                infile = open(src_file,'r')
-                for line in infile:
-                    EreconOutfile.write(line)
-                infile.close()
+                src_file = src_file_base + "/source_peaks_%i_Erecon.dat"%run
+                if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
+                    infile = open(src_file,'r')
+                    for line in infile:
+                        EreconOutfile.write(line)
+                    infile.close()
 
-        EvisOutfile.close()
-        EvisWidthOutfile.close()
-        EreconOutfile.close()
+            EvisOutfile.close()
+            EvisWidthOutfile.close()
+            EreconOutfile.close()
 
         print "Made combined source peak file for Calibration Period %i"%CalibrationPeriod
 
@@ -617,6 +661,14 @@ class CalibrationManager:
         else:
             print "No peak file to calculate linearity curves"
             sys.exit
+
+
+            
+    def calc_new_nPE_per_keV(self, CalibrationPeriod):
+        print "Calculating new nPE per keV for Calibration Period %i"%CalibrationPeriod
+        os.system("cd %s/source_peaks/; root -l -b -q 'width_fitter.C(%i)'"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod))
+        print "DONE"
+
 
 
     #Calculates residuals for each PMT and as a whole for given run period
@@ -749,7 +801,7 @@ if __name__ == "__main__":
         
     ### Makes a file with each run followed by a boolean (0,1) for whether each PMT should be used or not
     if options.makePMTrunFile:
-        runPeriods = [13,14,15,16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[13,14,15,16,17,18,19,20,21,22,23,24]#
         cal=CalibrationManager()
         for period in runPeriods:
             cal.makePMTrunFile(period)
@@ -764,11 +816,10 @@ if __name__ == "__main__":
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
         cal = CalibrationManager()
         for period in runPeriods:
-            cal.makeSourceCalibrationFile(period)
-            cal.makePMTrunFile(period)
+            #cal.makeSourceCalibrationFile(period)
+            cal.makePMTrunFile(period, master=False)
             #cal.calculateResiduals(period)
             
-
         #cal.makeGlobalResiduals(runPeriods,PMT=1,Side="Both")
 
 
@@ -830,34 +881,51 @@ if __name__ == "__main__":
         #cal.makePMTrunFile(master=True)
 
     ### Simulation reverse calibration procedure
-    if 1: 
+    if 0: 
         runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]#, 13,14,15,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
         
         for runPeriod in runPeriods:
-            #rep.runReverseCalibration(runPeriod)
-            #cal.fitSourcePeaks(runPeriod, Simulation=True)
-            #cal.fitSourcePeaksInEnergy(runPeriod, Simulation=True)
-            
-            cal.makeSourceCalibrationFile(runPeriod, Simulation=True)
+            rep.runReverseCalibration(runPeriod)
+            cal.fitSourcePeaks(runPeriod, Simulation=True)
+            cal.fitSourcePeaksInEnergy(runPeriod, Simulation=True)
+            cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False)
+            cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)
 
     ### Source Run Calibration Steps...
     if 1: 
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
+
+        iterations = 1 # number of times to run through the calibration
+
+        for i in range(0,iterations,1):
         
-        for runPeriod in runPeriods:
-            #cal.makeSourceCalibrationFile(period, False)
-            #cal.makeSourceCalibrationFile(runPeriod, PeaksInEnergy=True, PMTbyPMT=True, Simulation=True)
-            #cal.LinearityCurves(runPeriod)
-            #rep.runReplayPass3(runPeriod)
-            #cal.fitSourcePeaksInEnergy(runPeriod, Simulation=False)
-            cal.makeSourceCalibrationFile(runPeriod, Simulation=False)
-            #cal.calculateResiduals(runPeriod)
+            for runPeriod in runPeriods:
             
-        #cal.makeGlobalResiduals(runPeriods)
+                #Simulation Stuff
+                rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
+                cal.fitSourcePeaks(runPeriod, Simulation=True) #fit the source peaks in eta*Evis
+                cal.fitSourcePeaksInEnergy(runPeriod, Simulation=True) #fit the source peaks in Evis and Erecon
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
+                
+                # Data Stuff
+                cal.fitSourcePeaks(runPeriod, Simulation=False) #fits the source peaks in ADC
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
+                cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves
+                rep.runReplayPass3(runPeriod) # apply Calibration
+                cal.fitSourcePeaksInEnergy(runPeriod, Simulation=False) # Fit the source peaks in Evis and Erecon
+                #cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
+                
+                cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
+            
+            cal.makeGlobalResiduals(runPeriods) # gathers all the residual data to be plotted separately
+
+
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream

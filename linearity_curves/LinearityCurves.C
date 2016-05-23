@@ -179,6 +179,8 @@ void LinearityCurves(Int_t runPeriod)
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;*/
 
+    if (sourceName[i]=="Bi2") continue;
+
     if (pmtQuality[runPos][0]) {
       runE1.push_back(run[i]);
       EQE1.push_back(EqE1[i]);
