@@ -50,10 +50,10 @@ void plot_position_map(int iRunPeriod)
   gROOT->ForceStyle();
 
   // Geometry
-  double xBinWidth = 2.5;
-  double yBinWidth = 2.5;
-  const int nPosBinsX = 43; //Be sure these two are odd (10->11 and 5->21)
-  const int nPosBinsY = 43;
+  double xBinWidth = 5.;
+  double yBinWidth = 5.;
+  const int nPosBinsX = 23; //Be sure these two are odd (10->11 and 5->21)
+  const int nPosBinsY = 23;
   // const unsigned int nPosBinsX = (110/(int)xBinWidth);
   // const unsigned int nPosBinsY = (110/(int)yBinWidth);
   double xBinLower[nPosBinsX];
@@ -92,7 +92,7 @@ void plot_position_map(int iRunPeriod)
 
   // Read position map
   char tempIn[500];
-  sprintf(tempIn, "%s/position_map_%i_RC_123.dat", getenv("POSITION_MAPS"), iRunPeriod);
+  sprintf(tempIn, "%s/position_map_%i_RC_123_%0.1fmm.dat", getenv("POSITION_MAPS"), iRunPeriod,xBinWidth);
   cout << "Processing ... " << tempIn << endl;
   ifstream fileIn(tempIn);
 
@@ -135,7 +135,7 @@ void plot_position_map(int iRunPeriod)
   TString filenameOut;
   Char_t runPeriodString[10];
   sprintf(runPeriodString,"%i",iRunPeriod);
-  filenameOut = TString(getenv("POSITION_MAPS")) + "position_map_"+TString(runPeriodString)+"_RC_123.pdf";
+  filenameOut = TString(getenv("POSITION_MAPS")) + "position_map_"+TString(runPeriodString)+"_RC_123"+TString::Format("_%0.1fmm.pdf",xBinWidth);
   
   /*if (iRunPeriod == 1) filenameOut  = "position_map_1_RC_123.pdf";
   if (iRunPeriod == 2) filenameOut  = "position_map_2_RC_123.pdf";
@@ -165,7 +165,7 @@ void plot_position_map(int iRunPeriod)
   hisE3->GetXaxis()->CenterTitle();
   hisE3->GetYaxis()->CenterTitle();
   hisE3->GetYaxis()->CenterTitle();
-  hisE3->SetAxisRange(0.5,1.5,"Z");
+  hisE3->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -197,7 +197,7 @@ void plot_position_map(int iRunPeriod)
   hisE2->GetXaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
-  hisE2->SetAxisRange(0.5,1.5,"Z");
+  hisE2->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -235,7 +235,7 @@ void plot_position_map(int iRunPeriod)
   hisE0->GetXaxis()->CenterTitle();
   hisE0->GetYaxis()->CenterTitle();
   hisE0->GetYaxis()->CenterTitle();
-  hisE0->SetAxisRange(0.5,1.5,"Z");
+  hisE0->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -267,7 +267,7 @@ void plot_position_map(int iRunPeriod)
   hisE1->GetXaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
-  hisE1->SetAxisRange(0.5,1.5,"Z");
+  hisE1->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -305,7 +305,7 @@ void plot_position_map(int iRunPeriod)
   hisW1->GetXaxis()->CenterTitle();
   hisW1->GetYaxis()->CenterTitle();
   hisW1->GetYaxis()->CenterTitle();
-  hisW1->SetAxisRange(0.5,1.5,"Z");
+  hisW1->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -337,7 +337,7 @@ void plot_position_map(int iRunPeriod)
   hisW0->GetXaxis()->CenterTitle();
   hisW0->GetYaxis()->CenterTitle();
   hisW0->GetYaxis()->CenterTitle();
-  hisW0->SetAxisRange(0.5,1.5,"Z");
+  hisW0->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -375,7 +375,7 @@ void plot_position_map(int iRunPeriod)
   hisW2->GetXaxis()->CenterTitle();
   hisW2->GetYaxis()->CenterTitle();
   hisW2->GetYaxis()->CenterTitle();
-  hisW2->SetAxisRange(0.5,1.5,"Z");
+  hisW2->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -407,7 +407,7 @@ void plot_position_map(int iRunPeriod)
   hisW3->GetXaxis()->CenterTitle();
   hisW3->GetYaxis()->CenterTitle();
   hisW3->GetYaxis()->CenterTitle();
-  hisW3->SetAxisRange(0.5,1.5,"Z");
+  hisW3->SetAxisRange(0.,2.,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);

@@ -19,13 +19,15 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o
+objects = DataTree.o MBUtils.o
 
 position_map.exe: position_map.o $(objects)
 	$(CXX) $(CXXFLAGS) -o position_map.exe position_map.o $(objects) $(LIBS)
 	@echo "Done"
 
 DataTree.o: DataTree.hh
+
+MBUtils.o: MBUtils.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

@@ -22,16 +22,12 @@
 #include "cuts.h"
 #include "basic_reconstruction.h"
 #include "DataTree.hh"
+#include "MBUtils.hh"
 
 #include "replay_pass2.h"
 
 using namespace std;
 
-string itos(int val) {
-  char temp[32];
-  sprintf(temp,"%i",val);
-  return string(temp);
-};
 
 int main(int argc, char *argv[])
 {
@@ -95,10 +91,10 @@ int main(int argc, char *argv[])
   }
 
   // Position bins
-  double xBinWidth = 2.5;
-  double yBinWidth = 2.5;
-  int nPosBinsX = 43; //Be sure these two are odd (10->11 and 5->21 and 4->27 and 2->53)
-  int nPosBinsY = 43;
+  double xBinWidth = 5.; //2.5;
+  double yBinWidth = 5.; //2.5;
+  int nPosBinsX = 23; //Be sure these two are odd (10->11 and 5->21 and 4->27 and 2->53)
+  int nPosBinsY = 23;
   double xBinLower[nPosBinsX];
   double xBinUpper[nPosBinsX];
   double xBinCenter[nPosBinsX];
@@ -482,7 +478,7 @@ int main(int argc, char *argv[])
 
   // Write position maps to file
   string tempMap;
-  tempMap =  getenv("POSITION_MAPS") + tempOutBase + ".dat";
+  tempMap =  getenv("POSITION_MAPS") + tempOutBase + "_" +ftos(xBinWidth)+ "mm.dat";
   ofstream outMap(tempMap.c_str());
 
   for (int i=0; i<nPosBinsX; i++) {
@@ -503,7 +499,7 @@ int main(int argc, char *argv[])
 
   // Write norms to file
   string tempNorm;
-  tempNorm =  getenv("POSITION_MAPS") + std::string("norm_") + tempOutBase + ".dat";
+  tempNorm =  getenv("POSITION_MAPS") + std::string("norm_") + tempOutBase + "_" +ftos(xBinWidth)+ "mm.dat";
   ofstream outNorm(tempNorm.c_str());
 
   for (int p=0; p<nPMT; p++) {
