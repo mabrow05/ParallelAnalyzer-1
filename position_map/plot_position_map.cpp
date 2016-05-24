@@ -1,14 +1,40 @@
 // Usage: root[0] .x plot_position_map.C("runPeriod")
 
 #include <string>
+#include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <ios>
+#include "positionMapHandler.hh"
 
-void plot_position_map(int iRunPeriod)
+#include <TH2D.h>
+#include <TStyle.h>
+#include <TCanvas.h>
+#include <TString.h>
+#include <TPaveText.h>
+#include <TMath.h>
+
+using namespace std;
+
+void plot_position_map(int iRunPeriod, double binWidth);
+
+
+int main(int argc, char* argv[]) {
+  int runPeriod = atoi(argv[1]);
+  double binWidth = atof(argv[2]);
+
+  plot_position_map(runPeriod, binWidth);
+  
+
+}
+
+void plot_position_map(int XePeriod, double binWidth)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
 
   // Style options
-  gROOT->SetStyle("Plain");
+  //gROOT->SetStyle("Plain");
   Int_t palette[10];
   palette[0] = 0;
   palette[1] = 19;
@@ -47,95 +73,60 @@ void plot_position_map(int iRunPeriod)
   gStyle->SetLabelOffset(0.01, "Y");
   gStyle->SetTitleSize(0.050, "X");
   gStyle->SetTitleSize(0.050, "Y");
-  gROOT->ForceStyle();
+  //gROOT->ForceStyle();
 
-  // Geometry
-  double xBinWidth = 5.;
-  double yBinWidth = 5.;
-  const int nPosBinsX = 23; //Be sure these two are odd (10->11 and 5->21)
-  const int nPosBinsY = 23;
-  // const unsigned int nPosBinsX = (110/(int)xBinWidth);
-  // const unsigned int nPosBinsY = (110/(int)yBinWidth);
-  double xBinLower[nPosBinsX];
-  double xBinUpper[nPosBinsX];
-  double xBinCenter[nPosBinsX];
-  double yBinLower[nPosBinsY];
-  double yBinUpper[nPosBinsY];
-  double yBinCenter[nPosBinsY];
-
-  double xMax = (double)nPosBinsX*xBinWidth/2.;
-  double xMin = -xMax;
-  double yMax = (double)nPosBinsY*yBinWidth/2.;
-  double yMin = -yMax;
   
+  PositionMap posmap(binWidth);
+  posmap.readPositionMap(XePeriod);
 
-  for (int k=0; k<nPosBinsX; k++) {
-    xBinLower[k]     = xMin + ((double) k)*xBinWidth;
-    xBinUpper[k]     = xMin + ((double) k)*xBinWidth + xBinWidth;
-    xBinCenter[k]    = (xBinLower[k] + xBinUpper[k])/2.;
-  }
-  for (int k=0; k<nPosBinsY; k++) {
-    yBinLower[k]     = yMin + ((double) k)*yBinWidth;
-    yBinUpper[k]     = yMin + ((double) k)*yBinWidth + yBinWidth;
-    yBinCenter[k]    = (yBinLower[k] + yBinUpper[k])/2.;
-  }
+  
+  PositionMap plotMap(0.5);
+
+  int nPosBinsXY = plotMap.getNbinsXY();
+  double xyMin = plotMap.getBinLower(0);
+  double xyMax = plotMap.getBinUpper(nPosBinsXY-1);  
+
+  cout << nPosBinsXY << " " << xyMin << " " << xyMax << endl;
 
   // Histograms
-  TH2F *hisE0 = new TH2F("E0", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
-  TH2F *hisE1 = new TH2F("E1", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
-  TH2F *hisE2 = new TH2F("E2", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
-  TH2F *hisE3 = new TH2F("E3", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
-  TH2F *hisW0 = new TH2F("W0", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
-  TH2F *hisW1 = new TH2F("W1", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
-  TH2F *hisW2 = new TH2F("W2", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
-  TH2F *hisW3 = new TH2F("W3", "", nPosBinsX,xMin,xMax, nPosBinsY,yMin,yMax);
+  TH2D *hisE0 = new TH2D("E0", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
+  TH2D *hisE1 = new TH2D("E1", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
+  TH2D *hisE2 = new TH2D("E2", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
+  TH2D *hisE3 = new TH2D("E3", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
+  TH2D *hisW0 = new TH2D("W0", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
+  TH2D *hisW1 = new TH2D("W1", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
+  TH2D *hisW2 = new TH2D("W2", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
+  TH2D *hisW3 = new TH2D("W3", "", nPosBinsXY,xyMin,xyMax, nPosBinsXY,xyMin,xyMax);
 
-  // Read position map
-  char tempIn[500];
-  sprintf(tempIn, "%s/position_map_%i_RC_123_%0.1fmm.dat", getenv("POSITION_MAPS"), iRunPeriod,xBinWidth);
-  cout << "Processing ... " << tempIn << endl;
-  ifstream fileIn(tempIn);
+  //Fill all the bins
+  for (int xb=0; xb<nPosBinsXY; xb++) {
 
-  const int nPMT = 8;
-  double posMap[nPMT][nPosBinsX][nPosBinsY];
+    for (int yb=0; yb<nPosBinsXY; yb++) {
 
-  double x, y;
-  for (int i=0; i<nPosBinsX; i++) {
-    for (int j=0; j<nPosBinsY; j++) {
-      fileIn >> x
-             >> y
-             >> posMap[0][i][j]
-             >> posMap[1][i][j]
-             >> posMap[2][i][j]
-             >> posMap[3][i][j]
-             >> posMap[4][i][j]
-             >> posMap[5][i][j]
-             >> posMap[6][i][j]
-	     >> posMap[7][i][j];
-    }
-  }
+      if (TMath::Sqrt(plotMap.getBinCenter(xb)*plotMap.getBinCenter(xb)+plotMap.getBinCenter(yb)*plotMap.getBinCenter(yb)) <= 50.+binWidth) {
 
-  // Fill histograms
-  for (int i=0; i<nPosBinsX; i++) {
-    for (int j=0; j<nPosBinsY; j++) {
-      if (sqrt(xBinCenter[i]*xBinCenter[i] + yBinCenter[j]*yBinCenter[j]) <= 52.5) {
-        hisE0->Fill(xBinCenter[i],yBinCenter[j],posMap[0][i][j]);
-        hisE1->Fill(xBinCenter[i],yBinCenter[j],posMap[1][i][j]);
-        hisE2->Fill(xBinCenter[i],yBinCenter[j],posMap[2][i][j]);
-        hisE3->Fill(xBinCenter[i],yBinCenter[j],posMap[3][i][j]);
-        hisW0->Fill(xBinCenter[i],yBinCenter[j],posMap[4][i][j]);
-        hisW1->Fill(xBinCenter[i],yBinCenter[j],posMap[5][i][j]);
-        hisW2->Fill(xBinCenter[i],yBinCenter[j],posMap[6][i][j]);
-        hisW3->Fill(xBinCenter[i],yBinCenter[j],posMap[7][i][j]);
+	std::vector <Double_t> eta = posmap.getInterpolatedEta(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),plotMap.getBinCenter(xb),plotMap.getBinCenter(yb));
+	//std::vector <Double_t> eta = posmap.getInterpolatedEta(0., 0., 0., 0.);
+
+	//cout << eta[0] << endl;
+        hisE0->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[0]);
+        hisE1->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[1]);
+        hisE2->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[2]);
+        hisE3->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[3]);
+        hisW0->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[4]);
+        hisW1->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[5]);
+        hisW2->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[6]);
+        hisW3->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[7]);
       }
     }
   }
+  
 
   // Output PDF file
   TString filenameOut;
   Char_t runPeriodString[10];
-  sprintf(runPeriodString,"%i",iRunPeriod);
-  filenameOut = TString(getenv("POSITION_MAPS")) + "position_map_"+TString(runPeriodString)+"_RC_123"+TString::Format("_%0.1fmm.pdf",xBinWidth);
+  sprintf(runPeriodString,"%i",XePeriod);
+  filenameOut = TString(getenv("POSITION_MAPS")) + "position_map_"+TString(runPeriodString)+"_RC_123"+TString::Format("_%0.1fmm.pdf",binWidth);
   
   /*if (iRunPeriod == 1) filenameOut  = "position_map_1_RC_123.pdf";
   if (iRunPeriod == 2) filenameOut  = "position_map_2_RC_123.pdf";
@@ -153,12 +144,12 @@ void plot_position_map(int iRunPeriod)
   filenameOutLast  = filenameOut;
   filenameOutLast += ")";
 
-  c0 = new TCanvas("c0", "canvas");
+  TCanvas * c0 = new TCanvas("c0", "canvas");
   c0->Divide(2,1);
   c0->SetLogy(0);
 
   // East 3
-  c0_1->cd();
+  c0->cd(1);
   hisE3->Draw("colz");
   hisE3->SetXTitle("x [mm]");
   hisE3->SetYTitle("y [mm]");
@@ -190,7 +181,7 @@ void plot_position_map(int iRunPeriod)
   pt1->Draw();
 
   // East 2
-  c0_2->cd();
+  c0->cd(2);
   hisE2->Draw("colz");
   hisE2->SetXTitle("x [mm]");
   hisE2->SetYTitle("y [mm]");
@@ -208,10 +199,10 @@ void plot_position_map(int iRunPeriod)
   ell->Draw("same");
   */
 
-  Double_t x1_text = -45;
-  Double_t y1_text =  45;
+  x1_text = -45;
+  y1_text =  45;
 
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+  pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
   pt1->SetTextColor(1);
   pt1->SetTextAlign(12);
@@ -223,12 +214,12 @@ void plot_position_map(int iRunPeriod)
 
   c0->Print(filenameOutFirst);
 
-  c1 = new TCanvas("c1", "canvas");
+  TCanvas * c1 = new TCanvas("c1", "canvas");
   c1->Divide(2,1);
   c1->SetLogy(0);
 
   // East 0
-  c1_1->cd();
+  c1->cd(1);
   hisE0->Draw("colz");
   hisE0->SetXTitle("x [mm]");
   hisE0->SetYTitle("y [mm]");
@@ -246,10 +237,10 @@ void plot_position_map(int iRunPeriod)
   ell->Draw("same");
   */
 
-  Double_t x1_text = -45;
-  Double_t y1_text = -45;
+  x1_text = -45;
+  y1_text = -45;
 
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+  pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
   pt1->SetTextColor(1);
   pt1->SetTextAlign(12);
@@ -260,7 +251,7 @@ void plot_position_map(int iRunPeriod)
   pt1->Draw();
 
   // East 1
-  c1_2->cd();
+  c1->cd(2);
   hisE1->Draw("colz");
   hisE1->SetXTitle("x [mm]");
   hisE1->SetYTitle("y [mm]");
@@ -278,10 +269,10 @@ void plot_position_map(int iRunPeriod)
   ell->Draw("same");
   */
 
-  Double_t x1_text =  40;
-  Double_t y1_text = -45;
+  x1_text =  40;
+  y1_text = -45;
 
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+  pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
   pt1->SetTextColor(1);
   pt1->SetTextAlign(12);
@@ -293,12 +284,12 @@ void plot_position_map(int iRunPeriod)
 
   c1->Print(filenameOut);
 
-  c2 = new TCanvas("c2", "canvas");
+  TCanvas * c2 = new TCanvas("c2", "canvas");
   c2->Divide(2,1);
   c2->SetLogy(0);
 
   // West 1
-  c2_1->cd();
+  c2->cd(1);
   hisW1->Draw("colz");
   hisW1->SetXTitle("x [mm]");
   hisW1->SetYTitle("y [mm]");
@@ -316,10 +307,10 @@ void plot_position_map(int iRunPeriod)
   ell->Draw("same");
   */
 
-  Double_t x1_text = -45;
-  Double_t y1_text = -45;
+  x1_text = -45;
+  y1_text = -45;
 
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+  pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
   pt1->SetTextColor(1);
   pt1->SetTextAlign(12);
@@ -330,7 +321,7 @@ void plot_position_map(int iRunPeriod)
   pt1->Draw();
 
   // West 0
-  c2_2->cd();
+  c2->cd(2);
   hisW0->Draw("colz");
   hisW0->SetXTitle("x [mm]");
   hisW0->SetYTitle("y [mm]");
@@ -348,10 +339,10 @@ void plot_position_map(int iRunPeriod)
   ell->Draw("same");
   */
 
-  Double_t x1_text =  40;
-  Double_t y1_text = -45;
+  x1_text =  40;
+  y1_text = -45;
 
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+  pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
   pt1->SetTextColor(1);
   pt1->SetTextAlign(12);
@@ -363,12 +354,12 @@ void plot_position_map(int iRunPeriod)
 
   c2->Print(filenameOut);
 
-  c3 = new TCanvas("c3", "canvas");
+  TCanvas * c3 = new TCanvas("c3", "canvas");
   c3->Divide(2,1);
   c3->SetLogy(0);
 
   // West 2
-  c3_1->cd();
+  c3->cd(1);
   hisW2->Draw("colz");
   hisW2->SetXTitle("x [mm]");
   hisW2->SetYTitle("y [mm]");
@@ -386,10 +377,10 @@ void plot_position_map(int iRunPeriod)
   ell->Draw("same");
   */
 
-  Double_t x1_text =  40;
-  Double_t y1_text =  45;
+  x1_text =  40;
+  y1_text =  45;
 
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+  pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
   pt1->SetTextColor(1);
   pt1->SetTextAlign(12);
@@ -400,7 +391,7 @@ void plot_position_map(int iRunPeriod)
   pt1->Draw();
 
   // West 3
-  c3_2->cd();
+  c3->cd(2);
   hisW3->Draw("colz");
   hisW3->SetXTitle("x [mm]");
   hisW3->SetYTitle("y [mm]");
@@ -418,10 +409,10 @@ void plot_position_map(int iRunPeriod)
   ell->Draw("same");
   */
 
-  Double_t x1_text = -45;
-  Double_t y1_text =  45;
+  x1_text = -45;
+  y1_text =  45;
 
-  TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
+  pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
   pt1->SetTextColor(1);
   pt1->SetTextAlign(12);
@@ -431,8 +422,13 @@ void plot_position_map(int iRunPeriod)
   pt1->SetFillColor(0);
   pt1->Draw();
 
+  // Redraw axis covered up by gray band
+  //gPad->RedrawAxis();
+
   c3->Print(filenameOutLast);
 
-  // Redraw axis covered up by gray band
-  gPad->RedrawAxis();
+  delete pt1; delete c0; delete c1; delete c2; delete c3;
+  delete hisE0; delete hisE1; delete hisE2; delete hisE3;
+  delete hisW0; delete hisW1; delete hisW2; delete hisW3;
+  
 }

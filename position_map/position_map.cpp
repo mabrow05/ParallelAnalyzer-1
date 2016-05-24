@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
         binCenterMax[p][i][j] = hisxy[p][i][j]->GetBinCenter(maxBin[p][i][j]);
 	
 	  
-	if (r<=52.5)
+	if (r<=(50.+2*xBinWidth))
 	      {
 		spec = new TSpectrum(20);
 		Int_t npeaks = spec->Search(hisxy[p][i][j],1.5,"",0.5);
@@ -403,7 +403,7 @@ int main(int argc, char *argv[])
 
 	double r = sqrt(xBinCenter[i]*xBinCenter[i]+yBinCenter[j]*yBinCenter[j]);
 
-        if (maxCounts[p][i][j] > 0. && r<=52.5) {
+        if (maxCounts[p][i][j] > 0. && r<=(50.+2*xBinWidth)) {
           hisxy[p][i][j]->Fit(fitName, "LRQ");
           fitMean[p][i][j] = gaussian_fit[p][i][j]->GetParameter(1);
 	  //attempt at manual fix of fitting problem. Constrain p1 and p2

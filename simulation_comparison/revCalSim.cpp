@@ -1,9 +1,10 @@
-/* Code to take a run number, retrieve it's runperiod, and construct the 
+ /* Code to take a run number, retrieve it's runperiod, and construct the 
 weighted spectra which would be seen as a reconstructed energy on one side
 of the detector. Also applies the trigger functions */
 
 #include "revCalSim.h"
 #include "posMapReader.h"
+#include "positionMapHandler.hh"
 #include "sourcePeaks.h"
 #include "runInfo.h"
 
@@ -277,7 +278,9 @@ void revCalSimulation (Int_t runNumber, string source)
   vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
   UInt_t calibrationPeriod = getSrcRunPeriod(runNumber); // retrieve the calibration period for this run
   UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
-  GetPositionMap(XePeriod);
+  //GetPositionMap(XePeriod);
+  PositionMap posmap(5.0); //Load position map with 5 mm bins
+  posmap.readPositionMap(XePeriod);
   vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
   vector <Double_t> meanEta = getMeanEtaForAlpha(runNumber); // fill vector with the calculated mean position correction for the source used to calculate alpha
   vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
@@ -403,6 +406,11 @@ void revCalSimulation (Int_t runNumber, string source)
     Int_t intEastBinY = gridPoint[0][1];
     Int_t intWestBinX = gridPoint[1][0];
     Int_t intWestBinY = gridPoint[1][1];
+
+    std::vector <Double_t> eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
+
+    //for (UInt_t iii=0; iii<eta.size(); iii++) std::cout << eta[iii] << std::endl;
+    
       
     //MWPC triggers
     if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
@@ -417,9 +425,9 @@ void revCalSimulation (Int_t runNumber, string source)
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
 	//cout << p << " " << positionMap[p][intEastBinX][intEastBinY] << endl;
 	
-	if (positionMap[p][intEastBinX][intEastBinY]>0.) {
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*positionMap[p][intEastBinX][intEastBinY]*edepQ.EdepQE));
-	  pmt.Evis[p] = pmt.etaEvis[p]/positionMap[p][intEastBinX][intEastBinY];
+	if (eta[p]>0.) {
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQE));
+	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQE));
@@ -440,7 +448,7 @@ void revCalSimulation (Int_t runNumber, string source)
     Double_t numer=0., denom=0.;
     for (UInt_t p=0;p<4;p++) {
       numer += pmt.nPE[p];
-      denom += pmt.nPE[p]>0. ? positionMap[p][intEastBinX][intEastBinY]*alpha[p] : 0.;
+      denom += pmt.nPE[p]>0. ? eta[p]*alpha[p] : 0.;
     }
 
     //Now we apply the trigger probability
@@ -458,9 +466,9 @@ void revCalSimulation (Int_t runNumber, string source)
     for (UInt_t p=4; p<8; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
 	
-	if (positionMap[p][intWestBinX][intWestBinY]>0.) {
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*positionMap[p][intWestBinX][intWestBinY]*edepQ.EdepQW));
-	  pmt.Evis[p] = pmt.etaEvis[p]/positionMap[p][intWestBinX][intWestBinY];
+	if (eta[p]>0.) {
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQW));
+	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQW));
@@ -481,7 +489,7 @@ void revCalSimulation (Int_t runNumber, string source)
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
       numer+=pmt.nPE[p];
-      denom += pmt.nPE[p]>0. ? positionMap[p][intWestBinX][intWestBinY]*alpha[p] : 0.;
+      denom += pmt.nPE[p]>0. ? eta[p]*alpha[p] : 0.;
     }
     //Now we apply the trigger probability
     Double_t totalEnW = numer>0. ? numer/denom : 0.;

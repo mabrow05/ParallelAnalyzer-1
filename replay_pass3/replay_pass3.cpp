@@ -22,6 +22,7 @@
 #include "runInfo.h"
 #include "DataTree.hh"
 #include "posMapReader.h"
+#include "positionMapHandler.hh"
 
 #include "replay_pass2.h"
 #include "replay_pass3.h"
@@ -142,8 +143,9 @@ int main(int argc, char *argv[])
   
   //Reading position map...
   UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
-  GetPositionMap(XePeriod);
-  
+  //GetPositionMap(XePeriod);
+  PositionMap posmap(5.0);
+  posmap.readPositionMap(XePeriod);
 
   // DataTree structure
   DataTree *t = new DataTree();
@@ -164,6 +166,7 @@ int main(int argc, char *argv[])
   cout << "... Processing nEvents = " << nEvents << endl;
 
   vector < vector <Int_t> > gridPoint;
+  vector < Double_t > eta;
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
@@ -177,61 +180,61 @@ int main(int argc, char *argv[])
     Int_t intWestBinX = gridPoint[1][0];
     Int_t intWestBinY = gridPoint[1][1];
 
-    
+    eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
 
-    if (intEastBinX > -1 && intEastBinY > -1) { 
-      t->ScintE.e1 = positionMap[0][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q1),linearityCurve[0]) / positionMap[0][intEastBinX][intEastBinY] : 0.;
-      t->ScintE.e2 = positionMap[1][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q2),linearityCurve[1]) / positionMap[1][intEastBinX][intEastBinY] : 0.;
-      t->ScintE.e3 = positionMap[2][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q3),linearityCurve[2]) / positionMap[2][intEastBinX][intEastBinY] : 0.;
-      t->ScintE.e4 = positionMap[3][intEastBinX][intEastBinY]>0. ? fitADC->EvalPar(&(t->ScintE.q4),linearityCurve[3]) / positionMap[3][intEastBinX][intEastBinY] : 0.;
+    //if (intEastBinX > -1 && intEastBinY > -1) { 
+      t->ScintE.e1 = eta[0]>0. ? fitADC->EvalPar(&(t->ScintE.q1),linearityCurve[0]) / eta[0] : 0.;
+      t->ScintE.e2 = eta[1]>0. ? fitADC->EvalPar(&(t->ScintE.q2),linearityCurve[1]) / eta[1] : 0.;
+      t->ScintE.e3 = eta[2]>0. ? fitADC->EvalPar(&(t->ScintE.q3),linearityCurve[2]) / eta[2] : 0.;
+      t->ScintE.e4 = eta[3]>0. ? fitADC->EvalPar(&(t->ScintE.q4),linearityCurve[3]) / eta[3] : 0.;
       
-      t->ScintE.nPE1 = fitADC->EvalPar(&(t->ScintE.q1),linearityCurve[0]) * alpha[0];
-      t->ScintE.nPE2 = fitADC->EvalPar(&(t->ScintE.q2),linearityCurve[1]) * alpha[1];
-      t->ScintE.nPE3 = fitADC->EvalPar(&(t->ScintE.q3),linearityCurve[2]) * alpha[2];
-      t->ScintE.nPE4 = fitADC->EvalPar(&(t->ScintE.q4),linearityCurve[3]) * alpha[3];
+      t->ScintE.nPE1 = eta[0]>0. ? fitADC->EvalPar(&(t->ScintE.q1),linearityCurve[0]) * alpha[0] : 0.;
+      t->ScintE.nPE2 = eta[1]>0. ? fitADC->EvalPar(&(t->ScintE.q2),linearityCurve[1]) * alpha[1] : 0.;
+      t->ScintE.nPE3 = eta[2]>0. ? fitADC->EvalPar(&(t->ScintE.q3),linearityCurve[2]) * alpha[2] : 0.;
+      t->ScintE.nPE4 = eta[3]>0. ? fitADC->EvalPar(&(t->ScintE.q4),linearityCurve[3]) * alpha[3] : 0.;
       
-      t->ScintE.de1 = t->ScintE.e1/sqrt(t->ScintE.nPE1);
-      t->ScintE.de2 = t->ScintE.e2/sqrt(t->ScintE.nPE2);
-      t->ScintE.de3 = t->ScintE.e3/sqrt(t->ScintE.nPE3);
-      t->ScintE.de4 = t->ScintE.e4/sqrt(t->ScintE.nPE4);
+      t->ScintE.de1 = eta[0]>0. ? t->ScintE.e1/sqrt(t->ScintE.nPE1) : 0.;
+      t->ScintE.de2 = eta[1]>0. ? t->ScintE.e2/sqrt(t->ScintE.nPE2) : 0.;
+      t->ScintE.de3 = eta[2]>0. ? t->ScintE.e3/sqrt(t->ScintE.nPE3) : 0.;
+      t->ScintE.de4 = eta[3]>0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
 
-    }
+      //}
 
-    else {
+      /*else {
       t->ScintE.e1 = t->ScintE.e2 = t->ScintE.e3 = t->ScintE.e4 = 0.;
       t->ScintE.de1 = t->ScintE.de2 = t->ScintE.de3 = t->ScintE.de4 = 0.;
       t->ScintE.nPE1 = t->ScintE.nPE2 = t->ScintE.nPE3 = t->ScintE.nPE4 = 0.;
-    }
+      }*/
 
 
-    if (intWestBinX > -1 && intWestBinY > -1) {
-      t->ScintW.e1 = positionMap[4][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q1),linearityCurve[4]) / positionMap[4][intWestBinX][intWestBinY] : 0.;
-      t->ScintW.e2 = positionMap[5][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q2),linearityCurve[5]) / positionMap[5][intWestBinX][intWestBinY] : 0.;
-      t->ScintW.e3 = positionMap[6][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q3),linearityCurve[6]) / positionMap[6][intWestBinX][intWestBinY] : 0.;
-      t->ScintW.e4 = positionMap[7][intWestBinX][intWestBinY]>0. ? fitADC->EvalPar(&(t->ScintW.q4),linearityCurve[7]) / positionMap[7][intWestBinX][intWestBinY] : 0.;
+      //if (intWestBinX > -1 && intWestBinY > -1) {
+      t->ScintW.e1 = eta[4]>0. ? fitADC->EvalPar(&(t->ScintW.q1),linearityCurve[4]) / eta[4] : 0.;
+      t->ScintW.e2 = eta[5]>0. ? fitADC->EvalPar(&(t->ScintW.q2),linearityCurve[5]) / eta[5] : 0.;
+      t->ScintW.e3 = eta[6]>0. ? fitADC->EvalPar(&(t->ScintW.q3),linearityCurve[6]) / eta[6] : 0.;
+      t->ScintW.e4 = eta[7]>0. ? fitADC->EvalPar(&(t->ScintW.q4),linearityCurve[7]) / eta[7] : 0.;
 
-      t->ScintW.nPE1 = fitADC->EvalPar(&(t->ScintW.q1),linearityCurve[4]) * alpha[4];
-      t->ScintW.nPE2 = fitADC->EvalPar(&(t->ScintW.q2),linearityCurve[5]) * alpha[5];
-      t->ScintW.nPE3 = fitADC->EvalPar(&(t->ScintW.q3),linearityCurve[6]) * alpha[6];
-      t->ScintW.nPE4 = fitADC->EvalPar(&(t->ScintW.q4),linearityCurve[7]) * alpha[7];
+      t->ScintW.nPE1 = eta[4]>0. ?  fitADC->EvalPar(&(t->ScintW.q1),linearityCurve[4]) * alpha[4] : 0.;
+      t->ScintW.nPE2 = eta[5]>0. ? fitADC->EvalPar(&(t->ScintW.q2),linearityCurve[5]) * alpha[5] : 0.;
+      t->ScintW.nPE3 = eta[6]>0. ? fitADC->EvalPar(&(t->ScintW.q3),linearityCurve[6]) * alpha[6] : 0.;
+      t->ScintW.nPE4 = eta[7]>0. ? fitADC->EvalPar(&(t->ScintW.q4),linearityCurve[7]) * alpha[7] : 0.;
 
-      t->ScintW.de1 = t->ScintW.e1/sqrt(t->ScintW.nPE1);
-      t->ScintW.de2 = t->ScintW.e2/sqrt(t->ScintW.nPE2);
-      t->ScintW.de3 = t->ScintW.e3/sqrt(t->ScintW.nPE3);
-      t->ScintW.de4 = t->ScintW.e4/sqrt(t->ScintW.nPE4);
-    }
-    else {
+      t->ScintW.de1 = eta[4]>0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
+      t->ScintW.de2 = eta[5]>0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
+      t->ScintW.de3 = eta[6]>0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
+      t->ScintW.de4 = eta[7]>0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
+      //}
+      /*else {
       t->ScintW.e1 = t->ScintW.e2 = t->ScintW.e3 = t->ScintW.e4 = 0.;
       t->ScintW.de1 = t->ScintW.de2 = t->ScintW.de3 = t->ScintW.de4 = 0.;
       t->ScintW.nPE1 = t->ScintW.nPE2 = t->ScintW.nPE3 = t->ScintW.nPE4 = 0.;
-    }
+      }*/
 
     //Calculate the weighted energy on a side
 
     //EAST
     Double_t numer = (pmtQuality[0] ? t->ScintE.nPE1 : 0.) + (pmtQuality[1] ? t->ScintE.nPE2 : 0.) + (pmtQuality[2] ? t->ScintE.nPE3 : 0.) + (pmtQuality[3] ? t->ScintE.nPE4 : 0.);
     Double_t denom = 0.;
-    for (int i=0; i<4; i++) denom += (pmtQuality[i] ? alpha[i] * positionMap[i][intEastBinX][intEastBinY] : 0.); 
+    for (int i=0; i<4; i++) denom += (pmtQuality[i] ? alpha[i] * eta[i] : 0.); 
 
     t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
     t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
@@ -239,7 +242,7 @@ int main(int argc, char *argv[])
     //WEST
     numer = (pmtQuality[4] ? t->ScintW.nPE1 : 0.) + (pmtQuality[5] ? t->ScintW.nPE2 : 0.) + (pmtQuality[6] ? t->ScintW.nPE3 : 0.) + (pmtQuality[7] ? t->ScintW.nPE4 : 0.);
     denom = 0.;
-    for (int i=4; i<8; i++) denom += (pmtQuality[i] ? alpha[i] * positionMap[i][intWestBinX][intWestBinY] : 0.); 
+    for (int i=4; i<8; i++) denom += (pmtQuality[i] ? alpha[i] * eta[i] : 0.); 
 
     t->ScintW.energy = t->EvisW = (denom!=0. ? numer/denom : 0.);
     t->ScintW.denergy = (denom!=0. ? sqrt(t->ScintW.energy/denom) : 0.);

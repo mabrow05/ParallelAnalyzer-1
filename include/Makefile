@@ -8,7 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
-VPATH = ./:../include/
+VPATH = ./:../include/:../Asymmetry/
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -19,21 +19,19 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o MBUtils.o positionMapHandler.o
-
-position_map.exe: position_map.o $(objects)
-	$(CXX) $(CXXFLAGS) -o position_map.exe position_map.o $(objects) $(LIBS)
+positionMapHandler.exe: positionMapHandler.o positionMapHandler.o SQLinterface.o ../include/MBUtils.o
+	$(CXX) $(CXXFLAGS) -o positionMapHandler.exe positionMapHandler.o MBUtils.o ../Asymmetry/SQLinterface.o $(LIBS)
 	@echo "Done"
 
-plot_position_map.exe: plot_position_map.o $(objects)
-	$(CXX) $(CXXFLAGS) -o plot_position_map.exe plot_position_map.o $(objects) $(LIBS)
-	@echo "Done"
-
-DataTree.o: DataTree.hh
+#../include/positionMapHandler.o: positionMapHandler.hh MBUtils.o
 
 MBUtils.o: MBUtils.hh
 
-positionMapHandler.o: positionMapHandler.hh MBUtils.hh
+../Asymmetry/SQLinterface.o: ../Asymmetry/SQLinterface.hh
+
+#posMapReader.o: posMapReader.h
+
+
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from
