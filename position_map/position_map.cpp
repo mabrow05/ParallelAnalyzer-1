@@ -24,6 +24,8 @@
 #include "DataTree.hh"
 #include "MBUtils.hh"
 
+#include "positionMapHandler.hh"
+
 #include "replay_pass2.h"
 
 using namespace std;
@@ -90,35 +92,11 @@ int main(int argc, char *argv[])
     cout << runList[i] << endl;
   }
 
-  // Position bins
-  double xBinWidth = 5.; //2.5;
-  double yBinWidth = 5.; //2.5;
-  int nPosBinsX = 23; //Be sure these two are odd (10->11 and 5->21 and 4->27 and 2->53)
-  int nPosBinsY = 23;
-  double xBinLower[nPosBinsX];
-  double xBinUpper[nPosBinsX];
-  double xBinCenter[nPosBinsX];
-  double yBinLower[nPosBinsY];
-  double yBinUpper[nPosBinsY];
-  double yBinCenter[nPosBinsY];
-  int intXBinCenter[nPosBinsX];
-  int intYBinCenter[nPosBinsY];
-
-  for (int k=0; k<nPosBinsX; k++) {
-    xBinLower[k]     = -(double)nPosBinsX*xBinWidth/2. + ((double) k)*xBinWidth;
-    xBinUpper[k]     = -(double)nPosBinsX*xBinWidth/2. + ((double) k)*xBinWidth + xBinWidth;
-    xBinCenter[k]    = (xBinLower[k] + xBinUpper[k])/2.;
-    intXBinCenter[k] = (int) xBinCenter[k];
-    //cout << xBinLower[k] << " " << intXBinCenter[k] << " " << xBinUpper[k] << endl;
-  }
-
-  for (int k=0; k<nPosBinsY; k++) {
-    yBinLower[k]     = -(double)nPosBinsY*yBinWidth/2. + ((double) k)*yBinWidth;
-    yBinUpper[k]     = -(double)nPosBinsY*yBinWidth/2. + ((double) k)*yBinWidth + yBinWidth;
-    yBinCenter[k]    = (yBinLower[k] + yBinUpper[k])/2.;
-    intYBinCenter[k] = (int) yBinCenter[k];
-    //cout << yBinLower[k] << " " << intYBinCenter[k] << " " << yBinUpper[k] << endl;
-  }
+  
+  double xyBinWidth = 5.; //2.5;
+  PositionMap posmap(xyBinWidth);
+  Int_t nBinsXY = posmap.getNbinsXY();
+  
 
   // Open output ntuple
   string tempOutBase;
@@ -136,32 +114,32 @@ int main(int argc, char *argv[])
 
   // Output histograms
   int nPMT = 8;
-  int nBin = 800;
+  int nBinHist = 1025;
 
-  TH1F *hisxy[nPMT][nPosBinsX][nPosBinsY];
+  TH1D *hisxy[nPMT][nBinsXY][nBinsXY];
   char *hisxyName = new char[10];
 
   for (int p=0; p<nPMT; p++) {
-    for (int i=0; i<nPosBinsX; i++) {
-      for (int j=0; j<nPosBinsY; j++) {
+    for (int i=0; i<posmap.getNbinsXY(); i++) {
+      for (int j=0; j<posmap.getNbinsXY(); j++) {
         if (p == 0)
-          sprintf(hisxyName, "e0_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "e0_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
         if (p == 1)
-          sprintf(hisxyName, "e1_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "e1_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
         if (p == 2)
-          sprintf(hisxyName, "e2_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "e2_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
         if (p == 3)
-          sprintf(hisxyName, "e3_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "e3_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
         if (p == 4)
-          sprintf(hisxyName, "w0_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "w0_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
         if (p == 5)
-          sprintf(hisxyName, "w1_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "w1_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
         if (p == 6)
-          sprintf(hisxyName, "w2_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "w2_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
         if (p == 7)
-          sprintf(hisxyName, "w3_%i_%i", intXBinCenter[i], intYBinCenter[j]);
+          sprintf(hisxyName, "w3_%0.0f_%0.0f", posmap.getBinCenter(i), posmap.getBinCenter(j));
 
-        hisxy[p][i][j] = new TH1F(hisxyName, "", nBin,0.0,4000.0);
+        hisxy[p][i][j] = new TH1D(hisxyName, "", nBinHist,-100.,4000.0);
 
       }
     }
@@ -205,16 +183,8 @@ int main(int argc, char *argv[])
       
 	if (moveOnX || moveOnY) continue;
 
-	intBinX = -1;
-        intBinY = -1;
-
-        // Determine position bin
-        for (int m=0; m<nPosBinsX; m++) {
-          if ( (t->xE.center >= xBinLower[m]) && (t->xE.center < xBinUpper[m]) ) intBinX = m;
-        }
-        for (int m=0; m<nPosBinsY; m++) {
-          if ( (t->yE.center >= yBinLower[m]) && (t->yE.center < yBinUpper[m]) ) intBinY = m;
-        }
+	intBinX = posmap.getBinNumber(t->xE.center);
+        intBinY = posmap.getBinNumber(t->yE.center);
 
         // Fill PMT histograms
         if (intBinX>-1 && intBinY>-1) hisxy[0][intBinX][intBinY]->Fill(t->ScintE.q1);
@@ -234,15 +204,8 @@ int main(int argc, char *argv[])
       
 	if (moveOnX || moveOnY) continue;
 	
-        intBinX = -1;
-        intBinY = -1;
-        // Determine position bin
-        for (int m=0; m<nPosBinsX; m++) {
-          if ( (t->xW.center >= xBinLower[m]) && (t->xW.center < xBinUpper[m]) ) intBinX = m;
-        }
-        for (int m=0; m<nPosBinsY; m++) {
-          if ( (t->yW.center >= yBinLower[m]) && (t->yW.center < yBinUpper[m]) ) intBinY = m;
-        }
+        intBinX = posmap.getBinNumber(t->xW.center);
+        intBinY = posmap.getBinNumber(t->yW.center);
 
 	// Fill PMT histograms 
         if (intBinX>-1 && intBinY>-1) hisxy[4][intBinX][intBinY]->Fill(t->ScintW.q1);
@@ -259,16 +222,56 @@ int main(int argc, char *argv[])
 
   }
 
-  // Gaussian fits to "200 keV" peak
+  // Extracting mean from 200 keV peak 
 
   // Define fit ranges
-  double xLow[nPMT][nPosBinsX][nPosBinsY];
-  double xHigh[nPMT][nPosBinsX][nPosBinsY];
-  int maxBin[nPMT][nPosBinsX][nPosBinsY];
-  double maxCounts[nPMT][nPosBinsX][nPosBinsY];
-  double binCenterMax[nPMT][nPosBinsX][nPosBinsY];
+  double xLowBin[nPMT][nBinsXY][nBinsXY];
+  double xHighBin[nPMT][nBinsXY][nBinsXY];
+  int maxBin[nPMT][nBinsXY][nBinsXY];
+  double maxCounts[nPMT][nBinsXY][nBinsXY];
+  double binCenterMax[nPMT][nBinsXY][nBinsXY];
+  double meanVal[nPMT][nBinsXY][nBinsXY];
 
-  TSpectrum *spec;
+  for (int p=0; p<nPMT; p++) {
+    for (int i=0; i<nBinsXY; i++) {
+      for (int j=0; j<nBinsXY; j++) {	
+	
+	double r = sqrt(power(posmap.getBinCenter(j),2)+power(posmap.getBinCenter(i),2));
+        // Find bin with maximum content
+	hisxy[p][i][j]->GetXaxis()->SetRange(2,nBinHist);
+        maxBin[p][i][j] = hisxy[p][i][j]->GetMaximumBin();
+        maxCounts[p][i][j] = hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]);
+        binCenterMax[p][i][j] = hisxy[p][i][j]->GetBinCenter(maxBin[p][i][j]);
+	
+	//Determine Low edge bin
+	int counts = maxCounts[p][i][j];
+	int bin=0;
+	while (counts>0.5*maxCounts[p][i][j]) {
+	  bin++;
+	  counts = hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]-bin);
+	}
+	xLowBin[p][i][j] = (maxBin[p][i][j]-bin) > 0 ? (maxBin[p][i][j]-bin): 1;
+	
+      //Determine high edge bin
+	counts = maxCounts[p][i][j];
+	bin=0;
+	while (counts>0.5*maxCounts[p][i][j]) {
+	  bin++;
+	  counts = hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]+bin);
+	}
+	xHighBin[p][i][j] = (maxBin[p][i][j]+bin) < nBinHist ? (maxBin[p][i][j]+bin): nBinHist-1;
+
+	//Determine mean of range
+	hisxy[p][i][j]->GetXaxis()->SetRange(xLowBin[p][i][j],xHighBin[p][i][j]);
+	meanVal[p][i][j] = hisxy[p][i][j]->GetMean();
+	hisxy[p][i][j]->GetXaxis()->SetRange(0,nBinHist);
+	
+      }
+    }
+  }
+
+
+	  /*TSpectrum *spec;
 
   for (int p=0; p<nPMT; p++) {
     for (int i=0; i<nPosBinsX; i++) {
@@ -314,69 +317,10 @@ int main(int argc, char *argv[])
 	xLow[p][i][j] = binCenterMax[p][i][j]/3.;
 	xHigh[p][i][j] = 2.*binCenterMax[p][i][j];
 
-	/*bool flag = false;
-        // Define fit range
-        for (int m=maxBin[p][i][j]; m<nBin; m++) {
-          if (hisxy[p][i][j]->GetBinContent(m+1) < 0.5*maxCounts[p][i][j]) {
-            xHigh[p][i][j] = hisxy[p][i][j]->GetBinCenter(m+1);
-	    
-	    if (((m+1)-maxBin[p][i][j])>4) break;
-	    else {
-	      if (r<50.) 
-		{
-		  flag=true;
-		  cout << "Max Bin was " << m+1 << " at pmt " << p << " position " << xBinCenter[i] << ", " << yBinCenter[j] << endl;
-		}
-	      //xHigh[p][i][j] = 2.*binCenterMax[p][i][j];
-	      break;
-	    }
-	  }
-        }
-
-        for (int m=maxBin[p][i][j]; m>0; m--) {
-          if (hisxy[p][i][j]->GetBinContent(m-1) < 0.5*maxCounts[p][i][j]) {
-            xLow[p][i][j] = hisxy[p][i][j]->GetBinCenter(m-1);
-	    
-	    if (m!=1 && (maxBin[p][i][j]-(m-1))>4) break;
-	    else {
-	      if (r<50.) 
-		{
-		  flag=true;
-		  cout << "Min Bin was " << m-1 << " at pmt " << p << " position " << xBinCenter[i] << ", " << yBinCenter[j] << endl;
-		}
-	      //xLow[p][i][j] = binCenterMax[p][i][j]/3.;
-	      break;
-	    }
-	  }
-	}
 	
-	//xLow[p][i][j] = binCenterMax[p][i][j]/2.;
-	//xHigh[p][i][j] = 3.*binCenterMax[p][i][j]/2.;
-	if (flag)
-	  {
-	    spec = new TSpectrum(5);
-	    Int_t npeaks = spec->Search(hisxy[p][i][j],1,"",0.99);
-	    
-	    if (npeaks==1)
-	      {
-		Float_t *xpeaks = spec->GetPositionX();
-		Int_t max = 0;
-		binCenterMax[p][i][j] = xpeaks[max];
-		xLow[p][i][j] = binCenterMax[p][i][j]/3.;
-		xHigh[p][i][j] = 2.*binCenterMax[p][i][j];
-		cout << "No peaks identified at PMT" << p << " position " << xBinCenter[i] << ", " << yBinCenter[j] << endl;		    
-	      }
-	    //else if (npeaks>1) cout << "More than 1 peak identified at PMT" << p << " position " << xBinCenter[i] << ", " << yBinCenter[j] << endl;
-	    else
-	      {
-		xLow[p][i][j] = binCenterMax[p][i][j]/3.;
-		xHigh[p][i][j] = 2.*binCenterMax[p][i][j];
-	      }
-	    delete spec;
-	    }*/
       }
     }
-  }
+    }
   
   // Fit histograms
   TF1 *gaussian_fit[nPMT][nPosBinsX][nPosBinsY];
@@ -458,33 +402,33 @@ int main(int argc, char *argv[])
 
       }
     }
-  }
+    }*/
 
   // Extract position maps
   double norm[nPMT];
   for (int p=0; p<nPMT; p++) {
-    norm[p] = fitMean[p][nPosBinsX/2][nPosBinsY/2];
+    norm[p] = meanVal[p][nBinsXY/2][nBinsXY/2];
     cout << norm[p] << endl;
   }
 
-  double positionMap[nPMT][nPosBinsX][nPosBinsY];
+  double positionMap[nPMT][nBinsXY][nBinsXY];
   for (int p=0; p<nPMT; p++) {
-    for (int i=0; i<nPosBinsX; i++) {
-      for (int j=0; j<nPosBinsY; j++) {
-        positionMap[p][i][j] = fitMean[p][i][j] / norm[p];
+    for (int i=0; i<nBinsXY; i++) {
+      for (int j=0; j<nBinsXY; j++) {
+        positionMap[p][i][j] = meanVal[p][i][j] / norm[p];
       }
     }
   }
 
   // Write position maps to file
   string tempMap;
-  tempMap =  getenv("POSITION_MAPS") + tempOutBase + "_" +ftos(xBinWidth)+ "mm.dat";
+  tempMap =  getenv("POSITION_MAPS") + tempOutBase + "_" +ftos(xyBinWidth)+ "mm.dat";
   ofstream outMap(tempMap.c_str());
 
-  for (int i=0; i<nPosBinsX; i++) {
-    for (int j=0; j<nPosBinsY; j++) {
-      outMap << xBinCenter[i]        << "  "
-             << yBinCenter[j]        << "  "
+  for (int i=0; i<nBinsXY; i++) {
+    for (int j=0; j<nBinsXY; j++) {
+      outMap << posmap.getBinCenter(i) << "  "
+             << posmap.getBinCenter(j) << "  "
              << positionMap[0][i][j] << "  "
              << positionMap[1][i][j] << "  "
              << positionMap[2][i][j] << "  "
@@ -499,7 +443,7 @@ int main(int argc, char *argv[])
 
   // Write norms to file
   string tempNorm;
-  tempNorm =  getenv("POSITION_MAPS") + std::string("norm_") + tempOutBase + "_" +ftos(xBinWidth)+ "mm.dat";
+  tempNorm =  getenv("POSITION_MAPS") + std::string("norm_") + tempOutBase + "_" +ftos(xyBinWidth)+ "mm.dat";
   ofstream outNorm(tempNorm.c_str());
 
   for (int p=0; p<nPMT; p++) {

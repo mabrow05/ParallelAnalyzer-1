@@ -65,7 +65,7 @@ void plot_position_map(int XePeriod, double binWidth)
   gStyle->SetNdivisions(9,"Z");
   gStyle->SetPadLeftMargin(0.13); // 0.13
   gStyle->SetPadRightMargin(0.15); // 0.04
-  gStyle->SetPadBottomMargin(0.37); // 0.30
+  //gStyle->SetPadBottomMargin(0.37); // 0.30
   gStyle->SetLabelSize(0.045, "X");
   gStyle->SetLabelSize(0.045, "Y");
   gStyle->SetLabelSize(0.045, "Z");
@@ -144,9 +144,8 @@ void plot_position_map(int XePeriod, double binWidth)
   filenameOutLast  = filenameOut;
   filenameOutLast += ")";
 
-  TCanvas * c0 = new TCanvas("c0", "canvas");
-  c0->Divide(2,1);
-  c0->SetLogy(0);
+  TCanvas * c0 = new TCanvas("c0", "canvas", 1000, 900);
+  c0->Divide(2,2);
 
   // East 3
   c0->cd(1);
@@ -167,7 +166,7 @@ void plot_position_map(int XePeriod, double binWidth)
   ell->Draw("same");
   */
 
-  Double_t x1_text =  40;
+  Double_t x1_text =  -47;
   Double_t y1_text =  45;
 
   TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
@@ -199,8 +198,8 @@ void plot_position_map(int XePeriod, double binWidth)
   ell->Draw("same");
   */
 
-  x1_text = -45;
-  y1_text =  45;
+  x1_text = 40;
+  y1_text = 45;
 
   pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
@@ -212,14 +211,14 @@ void plot_position_map(int XePeriod, double binWidth)
   pt1->SetFillColor(0);
   pt1->Draw();
 
-  c0->Print(filenameOutFirst);
+  //c0->Print(filenameOutFirst);
 
-  TCanvas * c1 = new TCanvas("c1", "canvas");
-  c1->Divide(2,1);
-  c1->SetLogy(0);
+  //TCanvas * c1 = new TCanvas("c1", "canvas");
+  //c1->Divide(2,1);
+  //c1->SetLogy(0);
 
   // East 0
-  c1->cd(1);
+  c0->cd(3);
   hisE0->Draw("colz");
   hisE0->SetXTitle("x [mm]");
   hisE0->SetYTitle("y [mm]");
@@ -237,7 +236,7 @@ void plot_position_map(int XePeriod, double binWidth)
   ell->Draw("same");
   */
 
-  x1_text = -45;
+  x1_text = -47;
   y1_text = -45;
 
   pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
@@ -251,7 +250,7 @@ void plot_position_map(int XePeriod, double binWidth)
   pt1->Draw();
 
   // East 1
-  c1->cd(2);
+  c0->cd(4);
   hisE1->Draw("colz");
   hisE1->SetXTitle("x [mm]");
   hisE1->SetYTitle("y [mm]");
@@ -282,11 +281,10 @@ void plot_position_map(int XePeriod, double binWidth)
   pt1->SetFillColor(0);
   pt1->Draw();
 
-  c1->Print(filenameOut);
+  c0->Print(filenameOutFirst);
 
-  TCanvas * c2 = new TCanvas("c2", "canvas");
-  c2->Divide(2,1);
-  c2->SetLogy(0);
+  TCanvas * c2 = new TCanvas("c2", "canvas", 1000, 900);
+  c2->Divide(2,2);
 
   // West 1
   c2->cd(1);
@@ -307,8 +305,8 @@ void plot_position_map(int XePeriod, double binWidth)
   ell->Draw("same");
   */
 
-  x1_text = -45;
-  y1_text = -45;
+  x1_text = -47;
+  y1_text = 45;
 
   pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
@@ -340,7 +338,7 @@ void plot_position_map(int XePeriod, double binWidth)
   */
 
   x1_text =  40;
-  y1_text = -45;
+  y1_text = 45;
 
   pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
@@ -352,14 +350,14 @@ void plot_position_map(int XePeriod, double binWidth)
   pt1->SetFillColor(0);
   pt1->Draw();
 
-  c2->Print(filenameOut);
+  //c2->Print(filenameOut);
 
-  TCanvas * c3 = new TCanvas("c3", "canvas");
-  c3->Divide(2,1);
-  c3->SetLogy(0);
+  //TCanvas * c3 = new TCanvas("c3", "canvas");
+  //c3->Divide(2,1);
+  //c3->SetLogy(0);
 
   // West 2
-  c3->cd(1);
+  c2->cd(3);
   hisW2->Draw("colz");
   hisW2->SetXTitle("x [mm]");
   hisW2->SetYTitle("y [mm]");
@@ -377,8 +375,8 @@ void plot_position_map(int XePeriod, double binWidth)
   ell->Draw("same");
   */
 
-  x1_text =  40;
-  y1_text =  45;
+  x1_text =  -47;
+  y1_text =  -45;
 
   pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
@@ -391,7 +389,7 @@ void plot_position_map(int XePeriod, double binWidth)
   pt1->Draw();
 
   // West 3
-  c3->cd(2);
+  c2->cd(4);
   hisW3->Draw("colz");
   hisW3->SetXTitle("x [mm]");
   hisW3->SetYTitle("y [mm]");
@@ -409,8 +407,8 @@ void plot_position_map(int XePeriod, double binWidth)
   ell->Draw("same");
   */
 
-  x1_text = -45;
-  y1_text =  45;
+  x1_text = 40;
+  y1_text = -45;
 
   pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
   pt1->SetTextSize(0.052);
@@ -425,9 +423,9 @@ void plot_position_map(int XePeriod, double binWidth)
   // Redraw axis covered up by gray band
   //gPad->RedrawAxis();
 
-  c3->Print(filenameOutLast);
+  c2->Print(filenameOutLast);
 
-  delete pt1; delete c0; delete c1; delete c2; delete c3;
+  delete pt1; delete c0;  delete c2; //delete c3;
   delete hisE0; delete hisE1; delete hisE2; delete hisE3;
   delete hisW0; delete hisW1; delete hisW2; delete hisW3;
   
