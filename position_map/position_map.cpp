@@ -262,7 +262,8 @@ int main(int argc, char *argv[])
 	xHighBin[p][i][j] = (maxBin[p][i][j]+bin) < nBinHist ? (maxBin[p][i][j]+bin): nBinHist-1;
 
 	//Determine mean of range
-	hisxy[p][i][j]->GetXaxis()->SetRange(xLowBin[p][i][j],xHighBin[p][i][j]);
+	//hisxy[p][i][j]->GetXaxis()->SetRange(xLowBin[p][i][j],xHighBin[p][i][j]);
+	hisxy[p][i][j]->GetXaxis()->SetRange(xHighBin[p][i][j], nBinHist);
 	meanVal[p][i][j] = hisxy[p][i][j]->GetMean();
 	hisxy[p][i][j]->GetXaxis()->SetRange(0,nBinHist);
 	

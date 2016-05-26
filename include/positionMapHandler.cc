@@ -92,7 +92,7 @@ std::vector <Double_t> PositionMap::getInterpolatedEta(Double_t xE, Double_t yE,
     Double_t x = TMath::Abs(xE)>1.e-5 ? (xE>0. ? rmax/TMath::Sqrt(tanTheta*tanTheta+1.) : -rmax/TMath::Sqrt(tanTheta*tanTheta+1.)) : 0.;
     Double_t y = TMath::Abs(xE)>1.e-5 ? (yE>0. ? tanTheta*rmax/TMath::Sqrt(tanTheta*tanTheta+1.) : -tanTheta*rmax/TMath::Sqrt(tanTheta*tanTheta+1.)) : (yE>0. ? rmax : -rmax);
 
-    std::cout << "x = " << x << "  y = " << y << std::endl;
+    //std::cout << "x = " << x << "  y = " << y << std::endl;
     
     Int_t xBin = x > getBinCenter(getBinNumber(x)) ? getBinNumber(x) : getBinNumber(x)-1;
     Int_t yBin = y > getBinCenter(getBinNumber(y)) ? getBinNumber(y) : getBinNumber(y)-1;
@@ -103,8 +103,8 @@ std::vector <Double_t> PositionMap::getInterpolatedEta(Double_t xE, Double_t yE,
     if (xp==1. && x<0.) {xp=0.; xBin+=1;}
     if (yp==1. && y<0.) {yp=0.; yBin+=1;}
 
-    std::cout << "xBin = " << xBin << "  yBin = " << yBin << std::endl;
-    std::cout << "xp = " << xp << "  yp = " << yp << std::endl;
+    //std::cout << "xBin = " << xBin << "  yBin = " << yBin << std::endl;
+    //std::cout << "xp = " << xp << "  yp = " << yp << std::endl;
 
     for (int p=0; p<4; p++) {
       Int_t xx=0;

@@ -162,8 +162,8 @@ void plot_sim_source_peaks_postCal(TString runNumber)
     his1_W3->GetXaxis()->SetRangeUser(0.0,upperRange+980.);
     his1_W3->Draw();
     
-    if (nSources > 1 && (useSource[1] || useSource[2])) c1->Print(filenameOut);
-    else c1->Print(filenameOutLast);
+    if (nSources > 1 && (useSource[1] || useSource[2])) c2->Print(filenameOut);
+    else c2->Print(filenameOutLast);
     
   }
   if (nSources > 1 && useSource[1]) {
@@ -176,14 +176,14 @@ void plot_sim_source_peaks_postCal(TString runNumber)
     
     c3_1->cd();
     c3_1->SetLogy(0);
-    his2_E0->SetXTitle("East 1");
+    his2_E0->SetXTitle("East PMT 1");
     his2_E0->GetXaxis()->CenterTitle();
     his2_E0->GetXaxis()->SetRangeUser(0.0,upperRange);
     his2_E0->Draw();
     
     c3_2->cd();
     c3_2->SetLogy(0);
-    his2_E1->SetXTitle("East 2");
+    his2_E1->SetXTitle("East PMT 2");
     his2_E1->GetXaxis()->CenterTitle();
     his2_E1->GetXaxis()->SetRangeUser(0.0,upperRange);
     his2_E1->Draw();

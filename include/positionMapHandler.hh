@@ -9,7 +9,7 @@ public:
   ~PositionMap();
 
   void readPositionMap(Int_t XeRunPeriod); //Read in a trigger map
-  void writePositionMap(Int_t XeRunPeriod); //Write trigger map
+  //void writePositionMap(Int_t XeRunPeriod); //Write trigger map
   void setPositionMapPoint(Int_t xBin, Int_t yBin, std::vector <Double_t> vals); //Set a trigger map val
 
   std::vector <Double_t> getInterpolatedEta(Double_t xE, Double_t yE, Double_t xW, Double_t yW); //return interpolated value from position map

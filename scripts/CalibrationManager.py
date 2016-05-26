@@ -850,10 +850,10 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]
-        pmts = [0]#[1,2,3,4] #PMT 0 is for the weighted average of all 4
-        for pmt in pmts:
-            cal.makeGlobalResiduals(runPeriods,PMT=pmt,Side="Both", InEnergy=True, PMTbyPMT=False)
+        runPeriods = [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        
+        for per in runPeriods:
+            cal.makeGlobalResiduals(per)
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
@@ -894,12 +894,12 @@ if __name__ == "__main__":
             cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)
 
     ### Source Run Calibration Steps...
-    if 1: 
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 0: 
+        runPeriods = [5,6,7,8,9,10,11,12,1,2,3,4]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 1 # number of times to run through the calibration
+        iterations = 2 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -913,12 +913,12 @@ if __name__ == "__main__":
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
                 
                 # Data Stuff
-                cal.fitSourcePeaks(runPeriod, Simulation=False) #fits the source peaks in ADC
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
+                #cal.fitSourcePeaks(runPeriod, Simulation=False) #fits the source peaks in ADC
+                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
                 cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves
                 rep.runReplayPass3(runPeriod) # apply Calibration
                 cal.fitSourcePeaksInEnergy(runPeriod, Simulation=False) # Fit the source peaks in Evis and Erecon
-                #cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
+                cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
                 
                 cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks

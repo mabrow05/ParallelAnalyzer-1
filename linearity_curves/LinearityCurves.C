@@ -179,7 +179,7 @@ void LinearityCurves(Int_t runPeriod)
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;*/
 
-    if (sourceName[i]=="Bi2") continue;
+    //if (sourceName[i]=="Bi1") continue;
 
     if (pmtQuality[runPos][0]) {
       runE1.push_back(run[i]);
@@ -247,7 +247,7 @@ void LinearityCurves(Int_t runPeriod)
     cout << "Not enough sources to construct quadratic linearity curve\n";
     num=0;
     }*/
-  if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end()) { 
+  if (std::find(nameE1.begin(),nameE1.end(),"Ce")==nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Sn")==nameE1.end() || (std::find(nameE1.begin(),nameE1.end(),"Bi1")==nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi2")==nameE1.end())) { 
     cout << "Not enough sources to construct quadratic linearity curve\n";
     num=0;
   }
@@ -262,7 +262,8 @@ void LinearityCurves(Int_t runPeriod)
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-  fitADC->FixParameter(2, 0.0);
+  //fitADC->FixParameter(2, 0.0);
+  fitADC->FixParameter(0, 0.0);
 
   /*TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", 0., 2500.0);
   fitADC->SetParameter(0, 0.0);
@@ -330,7 +331,7 @@ void LinearityCurves(Int_t runPeriod)
 
   
 
-  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end())) {
+  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && (std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi2")!=nameE1.end()))) {
  
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
@@ -468,7 +469,7 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileE2(temp);
   vector <Double_t> fitEQ_E2(runE2.size(),0);
 
-  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end())) {
+  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && (std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Bi2")!=nameE2.end()))) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ=0.;
@@ -605,7 +606,7 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileE3(temp);
   vector <Double_t> fitEQ_E3(runE3.size(),0);
 
-  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end())) {
+  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && (std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Bi2")!=nameE3.end()))) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
@@ -741,7 +742,7 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileE4(temp);
   vector <Double_t> fitEQ_E4(runE4.size(),0);
 
-  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end())) {
+  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && (std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Bi2")!=nameE4.end()))) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
@@ -880,7 +881,7 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileW1(temp);
   vector <Double_t> fitEQ_W1(runW1.size(),0);
 
-  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end())) {
+  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && (std::find(nameW1.begin(),nameW1.end(),"Bi2")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end()))) {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
@@ -1012,7 +1013,7 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileW2(temp);
   vector <Double_t> fitEQ_W2(runW2.size(),0);
 
-  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end())) {
+  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && (std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Bi2")!=nameW2.end()))) {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW2.size(); ii++) {
@@ -1143,7 +1144,7 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileW3(temp);
   vector <Double_t> fitEQ_W3(runW3.size(),0);
 
-  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end())) {
+  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && (std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end()) || std::find(nameW3.begin(),nameW3.end(),"Bi2")!=nameW3.end())) {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW3.size(); ii++) {
@@ -1274,7 +1275,7 @@ void LinearityCurves(Int_t runPeriod)
   ofstream oFileW4(temp);
   vector <Double_t> fitEQ_W4(runW4.size(),0);
 
-  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end())) {
+  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && (std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end()) || std::find(nameW4.begin(),nameW4.end(),"Bi2")!=nameW4.end())) {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW4.size(); ii++) {
