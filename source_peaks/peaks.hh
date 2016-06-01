@@ -14,7 +14,7 @@ class SinglePeakHist {
 
 public:
 
-  SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=3);
+  SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=5);
   ~SinglePeakHist();
 
   void FitHist(Double_t meanGuess=0., Double_t sigGuess=1., Double_t heightGuess=1.);
@@ -37,6 +37,7 @@ private:
   Double_t max;
   Double_t iters;
   bool goodFit;
+  TString status;
 };
 
 
@@ -44,7 +45,7 @@ class DoublePeakHist {
 
 public:
 
-  DoublePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=3);
+  DoublePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=6);
   ~DoublePeakHist();
 
   void FitHist(Double_t meanGuess1=0., Double_t sigGuess1=1., Double_t heightGuess1=1., Double_t meanGuess2=1., Double_t sigGuess2=1., Double_t heightGuess2=1.);
@@ -72,6 +73,7 @@ private:
   Double_t max;
   Double_t iters;
   bool goodFit;
+  TString status;
 };
 
 #endif

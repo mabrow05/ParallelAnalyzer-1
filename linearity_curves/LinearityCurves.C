@@ -262,8 +262,8 @@ void LinearityCurves(Int_t runPeriod)
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-  //fitADC->FixParameter(2, 0.0);
-  fitADC->FixParameter(0, 0.0);
+  fitADC->FixParameter(2, 0.0);
+  //fitADC->FixParameter(0, 0.0);
 
   /*TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", 0., 2500.0);
   fitADC->SetParameter(0, 0.0);

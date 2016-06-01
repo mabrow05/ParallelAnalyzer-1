@@ -19,7 +19,7 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o peaks.o
+objects = DataTree.o MBUtils.o peaks.o positionMapHandler.o calibrationTools.o
 
 .PHONY: all
 all: source_peaks.exe source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.exe 
@@ -27,6 +27,15 @@ all: source_peaks.exe source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EvisPMTbyPM
 source_peaks.exe: source_peaks.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks.exe source_peaks.o $(objects) $(LIBS)
 	@echo "Done"
+
+srcCalReplay.exe: srcCalReplay.o $(objects)
+	$(CXX) $(CXXFLAGS) -o srcCalReplay.exe srcCalReplay.o $(objects) $(LIBS)
+	@echo "Done"
+
+sim_source_peak_fitter.exe: sim_source_peak_fitter.o $(objects)
+	$(CXX) $(CXXFLAGS) -o sim_source_peak_fitter.exe sim_source_peak_fitter.o $(objects) $(LIBS)
+	@echo "Done"
+
 
 source_peaks_postCal.exe: source_peaks_postCal.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks_postCal.exe source_peaks_postCal.o $(objects) $(LIBS)
@@ -56,9 +65,15 @@ source_peaks_EnergyPeak.exe: source_peaks_EnergyPeak.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.o $(objects) $(LIBS)
 	@echo "Done"
 
-DataTree.o: DataTree.hh 
-
 peaks.o: peaks.hh
+
+DataTree.o: DataTree.hh
+
+MBUtils.o: MBUtils.hh
+
+positionMapHandler.o: positionMapHandler.hh MBUtils.o
+
+calibrationTools.o: calibrationTools.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from

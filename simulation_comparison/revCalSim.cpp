@@ -7,7 +7,7 @@ of the detector. Also applies the trigger functions */
 #include "positionMapHandler.hh"
 #include "sourcePeaks.h"
 #include "runInfo.h"
-
+#include "calibrationTools.hh"
 #include "../Asymmetry/SQLinterface.hh"
 
 #include <vector>
@@ -157,19 +157,6 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
   return alphas;
 }
 
-//Returns the average eta value from the position map for the Sn source used to calculate alpha
-vector < Double_t > getMeanEtaForAlpha(Int_t run) 
-{
-  Char_t temp[500];
-  vector < Double_t > eta (8,0.);
-  sprintf(temp,"%s/nPE_meanEtaVal_%i.dat",getenv("NPE_WEIGHTS"),run);
-  ifstream infile;
-  infile.open(temp);
-  Int_t i = 0;
-
-  while (infile >> eta[i]) i++;
-  return eta;
-}
   
 //Get the conversion from EQ2Etrue
 std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
@@ -273,6 +260,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   ///////////////////////// SETTING GAIN OF FIRST DYNYODE
   Double_t g_d = 16.;
+  Double_t g_rest = 20000.;
 
   /////// Loading other run dependent quantities
   vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
@@ -282,10 +270,10 @@ void revCalSimulation (Int_t runNumber, string source)
   PositionMap posmap(5.0); //Load position map with 5 mm bins
   posmap.readPositionMap(XePeriod);
   vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
-  vector <Double_t> meanEta = getMeanEtaForAlpha(runNumber); // fill vector with the calculated mean position correction for the source used to calculate alpha
   vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
   Int_t pol = getPolarization(runNumber);
+  LinearityCurve linCurve(calibrationPeriod);
 
   //Setup the output tree
   TTree *tree = new TTree("revCalSim", "revCalSim");
@@ -357,15 +345,17 @@ void revCalSimulation (Int_t runNumber, string source)
   Double_t MWPCThreshold=0.001;
 
   //Set random number generator
-  TRandom3 *rand = new TRandom3(0);
-  TRandom3 *rand2 = new TRandom3(0);
+  TRandom3 *seed = new TRandom3(0);
+  TRandom3 *rand0 = new TRandom3((int)seed->Rndm()*1000);
+  TRandom3 *rand1 = new TRandom3((int)seed->Rndm()*1000);
+  TRandom3 *rand2 = new TRandom3((int)seed->Rndm()*1000);
   
   //Get total number of events in TChain
   UInt_t nevents = chain->GetEntries();
   cout << "events = " << nevents << endl;
  
   //Start from random position in evt sequence
-  UInt_t evtStart = rand->Rndm()*nevents;
+  UInt_t evtStart = rand0->Rndm()*nevents;
   UInt_t evtTally = 0; //To keep track of the number of events 
   UInt_t evt = evtStart; //current event number
   vector < vector <Int_t> > gridPoint;
@@ -420,17 +410,20 @@ void revCalSimulation (Int_t runNumber, string source)
     
 
     //East Side smeared PMT energies
-
+    
     for (UInt_t p=0; p<4; p++) {
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
 	//cout << p << " " << positionMap[p][intEastBinX][intEastBinY] << endl;
-	
+	//if (p==1) g_d=8.;
+	//else g_d=16.;
 	if (eta[p]>0.) {
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQE));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQE)));
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQE));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQE)));
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
 	  pmt.Evis[p] = pmt.etaEvis[p];
 	}
 
@@ -457,7 +450,7 @@ void revCalSimulation (Int_t runNumber, string source)
     Double_t triggProb = triggerProbability(triggerFunc[0],totalEnE);
       
     //Set East Scint Trigger to true if event passes triggProb
-    if (rand->Rndm(0)<triggProb) { // && evis.EvisE>0.) {
+    if (rand0->Rndm()<triggProb) { // && evis.EvisE>0.) {
       EastScintTrigger=true;
     }
       
@@ -467,11 +460,13 @@ void revCalSimulation (Int_t runNumber, string source)
       if (pmtQuality[p]) { //Check to make sure PMT was functioning
 	
 	if (eta[p]>0.) {
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQW));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQW)));
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * rand->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQW));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQW)));
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
 	  pmt.Evis[p] = pmt.etaEvis[p];
 	}
 
@@ -496,7 +491,7 @@ void revCalSimulation (Int_t runNumber, string source)
     evis.EvisW = totalEnW;
     triggProb = triggerProbability(triggerFunc[1],totalEnW);
     //Fill histograms if event passes trigger function
-    if (rand->Rndm(0)<triggProb) { // && evis.EvisW>0.) {
+    if (rand0->Rndm()<triggProb) { // && evis.EvisW>0.) {
       WestScintTrigger = true;      
     }
             
@@ -618,7 +613,8 @@ void revCalSimulation (Int_t runNumber, string source)
   }
   cout << endl;
   delete chain;
-  delete rand;
+  delete rand0;
+  delete rand1;
   delete rand2;
   outfile->Write();
   outfile->Close();

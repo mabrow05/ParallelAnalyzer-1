@@ -1,22 +1,26 @@
 
 #include <TMath.h>
 #include <TRandom3.h>
-
+#include <TMinuit.h>
+#include <TString.h>
 #include "peaks.hh"
 
 
 SinglePeakHist::SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit, Int_t iterations) :
-  hist(h), func(NULL), mean(0.), sigma(0.), scale(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false) {
+  hist(h), func(NULL), mean(0.), sigma(0.), scale(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false), status("NO FITS") {
 
   if (autoFit) {
     mean = hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin());
     scale = hist->GetBinContent(hist->GetMaximumBin());
     sigma = 50.;
-    for (Int_t it=0; it<iters; it++) {
+    Int_t it = 0;
+    while (it<iters) {
       FitHist(mean, sigma, scale);
+      if (goodFit) break;
+      it++;
     }
     
-    std::cout << "Finished Fitting\n"; 
+    std::cout << "Finished Fitting after " << it << " iterations with Status = " << status << "\n"; 
   }
 }
 
@@ -30,16 +34,27 @@ void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t hei
 
   func->SetParameters(heightGuess, meanGuess, sigGuess);
   
-  hist->Fit(func, "R");
+  hist->Fit(func, "RQ");
 
   Double_t scaleCheck = func->GetParameter(0);  
   Double_t meanCheck = func->GetParameter(1);
   Double_t sigmaCheck = TMath::Abs(func->GetParameter(2));
-  delete func;
+  
+  status = gMinuit->fCstatu;
 
-  if ((TMath::Abs(meanCheck)>50.?TMath::Abs(meanCheck):50.)/sigmaCheck > 0.5 && (TMath::Abs(meanCheck)>50.?TMath::Abs(meanCheck):50.)/sigmaCheck < 500. && meanCheck > min && meanCheck < max) { 
-
+  if (status==TString("CONVERGED ")) { 
+    //std::cout << gMinuit->fCstatu << std::endl;
     goodFit=true;
+    scale = scaleCheck;
+    mean = meanCheck;
+    sigma = sigmaCheck;
+    min = mean-sigma;
+    max = mean+sigma;
+  }
+
+  else if ((TMath::Abs(meanCheck)>50.?TMath::Abs(meanCheck):50.)/sigmaCheck > 0.5 && (TMath::Abs(meanCheck)>50.?TMath::Abs(meanCheck):50.)/sigmaCheck < 500. && meanCheck > min && meanCheck < max) { 
+
+    goodFit=false;
     scale = scaleCheck;
     mean = meanCheck;
     sigma = sigmaCheck;
@@ -53,13 +68,14 @@ void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t hei
     mean = mean + rand.Gaus(mean, 20.); 
   }
 
+  delete func;
 }
 
 
 
 
 DoublePeakHist::DoublePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit, Int_t iterations) :
-  hist(h), func(NULL), mean1(0.), sigma1(0.), scale1(0.), mean2(0.), sigma2(0.), scale2(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false) {
+  hist(h), func(NULL), mean1(0.), sigma1(0.), scale1(0.), mean2(0.), sigma2(0.), scale2(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false), status("NO FITS") {
 
   if (autoFit) {
     mean1 = hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin());
@@ -70,11 +86,14 @@ DoublePeakHist::DoublePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, b
     scale2 = scale1*0.5; //hist->GetBinContent(hist->GetXaxis()->FindBin(mean2));
     sigma2 = 50.;
 
-    for (Int_t it=0; it<iters; it++) {
+    Int_t it = 0;
+    while (it<iters) {
       FitHist(mean1, sigma1, scale1, mean2, sigma2, scale2);
+      if (goodFit) break;
+      it++;
     }
     
-    std::cout << "Finished Fitting\n"; 
+    std::cout << "Finished Fitting after " << it << " iterations with Status = " << status << "\n"; 
   }
 }
 
@@ -88,7 +107,7 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
 
   func->SetParameters(heightGuess1, meanGuess1, sigGuess1, heightGuess2, meanGuess2, sigGuess2);
   
-  hist->Fit(func, "R");
+  hist->Fit(func, "RQ");
 
   Int_t highPeak = func->GetParameter(1) > func->GetParameter(4) ? 0 : 1;
 
@@ -111,12 +130,26 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     sigma2Check = TMath::Abs(func->GetParameter(2));
   }
 
-  delete func;
+  status = gMinuit->fCstatu;
 
-  if ((TMath::Abs(mean1Check)>50.?TMath::Abs(mean1Check):50.)/sigma1Check > 0.5 && (TMath::Abs(mean1Check)>50.?TMath::Abs(mean1Check):50.)/sigma1Check < 500. && mean1Check > min && mean1Check < max
-      && (TMath::Abs(mean2Check)>50.?TMath::Abs(mean2Check):50.)/sigma2Check > 0.5 && (TMath::Abs(mean2Check)>50.?TMath::Abs(mean2Check):50.)/sigma2Check < 500. && mean2Check > min && mean2Check < max) { 
-
+  if (status==TString("CONVERGED ")) { 
+    //std::cout << gMinuit->fCstatu << std::endl;
     goodFit=true;
+    scale1 = scale1Check;
+    mean1 = mean1Check;
+    sigma1 = sigma1Check;
+    scale2 = scale2Check;
+    mean2 = mean2Check;
+    sigma2 = sigma2Check;
+    min = mean2-sigma2;
+    max = mean1+sigma1;    
+
+  }
+
+  else if ((TMath::Abs(mean1Check)>50.?TMath::Abs(mean1Check):50.)/sigma1Check > 0.5 && (TMath::Abs(mean1Check)>50.?TMath::Abs(mean1Check):50.)/sigma1Check < 500. && mean1Check > min && mean1Check < max
+    && (TMath::Abs(mean2Check)>50.?TMath::Abs(mean2Check):50.)/sigma2Check > 0.5 && (TMath::Abs(mean2Check)>50.?TMath::Abs(mean2Check):50.)/sigma2Check < 500. && mean2Check > min && mean2Check < max) { 
+
+    goodFit=false;
     scale1 = scale1Check;
     mean1 = mean1Check;
     sigma1 = sigma1Check;
@@ -134,5 +167,5 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     mean1 = mean1 + rand.Gaus(mean1, 20.); 
     mean2 = mean2 + rand.Gaus(mean2, 20.); 
   }
-
+  delete func;
 }

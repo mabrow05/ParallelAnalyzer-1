@@ -103,7 +103,7 @@ void plot_position_map(int XePeriod, double binWidth)
 
     for (int yb=0; yb<nPosBinsXY; yb++) {
 
-      if (TMath::Sqrt(plotMap.getBinCenter(xb)*plotMap.getBinCenter(xb)+plotMap.getBinCenter(yb)*plotMap.getBinCenter(yb)) <= 50.+binWidth) {
+      if (TMath::Sqrt(plotMap.getBinCenter(xb)*plotMap.getBinCenter(xb)+plotMap.getBinCenter(yb)*plotMap.getBinCenter(yb)) <= 50.) {
 
 	std::vector <Double_t> eta = posmap.getInterpolatedEta(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),plotMap.getBinCenter(xb),plotMap.getBinCenter(yb));
 	//std::vector <Double_t> eta = posmap.getInterpolatedEta(0., 0., 0., 0.);

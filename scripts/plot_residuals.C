@@ -31,7 +31,7 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   // Setup output file for error Envelope
   ofstream errEnv;
   Char_t tempfile[200];
-  sprintf(tempfile,"%s/error_envelope/error_envelope_calPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriodHigh);
+  sprintf(tempfile,"%s/error_envelope/error_envelope_calPeriods_%i-%i.dat",getenv("ANALYSIS_CODE"),calPeriodLow,calPeriodHigh);
   
   errEnv.open(tempfile);
   

@@ -100,6 +100,7 @@ class CalReplayManager:
         os.system("mkdir -p %s"%self.srcPositionsPath)
         os.system("mkdir -p %s"%os.getenv("BASIC_HISTOGRAMS"))
         os.system("mkdir -p %s"%os.getenv("PEDESTALS"))
+        os.system("mkdir -p %s"%os.getenv("CUTS"))
         os.system("mkdir -p %s"%self.srcPeakPath)
         os.system("mkdir -p %s"%self.srcListPath)
         os.system("mkdir -p %s"%self.replayPass1)
@@ -361,6 +362,21 @@ class CalibrationManager:
             exit
 
 
+    def runSourceCalReplayPeakFitter(self,srcRunPeriod=1):
+        print "Running SrcCalReplay for run period %i"%(srcRunPeriod)
+        filename=None
+        
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+            
+        for run in runs:
+            os.system("cd ../source_peaks/; ./srcCalReplay.exe %i"%run)
+        print "DONE"
+                
+        
 
     def calc_nPE_per_PMT(self, runAllRefRun=False, run=19359, writeNPEforAllRuns=False, year="2011-2012"):
 
@@ -424,6 +440,24 @@ class CalibrationManager:
             print "Running fit_source_positions.C on run %i"%run
         
 
+    def fitSimSourcePeaks(self,srcRunPeriod=1, overwrite=True):
+        filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:       
+            #checking if peaks have already been fit
+            filepath = self.srcPeakPath +"source_peaks_%i.dat"%int(line)
+            print filepath
+            if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
+                runs.append(int(line))
+
+        for run in runs:
+            
+            os.system("cd ../source_peaks; ./sim_source_peak_fitter.exe %i"%run)
+            #os.system("root -b -q '../source_peaks/plot_sim_source_peaks.C(\"%i\")'"%run)
+            print "Ran sim_source_peak_fitter.exe on run %i"%run
+
+            
     def fitSourcePeaks(self,srcRunPeriod=1, Simulation=False, overwrite=True):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
@@ -550,15 +584,17 @@ class CalibrationManager:
 
             src_file_base = None
             peak_file = None
+            fileEnding = None
             
             if Simulation:
                 peak_file = "%s/residuals/SIM_source_runs_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 src_file_base = self.revCalSimPath + "/source_peaks/source_peaks_"
+                fileEnding = "_etaEvis.dat"
 
             else:
                 peak_file = "%s/residuals/source_runs_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 src_file_base = self.srcPeakPath + "source_peaks_"
-
+                fileEnding = "_ADC.dat"
                 
             runList = []
 
@@ -577,7 +613,7 @@ class CalibrationManager:
             outfile = open(peak_file,'w')
 
             for run in runList:
-                src_file = src_file_base+"%i.dat"%run
+                src_file = src_file_base+"%i"%run+fileEnding
                 if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
                     infile = open(src_file,'r')
                     for line in infile:
@@ -638,7 +674,7 @@ class CalibrationManager:
                         EvisWidthOutfile.write(line)
                     infile.close()
 
-                src_file = src_file_base + "/source_peaks_%i_Erecon.dat"%run
+                src_file = src_file_base + "/source_peaks_%i_EreconTot.dat"%run
                 if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
                     infile = open(src_file,'r')
                     for line in infile:
@@ -850,10 +886,9 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
-        for per in runPeriods:
-            cal.makeGlobalResiduals(per)
+        cal.makeGlobalResiduals(runPeriods)
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
@@ -895,53 +930,51 @@ if __name__ == "__main__":
 
     ### Source Run Calibration Steps...
     if 0: 
-        runPeriods = [5,6,7,8,9,10,11,12,1,2,3,4]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [6]#,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 2 # number of times to run through the calibration
+        iterations = 1 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
             for runPeriod in runPeriods:
             
+                # Data Stuff
+                cal.runSourceCalReplayPeakFitter(runPeriod);
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
+
                 #Simulation Stuff
                 rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
-                cal.fitSourcePeaks(runPeriod, Simulation=True) #fit the source peaks in eta*Evis
-                cal.fitSourcePeaksInEnergy(runPeriod, Simulation=True) #fit the source peaks in Evis and Erecon
+                cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
                 
-                # Data Stuff
-                #cal.fitSourcePeaks(runPeriod, Simulation=False) #fits the source peaks in ADC
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
-                cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves
-                rep.runReplayPass3(runPeriod) # apply Calibration
-                cal.fitSourcePeaksInEnergy(runPeriod, Simulation=False) # Fit the source peaks in Evis and Erecon
                 cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
+                cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
                 
                 cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
             
-            cal.makeGlobalResiduals(runPeriods) # gathers all the residual data to be plotted separately
+            ##cal.makeGlobalResiduals(runPeriods) # gathers all the residual data to be plotted separately
 
 
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 0: 
-        runPeriods = [2,3,4,5]#7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+    if 1: 
+        runPeriods = [2,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             
     

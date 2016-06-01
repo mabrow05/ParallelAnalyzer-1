@@ -19,8 +19,8 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-revCalSim.exe: revCalSim.o positionMapHandler.o SQLinterface.o ../include/MBUtils.o
-	$(CXX) $(CXXFLAGS) -o revCalSim.exe revCalSim.o ../include/MBUtils.o ../include/positionMapHandler.o ../Asymmetry/SQLinterface.o $(LIBS)
+revCalSim.exe: revCalSim.o positionMapHandler.o SQLinterface.o calibrationTools.o ../include/MBUtils.o
+	$(CXX) $(CXXFLAGS) -o revCalSim.exe revCalSim.o ../include/MBUtils.o calibrationTools.o ../include/positionMapHandler.o ../Asymmetry/SQLinterface.o $(LIBS)
 	@echo "Done"
 
 ../include/positionMapHandler.o: ../include/positionMapHandler.hh ../include/MBUtils.o
@@ -28,6 +28,8 @@ revCalSim.exe: revCalSim.o positionMapHandler.o SQLinterface.o ../include/MBUtil
 ../include/MBUtils.o: ../include/MBUtils.hh
 
 ../Asymmetry/SQLinterface.o: ../Asymmetry/SQLinterface.hh
+
+calibrationTools.o: calibrationTools.hh
 
 #posMapReader.o: posMapReader.h
 

@@ -87,8 +87,8 @@ void quick_plot_spectra(Int_t runNumber, string src) {
   sprintf(cuts,"PID==1 && side==0 && type<3 && EvisE>0.");
   TSim->Draw("Erecon>>sim_E_all",cuts,"SAME");
   //sim_E_all->GetXaxis()->SetRangeUser(0.,250.);
-  //Double_t scaleValE = integralE/sim_E_all->Integral();
-  Double_t scaleValE = data_E_all->GetBinContent(data_E_all->GetMaximumBin())/sim_E_all->GetBinContent(sim_E_all->GetMaximumBin());
+  Double_t scaleValE = integralE/sim_E_all->Integral();
+  //Double_t scaleValE = data_E_all->GetBinContent(data_E_all->GetMaximumBin())/sim_E_all->GetBinContent(sim_E_all->GetMaximumBin());
   //sim_E_all->GetXaxis()->SetRangeUser(0.,1200.);
   sim_E_all->Scale(scaleValE);
   sim_E_all->Draw("SAME");
@@ -105,8 +105,8 @@ void quick_plot_spectra(Int_t runNumber, string src) {
   sprintf(cuts,"PID==1 && side==1 && type<3 && EvisW>0.");
   TSim->Draw("Erecon>>sim_W_all",cuts,"SAME");
   //sim_W_all->GetXaxis()->SetRangeUser(0.,250.);
-  //Double_t scaleValW = integralW/sim_W_all->Integral();
-  Double_t scaleValW = data_W_all->GetBinContent(data_W_all->GetMaximumBin())/sim_W_all->GetBinContent(sim_W_all->GetMaximumBin());
+  Double_t scaleValW = integralW/sim_W_all->Integral();
+  //Double_t scaleValW = data_W_all->GetBinContent(data_W_all->GetMaximumBin())/sim_W_all->GetBinContent(sim_W_all->GetMaximumBin());
 
   //sim_W_all->GetXaxis()->SetRangeUser(0.,1200.);
   sim_W_all->Scale(scaleValW);

@@ -172,14 +172,6 @@ int main(int argc, char *argv[])
   for (int i=0; i<nEvents; i++) {
     t->getEvent(i);
 
-    //retrieve point on grid for each side of detector [E/W][x/y]
-    //gridPoint = getGridPoint(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
-
-    //Int_t intEastBinX = gridPoint[0][0];
-    //Int_t intEastBinY = gridPoint[0][1];
-    //Int_t intWestBinX = gridPoint[1][0];
-    //Int_t intWestBinY = gridPoint[1][1];
-
     eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
 
     //if (intEastBinX > -1 && intEastBinY > -1) { 

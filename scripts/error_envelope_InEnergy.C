@@ -25,34 +25,34 @@
   gStyle->SetPadBottomMargin(0.12);
 
   // East residuals
-  double EQ[5];
-  EQ[0] = peakCe;//98.2;
-  EQ[1] = peakIn;
-  EQ[2] = peakSn;//331.2;
-  EQ[3] = peakBiLow; //443.0;
-  EQ[4] = peakBiHigh;//928.0;
+  double En[5];
+  En[0] = peakCe;//98.2;
+  En[1] = peakIn;
+  En[2] = peakSn;//331.2;
+  En[3] = peakBiLow; //443.0;
+  En[4] = peakBiHigh;//928.0;
  
-  double dEQ[5] = {0.};
+  double dEn[5] = {0.};
 
   double resEast[5];
-  resEast[0] = -1.97293;
-  resEast[1] = -.9;
-  resEast[2] =  2.9;
-  resEast[3] = 2.1;
-  resEast[4] = -.8;
+  resEast[0] = -0.25;
+  resEast[1] = -.63;
+  resEast[2] =  -1.3;
+  resEast[3] = -0.58;
+  resEast[4] = -.53;
 
   double sigEast[5];
-  sigEast[0] = 2.1;
-  sigEast[1] = 4.1;
-  sigEast[2] = 3.7;
-  sigEast[3] = 5.85;
-  sigEast[4] = 8.4;
+  sigEast[0] = 1.74;
+  sigEast[1] = 2.2;
+  sigEast[2] = 3.16;
+  sigEast[3] = 5.47;
+  sigEast[4] = 9.0;
 
   // Plot
   c1 = new TCanvas("c1", "canvas");
   c1->SetLogy(0);
 
-  TGraphErrors *gr1 = new TGraphErrors(5,EQ,resEast,dEQ,sigEast);
+  TGraphErrors *gr1 = new TGraphErrors(5,En,resEast,dEn,sigEast);
   gr1->SetTitle("");
   gr1->SetMarkerColor(1);
   gr1->SetMarkerStyle(20);
@@ -63,19 +63,19 @@
   TMultiGraph *mg = new TMultiGraph();
   mg->Add(gr1,"P");
   mg->Draw("A");
-  mg->GetXaxis()->SetTitle("E_{Q} [keV]");
+  mg->GetXaxis()->SetTitle("E_{recon} [keV]");
   mg->GetXaxis()->SetTitleOffset(1.2);
   mg->GetXaxis()->CenterTitle();
   mg->GetYaxis()->SetTitle("Calibration Residual [keV]");
   mg->GetYaxis()->SetTitleOffset(1.2);
   mg->GetYaxis()->CenterTitle();
 
-  mg->GetXaxis()->SetLimits(0.0,1000.0);
+  mg->GetXaxis()->SetLimits(0.0,1200.0);
   mg->SetMinimum(-30.0);
   mg->SetMaximum( 30.0);
 
  Int_t n = 2;
-  Double_t x[n] = {0, 1000};
+  Double_t x[n] = {0, 1200};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr0 = new TGraph(n,x,y);
@@ -85,11 +85,11 @@
   gr0->SetLineStyle(2);
 
   Int_t nn = 5;
-  Double_t perc1=0.025;
-  Double_t perc2=0.018;
-  Double_t perc3=0.011;
-  Double_t perc4=0.011;
-  Double_t x2[nn] = {0., peakCe_EQ, peakSn_EQ, peakBiHigh_EQ, 1000.};
+  Double_t perc1=0.02;
+  Double_t perc2=0.014;
+  Double_t perc3=0.009;
+  Double_t perc4=0.009;
+  Double_t x2[nn] = {0., peakCe, peakSn, peakBiHigh, 1200.};
   Double_t percent[nn] = {1., perc1, perc2, perc3, perc4};
   Double_t y_upper[nn], y_lower[nn];
   for (int i=1; i<nn; i++) {
