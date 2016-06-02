@@ -1,5 +1,6 @@
 //
 #include <vector>
+#include <TF1.h>
 
 class TriggerMap {
 
@@ -8,21 +9,24 @@ public:
   TriggerMap(int bin_width); //Constructor
   ~TriggerMap();
 
-  void readTriggerMap(int XeRunPeriod); //Read in a trigger map
+  void readTriggerMap(int XeRunPeriod, Double_t nparams); //Read in a trigger map
   double returnTriggerProbability(double x, double y, double En);
   std::vector <double> getTriggerFunction(double x, double y); //returns the trigger function for the given event position
   void writeTriggerMap(int XeRunPeriod); //Write trigger map
   void setTriggerMapPoint(int xBin, int yBin, double val); //Set a trigger map val
+
+  void setTriggerFunc(TF1* f);
+  void setTriggerFunc(TF1 f);
 
   int getBinNumber(double pos); //returns bin number for position
 
   double getBinWidth() {return binWidth;}
   int getNbins() {return nBinsTotal;}
   int getNbinsXY() {return nBinsXY;}
-  double getBinUpper(int bin) {return xyBinUpper[bin];}
-  double getBinLower(int bin) {return xyBinLower[bin];}
-  double getBinCenter(int bin) {return xyBinCenter[bin];}
-  int getCurrentXeRunPeriod() {return XePeriod;}
+  Double_t getBinUpper(Int_t bin) {return (bin >= 0 && bin < nBinsTotal) ? xyBinUpper[bin] : -1000. ;}
+  Double_t getBinLower(Int_t bin) {return (bin >= 0 && bin < nBinsTotal) ? xyBinLower[bin] : -1000.;}
+  Double_t getBinCenter(Int_t bin) {return (bin >= 0 && bin < nBinsTotal) ? xyBinCenter[bin] : -1000.;}
+  Int_t getCurrentXeRunPeriod() {return XePeriod;}
 
 private:
 
@@ -38,6 +42,8 @@ private:
   //std::vector <double> yBinLower;
   //std::vector <double> yBinUpper;
   //std::vector <double> yBinCenter;
+
+  TF1 *func;
 
   std::vector < std::vector < std::vector <double> > > triggMap;
  

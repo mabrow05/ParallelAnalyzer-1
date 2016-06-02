@@ -963,7 +963,7 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 1: 
-        runPeriods = [2,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [7]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
