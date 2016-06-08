@@ -19,21 +19,15 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-revCalSim.exe: revCalSim.o positionMapHandler.o SQLinterface.o calibrationTools.o MBUtils.o TriggerMap.o
-	$(CXX) $(CXXFLAGS) -o revCalSim.exe revCalSim.o MBUtils.o calibrationTools.o positionMapHandler.o TriggerMap.o ../Asymmetry/SQLinterface.o $(LIBS)
+triggerThreshold.exe: triggerThreshold.o positionMapHandler.o SQLinterface.o calibrationTools.o MBUtils.o TriggerMap.o
+	$(CXX) $(CXXFLAGS) -o triggerThreshold.exe triggerThreshold.o MBUtils.o calibrationTools.o TriggerMap.o $(LIBS)
 	@echo "Done"
-
-positionMapHandler.o: positionMapHandler.hh MBUtils.o
-
-TriggerMap.o: TriggerMap.hh MBUtils.o
 
 MBUtils.o: MBUtils.hh
 
-../Asymmetry/SQLinterface.o: ../Asymmetry/SQLinterface.hh
-
 calibrationTools.o: calibrationTools.hh
 
-#posMapReader.o: posMapReader.h
+TriggerMap.o: TriggerMap.hh MBUtils.o
 
 
 

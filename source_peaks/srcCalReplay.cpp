@@ -248,40 +248,40 @@ int main(int argc, char *argv[])
 
   Int_t nBin = 600;
   TH1D *hisEvisTot[3][2];
-  hisEvisTot[0][0] = new TH1D("hisEvis1E", "source1 East", nBin,0.0,2400.0);
-  hisEvisTot[0][1] = new TH1D("hisEvis1W", "source1 West", nBin,0.0,2400.0);
-  hisEvisTot[1][0] = new TH1D("hisEvis2E", "source2 East", nBin,0.0,2400.0);
-  hisEvisTot[1][1] = new TH1D("hisEvis2W", "source2 West", nBin,0.0,2400.0);
-  hisEvisTot[2][0] = new TH1D("hisEvis3E", "source3 East", nBin,0.0,2400.0);
-  hisEvisTot[2][1] = new TH1D("hisEvis3W", "source3 West", nBin,0.0,2400.0);
+  hisEvisTot[0][0] = new TH1D("hisEvis1E", "source1 East", nBin,-50.0,2400.0);
+  hisEvisTot[0][1] = new TH1D("hisEvis1W", "source1 West", nBin,-50.0,2400.0);
+  hisEvisTot[1][0] = new TH1D("hisEvis2E", "source2 East", nBin,-50.0,2400.0);
+  hisEvisTot[1][1] = new TH1D("hisEvis2W", "source2 West", nBin,-50.0,2400.0);
+  hisEvisTot[2][0] = new TH1D("hisEvis3E", "source3 East", nBin,-50.0,2400.0);
+  hisEvisTot[2][1] = new TH1D("hisEvis3W", "source3 West", nBin,-50.0,2400.0);
 
   TH1D *hisEvis[3][8];
-  hisEvis[0][0] = new TH1D("hisEvis1_E0", "", nBin,0.0,2400.0);
-  hisEvis[0][1] = new TH1D("hisEvis1_E1", "", nBin,0.0,2400.0);
-  hisEvis[0][2] = new TH1D("hisEvis1_E2", "", nBin,0.0,2400.0);
-  hisEvis[0][3] = new TH1D("hisEvis1_E3", "", nBin,0.0,2400.0);
-  hisEvis[0][4] = new TH1D("hisEvis1_W0", "", nBin,0.0,2400.0);
-  hisEvis[0][5] = new TH1D("hisEvis1_W1", "", nBin,0.0,2400.0);
-  hisEvis[0][6] = new TH1D("hisEvis1_W2", "", nBin,0.0,2400.0);
-  hisEvis[0][7] = new TH1D("hisEvis1_W3", "", nBin,0.0,2400.0);
+  hisEvis[0][0] = new TH1D("hisEvis1_E0", "", nBin,-50.0,2400.0);
+  hisEvis[0][1] = new TH1D("hisEvis1_E1", "", nBin,-50.0,2400.0);
+  hisEvis[0][2] = new TH1D("hisEvis1_E2", "", nBin,-50.0,2400.0);
+  hisEvis[0][3] = new TH1D("hisEvis1_E3", "", nBin,-50.0,2400.0);
+  hisEvis[0][4] = new TH1D("hisEvis1_W0", "", nBin,-50.0,2400.0);
+  hisEvis[0][5] = new TH1D("hisEvis1_W1", "", nBin,-50.0,2400.0);
+  hisEvis[0][6] = new TH1D("hisEvis1_W2", "", nBin,-50.0,2400.0);
+  hisEvis[0][7] = new TH1D("hisEvis1_W3", "", nBin,-50.0,2400.0);
 
-  hisEvis[1][0] = new TH1D("hisEvis2_E0", "", nBin,0.0,2400.0);
-  hisEvis[1][1] = new TH1D("hisEvis2_E1", "", nBin,0.0,2400.0);
-  hisEvis[1][2] = new TH1D("hisEvis2_E2", "", nBin,0.0,2400.0);
-  hisEvis[1][3] = new TH1D("hisEvis2_E3", "", nBin,0.0,2400.0);
-  hisEvis[1][4] = new TH1D("hisEvis2_W0", "", nBin,0.0,2400.0);
-  hisEvis[1][5] = new TH1D("hisEvis2_W1", "", nBin,0.0,2400.0);
-  hisEvis[1][6] = new TH1D("hisEvis2_W2", "", nBin,0.0,2400.0);
-  hisEvis[1][7] = new TH1D("hisEvis2_W3", "", nBin,0.0,2400.0);
+  hisEvis[1][0] = new TH1D("hisEvis2_E0", "", nBin,-50.0,2400.0);
+  hisEvis[1][1] = new TH1D("hisEvis2_E1", "", nBin,-50.0,2400.0);
+  hisEvis[1][2] = new TH1D("hisEvis2_E2", "", nBin,-50.0,2400.0);
+  hisEvis[1][3] = new TH1D("hisEvis2_E3", "", nBin,-50.0,2400.0);
+  hisEvis[1][4] = new TH1D("hisEvis2_W0", "", nBin,-50.0,2400.0);
+  hisEvis[1][5] = new TH1D("hisEvis2_W1", "", nBin,-50.0,2400.0);
+  hisEvis[1][6] = new TH1D("hisEvis2_W2", "", nBin,-50.0,2400.0);
+  hisEvis[1][7] = new TH1D("hisEvis2_W3", "", nBin,-50.0,2400.0);
 
-  hisEvis[2][0] = new TH1D("hisEvis3_E0", "", nBin,0.0,2400.0);
-  hisEvis[2][1] = new TH1D("hisEvis3_E1", "", nBin,0.0,2400.0);
-  hisEvis[2][2] = new TH1D("hisEvis3_E2", "", nBin,0.0,2400.0);
-  hisEvis[2][3] = new TH1D("hisEvis3_E3", "", nBin,0.0,2400.0);
-  hisEvis[2][4] = new TH1D("hisEvis3_W0", "", nBin,0.0,2400.0);
-  hisEvis[2][5] = new TH1D("hisEvis3_W1", "", nBin,0.0,2400.0);
-  hisEvis[2][6] = new TH1D("hisEvis3_W2", "", nBin,0.0,2400.0);
-  hisEvis[2][7] = new TH1D("hisEvis3_W3", "", nBin,0.0,2400.0);
+  hisEvis[2][0] = new TH1D("hisEvis3_E0", "", nBin,-50.0,2400.0);
+  hisEvis[2][1] = new TH1D("hisEvis3_E1", "", nBin,-50.0,2400.0);
+  hisEvis[2][2] = new TH1D("hisEvis3_E2", "", nBin,-50.0,2400.0);
+  hisEvis[2][3] = new TH1D("hisEvis3_E3", "", nBin,-50.0,2400.0);
+  hisEvis[2][4] = new TH1D("hisEvis3_W0", "", nBin,-50.0,2400.0);
+  hisEvis[2][5] = new TH1D("hisEvis3_W1", "", nBin,-50.0,2400.0);
+  hisEvis[2][6] = new TH1D("hisEvis3_W2", "", nBin,-50.0,2400.0);
+  hisEvis[2][7] = new TH1D("hisEvis3_W3", "", nBin,-50.0,2400.0);
   
 
   TH1D *hisEreconTot[3][2];

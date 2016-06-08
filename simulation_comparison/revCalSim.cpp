@@ -8,6 +8,7 @@ of the detector. Also applies the trigger functions */
 #include "sourcePeaks.h"
 #include "runInfo.h"
 #include "calibrationTools.hh"
+#include "TriggerMap.hh"
 #include "../Asymmetry/SQLinterface.hh"
 
 #include <vector>
@@ -270,7 +271,15 @@ void revCalSimulation (Int_t runNumber, string source)
   PositionMap posmap(5.0); //Load position map with 5 mm bins
   posmap.readPositionMap(XePeriod);
   vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
-  vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
+
+  TriggerMap triggMap(120., 8);
+  triggMap.readTriggerMap(XePeriod);
+  TF1 *triggFunc = new TF1("triggFunc","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-20.,150.);
+  triggMap.setTriggerFunc(triggFunc);
+  delete triggFunc;
+
+  //vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
+
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
   Int_t pol = getPolarization(runNumber);
   LinearityCurve linCurve(calibrationPeriod);
@@ -342,7 +351,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-  Double_t MWPCThreshold=0.001;
+  Double_t MWPCThreshold=1.;
 
   //Set random number generator
   TRandom3 *seed = new TRandom3(0);
@@ -447,7 +456,8 @@ void revCalSimulation (Int_t runNumber, string source)
     //Now we apply the trigger probability
     Double_t totalEnE = numer>0. ? numer/denom : 0.;
     evis.EvisE = totalEnE;
-    Double_t triggProb = triggerProbability(triggerFunc[0],totalEnE);
+    //std::cout << scint_pos_adj.ScintPosAdjE[0] << " " << scint_pos_adj.ScintPosAdjE[1] << " " << totalEnE << std::endl;
+    Double_t triggProb = triggMap.returnTriggerProbabilityEast(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],totalEnE);//triggerProbability(triggerFunc[0],totalEnE);
       
     //Set East Scint Trigger to true if event passes triggProb
     if (rand0->Rndm()<triggProb) { // && evis.EvisE>0.) {
@@ -489,7 +499,8 @@ void revCalSimulation (Int_t runNumber, string source)
     //Now we apply the trigger probability
     Double_t totalEnW = numer>0. ? numer/denom : 0.;
     evis.EvisW = totalEnW;
-    triggProb = triggerProbability(triggerFunc[1],totalEnW);
+    //std::cout << scint_pos_adj.ScintPosAdjW[0] << " " << scint_pos_adj.ScintPosAdjW[1] << " " << totalEnW << std::endl;
+    triggProb = triggMap.returnTriggerProbabilityWest(scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1],totalEnW);//triggerProbability(triggerFunc[1],totalEnW);
     //Fill histograms if event passes trigger function
     if (rand0->Rndm()<triggProb) { // && evis.EvisW>0.) {
       WestScintTrigger = true;      
