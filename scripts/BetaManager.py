@@ -108,7 +108,8 @@ class BetaReplayManager:
         
             for run in runs:
                 print "Running pedestals for run %i"%run
-                os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
+                #os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
+                os.system("cd ../pedestals/; ./pedestal_widths.exe %i"%run)
         print "DONE"
 
 
@@ -324,7 +325,7 @@ if __name__ == "__main__":
 
 
     if 0:
-        octet_range = [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range = [40,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
@@ -337,7 +338,7 @@ if __name__ == "__main__":
 
     #Running reverse calibrations
     if 1:
-        octet_range = [40,49];
+        octet_range = [50,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             beta.runReverseCalibration(octet)

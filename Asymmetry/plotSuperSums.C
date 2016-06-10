@@ -3,13 +3,17 @@
 {
   gStyle->SetOptStat(0);
 
-  int octetStart=0;
+  int octetStart=30;
   int octetEnd=59;
 
   Double_t normLow = 0.;
   Double_t normHigh = 1200.;
   
-  TString fileBase = "superSumPlots/SuperSum_octets_0-59_AsymOff";
+  TString fileBase = "superSumPlots/SuperSum_octets_";
+  fileBase+=octetStart;
+  fileBase+="-";
+  fileBase+=octetEnd;
+  fileBase+="_AsymOff";
   TString fileName = TString::Format("%s.root",fileBase.Data());
   TFile *f = new TFile(fileName,"READ");
 

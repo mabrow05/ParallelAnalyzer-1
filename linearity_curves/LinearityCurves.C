@@ -252,6 +252,18 @@ void LinearityCurves(Int_t runPeriod)
     num=0;
   }
     
+  //Finding the lowest ADC/EQ peak in each PMT for fitting purposes
+  std::vector <Double_t> lowestEQ(8,10000.);
+  std::vector <Double_t> lowestADC(8,10000.);
+  for (Int_t i=0; i<ADCE1.size(); i++) { if (ADCE1[i] < lowestADC[0]) { lowestADC[0] = ADCE1[i]; lowestEQ[0] = EQE1[i]; } }
+  for (Int_t i=0; i<ADCE2.size(); i++) { if (ADCE2[i] < lowestADC[1]) { lowestADC[1] = ADCE2[i]; lowestEQ[1] = EQE2[i]; } }
+  for (Int_t i=0; i<ADCE3.size(); i++) { if (ADCE3[i] < lowestADC[2]) { lowestADC[2] = ADCE3[i]; lowestEQ[2] = EQE3[i]; } }
+  for (Int_t i=0; i<ADCE4.size(); i++) { if (ADCE4[i] < lowestADC[3]) { lowestADC[3] = ADCE4[i]; lowestEQ[3] = EQE4[i]; } }
+  for (Int_t i=0; i<ADCW1.size(); i++) { if (ADCW1[i] < lowestADC[4]) { lowestADC[4] = ADCW1[i]; lowestEQ[4] = EQW1[i]; } }
+  for (Int_t i=0; i<ADCW2.size(); i++) { if (ADCW2[i] < lowestADC[5]) { lowestADC[5] = ADCW2[i]; lowestEQ[5] = EQW2[i]; } }
+  for (Int_t i=0; i<ADCW3.size(); i++) { if (ADCW3[i] < lowestADC[6]) { lowestADC[6] = ADCW3[i]; lowestEQ[6] = EQW3[i]; } }
+  for (Int_t i=0; i<ADCW4.size(); i++) { if (ADCW4[i] < lowestADC[7]) { lowestADC[7] = ADCW4[i]; lowestEQ[7] = EQW4[i]; } }
+  
 
   //File to hold the linearity curves for each calibration run period
   sprintf(temp,"%s/lin_curves_srcCal_Period_%i.dat",getenv("LINEARITY_CURVES"),calibrationPeriod);
@@ -260,6 +272,7 @@ void LinearityCurves(Int_t runPeriod)
   // Fit function
   TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)", 0., 2500.0);
   fitADC->SetParameter(0, 0.0);
+  //fitADC->FixParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
   fitADC->FixParameter(2, 0.0);
@@ -269,22 +282,25 @@ void LinearityCurves(Int_t runPeriod)
   fitADC->SetParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
+  fitADC->FixParameter(0, 0.0);
+
   fitADC->SetParameter(3, 1.0);
   fitADC->SetParameter(4, 50.);
   fitADC->SetParameter(5, 1.);
-  fitADC->FixParameter(5, 75.0);
+  //fitADC->FixParameter(5, 75.0);
   //fitADC->FixParameter(2, 0.);
   //fitADC->SetParLimits(5, 1., 20.);
   
-  fitADC->SetParLimits(2, -0.0004, 0.0004);
-  fitADC->SetParLimits(3, 0.1, 2.);*/
+  
+  //fitADC->SetParLimits(3, 0.1, 2.);
+  */
 
   fitADC->SetNpx(100000);
   fitADC->SetLineColor(2);
   fitADC->SetLineWidth(1);
   //fitADC->SetLineStyle(10);
 
-  Double_t offset=0., slope=0., quad=0., cubic=0.; //Fit Parameters
+  Double_t offset=0., slope=0., quad=0., cubic=0., spreadOfTanH=0., meanOfTanH=0., lowEnSlope=0.; //Fit Parameters
 
   //Creating canvases and TPads for all of the calibrations curves
   TCanvas *c1 = new TCanvas("c1", "c1", 1400, 1000);
@@ -359,13 +375,18 @@ void LinearityCurves(Int_t runPeriod)
     grE1->SetMaximum(maxEQ+40.);
     grE1->Draw("AP");
 
+
     grE1->Fit("fitADC", "","", 0., maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    
-    linCurves << offset << " " << slope << " " << quad  << endl; //<< " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
+    shiftOfTanH = offset>=0. ? lowestADC[0]/2. : (lowestADC[0]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
   
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -459,7 +480,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;//" " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE1 << "PMT NOT USABLE";}
   oFileE1.close();
 
@@ -498,13 +519,19 @@ void LinearityCurves(Int_t runPeriod)
     grE2->SetMaximum(maxEQ+40.);
     grE2->Draw("AP");
 
-    grE2->Fit("fitADC", "Q","",0.,maxADC+40.);
+    grE2->Fit("fitADC", "","", 0., maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
-    
-    linCurves << offset << " " << slope << " " << quad << endl;// " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
+    shiftOfTanH = offset>=0. ? lowestADC[1]/2. : (lowestADC[1]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+  
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -596,7 +623,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;//<< " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE2 << "PMT NOT USABLE";}
   oFileE2.close();
 
@@ -634,13 +661,27 @@ void LinearityCurves(Int_t runPeriod)
     grE3->SetMaximum(maxEQ+40.);
     grE3->Draw("AP");
 
-    grE3->Fit("fitADC", "","",0.,maxADC+40.);
+
+    grE3->Fit("fitADC", "","", 0., maxADC+40.);
+
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+
+    shiftOfTanH = offset>=0. ? lowestADC[2]/2. : (lowestADC[2]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
+    /*grE3->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     
-    linCurves << offset << " " << slope << " " << quad << endl;//<< " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    linCurves << offset << " " << slope << " " << quad << << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    */
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -732,7 +773,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl; //<< " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE3 << "PMT NOT USABLE";}
   oFileE3.close();
 
@@ -770,14 +811,27 @@ void LinearityCurves(Int_t runPeriod)
     grE4->SetMaximum(maxEQ+40.);
     grE4->Draw("AP");
 
-    grE4->Fit("fitADC", "","",0.,maxADC+40.);
+    grE4->Fit("fitADC", "","", 0., maxADC+40.);
+
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+   
+    shiftOfTanH = offset>=0. ? lowestADC[3]/2. : (lowestADC[3]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
+    /*grE4->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     
-    linCurves << offset << " " << slope << " " << quad << endl; //" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
-    
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    */
+
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
@@ -868,7 +922,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;// " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. <<  " " << 0. << " " << 0. << " " << 0. << endl;
     oFileE4 << "PMT NOT USABLE";}
   oFileE4.close();
 
@@ -909,13 +963,26 @@ void LinearityCurves(Int_t runPeriod)
     grW1->SetMaximum(maxEQ+40.);
     grW1->Draw("AP");
 
-    grW1->Fit("fitADC", "","",0.,maxADC+40.);
+    grW1->Fit("fitADC", "","", 0., maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     
-    linCurves << offset << " " << slope << " " << quad << endl;// " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    shiftOfTanH = offset>=0. ? lowestADC[4]/2. : (lowestADC[4]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
+    /*grW1->Fit("fitADC", "","",0.,maxADC+40.);
+
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    
+    linCurves << offset << " " << slope << " " << quad <<  " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    */ 
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1003,7 +1070,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl;// " " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. <<  " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW1 << "PMT NOT USABLE";}
   oFileW1.close();
 
@@ -1040,13 +1107,27 @@ void LinearityCurves(Int_t runPeriod)
     grW2->SetMaximum(maxEQ+40.);
     grW2->Draw("AP");
 
-    grW2->Fit("fitADC", "","",0.,maxADC+40.);
+    grW2->Fit("fitADC", "","", 0., maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     
-    linCurves << offset << " " << slope << " " << quad << endl; //" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    shiftOfTanH = offset>=0. ? lowestADC[5]/2. : (lowestADC[5]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
+
+    /*grW2->Fit("fitADC", "","",0.,maxADC+40.);
+
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    */ 
 
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -1134,7 +1215,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl; //" " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW2 << "PMT NOT USABLE";}
   oFileW2.close();
 
@@ -1171,14 +1252,28 @@ void LinearityCurves(Int_t runPeriod)
     grW3->SetMaximum(maxEQ+40.);
     grW3->Draw("AP");
 
-    grW3->Fit("fitADC", "","",0.,maxADC+40.);
+    grW3->Fit("fitADC", "","", 0., maxADC+40.);
+
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+    
+    shiftOfTanH = offset>=0. ? lowestADC[6]/2. : (lowestADC[6]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
+
+    /*grW3->Fit("fitADC", "","",0.,maxADC+40.);
   
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     
-    linCurves << offset << " " << slope << " " << quad << endl; //" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
-    
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    */
+
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
 
@@ -1265,7 +1360,7 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << endl; //" " << 0. << " " << 0. << " " << 0. << endl;
+  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW3 << "PMT NOT USABLE";}
   oFileW3.close();
 
@@ -1303,14 +1398,27 @@ void LinearityCurves(Int_t runPeriod)
     grW4->SetMaximum(maxEQ+40.);
     grW4->Draw("AP");
 
+    grW4->Fit("fitADC", "","", 0., maxADC+40.);
+
+    offset = fitADC->GetParameter(0);
+    slope = fitADC->GetParameter(1);
+    quad = fitADC->GetParameter(2);
+
+    shiftOfTanH = offset>=0. ? lowestADC[7]/2. : (lowestADC[7]-offset/slope)/2.;
+    lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
+    spreadOfTanH = shiftOfTanH/3.;
+
+    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+
     //fitADC->SetRange(0., 3500.);
-    grW4->Fit("fitADC", "","",0.,maxADC+40.);
+    /*grW4->Fit("fitADC", "","",0.,maxADC+40.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);
     quad = fitADC->GetParameter(2);
     
-    linCurves << offset << " " << slope << " " << quad << endl;//" " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    */
 
     linCurves.close();
   
@@ -1401,7 +1509,7 @@ void LinearityCurves(Int_t runPeriod)
   }
   
   else { 
-    linCurves << 0. << " " << 0. << " " << 0. << endl;//" " << 0. << " " << 0. << " " << 0. << endl;
+    linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
     oFileW4 << "PMT NOT USABLE";
   }
   oFileW4.close();

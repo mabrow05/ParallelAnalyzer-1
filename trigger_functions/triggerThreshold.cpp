@@ -71,7 +71,7 @@ void trigger_threshold(Int_t XeRunPeriod, Double_t binWidth, bool mpmData) {
  
   
   //Int_t nbins = 75;
-  Double_t lower_limit = -20.;
+  Double_t lower_limit = -50.;
   Int_t hisBinWidth = 1;
   Double_t East_upper_limit = 150.;
   Double_t West_upper_limit = 150.;
@@ -154,11 +154,14 @@ void trigger_threshold(Int_t XeRunPeriod, Double_t binWidth, bool mpmData) {
       erf->SetParLimits(4,1.,25.);
       erf->SetParameter(5,0.5); //constant offset of second tanh
       erf->SetParameter(6,0.5); //Scaling of second tanh
+      erf->SetParLimits(4,0.,2.);
       //erf->FixParameter(5,0.5); 
       //erf->FixParameter(6,0.5); 
       erf->SetParameter(7,12.); // stretching factor of second tanh
-      
-      EtriggFunc[xb][yb]->Fit("erf","","",0.,East_upper_limit);
+      erf->SetParLimits(7,0.,50.);
+
+
+      EtriggFunc[xb][yb]->Fit("erf","","",-20.,East_upper_limit);
       
       EtriggFunc[xb][yb]->Draw("P");
       
@@ -178,7 +181,7 @@ void trigger_threshold(Int_t XeRunPeriod, Double_t binWidth, bool mpmData) {
       WtriggFunc[xb][yb]->Divide(Wtrigg[xb][yb],Wtotal[xb][yb]);
       WtriggFunc[xb][yb]->SetStats(0);
 
-      erf->SetParameter(2,25.); //Mean of gaussian integrated for erf
+      erf->SetParameter(2,15.); //Mean of gaussian integrated for erf
       erf->SetParameter(3,5.); //std. dev. of gaussian integrated for erf
       erf->SetParameter(4,7.); //severity of transition function "turn on"
       erf->SetParameter(5,0.5); //constant offset of second tanh

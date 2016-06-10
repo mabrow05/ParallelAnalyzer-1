@@ -56,33 +56,6 @@ int getPolarization(int run) {
   }
 };
 
-vector < vector < Double_t > > getTriggerFunctionParams(Int_t XeRunPeriod, Int_t nParams=8) {
-  Char_t file[500];
-  sprintf(file,"%s/trigger_functions_XePeriod_%i.dat",getenv("TRIGGER_FUNC"),XeRunPeriod);
-  ifstream infile(file);
-  vector < vector <Double_t> > func;
-  func.resize(2,vector <Double_t> (nParams,0.));
-  //cout << "made it here\n";
-  for (Int_t side = 0; side<2; side++) {
-    Int_t param = 0;
-    while (param<nParams) {
-      infile >> func[side][param];
-      cout << func[side][param] << " ";
-      param++;
-    }
-    cout << endl;
-  }
-  infile.close();
-  return func;
-}
-
-Double_t triggerProbability(vector <Double_t> params, Double_t En) {
-  //Double_t prob = params[0]+params[1]*TMath::Erf((En-params[2])/params[3])
-  //+ params[4]*TMath::Gaus(En,params[5],params[6]);
-  if (En<100.) return (params[0]+params[1]*TMath::Erf((En-params[2])/params[3]))*(0.5-0.5*TMath::TanH((En-params[2])/params[4])) + 
-    (0.5+0.5*TMath::TanH((En-params[2])/params[4]))*(params[5]+params[6]*TMath::TanH((En-params[2])/params[7]));
-  else return 1.;
-}
 
 vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
   Char_t temp[500];
@@ -184,6 +157,22 @@ std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNu
   return params;
 }
 
+std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
+
+  Char_t temp[500];
+  std::vector < std::vector < Double_t > > peds (8,std::vector <Double_t> (2,0.));
+  sprintf(temp,"%s/pedestal_widths_%i.dat",getenv("PEDESTALS"),runNumber);
+  ifstream infile;
+  infile.open(temp);
+
+  Int_t i = 0;
+  Int_t run;
+
+  while (infile >> run >> peds[i][0] >> peds[i][1]) { std::cout << "Pedestal " << i << ": " << peds[i][0] << " " << peds[i][1] << std::endl; i++; }
+  return peds;
+
+};
+
 
 void SetUpTree(TTree *tree) {
   tree->Branch("PID", &PID, "PID/I");
@@ -278,6 +267,8 @@ void revCalSimulation (Int_t runNumber, string source)
   triggMap.setTriggerFunc(triggFunc);
   delete triggFunc;
 
+  std::vector < std::vector <Double_t> > pedestals = loadPMTpedestals(runNumber);
+
   //vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
 
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
@@ -351,7 +342,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-  Double_t MWPCThreshold=1.;
+  Double_t MWPCThreshold=0.5; // keV dep in the wirechamber.. 
 
   //Set random number generator
   TRandom3 *seed = new TRandom3(0);
@@ -397,14 +388,6 @@ void revCalSimulation (Int_t runNumber, string source)
     scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2]*10.;
     scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2]*10.;
 
-          
-    //retrieve point on grid for each side of detector [E/W][x/y]
-    gridPoint = getGridPoint(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
-
-    Int_t intEastBinX = gridPoint[0][0];
-    Int_t intEastBinY = gridPoint[0][1];
-    Int_t intWestBinX = gridPoint[1][0];
-    Int_t intWestBinY = gridPoint[1][1];
 
     std::vector <Double_t> eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
 
@@ -421,26 +404,28 @@ void revCalSimulation (Int_t runNumber, string source)
     //East Side smeared PMT energies
     
     for (UInt_t p=0; p<4; p++) {
-      if (pmtQuality[p]) { //Check to make sure PMT was functioning
+      if (pmtQuality[p] && edepQ.EdepQE>0.) { //Check to make sure PMT was functioning and that there is light to see in the scintillator
 	//cout << p << " " << positionMap[p][intEastBinX][intEastBinY] << endl;
 	//if (p==1) g_d=8.;
 	//else g_d=16.;
 	if (eta[p]>0.) {
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQE)));
-	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQE)));
-	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];
 	}
 
-	pmt.nPE[p] = alpha[p]*pmt.etaEvis[p];
+	pmt.nPE[p] = pmt.etaEvis[p]>0. ? alpha[p]*pmt.etaEvis[p] : 0.;
       }	
       // If PMT quality failed, set the evis and the weight to zero for this PMT
       else {
-	pmt.Evis[p] = 0.;
+	pmt.etaEvis[p] = 0.;
 	pmt.Evis[p] = 0.;
 	pmt.nPE[p] = 0.;
       }
@@ -449,12 +434,12 @@ void revCalSimulation (Int_t runNumber, string source)
     //Calculate the weighted energy on a side
     Double_t numer=0., denom=0.;
     for (UInt_t p=0;p<4;p++) {
-      numer += pmt.nPE[p];
-      denom += pmt.nPE[p]>0. ? eta[p]*alpha[p] : 0.;
+      numer += pmtQuality[p] ? pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] ? eta[p]*alpha[p] : 0.;
     }
 
     //Now we apply the trigger probability
-    Double_t totalEnE = numer>0. ? numer/denom : 0.;
+    Double_t totalEnE = denom>0. ? numer/denom : 0.;
     evis.EvisE = totalEnE;
     //std::cout << scint_pos_adj.ScintPosAdjE[0] << " " << scint_pos_adj.ScintPosAdjE[1] << " " << totalEnE << std::endl;
     Double_t triggProb = triggMap.returnTriggerProbabilityEast(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],totalEnE);//triggerProbability(triggerFunc[0],totalEnE);
@@ -467,24 +452,27 @@ void revCalSimulation (Int_t runNumber, string source)
       
     //West Side
     for (UInt_t p=4; p<8; p++) {
-      if (pmtQuality[p]) { //Check to make sure PMT was functioning
+      if (pmtQuality[p] && edepQ.EdepQW>0.) { //Check to make sure PMT was functioning
 	
 	if (eta[p]>0.) {
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQW)));
-	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQW)));
-	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];
 	}
 
-	pmt.nPE[p] = alpha[p]*pmt.etaEvis[p];
+	pmt.nPE[p] = pmt.etaEvis[p]>0. ? alpha[p]*pmt.etaEvis[p] : 0.;
       }	
       // If PMT quality failed, set the evis and the weight to zero for this PMT
       else {
-	pmt.Evis[p] = 0.;
+	pmt.etaEvis[p] = 0.;
 	pmt.Evis[p] = 0.;
 	pmt.nPE[p] = 0.;
       }
@@ -493,11 +481,11 @@ void revCalSimulation (Int_t runNumber, string source)
     //Calculate the total weighted energy
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
-      numer+=pmt.nPE[p];
-      denom += pmt.nPE[p]>0. ? eta[p]*alpha[p] : 0.;
+      numer += pmtQuality[p] ? pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] ? eta[p]*alpha[p] : 0.;
     }
     //Now we apply the trigger probability
-    Double_t totalEnW = numer>0. ? numer/denom : 0.;
+    Double_t totalEnW = denom>0. ? numer/denom : 0.;
     evis.EvisW = totalEnW;
     //std::cout << scint_pos_adj.ScintPosAdjW[0] << " " << scint_pos_adj.ScintPosAdjW[1] << " " << totalEnW << std::endl;
     triggProb = triggMap.returnTriggerProbabilityWest(scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1],totalEnW);//triggerProbability(triggerFunc[1],totalEnW);
@@ -591,6 +579,7 @@ void revCalSimulation (Int_t runNumber, string source)
     }
     
     //Calculate Erecon
+    Erecon = -1.;
     Int_t typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
     if (side==0) {
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
@@ -624,6 +613,7 @@ void revCalSimulation (Int_t runNumber, string source)
   }
   cout << endl;
   delete chain;
+  delete seed;
   delete rand0;
   delete rand1;
   delete rand2;

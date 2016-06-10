@@ -893,7 +893,7 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
         runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#,13,14,16,17,18,19,20,21,22,23,24]# 
@@ -930,7 +930,7 @@ if __name__ == "__main__":
 
     ### Source Run Calibration Steps...
     if 0: 
-        runPeriods = [2]#,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -942,20 +942,20 @@ if __name__ == "__main__":
                 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
                 #cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
-                #cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
+                cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
 
                 # Data Stuff
-                cal.runSourceCalReplayPeakFitter(runPeriod);
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
+                #cal.runSourceCalReplayPeakFitter(runPeriod);
+                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
+                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
 
                 #Simulation Stuff
-                rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
-                cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
+                #rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
+                #cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
+                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
+                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
                 
-                cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
+                #cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
             
             ##cal.makeGlobalResiduals(runPeriods) # gathers all the residual data to be plotted separately
 
@@ -963,7 +963,7 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 0: 
+    if 1: 
         runPeriods = [7]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
@@ -971,9 +971,9 @@ if __name__ == "__main__":
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 

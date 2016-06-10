@@ -19,7 +19,7 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o ../include/positionMapHandler.o ../include/MBUtils.o
+objects = DataTree.o positionMapHandler.o MBUtils.o calibrationTools.o
 
 replay_pass3.exe: replay_pass3.o $(objects)
 	$(CXX) $(CXXFLAGS) -o replay_pass3.exe replay_pass3.o $(objects) $(LIBS)
@@ -27,9 +27,11 @@ replay_pass3.exe: replay_pass3.o $(objects)
 
 DataTree.o: DataTree.hh
 
-../include/positionMapHandler.o: ../include/positionMapHandler.hh ../include/MBUtils.o
+positionMapHandler.o: positionMapHandler.hh MBUtils.o
 
-../include/MBUtils.o: ../include/MBUtils.hh
+MBUtils.o: MBUtils.hh
+
+calibrationTools.o: calibrationTools.hh
 
 #../include/positionMapHandler.o: ../include/positionMapHandler.hh ../include/MBUtils.o
 #	$(CXX) $(CXXFLAGS) -c ../include/positionMapHandler.o ../include/positionMapHandler.cc ../include/MBUtils.o $(LIBS)

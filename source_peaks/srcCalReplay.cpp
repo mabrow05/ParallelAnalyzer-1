@@ -348,7 +348,39 @@ int main(int argc, char *argv[])
 
     eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
 
-    //if (intEastBinX > -1 && intEastBinY > -1) { 
+
+    t->ScintE.e1 = eta[0]>0. ? linearityCurve.applyLinCurve(0,t->ScintE.q1) / eta[0] : 0.;
+    t->ScintE.e2 = eta[1]>0. ? linearityCurve.applyLinCurve(1,t->ScintE.q2) / eta[1] : 0.;
+    t->ScintE.e3 = eta[2]>0. ? linearityCurve.applyLinCurve(2,t->ScintE.q3) / eta[2] : 0.;
+    t->ScintE.e4 = eta[3]>0. ? linearityCurve.applyLinCurve(3,t->ScintE.q4) / eta[3] : 0.;
+    
+    t->ScintE.nPE1 = t->ScintE.e1 > 0. ? t->ScintE.e1 * alpha[0] : 0.;
+    t->ScintE.nPE2 = t->ScintE.e2 > 0. ? t->ScintE.e2 * alpha[1] : 0.;
+    t->ScintE.nPE3 = t->ScintE.e3 > 0. ? t->ScintE.e3 * alpha[2] : 0.;
+    t->ScintE.nPE4 = t->ScintE.e4 > 0. ? t->ScintE.e4 * alpha[3] : 0.;
+    
+    t->ScintE.de1 = t->ScintE.nPE1 > 0. ? t->ScintE.e1/sqrt(t->ScintE.nPE1) : 0.;
+    t->ScintE.de2 = t->ScintE.nPE2 > 0. ? t->ScintE.e2/sqrt(t->ScintE.nPE2) : 0.;
+    t->ScintE.de3 = t->ScintE.nPE3 > 0. ? t->ScintE.e3/sqrt(t->ScintE.nPE3) : 0.;
+    t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
+
+    
+    t->ScintW.e1 = eta[4]>0. ? linearityCurve.applyLinCurve(4,t->ScintW.q1) / eta[4] : 0.;
+    t->ScintW.e2 = eta[5]>0. ? linearityCurve.applyLinCurve(5,t->ScintW.q2) / eta[5] : 0.;
+    t->ScintW.e3 = eta[6]>0. ? linearityCurve.applyLinCurve(6,t->ScintW.q3) / eta[6] : 0.;
+    t->ScintW.e4 = eta[7]>0. ? linearityCurve.applyLinCurve(7,t->ScintW.q4) / eta[7] : 0.;
+    
+    t->ScintW.nPE1 = t->ScintW.e1 > 0. ? t->ScintW.e1 * alpha[4] : 0.;
+    t->ScintW.nPE2 = t->ScintW.e2 > 0. ? t->ScintW.e2 * alpha[5] : 0.;
+    t->ScintW.nPE3 = t->ScintW.e3 > 0. ? t->ScintW.e3 * alpha[6] : 0.;
+    t->ScintW.nPE4 = t->ScintW.e4 > 0. ? t->ScintW.e4 * alpha[7] : 0.;
+    
+    t->ScintW.de1 = t->ScintW.nPE1 > 0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
+    t->ScintW.de2 = t->ScintW.nPE2 > 0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
+    t->ScintW.de3 = t->ScintW.nPE3 > 0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
+    t->ScintW.de4 = t->ScintW.nPE4 > 0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
+
+    /*//if (intEastBinX > -1 && intEastBinY > -1) { 
     t->ScintE.e1 = eta[0]>0. ? linearityCurve.applyLinCurve(0,t->ScintE.q1) / eta[0] : 0.;
     t->ScintE.e2 = eta[1]>0. ? linearityCurve.applyLinCurve(1,t->ScintE.q2) / eta[1] : 0.;
     t->ScintE.e3 = eta[2]>0. ? linearityCurve.applyLinCurve(2,t->ScintE.q3) / eta[2] : 0.;
@@ -379,7 +411,7 @@ int main(int argc, char *argv[])
     t->ScintW.de1 = eta[4]>0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
     t->ScintW.de2 = eta[5]>0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
     t->ScintW.de3 = eta[6]>0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
-    t->ScintW.de4 = eta[7]>0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
+    t->ScintW.de4 = eta[7]>0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;*/
     
     
     //Calculate the weighted energy on a side
@@ -421,7 +453,7 @@ int main(int argc, char *argv[])
       else t->Erecon=-1.;
     }
     
-    if (t->Erecon>0.){ t->fillOutputTree();}
+    t->fillOutputTree();
 
 
     ///////////////////////////////////////////////////////////////////////////
