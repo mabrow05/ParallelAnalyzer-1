@@ -248,9 +248,10 @@ void revCalSimulation (Int_t runNumber, string source)
   TFile *outfile = new TFile(outputfile, "RECREATE");
 
 
-  ///////////////////////// SETTING GAIN OF FIRST DYNYODE
-  Double_t g_d = 16.;
-  Double_t g_rest = 20000.;
+  ///////////////////////// SETTING GAIN OF FIRST and second DYNYODE
+  Double_t g_d1 = 4.;
+  Double_t g_d2 = 4.;
+  //Double_t g_rest = 20000.;
 
   /////// Loading other run dependent quantities
   vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
@@ -345,10 +346,11 @@ void revCalSimulation (Int_t runNumber, string source)
   Double_t MWPCThreshold=0.5; // keV dep in the wirechamber.. 
 
   //Set random number generator
-  TRandom3 *seed = new TRandom3(0);
+  TRandom3 *seed = new TRandom3();
   TRandom3 *rand0 = new TRandom3((int)seed->Rndm()*1000);
   TRandom3 *rand1 = new TRandom3((int)seed->Rndm()*1000);
   TRandom3 *rand2 = new TRandom3((int)seed->Rndm()*1000);
+  TRandom3 *rand3 = new TRandom3((int)seed->Rndm()*1000);
   
   //Get total number of events in TChain
   UInt_t nevents = chain->GetEntries();
@@ -409,13 +411,13 @@ void revCalSimulation (Int_t runNumber, string source)
 	//if (p==1) g_d=8.;
 	//else g_d=16.;
 	if (eta[p]>0.) {
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQE)));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d1*g_d2)) * (rand3->Poisson(g_d2*rand2->Poisson(g_d1*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQE)));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d1*g_d2)) * (rand3->Poisson(g_d2*rand2->Poisson(g_d1*rand1->Poisson(alpha[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];
@@ -455,14 +457,14 @@ void revCalSimulation (Int_t runNumber, string source)
       if (pmtQuality[p] && edepQ.EdepQW>0.) { //Check to make sure PMT was functioning
 	
 	if (eta[p]>0.) {
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*eta[p]*edepQ.EdepQW)));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d1*g_d2)) * (rand3->Poisson(g_d2*rand2->Poisson(g_d1*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
 	}
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand1->Poisson(g_d*rand2->Poisson(alpha[p]*edepQ.EdepQW)));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d1*g_d2)) * (rand3->Poisson(g_d2*rand2->Poisson(g_d1*rand1->Poisson(alpha[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];
@@ -612,11 +614,9 @@ void revCalSimulation (Int_t runNumber, string source)
     //if (evtTally%1000==0) {cout << evtTally << endl;}//cout << "filled event " << evt << endl;
   }
   cout << endl;
-  delete chain;
-  delete seed;
-  delete rand0;
-  delete rand1;
-  delete rand2;
+
+  delete chain; delete seed; delete rand0; delete rand1; delete rand2; delete rand3;
+
   outfile->Write();
   outfile->Close();
   
