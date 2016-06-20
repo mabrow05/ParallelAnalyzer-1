@@ -50,13 +50,15 @@ void width_fitter(Int_t calPeriod)
       simFile >> simWidths[0][i] >> simWidths[1][i] >> simWidths[2][i] >> simWidths[3][i]
 	      >> simWidths[4][i] >> simWidths[5][i] >> simWidths[6][i] >> simWidths[7][i];
       cout << simRun << " " << srcNameSim << endl;
+
+      if (srcNameData!="Bi1") i++; //Put peaks to exclude here
     }
     else {
       cout << "Data and sim files don't match. Rerun MakeSourceCalibrationFiles!\n"; 
       exit(0);
     }
     if (dataFile.fail()) break;
-    i++;
+    
   }
   dataFile.close();
   simFile.close();
@@ -85,8 +87,13 @@ void width_fitter(Int_t calPeriod)
 
   TF1 *f1 = new TF1("f1","[0]*x",0., 170.);
   f1->SetParameter(0,1.);
+  f1->SetParLimits(0,0.5,1.5);
   gStyle->SetOptFit();
   
+  TString status = " ";
+  Int_t nAttempts = 5;
+  Int_t attempt = 0;
+
   
   p0->cd();
 
@@ -100,8 +107,17 @@ void width_fitter(Int_t calPeriod)
   pmt0->SetMaximum(170.);
   pmt0->Draw("AP");
   
-  pmt0->Fit("f1");
-  slope[0] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt0->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[0] = 1.;
+  else slope[0] = f1->GetParameter(0);
+
+  status = " ";
+  attempt = 0;
+  f1->SetParameter(0,1.);
 
   p1->cd();
 
@@ -115,9 +131,17 @@ void width_fitter(Int_t calPeriod)
   pmt1->SetMaximum(170.);
   pmt1->Draw("AP");
   
-  pmt1->Fit("f1");
-  slope[1] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt1->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[1] = 1.;
+  else slope[1] = f1->GetParameter(0);
 
+  status = " ";
+  attempt = 0;
+  f1->SetParameter(0,1.);
 
   p2->cd();
 
@@ -131,8 +155,18 @@ void width_fitter(Int_t calPeriod)
   pmt2->SetMaximum(170.);
   pmt2->Draw("AP");
   
-  pmt2->Fit("f1");
-  slope[2] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt2->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[2] = 1.;
+  else slope[2] = f1->GetParameter(0);
+
+  status = " ";
+  attempt = 0;
+  f1->SetParameter(0,1.);
+
 
   p3->cd();
 
@@ -146,10 +180,19 @@ void width_fitter(Int_t calPeriod)
   pmt3->SetMaximum(170.);
   pmt3->Draw("AP");
   
-  pmt3->Fit("f1");
-  slope[3] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt3->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[3] = 1.;
+  else slope[3] = f1->GetParameter(0);
 
-  
+  status = " ";
+  attempt = 0;
+  f1->SetParameter(0,1.);
+
+
   p4->cd();
 
   TGraph *pmt4 = new TGraph(i, &simWidths[4][0], &dataWidths[4][0]);
@@ -162,8 +205,17 @@ void width_fitter(Int_t calPeriod)
   pmt4->SetMaximum(170.);
   pmt4->Draw("AP");
   
-  pmt4->Fit("f1");
-  slope[4] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt4->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[4] = 1.;
+  else slope[4] = f1->GetParameter(0);
+
+  status = " ";
+  attempt = 0;
+  f1->SetParameter(0,1.);
 
 
   p5->cd();
@@ -178,8 +230,17 @@ void width_fitter(Int_t calPeriod)
   pmt5->SetMaximum(170.);
   pmt5->Draw("AP");
   
-  pmt5->Fit("f1");
-  slope[5] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt5->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[5] = 1.;
+  else slope[5] = f1->GetParameter(0);
+
+  status = " ";
+  attempt = 0;
+  f1->SetParameter(0,1.);
 
 
   p6->cd();
@@ -194,8 +255,17 @@ void width_fitter(Int_t calPeriod)
   pmt6->SetMaximum(170.);
   pmt6->Draw("AP");
   
-  pmt6->Fit("f1");
-  slope[6] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt6->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[6] = 1.;
+  else slope[6] = f1->GetParameter(0);
+
+  status = " ";
+  attempt = 0;
+  f1->SetParameter(0,1.);
 
 
   p7->cd();
@@ -210,8 +280,15 @@ void width_fitter(Int_t calPeriod)
   pmt7->SetMaximum(170.);
   pmt7->Draw("AP");
   
-  pmt7->Fit("f1");
-  slope[7] = f1->GetParameter(0);
+  while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
+    pmt7->Fit("f1");
+    status = gMinuit->fCstatu;
+    attempt++;
+  }
+  if (status!=TString("CONVERGED ")) slope[7] = 1.;
+  else slope[7] = f1->GetParameter(0);
+
+
 
   TString pdffile = TString::Format("%s/simulation_comparison/nPE_per_keV/width_comp_%i.pdf",getenv("ANALYSIS_CODE"),calPeriod);
   c1->Print(pdffile);

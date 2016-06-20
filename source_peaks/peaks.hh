@@ -24,7 +24,8 @@ public:
   Double_t ReturnScale() { return scale; }
   bool isGoodFit()       { return goodFit; }
   
-
+  void SetRangeMin(Double_t m) { min = m; }
+  void SetRangeMax(Double_t m) { max = m; }
 
 private:
 
@@ -58,6 +59,8 @@ public:
   Double_t ReturnScale2() { return scale2; }
   bool isGoodFit()       { return goodFit; }
 
+  void SetRangeMin(Double_t m) { min = m; }
+  void SetRangeMax(Double_t m) { max = m; }
 
 private:
 

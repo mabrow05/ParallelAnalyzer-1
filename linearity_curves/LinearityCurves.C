@@ -29,7 +29,7 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
   
 }
 
-void LinearityCurves(Int_t runPeriod)
+void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 {
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -179,7 +179,7 @@ void LinearityCurves(Int_t runPeriod)
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;*/
 
-    //if (sourceName[i]=="Bi1") continue;
+    if (sourceName[i]=="Cd") continue;
 
     if (pmtQuality[runPos][0]) {
       runE1.push_back(run[i]);
@@ -386,7 +386,8 @@ void LinearityCurves(Int_t runPeriod)
     lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
     spreadOfTanH = shiftOfTanH/3.;
 
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
   
     Double_t x1_text = 1200;
     Double_t y1_text = 100;
@@ -428,9 +429,14 @@ void LinearityCurves(Int_t runPeriod)
 	ResE1[j] = 100.*(fitEQ_E1[j] - EQE1[j])/fitEQ_E1[j];
 	//ResE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE1 << "Bi2_East" << " " << runE1[j] << " " << ResE1[j] << endl;
-	if (sqrt(ResE1[j]*ResE1[j])>2.5) cout << "Bi2_East" << " " << "PMT1 " << runE1[j] << " " << ResE1[j] << endl;
+	if (sqrt(ResE1[j]*ResE1[j])>2.5) cout << "Bi2_East" << " " << "PMT1 " << runE1[j] << " " << ResE1[j] << endl;	
       }
- 
+      else if (nameE1[j]=="In") {
+	ResE1[j] = 100.*(fitEQ_E1[j] - EQE1[j])/fitEQ_E1[j];
+	//ResE1[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+	oFileE1 << "In_East" << " " << runE1[j] << " " << ResE1[j] << endl;
+	if (sqrt(ResE1[j]*ResE1[j])>2.5) cout << "In_East" << " " << "PMT1 " << runE1[j] << " " << ResE1[j] << endl;	
+      }
     }
   
 
@@ -480,7 +486,9 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { 
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileE1 << "PMT NOT USABLE";}
   oFileE1.close();
 
@@ -530,7 +538,8 @@ void LinearityCurves(Int_t runPeriod)
     spreadOfTanH = shiftOfTanH/3.;
 
   
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
 
 
     Double_t x1_text = 1200;
@@ -573,6 +582,12 @@ void LinearityCurves(Int_t runPeriod)
 	//ResE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
 	oFileE2 << "Bi2_East" << " " << runE2[j] << " " << ResE2[j] << endl;
 	if (sqrt(ResE2[j]*ResE2[j])>2.5) cout<< "Bi2_East" << " " << "PMT2 " << runE2[j] << " " << ResE2[j] << endl;  
+      }
+      else if (nameE2[j]=="In") {
+	ResE2[j] = 100.*(fitEQ_E2[j] - EQE2[j])/fitEQ_E2[j];
+	//ResE2[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+	oFileE2 << "In_East" << " " << runE2[j] << " " << ResE2[j] << endl;
+	if (sqrt(ResE2[j]*ResE2[j])>2.5) cout<< "In_East" << " " << "PMT2 " << runE2[j] << " " << ResE2[j] << endl;  
       }
     }
 
@@ -623,7 +638,9 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else {
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileE2 << "PMT NOT USABLE";}
   oFileE2.close();
 
@@ -672,7 +689,8 @@ void LinearityCurves(Int_t runPeriod)
     lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
     spreadOfTanH = shiftOfTanH/3.;
 
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
 
     /*grE3->Fit("fitADC", "","",0.,maxADC+40.);
 
@@ -724,6 +742,12 @@ void LinearityCurves(Int_t runPeriod)
 	oFileE3 << "Bi2_East" << " " << runE3[j] << " " << ResE3[j] << endl;
 	if (sqrt(ResE3[j]*ResE3[j])>2.5) cout << "Bi2_East" << " " << "PMT3 " << runE3[j] << " " << ResE3[j] << endl;  
       }
+      else if (nameE3[j]=="In") {
+	ResE3[j] = 100.*(fitEQ_E3[j] - EQE3[j])/fitEQ_E3[j];
+	//ResE3[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+	oFileE3 << "In_East" << " " << runE3[j] << " " << ResE3[j] << endl;
+	if (sqrt(ResE3[j]*ResE3[j])>2.5) cout << "In_East" << " " << "PMT3 " << runE3[j] << " " << ResE3[j] << endl;  
+      }
     }
 
     // East 3 residuals
@@ -773,7 +797,9 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { 
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileE3 << "PMT NOT USABLE";}
   oFileE3.close();
 
@@ -821,7 +847,8 @@ void LinearityCurves(Int_t runPeriod)
     lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
     spreadOfTanH = shiftOfTanH/3.;
 
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
 
     /*grE4->Fit("fitADC", "","",0.,maxADC+40.);
 
@@ -873,6 +900,12 @@ void LinearityCurves(Int_t runPeriod)
 	oFileE4 << "Bi2_East" << " " << runE4[j] << " " << ResE4[j] << endl;
 	if (sqrt(ResE4[j]*ResE4[j])>2.5) cout<< "Bi2_East" << " " << "PMT4 " << runE4[j] << " " << ResE4[j] << endl;  
       }
+      else if (nameE4[j]=="In") {
+	ResE4[j] = 100.*(fitEQ_E4[j] - EQE4[j]) / fitEQ_E4[j];
+	//ResE4[j] = (fitEQ - peakBiHigh)/peakBiHigh * 100.;
+	oFileE4 << "In_East" << " " << runE4[j] << " " << ResE4[j] << endl;
+	if (sqrt(ResE4[j]*ResE4[j])>2.5) cout<< "In_East" << " " << "PMT4 " << runE4[j] << " " << ResE4[j] << endl;  
+      }
     }
 
     // East 4 residuals
@@ -922,7 +955,9 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. <<  " " << 0. << " " << 0. << " " << 0. << endl;
+  else { 
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileE4 << "PMT NOT USABLE";}
   oFileE4.close();
 
@@ -973,7 +1008,8 @@ void LinearityCurves(Int_t runPeriod)
     lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
     spreadOfTanH = shiftOfTanH/3.;
 
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
 
     /*grW1->Fit("fitADC", "","",0.,maxADC+40.);
 
@@ -1020,6 +1056,11 @@ void LinearityCurves(Int_t runPeriod)
 	ResW1[j] = 100.*(fitEQ_W1[j] - EQW1[j])/fitEQ_W1[j];
 	oFileW1 << "Bi2_West" << " " << runW1[j] << " " << ResW1[j] << endl;
 	if (sqrt(ResW1[j]*ResW1[j])>2.5) cout<< "Bi2_West" << " " << "PMT1 " << runW1[j] << " " << ResW1[j] << endl;  
+      }
+      else if (nameW1[j]=="In") {
+	ResW1[j] = 100.*(fitEQ_W1[j] - EQW1[j])/fitEQ_W1[j];
+	oFileW1 << "In_West" << " " << runW1[j] << " " << ResW1[j] << endl;
+	if (sqrt(ResW1[j]*ResW1[j])>2.5) cout<< "In_West" << " " << "PMT1 " << runW1[j] << " " << ResW1[j] << endl;  
       }
     }
 
@@ -1070,7 +1111,9 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. <<  " " << 0. << " " << 0. << " " << 0. << endl;
+  else {
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileW1 << "PMT NOT USABLE";}
   oFileW1.close();
 
@@ -1117,7 +1160,8 @@ void LinearityCurves(Int_t runPeriod)
     lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
     spreadOfTanH = shiftOfTanH/3.;
 
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
 
 
     /*grW2->Fit("fitADC", "","",0.,maxADC+40.);
@@ -1165,6 +1209,11 @@ void LinearityCurves(Int_t runPeriod)
 	ResW2[j] = 100.*(fitEQ_W2[j] - EQW2[j])/fitEQ_W2[j];
 	oFileW2 << "Bi2_West" << " " << runW2[j] << " " << ResW2[j] << endl;
 	if (sqrt(ResW2[j]*ResW2[j])>2.5) cout<< "Bi2_West" << " " << "PMT2 " << runW2[j] << " " << ResW2[j] << endl;  
+      }
+      else if (nameW2[j]=="In") {
+	ResW2[j] = 100.*(fitEQ_W2[j] - EQW2[j])/fitEQ_W2[j];
+	oFileW2 << "In_West" << " " << runW2[j] << " " << ResW2[j] << endl;
+	if (sqrt(ResW2[j]*ResW2[j])>2.5) cout<< "In_West" << " " << "PMT2 " << runW2[j] << " " << ResW2[j] << endl;  
       }
     }
 
@@ -1215,7 +1264,9 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { 
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileW2 << "PMT NOT USABLE";}
   oFileW2.close();
 
@@ -1262,7 +1313,8 @@ void LinearityCurves(Int_t runPeriod)
     lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
     spreadOfTanH = shiftOfTanH/3.;
 
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
 
 
     /*grW3->Fit("fitADC", "","",0.,maxADC+40.);
@@ -1310,6 +1362,11 @@ void LinearityCurves(Int_t runPeriod)
 	ResW3[j] = 100.*(fitEQ_W3[j] - EQW3[j])/fitEQ_W3[j];
 	oFileW3 << "Bi2_West" << " " << runW3[j] << " " << ResW3[j] << endl;
 	if (sqrt(ResW3[j]*ResW3[j])>2.5) cout<< "Bi2_West" << " " << "PMT3 " << runW3[j] << " " << ResW3[j] << endl;  
+      }
+      else if (nameW3[j]=="In") {
+	ResW3[j] = 100.*(fitEQ_W3[j] - EQW3[j])/fitEQ_W3[j];
+	oFileW3 << "In_West" << " " << runW3[j] << " " << ResW3[j] << endl;
+	if (sqrt(ResW3[j]*ResW3[j])>2.5) cout<< "In_West" << " " << "PMT3 " << runW3[j] << " " << ResW3[j] << endl;  
       }
     }
 
@@ -1360,7 +1417,9 @@ void LinearityCurves(Int_t runPeriod)
     pt1->Draw();*/
   }
 
-  else { linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+  else { 
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileW3 << "PMT NOT USABLE";}
   oFileW3.close();
 
@@ -1408,7 +1467,8 @@ void LinearityCurves(Int_t runPeriod)
     lowEnSlope = (quad*shiftOfTanH*shiftOfTanH + slope*shiftOfTanH + offset)/shiftOfTanH;
     spreadOfTanH = shiftOfTanH/3.;
 
-    linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
+    else linCurves << offset << " " << slope << " " << quad << endl;
 
     //fitADC->SetRange(0., 3500.);
     /*grW4->Fit("fitADC", "","",0.,maxADC+40.);
@@ -1458,6 +1518,11 @@ void LinearityCurves(Int_t runPeriod)
 	ResW4[j] = 100.*(fitEQ_W4[j] - EQW4[j])/fitEQ_W4[j];
 	oFileW4 << "Bi2_West" << " " << runW4[j] << " " << ResW4[j] << endl;
 	if (sqrt(ResW4[j]*ResW4[j])>2.5) cout<< "Bi2_West" << " " << "PMT4 " << runW4[j] << " " << ResW4[j] << endl;  
+      }
+      else if (nameW4[j]=="In"){
+	ResW4[j] = 100.*(fitEQ_W4[j] - EQW4[j])/fitEQ_W4[j];
+	oFileW4 << "In_West" << " " << runW4[j] << " " << ResW4[j] << endl;
+	if (sqrt(ResW4[j]*ResW4[j])>2.5) cout<< "In_West" << " " << "PMT4 " << runW4[j] << " " << ResW4[j] << endl;  
       }
     }
 
@@ -1509,7 +1574,8 @@ void LinearityCurves(Int_t runPeriod)
   }
   
   else { 
-    linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    if (useTanh) linCurves << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << " " << 0. << endl;
+    else linCurves << 0. << " " << 0. << " " << 0. << endl;
     oFileW4 << "PMT NOT USABLE";
   }
   oFileW4.close();

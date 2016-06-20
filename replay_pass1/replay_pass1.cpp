@@ -457,13 +457,18 @@ int main(int argc, char *argv[])
     if (mwpcHitEast && scintillatorHitEast) coincidenceEast = true;
     if (mwpcHitWest && scintillatorHitWest) coincidenceWest = true;
 
+
     // Event PID logic
+
+    type = -1;
+    side = -1;
+
     if (UCNMonitorTrigger) PID = 5;
     else if (LEDTrigger) PID = 3;
     else if (muonHitEast || muonHitWest) PID = 2;
     else if (bismuthPulser) PID = 4;
     else if ( (scintillatorHitEast && !mwpcHitEast && !scintillatorHitWest && !mwpcHitWest) ||
-              (!scintillatorHitEast && !mwpcHitEast && scintillatorHitWest && !mwpcHitWest) ) PID = 0;
+              (!scintillatorHitEast && !mwpcHitEast && scintillatorHitWest && !mwpcHitWest) ) { PID = 0; side = scintillatorHitEast ? 0 : 1; }
     else if ( (coincidenceEast && !scintillatorHitWest && !mwpcHitWest) ||
               (!scintillatorHitEast && !mwpcHitEast && coincidenceWest) ||
               (coincidenceEast && coincidenceWest && !scintillatorHitBothBad) ||
@@ -471,8 +476,7 @@ int main(int argc, char *argv[])
               (!scintillatorHitEast && mwpcHitEast && coincidenceWest) ) PID = 1;
     else PID = 6;
 
-    type = -1;
-    side = -1;
+    
     if (PID == 1) {
       if (coincidenceEast && !scintillatorHitWest && !mwpcHitWest) {
         type = 0;

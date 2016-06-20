@@ -198,6 +198,10 @@ void SetUpTree(TTree *tree) {
 
 void revCalSimulation (Int_t runNumber, string source) 
 {
+  bool allEvtsTrigg = true; //This just removes the use of the trigger function for an initial calibration. 
+                            // Once a calibration is established (or if running on Betas), you can keep this false
+                            
+  
   cout << "Running reverse calibration for run " << runNumber << " and source " << source << endl;
 
   //Start by getting the source position if not a Beta decay run
@@ -274,7 +278,8 @@ void revCalSimulation (Int_t runNumber, string source)
 
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
   Int_t pol = getPolarization(runNumber);
-  LinearityCurve linCurve(calibrationPeriod);
+
+  LinearityCurve linCurve(calibrationPeriod,false);
 
   //Setup the output tree
   TTree *tree = new TTree("revCalSim", "revCalSim");
@@ -445,9 +450,9 @@ void revCalSimulation (Int_t runNumber, string source)
     evis.EvisE = totalEnE;
     //std::cout << scint_pos_adj.ScintPosAdjE[0] << " " << scint_pos_adj.ScintPosAdjE[1] << " " << totalEnE << std::endl;
     Double_t triggProb = triggMap.returnTriggerProbabilityEast(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],totalEnE);//triggerProbability(triggerFunc[0],totalEnE);
-      
+    
     //Set East Scint Trigger to true if event passes triggProb
-    if (rand0->Rndm()<triggProb) { // && evis.EvisE>0.) {
+    if (rand0->Rndm()<triggProb || (allEvtsTrigg && totalEnE>0.)) { // && evis.EvisE>0.) {
       EastScintTrigger=true;
     }
       
@@ -492,7 +497,7 @@ void revCalSimulation (Int_t runNumber, string source)
     //std::cout << scint_pos_adj.ScintPosAdjW[0] << " " << scint_pos_adj.ScintPosAdjW[1] << " " << totalEnW << std::endl;
     triggProb = triggMap.returnTriggerProbabilityWest(scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1],totalEnW);//triggerProbability(triggerFunc[1],totalEnW);
     //Fill histograms if event passes trigger function
-    if (rand0->Rndm()<triggProb) { // && evis.EvisW>0.) {
+    if (rand0->Rndm()<triggProb || (allEvtsTrigg && totalEnW>0.)) { // && evis.EvisW>0.) {
       WestScintTrigger = true;      
     }
             

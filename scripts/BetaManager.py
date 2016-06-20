@@ -324,20 +324,20 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
-    if 0:
-        octet_range = [40,59]#[20,28]#[45,50]#[38,40]#[0,59];
+    if 1:
+        octet_range = [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
-            #beta.runReplayPass1(octet)
+            beta.runReplayPass1(octet)
             #beta.runGainBismuth(octet)
-            #beta.runReplayPass2(octet)
-            beta.runReplayPass3(octet)
+            beta.runReplayPass2(octet)
+            #beta.runReplayPass3(octet)
            
 
 
     #Running reverse calibrations
-    if 1:
+    if 0:
         octet_range = [50,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):

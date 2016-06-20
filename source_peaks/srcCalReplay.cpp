@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
   
 
   //Get the linearity curve
-  LinearityCurve linearityCurve(calibrationPeriod);
+  LinearityCurve linearityCurve(calibrationPeriod, false);
 
   
 
@@ -348,16 +348,16 @@ int main(int argc, char *argv[])
 
     eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
 
-
+    
     t->ScintE.e1 = eta[0]>0. ? linearityCurve.applyLinCurve(0,t->ScintE.q1) / eta[0] : 0.;
     t->ScintE.e2 = eta[1]>0. ? linearityCurve.applyLinCurve(1,t->ScintE.q2) / eta[1] : 0.;
     t->ScintE.e3 = eta[2]>0. ? linearityCurve.applyLinCurve(2,t->ScintE.q3) / eta[2] : 0.;
     t->ScintE.e4 = eta[3]>0. ? linearityCurve.applyLinCurve(3,t->ScintE.q4) / eta[3] : 0.;
     
-    t->ScintE.nPE1 = t->ScintE.e1 > 0. ? t->ScintE.e1 * alpha[0] : 0.;
-    t->ScintE.nPE2 = t->ScintE.e2 > 0. ? t->ScintE.e2 * alpha[1] : 0.;
-    t->ScintE.nPE3 = t->ScintE.e3 > 0. ? t->ScintE.e3 * alpha[2] : 0.;
-    t->ScintE.nPE4 = t->ScintE.e4 > 0. ? t->ScintE.e4 * alpha[3] : 0.;
+    t->ScintE.nPE1 = eta[0] > 0. ? t->ScintE.e1 * eta[0] * alpha[0] : 0.;
+    t->ScintE.nPE2 = eta[1] > 0. ? t->ScintE.e2 * eta[1] * alpha[1] : 0.;
+    t->ScintE.nPE3 = eta[2] > 0. ? t->ScintE.e3 * eta[2] * alpha[2] : 0.;
+    t->ScintE.nPE4 = eta[3] > 0. ? t->ScintE.e4 * eta[3] * alpha[3] : 0.;
     
     t->ScintE.de1 = t->ScintE.nPE1 > 0. ? t->ScintE.e1/sqrt(t->ScintE.nPE1) : 0.;
     t->ScintE.de2 = t->ScintE.nPE2 > 0. ? t->ScintE.e2/sqrt(t->ScintE.nPE2) : 0.;
@@ -370,49 +370,15 @@ int main(int argc, char *argv[])
     t->ScintW.e3 = eta[6]>0. ? linearityCurve.applyLinCurve(6,t->ScintW.q3) / eta[6] : 0.;
     t->ScintW.e4 = eta[7]>0. ? linearityCurve.applyLinCurve(7,t->ScintW.q4) / eta[7] : 0.;
     
-    t->ScintW.nPE1 = t->ScintW.e1 > 0. ? t->ScintW.e1 * alpha[4] : 0.;
-    t->ScintW.nPE2 = t->ScintW.e2 > 0. ? t->ScintW.e2 * alpha[5] : 0.;
-    t->ScintW.nPE3 = t->ScintW.e3 > 0. ? t->ScintW.e3 * alpha[6] : 0.;
-    t->ScintW.nPE4 = t->ScintW.e4 > 0. ? t->ScintW.e4 * alpha[7] : 0.;
+    t->ScintW.nPE1 = eta[4] > 0. ? t->ScintW.e1 * eta[4] * alpha[4] : 0.;
+    t->ScintW.nPE2 = eta[5] > 0. ? t->ScintW.e2 * eta[5] * alpha[5] : 0.;
+    t->ScintW.nPE3 = eta[6] > 0. ? t->ScintW.e3 * eta[6] * alpha[6] : 0.;
+    t->ScintW.nPE4 = eta[7] > 0. ? t->ScintW.e4 * eta[7] * alpha[7] : 0.;
     
     t->ScintW.de1 = t->ScintW.nPE1 > 0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
     t->ScintW.de2 = t->ScintW.nPE2 > 0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
     t->ScintW.de3 = t->ScintW.nPE3 > 0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
     t->ScintW.de4 = t->ScintW.nPE4 > 0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
-
-    /*//if (intEastBinX > -1 && intEastBinY > -1) { 
-    t->ScintE.e1 = eta[0]>0. ? linearityCurve.applyLinCurve(0,t->ScintE.q1) / eta[0] : 0.;
-    t->ScintE.e2 = eta[1]>0. ? linearityCurve.applyLinCurve(1,t->ScintE.q2) / eta[1] : 0.;
-    t->ScintE.e3 = eta[2]>0. ? linearityCurve.applyLinCurve(2,t->ScintE.q3) / eta[2] : 0.;
-    t->ScintE.e4 = eta[3]>0. ? linearityCurve.applyLinCurve(3,t->ScintE.q4) / eta[3] : 0.;
-    
-    t->ScintE.nPE1 = eta[0]>0. ? linearityCurve.applyLinCurve(0,t->ScintE.q1) * alpha[0] : 0.;
-    t->ScintE.nPE2 = eta[1]>0. ? linearityCurve.applyLinCurve(1,t->ScintE.q2) * alpha[1] : 0.;
-    t->ScintE.nPE3 = eta[2]>0. ? linearityCurve.applyLinCurve(2,t->ScintE.q3) * alpha[2] : 0.;
-    t->ScintE.nPE4 = eta[3]>0. ? linearityCurve.applyLinCurve(3,t->ScintE.q4) * alpha[3] : 0.;
-    
-    t->ScintE.de1 = eta[0]>0. ? t->ScintE.e1/sqrt(t->ScintE.nPE1) : 0.;
-    t->ScintE.de2 = eta[1]>0. ? t->ScintE.e2/sqrt(t->ScintE.nPE2) : 0.;
-    t->ScintE.de3 = eta[2]>0. ? t->ScintE.e3/sqrt(t->ScintE.nPE3) : 0.;
-    t->ScintE.de4 = eta[3]>0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
-    
-    
-    
-    t->ScintW.e1 = eta[4]>0. ? linearityCurve.applyLinCurve(4,t->ScintW.q1) / eta[4] : 0.;
-    t->ScintW.e2 = eta[5]>0. ? linearityCurve.applyLinCurve(5,t->ScintW.q2) / eta[5] : 0.;
-    t->ScintW.e3 = eta[6]>0. ? linearityCurve.applyLinCurve(6,t->ScintW.q3) / eta[6] : 0.;
-    t->ScintW.e4 = eta[7]>0. ? linearityCurve.applyLinCurve(7,t->ScintW.q4) / eta[7] : 0.;
-    
-    t->ScintW.nPE1 = eta[4]>0. ? linearityCurve.applyLinCurve(4,t->ScintW.q1) * alpha[4] : 0.;
-    t->ScintW.nPE2 = eta[5]>0. ? linearityCurve.applyLinCurve(5,t->ScintW.q2) * alpha[5] : 0.;
-    t->ScintW.nPE3 = eta[6]>0. ? linearityCurve.applyLinCurve(6,t->ScintW.q3) * alpha[6] : 0.;
-    t->ScintW.nPE4 = eta[7]>0. ? linearityCurve.applyLinCurve(7,t->ScintW.q4) * alpha[7] : 0.;
-    
-    t->ScintW.de1 = eta[4]>0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
-    t->ScintW.de2 = eta[5]>0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
-    t->ScintW.de3 = eta[6]>0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
-    t->ScintW.de4 = eta[7]>0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;*/
-    
     
     //Calculate the weighted energy on a side
     
@@ -459,7 +425,7 @@ int main(int argc, char *argv[])
     ///////////////////////////////////////////////////////////////////////////
     // Now for filling the individual peak histograms using only type 0 events
     //////////////////////////////////////////////////////////////////////////
-    if (t->Type != 0 || t->PID!=1 || t->Erecon<0.) continue;
+    if (t->Type != 0 || t->PID!=1) continue;
 
     if (useSource[0]) {
       
@@ -474,7 +440,7 @@ int main(int argc, char *argv[])
 	  aveEta[0][2] += eta[2];
 	  aveEta[0][3] += eta[3];
 
-	  hisEreconTot[0][0]->Fill(t->Erecon);
+	  if (t->Erecon>=0.) hisEreconTot[0][0]->Fill(t->Erecon);
 	  hisEvisTot[0][0]->Fill(t->EvisE);
 
 	  hisEvis[0][0]->Fill(t->ScintE.e1);
@@ -496,7 +462,7 @@ int main(int argc, char *argv[])
 	  aveEta[0][6] += eta[6];
 	  aveEta[0][7] += eta[7];
 	  
-	  hisEreconTot[0][1]->Fill(t->Erecon);
+	  if (t->Erecon>=0.) hisEreconTot[0][1]->Fill(t->Erecon);
 	  hisEvisTot[0][1]->Fill(t->EvisW);
 
 	  hisEvis[0][4]->Fill(t->ScintW.e1);
@@ -524,7 +490,7 @@ int main(int argc, char *argv[])
 	  aveEta[1][2] += eta[2];
 	  aveEta[1][3] += eta[3];
 
-	  hisEreconTot[1][0]->Fill(t->Erecon);
+	  if (t->Erecon>=0.) hisEreconTot[1][0]->Fill(t->Erecon);
 	  hisEvisTot[1][0]->Fill(t->EvisE);
 
 	  hisEvis[1][0]->Fill(t->ScintE.e1);
@@ -545,7 +511,7 @@ int main(int argc, char *argv[])
 	  aveEta[1][6] += eta[6];
 	  aveEta[1][7] += eta[7];
 	 
-	  hisEreconTot[1][1]->Fill(t->Erecon);
+	  if (t->Erecon>=0.) hisEreconTot[1][1]->Fill(t->Erecon);
 	  hisEvisTot[1][1]->Fill(t->EvisW);
 
 	  hisEvis[1][4]->Fill(t->ScintW.e1);
@@ -571,7 +537,7 @@ int main(int argc, char *argv[])
 	  aveEta[2][2] += eta[2];
 	  aveEta[2][3] += eta[3];
 	  
-	  hisEreconTot[2][0]->Fill(t->Erecon);
+	  if (t->Erecon>=0.) hisEreconTot[2][0]->Fill(t->Erecon);
 	  hisEvisTot[2][0]->Fill(t->EvisE);
 
 	  hisEvis[2][0]->Fill(t->ScintE.e1);
@@ -591,7 +557,7 @@ int main(int argc, char *argv[])
 	  aveEta[2][6] += eta[6];
 	  aveEta[2][7] += eta[7];
 	   
-	  hisEreconTot[2][1]->Fill(t->Erecon);
+	  if (t->Erecon>=0.) hisEreconTot[2][1]->Fill(t->Erecon);
 	  hisEvisTot[2][1]->Fill(t->EvisW);
 
 	  hisEvis[2][4]->Fill(t->ScintW.e1);
@@ -618,25 +584,22 @@ int main(int argc, char *argv[])
     for (int src=0; src<3; src++) {
       for (int pmt=0; pmt<8; pmt++) {
 	
-	aveEta[src][pmt] = pmt<4 ? aveEta[src][pmt]/(double)numDataPoints[src][0] : aveEta[src][pmt]/(double)numDataPoints[src][1];
+	aveEta[src][pmt] = useSource[src] ? (pmt<4 ? aveEta[src][pmt]/(double)numDataPoints[src][0] : aveEta[src][pmt]/(double)numDataPoints[src][1]) : 0.;
 	
       }
     }
 
-    for (int n=0; n<nSources; n++) {
-      if (useSource[n]) {
-	//if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
-	meanEtaVals << runNumber << " "
-		    << sourceName[n] << " "
-		    << aveEta[n][0] << " "
-		    << aveEta[n][1] << " "
-		    << aveEta[n][2] << " "
-		    << aveEta[n][3] << " "
-		    << aveEta[n][4] << " "
-		    << aveEta[n][5] << " "
-		    << aveEta[n][6] << " "
-		    << aveEta[n][7] << endl;
-      }
+    for (int n=0; n<3; n++) {
+      meanEtaVals << runNumber << " "
+		  << sourceName[n] << " "
+		  << aveEta[n][0] << " "
+		  << aveEta[n][1] << " "
+		  << aveEta[n][2] << " "
+		  << aveEta[n][3] << " "
+		  << aveEta[n][4] << " "
+		  << aveEta[n][5] << " "
+		  << aveEta[n][6] << " "
+		  << aveEta[n][7] << endl;
     }
     meanEtaVals.close();
   }
@@ -715,6 +678,8 @@ int main(int argc, char *argv[])
 
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << ". Trying one more time......" << endl;
+	    sing.SetRangeMin(xLow[n][j]);
+	    sing.SetRangeMax(xHigh[n][j]);
 	    sing.FitHist(maxBin[n][j], 40., hisEvis[n][j]->GetBinContent(maxBin[n][j]));
 
 	    if (sing.isGoodFit()) { 
@@ -742,6 +707,8 @@ int main(int argc, char *argv[])
 
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << ". Trying one more time......" << endl;
+	    doub.SetRangeMin(xLow[n][j]);
+	    doub.SetRangeMax(xHigh[n][j]);
 	    doub.FitHist(maxBin[n][j], 40., hisEvis[n][j]->GetBinContent(maxBin[n][j]), 0.5*maxBin[n][j], 40., 0.5*hisEvis[n][j]->GetBinContent(maxBin[n][j]));
 
 	    if (doub.isGoodFit()) {
@@ -891,6 +858,8 @@ int main(int argc, char *argv[])
 	  
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EvisTot peak.... Trying one more time......" << endl;
+	    sing.SetRangeMin(xLowEvisTot[n][j]);
+	    sing.SetRangeMax(xHighEvisTot[n][j]);
 	    sing.FitHist(maxBinEvisTot[n][j], 40., hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
 	    
 	    if (sing.isGoodFit()) { 
@@ -906,8 +875,8 @@ int main(int argc, char *argv[])
 	  
 	  
 	  //DoublePeakHist doub(hisEvisTot[n][j], xLowEvisTot[n][j], xHighEvisTot[n][j]);
-	  SinglePeakHist singBi1(hisEvisTot[n][j], 750., xHighEvisTot[n][j]);
-	  SinglePeakHist singBi2(hisEvisTot[n][j], 300., 600.);
+	  SinglePeakHist singBi1(hisEvisTot[n][j], 800., xHighEvisTot[n][j]);
+	  SinglePeakHist singBi2(hisEvisTot[n][j], 340., 530.);
 	  
 	  if (singBi1.isGoodFit()) {	    
 	    fitMeanEvisTot[n][j] = singBi1.ReturnMean();	 
@@ -915,7 +884,9 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EvisTot peak.... Trying one more time......" << endl;
-	    singBi1.FitHist(900., 40., hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
+	    singBi1.SetRangeMin(775.);
+	    singBi1.SetRangeMax(xHighEvisTot[n][j]);
+	    singBi1.FitHist(910., 40., hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
 	    
 	    if (singBi1.isGoodFit()) {
 	      fitMeanEvisTot[n][j] = singBi1.ReturnMean();
@@ -932,7 +903,9 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EvisTot peak.... Trying one more time......" << endl;
-	    singBi2.FitHist(440., 40., 0.4*hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
+	    singBi2.SetRangeMin(340.);
+	    singBi2.SetRangeMax(530.);
+	    singBi2.FitHist(430., 40., 0.4*hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
 	    
 	    if (singBi2.isGoodFit()) {
 	      lowBiFitMeanEvisTot[j] = singBi2.ReturnMean();
@@ -1050,6 +1023,8 @@ int main(int argc, char *argv[])
 	  
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EreconTot peak.... Trying one more time......" << endl;
+	    sing.SetRangeMin(xLowEreconTot[n][j]);
+	    sing.SetRangeMax(xHighEreconTot[n][j]);
 	    sing.FitHist(maxBinEreconTot[n][j], 40., hisEreconTot[n][j]->GetBinContent(maxBinEreconTot[n][j]));
 	    
 	    if (sing.isGoodFit()) { 
@@ -1065,8 +1040,8 @@ int main(int argc, char *argv[])
 	  
 	  
 	  //DoublePeakHist doub(hisEreconTot[n][j], xLowEreconTot[n][j], xHighEreconTot[n][j]);
-	  SinglePeakHist singBi1(hisEreconTot[n][j], 800., xHighEreconTot[n][j]);
-	  SinglePeakHist singBi2(hisEreconTot[n][j], 350., 600.);
+	  SinglePeakHist singBi1(hisEreconTot[n][j], 850., xHighEreconTot[n][j]);
+	  SinglePeakHist singBi2(hisEreconTot[n][j], 390., 580.);
 	  
 	  if (singBi1.isGoodFit()) {	    
 	    fitMeanEreconTot[n][j] = singBi1.ReturnMean();	 
@@ -1074,6 +1049,8 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EreconTot peak.... Trying one more time......" << endl;
+	    singBi1.SetRangeMin(850.);
+	    singBi1.SetRangeMax(990.);
 	    singBi1.FitHist(960., 40., hisEreconTot[n][j]->GetBinContent(maxBinEreconTot[n][j]));
 	    
 	    if (singBi1.isGoodFit()) {
@@ -1091,6 +1068,8 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EreconTot peak.... Trying one more time......" << endl;
+	    singBi2.SetRangeMin(390.);
+	    singBi2.SetRangeMax(580.);
 	    singBi2.FitHist(480., 40., 0.4*hisEreconTot[n][j]->GetBinContent(maxBinEreconTot[n][j]));
 	    
 	    if (singBi2.isGoodFit()) {

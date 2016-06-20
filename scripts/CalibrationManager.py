@@ -929,52 +929,54 @@ if __name__ == "__main__":
             cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)
 
     ### Source Run Calibration Steps...
-    if 0: 
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods = [2]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 1 # number of times to run through the calibration
+        iterations = 2 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
             for runPeriod in runPeriods:
-                
-                # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                #cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
-                cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
 
                 # Data Stuff
-                #cal.runSourceCalReplayPeakFitter(runPeriod);
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
+                cal.runSourceCalReplayPeakFitter(runPeriod);
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
 
                 #Simulation Stuff
-                #rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
-                #cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
+                rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
+                cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
                 
-                #cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
+                cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
+
+
+                # Calculate new linearity curves and nPE/keV values from previous iterations peaks
+                if 1:
+                    cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
+                    #cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
-            ##cal.makeGlobalResiduals(runPeriods) # gathers all the residual data to be plotted separately
+        #cal.makeGlobalResiduals(runPeriods) # gathers all the residual data to be plotted separately
 
 
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 1: 
-        runPeriods = [7]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+    if 0: 
+        runPeriods = [2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
-            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.findPedestals(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             

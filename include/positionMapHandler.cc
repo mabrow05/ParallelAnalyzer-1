@@ -10,7 +10,7 @@
 
 
 
-PositionMap::PositionMap(Double_t bin_width) : binWidth(bin_width) {
+PositionMap::PositionMap(Double_t bin_width, Double_t r_max) : binWidth(bin_width), rmax(r_max) {
   
   Int_t nBinsHold = (int)(110./binWidth);
   nBinsXY = ((int)nBinsHold%2)==0 ? (int)nBinsHold+1 : (int)nBinsHold;
@@ -79,14 +79,10 @@ void PositionMap::setPositionMapPoint(Int_t xBin, Int_t yBin, std::vector <Doubl
 std::vector <Double_t> PositionMap::getInterpolatedEta(Double_t xE, Double_t yE, Double_t xW, Double_t yW) {
 
   std::vector <Double_t> val(8, 0.);
-  //Int_t xBinE = getBinNumber(xE);
-  //Int_t yBinE = getBinNumber(yE);
-  //Int_t xBinW = getBinNumber(xW);
-  //Int_t yBinW = getBinNumber(yW);
-
-  Double_t rmax = 50.;//getBinUpper(getBinNumber(45.));
   
   if (xE*xE+yE*yE >= rmax*rmax) {
+
+    //First we go to a point at the same angle on the position map, only with radius = 50. mm
     Double_t tanTheta = TMath::Abs(xE)>1.e-5 ? TMath::Abs(yE)/TMath::Abs(xE) : 1.;
     
     Double_t x = TMath::Abs(xE)>1.e-5 ? (xE>0. ? rmax/TMath::Sqrt(tanTheta*tanTheta+1.) : -rmax/TMath::Sqrt(tanTheta*tanTheta+1.)) : 0.;
@@ -100,6 +96,7 @@ std::vector <Double_t> PositionMap::getInterpolatedEta(Double_t xE, Double_t yE,
     Double_t xp = (x-getBinCenter(xBin))/binWidth;
     Double_t yp = (y-getBinCenter(yBin))/binWidth; 
 
+    // if we lie directly on the center of a bin, use only one bin to the left/down if val is neg. in interpolation (Shift bins)
     if (xp==1. && x<0.) {xp=0.; xBin+=1;}
     if (yp==1. && y<0.) {yp=0.; yBin+=1;}
 

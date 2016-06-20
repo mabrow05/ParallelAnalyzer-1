@@ -80,7 +80,7 @@ string getIndiumSide(int runNumber) {
     //cout << "Connected to DB Server\n";
     TSQLResult *res = db->Query(cmd);
     int rows = res->GetRowCount();
-    cout << rows << endl;
+    //cout << rows << endl;
     TSQLRow *row = res->Next();
    
     if (!row) {

@@ -5,7 +5,7 @@ class PositionMap {
 
 public:
 
-  PositionMap(Double_t bin_width); //Constructor
+  PositionMap(Double_t bin_width, Double_t r_max=50.); //Constructor
   ~PositionMap();
 
   void readPositionMap(Int_t XeRunPeriod); //Read in a trigger map
@@ -29,6 +29,7 @@ private:
   void setBinValues();
 
   Double_t binWidth; //x and y width of position bins
+  Double_t rmax; //Maximum r where an interpolation can faithfully be constructed
   Int_t nBinsXY, nBinsTotal;
   Int_t XePeriod;
   std::vector <Double_t> xyBinLower;

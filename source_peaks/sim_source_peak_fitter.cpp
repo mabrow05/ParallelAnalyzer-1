@@ -48,6 +48,7 @@ vector < vector < Double_t > > getMeanEtaForSources(Int_t run)
 
   while (infile >> rn >> name >> eta[i][0] >> eta[i][1] >> eta[i][2] >> eta[i][3] >> eta[i][4] >> eta[i][5] >> eta[i][6] >> eta[i][7] ) {
     //if (name==src) break;
+    //std::cout << eta[i][0] << eta[i][1] << eta[i][2] << eta[i][3] << eta[i][4] << eta[i][5] << eta[i][6] << eta[i][7] << std::endl;
     i++;
   }
   //if (name!=src) {std::cout << "Didn't find " << src << " in this run!\n"; exit(0);}
@@ -140,52 +141,53 @@ int main(int argc, char *argv[])
 
   //Set up all the output histograms
 
-  Int_t nBin = 300;
+  Int_t nBin = 600;
   TH1D *hisEvisTot[3][2];
-  hisEvisTot[0][0] = new TH1D("hisEvis1E", "source1 East", nBin,0.0,1200.0);
-  hisEvisTot[0][1] = new TH1D("hisEvis1W", "source1 West", nBin,0.0,1200.0);
-  hisEvisTot[1][0] = new TH1D("hisEvis2E", "source2 East", nBin,0.0,1200.0);
-  hisEvisTot[1][1] = new TH1D("hisEvis2W", "source2 West", nBin,0.0,1200.0);
-  hisEvisTot[2][0] = new TH1D("hisEvis3E", "source3 East", nBin,0.0,1200.0);
-  hisEvisTot[2][1] = new TH1D("hisEvis3W", "source3 West", nBin,0.0,1200.0);
+  hisEvisTot[0][0] = new TH1D("hisEvis1E", "source1 East", nBin,-50.0,2400.0);
+  hisEvisTot[0][1] = new TH1D("hisEvis1W", "source1 West", nBin,-50.0,2400.0);
+  hisEvisTot[1][0] = new TH1D("hisEvis2E", "source2 East", nBin,-50.0,2400.0);
+  hisEvisTot[1][1] = new TH1D("hisEvis2W", "source2 West", nBin,-50.0,2400.0);
+  hisEvisTot[2][0] = new TH1D("hisEvis3E", "source3 East", nBin,-50.0,2400.0);
+  hisEvisTot[2][1] = new TH1D("hisEvis3W", "source3 West", nBin,-50.0,2400.0);
 
   TH1D *hisEvis[3][8];
-  hisEvis[0][0] = new TH1D("hisEvis1_E0", "", nBin,0.0,1200.0);
-  hisEvis[0][1] = new TH1D("hisEvis1_E1", "", nBin,0.0,1200.0);
-  hisEvis[0][2] = new TH1D("hisEvis1_E2", "", nBin,0.0,1200.0);
-  hisEvis[0][3] = new TH1D("hisEvis1_E3", "", nBin,0.0,1200.0);
-  hisEvis[0][4] = new TH1D("hisEvis1_W0", "", nBin,0.0,1200.0);
-  hisEvis[0][5] = new TH1D("hisEvis1_W1", "", nBin,0.0,1200.0);
-  hisEvis[0][6] = new TH1D("hisEvis1_W2", "", nBin,0.0,1200.0);
-  hisEvis[0][7] = new TH1D("hisEvis1_W3", "", nBin,0.0,1200.0);
+  hisEvis[0][0] = new TH1D("hisEvis1_E0", "", nBin,-50.0,2400.0);
+  hisEvis[0][1] = new TH1D("hisEvis1_E1", "", nBin,-50.0,2400.0);
+  hisEvis[0][2] = new TH1D("hisEvis1_E2", "", nBin,-50.0,2400.0);
+  hisEvis[0][3] = new TH1D("hisEvis1_E3", "", nBin,-50.0,2400.0);
+  hisEvis[0][4] = new TH1D("hisEvis1_W0", "", nBin,-50.0,2400.0);
+  hisEvis[0][5] = new TH1D("hisEvis1_W1", "", nBin,-50.0,2400.0);
+  hisEvis[0][6] = new TH1D("hisEvis1_W2", "", nBin,-50.0,2400.0);
+  hisEvis[0][7] = new TH1D("hisEvis1_W3", "", nBin,-50.0,2400.0);
 
-  hisEvis[1][0] = new TH1D("hisEvis2_E0", "", nBin,0.0,1200.0);
-  hisEvis[1][1] = new TH1D("hisEvis2_E1", "", nBin,0.0,1200.0);
-  hisEvis[1][2] = new TH1D("hisEvis2_E2", "", nBin,0.0,1200.0);
-  hisEvis[1][3] = new TH1D("hisEvis2_E3", "", nBin,0.0,1200.0);
-  hisEvis[1][4] = new TH1D("hisEvis2_W0", "", nBin,0.0,1200.0);
-  hisEvis[1][5] = new TH1D("hisEvis2_W1", "", nBin,0.0,1200.0);
-  hisEvis[1][6] = new TH1D("hisEvis2_W2", "", nBin,0.0,1200.0);
-  hisEvis[1][7] = new TH1D("hisEvis2_W3", "", nBin,0.0,1200.0);
+  hisEvis[1][0] = new TH1D("hisEvis2_E0", "", nBin,-50.0,2400.0);
+  hisEvis[1][1] = new TH1D("hisEvis2_E1", "", nBin,-50.0,2400.0);
+  hisEvis[1][2] = new TH1D("hisEvis2_E2", "", nBin,-50.0,2400.0);
+  hisEvis[1][3] = new TH1D("hisEvis2_E3", "", nBin,-50.0,2400.0);
+  hisEvis[1][4] = new TH1D("hisEvis2_W0", "", nBin,-50.0,2400.0);
+  hisEvis[1][5] = new TH1D("hisEvis2_W1", "", nBin,-50.0,2400.0);
+  hisEvis[1][6] = new TH1D("hisEvis2_W2", "", nBin,-50.0,2400.0);
+  hisEvis[1][7] = new TH1D("hisEvis2_W3", "", nBin,-50.0,2400.0);
 
-  hisEvis[2][0] = new TH1D("hisEvis3_E0", "", nBin,0.0,1200.0);
-  hisEvis[2][1] = new TH1D("hisEvis3_E1", "", nBin,0.0,1200.0);
-  hisEvis[2][2] = new TH1D("hisEvis3_E2", "", nBin,0.0,1200.0);
-  hisEvis[2][3] = new TH1D("hisEvis3_E3", "", nBin,0.0,1200.0);
-  hisEvis[2][4] = new TH1D("hisEvis3_W0", "", nBin,0.0,1200.0);
-  hisEvis[2][5] = new TH1D("hisEvis3_W1", "", nBin,0.0,1200.0);
-  hisEvis[2][6] = new TH1D("hisEvis3_W2", "", nBin,0.0,1200.0);
-  hisEvis[2][7] = new TH1D("hisEvis3_W3", "", nBin,0.0,1200.0);
+  hisEvis[2][0] = new TH1D("hisEvis3_E0", "", nBin,-50.0,2400.0);
+  hisEvis[2][1] = new TH1D("hisEvis3_E1", "", nBin,-50.0,2400.0);
+  hisEvis[2][2] = new TH1D("hisEvis3_E2", "", nBin,-50.0,2400.0);
+  hisEvis[2][3] = new TH1D("hisEvis3_E3", "", nBin,-50.0,2400.0);
+  hisEvis[2][4] = new TH1D("hisEvis3_W0", "", nBin,-50.0,2400.0);
+  hisEvis[2][5] = new TH1D("hisEvis3_W1", "", nBin,-50.0,2400.0);
+  hisEvis[2][6] = new TH1D("hisEvis3_W2", "", nBin,-50.0,2400.0);
+  hisEvis[2][7] = new TH1D("hisEvis3_W3", "", nBin,-50.0,2400.0);
   
 
   TH1D *hisEreconTot[3][2];
-  hisEreconTot[0][0] = new TH1D("hisErecon1E", "source1 East", nBin,0.0,1200.0);
-  hisEreconTot[0][1] = new TH1D("hisErecon1W", "source1 West", nBin,0.0,1200.0);
-  hisEreconTot[1][0] = new TH1D("hisErecon2E", "source2 East", nBin,0.0,1200.0);
-  hisEreconTot[1][1] = new TH1D("hisErecon2W", "source2 West", nBin,0.0,1200.0);
-  hisEreconTot[2][0] = new TH1D("hisErecon3E", "source3 East", nBin,0.0,1200.0);
-  hisEreconTot[2][1] = new TH1D("hisErecon3W", "source3 West", nBin,0.0,1200.0);
+  hisEreconTot[0][0] = new TH1D("hisErecon1E", "source1 East", nBin,0.0,2400.0);
+  hisEreconTot[0][1] = new TH1D("hisErecon1W", "source1 West", nBin,0.0,2400.0);
+  hisEreconTot[1][0] = new TH1D("hisErecon2E", "source2 East", nBin,0.0,2400.0);
+  hisEreconTot[1][1] = new TH1D("hisErecon2W", "source2 West", nBin,0.0,2400.0);
+  hisEreconTot[2][0] = new TH1D("hisErecon3E", "source3 East", nBin,0.0,2400.0);
+  hisEreconTot[2][1] = new TH1D("hisErecon3W", "source3 West", nBin,0.0,2400.0);
 
+  
 
   // Load calibration info
   PositionMap posmap(5.0);
@@ -241,7 +243,7 @@ int main(int argc, char *argv[])
 	aveEta[src][2] += eta[2];
 	aveEta[src][3] += eta[3];
 	
-	hisEreconTot[src][0]->Fill(Erecon);
+	if (Erecon>=0.) hisEreconTot[src][0]->Fill(Erecon);
 	hisEvisTot[src][0]->Fill(Evis[0]);
 	
 	for (int p=0; p<4; p++) {
@@ -257,7 +259,7 @@ int main(int argc, char *argv[])
 	aveEta[src][6] += eta[6];
 	aveEta[src][7] += eta[7];
 	
-	hisEreconTot[src][1]->Fill(Erecon);
+	if (Erecon>=0.) hisEreconTot[src][1]->Fill(Erecon);
 	hisEvisTot[src][1]->Fill(Evis[1]);
 	
 	for (int p=4; p<8; p++) {
@@ -352,6 +354,8 @@ int main(int argc, char *argv[])
 
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << ". Trying one more time......" << endl;
+	    sing.SetRangeMin(xLow[n][j]);
+	    sing.SetRangeMax(xHigh[n][j]);
 	    sing.FitHist(maxBin[n][j], 40., hisEvis[n][j]->GetBinContent(maxBin[n][j]));
 
 	    if (sing.isGoodFit()) { 
@@ -378,6 +382,8 @@ int main(int argc, char *argv[])
 
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " peak in PMT " << j << ". Trying one more time......" << endl;
+	    doub.SetRangeMin(xLow[n][j]);
+	    doub.SetRangeMax(xHigh[n][j]);
 	    doub.FitHist(maxBin[n][j], 40., hisEvis[n][j]->GetBinContent(maxBin[n][j]), 0.5*maxBin[n][j], 40., 0.5*hisEvis[n][j]->GetBinContent(maxBin[n][j]));
 
 	    if (doub.isGoodFit()) {
@@ -527,6 +533,8 @@ int main(int argc, char *argv[])
 	  
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EvisTot peak.... Trying one more time......" << endl;
+	    sing.SetRangeMin(xLowEvisTot[n][j]);
+	    sing.SetRangeMax(xHighEvisTot[n][j]);
 	    sing.FitHist(maxBinEvisTot[n][j], 40., hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
 	    
 	    if (sing.isGoodFit()) { 
@@ -542,8 +550,8 @@ int main(int argc, char *argv[])
 	  
 	  
 	  //DoublePeakHist doub(hisEvisTot[n][j], xLowEvisTot[n][j], xHighEvisTot[n][j]);
-	  SinglePeakHist singBi1(hisEvisTot[n][j], 750., xHighEvisTot[n][j]);
-	  SinglePeakHist singBi2(hisEvisTot[n][j], 300., 600.);
+	  SinglePeakHist singBi1(hisEvisTot[n][j], 800., xHighEvisTot[n][j]);
+	  SinglePeakHist singBi2(hisEvisTot[n][j], 340., 530.);
 	  
 	  if (singBi1.isGoodFit()) {	    
 	    fitMeanEvisTot[n][j] = singBi1.ReturnMean();	 
@@ -551,7 +559,9 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EvisTot peak.... Trying one more time......" << endl;
-	    singBi1.FitHist(900., 40., hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
+	    singBi1.SetRangeMin(775.);
+	    singBi1.SetRangeMax(xHighEvisTot[n][j]);
+	    singBi1.FitHist(910., 40., hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
 	    
 	    if (singBi1.isGoodFit()) {
 	      fitMeanEvisTot[n][j] = singBi1.ReturnMean();
@@ -568,6 +578,8 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EvisTot peak.... Trying one more time......" << endl;
+	    singBi2.SetRangeMin(330.);
+	    singBi2.SetRangeMax(530.);
 	    singBi2.FitHist(440., 40., 0.4*hisEvisTot[n][j]->GetBinContent(maxBinEvisTot[n][j]));
 	    
 	    if (singBi2.isGoodFit()) {
@@ -686,6 +698,8 @@ int main(int argc, char *argv[])
 	  
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EreconTot peak.... Trying one more time......" << endl;
+	    sing.SetRangeMin(xLowEreconTot[n][j]);
+	    sing.SetRangeMax(xHighEreconTot[n][j]);
 	    sing.FitHist(maxBinEreconTot[n][j], 40., hisEreconTot[n][j]->GetBinContent(maxBinEreconTot[n][j]));
 	    
 	    if (sing.isGoodFit()) { 
@@ -701,8 +715,8 @@ int main(int argc, char *argv[])
 	  
 	  
 	  //DoublePeakHist doub(hisEreconTot[n][j], xLowEreconTot[n][j], xHighEreconTot[n][j]);
-	  SinglePeakHist singBi1(hisEreconTot[n][j], 800., xHighEreconTot[n][j]);
-	  SinglePeakHist singBi2(hisEreconTot[n][j], 350., 600.);
+	  SinglePeakHist singBi1(hisEreconTot[n][j], 850., xHighEreconTot[n][j]);
+	  SinglePeakHist singBi2(hisEreconTot[n][j], 390., 580.);
 	  
 	  if (singBi1.isGoodFit()) {	    
 	    fitMeanEreconTot[n][j] = singBi1.ReturnMean();	 
@@ -710,6 +724,8 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EreconTot peak.... Trying one more time......" << endl;
+	    singBi1.SetRangeMin(850.);
+	    singBi1.SetRangeMax(990.);
 	    singBi1.FitHist(960., 40., hisEreconTot[n][j]->GetBinContent(maxBinEreconTot[n][j]));
 	    
 	    if (singBi1.isGoodFit()) {
@@ -727,7 +743,9 @@ int main(int argc, char *argv[])
 	  }
 	  else  {
 	    cout << "Run " << runNumber << " can't converge on " << sourceName[n] << " EreconTot peak.... Trying one more time......" << endl;
-	    singBi2.FitHist(480., 40., 0.4*hisEreconTot[n][j]->GetBinContent(maxBinEreconTot[n][j]));
+	    singBi2.SetRangeMin(390.);
+	    singBi2.SetRangeMax(580.);
+	    singBi2.FitHist(490., 40., 0.4*hisEreconTot[n][j]->GetBinContent(maxBinEreconTot[n][j]));
 	    
 	    if (singBi2.isGoodFit()) {
 	      lowBiFitMeanEreconTot[j] = singBi2.ReturnMean();

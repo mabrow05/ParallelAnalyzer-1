@@ -2,9 +2,9 @@
 
 import os
 
-calibrationName = "BestCal"
+calibrationName = "06172016_bestFirstIteration_Evis_0keV_trigger"
 year = "2011-2012" #"2011-2012" or "2012-2013"
-calibrationName = "BestCal"+"_"+year
+calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"
 
 os.system("mkdir -p %s"%(location))

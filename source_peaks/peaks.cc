@@ -16,7 +16,7 @@ SinglePeakHist::SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, b
     Int_t it = 0;
     while (it<iters) {
       FitHist(mean, sigma, scale);
-      if (goodFit) break;
+      if (goodFit && it > 1) break;
       it++;
     }
     
@@ -89,7 +89,7 @@ DoublePeakHist::DoublePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, b
     Int_t it = 0;
     while (it<iters) {
       FitHist(mean1, sigma1, scale1, mean2, sigma2, scale2);
-      if (goodFit) break;
+      if (goodFit && it>1) break;
       it++;
     }
     
@@ -141,13 +141,13 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     scale2 = scale2Check;
     mean2 = mean2Check;
     sigma2 = sigma2Check;
-    min = mean2-sigma2;
+    min = mean2-1.5*sigma2;
     max = mean1+sigma1;    
 
   }
 
-  else if ((TMath::Abs(mean1Check)>50.?TMath::Abs(mean1Check):50.)/sigma1Check > 0.5 && (TMath::Abs(mean1Check)>50.?TMath::Abs(mean1Check):50.)/sigma1Check < 500. && mean1Check > min && mean1Check < max
-    && (TMath::Abs(mean2Check)>50.?TMath::Abs(mean2Check):50.)/sigma2Check > 0.5 && (TMath::Abs(mean2Check)>50.?TMath::Abs(mean2Check):50.)/sigma2Check < 500. && mean2Check > min && mean2Check < max) { 
+  else if ((TMath::Abs(mean1Check) > 50. ? (TMath::Abs(mean1Check)) : 50.)/sigma1Check > 0.5 && (TMath::Abs(mean1Check)>50. ? (TMath::Abs(mean1Check)) : 50.)/sigma1Check < 500. && mean1Check > min && mean1Check < max
+	   && (TMath::Abs(mean2Check)>50. ? (TMath::Abs(mean2Check)) : 50.)/sigma2Check > 0.5 && (TMath::Abs(mean2Check)>50. ? (TMath::Abs(mean2Check)) : 50.)/sigma2Check < 500. && mean2Check > min && mean2Check < max) { 
 
     goodFit=false;
     scale1 = scale1Check;
@@ -156,7 +156,7 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     scale2 = scale2Check;
     mean2 = mean2Check;
     sigma2 = sigma2Check;
-    min = mean2-sigma2;
+    min = mean2-1.5*sigma2;
     max = mean1+sigma1;    
 
   }
