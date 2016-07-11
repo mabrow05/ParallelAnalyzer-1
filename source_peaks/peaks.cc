@@ -48,8 +48,8 @@ void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t hei
     scale = scaleCheck;
     mean = meanCheck;
     sigma = sigmaCheck;
-    min = mean-sigma;
-    max = mean+sigma;
+    min = mean-1.25*sigma;
+    max = mean+1.75*sigma;
   }
 
   else if ((TMath::Abs(meanCheck)>50.?TMath::Abs(meanCheck):50.)/sigmaCheck > 0.5 && (TMath::Abs(meanCheck)>50.?TMath::Abs(meanCheck):50.)/sigmaCheck < 500. && meanCheck > min && meanCheck < max) { 
@@ -141,8 +141,8 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     scale2 = scale2Check;
     mean2 = mean2Check;
     sigma2 = sigma2Check;
-    min = mean2-1.5*sigma2;
-    max = mean1+sigma1;    
+    min = mean2-2.25*sigma2;
+    max = mean1+2.0*sigma1;    
 
   }
 
@@ -156,8 +156,8 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     scale2 = scale2Check;
     mean2 = mean2Check;
     sigma2 = sigma2Check;
-    min = mean2-1.5*sigma2;
-    max = mean1+sigma1;    
+    min = mean2-2.25*sigma2;
+    max = mean1+2.0*sigma1;    
 
   }
 

@@ -30,7 +30,7 @@ for Range in omittedRanges:
 #### is set to 0 or 1 to represent false (don't use) and true (do use)
 
 EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
-EPMT2 = [17874,17877,17893,17903,17904,17917,17892,17918]
+EPMT2 = []#[17874,17877,17893,17903,17904,17917,17892,17918]
 EPMT3 = []
 EPMT4 = [20517,20519,20821,20822]
 WPMT1 = []
@@ -45,7 +45,7 @@ EPMT4_runRanges = [(17233,18055),(20121,23173)]
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)]
 WPMT3_runRanges = []
-WPMT4_runRanges = [(18370,18386),(18745,18768),(19347,19960),(20000,23000)]
+WPMT4_runRanges = [(19347,19960),(20000,23000)]
 
 for Range in EPMT1_runRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -930,11 +930,11 @@ if __name__ == "__main__":
 
     ### Source Run Calibration Steps...
     if 1: 
-        runPeriods = [2]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [11,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 2 # number of times to run through the calibration
+        iterations = 1 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -957,10 +957,8 @@ if __name__ == "__main__":
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
                 if 1:
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
-                    #cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
+                    cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
-        #cal.makeGlobalResiduals(runPeriods) # gathers all the residual data to be plotted separately
-
 
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to

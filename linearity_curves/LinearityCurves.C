@@ -179,7 +179,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;*/
 
-    if (sourceName[i]=="Cd") continue;
+    if (sourceName[i]=="Cd" /*|| sourceName[i]=="Bi2"*/ || sourceName[i]=="In") continue;
 
     if (pmtQuality[runPos][0]) {
       runE1.push_back(run[i]);
@@ -275,7 +275,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   //fitADC->FixParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-  fitADC->FixParameter(2, 0.0);
+  //fitADC->FixParameter(2, 0.0);
+  fitADC->SetParLimits(2, -0.001, 0.001);
   //fitADC->FixParameter(0, 0.0);
 
   /*TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", 0., 2500.0);

@@ -624,7 +624,7 @@ int main(int argc, char *argv[])
     
     for (int j=0; j<8; j++) {
       for (int i=maxBin[n][j]; i<nBin; i++) {
-        if (hisEvis[n][j]->GetBinContent(i+1) < 0.33*maxCounts[n][j]) {
+        if (hisEvis[n][j]->GetBinContent(i+1) < 0.25*maxCounts[n][j]) {
           xHigh[n][j] = hisEvis[n][j]->GetBinCenter(i+1);
 	  //Check to make sure the value isn't too close to the maximum bin...
           if ((i-maxBin[n][j])<5) xHigh[n][j] = hisEvis[n][j]->GetXaxis()->GetBinCenter(maxBin[n][j])+250.;
@@ -634,7 +634,7 @@ int main(int argc, char *argv[])
       }
       if (sourceName[n]!="Bi") {
 	for (int i=maxBin[n][j]; i>0; i--) {
-	  if (hisEvis[n][j]->GetBinContent(i-1) < 0.33*maxCounts[n][j]) {
+	  if (hisEvis[n][j]->GetBinContent(i-1) < 0.25*maxCounts[n][j]) {
 	    xLow[n][j] = hisEvis[n][j]->GetBinCenter(i-1);
 	    //if ((maxBin[n][j]-i)<5) xLow[n][j] = binCenterMax[n][j]-200.;
 	    break;
@@ -643,7 +643,7 @@ int main(int argc, char *argv[])
       }
       else {
 	for (int i=maxBin[n][j]*0.5; i>0; i--) {
-	  if (hisEvis[n][j]->GetBinContent(i-1) < 0.33*0.5*maxCounts[n][j]) {
+	  if (hisEvis[n][j]->GetBinContent(i-1) < 0.2*0.5*maxCounts[n][j]) {
 	    xLow[n][j] = hisEvis[n][j]->GetBinCenter(i-1);
 	    //if ((maxBin[n][j]-i)<5) xLow[n][j] = binCenterMax[n][j]-200.;
 	    break;

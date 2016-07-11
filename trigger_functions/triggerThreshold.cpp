@@ -113,7 +113,7 @@ void trigger_threshold(Int_t XeRunPeriod, Double_t binWidth, bool mpmData) {
   // Best fit function. This is a shifted erf which goes into a shifted tanh, where the smooth transition is done via application of another shifted tanh
   TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-20.,150.);
   
-
+ 
 
   TString pdfFileBase = TString(getenv("TRIGGER_FUNC")) + TString("trigger_functions_XePeriod_")+itos(XeRunPeriod)+"_"+ftos(binWidth)+TString("mm.pdf");
   

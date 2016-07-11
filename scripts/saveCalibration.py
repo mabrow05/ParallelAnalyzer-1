@@ -2,7 +2,7 @@
 
 import os
 
-calibrationName = "06172016_bestFirstIteration_Evis_0keV_trigger"
+calibrationName = "07112016_3PoissonMethod_without_Trigger_noIn_quadratic_6thIteration"
 year = "2011-2012" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"
@@ -22,5 +22,6 @@ for per in calPeriods:
     os.system("cp %s/lin_curves_srcCal_Period_%i.dat %s"%(os.getenv("LINEARITY_CURVES"),per,location))
     os.system("cp %s/simulation_comparison/nPE_per_keV/nPE_per_keV_%i.dat %s"%(os.getenv("ANALYSIS_CODE"),per,location))
     os.system("cp %s/simulation_comparison/nPE_per_keV/width_comp_%i.pdf %s"%(os.getenv("ANALYSIS_CODE"),per,location))
+    os.system("cp %s/error_envelope/error_envelope_calPeriods_1-12.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
     
 

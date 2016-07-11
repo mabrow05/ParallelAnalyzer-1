@@ -12,7 +12,7 @@ VPATH = ./:../include/:../Asymmetry/
 
 # Work with Linux with egcs	
 CXX           = g++ 
-CXXFLAGS      = -O2 -Wall -fPIC
+CXXFLAGS      = -O2 -Wall -fPIC -std=c++11 -g
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
@@ -21,6 +21,14 @@ LIBS         += -lSpectrum -lMinuit
 
 triggerThreshold.exe: triggerThreshold.o positionMapHandler.o SQLinterface.o calibrationTools.o MBUtils.o TriggerMap.o
 	$(CXX) $(CXXFLAGS) -o triggerThreshold.exe triggerThreshold.o MBUtils.o calibrationTools.o TriggerMap.o $(LIBS)
+	@echo "Done"
+
+findADCthreshold.exe: findADCthreshold.o
+	$(CXX) $(CXXFLAGS) -o findADCthreshold.exe findADCthreshold.o $(LIBS)
+	@echo "Done"
+
+findDiscriminatorThresh.exe: findDiscriminatorThresh.o MBUtils.o 
+	$(CXX) $(CXXFLAGS) -o findDiscriminatorThresh.exe findDiscriminatorThresh.o MBUtils.o $(LIBS)
 	@echo "Done"
 
 MBUtils.o: MBUtils.hh
