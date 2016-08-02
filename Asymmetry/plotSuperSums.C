@@ -3,11 +3,11 @@
 {
   gStyle->SetOptStat(0);
 
-  int octetStart=30;
-  int octetEnd=59;
+  int octetStart=0;
+  int octetEnd=19;
 
-  Double_t normLow = 0.;
-  Double_t normHigh = 1200.;
+  Double_t normLow = 220.;//0.;
+  Double_t normHigh = 680.;//1200.;
   
   TString fileBase = "superSumPlots/SuperSum_octets_";
   fileBase+=octetStart;

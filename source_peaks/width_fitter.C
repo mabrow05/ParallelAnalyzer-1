@@ -78,15 +78,15 @@ void width_fitter(Int_t calPeriod)
       simFile >> simWidths_hold[0] >> simWidths_hold[1] >> simWidths_hold[2] >> simWidths_hold[3]
 	      >> simWidths_hold[4] >> simWidths_hold[5] >> simWidths_hold[6] >> simWidths_hold[7];
 
-      std::vector <Int_t> pmtQuality = getPMTQuality(Run);
+      std::vector <Int_t> pmtQuality = getPMTQuality(Run); //Not using this right now
 
       for (Int_t p=0; p<8; p++) {
-	if (pmtQuality[p]) { 
+	if ( !(p==5 && Run>16983 && Run<17249) ) { //Checking if run is in range where PMTW2 was dead 
 	  
-	  if (TMath::Abs(simWidths_hold[p]-dataWidths_hold[p])/simWidths_hold[p] < 0.2) { //Checking for outliers
+	  if ( (TMath::Abs(simWidths_hold[p]-dataWidths_hold[p])/simWidths_hold[p] < 0.2) || p==3) { //Checking for outliers
 	    dataWidths[p][num[p]] = dataWidths_hold[p];
 	    simWidths[p][num[p]] = simWidths_hold[p];
-	    if (srcNameData!="Cd") num[p]++; //Put peaks to exclude here
+	    if (srcNameData!="Cd" && srcNameData!="Bi1") num[p]++; //Put peaks to exclude here
 	    //num[p]++; 
 	  }
 	}

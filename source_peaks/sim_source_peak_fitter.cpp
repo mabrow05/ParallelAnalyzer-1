@@ -331,7 +331,9 @@ int main(int argc, char *argv[])
   }
 
   double fitMean[3][8]={0.};
+  double fitMeanError[3][8]={0.};
   double lowBiFitMean[8]={0.};
+  double lowBiFitMeanError[8]={0.};
   double fitSigma[3][8]={0.};
   double lowBiFitSigma[8]={0.};
 
@@ -349,6 +351,7 @@ int main(int argc, char *argv[])
 
 	  if (sing.isGoodFit()) {
 	    fitMean[n][j] = sing.ReturnMean();
+	    fitMeanError[n][j] = sing.ReturnMeanError();
 	    fitSigma[n][j] = sing.ReturnSigma();
 	  }
 
@@ -360,6 +363,7 @@ int main(int argc, char *argv[])
 
 	    if (sing.isGoodFit()) { 
 	      fitMean[n][j] = sing.ReturnMean();
+	      fitMeanError[n][j] = sing.ReturnMeanError();
 	      fitSigma[n][j] = sing.ReturnSigma();
 	    }
 
@@ -375,7 +379,9 @@ int main(int argc, char *argv[])
 
 	  if (doub.isGoodFit()) {	    
 	    fitMean[n][j] = doub.ReturnMean1();
+	    fitMeanError[n][j] = doub.ReturnMean1Error();
 	    lowBiFitMean[j] = doub.ReturnMean2();
+	    lowBiFitMeanError[j] = doub.ReturnMean2Error();
 	    fitSigma[n][j] = doub.ReturnSigma1();
 	    lowBiFitSigma[j] = doub.ReturnSigma2();
 	  }
@@ -388,7 +394,9 @@ int main(int argc, char *argv[])
 
 	    if (doub.isGoodFit()) {
 	      fitMean[n][j] = doub.ReturnMean1();
+	      fitMeanError[n][j] = doub.ReturnMean1Error();
 	      lowBiFitMean[j] = doub.ReturnMean2();
+	      lowBiFitMeanError[j] = doub.ReturnMean2Error();
 	      fitSigma[n][j] = doub.ReturnSigma1();
 	      lowBiFitSigma[j] = doub.ReturnSigma2();
 	    }
@@ -406,6 +414,8 @@ int main(int argc, char *argv[])
   char tempResults[500];
   sprintf(tempResults, "%s/source_peaks/source_peaks_%s_Evis.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsMean(tempResults);
+  sprintf(tempResults, "%s/source_peaks/source_peaks_errors_%s_Evis.dat",getenv("REVCALSIM"), argv[1]);
+  ofstream outResultsMeanError(tempResults);
   sprintf(tempResults, "%s/source_peaks/source_widths_%s_Evis.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsSigma(tempResults);
 
@@ -422,6 +432,16 @@ int main(int argc, char *argv[])
 		     << fitMean[n][5] << " "
 		     << fitMean[n][6] << " "
 		     << fitMean[n][7] << endl;
+      outResultsMeanError << runNumber << " "
+		     << sourceName[n] << " "
+		     << fitMeanError[n][0] << " "
+		     << fitMeanError[n][1] << " "
+		     << fitMeanError[n][2] << " "
+		     << fitMeanError[n][3] << " "
+		     << fitMeanError[n][4] << " "
+		     << fitMeanError[n][5] << " "
+		     << fitMeanError[n][6] << " "
+		     << fitMeanError[n][7] << endl;
       outResultsSigma << runNumber << " "
 		     << sourceName[n] << " "
 		     << fitSigma[n][0] << " "
@@ -446,6 +466,16 @@ int main(int argc, char *argv[])
 		   << lowBiFitMean[5] << " "
 		   << lowBiFitMean[6] << " "
 		   << lowBiFitMean[7] << endl;
+    outResultsMeanError << runNumber << " "
+		   << "Bi2" << " "
+		   << lowBiFitMeanError[0] << " "
+		   << lowBiFitMeanError[1] << " "
+		   << lowBiFitMeanError[2] << " "
+		   << lowBiFitMeanError[3] << " "
+		   << lowBiFitMeanError[4] << " "
+		   << lowBiFitMeanError[5] << " "
+		   << lowBiFitMeanError[6] << " "
+		   << lowBiFitMeanError[7] << endl;
     outResultsSigma << runNumber << " "
 		   << "Bi2" << " "
 		   << lowBiFitSigma[0] << " "
@@ -458,6 +488,7 @@ int main(int argc, char *argv[])
 		   << lowBiFitSigma[7] << endl;
   }
   outResultsMean.close();
+  outResultsMeanError.close();
   outResultsSigma.close();
 
 
@@ -800,6 +831,8 @@ int main(int argc, char *argv[])
  
   sprintf(tempResults, "%s/source_peaks/source_peaks_%s_etaEvis.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsEtaEvis(tempResults);
+  sprintf(tempResults, "%s/source_peaks/source_peaks_errors_%s_etaEvis.dat",getenv("REVCALSIM"), argv[1]);
+  ofstream outResultsEtaEvisError(tempResults);
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
@@ -814,6 +847,16 @@ int main(int argc, char *argv[])
 			<< fitMean[n][5]*meanEta[n][5] << " "
 			<< fitMean[n][6]*meanEta[n][6] << " "
 			<< fitMean[n][7]*meanEta[n][7] << " " << endl;
+      outResultsEtaEvisError << runNumber << " "
+			<< sourceName[n] << " "
+			<< fitMeanError[n][0]*meanEta[n][0] << " "
+			<< fitMeanError[n][1]*meanEta[n][1] << " "
+			<< fitMeanError[n][2]*meanEta[n][2] << " "
+			<< fitMeanError[n][3]*meanEta[n][3] << " "
+			<< fitMeanError[n][4]*meanEta[n][4] << " "
+			<< fitMeanError[n][5]*meanEta[n][5] << " "
+			<< fitMeanError[n][6]*meanEta[n][6] << " "
+			<< fitMeanError[n][7]*meanEta[n][7] << " " << endl;
     }
   }
 
@@ -828,6 +871,16 @@ int main(int argc, char *argv[])
 		      << lowBiFitMean[5]*meanEta[BiPeakIndex][5] << " "
 		      << lowBiFitMean[6]*meanEta[BiPeakIndex][6] << " "
 		      << lowBiFitMean[7]*meanEta[BiPeakIndex][7] << " " << endl;
+    outResultsEtaEvisError << runNumber << " "
+		      << "Bi2" << " "
+		      << lowBiFitMeanError[0]*meanEta[BiPeakIndex][0] << " "
+		      << lowBiFitMeanError[1]*meanEta[BiPeakIndex][1] << " "
+		      << lowBiFitMeanError[2]*meanEta[BiPeakIndex][2] << " "
+		      << lowBiFitMeanError[3]*meanEta[BiPeakIndex][3] << " "
+		      << lowBiFitMeanError[4]*meanEta[BiPeakIndex][4] << " "
+		      << lowBiFitMeanError[5]*meanEta[BiPeakIndex][5] << " "
+		      << lowBiFitMeanError[6]*meanEta[BiPeakIndex][6] << " "
+		      << lowBiFitMeanError[7]*meanEta[BiPeakIndex][7] << " " << endl;
 		   
   }
   outResultsEtaEvis.close();

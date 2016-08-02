@@ -30,12 +30,6 @@
 #include "replay_pass2.h"
 #include "replay_pass3.h"
 
-
-
-//void SetupOutputHistos(std::vector <TH1D*> EvisPMT, std::vector <TH1D*> EvisTotal, std::vector <TH1D*> EreconPMT, std::vector <TH1D*> EvisTot) {};  
-
-
-
 std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
   ifstream infile;
   Char_t temp[200];
@@ -655,7 +649,9 @@ int main(int argc, char *argv[])
   }
 
   double fitMean[3][8]={0.};
+  double fitMeanError[3][8]={0.};
   double lowBiFitMean[8]={0.};
+  double lowBiFitMeanError[8]={0.};
   double fitSigma[3][8]={0.};
   double lowBiFitSigma[8]={0.};
 
@@ -673,6 +669,7 @@ int main(int argc, char *argv[])
 
 	  if (sing.isGoodFit()) {
 	    fitMean[n][j] = sing.ReturnMean();
+	    fitMeanError[n][j] = sing.ReturnMeanError();
 	    fitSigma[n][j] = sing.ReturnSigma();
 	  }
 
@@ -684,6 +681,7 @@ int main(int argc, char *argv[])
 
 	    if (sing.isGoodFit()) { 
 	      fitMean[n][j] = sing.ReturnMean();
+	      fitMeanError[n][j] = sing.ReturnMeanError();
 	      fitSigma[n][j] = sing.ReturnSigma();
 	    }
 
@@ -700,7 +698,9 @@ int main(int argc, char *argv[])
 	  if (doub.isGoodFit()) {
 	    //std::cout << "IT WAS A GOOD FIT\n";
 	    fitMean[n][j] = doub.ReturnMean1();
+	    fitMeanError[n][j] = doub.ReturnMean1Error();
 	    lowBiFitMean[j] = doub.ReturnMean2();
+	    lowBiFitMeanError[j] = doub.ReturnMean2Error();
 	    fitSigma[n][j] = doub.ReturnSigma1();
 	    lowBiFitSigma[j] = doub.ReturnSigma2();
 	  }
@@ -713,7 +713,9 @@ int main(int argc, char *argv[])
 
 	    if (doub.isGoodFit()) {
 	      fitMean[n][j] = doub.ReturnMean1();
+	      fitMeanError[n][j] = doub.ReturnMean1Error();
 	      lowBiFitMean[j] = doub.ReturnMean2();
+	      lowBiFitMeanError[j] = doub.ReturnMean2Error();
 	      fitSigma[n][j] = doub.ReturnSigma1();
 	      lowBiFitSigma[j] = doub.ReturnSigma2();
 	    }
@@ -731,6 +733,8 @@ int main(int argc, char *argv[])
   char tempResults[500];
   sprintf(tempResults, "%s/source_peaks_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResultsMean(tempResults);
+  sprintf(tempResults, "%s/source_peaks_errors_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  ofstream outResultsMeanError(tempResults);
   sprintf(tempResults, "%s/source_widths_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResultsSigma(tempResults);
 
@@ -747,6 +751,16 @@ int main(int argc, char *argv[])
 		     << fitMean[n][5] << " "
 		     << fitMean[n][6] << " "
 		     << fitMean[n][7] << endl;
+      outResultsMeanError << runNumber << " "
+		     << sourceName[n] << " "
+		     << fitMeanError[n][0] << " "
+		     << fitMeanError[n][1] << " "
+		     << fitMeanError[n][2] << " "
+		     << fitMeanError[n][3] << " "
+		     << fitMeanError[n][4] << " "
+		     << fitMeanError[n][5] << " "
+		     << fitMeanError[n][6] << " "
+		     << fitMeanError[n][7] << endl;
       outResultsSigma << runNumber << " "
 		     << sourceName[n] << " "
 		     << fitSigma[n][0] << " "
@@ -771,6 +785,16 @@ int main(int argc, char *argv[])
 		   << lowBiFitMean[5] << " "
 		   << lowBiFitMean[6] << " "
 		   << lowBiFitMean[7] << endl;
+    outResultsMeanError << runNumber << " "
+		   << "Bi2" << " "
+		   << lowBiFitMeanError[0] << " "
+		   << lowBiFitMeanError[1] << " "
+		   << lowBiFitMeanError[2] << " "
+		   << lowBiFitMeanError[3] << " "
+		   << lowBiFitMeanError[4] << " "
+		   << lowBiFitMeanError[5] << " "
+		   << lowBiFitMeanError[6] << " "
+		   << lowBiFitMeanError[7] << endl;
     outResultsSigma << runNumber << " "
 		   << "Bi2" << " "
 		   << lowBiFitSigma[0] << " "
@@ -783,6 +807,7 @@ int main(int argc, char *argv[])
 		   << lowBiFitSigma[7] << endl;
   }
   outResultsMean.close();
+  outResultsMeanError.close();
   outResultsSigma.close();
 
 
@@ -1125,6 +1150,10 @@ int main(int argc, char *argv[])
  
   sprintf(tempResults, "%s/source_peaks_%s_ADC.dat",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResultsADC(tempResults);
+  sprintf(tempResults, "%s/source_peaks_errors_%s_ADC.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  ofstream outResultsADCError(tempResults);
+
+  std::vector < std::vector < Double_t > > calParams = linearityCurve.returnLinCurveParams();
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
@@ -1141,6 +1170,16 @@ int main(int argc, char *argv[])
 		    << linearityCurve.applyInverseLinCurve(5,fitMean[n][5]*aveEta[n][5]) << " "
 		    << linearityCurve.applyInverseLinCurve(6,fitMean[n][6]*aveEta[n][6]) << " "
 		    << linearityCurve.applyInverseLinCurve(7,fitMean[n][7]*aveEta[n][7]) << endl;
+      outResultsADCError << runNumber << " "
+			 << sourceName[n] << " "
+			 << fitMeanError[n][0]/calParams[0][1] << " "
+			 << fitMeanError[n][1]/calParams[1][1] << " "
+			 << fitMeanError[n][2]/calParams[2][1] << " "
+			 << fitMeanError[n][3]/calParams[3][1] << " "
+			 << fitMeanError[n][4]/calParams[4][1] << " "
+			 << fitMeanError[n][5]/calParams[5][1] << " "
+			 << fitMeanError[n][6]/calParams[6][1] << " "
+			 << fitMeanError[n][7]/calParams[7][1] << " " << endl;
     }
   }
 
@@ -1157,7 +1196,17 @@ int main(int argc, char *argv[])
 		  << linearityCurve.applyInverseLinCurve(5,lowBiFitMean[5]*aveEta[BiPeakIndex][5]) << " "
 		  << linearityCurve.applyInverseLinCurve(6,lowBiFitMean[6]*aveEta[BiPeakIndex][6]) << " "
 		  << linearityCurve.applyInverseLinCurve(7,lowBiFitMean[7]*aveEta[BiPeakIndex][7]) << std::endl;
-		   
+		
+    outResultsADCError << runNumber << " "
+		       << "Bi2" << " "
+		       << lowBiFitMeanError[0]/calParams[0][1] << " "
+		       << lowBiFitMeanError[1]/calParams[1][1] << " "
+		       << lowBiFitMeanError[2]/calParams[2][1] << " "
+		       << lowBiFitMeanError[3]/calParams[3][1] << " "
+		       << lowBiFitMeanError[4]/calParams[4][1] << " "
+		       << lowBiFitMeanError[5]/calParams[5][1] << " "
+		       << lowBiFitMeanError[6]/calParams[6][1] << " "
+		       << lowBiFitMeanError[7]/calParams[7][1] << " " << endl;
   }
   outResultsADC.close();
 

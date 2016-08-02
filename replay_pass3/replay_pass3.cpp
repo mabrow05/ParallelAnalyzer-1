@@ -25,6 +25,8 @@
 #include "positionMapHandler.hh"
 #include "calibrationTools.hh"
 
+
+
 #include "replay_pass2.h"
 #include "replay_pass3.h"
 
@@ -100,7 +102,7 @@ int main(int argc, char *argv[])
   
   int runNumber = atoi(argv[1]);
   int nPMT = 8;
-  int nParams = 3; //takes a quadratic (but quadratic term set to zero)
+  int nParams = 3; //takes a quadratic 
 
   // Run number integer
   cout << "Run " << runNumber << " ..." << endl;
@@ -109,7 +111,7 @@ int main(int argc, char *argv[])
   unsigned int calibrationPeriod = getSrcRunPeriod(runNumber);
 
   //Get the linearity curve
-  LinearityCurve linearityCurve(calibrationPeriod);
+  LinearityCurve linearityCurve(calibrationPeriod,false);
 
   //Load the simulated relationship between EQ and Etrue
   vector < vector < vector < double > > > EQ2Etrue = getEQ2EtrueParams(runNumber);

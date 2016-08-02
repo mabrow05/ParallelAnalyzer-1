@@ -29,6 +29,31 @@
 
 using namespace std;
 
+
+vector <Int_t> getPMTQuality(Int_t runNumber) {
+  //Read in PMT quality file
+  cout << "Reading in PMT Quality file ...\n";
+  vector <Int_t>  pmtQuality (8,0);
+  Char_t temp[200];
+  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  ifstream pmt;
+  std::cout << temp << std::endl;
+  pmt.open(temp);
+  Int_t run_hold;
+  while (pmt >> run_hold >> pmtQuality[0] >> pmtQuality[1] >> pmtQuality[2]
+	 >> pmtQuality[3] >> pmtQuality[4] >> pmtQuality[5]
+	 >> pmtQuality[6] >> pmtQuality[7]) {
+    if (run_hold==runNumber) break;
+    if (pmt.fail()) break;
+  }
+  pmt.close();
+  if (run_hold!=runNumber) {
+    cout << "Run not found in PMT quality file!" << endl;
+    exit(0);
+  }
+  return pmtQuality;
+};
+
 int main(int argc, char *argv[])
 {
   cout.setf(ios::fixed, ios::floatfield);
@@ -42,10 +67,14 @@ int main(int argc, char *argv[])
   sprintf(tempFileGain, "%s/gain_bismuth_%s.dat",getenv("GAIN_BISMUTH"), argv[1]);
   cout << "... Reading: " << tempFileGain << endl;
 
+  //Read in PMT Quality
+  std::vector<Int_t> pmtquality = getPMTQuality(atoi(argv[1])); 
+
   double fitMean[8], gainCorrection[8];
   ifstream fileGain(tempFileGain);
   for (int i=0; i<8; i++) {
     fileGain >> fitMean[i] >> gainCorrection[i];
+    gainCorrection[i] = pmtquality[i] ? gainCorrection[i] : 1.; //This sets the gain to 1 if the bi pulser was bad or something was wrong with the pmt
   }
   cout << "...   PMT E1: " << gainCorrection[0] << endl;
   cout << "...   PMT E2: " << gainCorrection[1] << endl;
@@ -55,6 +84,8 @@ int main(int argc, char *argv[])
   cout << "...   PMT W2: " << gainCorrection[5] << endl;
   cout << "...   PMT W3: " << gainCorrection[6] << endl;
   cout << "...   PMT W4: " << gainCorrection[7] << endl;
+
+  
 
   // Open output ntuple
   char tempOut[500];

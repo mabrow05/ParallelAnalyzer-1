@@ -7,7 +7,7 @@
 
 
 SinglePeakHist::SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit, Int_t iterations) :
-  hist(h), func(NULL), mean(0.), sigma(0.), scale(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false), status("NO FITS") {
+  hist(h), func(NULL), mean(0.), meanErr(0.), sigma(0.), scale(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false), status("NO FITS") {
 
   if (autoFit) {
     mean = hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin());
@@ -19,6 +19,8 @@ SinglePeakHist::SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, b
       if (goodFit && it > 1) break;
       it++;
     }
+
+    if (!goodFit && meanErr==0.) meanErr = 100.;
     
     std::cout << "Finished Fitting after " << it << " iterations with Status = " << status << "\n"; 
   }
@@ -47,6 +49,7 @@ void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t hei
     goodFit=true;
     scale = scaleCheck;
     mean = meanCheck;
+    meanErr = func->GetParError(1);
     sigma = sigmaCheck;
     min = mean-1.25*sigma;
     max = mean+1.75*sigma;
@@ -57,6 +60,7 @@ void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t hei
     goodFit=false;
     scale = scaleCheck;
     mean = meanCheck;
+    meanErr = func->GetParError(1);
     sigma = sigmaCheck;
     min = mean-sigma;
     max = mean+sigma;
@@ -75,7 +79,7 @@ void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t hei
 
 
 DoublePeakHist::DoublePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit, Int_t iterations) :
-  hist(h), func(NULL), mean1(0.), sigma1(0.), scale1(0.), mean2(0.), sigma2(0.), scale2(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false), status("NO FITS") {
+  hist(h), func(NULL), mean1(0.), mean1Err(0.), sigma1(0.), scale1(0.), mean2(0.), mean2Err(0.), sigma2(0.), scale2(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit(false), status("NO FITS") {
 
   if (autoFit) {
     mean1 = hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin());
@@ -93,6 +97,9 @@ DoublePeakHist::DoublePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, b
       it++;
     }
     
+    if (!goodFit && mean1Err==0.) mean1Err = 100.;
+    if (!goodFit && mean2Err==0.) mean2Err = 100.;
+
     std::cout << "Finished Fitting after " << it << " iterations with Status = " << status << "\n"; 
   }
 }
@@ -137,9 +144,11 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     goodFit=true;
     scale1 = scale1Check;
     mean1 = mean1Check;
+    mean1Err = highPeak==0 ? func->GetParError(1) : func->GetParError(4);
     sigma1 = sigma1Check;
     scale2 = scale2Check;
     mean2 = mean2Check;
+    mean2Err = highPeak==0 ? func->GetParError(4) : func->GetParError(1);
     sigma2 = sigma2Check;
     min = mean2-2.25*sigma2;
     max = mean1+2.0*sigma1;    
@@ -152,9 +161,11 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
     goodFit=false;
     scale1 = scale1Check;
     mean1 = mean1Check;
+    mean1Err = highPeak==0 ? func->GetParError(1) : func->GetParError(4);
     sigma1 = sigma1Check;
     scale2 = scale2Check;
     mean2 = mean2Check;
+    mean2Err = highPeak==0 ? func->GetParError(4) : func->GetParError(1);
     sigma2 = sigma2Check;
     min = mean2-2.25*sigma2;
     max = mean1+2.0*sigma1;    
