@@ -1,10 +1,11 @@
 #include <vector>
+#include <iomanip>
 
-void EQ2EtrueFitter() {
-  
-  ofstream params("2011-2012_EQ2EtrueFitParams.dat"); //Output file for fit parameters
-  string fileName  = "HistMeans.dat";
-  ifstream infile(fileName.c_str());
+void EQ2EtrueFitter(TString geom) {
+
+  ofstream params(TString::Format("%s_EQ2EtrueFitParams.dat",geom.Data()).Data()); //Output file for fit parameters
+  TString fileName  = TString::Format("HistMeans_%s.dat",geom.Data());
+  ifstream infile(fileName.Data());
 
   int type0lowOffset = 5;
   int type1lowOffset = 13;
@@ -103,6 +104,8 @@ void EQ2EtrueFitter() {
   t0E->Fit(func0,"R");
   t1E->Fit(func1,"R");
   t23E->Fit(func23,"R");
+
+  params << std::fixed << std::setprecision(17);
   
   params << "Type0E: " << func0->GetParameter(0) << " " << func0->GetParameter(1) << " " << func0->GetParameter(2) << " " << func0->GetParameter(3) 
 	 << " " << func0->GetParameter(4) << " " << func0->GetParameter(5) << endl;

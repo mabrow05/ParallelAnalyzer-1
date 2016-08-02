@@ -35,18 +35,18 @@
   double dEn[5] = {0.};
 
   double resEast[5];
-  resEast[0] = -0.25;
-  resEast[1] = -.63;
-  resEast[2] =  -1.3;
-  resEast[3] = -0.58;
-  resEast[4] = -.53;
+  resEast[0] = 0.48;
+  resEast[1] = -.44;
+  resEast[2] =  -3.47;
+  resEast[3] = -0.46;
+  resEast[4] = -1.73;
 
   double sigEast[5];
-  sigEast[0] = 1.74;
-  sigEast[1] = 2.2;
-  sigEast[2] = 3.16;
-  sigEast[3] = 5.47;
-  sigEast[4] = 9.0;
+  sigEast[0] = 1.94;
+  sigEast[1] = 2.4;
+  sigEast[2] = 3.5;
+  sigEast[3] = 4.9;
+  sigEast[4] = 5.96;
 
   // Plot
   c1 = new TCanvas("c1", "canvas");
@@ -85,12 +85,12 @@
   gr0->SetLineStyle(2);
 
   Int_t nn = 5;
-  Double_t perc1=0.02;
+  Double_t perc1=0.017;
   Double_t perc2=0.014;
-  Double_t perc3=0.009;
-  Double_t perc4=0.009;
+  Double_t perc3=0.007;
+  Double_t perc4=0.007;
   Double_t x2[nn] = {0., peakCe, peakSn, peakBiHigh, 1200.};
-  Double_t percent[nn] = {1., perc1, perc2, perc3, perc4};
+  Double_t percent[nn] = {1., perc1, perc2, perc3, peakBiHigh/1200.*perc4};
   Double_t y_upper[nn], y_lower[nn];
   for (int i=1; i<nn; i++) {
     Double_t val = x2[i]*percent[i];

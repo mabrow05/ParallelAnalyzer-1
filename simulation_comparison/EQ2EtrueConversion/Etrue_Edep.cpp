@@ -6,6 +6,7 @@
 #include "iostream"
 #include "string"
 #include "vector"
+#include <TString.h>
 
 using std::ifstream;
 using std::ofstream;
@@ -39,10 +40,22 @@ void DataTree::setupInputTree(string inputFileName, string inputTreeName) {
 
 int main(int argc, char *argv[]) {
 
-  TFile *outputHists = new TFile("Hists.root","RECREATE");
+  if (argc!=2) {
+    std::cout << "Usage: ./Etrue_Edep [geometry]\n";
+    exit(0);
+  }
+
+  TString geometry = TString(argv[1]);
+
+  if (geometry!=TString("2011-2012") && geometry!=TString("2012-2013") && geometry!=TString("2012-2013_isobutane")) {
+    std::cout << "Bad choice in geometry!!\n";
+    exit(0);
+  }
+
+  TFile *outputHists = new TFile(TString::Format("Hists_%s.root",geometry.Data()),"RECREATE");
 
   ofstream outdata;
-  outdata.open ("HistMeans.dat");
+  outdata.open (TString::Format("HistMeans_%s.dat",geometry.Data()).Data());
   outdata << setw(5) << "Nhist" << setw(7) << "Emin" << setw(7) << "Emax" 
                      << setw(11) << "EQType0E" << setw(7) << "Neve" 
                      << setw(11) << "EQType0W" << setw(7) << "Neve"  
@@ -130,11 +143,12 @@ int main(int argc, char *argv[]) {
        }
  
   double FidRad = 50.0;
-  char path[] = "/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/Beta/"; //"/extern/mabrow05/ucna/geant4work/output/bigSim/flatFieldnewEQ_2011-2012/F0/";//
+  TString path = TString::Format("/extern/mabrow05/ucna/geant4work/output/10mil_%s/Beta/",geometry.Data());
+  //char path[] = "/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/Beta/"; //"/extern/mabrow05/ucna/geant4work/output/bigSim/flatFieldnewEQ_2011-2012/F0/";//
   for (int nF = 0; nF<nFile; nF++) 
       {
        DataTree Tin;
-       sprintf(temp, "%s/analyzed_%d.root", path, nF);
+       sprintf(temp, "%s/analyzed_%d.root", path.Data(), nF);
        Tin.setupInputTree (temp, "anaTree");
        int Nevt = Tin.getEntries();
        for (Int_t evt = 0; evt<Nevt; evt++) 

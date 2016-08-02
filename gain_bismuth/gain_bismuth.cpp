@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	}
       }
       for (int i=maxBin[n]; i>0; i--) {
-	if (his[n]->GetBinContent(i-1) < 0.4*maxCounts[n]) {
+	if (his[n]->GetBinContent(i-1) < 0.65*maxCounts[n]) {
 	  xLow[n] = his[n]->GetBinCenter(i-1);
 	  break;
 	}

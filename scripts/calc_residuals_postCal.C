@@ -106,28 +106,28 @@ void calc_residuals_postCal(Int_t runPeriod)
   for (int j=0; j<num; j++) {
   
     if (sourceName[j]=="Ce") {
-      resE[j] = dataEreconE[j] - simEreconE[j];
-      resW[j] = dataEreconW[j] - simEreconW[j];
+      resE[j] = simEreconE[j] - dataEreconE[j];
+      resW[j] = simEreconW[j] - dataEreconW[j];
       oFile << "Ce" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     if (sourceName[j]=="In") {
-      resE[j] = dataEreconE[j] - simEreconE[j];
-      resW[j] = dataEreconW[j] - simEreconW[j];
+      resE[j] = simEreconE[j] - dataEreconE[j];
+      resW[j] = simEreconW[j] - dataEreconW[j];
       oFile << "In" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     else if (sourceName[j]=="Sn") {
-      resE[j] = dataEreconE[j] - simEreconE[j];
-      resW[j] = dataEreconW[j] - simEreconW[j];
+      resE[j] = simEreconE[j] - dataEreconE[j];
+      resW[j] = simEreconW[j] - dataEreconW[j];
       oFile << "Sn" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     else if (sourceName[j]=="Bi2") {
-      resE[j] = dataEreconE[j] - simEreconE[j];
-      resW[j] = dataEreconW[j] - simEreconW[j];
+      resE[j] = simEreconE[j] - dataEreconE[j];
+      resW[j] = simEreconW[j] - dataEreconW[j];
       oFile << "Bi2" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
     }
     else if (sourceName[j]=="Bi1") {
-      resE[j] = dataEreconE[j] - simEreconE[j];
-      resW[j] = dataEreconW[j] - simEreconW[j];
+      resE[j] = simEreconE[j] - dataEreconE[j];
+      resW[j] = simEreconW[j] - dataEreconW[j];
       oFile << "Bi1" << " " << (int) run[j] << " " << resE[j] << " " << resW[j] << endl;
    }
 

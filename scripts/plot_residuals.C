@@ -214,13 +214,19 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "meanSn = " << meanSn << endl;
   errEnv << "sigma = " << sigmaSn << endl;
 
+  ofstream check("check.dat");
+
   double meanBi2 = 0.;
   for (int j=0; j<nBi2; j++) {
     meanBi2 += resBi2E[j];
     meanBi2 += resBi2W[j];
+    check << meanBi2 << endl;
   }
+  check << "meanBi2 = " << meanBi2 << "/" << 2*nBi2 << " = ";
   meanBi2 = meanBi2 / (double) (2*nBi2);
-
+  check << meanBi2;
+  check.close();
+   
   double sigmaBi2 = 0.;
   for (int j=0; j<nBi2; j++) {
     sigmaBi2 += (resBi2E[j] - meanBi2)*(resBi2E[j] - meanBi2);
@@ -255,7 +261,7 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << sigmaBi1 << endl;
 
   
-  
+  TString pdffile = "final_residuals.pdf";
   
   cout << endl << "Results of Gaussian Fits:\n";
   errEnv << endl << "Results of Gaussian Fits:\n";
@@ -474,6 +480,25 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
   errEnv << "meanBi2 = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
+
+  c1->Print(pdffile+"(");
+  c2->Print(pdffile);
+  c3->Print(pdffile);
+  c4->Print(pdffile);
+  c5->Print(pdffile);
+  c6->Print(pdffile);
+  c7->Print(pdffile);
+  c8->Print(pdffile);
+  c9->Print(pdffile);
+  c10->Print(pdffile);
+  c11->Print(pdffile);
+  c12->Print(pdffile);
+  c13->Print(pdffile);
+  c14->Print(pdffile);
+  c15->Print(pdffile+")");
+
+
+  cout << nBi2 << endl;  
 
   errEnv.close();
 }

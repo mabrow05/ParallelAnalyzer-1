@@ -41,11 +41,13 @@ WPMT4 = []
 EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 EPMT2_runRanges = []
 EPMT3_runRanges = []
-EPMT4_runRanges = [(17233,18055),(20121,23173)]
+EPMT4_runRanges = [(20121,23173)] #(17233,18055) not sure why these used to be removed...
 WPMT1_runRanges = [(17359,18055)]
-WPMT2_runRanges = [(16983,17297)]
+WPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 WPMT3_runRanges = []
-WPMT4_runRanges = [(19347,19960),(20000,23000)]
+WPMT4_runRanges = [(18370,18386),(19347,19960),(20000,23000)]
+#(18370,18385) there was a drastic change in the gain of WPMT4, and this calibration period only
+#applies to runs before it so these were removed...
 
 for Range in EPMT1_runRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -255,7 +257,7 @@ class CalReplayManager:
             runs.append(int(line))
         
         for run in runs:
-            #os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
+            os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
             os.system("cd ../pedestals/; ./pedestal_widths.exe %i"%run)
             
         print "DONE"
@@ -585,15 +587,18 @@ class CalibrationManager:
 
             src_file_base = None
             peak_file = None
+            peak_error_file = None
             fileEnding = None
             
             if Simulation:
                 peak_file = "%s/residuals/SIM_source_runs_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                peak_error_file = "%s/residuals/SIM_source_runs_peakErrors_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 src_file_base = self.revCalSimPath + "/source_peaks/source_peaks_"
                 fileEnding = "_etaEvis.dat"
 
             else:
                 peak_file = "%s/residuals/source_runs_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                peak_error_file = "%s/residuals/source_runs_peakErrors_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 src_file_base = self.srcPeakPath + "source_peaks_"
                 fileEnding = "_ADC.dat"
                 
@@ -612,6 +617,7 @@ class CalibrationManager:
             #print runList
 
             outfile = open(peak_file,'w')
+            outfileError = open(peak_error_file,'w')
 
             for run in runList:
                 src_file = src_file_base+"%i"%run+fileEnding
@@ -621,7 +627,15 @@ class CalibrationManager:
                         outfile.write(line)
                     infile.close()
 
+                src_file_err = src_file_base+"errors_%i"%run+fileEnding
+                if MButils.fileExistsAndNotEmpty(src_file_err) and run not in omittedRuns:
+                    infile = open(src_file_err,'r')
+                    for line in infile:
+                        outfileError.write(line)
+                    infile.close()
+
             outfile.close()
+            outfileError.close()
 
         else:
 
@@ -854,8 +868,8 @@ if __name__ == "__main__":
         cal = CalibrationManager()
         for period in runPeriods:
             #cal.makeSourceCalibrationFile(period)
-            cal.makePMTrunFile(period, master=False)
-            #cal.calculateResiduals(period)
+            #cal.makePMTrunFile(period, master=False)
+            cal.calculateResiduals(period)
             
         #cal.makeGlobalResiduals(runPeriods,PMT=1,Side="Both")
 
@@ -887,7 +901,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [1,2,3,4]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -896,41 +910,20 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#,13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
             rep.findPedestals(runPeriod)
-            #rep.runReplayPass1(runPeriod)
-            #rep.runGainBismuth(runPeriod)
-            #rep.runReplayPass2(runPeriod)
+            rep.runReplayPass1(runPeriod)
+            rep.runGainBismuth(runPeriod)
+            rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
-            #rep.runReplayPass3(runPeriod)
             
-            #cal.makeSourceCalibrationFile(runPeriod, False)
-            #rep.runReplayPass4(runPeriod)
-
-    ### Making the files which hold the PMT quality
-    if 0:
-        cal = CalibrationManager()
-        cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True,year="2011-2012")
-        #cal.makePMTrunFile(master=True)
-
-    ### Simulation reverse calibration procedure
-    if 0: 
-        runPeriods =[1,2,3,4,5,6,7,8,9,10,11,12]#, 13,14,15,16,17,18,19,20,21,22,23,24]#
-        rep = CalReplayManager()
-        cal = CalibrationManager()
         
-        for runPeriod in runPeriods:
-            rep.runReverseCalibration(runPeriod)
-            cal.fitSourcePeaks(runPeriod, Simulation=True)
-            cal.fitSourcePeaksInEnergy(runPeriod, Simulation=True)
-            cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False)
-            cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)
-
+    
     ### Source Run Calibration Steps...
-    if 1: 
-        runPeriods = [11,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 0: 
+        runPeriods = [1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -964,7 +957,7 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [9]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
@@ -972,7 +965,7 @@ if __name__ == "__main__":
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             rep.findPedestals(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
