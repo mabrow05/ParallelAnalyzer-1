@@ -5,9 +5,12 @@
 
 #include <TString.h>
 #include <TH2D.h>
+#include <TMinuit.h>
+#include <TRandom3.h>
 #include <TH1.h>
 #include <TF1.h>
 #include <TH1F.h>
+#include <TGraphAsymmErrors.h>
 #include <TFile.h>
 #include <TCanvas.h>
 #include <TTree.h>
@@ -52,19 +55,26 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber);
 
 void loadCuts(Int_t runNumber, cuts* Cuts);
 
+std::vector <Double_t> loadGainFactors(Int_t runNumber);
+
 void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex); 
 
-std::vector<Double_t> fitThreshold(TH1F *trigg, std::vector <Double_t> paramGuesses = std::vector <Double_t>(0));
+std::vector<Double_t> fitThreshold(TGraphAsymmErrors *trigg, std::vector <Double_t> paramGuesses = std::vector <Double_t>(0));
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
   
   std::vector <Int_t> evtTypes;
 
-  if (argc!=3) { std::cout << "USAGE: ./findADCthreshold.exe [octet or xenon] [runListIndex]\n"; exit(0); }
+  if (argc!=3) { std::cout << "USAGE: ./findADCthreshold.exe [octet/xenon/source] [runListIndex]\n"; exit(0); }
 
   findDiscriminatorThresh(TString(argv[1]),atoi(argv[2]));
 
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
@@ -84,7 +94,7 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 };
 
 
-void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
+void findDiscriminatorThresh(TString octetORxenonORsource, Int_t runListIndex) {
 
   // Read in the Beta/octet runs in this Octet
   std::vector <Int_t> runs;
@@ -96,7 +106,7 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
   Char_t temp[200];
   ifstream runList;
 
-  if (octetORxenon==TString("octet")) {
+  if (octetORxenonORsource==TString("octet")) {
 
     Char_t type[5];
     sprintf(temp,"%s/All_Octets/octet_list_%i.dat",getenv("OCTET_LIST"),runListIndex);
@@ -109,9 +119,21 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
     }
     runList.close();
   }
-  else { 
+  else if (octetORxenonORsource==TString("xenon")) { 
     
     sprintf(temp,"../run_lists/Xenon_Calibration_Run_Period_%i.dat",runListIndex);
+    runList.open(temp);
+    while (runList >> rn) {
+      runs.push_back(rn);
+      std::cout << runs[numRuns] << std::endl;
+      numRuns++;
+      //if (numRuns>30) break;
+    }
+    runList.close();
+  }
+  else { 
+    
+    sprintf(temp,"../run_lists/Source_Calibration_Run_Period_%i.dat",runListIndex);
     runList.open(temp);
     while (runList >> rn) {
       runs.push_back(rn);
@@ -133,42 +155,42 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
   TFile *f = NULL;
   TTree *t = NULL;
 
-  Double_t lower_limit = -30.;
+  Double_t lower_limit = -40.;
   Int_t hisBinWidth = 2;
-  Double_t upper_limit = 150.;
+  Double_t upper_limit = 180.;
   Int_t nBins = (int)(upper_limit/hisBinWidth);
 
   TH1F *totalE1 = new TH1F("totalE1", "total events E1", nBins, lower_limit, upper_limit);
   TH1F *triggerE1 = new TH1F("triggerE1", "trigger events E1", nBins, lower_limit, upper_limit);
-  TH1F *probE1 = new TH1F("probE1", "probability E1", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probE1 = new TGraphAsymmErrors();
   
   TH1F *totalE2 = new TH1F("totalE2", "total events E2", nBins, lower_limit, upper_limit);
   TH1F *triggerE2 = new TH1F("triggerE2", "trigger events E2", nBins, lower_limit, upper_limit);
-  TH1F *probE2 = new TH1F("probE2", "probability E2", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probE2 = new TGraphAsymmErrors();
 
   TH1F *totalE3 = new TH1F("totalE3", "total events E3", nBins, lower_limit, upper_limit);
   TH1F *triggerE3 = new TH1F("triggerE3", "trigger events E3", nBins, lower_limit, upper_limit);
-  TH1F *probE3 = new TH1F("probE3", "probability E3", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probE3 = new TGraphAsymmErrors();
 
   TH1F *totalE4 = new TH1F("totalE4", "total events E4", nBins, lower_limit, upper_limit);
   TH1F *triggerE4 = new TH1F("triggerE4", "trigger events E4", nBins, lower_limit, upper_limit);
-  TH1F *probE4 = new TH1F("probE4", "probability E4", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probE4 = new TGraphAsymmErrors();
 
   TH1F *totalW1 = new TH1F("totalW1", "total events W1", nBins, lower_limit, upper_limit);
   TH1F *triggerW1 = new TH1F("triggerW1", "trigger events W1", nBins, lower_limit, upper_limit);
-  TH1F *probW1 = new TH1F("probW1", "probability W1", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probW1 = new TGraphAsymmErrors();
   
   TH1F *totalW2 = new TH1F("totalW2", "total events W2", nBins, lower_limit, upper_limit);
   TH1F *triggerW2 = new TH1F("triggerW2", "trigger events W2", nBins, lower_limit, upper_limit);
-  TH1F *probW2 = new TH1F("probW2", "probability W2", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probW2 = new TGraphAsymmErrors();
 
   TH1F *totalW3 = new TH1F("totalW3", "total events W3", nBins, lower_limit, upper_limit);
   TH1F *triggerW3 = new TH1F("triggerW3", "trigger events W3", nBins, lower_limit, upper_limit);
-  TH1F *probW3 = new TH1F("probW3", "probability W3", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probW3 = new TGraphAsymmErrors();
 
   TH1F *totalW4 = new TH1F("totalW4", "total events W4", nBins, lower_limit, upper_limit);
   TH1F *triggerW4 = new TH1F("triggerW4", "trigger events W4", nBins, lower_limit, upper_limit);
-  TH1F *probW4 = new TH1F("probW4", "probability W4", nBins, lower_limit, upper_limit);
+  TGraphAsymmErrors *probW4 = new TGraphAsymmErrors();
   
 
   // All pertinent variables to be read in from data files
@@ -181,12 +203,14 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
 
   // pedestal variables
   Double_t pedE1, pedE2, pedE3, pedE4, pedW1, pedW2, pedW3, pedW4;
-  Double_t pedE1_width, pedE2_width, pedE3_width, pedE4_width, pedW1_width, pedW2_width, pedW3_width, pedW4_width;
+  //Double_t pedE1_width, pedE2_width, pedE3_width, pedE4_width, pedW1_width, pedW2_width, pedW3_width, pedW4_width;
+  Double_t gainE1, gainE2, gainE3, gainE4, gainW1, gainW2, gainW3, gainW4;
 
   //Cut variables  
   cuts Cuts;
 
   std::vector < std::vector < Double_t > > peds(8, std::vector <Double_t> (2,0.));
+  std::vector <Double_t> gain(8,1.);
 
   // Cycling through all the input files and filling the histograms
   for (UInt_t i=0; i<runs.size(); i++) {
@@ -194,8 +218,9 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
     std::cout << "MADE IT\n";
 
     loadCuts(run, &Cuts);
-    peds = loadPMTpedestals(run);    
 
+    peds = loadPMTpedestals(run);
+    
     pedE1 = peds[0][0];
     pedE2 = peds[1][0];
     pedE3 = peds[2][0];
@@ -205,14 +230,24 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
     pedW3 = peds[6][0];
     pedW4 = peds[7][0];
 
-    pedE1_width = peds[0][1];
+    gain = loadGainFactors(run);
+    gainE1 = (gain[0]>0.5 && gain[0]<1.5) ? gain[0] : 1.;
+    gainE2 = (gain[1]>0.5 && gain[1]<1.5) ? gain[1] : 1.;
+    gainE3 = (gain[2]>0.5 && gain[2]<1.5) ? gain[2] : 1.;
+    gainE4 = (gain[3]>0.5 && gain[3]<1.5) ? gain[3] : 1.;
+    gainW1 = (gain[4]>0.5 && gain[4]<1.5) ? gain[4] : 1.;
+    gainW2 = (gain[5]>0.5 && gain[5]<1.5) ? gain[5] : 1.;
+    gainW3 = (gain[6]>0.5 && gain[6]<1.5) ? gain[6] : 1.;
+    gainW4 = (gain[7]>0.5 && gain[7]<1.5) ? gain[7] : 1.;
+
+    /*pedE1_width = peds[0][1];
     pedE2_width = peds[1][1];
     pedE3_width = peds[2][1];
     pedE4_width = peds[3][1];
     pedW1_width = peds[4][1];
     pedW2_width = peds[5][1];
     pedW3_width = peds[6][1];
-    pedW4_width = peds[7][1];
+    pedW4_width = peds[7][1];*/
 
     std::cout << "Ped width: " << pedE1 << std::endl;
     
@@ -271,29 +306,31 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
       if ( TdcEast2fold > 0. ) {
 
 	//Fill West side total histograms
-	totalW1->Fill(QadcW1-pedW1);
-	totalW2->Fill(QadcW2-pedW2);
-	totalW3->Fill(QadcW3-pedW3);
-	totalW4->Fill(QadcW4-pedW4);
-
-	if ( TdcW1>0. ) triggerW1->Fill(QadcW1-pedW1);
-	if ( TdcW2>0. ) triggerW2->Fill(QadcW2-pedW2);
-	if ( TdcW3>0. ) triggerW3->Fill(QadcW3-pedW3);
-	if ( TdcW4>0. ) triggerW4->Fill(QadcW4-pedW4);
+	//if (PdcWest>Cuts.cutWestAnode) {
+	  totalW1->Fill((QadcW1-pedW1)*gainW1);
+	  totalW2->Fill((QadcW2-pedW2)*gainW2);
+	  totalW3->Fill((QadcW3-pedW3)*gainW3);
+	  totalW4->Fill((QadcW4-pedW4)*gainW4);
+	  
+	  if ( TdcW1>0. ) triggerW1->Fill((QadcW1-pedW1)*gainW1);
+	  if ( TdcW2>0. ) triggerW2->Fill((QadcW2-pedW2)*gainW2);
+	  if ( TdcW3>0. ) triggerW3->Fill((QadcW3-pedW3)*gainW3);
+	  if ( TdcW4>0. ) triggerW4->Fill((QadcW4-pedW4)*gainW4);
+	  //}
 
 	//3 PMTs trigger
 	if ( (TdcE1>0. && TdcE2>0. && TdcE3>0.) || (TdcE2>0. && TdcE3>0. && TdcE4>0.) || (TdcE1>0. && TdcE3>0. && TdcE4>0.) || (TdcE1>0. && TdcE2>0. && TdcE4>0.) ) { 
 	  
 	  //East side 3-fold trigger events
-	  totalE1->Fill(QadcE1-pedE1);
-	  totalE2->Fill(QadcE2-pedE2);
-	  totalE3->Fill(QadcE3-pedE3);
-	  totalE4->Fill(QadcE4-pedE4);
+	  totalE1->Fill((QadcE1-pedE1)*gainE1);
+	  totalE2->Fill((QadcE2-pedE2)*gainE2);
+	  totalE3->Fill((QadcE3-pedE3)*gainE3);
+	  totalE4->Fill((QadcE4-pedE4)*gainE4);
 
-	  if ( TdcE1>0. ) triggerE1->Fill(QadcE1-pedE1);
-	  if ( TdcE2>0. ) triggerE2->Fill(QadcE2-pedE2);
-	  if ( TdcE3>0. ) triggerE3->Fill(QadcE3-pedE3);
-	  if ( TdcE4>0. ) triggerE4->Fill(QadcE4-pedE4);
+	  if ( TdcE1>0. ) triggerE1->Fill((QadcE1-pedE1)*gainE1);
+	  if ( TdcE2>0. ) triggerE2->Fill((QadcE2-pedE2)*gainE2);
+	  if ( TdcE3>0. ) triggerE3->Fill((QadcE3-pedE3)*gainE3);
+	  if ( TdcE4>0. ) triggerE4->Fill((QadcE4-pedE4)*gainE4);
 	}
 	
       }
@@ -302,29 +339,31 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
       if ( TdcWest2fold > 0. ) {
 
 	//Fill East side total histograms
-	totalE1->Fill(QadcE1-pedE1);
-	totalE2->Fill(QadcE2-pedE2);
-	totalE3->Fill(QadcE3-pedE3);
-	totalE4->Fill(QadcE4-pedE4);
-
-	if ( TdcE1>0. ) triggerE1->Fill(QadcE1-pedE1);
-	if ( TdcE2>0. ) triggerE2->Fill(QadcE2-pedE2);
-	if ( TdcE3>0. ) triggerE3->Fill(QadcE3-pedE3);
-	if ( TdcE4>0. ) triggerE4->Fill(QadcE4-pedE4);
+	//if (PdcEast>Cuts.cutEastAnode) {
+	  totalE1->Fill((QadcE1-pedE1)*gainE1);
+	  totalE2->Fill((QadcE2-pedE2)*gainE2);
+	  totalE3->Fill((QadcE3-pedE3)*gainE3);
+	  totalE4->Fill((QadcE4-pedE4)*gainE4);
+	  
+	  if ( TdcE1>0. ) triggerE1->Fill((QadcE1-pedE1)*gainE1);
+	  if ( TdcE2>0. ) triggerE2->Fill((QadcE2-pedE2)*gainE2);
+	  if ( TdcE3>0. ) triggerE3->Fill((QadcE3-pedE3)*gainE3);
+	  if ( TdcE4>0. ) triggerE4->Fill((QadcE4-pedE4)*gainE4);
+	  //}
 
 	
 	if ( (TdcW1>0. && TdcW2>0. && TdcW3>0.) || (TdcW2>0. && TdcW3>0. && TdcW4>0.) || (TdcW1>0. && TdcW3>0. && TdcW4>0.) || (TdcW1>0. && TdcW2>0. && TdcW4>0.) ) { 
 	  
 	  //West side events
-	  totalW1->Fill(QadcW1-pedW1);
-	  totalW2->Fill(QadcW2-pedW2);
-	  totalW3->Fill(QadcW3-pedW3);
-	  totalW4->Fill(QadcW4-pedW4);
+	  totalW1->Fill((QadcW1-pedW1)*gainW1);
+	  totalW2->Fill((QadcW2-pedW2)*gainW2);
+	  totalW3->Fill((QadcW3-pedW3)*gainW3);
+	  totalW4->Fill((QadcW4-pedW4)*gainW4);
 	  
-	  if ( TdcW1>0. ) triggerW1->Fill(QadcW1-pedW1);
-	  if ( TdcW2>0. ) triggerW2->Fill(QadcW2-pedW2);
-	  if ( TdcW3>0. ) triggerW3->Fill(QadcW3-pedW3);
-	  if ( TdcW4>0. ) triggerW4->Fill(QadcW4-pedW4);
+	  if ( TdcW1>0. ) triggerW1->Fill((QadcW1-pedW1)*gainW1);
+	  if ( TdcW2>0. ) triggerW2->Fill((QadcW2-pedW2)*gainW2);
+	  if ( TdcW3>0. ) triggerW3->Fill((QadcW3-pedW3)*gainW3);
+	  if ( TdcW4>0. ) triggerW4->Fill((QadcW4-pedW4)*gainW4);
 	}
       }
       
@@ -332,14 +371,6 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
     f->Close();
   }
 
-  probE1->SetMarkerStyle(20);
-  probE2->SetMarkerStyle(20);
-  probE3->SetMarkerStyle(20);
-  probE4->SetMarkerStyle(20);
-  probW1->SetMarkerStyle(20);
-  probW2->SetMarkerStyle(20);
-  probW3->SetMarkerStyle(20);
-  probW4->SetMarkerStyle(20);
 
   triggerE1->GetXaxis()->SetTitle("ADC channels above pedestal");
   triggerE2->GetXaxis()->SetTitle("ADC channels above pedestal");
@@ -358,24 +389,6 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
   totalW2->GetXaxis()->SetTitle("ADC channels above pedestal");
   totalW3->GetXaxis()->SetTitle("ADC channels above pedestal");
   totalW4->GetXaxis()->SetTitle("ADC channels above pedestal");
-
-  probE1->GetXaxis()->SetTitle("ADC channels above pedestal");
-  probE2->GetXaxis()->SetTitle("ADC channels above pedestal");
-  probE3->GetXaxis()->SetTitle("ADC channels above pedestal");
-  probE4->GetXaxis()->SetTitle("ADC channels above pedestal");
-  probW1->GetXaxis()->SetTitle("ADC channels above pedestal");
-  probW2->GetXaxis()->SetTitle("ADC channels above pedestal");
-  probW3->GetXaxis()->SetTitle("ADC channels above pedestal");
-  probW4->GetXaxis()->SetTitle("ADC channels above pedestal");
-
-  probE1->SetMinimum(0.);
-  probE2->SetMinimum(0.);
-  probE3->SetMinimum(0.);
-  probE4->SetMinimum(0.);
-  probW1->SetMinimum(0.);
-  probW2->SetMinimum(0.);
-  probW3->SetMinimum(0.);
-  probW4->SetMinimum(0.);
 
   
   triggerE1->SetLineColor(kRed);
@@ -405,61 +418,81 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
   probW3->Divide(triggerW3, totalW3);
   probW4->Divide(triggerW4, totalW4);
 
-  //Set all the error bars in prob histos
-  for (Int_t bin=1; bin<=nBins; bin++) {
-    probE1->SetBinError(bin, (totalE1->GetBinContent(bin) > 0. ? probE1->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerE1->GetBinContent(bin)>0.?triggerE1->GetBinContent(bin):1.) + 1./totalE1->GetBinContent(bin)) : 1.));
-    probE2->SetBinError(bin, (totalE2->GetBinContent(bin) > 0. ? probE2->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerE2->GetBinContent(bin)>0.?triggerE2->GetBinContent(bin):1.) + 1./totalE2->GetBinContent(bin)) : 1.));
-    probE3->SetBinError(bin, (totalE3->GetBinContent(bin) > 0. ? probE3->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerE3->GetBinContent(bin)>0.?triggerE3->GetBinContent(bin):1.) + 1./totalE3->GetBinContent(bin)) : 1.));
-    probE4->SetBinError(bin, (totalE4->GetBinContent(bin) > 0. ? probE4->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerE4->GetBinContent(bin)>0.?triggerE4->GetBinContent(bin):1.) + 1./totalE4->GetBinContent(bin)) : 1.));
-    probW1->SetBinError(bin, (totalW1->GetBinContent(bin) > 0. ? probW1->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerW1->GetBinContent(bin)>0.?triggerW1->GetBinContent(bin):1.) + 1./totalW1->GetBinContent(bin)) : 1.));
-    probW2->SetBinError(bin, (totalW2->GetBinContent(bin) > 0. ? probW2->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerW2->GetBinContent(bin)>0.?triggerW2->GetBinContent(bin):1.) + 1./totalW2->GetBinContent(bin)) : 1.));
-    probW3->SetBinError(bin, (totalW3->GetBinContent(bin) > 0. ? probW3->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerW3->GetBinContent(bin)>0.?triggerW3->GetBinContent(bin):1.) + 1./totalW3->GetBinContent(bin)) : 1.));
-    probW4->SetBinError(bin, (totalW4->GetBinContent(bin) > 0. ? probW4->GetBinContent(bin)
-			      *TMath::Sqrt(1./(triggerW4->GetBinContent(bin)>0.?triggerW4->GetBinContent(bin):1.) + 1./totalW4->GetBinContent(bin)) : 1.));
-  }
-	
 
+  probE1->SetMarkerStyle(20);
+  probE2->SetMarkerStyle(20);
+  probE3->SetMarkerStyle(20);
+  probE4->SetMarkerStyle(20);
+  probW1->SetMarkerStyle(20);
+  probW2->SetMarkerStyle(20);
+  probW3->SetMarkerStyle(20);
+  probW4->SetMarkerStyle(20);
+
+  probE1->SetTitle("Trigger Probabability PMT East 1");
+  probE2->SetTitle("Trigger Probabability PMT East 2");
+  probE3->SetTitle("Trigger Probabability PMT East 3");
+  probE4->SetTitle("Trigger Probabability PMT East 4");
+  probW1->SetTitle("Trigger Probabability PMT West 1");
+  probW2->SetTitle("Trigger Probabability PMT West 2");
+  probW3->SetTitle("Trigger Probabability PMT West 3");
+  probW4->SetTitle("Trigger Probabability PMT West 4");
+
+  probE1->GetXaxis()->SetTitle("ADC channels above pedestal");
+  probE2->GetXaxis()->SetTitle("ADC channels above pedestal");
+  probE3->GetXaxis()->SetTitle("ADC channels above pedestal");
+  probE4->GetXaxis()->SetTitle("ADC channels above pedestal");
+  probW1->GetXaxis()->SetTitle("ADC channels above pedestal");
+  probW2->GetXaxis()->SetTitle("ADC channels above pedestal");
+  probW3->GetXaxis()->SetTitle("ADC channels above pedestal");
+  probW4->GetXaxis()->SetTitle("ADC channels above pedestal");
+
+  
+
+  
   //Fit the probabaility histograms and write to file
-  TString filename = TString::Format("%s/%s/%s_%i_thresholds.dat",getenv("TRIGGER_FUNC"),octetORxenon.Data(),octetORxenon.Data(), runListIndex);
+  TString filename = TString::Format("%s/%s/%s_%i_thresholds.dat",getenv("TRIGGER_FUNC"),octetORxenonORsource.Data(),octetORxenonORsource.Data(), runListIndex);
   ofstream funcfile(filename.Data());
   
   std::vector <Double_t> params(8,0);
   
   params = fitThreshold(probE1);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
   params = fitThreshold(probE2);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
   params = fitThreshold(probE3);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
   params =   fitThreshold(probE4);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
   params = fitThreshold(probW1);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
   params = fitThreshold(probW2);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
   params = fitThreshold(probW3);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
   params = fitThreshold(probW4);
   funcfile << params[0] << " " << params[1] << " " << params[2] << " " << params[3] 
-	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
+  	   << " " << params[4] << " " << params[5] << " " << params[6] << " " << params[7] << std::endl;
 
   funcfile.close();
 
-  TString pdf_file = TString::Format("%s/%s/%s_%i_Thresholds.pdf",getenv("TRIGGER_FUNC"),octetORxenon.Data(),octetORxenon.Data(), runListIndex);
+  probE1->SetMinimum(-0.1);
+  probE2->SetMinimum(-0.1);
+  probE3->SetMinimum(-0.1);
+  probE4->SetMinimum(-0.1);
+  probW1->SetMinimum(-0.1);
+  probW2->SetMinimum(-0.1);
+  probW3->SetMinimum(-0.1);
+  probW4->SetMinimum(-0.1);
+
+
+  TString pdf_file = TString::Format("%s/%s/%s_%i_Thresholds.pdf",getenv("TRIGGER_FUNC"),octetORxenonORsource.Data(),octetORxenonORsource.Data(), runListIndex);
 
   TCanvas *cEtrigg = new TCanvas("cEtrigg"," ",2000,800);
   cEtrigg->Divide(4,1);
@@ -509,13 +542,13 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
   cEprob->Divide(4,1);
 
   cEprob->cd(1);
-  probE1->Draw("EP");
+  probE1->Draw("AP");
   cEprob->cd(2);
-  probE2->Draw("EP");
+  probE2->Draw("AP");
   cEprob->cd(3);
-  probE3->Draw("EP");
+  probE3->Draw("AP");
   cEprob->cd(4);
-  probE4->Draw("EP");
+  probE4->Draw("AP");
 
   cEprob->Print(pdf_file);
 
@@ -523,13 +556,13 @@ void findDiscriminatorThresh(TString octetORxenon, Int_t runListIndex) {
   cWprob->Divide(4,1);
 
   cWprob->cd(1);
-  probW1->Draw("EP");
+  probW1->Draw("AP");
   cWprob->cd(2);
-  probW2->Draw("EP");
+  probW2->Draw("AP");
   cWprob->cd(3);
-  probW3->Draw("EP");
+  probW3->Draw("AP");
   cWprob->cd(4);
-  probW4->Draw("EP");
+  probW4->Draw("AP");
 
   cWprob->Print(pdf_file+")");
 
@@ -605,12 +638,13 @@ void loadCuts(Int_t runNumber, cuts* Cuts) {
 
 }
 
-std::vector <Double_t> fitThreshold(TH1F *trigg, std::vector <Double_t> params) {
+std::vector <Double_t> fitThreshold(TGraphAsymmErrors *trigg, std::vector <Double_t> params) {
 
   bool defaultParams = true;
   if (params.size()==8) defaultParams = false;
 
-  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-20.,150.);
+  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-30.,150.);
+  //TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))",-30.,150.);
 
   if (defaultParams) {
     params.resize(8);
@@ -637,8 +671,8 @@ std::vector <Double_t> fitThreshold(TH1F *trigg, std::vector <Double_t> params) 
   
   erf->FixParameter(0,0.5);
   erf->FixParameter(1,0.5);
-  // erf->SetParLimits(4,1.,25.);
-  //erf->SetParLimits(4,0.,2.);
+  erf->SetParLimits(3,1.,100.);
+  erf->SetParLimits(4,1.,100.);
   erf->FixParameter(5,0.5);                                                                                                              
   erf->FixParameter(6,0.5);
   //erf->SetParLimits(7,0.,50.); //Constant offset of erf     
@@ -646,9 +680,54 @@ std::vector <Double_t> fitThreshold(TH1F *trigg, std::vector <Double_t> params) 
     
   trigg->Fit("erf","R");
 
+  Int_t attempt = 0;
+
+  while ( gMinuit->fCstatu!=TString("CONVERGED ") && attempt<20 ) {
+
+    TRandom3 rand(0);
+                                                                                            
+    erf->SetParameter(2, rand.Gaus(25., 5.)); //Mean of gaussian integrated for erf                                                                         
+    erf->SetParameter(3, rand.Gaus(10.,2.)); //std. dev. of gaussian integrated for erf    
+                                                                  
+    erf->SetParameter(4, rand.Gaus(15.,7.)); //severity of transition function "turn on"                                                                     
+                              
+    erf->SetParameter(7,rand.Gaus(12.,3.)); // stretching factor of second tanh 
+    
+    erf->SetParLimits(3,3.,100.);
+    
+    trigg->Fit("erf","R");
+
+    attempt+=1;
+  }
+
   for (UInt_t i=0; i<params.size();i++) params[i] = erf->GetParameter(i);
 
   delete erf;
 
   return params;
+}
+
+std::vector <Double_t> loadGainFactors(Int_t runNumber) {
+
+  // Read gain corrections file                                                                                                                
+  char tempFileGain[500];
+  sprintf(tempFileGain, "%s/gain_bismuth_%i.dat",getenv("GAIN_BISMUTH"), runNumber);
+  std::cout << "... Reading: " << tempFileGain << std::endl;
+
+  std::vector <Double_t> gainCorrection(8,1.);
+  std::vector <Double_t> fitMean(8,1.);
+  ifstream fileGain(tempFileGain);
+  for (int i=0; i<8; i++) {
+    fileGain >> fitMean[i] >> gainCorrection[i];
+  }
+  std::cout << "...   PMT E1: " << gainCorrection[0] << std::endl;
+  std::cout << "...   PMT E2: " << gainCorrection[1] << std::endl;
+  std::cout << "...   PMT E3: " << gainCorrection[2] << std::endl;
+  std::cout << "...   PMT E4: " << gainCorrection[3] << std::endl;
+  std::cout << "...   PMT W1: " << gainCorrection[4] << std::endl;
+  std::cout << "...   PMT W2: " << gainCorrection[5] << std::endl;
+  std::cout << "...   PMT W3: " << gainCorrection[6] << std::endl;
+  std::cout << "...   PMT W4: " << gainCorrection[7] << std::endl;
+
+  return gainCorrection;
 }
