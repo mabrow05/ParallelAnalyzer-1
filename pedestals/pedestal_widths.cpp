@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
     if (iSis00 == 2) triggerWest = true;
     if (iSis00 == 260 || iSis00 == 516 || iSis00 == 1028 || iSis00 == 2052) triggerUCN = true;
 
-    if (triggerWest || triggerUCN) {
+    if (triggerWest) { // || triggerUCN) {
       his11->Fill(Qadc[0]);
       his12->Fill(Qadc[1]);
       his13->Fill(Qadc[2]);
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
       nEastPed++;
     }
 
-    if (triggerEast || triggerUCN) {
+    if (triggerEast) { // || triggerUCN) {
       his15->Fill(Qadc[4]);
       his16->Fill(Qadc[5]);
       his17->Fill(Qadc[6]);
