@@ -31,6 +31,9 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
 
 void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 {
+
+  bool quadratic = false;
+  
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
 
@@ -64,24 +67,43 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   char temp[500];
   sprintf(temp, "%s/residuals/source_runs_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calibrationPeriod);
   ifstream filein(temp);
+  sprintf(temp, "%s/residuals/source_runs_peakErrors_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calibrationPeriod);
+  ifstream fileinErr(temp);
   sprintf(temp, "%s/residuals/SIM_source_runs_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calibrationPeriod);
   ifstream simFileIn(temp);
+  sprintf(temp, "%s/residuals/SIM_source_runs_peakErrors_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calibrationPeriod);
+  ifstream simFileInErr(temp);
 
   Int_t i = 0;
   Int_t run[500], run_hold=0;
   string sourceName[500], sourceName_hold="";
   Double_t adcE1[500], adcE2[500], adcE3[500], adcE4[500];
   Double_t adcW1[500], adcW2[500], adcW3[500], adcW4[500];
+  Double_t adcE1_err[500], adcE2_err[500], adcE3_err[500], adcE4_err[500];
+  Double_t adcW1_err[500], adcW2_err[500], adcW3_err[500], adcW4_err[500];
   Double_t EqE1[500], EqE2[500], EqE3[500], EqE4[500];
   Double_t EqW1[500], EqW2[500], EqW3[500], EqW4[500];
+  Double_t EqE1_err[500], EqE2_err[500], EqE3_err[500], EqE4_err[500];
+  Double_t EqW1_err[500], EqW2_err[500], EqW3_err[500], EqW4_err[500];
   Double_t resE1[500], resE2[500], resE3[500], resE4[500];
   Double_t resW1[500], resW2[500], resW3[500], resW4[500];
   Double_t err[500];
-  Double_t Eq_hold[8];
+
+  TString Eq_hold[8], ADC_hold[8]; //this is a string to take care of a -nan issue with bad PMT values
   
+  //Load the peak information
   while (filein >> run[i] >> sourceName[i]
-	 >> adcE1[i] >> adcE2[i] >> adcE3[i] >> adcE4[i]
-	 >> adcW1[i] >> adcW2[i] >> adcW3[i] >> adcW4[i]) {
+	 >> ADC_hold[0] >> ADC_hold[1] >> ADC_hold[2] >> ADC_hold[3]
+	 >> ADC_hold[4] >> ADC_hold[5] >> ADC_hold[6] >> ADC_hold[7]) {
+
+    adcE1[i] = TMath::IsNaN(atof(ADC_hold[0].Data())) ? 10000. : atof(ADC_hold[0].Data());
+    adcE2[i] = TMath::IsNaN(atof(ADC_hold[1].Data())) ? 10000. : atof(ADC_hold[1].Data());
+    adcE3[i] = TMath::IsNaN(atof(ADC_hold[2].Data())) ? 10000. : atof(ADC_hold[2].Data());
+    adcE4[i] = TMath::IsNaN(atof(ADC_hold[3].Data())) ? 10000. : atof(ADC_hold[3].Data());
+    adcW1[i] = TMath::IsNaN(atof(ADC_hold[4].Data())) ? 10000. : atof(ADC_hold[4].Data());
+    adcW2[i] = TMath::IsNaN(atof(ADC_hold[5].Data())) ? 10000. : atof(ADC_hold[5].Data());
+    adcW3[i] = TMath::IsNaN(atof(ADC_hold[6].Data())) ? 10000. : atof(ADC_hold[6].Data());
+    adcW4[i] = TMath::IsNaN(atof(ADC_hold[7].Data())) ? 10000. : atof(ADC_hold[7].Data());
 
     while (!(run_hold==run[i] && sourceName_hold==sourceName[i])) {
       simFileIn >> run_hold >> sourceName_hold >> Eq_hold[0] >> Eq_hold[1] >> Eq_hold[2]
@@ -89,14 +111,14 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     }
     //cout << run_hold << " " << sourceName_hold << " ";
     if (run_hold==run[i] && sourceName_hold==sourceName[i]) { 
-      EqE1[i] = Eq_hold[0];
-      EqE2[i] = Eq_hold[1];
-      EqE3[i] = Eq_hold[2];
-      EqE4[i] = Eq_hold[3];
-      EqW1[i] = Eq_hold[4];
-      EqW2[i] = Eq_hold[5];
-      EqW3[i] = Eq_hold[6];
-      EqW4[i] = Eq_hold[7];
+      EqE1[i] = TMath::IsNaN(atof(Eq_hold[0].Data())) ? 10000. : atof(Eq_hold[0].Data()); //The 10000. here takes the peak outside the fit range if for 
+      EqE2[i] = TMath::IsNaN(atof(Eq_hold[1].Data())) ? 10000. : atof(Eq_hold[1].Data()); // some reason it wasn't a real number...
+      EqE3[i] = TMath::IsNaN(atof(Eq_hold[2].Data())) ? 10000. : atof(Eq_hold[2].Data());
+      EqE4[i] = TMath::IsNaN(atof(Eq_hold[3].Data())) ? 10000. : atof(Eq_hold[3].Data());
+      EqW1[i] = TMath::IsNaN(atof(Eq_hold[4].Data())) ? 10000. : atof(Eq_hold[4].Data());
+      EqW2[i] = TMath::IsNaN(atof(Eq_hold[5].Data())) ? 10000. : atof(Eq_hold[5].Data());
+      EqW3[i] = TMath::IsNaN(atof(Eq_hold[6].Data())) ? 10000. : atof(Eq_hold[6].Data());
+      EqW4[i] = TMath::IsNaN(atof(Eq_hold[7].Data())) ? 10000. : atof(Eq_hold[7].Data());
       //simFileIn >> EqE1[i] >> EqE2[i] >> EqE3[i] >> EqE4[i]
       //	>> EqW1[i] >> EqW2[i] >> EqW3[i] >> EqW4[i];
       //cout << EqE1[i] << " " << EqE2[i] << " " << EqE3[i] << " " << EqE4[i] << " "
@@ -110,26 +132,65 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     if (filein.fail()) break;
     i++;
   }
+
+
+  //Load the peak errors
+  Int_t j = 0;
+  run_hold = 0;
+  sourceName_hold = "";
+  string w2;
+
+  while (fileinErr >> run[j] >> sourceName[j]
+	 >> ADC_hold[0] >> ADC_hold[1] >> ADC_hold[2] >> ADC_hold[3]
+	 >> ADC_hold[4] >> ADC_hold[5] >> ADC_hold[6] >> ADC_hold[7]) {
+
+    adcE1_err[j] = TMath::IsNaN(atof(ADC_hold[0].Data())) ? 100. : atof(ADC_hold[0].Data());
+    adcE2_err[j] = TMath::IsNaN(atof(ADC_hold[1].Data())) ? 100. : atof(ADC_hold[1].Data());
+    adcE3_err[j] = TMath::IsNaN(atof(ADC_hold[2].Data())) ? 100. : atof(ADC_hold[2].Data());
+    adcE4_err[j] = TMath::IsNaN(atof(ADC_hold[3].Data())) ? 100. : atof(ADC_hold[3].Data());
+    adcW1_err[j] = TMath::IsNaN(atof(ADC_hold[4].Data())) ? 100. : atof(ADC_hold[4].Data());
+    adcW2_err[j] = TMath::IsNaN(atof(ADC_hold[5].Data())) ? 100. : atof(ADC_hold[5].Data());
+    adcW3_err[j] = TMath::IsNaN(atof(ADC_hold[6].Data())) ? 100. : atof(ADC_hold[6].Data());
+    adcW4_err[j] = TMath::IsNaN(atof(ADC_hold[7].Data())) ? 100. : atof(ADC_hold[7].Data());
+      
+    while (!(run_hold==run[j] && sourceName_hold==sourceName[j])) {
+      simFileInErr >> run_hold >> sourceName_hold >> Eq_hold[0] >> Eq_hold[1] >> Eq_hold[2]
+		>> Eq_hold[3] >> Eq_hold[4] >> Eq_hold[5] >> Eq_hold[6] >> Eq_hold[7];
+    }
+    cout << run_hold << " " << sourceName_hold << " ";
+    if (run_hold==run[j] && sourceName_hold==sourceName[j]) { 
+      EqE1_err[j] = TMath::IsNaN(atof(Eq_hold[0].Data())) ? 100. : atof(Eq_hold[0].Data());
+      EqE2_err[j] = TMath::IsNaN(atof(Eq_hold[1].Data())) ? 100. : atof(Eq_hold[1].Data());
+      EqE3_err[j] = TMath::IsNaN(atof(Eq_hold[2].Data())) ? 100. : atof(Eq_hold[2].Data());
+      EqE4_err[j] = TMath::IsNaN(atof(Eq_hold[3].Data())) ? 100. : atof(Eq_hold[3].Data());
+      EqW1_err[j] = TMath::IsNaN(atof(Eq_hold[4].Data())) ? 100. : atof(Eq_hold[4].Data());
+      EqW2_err[j] = TMath::IsNaN(atof(Eq_hold[5].Data())) ? 100. : atof(Eq_hold[5].Data());
+      EqW3_err[j] = TMath::IsNaN(atof(Eq_hold[6].Data())) ? 100. : atof(Eq_hold[6].Data());
+      EqW4_err[j] = TMath::IsNaN(atof(Eq_hold[7].Data())) ? 100. : atof(Eq_hold[7].Data());
+      //simFileInErr >> EqE1_err[j] >> EqE2_err[j] >> EqE3_err[j] >> EqE4_err[j]
+      //	>> EqW1_err[j] >> EqW2_err[j] >> EqW3_err[j] >> EqW4_err[j];
+      //cout << EqE1_err[j] << " " << EqE2_err[j] << " " << EqE3_err[j] << " " << EqE4_err[j] << " "
+      //   << EqW1_err[j] << " " << EqW2_err[j] << " " << EqW3_err[j] << " " << EqW4_err[j] << endl;
+    }
+    else {
+      cout << "The simulation and data source peak files don't match. You need to re-make the source calibration files for both sim and data\n";
+      exit(0);
+    }
+
+    if (fileinErr.fail()) break;
+    j++;
+  }
+  
+  std::cout << i << " " << j << std::endl;
+
+  if (i!=j) {
+    std::cout << "Source peaks and source errors don't match up!!\n";
+    exit(0);
+  }
   Int_t num = i;
   cout << "Number of data points: " << num << endl;
 
-  /* // Load the smeared EQ values which are different for each PMT and source
-  vector < vector <double> > EQsmeared = returnPeaks(calibrationPeriod,"EQ");
-  for (int m=0; m<EQsmeared.size(); m++) {
-    for (int mm=0; mm<EQsmeared[m].size(); mm++) {
-      cout << EQsmeared[m][mm] << " ";
-    }
-    cout << endl;
-  }
- 
-  //Load the simulated relationship between EQ and Etrue
-  vector < vector <double> > EQ2Etrue = EQ2EtrueFit(calibrationPeriod);
-  for (int m=0; m<EQ2Etrue.size(); m++) {
-    for (int mm=0; mm<EQ2Etrue[m].size(); mm++) {
-      cout << EQ2Etrue[m][mm] << " ";
-    }
-    cout << endl;
-    }*/
+  
 
   //Read in PMT quality file to save whether or not to use a PMT for each run
   vector<vector<int> > pmtQuality;
@@ -164,9 +225,12 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   // usable
   vector<int> runE1,runE2,runE3,runE4,runW1,runW2,runW3,runW4;
   vector<Double_t> EQE1,EQE2,EQE3,EQE4,EQW1,EQW2,EQW3,EQW4;
+  vector<Double_t> EQE1_err,EQE2_err,EQE3_err,EQE4_err,EQW1_err,EQW2_err,EQW3_err,EQW4_err;
   vector<string> nameE1,nameE2,nameE3,nameE4,nameW1,nameW2,nameW3,nameW4;
   vector<Double_t> ADCE1, ADCE2, ADCE3, ADCE4;
   vector<Double_t> ADCW1, ADCW2, ADCW3, ADCW4;
+  vector<Double_t> ADCE1_err, ADCE2_err, ADCE3_err, ADCE4_err;
+  vector<Double_t> ADCW1_err, ADCW2_err, ADCW3_err, ADCW4_err;
   vector<Double_t> ResE1, ResE2, ResE3, ResE4;
   vector<Double_t> ResW1, ResW2, ResW3, ResW4;
   // Fill run, adc, and eQ vectors
@@ -179,56 +243,72 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;*/
 
-    if (sourceName[i]=="Cd" /*|| sourceName[i]=="Bi2"*/ || sourceName[i]=="In") continue;
+    if (sourceName[i]=="Cd" || sourceName[i]=="Bi2" /*|| sourceName[i]=="In"*/) continue;
 
-    if (pmtQuality[runPos][0]) {
-      runE1.push_back(run[i]);
-      EQE1.push_back(EqE1[i]);
-      nameE1.push_back(sourceName[i]);
-      ADCE1.push_back(adcE1[i]);
-    }
-    if (pmtQuality[runPos][1]) {
-      runE2.push_back(run[i]);
-      EQE2.push_back(EqE2[i]);
-      nameE2.push_back(sourceName[i]);
-      ADCE2.push_back(adcE2[i]);
-    }
-    if (pmtQuality[runPos][2]) {
-      runE3.push_back(run[i]);
-      EQE3.push_back(EqE3[i]);
-      nameE3.push_back(sourceName[i]);
-      ADCE3.push_back(adcE3[i]);
-    }
-    if (pmtQuality[runPos][3]) {
-      runE4.push_back(run[i]);
-      EQE4.push_back(EqE4[i]);
-      nameE4.push_back(sourceName[i]);
-      ADCE4.push_back(adcE4[i]);
-    }
-    if (pmtQuality[runPos][4]) {
-      runW1.push_back(run[i]);
-      EQW1.push_back(EqW1[i]);
-      nameW1.push_back(sourceName[i]);
-      ADCW1.push_back(adcW1[i]);
-    }
-    if (pmtQuality[runPos][5]) {
+    //if (pmtQuality[runPos][0]) {
+    runE1.push_back(run[i]);
+    EQE1.push_back(EqE1[i]);
+    EQE1_err.push_back(EqE1_err[i]);
+    nameE1.push_back(sourceName[i]);
+    ADCE1.push_back(adcE1[i]);
+    ADCE1_err.push_back(adcE1_err[i]);
+    //}
+    //if (pmtQuality[runPos][1]) {
+    runE2.push_back(run[i]);
+    EQE2.push_back(EqE2[i]);
+    EQE2_err.push_back(EqE2_err[i]);
+    nameE2.push_back(sourceName[i]);
+    ADCE2.push_back(adcE2[i]);
+    ADCE2_err.push_back(adcE2_err[i]);
+    //}
+    //if (pmtQuality[runPos][2]) {
+    runE3.push_back(run[i]);
+    EQE3.push_back(EqE3[i]);
+    EQE3_err.push_back(EqE3_err[i]);
+    nameE3.push_back(sourceName[i]);
+    ADCE3.push_back(adcE3[i]);
+    ADCE3_err.push_back(adcE3_err[i]);
+    //}
+    //if (pmtQuality[runPos][3]) {
+    runE4.push_back(run[i]);
+    EQE4.push_back(EqE4[i]);
+    EQE4_err.push_back(EqE4_err[i]);
+    nameE4.push_back(sourceName[i]);
+    ADCE4.push_back(adcE4[i]);
+    ADCE4_err.push_back(adcE4_err[i]);
+    //}
+    //if (pmtQuality[runPos][4]) {
+    runW1.push_back(run[i]);
+    EQW1.push_back(EqW1[i]);
+    EQW1_err.push_back(EqW1_err[i]);
+    nameW1.push_back(sourceName[i]);
+    ADCW1.push_back(adcW1[i]);
+    ADCW1_err.push_back(adcW1_err[i]);
+    //}
+    if (run[i]<16983 || run[i]>17249) { //pmtQuality[runPos][5]) {
       runW2.push_back(run[i]);
       EQW2.push_back(EqW2[i]);
+      EQW2_err.push_back(EqW2_err[i]);
       nameW2.push_back(sourceName[i]);
       ADCW2.push_back(adcW2[i]);
+      ADCW2_err.push_back(adcW2_err[i]);
     }
-    if (pmtQuality[runPos][6]) {
-      runW3.push_back(run[i]);
-      EQW3.push_back(EqW3[i]);
-      nameW3.push_back(sourceName[i]);
-      ADCW3.push_back(adcW3[i]);
-    }
-    if (pmtQuality[runPos][7]) {
-      runW4.push_back(run[i]);
-      EQW4.push_back(EqW4[i]);
-      nameW4.push_back(sourceName[i]);
-      ADCW4.push_back(adcW4[i]);
-    }
+    //if (pmtQuality[runPos][6]) {
+    runW3.push_back(run[i]);
+    EQW3.push_back(EqW3[i]);
+    EQW3_err.push_back(EqW3_err[i]);
+    nameW3.push_back(sourceName[i]);
+    ADCW3.push_back(adcW3[i]);
+    ADCW3_err.push_back(adcW3_err[i]);
+    //}
+    //if (pmtQuality[runPos][7]) {
+    runW4.push_back(run[i]);
+    EQW4.push_back(EqW4[i]);
+    EQW4_err.push_back(EqW4_err[i]);
+    nameW4.push_back(sourceName[i]);
+    ADCW4.push_back(adcW4[i]);
+    ADCW4_err.push_back(adcW4_err[i]);
+    //}
   }
 
 
@@ -275,8 +355,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   //fitADC->FixParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-  //fitADC->FixParameter(2, 0.0);
   fitADC->SetParLimits(2, -0.001, 0.001);
+  if (!quadratic) fitADC->FixParameter(2, 0.0);
   //fitADC->FixParameter(0, 0.0);
 
   /*TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", 0., 2500.0);
@@ -359,7 +439,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     E1->cd();
 
-    TGraphErrors *grE1 = new TGraphErrors(runE1.size(),&ADCE1[0],&EQE1[0],err,err);
+    TGraphErrors *grE1 = new TGraphErrors(runE1.size(),&ADCE1[0],&EQE1[0],&ADCE1_err[0],&EQE1_err[0]);
     grE1->SetTitle("East PMT 1");
     grE1->SetMarkerColor(1);
     grE1->SetLineColor(1);
@@ -511,7 +591,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     E2->cd();
 
-    TGraphErrors *grE2 = new TGraphErrors(runE2.size(),&ADCE2[0],&EQE2[0],err,err);
+    TGraphErrors *grE2 = new TGraphErrors(runE2.size(),&ADCE2[0],&EQE2[0],&ADCE2_err[0],&EQE2_err[0]);
     grE2->SetTitle("East PMT 2");
     grE2->SetMarkerColor(1);
     grE2->SetLineColor(1);
@@ -662,7 +742,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     E3->cd();
 
-    TGraphErrors *grE3 = new TGraphErrors(runE3.size(),&ADCE3[0],&EQE3[0],err,err);
+    TGraphErrors *grE3 = new TGraphErrors(runE3.size(),&ADCE3[0],&EQE3[0],&ADCE3_err[0],&EQE3_err[0]);
     grE3->SetTitle("East PMT 3");
     grE3->SetMarkerColor(1);
     grE3->SetLineColor(1);
@@ -821,7 +901,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     E4->cd();
 
-    TGraphErrors *grE4 = new TGraphErrors(runE4.size(),&ADCE4[0],&EQE4[0],err,err);
+    TGraphErrors *grE4 = new TGraphErrors(runE4.size(),&ADCE4[0],&EQE4[0],&ADCE4_err[0],&EQE4_err[0]);
     grE4->SetTitle("East PMT 4");
     grE4->SetMarkerColor(1);
     grE4->SetLineColor(1);
@@ -982,7 +1062,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     W1->cd();
 
-    TGraphErrors *grW1 = new TGraphErrors(runW1.size(),&ADCW1[0],&EQW1[0],err,err);
+    TGraphErrors *grW1 = new TGraphErrors(runW1.size(),&ADCW1[0],&EQW1[0],&ADCW1_err[0],&EQW1_err[0]);
     grW1->SetTitle("West PMT 1");
     grW1->SetMarkerColor(1);
     grW1->SetLineColor(1);
@@ -1134,7 +1214,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     W2->cd();
 
-    TGraphErrors *grW2 = new TGraphErrors(runW2.size(),&ADCW2[0],&EQW2[0],err,err);
+    TGraphErrors *grW2 = new TGraphErrors(runW2.size(),&ADCW2[0],&EQW2[0],&ADCW2_err[0],&EQW2_err[0]);
     grW2->SetTitle("West PMT 2");
     grW2->SetMarkerColor(1);
     grW2->SetLineColor(1);
@@ -1287,7 +1367,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     
     W3->cd();
 
-    TGraphErrors *grW3 = new TGraphErrors(runW3.size(),&ADCW3[0],&EQW3[0],err,err);
+    TGraphErrors *grW3 = new TGraphErrors(runW3.size(),&ADCW3[0],&EQW3[0],&ADCW3_err[0],&EQW3_err[0]);
     grW3->SetTitle("West PMT 3");
     grW3->SetMarkerColor(1);
     grW3->SetLineColor(1);
@@ -1441,7 +1521,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     W4->cd();
 
-    TGraphErrors *grW4 = new TGraphErrors(runW4.size(),&ADCW4[0],&EQW4[0],err,err);
+    TGraphErrors *grW4 = new TGraphErrors(runW4.size(),&ADCW4[0],&EQW4[0],&ADCW4_err[0],&EQW4_err[0]);
     grW4->SetTitle("West PMT 4");
     grW4->SetMarkerColor(1);
     grW4->SetLineColor(1);
