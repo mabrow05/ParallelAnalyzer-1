@@ -441,7 +441,7 @@ void revCalSimulation (Int_t runNumber, string source)
       if (eta[p]>0.) {
 	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE)));
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE))));
-	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  ADCvecE[p] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
@@ -449,7 +449,7 @@ void revCalSimulation (Int_t runNumber, string source)
       else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
 	//pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE)));
 	pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE))));
-	Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	ADCvecE[p] = ADC;
 	pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	pmt.Evis[p] = pmt.etaEvis[p];
@@ -490,7 +490,7 @@ void revCalSimulation (Int_t runNumber, string source)
 	if (eta[p]>0.) {
 	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW)));
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW))));
-	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  ADCvecW[p-4] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  
@@ -499,7 +499,7 @@ void revCalSimulation (Int_t runNumber, string source)
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
 	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW)));
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW))));
-	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  ADCvecW[p-4] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];

@@ -852,7 +852,7 @@ if __name__ == "__main__":
         
     ### Makes a file with each run followed by a boolean (0,1) for whether each PMT should be used or not
     if options.makePMTrunFile:
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[13,14,15,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]#
         cal=CalibrationManager()
         for period in runPeriods:
             cal.makePMTrunFile(period)
@@ -922,7 +922,7 @@ if __name__ == "__main__":
         
     
     ### Source Run Calibration Steps...
-    if 0: 
+    if 1: 
         runPeriods = [1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
