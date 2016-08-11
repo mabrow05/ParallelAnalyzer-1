@@ -303,23 +303,23 @@ void findDiscriminatorThresh(TString octetORxenonORsource, Int_t runListIndex) {
       
 
       // East Side Triggers (including backscatters)
-      if ( TdcEast2fold > 0. ) {
+      if ( TdcEast2fold > 0.00001 ) {
 
 	//Fill West side total histograms
-	//if (PdcWest>Cuts.cutWestAnode) {
+	if (PdcWest>Cuts.cutWestAnode) {
 	  totalW1->Fill((QadcW1-pedW1)*gainW1);
 	  totalW2->Fill((QadcW2-pedW2)*gainW2);
 	  totalW3->Fill((QadcW3-pedW3)*gainW3);
 	  totalW4->Fill((QadcW4-pedW4)*gainW4);
 	  
-	  if ( TdcW1>0. ) triggerW1->Fill((QadcW1-pedW1)*gainW1);
-	  if ( TdcW2>0. ) triggerW2->Fill((QadcW2-pedW2)*gainW2);
-	  if ( TdcW3>0. ) triggerW3->Fill((QadcW3-pedW3)*gainW3);
-	  if ( TdcW4>0. ) triggerW4->Fill((QadcW4-pedW4)*gainW4);
-	  //}
+	  if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-pedW1)*gainW1);
+	  if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-pedW2)*gainW2);
+	  if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-pedW3)*gainW3);
+	  if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-pedW4)*gainW4);
+	}
 
 	//3 PMTs trigger
-	if ( (TdcE1>0. && TdcE2>0. && TdcE3>0.) || (TdcE2>0. && TdcE3>0. && TdcE4>0.) || (TdcE1>0. && TdcE3>0. && TdcE4>0.) || (TdcE1>0. && TdcE2>0. && TdcE4>0.) ) { 
+	if ( (TdcE1>0.00001 && TdcE2>0.00001 && TdcE3>0.00001) || (TdcE2>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE2>0.00001 && TdcE4>0.00001) ) { 
 	  
 	  //East side 3-fold trigger events
 	  totalE1->Fill((QadcE1-pedE1)*gainE1);
@@ -327,32 +327,32 @@ void findDiscriminatorThresh(TString octetORxenonORsource, Int_t runListIndex) {
 	  totalE3->Fill((QadcE3-pedE3)*gainE3);
 	  totalE4->Fill((QadcE4-pedE4)*gainE4);
 
-	  if ( TdcE1>0. ) triggerE1->Fill((QadcE1-pedE1)*gainE1);
-	  if ( TdcE2>0. ) triggerE2->Fill((QadcE2-pedE2)*gainE2);
-	  if ( TdcE3>0. ) triggerE3->Fill((QadcE3-pedE3)*gainE3);
-	  if ( TdcE4>0. ) triggerE4->Fill((QadcE4-pedE4)*gainE4);
+	  if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-pedE1)*gainE1);
+	  if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-pedE2)*gainE2);
+	  if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-pedE3)*gainE3);
+	  if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-pedE4)*gainE4);
 	}
 	
       }
 
       // West Side Triggers (including backscatters)
-      if ( TdcWest2fold > 0. ) {
+      if ( TdcWest2fold > 0.00001 ) {
 
 	//Fill East side total histograms
-	//if (PdcEast>Cuts.cutEastAnode) {
+	if (PdcEast>Cuts.cutEastAnode) {
 	  totalE1->Fill((QadcE1-pedE1)*gainE1);
 	  totalE2->Fill((QadcE2-pedE2)*gainE2);
 	  totalE3->Fill((QadcE3-pedE3)*gainE3);
 	  totalE4->Fill((QadcE4-pedE4)*gainE4);
 	  
-	  if ( TdcE1>0. ) triggerE1->Fill((QadcE1-pedE1)*gainE1);
-	  if ( TdcE2>0. ) triggerE2->Fill((QadcE2-pedE2)*gainE2);
-	  if ( TdcE3>0. ) triggerE3->Fill((QadcE3-pedE3)*gainE3);
-	  if ( TdcE4>0. ) triggerE4->Fill((QadcE4-pedE4)*gainE4);
-	  //}
+	  if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-pedE1)*gainE1);
+	  if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-pedE2)*gainE2);
+	  if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-pedE3)*gainE3);
+	  if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-pedE4)*gainE4);
+	}
 
 	
-	if ( (TdcW1>0. && TdcW2>0. && TdcW3>0.) || (TdcW2>0. && TdcW3>0. && TdcW4>0.) || (TdcW1>0. && TdcW3>0. && TdcW4>0.) || (TdcW1>0. && TdcW2>0. && TdcW4>0.) ) { 
+	if ( (TdcW1>0.00001 && TdcW2>0.00001 && TdcW3>0.00001) || (TdcW2>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW2>0.00001 && TdcW4>0.00001) ) { 
 	  
 	  //West side events
 	  totalW1->Fill((QadcW1-pedW1)*gainW1);
@@ -360,10 +360,10 @@ void findDiscriminatorThresh(TString octetORxenonORsource, Int_t runListIndex) {
 	  totalW3->Fill((QadcW3-pedW3)*gainW3);
 	  totalW4->Fill((QadcW4-pedW4)*gainW4);
 	  
-	  if ( TdcW1>0. ) triggerW1->Fill((QadcW1-pedW1)*gainW1);
-	  if ( TdcW2>0. ) triggerW2->Fill((QadcW2-pedW2)*gainW2);
-	  if ( TdcW3>0. ) triggerW3->Fill((QadcW3-pedW3)*gainW3);
-	  if ( TdcW4>0. ) triggerW4->Fill((QadcW4-pedW4)*gainW4);
+	  if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-pedW1)*gainW1);
+	  if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-pedW2)*gainW2);
+	  if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-pedW3)*gainW3);
+	  if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-pedW4)*gainW4);
 	}
       }
       
