@@ -620,7 +620,7 @@ void OctetAsymmetry::writeAsymToFile() {
     outfile << "BAD OCTET";
   }
   outfile.close();
-  std::cout << "Wrote Asymmetry to file for " << anaChoice << "\n";
+  std::cout << "Wrote Asymmetry to file for " << anaChoice << " in " << outpath << "\n";
 };
 
 void OctetAsymmetry::writeSuperSumToFile() {
@@ -1010,9 +1010,9 @@ void QuartetAsymmetry::writeAsymToFile() {
 
   int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
-  std::string outpathA = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) + 
+  std::string outpathA = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
     "Octet_" + itos(octet) + "/QuartetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_A.dat";
-  std::string outpathB = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) 
+  std::string outpathB = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) 
     + "Octet_" + itos(octet) + "/QuartetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_B.dat";
   
 
@@ -1040,7 +1040,7 @@ void QuartetAsymmetry::writeAsymToFile() {
   else outfileB << "BAD QUARTET";
   outfileB.close();
 
-  std::cout << "Wrote Asymmetry to file for anaChoice " << anaChoice << "\n";
+  std::cout << "Wrote Asymmetry to file for anaChoice " << anaChoice << " in:\n" << outpathA << std::endl << outpathB << "\n";
 };
 
 void QuartetAsymmetry::writeSuperSumToFile() {
@@ -1675,13 +1675,13 @@ void PairAsymmetry::writeAsymToFile() {
 
   int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
-  std::string outpathA0 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) + 
+  std::string outpathA0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
     "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
-  std::string outpathA1 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) + 
+  std::string outpathA1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
     "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
-  std::string outpathB0 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) +
+  std::string outpathB0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
     "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
-  std::string outpathB1 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) +
+  std::string outpathB1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
     "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
 
   //Open and fill file for quartet A
@@ -1741,13 +1741,13 @@ void PairAsymmetry::writeSuperSumToFile() {
 
   int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
-  std::string outpathA0 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) + 
+  std::string outpathA0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
     "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
-  std::string outpathA1 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) + 
+  std::string outpathA1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
     "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
-  std::string outpathB0 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) +
+  std::string outpathB0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
     "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
-  std::string outpathB1 = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) +
+  std::string outpathB1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
     "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
   
   //Open and fill file for quartet A

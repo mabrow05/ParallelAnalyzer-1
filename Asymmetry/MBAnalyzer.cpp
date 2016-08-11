@@ -30,7 +30,10 @@ Maybe even add in writing the final answer to the database if the user wants to
 
 bool BLINDED = true;
 
-std::vector <Int_t> badOct = {7};
+std::vector <Int_t> badOct = {7}; // Octet 7 had W anode dead for part of run
+                                  // Either need to discard, or apply the 
+                                  // Charge cloud method to determine a 
+                                  // coincidence
 
 // The Process functions will calculate all the raw asymmetries on a bin-by-bin basis and write them to file
 void ProcessOctets(Int_t octBegin, Int_t octEnd, Int_t anaChoice=1, Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true);
@@ -68,15 +71,17 @@ int main()
   try {
     
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-
     //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
     PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm);
+    
+    //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    //PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+     
+    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
     //PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    //PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    
   }
   catch(const char* ex){
     std::cerr << "Error: " << ex << std::endl;
@@ -367,13 +372,25 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       std::string basePath2 =basePath+ "Octet_"+itos(octet)+"/" + groupType + "Asymmetry/"; 
       std::string infilePath = basePath2 + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + ".dat";
       std::string outfilePath = basePath2 + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".dat";
+      
+      //Remove old output files in case they were created on accident and aren't filled with good values
+      std::string command = "rm " + outfilePath; 
+      system(command.c_str());
+
       //First check that Octet was good
       std::string checkStatus;
       infile.open(infilePath.c_str());
-      infile >> checkStatus; 
-      infile.close();
-      if (checkStatus=="BAD") continue;
-	
+
+      if ( infile.is_open() ) {
+	infile >> checkStatus; 
+	infile.close();
+	if (checkStatus=="BAD") continue;
+      }
+      else {
+	std::cout << "Could not open binned Asymmetries for Octet " << octet << " so skipping...\n";
+	continue; 
+      }
+
       std::vector < std::vector <Double_t > > AsymAndError;
       std::vector < std::vector <Double_t > > RawAsymAndError;
       std::vector < Double_t > enBinMedian;
@@ -467,7 +484,8 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 
     //Now the Quartets
     else if (groupType=="Quartet")
-    {
+    {	  
+
       std::string basePath2 =basePath+ "Octet_"+itos(octet)+"/" + groupType + "Asymmetry/"; 
 
       std::string infilePath[2];
@@ -488,12 +506,25 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       
       for (int quart=0; quart<2; quart++) {
 
+	std::string currentQuart = quart==0?"A":"B";
+
+	//Remove old output files in case they were created on accident and aren't filled with good values
+	std::string command = "rm " + outfilePath[quart]; 
+	system(command.c_str());
+
 	//First check that Quartet was good
 	std::string checkStatus;
 	infile.open(infilePath[quart].c_str());
-	infile >> checkStatus; 
-	infile.close();
-	if (checkStatus=="BAD")  continue;
+	
+	if ( infile.is_open() ) {
+	  infile >> checkStatus; 
+	  infile.close();
+	  if (checkStatus=="BAD") continue;
+	}
+	else {
+	  std::cout << "Could not open binned Asymmetries for Quartet " << currentQuart << " in Octet " << octet << " so skipping...\n";
+	  continue; 
+	}
 	    
 	infile.open(infilePath[quart].c_str());
       
@@ -606,13 +637,26 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	pdfPathCorr[1] = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
 	
 	for (int quart=0; quart<2; quart++) {
+	  
+	  std::string currentPair = quart==0?"A":"B" + itos(pair);
 
-	  //First check that Pair was good
+	  //Remove old output files in case they were created on accident and aren't filled with good values
+	  std::string command = "rm " + outfilePath[quart]; 
+	  system(command.c_str());
+
+	  //First check that pair was good
 	  std::string checkStatus;
 	  infile.open(infilePath[quart].c_str());
-	  infile >> checkStatus; 
-	  infile.close();
-	  if (checkStatus=="BAD")  continue;
+	  
+	  if ( infile.is_open() ) {
+	    infile >> checkStatus; 
+	    infile.close();
+	    if (checkStatus=="BAD") continue;
+	  }
+	  else {
+	    std::cout << "Could not open binned Asymmetries for Pair " << currentPair << " in Octet " << octet << " so skipping...\n";
+	    continue; 
+	  }
 	  
 	  infile.open(infilePath[quart].c_str());
 	  
