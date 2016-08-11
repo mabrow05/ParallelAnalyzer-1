@@ -24,6 +24,31 @@
 
 using namespace std;
 
+vector <Int_t> getPMTQuality(Int_t runNumber) {
+  //Read in PMT quality file                                                                                                                   
+  cout << "Reading in PMT Quality file ...\n";
+  vector <Int_t>  pmtQuality (8,0);
+  Char_t temp[200];
+  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE"));
+  ifstream pmt;
+  std::cout << temp << std::endl;
+  pmt.open(temp);
+  Int_t run_hold;
+  while (pmt >> run_hold >> pmtQuality[0] >> pmtQuality[1] >> pmtQuality[2]
+         >> pmtQuality[3] >> pmtQuality[4] >> pmtQuality[5]
+         >> pmtQuality[6] >> pmtQuality[7]) {
+    if (run_hold==runNumber) break;
+    if (pmt.fail()) break;
+  }
+  pmt.close();
+  if (run_hold!=runNumber) {
+    cout << "Run not found in PMT quality file!" << endl;
+    exit(0);
+  }
+  return pmtQuality;
+};
+
+
 int main(int argc, char *argv[])
 {
   cout.setf(ios::fixed, ios::floatfield);
@@ -121,7 +146,29 @@ int main(int argc, char *argv[])
   double binCenterMax[8];
   double binCounts[8];
 
-  if (runNumber<21274) {
+  // counting from the end bin to avoid weird high peaks at lower energies
+  
+  for (int j=0; j<8; j++) {
+    int counter = 0;
+    for (int i=nBin-1; i>0; i--) {
+      binCenter[j] = his[j]->GetBinCenter(i);
+      binCounts[j] = his[j]->GetBinContent(i);
+
+      if ( binCounts[j] > 50 && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
+	if ( binCounts[j] >= maxCounts[j] ) {
+	  maxCounts[j] = binCounts[j];
+	  maxBin[j] = i;
+	  binCenterMax[j] = binCenter[j];
+	  counter = 0;
+	}
+	else counter++;
+	if ( counter>10 ) break; //Making sure we only get the high energy peak
+      }
+    }
+  }
+  
+
+  /*if (runNumber<21274) {
     for (int i=1; i<nBin-1; i++) {
       for (int j=0; j<8; j++) {
 	binCenter[j] = his[j]->GetBinCenter(i);
@@ -147,7 +194,7 @@ int main(int argc, char *argv[])
 	}
       }
     }
-  }
+    }*/
 
   
 
@@ -290,6 +337,9 @@ int main(int argc, char *argv[])
   fitMean[7] = gaussian_fit_W3->GetParameter(1);
   cout << "fitMean[7] = " << fitMean[7] << endl;
 
+  //Get PMT quality status
+  std::vector<Int_t> pmtquality = getPMTQuality(runNumber);
+
   // Calculate gain correction factors
   double referenceMean[8];
   double gainCorrection[8];
@@ -303,7 +353,7 @@ int main(int argc, char *argv[])
     refGainFile.close();
       
     for (int n=0; n<8; n++) {
-      gainCorrection[n] = referenceMean[n] / fitMean[n];
+      gainCorrection[n] = pmtquality[n] ? (referenceMean[n] / fitMean[n]) : 1.;
     }    
   }
   else {
