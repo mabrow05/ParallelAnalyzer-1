@@ -1,7 +1,7 @@
 
 int PID, type, side; // basic analysis tags
 
-double Eprim, AsymWeight, primTheta; // initial energy from simulation
+double primKE, AsymWeight, primTheta; // initial energy from simulation
 
 double Erecon; // smeared, weighted, and trigger func corrected energy summed over two sides scint and MWPC energy
 

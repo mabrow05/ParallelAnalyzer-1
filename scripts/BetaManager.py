@@ -109,7 +109,7 @@ class BetaReplayManager:
             for run in runs:
                 print "Running pedestals for run %i"%run
                 os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
-                os.system("cd ../pedestals/; ./pedestal_widths.exe %i"%run)
+                #os.system("cd ../pedestals/; ./pedestal_widths.exe %i"%run)
         print "DONE"
 
 
@@ -212,6 +212,7 @@ class BetaReplayManager:
     
     def runReverseCalibration(self, runORoctet):
         runs = []
+        runTypes = ["A2","A5","A7","A10","B2","B5","B7","B10"]
         if runORoctet > 16000:
             print "Running reverse calibration for run %i"%runORoctet
             os.system("./../simulation_comparison/revCalSim.exe %i %s"%(runORoctet, "Beta"))
@@ -222,7 +223,8 @@ class BetaReplayManager:
         
             for line in infile:      
                 words=line.split()
-                runs.append(int(words[1]))
+                if words[0] in runTypes: # Avoids background and depol runs
+                    runs.append(int(words[1]))
         
             for run in runs:
                 print "Running reverse calibration for run %i"%run
@@ -325,20 +327,20 @@ if __name__ == "__main__":
 
 
     if 0:
-        octet_range =[20,39]# [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[5,5]# [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
             #beta.runReplayPass1(octet)
-            #beta.runGainBismuth(octet)
-            #beta.runReplayPass2(octet)
+            beta.runGainBismuth(octet)
+            beta.runReplayPass2(octet)
             beta.runReplayPass3(octet)
            
 
 
     #Running reverse calibrations
     if 1:
-        octet_range = [50,59];
+        octet_range = [47,47];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             beta.runReverseCalibration(octet)

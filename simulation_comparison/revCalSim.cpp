@@ -184,7 +184,8 @@ void SetUpTree(TTree *tree) {
   tree->Branch("Evis",&evis,"EvisE/D:EvisW");
   tree->Branch("Edep",&edep,"EdepE/D:EdepW");
   tree->Branch("EdepQ",&edepQ,"EdepQE/D:EdepQW");
-  tree->Branch("Eprim",&Eprim,"Eprim/D");
+  tree->Branch("primKE",&primKE,"primKE/D");
+  tree->Branch("primTheta",&primTheta,"primTheta/D");
   tree->Branch("AsymWeight",&AsymWeight,"AsymWeight/D");
   
   tree->Branch("time",&Time,"timeE/D:timeW");
@@ -201,6 +202,8 @@ void revCalSimulation (Int_t runNumber, string source)
 {
   bool allEvtsTrigg = false; //This just removes the use of the trigger function for an initial calibration. 
                             // Once a calibration is established (or if running on Betas), you can keep this false
+
+  bool simProperStatistics = false; // If True, this uses the actual data run to determine the number of Type 0s to simulate
                             
   
   cout << "Running reverse calibration for run " << runNumber << " and source " << source << endl;
@@ -222,32 +225,49 @@ void revCalSimulation (Int_t runNumber, string source)
     else {cout << "can't find Indium in run requested\n"; exit(0);}
   }
 
-  //First get the number of total electron events around the source position from the data file and also the length of the run
-  Char_t temp[500],tempE[500],tempW[500];
-  //sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
-  sprintf(temp,"%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"),runNumber);
-  TFile *dataFile = new TFile(temp,"READ");
-  TTree *data = (TTree*)(dataFile->Get("pass2"));
+  
 
   string outputBase;
-  if (source!="Beta") {
-    sprintf(tempE,"Type<4 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
-    sprintf(tempW,"Type<4 && PID==1 && Side==1 && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
-    outputBase = string(getenv("REVCALSIM")) + "sources/";
-  }
-  else if (source=="Beta") {
-    sprintf(tempE,"Type<4 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
-    sprintf(tempW,"Type<4 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
-    outputBase = string(getenv("REVCALSIM")) + "beta/";
-  }
-  UInt_t BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
-  cout << "Electron Events in Data file: " << BetaEvents << endl;
-  cout << "East: " << data->GetEntries(tempE) << "\tWest: " << data->GetEntries(tempW) << endl;
-  delete data;
-  dataFile->Close();
+  UInt_t BetaEvents = 0; //Holds the number of electron like Type 0 events to process
 
-  //If we have a source run, simulate 3 times the number of events so the peaks can be better determined
-  if (source!="Beta") BetaEvents = 3.*BetaEvents;
+  Char_t temp[500],tempE[500],tempW[500];
+
+  if ( simProperStatistics ) {
+
+    //First get the number of total electron events around the source position from the data file and also the length of the run
+    
+    //sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
+    sprintf(temp,"%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"),runNumber);
+    TFile *dataFile = new TFile(temp,"READ");
+    TTree *data = (TTree*)(dataFile->Get("pass2"));
+    
+    if (source!="Beta") {
+      sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
+      sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
+      outputBase = string(getenv("REVCALSIM")) + "sources/";
+    }
+    else if (source=="Beta") {
+      sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
+      sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
+      outputBase = string(getenv("REVCALSIM")) + "beta/";
+    }
+    BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
+    cout << "Electron Events in Data file: " << BetaEvents << endl;
+    cout << "East: " << data->GetEntries(tempE) << "\tWest: " << data->GetEntries(tempW) << endl;
+    delete data;
+    dataFile->Close();
+
+    //If we have a source run, simulate 3 times the number of events so the peaks can be better determined
+    if (source!="Beta") BetaEvents = 3.*BetaEvents;
+  }
+
+  else {
+    if (source!="Beta") outputBase = string(getenv("REVCALSIM")) + "sources_1mil/";
+    else if (source=="Beta") outputBase = string(getenv("REVCALSIM")) + "beta_1mil/";
+    BetaEvents = 1000000;
+    std::cout << "Processing 1e6 events...\n";
+  }
+  
 
   //Create simulation output file
   Char_t outputfile[500];
@@ -314,12 +334,16 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Read in simulated data and put in a TChain
   TRandom3 *randFile = new TRandom3(0);
-  int numFiles = source=="Beta"?400:250;
-  int fileNum = source=="Beta" ? (int)(randFile->Rndm()*400) : 0;
+  int numFiles = source=="Beta" ? 200 : 250; //The 200 is for the 10 million events we are testing for each polarization state
+  int fileNum = (int)(randFile->Rndm()*numFiles);
   delete randFile;
   for (int i=0; i<numFiles; i++) {
     if (fileNum==numFiles) fileNum=0;
-    sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
+    if (source=="Beta") {
+      if (pol==-1) sprintf(temp,"%s/Beta_polE/analyzed_%i.root",simLocation.c_str(),fileNum);
+      if (pol==1) sprintf(temp,"%s/Beta_polW/analyzed_%i.root",simLocation.c_str(),fileNum);
+    }
+    else sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
     //sprintf(temp,"/extern/mabrow05/ucna/XuanSim/%s/xuan_analyzed.root",source.c_str());
     chain->AddFile(temp);
     fileNum++;
@@ -333,7 +357,7 @@ void revCalSimulation (Int_t runNumber, string source)
   chain->SetBranchAddress("EdepQ",&edepQ);
   chain->SetBranchAddress("MWPCPos",&mwpc_pos);
   chain->SetBranchAddress("ScintPos",&scint_pos);
-  chain->SetBranchAddress("primKE",&Eprim);
+  chain->SetBranchAddress("primKE",&primKE);
   chain->SetBranchAddress("primTheta",&primTheta);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
@@ -406,7 +430,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
 
     //Calculate event weight
-    if (source=="Beta") AsymWeight = 1+(-0.12)*pol*sqrt(1-(1/((Eprim/511.+1.)*(Eprim/511.+1.))))*cos(primTheta);
+    if (source=="Beta") AsymWeight = 1+(-0.12)*pol*sqrt(1-(1/((primKE/511.+1.)*(primKE/511.+1.))))*cos(primTheta);
     else AsymWeight = 1.;
     
     scint_pos_adj.ScintPosAdjE[0] = source=="Beta"?scint_pos.ScintPosE[0]*sqrt(0.6)*10.:rand2->Gaus(srcPos[0][0], fabs(srcPos[0][2]));
@@ -536,7 +560,10 @@ void revCalSimulation (Int_t runNumber, string source)
 
             
     //Fill proper total event histogram based on event type
-    PID=-1;
+    PID=6; //This is an unidentified particle
+    type=4; //this is a lost event
+    side=2; //This means there are no scintillator triggers
+
     //Type 0 East
     if (EastScintTrigger && EMWPCTrigger && !WestScintTrigger && !WMWPCTrigger) {
       PID=1;
@@ -615,7 +642,7 @@ void revCalSimulation (Int_t runNumber, string source)
       else {
 	PID=1;
 	type=4;
-	side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0);
+	side = (WMWPCTrigger && EMWPCTrigger) ? 2 : (WMWPCTrigger ? 1 : 0); //Side==2 means the event triggered both wirechambers, but neither scint
       }
     }
     
@@ -645,9 +672,11 @@ void revCalSimulation (Int_t runNumber, string source)
     }    
   
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
-    if (PID==1 && sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
-	&& sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut) evtTally++;
+    if ( PID==1 && ( !simProperStatistics || ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
+					 && sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut ) ) ) evtTally++;
+
     evt++;
+
     if (PID>=0) tree->Fill();
     //cout << evtTally << endl;
     //if (evtTally%1000==0) {cout << evtTally << endl;}//cout << "filled event " << evt << endl;
