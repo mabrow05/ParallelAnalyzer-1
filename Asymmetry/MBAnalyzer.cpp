@@ -59,20 +59,20 @@ int main()
 {
 
   Int_t analysisChoice = 1;
-  Int_t octBegin = 0;
-  Int_t octEnd = 59;
+  Int_t octBegin = 1;
+  Int_t octEnd = 1;
   Double_t enBinWidth = 10.;
-  Double_t Elow = 220.;
-  Double_t Ehigh = 680.;
+  Double_t Elow = 180.;
+  Double_t Ehigh = 780.;
   bool UKdata = true;
   bool simulation = false;
   bool applyAsymm = true;
   
   try {
     
-    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
+    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
     //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm);
+    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm);
     
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
@@ -411,6 +411,8 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	RawAsymAndError[0].push_back(-Asym);
 	RawAsymAndError[1].push_back(AsymError);
       }
+      
+      infile.close();
 	
       std::string pdfPath = basePath2 + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
       TCanvas *c1 = new TCanvas("c1", "c1",800, 400);
@@ -547,6 +549,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	  RawAsymAndError[1].push_back(AsymError);
 	}
 
+	infile.close();
 	
 	TCanvas *c1 = new TCanvas("c1", "c1",800, 400);
 	gStyle->SetOptFit(1111);
@@ -636,13 +639,16 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	pdfPathCorr[0] = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
 	pdfPathCorr[1] = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
 	
+
+	//Remove old output files in case they were created on accident and aren't filled with good values
+	std::string command = "rm " + outfilePath[0]; 
+	system(command.c_str());
+	command = "rm " + outfilePath[1]; 
+	system(command.c_str());
+	
 	for (int quart=0; quart<2; quart++) {
 	  
-	  std::string currentPair = quart==0?"A":"B" + itos(pair);
-
-	  //Remove old output files in case they were created on accident and aren't filled with good values
-	  std::string command = "rm " + outfilePath[quart]; 
-	  system(command.c_str());
+	  std::string currentPair = (quart==0?"A":"B") + itos(pair);	  
 
 	  //First check that pair was good
 	  std::string checkStatus;
@@ -657,6 +663,9 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	    std::cout << "Could not open binned Asymmetries for Pair " << currentPair << " in Octet " << octet << " so skipping...\n";
 	    continue; 
 	  }
+
+
+	 
 	  
 	  infile.open(infilePath[quart].c_str());
 	  
@@ -678,6 +687,8 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	    RawAsymAndError[0].push_back(-Asym);
 	    RawAsymAndError[1].push_back(AsymError);
 	  }
+
+	  infile.close();
 	  
 	  
 	  TCanvas *c1 = new TCanvas("c1", "c1",800, 400);

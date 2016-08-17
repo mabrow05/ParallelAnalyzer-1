@@ -10,42 +10,42 @@ ppair, quartet, octet
 #include <cstdlib>
 #include <cmath>
 
-AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym) : UKdata(ukdata), Simulation(simulation), applyAsymmetry(applyAsym), octet(oct), energyBinWidth(enBinWidth), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0), analysisChoice(1) {
-  unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-  A2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  A5.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B5.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  A7.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B7.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  A10.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B10.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  A2err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B2err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  A5err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B5err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  A7err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B7err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  A10err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  B10err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numBins,0.)));
-  anaChoice_A2.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B2.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_A5.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B5.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_A7.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B7.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_A10.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B10.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_A2err.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B2err.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_A5err.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B5err.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_A7err.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B7err.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_A10err.resize(2,std::vector <double> (numBins,0.));
-  anaChoice_B10err.resize(2,std::vector <double> (numBins,0.));
-  numEvtsEastByTypeByBin.resize(4,std::vector<double>(numBins,0.));
-  numEvtsWestByTypeByBin.resize(4,std::vector<double>(numBins,0.));
+AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym) : UKdata(ukdata), Simulation(simulation), applyAsymmetry(applyAsym), octet(oct), energyBinWidth(enBinWidth), numEnBins(0), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0), analysisChoice(1) {
+  numEnBins = (unsigned int)(1200./energyBinWidth);
+  A2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  A5.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B5.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  A7.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B7.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  A10.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B10.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  A2err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B2err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  A5err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B5err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  A7err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B7err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  A10err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  B10err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
+  anaChoice_A2.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B2.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_A5.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B5.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_A7.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B7.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_A10.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B10.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_A2err.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B2err.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_A5err.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B5err.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_A7err.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B7err.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_A10err.resize(2,std::vector <double> (numEnBins,0.));
+  anaChoice_B10err.resize(2,std::vector <double> (numEnBins,0.));
+  numEvtsEastByTypeByBin.resize(4,std::vector<double>(numEnBins,0.));
+  numEvtsWestByTypeByBin.resize(4,std::vector<double>(numEnBins,0.));
   A2len.resize(2,std::vector <double> (2,0.));
   A5len.resize(2,std::vector <double> (2,0.));
   A7len.resize(2,std::vector <double> (2,0.));
@@ -55,10 +55,10 @@ AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukd
   B7len.resize(2,std::vector <double> (2,0.));
   B10len.resize(2,std::vector <double> (2,0.));
 
-  binLowerEdge.resize(numBins,0.);
-  binUpperEdge.resize(numBins,0.);
+  binLowerEdge.resize(numEnBins,0.);
+  binUpperEdge.resize(numEnBins,0.);
   
-  for (unsigned int i=0; i<numBins; i++) {
+  for (unsigned int i=0; i<numEnBins; i++) {
     binLowerEdge[i] = (double)(i)*energyBinWidth;
     binUpperEdge[i] = (double)(i+1)*energyBinWidth;
   }  
@@ -76,7 +76,9 @@ void AsymmetryBase::readOctetFile() {
   int numRuns = 0;
   // Populate the map with the runType and runNumber from this octet
   while (infile >> runTypeHold >> runNumberHold) {
-    runType[runTypeHold] = runNumberHold;
+    //runType[runTypeHold] = runNumberHold;
+    runType[runNumberHold] = runTypeHold;
+    std::cout << runTypeHold << " " << runNumberHold << std::endl;
     numRuns++;
   }
   infile.close();
@@ -86,32 +88,34 @@ void AsymmetryBase::readOctetFile() {
 
 bool AsymmetryBase::isFullOctet() {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
-  std::map <std::string,int>::iterator it;
+  //std::map <std::string,int>::iterator it;
+  std::map <int, std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
-    if (it->first=="A2") {A2=true; continue;}
-    if (it->first=="B2") {B2=true; continue;}
-    if (it->first=="A5") {A5=true; continue;}
-    if (it->first=="B5") {B5=true; continue;}
-    if (it->first=="A7") {A7=true; continue;}
-    if (it->first=="B7") {B7=true; continue;}
-    if (it->first=="A10") {A10=true; continue;}
-    if (it->first=="B10") {B10=true; continue;}
+    if (it->second=="A2") {A2=true; continue;}
+    if (it->second=="B2") {B2=true; continue;}
+    if (it->second=="A5") {A5=true; continue;}
+    if (it->second=="B5") {B5=true; continue;}
+    if (it->second=="A7") {A7=true; continue;}
+    if (it->second=="B7") {B7=true; continue;}
+    if (it->second=="A10") {A10=true; continue;}
+    if (it->second=="B10") {B10=true; continue;}
   }
   return (A2 && B2 && A5 && B5 && A7 && B7 && A10 && B10);
 };
 
 bool AsymmetryBase::isPair(int quartNum, int pairNum) {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
-  std::map <std::string,int>::iterator it;
+  //std::map <std::string,int>::iterator it;
+  std::map<int,std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
-    if (it->first=="A2") {A2=true; continue;}
-    if (it->first=="B2") {B2=true; continue;}
-    if (it->first=="A5") {A5=true; continue;}
-    if (it->first=="B5") {B5=true; continue;}
-    if (it->first=="A7") {A7=true; continue;}
-    if (it->first=="B7") {B7=true; continue;}
-    if (it->first=="A10") {A10=true; continue;}
-    if (it->first=="B10") {B10=true; continue;}
+    if (it->second=="A2") {A2=true; continue;}
+    if (it->second=="B2") {B2=true; continue;}
+    if (it->second=="A5") {A5=true; continue;}
+    if (it->second=="B5") {B5=true; continue;}
+    if (it->second=="A7") {A7=true; continue;}
+    if (it->second=="B7") {B7=true; continue;}
+    if (it->second=="A10") {A10=true; continue;}
+    if (it->second=="B10") {B10=true; continue;}
   }
   if (quartNum==0) {
     if (pairNum==0) return (A2 && A5);
@@ -129,16 +133,17 @@ bool AsymmetryBase::isPair(int quartNum, int pairNum) {
 
 bool AsymmetryBase::isFullQuartet(int quartNum) {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
-  std::map <std::string,int>::iterator it;
+  //std::map <std::string,int>::iterator it;
+  std::map<int,std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
-    if (it->first=="A2") {A2=true; continue;}
-    if (it->first=="B2") {B2=true; continue;}
-    if (it->first=="A5") {A5=true; continue;}
-    if (it->first=="B5") {B5=true; continue;}
-    if (it->first=="A7") {A7=true; continue;}
-    if (it->first=="B7") {B7=true; continue;}
-    if (it->first=="A10") {A10=true; continue;}
-    if (it->first=="B10") {B10=true; continue;}
+    if (it->second=="A2") {A2=true; continue;}
+    if (it->second=="B2") {B2=true; continue;}
+    if (it->second=="A5") {A5=true; continue;}
+    if (it->second=="B5") {B5=true; continue;}
+    if (it->second=="A7") {A7=true; continue;}
+    if (it->second=="B7") {B7=true; continue;}
+    if (it->second=="A10") {A10=true; continue;}
+    if (it->second=="B10") {B10=true; continue;}
   }
   if (quartNum==0) return (A2 && A5 && A7 && A10);
   else if (quartNum==1) return (B2 && B5 && B7 && B10);
@@ -148,75 +153,108 @@ bool AsymmetryBase::isFullQuartet(int quartNum) {
 
 
 void AsymmetryBase::loadRates() {
-  std::map<std::string,int>::iterator it = runType.begin();
-  BGSubtractedRate *bg;
+  //std::map<std::string,int>::iterator it = runType.begin();
+  std::map<int,std::string>::iterator it = runType.begin();
+  BGSubtractedRate *bgSubtr;
   while (it!=runType.end()) {
-    if (checkIfBetaRun(it->first)) {
-      bg = new BGSubtractedRate(it->second,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
+    
+    std::cout << it->second << std::endl;
+    
+    if (checkIfBetaRun(it->second)) {
+      bgSubtr = new BGSubtractedRate(it->first,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
 
-      std::cout << "initialized BGStubtractedRate for run " << it->second << " (BG run " 
-		<< bg->getBackgroundRun(it->second) << ") \n";
+      std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
+		<< bgSubtr->getBackgroundRun(it->first) << ") \n";
 
-      bg->calcBGSubtRates();
+      bgSubtr->calcBGSubtRates();
 
       for (int type=0;type<4;type++) {
 	for (int side=0; side<2; side++) {  
+
+	  // vectors to hold the rates bin by bin so that we can do addition of multiple beta runs of the same type.. dumb
+	  std::vector < double > rate (numEnBins, 0.);
+	  rate = bgSubtr->returnBGSubtRate(side,type);
+	  std::vector < double > rateErr (numEnBins, 0.);
+	  rateErr = bgSubtr->returnBGSubtRateError(side,type);	  
+
+	  // Note that the len vectors have the issue that they take on the length of the last beta run of that type when 
+	  // there are multiple (some octets have split runs, say 2 consecutive A2 runs...)
+	  // These lengths aren't currently used for anything though...
+
+	  for (unsigned int bin=0 ; bin<numEnBins ; bin++) {
       
-	  if (it->first=="A2") {
-	    A2[type][side] = bg->returnBGSubtRate(side,type);
-	    A2err[type][side] = bg->returnBGSubtRateError(side,type);
-	    A2len[0] = bg->returnRunLengths(true);
-	    A2len[1] = bg->returnRunLengths(false);
+	    if (it->second=="A2") {
+	      A2[type][side][bin] += rate[bin];
+	      A2err[type][side][bin] += power( rateErr[bin], 2 );
+	      A2len[0] = bgSubtr->returnRunLengths(true);
+	      A2len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else if (it->second=="B2") {
+	      B2[type][side][bin] += rate[bin];
+	      B2err[type][side][bin] += power( rateErr[bin], 2 );
+	      B2len[0] = bgSubtr->returnRunLengths(true);
+	      B2len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else if (it->second=="A5") {
+	      A5[type][side][bin] += rate[bin];
+	      A5err[type][side][bin] += power( rateErr[bin], 2 );
+	      A5len[0] = bgSubtr->returnRunLengths(true);
+	      A5len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else if (it->second=="B5") {
+	      B5[type][side][bin] += rate[bin];
+	      B5err[type][side][bin] += power( rateErr[bin], 2 );
+	      B5len[0] = bgSubtr->returnRunLengths(true);
+	      B5len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else if (it->second=="A7") {
+	      A7[type][side][bin] += rate[bin];
+	      A7err[type][side][bin] += power( rateErr[bin], 2 );
+	      A7len[0] = bgSubtr->returnRunLengths(true);
+	      A7len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else if (it->second=="B7") {
+	      B7[type][side][bin] += rate[bin];
+	      B7err[type][side][bin] += power( rateErr[bin], 2 );
+	      B7len[0] = bgSubtr->returnRunLengths(true);
+	      B7len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else if (it->second=="A10") {
+	      A10[type][side][bin] += rate[bin];
+	      A10err[type][side][bin] += power( rateErr[bin], 2 );
+	      A10len[0] = bgSubtr->returnRunLengths(true);
+	      A10len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else if (it->second=="B10") {
+	      B10[type][side][bin] += rate[bin];
+	      B10err[type][side][bin] += power( rateErr[bin], 2 );
+	      B10len[0] = bgSubtr->returnRunLengths(true);
+	      B10len[1] = bgSubtr->returnRunLengths(false);
+	    }
+	    else throw "Run misidentified in loadRates";
+
+	  
 	  }
-	  else if (it->first=="B2") {
-	    B2[type][side] = bg->returnBGSubtRate(side,type);
-	    B2err[type][side] = bg->returnBGSubtRateError(side,type);
-	    B2len[0] = bg->returnRunLengths(true);
-	    B2len[1] = bg->returnRunLengths(false);
-	  }
-	  else if (it->first=="A5") {
-	    A5[type][side] = bg->returnBGSubtRate(side,type);
-	    A5err[type][side] = bg->returnBGSubtRateError(side,type);
-	    A5len[0] = bg->returnRunLengths(true);
-	    A5len[1] = bg->returnRunLengths(false);
-	  }
-	  else if (it->first=="B5") {
-	    B5[type][side] = bg->returnBGSubtRate(side,type);
-	    B5err[type][side] = bg->returnBGSubtRateError(side,type);
-	    B5len[0] = bg->returnRunLengths(true);
-	    B5len[1] = bg->returnRunLengths(false);
-	  }
-	  else if (it->first=="A7") {
-	    A7[type][side] = bg->returnBGSubtRate(side,type);
-	    A7err[type][side] = bg->returnBGSubtRateError(side,type);
-	    A7len[0] = bg->returnRunLengths(true);
-	    A7len[1] = bg->returnRunLengths(false);
-	  }
-	  else if (it->first=="B7") {
-	    B7[type][side] = bg->returnBGSubtRate(side,type);
-	    B7err[type][side] = bg->returnBGSubtRateError(side,type);
-	    B7len[0] = bg->returnRunLengths(true);
-	    B7len[1] = bg->returnRunLengths(false);
-	  }
-	  else if (it->first=="A10") {
-	    A10[type][side] = bg->returnBGSubtRate(side,type);
-	    A10err[type][side] = bg->returnBGSubtRateError(side,type);
-	    A10len[0] = bg->returnRunLengths(true);
-	    A10len[1] = bg->returnRunLengths(false);
-	  }
-	  else if (it->first=="B10") {
-	    B10[type][side] = bg->returnBGSubtRate(side,type);
-	    B10err[type][side] = bg->returnBGSubtRateError(side,type);
-	    B10len[0] = bg->returnRunLengths(true);
-	    B10len[1] = bg->returnRunLengths(false);
-	  }
-	  else throw "Run misidentified in loadRates";
 	}
       }
 	  
-      delete bg;
+      delete bgSubtr;
     }
     it++;
+  }
+  for (int type=0;type<4;type++) {
+    for (int side=0; side<2; side++) {  
+      for (unsigned int bin=0 ; bin<numEnBins ; bin++) {
+	A2err[type][side][bin] = sqrt(A2err[type][side][bin]);
+	B2err[type][side][bin] = sqrt(B2err[type][side][bin]);
+	A5err[type][side][bin] = sqrt(A5err[type][side][bin]);
+	B5err[type][side][bin] = sqrt(B5err[type][side][bin]);
+	A7err[type][side][bin] = sqrt(A7err[type][side][bin]);
+	B7err[type][side][bin] = sqrt(B7err[type][side][bin]);
+	A10err[type][side][bin] = sqrt(A10err[type][side][bin]);
+	B10err[type][side][bin] = sqrt(B10err[type][side][bin]);
+      }
+    }
   }
 };
 
@@ -226,14 +264,15 @@ bool AsymmetryBase::checkIfBetaRun(std::string type) {
 };
 
 void AsymmetryBase::calcBGsubtractedEvts() {
-  std::map<std::string,int>::iterator it = runType.begin();
+  //std::map<std::string,int>::iterator it = runType.begin();
+  std::map<int,std::string>::iterator it = runType.begin();
   BGSubtractedRate *bg;
   while (it!=runType.end()) {
-    if (checkIfBetaRun(it->first)) {
-      bg = new BGSubtractedRate(it->second,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
+    if (checkIfBetaRun(it->second)) {
+      bg = new BGSubtractedRate(it->first,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
 
-      std::cout << "initialized BGStubtractedRate for run " << it->second << " (BG run " 
-		<< bg->getBackgroundRun(it->second) << ") \n";
+      std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
+		<< bg->getBackgroundRun(it->first) << ") \n";
 
       bg->calcBGSubtRates();
       
@@ -305,7 +344,7 @@ void AsymmetryBase::makeAnalysisChoiceRateVectors(int anaChoice) {
     for (auto &elem : anaChoice_B10err) std::fill(elem.begin(), elem.end(), 0.);    
   }
   analysisChoice = anaChoice;
-  unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+  //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   unsigned int type_low=0, type_high=0;
   if (anaChoice==1 || anaChoice==3 || anaChoice==5) { type_low=0; type_high=3;}
   else if (anaChoice==2) { type_low=0; type_high=1;}
@@ -315,7 +354,7 @@ void AsymmetryBase::makeAnalysisChoiceRateVectors(int anaChoice) {
   else throw "Bad Analysis Choice";
   
   for (unsigned int side=0; side<2; side++) {
-    for (unsigned int bin=0; bin<numBins; bin++) {
+    for (unsigned int bin=0; bin<numEnBins; bin++) {
       for (unsigned int type=type_low; type<=type_high; type++) {	 
 	anaChoice_A2[side][bin]+=A2[type][side][bin];
 	anaChoice_A5[side][bin]+=A5[type][side][bin];
@@ -382,11 +421,11 @@ std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtr
 
 OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym), totalAsymmetry(0.), totalAsymmetryError(0.), boolSuperSum(false), boolAsymmetry(false) {
   if (isFullOctet()) {
-    unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-    asymmetry.resize(numBins,0.);
-    asymmetryError.resize(numBins,0.);
-    superSum.resize(numBins,0.);
-    superSumError.resize(numBins,0.);
+    //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+    asymmetry.resize(numEnBins,0.);
+    asymmetryError.resize(numEnBins,0.);
+    superSum.resize(numEnBins,0.);
+    superSumError.resize(numEnBins,0.);
     loadRates(); // load the rates in the rate vectors for each run
     std::cout <<"//////////////////////////////////////////////////////////////////\n"
 	      <<"Initialized OctetAsymmetry for octet " << octet << std::endl;
@@ -550,9 +589,9 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
   if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
     makeAnalysisChoiceRateVectors(anaChoice);
   }
-  unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-  superSum.resize(numBins,0.);
-  superSumError.resize(numBins,0.);
+  //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+  superSum.resize(numEnBins,0.);
+  superSumError.resize(numEnBins,0.);
 
   double sfON[2]={0.};
   double sfOFF[2]={0.};
@@ -662,11 +701,11 @@ QuartetAsymmetry::QuartetAsymmetry(int oct, double enBinWidth, double fidCut, bo
   isGoodQuartet.push_back(isFullQuartet(1));
 
   if (isGoodQuartet[0] || isGoodQuartet[1]) {
-    unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-    asymmetry.resize(2, std::vector<double> (numBins,0.));
-    asymmetryError.resize(2, std::vector<double> (numBins,0.));
-    superSum.resize(2, std::vector<double> (numBins,0.));
-    superSumError.resize(2, std::vector<double> (numBins,0.));
+    //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+    asymmetry.resize(2, std::vector<double> (numEnBins,0.));
+    asymmetryError.resize(2, std::vector<double> (numEnBins,0.));
+    superSum.resize(2, std::vector<double> (numEnBins,0.));
+    superSumError.resize(2, std::vector<double> (numEnBins,0.));
     loadRates(); // load the rates in the rate vectors for each run
     std::cout <<"//////////////////////////////////////////////////////////////////\n"
 	      <<"Initialized QuartetAsymmetry for octet " << octet << std::endl
@@ -907,9 +946,9 @@ void QuartetAsymmetry::calcSuperSum(int anaChoice) {
   if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
     makeAnalysisChoiceRateVectors(anaChoice);
   }
-  unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-  superSum.resize(2, std::vector<double> (numBins,0.));
-  superSumError.resize(2, std::vector<double> (numBins,0.));
+  //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+  superSum.resize(2, std::vector<double> (numEnBins,0.));
+  superSumError.resize(2, std::vector<double> (numEnBins,0.));
 
   double sfON[2]={0.};
   double sfOFF[2]={0.};
@@ -1096,11 +1135,11 @@ PairAsymmetry::PairAsymmetry(int oct, double enBinWidth, double fidCut, bool ukd
 
 
   if (isGoodPair[0][0] || isGoodPair[1][0] || isGoodPair[0][1] || isGoodPair[1][1]) {
-    unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-    asymmetry.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numBins,0.)));
-    asymmetryError.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numBins,0.)));
-    superSum.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numBins,0.)));
-    superSumError.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numBins,0.)));
+    //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+    asymmetry.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numEnBins,0.)));
+    asymmetryError.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numEnBins,0.)));
+    superSum.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numEnBins,0.)));
+    superSumError.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numEnBins,0.)));
     loadRates(); // load the rates in the rate vectors for each run
     std::cout <<"//////////////////////////////////////////////////////////////////\n"
 	      <<"Initialized PairAsymmetry for octet " << octet << std::endl
@@ -1501,9 +1540,9 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
   if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
     makeAnalysisChoiceRateVectors(anaChoice);
   }
-  unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-  superSum.resize(2, std::vector < std::vector <double> > (2,std::vector <double> (numBins, 0.)));
-  superSumError.resize(2, std::vector < std::vector <double> > (2,std::vector <double> (numBins, 0.)));;
+  //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+  superSum.resize(2, std::vector < std::vector <double> > (2,std::vector <double> (numEnBins, 0.)));
+  superSumError.resize(2, std::vector < std::vector <double> > (2,std::vector <double> (numEnBins, 0.)));;
 
   double sfON[2]={0.};
   double sfOFF[2]={0.};

@@ -43,11 +43,13 @@ protected:
   int octet; // Holds the octet being analyzed
   
   double energyBinWidth;
+  unsigned int numEnBins;
   double fiducialCut;
   bool boolAnaChRtVecs;
   int runsInOctet;
   int analysisChoice;
-  std::map <std::string,int> runType; // the key is the run type, mapped val is run number
+  std::map < int, std::string > runType;
+  //std::map <std::string,int> runType; // the key is the run type, mapped val is run number
 
   // The following vectors are bin by bin rates for each evt type on each side
   // for ecample, A2[type][side][bin] (A2[0-3][0-1][0-nBins])
