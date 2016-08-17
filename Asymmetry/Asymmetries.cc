@@ -76,9 +76,7 @@ void AsymmetryBase::readOctetFile() {
   int numRuns = 0;
   // Populate the map with the runType and runNumber from this octet
   while (infile >> runTypeHold >> runNumberHold) {
-    //runType[runTypeHold] = runNumberHold;
     runType[runNumberHold] = runTypeHold;
-    std::cout << runTypeHold << " " << runNumberHold << std::endl;
     numRuns++;
   }
   infile.close();
@@ -88,7 +86,6 @@ void AsymmetryBase::readOctetFile() {
 
 bool AsymmetryBase::isFullOctet() {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
-  //std::map <std::string,int>::iterator it;
   std::map <int, std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
     if (it->second=="A2") {A2=true; continue;}
@@ -105,7 +102,6 @@ bool AsymmetryBase::isFullOctet() {
 
 bool AsymmetryBase::isPair(int quartNum, int pairNum) {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
-  //std::map <std::string,int>::iterator it;
   std::map<int,std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
     if (it->second=="A2") {A2=true; continue;}
@@ -133,7 +129,6 @@ bool AsymmetryBase::isPair(int quartNum, int pairNum) {
 
 bool AsymmetryBase::isFullQuartet(int quartNum) {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
-  //std::map <std::string,int>::iterator it;
   std::map<int,std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
     if (it->second=="A2") {A2=true; continue;}
@@ -153,13 +148,10 @@ bool AsymmetryBase::isFullQuartet(int quartNum) {
 
 
 void AsymmetryBase::loadRates() {
-  //std::map<std::string,int>::iterator it = runType.begin();
   std::map<int,std::string>::iterator it = runType.begin();
   BGSubtractedRate *bgSubtr;
   while (it!=runType.end()) {
-    
-    std::cout << it->second << std::endl;
-    
+        
     if (checkIfBetaRun(it->second)) {
       bgSubtr = new BGSubtractedRate(it->first,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
 
@@ -264,7 +256,6 @@ bool AsymmetryBase::checkIfBetaRun(std::string type) {
 };
 
 void AsymmetryBase::calcBGsubtractedEvts() {
-  //std::map<std::string,int>::iterator it = runType.begin();
   std::map<int,std::string>::iterator it = runType.begin();
   BGSubtractedRate *bg;
   while (it!=runType.end()) {
