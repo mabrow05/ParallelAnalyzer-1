@@ -6,7 +6,10 @@ DataTreeFLOAT::DataTreeFLOAT() : inputFile(NULL), outputFile(NULL), inputTree(NU
 };
 
 DataTreeFLOAT::~DataTreeFLOAT() {
-  delete UCN_Mon_1_Rate; delete UCN_Mon_2_Rate; delete UCN_Mon_3_Rate; delete UCN_Mon_4_Rate; 
+  //if (UCN_Mon_1_Rate) delete UCN_Mon_1_Rate;  
+  //if (UCN_Mon_2_Rate) delete UCN_Mon_2_Rate;
+  //if (UCN_Mon_3_Rate) delete UCN_Mon_3_Rate;
+  //if (UCN_Mon_4_Rate) delete UCN_Mon_4_Rate; 
   if (outputTree) delete outputTree;
   if (outputFile) {outputFile->Close();  delete outputFile;}
   if (inputTree) delete inputTree;

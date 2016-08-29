@@ -30,7 +30,7 @@
 #include "replay_pass2.h"
 #include "replay_pass3.h"
 
-std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
+/*std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
   ifstream infile;
   Char_t temp[200];
   if (runNumber<20000) {
@@ -53,7 +53,37 @@ std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNu
     if (type==3) {type=0; side=1;}
   }
   return params;
-};
+  };*/
+
+//Get the conversion from EQ2Etrue                                                                                                            
+std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
+  ifstream infile;
+  std::string basePath = getenv("ANALYSIS_CODE");
+  if (runNumber<16000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
+  else if (runNumber<20000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
+  else if (runNumber<21628 && runNumber>21087) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_isobutane_EQ2EtrueFitParams.dat");
+  else if (runNumber<24000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat");
+  else {
+    std::cout << "Bad runNumber passed to getEQ2EtrueParams\n";
+    exit(0);
+  }
+  infile.open(basePath.c_str());
+  std::vector < std::vector < std::vector < double > > > params;
+  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
+
+  char holdType[10];
+  int side=0, type=0;
+  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] 
+	 >> params[side][type][4] >> params[side][type][5]) {
+    std::cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " 
+	      << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] 
+	      << " " << params[side][type][5] << std::endl;
+    type+=1;
+    if (type==3) {type=0; side=1;}
+  }
+  return params;
+}
+
 
 vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
   Char_t temp[500];
@@ -740,9 +770,10 @@ int main(int argc, char *argv[])
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
+      string src = sourceName[n];
+      if (sourceName[n]=="Bi") src=sourceName[n]+"1";
       outResultsMean << runNumber << " "
-		     << sourceName[n] << " "
+		     << src << " "
 		     << fitMean[n][0] << " "
 		     << fitMean[n][1] << " "
 		     << fitMean[n][2] << " "
@@ -752,7 +783,7 @@ int main(int argc, char *argv[])
 		     << fitMean[n][6] << " "
 		     << fitMean[n][7] << endl;
       outResultsMeanError << runNumber << " "
-		     << sourceName[n] << " "
+		     << src << " "
 		     << fitMeanError[n][0] << " "
 		     << fitMeanError[n][1] << " "
 		     << fitMeanError[n][2] << " "
@@ -762,7 +793,7 @@ int main(int argc, char *argv[])
 		     << fitMeanError[n][6] << " "
 		     << fitMeanError[n][7] << endl;
       outResultsSigma << runNumber << " "
-		     << sourceName[n] << " "
+		     << src << " "
 		     << fitSigma[n][0] << " "
 		     << fitSigma[n][1] << " "
 		     << fitSigma[n][2] << " "
@@ -951,10 +982,11 @@ int main(int argc, char *argv[])
   
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
+      string src = sourceName[n];
+      if (sourceName[n]=="Bi") src=sourceName[n]+"1";
      
       outResultsEvisTot << runNumber << " "
-		       << sourceName[n] << " "
+		       << src << " "
 		       << fitMeanEvisTot[n][0] << " "
 		       << fitSigmaEvisTot[n][0] << " "
 		       << fitMeanEvisTot[n][1] << " " 
@@ -1116,10 +1148,11 @@ int main(int argc, char *argv[])
   
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
-     
+      string src = sourceName[n];
+      if (sourceName[n]=="Bi") src=sourceName[n]+"1";
+       
       outResultsEreconTot << runNumber << " "
-		       << sourceName[n] << " "
+		       << src << " "
 		       << fitMeanEreconTot[n][0] << " "
 		       << fitSigmaEreconTot[n][0] << " "
 		       << fitMeanEreconTot[n][1] << " " 
@@ -1157,11 +1190,18 @@ int main(int argc, char *argv[])
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
-      //std::vector < std::vector <Double_t> > pos = returnSourcePositions(runNumber, sourceName[n]); //Holds the average value of eta for the the data being read in for each source and each PMT
-      //std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][0]);
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
+      std::vector < std::vector <Double_t> > pos = returnSourcePosition(runNumber, sourceName[n]); //Holds the average value of eta for the the data being read in for each source and each PMT
+      std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][0]);
+
+      for (Int_t ii=0; ii<8; ii++) {
+	if (aveEta[n][ii] > 2.5 || aveEta[n][ii] < 0.25) aveEta[n][ii] = eta0[ii];
+      }
+
+      string src = sourceName[n];
+      if (sourceName[n]=="Bi") src=sourceName[n]+"1";
+  
       outResultsADC << runNumber << " "
-		    << sourceName[n] << " "
+		    << src << " "
 		    << linearityCurve.applyInverseLinCurve(0,fitMean[n][0]*aveEta[n][0]) << " "
 		    << linearityCurve.applyInverseLinCurve(1,fitMean[n][1]*aveEta[n][1]) << " "
 		    << linearityCurve.applyInverseLinCurve(2,fitMean[n][2]*aveEta[n][2]) << " "
@@ -1171,7 +1211,7 @@ int main(int argc, char *argv[])
 		    << linearityCurve.applyInverseLinCurve(6,fitMean[n][6]*aveEta[n][6]) << " "
 		    << linearityCurve.applyInverseLinCurve(7,fitMean[n][7]*aveEta[n][7]) << endl;
       outResultsADCError << runNumber << " "
-			 << sourceName[n] << " "
+			 << src << " "
 			 << fitMeanError[n][0]/calParams[0][1] << " "
 			 << fitMeanError[n][1]/calParams[1][1] << " "
 			 << fitMeanError[n][2]/calParams[2][1] << " "

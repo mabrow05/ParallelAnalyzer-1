@@ -6,6 +6,8 @@
   int octetStart=0;
   int octetEnd=59;
 
+  TString normType = "0";
+
   Double_t normLow = 0.;
   Double_t normHigh = 1200.;
   
@@ -14,15 +16,34 @@
   fileBase+="-";
   fileBase+=octetEnd;
   fileBase+="_AsymOff";
+  
   TString fileName = TString::Format("%s.root",fileBase.Data());
   TFile *f = new TFile(fileName,"READ");
 
   
   TH1D *ukALL = (TH1D*)f->Get("EreconALL_uk");
   TH1D *simALL = (TH1D*)f->Get("EreconALL_sim");
+  TH1D *uk0 = (TH1D*)f->Get("Erecon0_uk");
+  TH1D *sim0 = (TH1D*)f->Get("Erecon0_sim");
+  TH1D *uk1 = (TH1D*)f->Get("Erecon1_uk");
+  TH1D *sim1 = (TH1D*)f->Get("Erecon1_sim");
+  TH1D *uk23 = (TH1D*)f->Get("Erecon23_uk");
+  TH1D *sim23 = (TH1D*)f->Get("Erecon23_sim");
 
   //Normalize
-  Double_t normFactor = ukALL->Integral(ukALL->GetXaxis()->FindFixBin(normLow),ukALL->GetXaxis()->FindFixBin(normHigh))/simALL->Integral(simALL->GetXaxis()->FindFixBin(normLow),simALL->GetXaxis()->FindFixBin(normHigh));
+  Double_t normFactor = 1.;
+  
+  if (normType==TString("ALL"))
+  normFactor = ukALL->Integral(ukALL->GetXaxis()->FindFixBin(normLow),ukALL->GetXaxis()->FindFixBin(normHigh))/simALL->Integral(simALL->GetXaxis()->FindFixBin(normLow),simALL->GetXaxis()->FindFixBin(normHigh));
+
+  if (normType==TString("0"))
+  normFactor = uk0->Integral(uk0->GetXaxis()->FindFixBin(normLow),uk0->GetXaxis()->FindFixBin(normHigh))/sim0->Integral(sim0->GetXaxis()->FindFixBin(normLow),sim0->GetXaxis()->FindFixBin(normHigh));
+
+  if (normType==TString("1"))
+  normFactor = uk1->Integral(uk1->GetXaxis()->FindFixBin(normLow),uk1->GetXaxis()->FindFixBin(normHigh))/sim1->Integral(sim1->GetXaxis()->FindFixBin(normLow),sim1->GetXaxis()->FindFixBin(normHigh));
+
+  if (normType==TString("23"))
+  normFactor = uk23->Integral(uk23->GetXaxis()->FindFixBin(normLow),uk23->GetXaxis()->FindFixBin(normHigh))/sim23->Integral(sim23->GetXaxis()->FindFixBin(normLow),sim23->GetXaxis()->FindFixBin(normHigh));
   
   simALL->Scale(normFactor);
 
@@ -68,8 +89,7 @@
   c2->Divide(3,1);
   c2->cd(1);
   
-  TH1D *uk0 = (TH1D*)f->Get("Erecon0_uk");
-  TH1D *sim0 = (TH1D*)f->Get("Erecon0_sim");
+  
 
   uk0->SetMarkerColor(kBlue);
   uk0->SetLineColor(kBlue);
@@ -89,8 +109,7 @@
   sim0->Draw("SAMEE0");
   
   c2->cd(2);
-  TH1D *uk1 = (TH1D*)f->Get("Erecon1_uk");
-  TH1D *sim1 = (TH1D*)f->Get("Erecon1_sim");
+  
 
   uk1->SetMarkerColor(kBlue);
   uk1->SetLineColor(kBlue);
@@ -133,7 +152,7 @@
   sim23->Draw("SAMEE0");
 
 
-  TString pdfFile = TString::Format("%s_norm_%0.1f-%0.1f.pdf",fileBase.Data(), normLow, normHigh);
+  TString pdfFile = TString::Format("%s_normType%s_%0.1f-%0.1f_.pdf",fileBase.Data(),normType.Data(), normLow, normHigh);
   //TString pdfFileStart = pdfFile + TString("(");
   //TString pdfFileEnd = pdfFile + TString
   c1->Print(TString::Format("%s[",pdfFile.Data()));

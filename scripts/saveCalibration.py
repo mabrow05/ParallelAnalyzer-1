@@ -2,8 +2,8 @@
 
 import os
 
-calibrationName = "07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
-year = "2011-2012" #"2011-2012" or "2012-2013"
+calibrationName = "08292016_quad_singleRunTriggFuncs_it4"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
+year = "2012-2013" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"
 
@@ -22,6 +22,12 @@ for per in calPeriods:
     os.system("cp %s/lin_curves_srcCal_Period_%i.dat %s"%(os.getenv("LINEARITY_CURVES"),per,location))
     os.system("cp %s/simulation_comparison/nPE_per_keV/nPE_per_keV_%i.dat %s"%(os.getenv("ANALYSIS_CODE"),per,location))
     os.system("cp %s/simulation_comparison/nPE_per_keV/width_comp_%i.pdf %s"%(os.getenv("ANALYSIS_CODE"),per,location))
+    
+
+if year=="2011-2012":
     os.system("cp %s/error_envelope/error_envelope_calPeriods_1-12.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
+ 
+if year=="2012-2013":
+    os.system("cp %s/error_envelope/error_envelope_calPeriods_13-24.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
     
 

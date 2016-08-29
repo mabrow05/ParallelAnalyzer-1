@@ -31,6 +31,10 @@ void width_fitter(Int_t calPeriod)
 
   std::vector < std::vector < Double_t > > simWidths(8,std::vector <Double_t> (500, 0.));
   std::vector < std::vector < Double_t > > dataWidths(8,std::vector <Double_t> (500,0.));
+  std::vector < std::vector < Double_t > > simPeaks(8,std::vector <Double_t> (500, 0.));
+  std::vector < std::vector < Double_t > > dataPeaks(8,std::vector <Double_t> (500,0.));
+  std::vector < std::vector < Double_t > > simRatio(8,std::vector <Double_t> (500, 0.));
+  std::vector < std::vector < Double_t > > dataRatio(8,std::vector <Double_t> (500,0.));
   std::vector < Double_t > old_k(8,0.);
   std::vector < Double_t > new_k(8,0.);
   std::vector < Double_t > slope(8,0.);
@@ -48,16 +52,18 @@ void width_fitter(Int_t calPeriod)
   kfilein.close();
 
 
-  sprintf(tempfile,"%s/residuals/source_runs_EvisWidth_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
-  //sprintf(tempfile,"../residuals/source_runs_EvisWidth_RunPeriod_%i.dat",calPeriod);
+  sprintf(tempfile,"%s/residuals/source_runs_EvisWidth_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
+  ifstream dataWidthsFile(tempfile); 
+  if (dataWidthsFile.is_open()) cout << tempfile << endl;
   
-  ifstream dataFile(tempfile); 
-  if (dataFile.is_open()) cout << tempfile << endl;
+  sprintf(tempfile,"%s/residuals/source_runs_Evis_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
+  ifstream dataPeaksFile(tempfile); 
+
+  sprintf(tempfile,"%s/residuals/SIM_source_runs_EvisWidth_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
+  ifstream simWidthsFile(tempfile);
   
-  sprintf(tempfile,"%s/residuals/SIM_source_runs_EvisWidth_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
-  //sprintf(tempfile,"../residuals/SIM_source_runs_EvisWidth_runPeriod_%i.dat",calPeriod);
-  
-  ifstream simFile(tempfile);
+  sprintf(tempfile,"%s/residuals/SIM_source_runs_Evis_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
+  ifstream simPeaksFile(tempfile);
   
   std::string srcNameData, srcNameSim;
   Int_t Run, simRun;
@@ -65,27 +71,47 @@ void width_fitter(Int_t calPeriod)
   Int_t i=0;
   std::vector < Double_t > dataWidths_hold(8,0.);
   std::vector < Double_t > simWidths_hold(8,0.);
+  std::vector < Double_t > dataPeaks_hold(8,0.);
+  std::vector < Double_t > simPeaks_hold(8,0.);
   std::vector <Int_t> num(8,0);
   
-  while (dataFile >> Run >> srcNameData
+  while (dataWidthsFile >> Run >> srcNameData
 	 >> dataWidths_hold[0] >> dataWidths_hold[1] >> dataWidths_hold[2] >> dataWidths_hold[3] >>
 	 dataWidths_hold[4] >> dataWidths_hold[5] >> dataWidths_hold[6] >> dataWidths_hold[7]) {
 
+
+    dataPeaksFile >> Run >> srcNameData
+	 >> dataPeaks_hold[0] >> dataPeaks_hold[1] >> dataPeaks_hold[2] >> dataPeaks_hold[3] >>
+      dataPeaks_hold[4] >> dataPeaks_hold[5] >> dataPeaks_hold[6] >> dataPeaks_hold[7];
     //cout << Run << " " << srcNameData << endl;
 
-    simFile >> simRun >> srcNameSim;
+    simPeaksFile >> simRun >> srcNameSim;
+    simWidthsFile >> simRun >> srcNameSim;
+    
     if (simRun==Run && srcNameSim==srcNameData) {
-      simFile >> simWidths_hold[0] >> simWidths_hold[1] >> simWidths_hold[2] >> simWidths_hold[3]
-	      >> simWidths_hold[4] >> simWidths_hold[5] >> simWidths_hold[6] >> simWidths_hold[7];
+      simWidthsFile >> simWidths_hold[0] >> simWidths_hold[1] >> simWidths_hold[2]
+		    >> simWidths_hold[3] >> simWidths_hold[4] >> simWidths_hold[5] 
+		    >> simWidths_hold[6] >> simWidths_hold[7];
+      simPeaksFile >> simPeaks_hold[0] >> simPeaks_hold[1] >> simPeaks_hold[2] 
+		    >> simPeaks_hold[3] >> simPeaks_hold[4] >> simPeaks_hold[5]
+		    >> simPeaks_hold[6] >> simPeaks_hold[7];
 
       std::vector <Int_t> pmtQuality = getPMTQuality(Run); //Not using this right now
 
       for (Int_t p=0; p<8; p++) {
 	if ( !(p==5 && Run>16983 && Run<17249) ) { //Checking if run is in range where PMTW2 was dead 
-	  
-	  if ( (TMath::Abs(simWidths_hold[p]-dataWidths_hold[p])/simWidths_hold[p] < 0.2) || p==3) { //Checking for outliers
+	  Double_t dataRatio_hold = dataWidths_hold[p]/dataPeaks_hold[p];
+	  Double_t simRatio_hold = simWidths_hold[p]/simPeaks_hold[p];
+
+	  if ( (TMath::Abs(simRatio_hold-dataRatio_hold)/dataRatio_hold < .5) ) { //Checking for outliers
+
 	    dataWidths[p][num[p]] = dataWidths_hold[p];
 	    simWidths[p][num[p]] = simWidths_hold[p];
+	    dataPeaks[p][num[p]] = dataPeaks_hold[p];
+	    simPeaks[p][num[p]] = simPeaks_hold[p];
+	    dataRatio[p][num[p]] = dataRatio_hold;
+	    simRatio[p][num[p]] = simRatio_hold;
+
 	    if (srcNameData!="Cd" && srcNameData!="Bi1") num[p]++; //Put peaks to exclude here
 	    //num[p]++; 
 	  }
@@ -100,11 +126,14 @@ void width_fitter(Int_t calPeriod)
       cout << "Data and sim files don't match. Rerun MakeSourceCalibrationFiles!\n"; 
       exit(0);
     }
-    if (dataFile.fail()) break;
+    if (dataWidthsFile.fail()) break;
     
   }
-  dataFile.close();
-  simFile.close();
+
+  dataWidthsFile.close();
+  simWidthsFile.close();
+  dataWidthsFile.close();
+  simWidthsFile.close();
 
   cout << i << endl;
 
@@ -128,9 +157,9 @@ void width_fitter(Int_t calPeriod)
   p7->Draw(); 
 
 
-  TF1 *f1 = new TF1("f1","[0]*x",0., 170.);
+  TF1 *f1 = new TF1("f1","[0]*x",0., 1.);
   f1->SetParameter(0,1.);
-  f1->SetParLimits(0,0.5,1.5);
+  f1->SetParLimits(0,0.3,1.8);
   gStyle->SetOptFit();
   
   TString status = " ";
@@ -142,16 +171,16 @@ void width_fitter(Int_t calPeriod)
 
   if (num[0]>0) {
 
-    TGraph *pmt0 = new TGraph(num[0], &simWidths[0][0], &dataWidths[0][0]);
+    TGraph *pmt0 = new TGraph(num[0], &simRatio[0][0], &dataRatio[0][0]);
     pmt0->SetMarkerColor(1);
     pmt0->SetLineColor(1);
     pmt0->SetMarkerStyle(20);
     pmt0->SetMarkerSize(0.75);
-    pmt0->GetXaxis()->SetLimits(0.0,170.);
-    pmt0->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt0->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt0->GetXaxis()->SetLimits(0.0,1.);
+    pmt0->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt0->GetYaxis()->SetTitle("Actual Width/Peak");
     pmt0->SetMinimum(0.0);
-    pmt0->SetMaximum(170.);
+    pmt0->SetMaximum(1.);
     pmt0->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
@@ -173,16 +202,16 @@ void width_fitter(Int_t calPeriod)
   p1->cd();
 
   if (num[1]>0) {
-    TGraph *pmt1 = new TGraph(num[1], &simWidths[1][0], &dataWidths[1][0]);
+    TGraph *pmt1 = new TGraph(num[1], &simRatio[1][0], &dataRatio[1][0]);
     pmt1->SetMarkerColor(1);
     pmt1->SetLineColor(1);
     pmt1->SetMarkerStyle(20);
     pmt1->SetMarkerSize(0.75);
-    pmt1->GetXaxis()->SetLimits(0.0,170.);
-    pmt1->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt1->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt1->GetXaxis()->SetLimits(0.0,1.);
+    pmt1->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt1->GetYaxis()->SetTitle("Actual Width/Peak");
     pmt1->SetMinimum(0.0);
-    pmt1->SetMaximum(170.);
+    pmt1->SetMaximum(1.);
     pmt1->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
@@ -204,16 +233,16 @@ void width_fitter(Int_t calPeriod)
 
 
   if (num[2]>0) {
-    TGraph *pmt2 = new TGraph(num[2], &simWidths[2][0], &dataWidths[2][0]);
+    TGraph *pmt2 = new TGraph(num[2], &simRatio[2][0], &dataRatio[2][0]);
     pmt2->SetMarkerColor(1);
     pmt2->SetLineColor(1);
     pmt2->SetMarkerStyle(20);
     pmt2->SetMarkerSize(0.75);
-    pmt2->GetXaxis()->SetLimits(0.0,170.);
-    pmt2->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt2->GetYaxis()->SetTitle("Actual Width (keV)");  
+    pmt2->GetXaxis()->SetLimits(0.0,1.);
+    pmt2->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt2->GetYaxis()->SetTitle("Actual Width/Peak");  
     pmt2->SetMinimum(0.0);
-    pmt2->SetMaximum(170.);
+    pmt2->SetMaximum(1.);
     pmt2->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
@@ -236,16 +265,16 @@ void width_fitter(Int_t calPeriod)
 
   if (num[3]>0) {
 
-    TGraph *pmt3 = new TGraph(num[3], &simWidths[3][0], &dataWidths[3][0]);
+    TGraph *pmt3 = new TGraph(num[3], &simRatio[3][0], &dataRatio[3][0]);
     pmt3->SetMarkerColor(1);
     pmt3->SetLineColor(1);
     pmt3->SetMarkerStyle(20);
     pmt3->SetMarkerSize(0.75);
-    pmt3->GetXaxis()->SetLimits(0.0,170.);
-    pmt3->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt3->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt3->GetXaxis()->SetLimits(0.0,1.);
+    pmt3->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt3->GetYaxis()->SetTitle("Actual Width/Peak");
     pmt3->SetMinimum(0.0);
-    pmt3->SetMaximum(170.);
+    pmt3->SetMaximum(1.);
     pmt3->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
@@ -268,16 +297,16 @@ void width_fitter(Int_t calPeriod)
 
   if (num[4]>0) {
     
-    TGraph *pmt4 = new TGraph(num[4], &simWidths[4][0], &dataWidths[4][0]);
+    TGraph *pmt4 = new TGraph(num[4], &simRatio[4][0], &dataRatio[4][0]);
     pmt4->SetMarkerColor(1);
     pmt4->SetLineColor(1);
     pmt4->SetMarkerStyle(20);
     pmt4->SetMarkerSize(0.75);
-    pmt4->GetXaxis()->SetLimits(0.0,170.);
-    pmt4->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt4->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt4->GetXaxis()->SetLimits(0.0,1.);
+    pmt4->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt4->GetYaxis()->SetTitle("Actual Width/Peak");
     pmt4->SetMinimum(0.0);
-    pmt4->SetMaximum(170.);
+    pmt4->SetMaximum(1.);
     pmt4->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
@@ -300,16 +329,16 @@ void width_fitter(Int_t calPeriod)
 
   if (num[5]>0) {
 
-    TGraph *pmt5 = new TGraph(num[5], &simWidths[5][0], &dataWidths[5][0]);
+    TGraph *pmt5 = new TGraph(num[5], &simRatio[5][0], &dataRatio[5][0]);
     pmt5->SetMarkerColor(1);
     pmt5->SetLineColor(1);
     pmt5->SetMarkerStyle(20);
     pmt5->SetMarkerSize(0.75);
-    pmt5->GetXaxis()->SetLimits(0.0,170.);
-    pmt5->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt5->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt5->GetXaxis()->SetLimits(0.0,1.);
+    pmt5->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt5->GetYaxis()->SetTitle("Actual Width/Peak");
     pmt5->SetMinimum(0.0);
-    pmt5->SetMaximum(170.);
+    pmt5->SetMaximum(1.);
     pmt5->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
@@ -332,16 +361,16 @@ void width_fitter(Int_t calPeriod)
 
   if (num[6]>0) {
 
-    TGraph *pmt6 = new TGraph(num[6], &simWidths[6][0], &dataWidths[6][0]);
+    TGraph *pmt6 = new TGraph(num[6], &simRatio[6][0], &dataRatio[6][0]);
     pmt6->SetMarkerColor(1);
     pmt6->SetLineColor(1);
     pmt6->SetMarkerStyle(20);
     pmt6->SetMarkerSize(0.75);
-    pmt6->GetXaxis()->SetLimits(0.0,170.);
-    pmt6->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt6->GetYaxis()->SetTitle("Actual Width (keV)");  
+    pmt6->GetXaxis()->SetLimits(0.0,1.);
+    pmt6->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt6->GetYaxis()->SetTitle("Actual Width/Peak");  
     pmt6->SetMinimum(0.0);
-    pmt6->SetMaximum(170.);
+    pmt6->SetMaximum(1.);
     pmt6->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    
@@ -364,16 +393,16 @@ void width_fitter(Int_t calPeriod)
 
   if (num[7]>0) {
     
-    TGraph *pmt7 = new TGraph(num[7], &simWidths[7][0], &dataWidths[7][0]);
+    TGraph *pmt7 = new TGraph(num[7], &simRatio[7][0], &dataRatio[7][0]);
     pmt7->SetMarkerColor(1);
     pmt7->SetLineColor(1);
     pmt7->SetMarkerStyle(20);
     pmt7->SetMarkerSize(0.75);
-    pmt7->GetXaxis()->SetLimits(0.0,170.);
-    pmt7->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt7->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt7->GetXaxis()->SetLimits(0.0,1.);
+    pmt7->GetXaxis()->SetTitle("Simulated Width/Peak");
+    pmt7->GetYaxis()->SetTitle("Actual Width/Peak");
     pmt7->SetMinimum(0.0);
-    pmt7->SetMaximum(170.);
+    pmt7->SetMaximum(1.);
     pmt7->Draw("AP");
     
     while (status!=TString("CONVERGED ") && attempt!=nAttempts) {    

@@ -27,6 +27,10 @@ findADCthreshold.exe: findADCthreshold.o
 	$(CXX) $(CXXFLAGS) -o findADCthreshold.exe findADCthreshold.o $(LIBS)
 	@echo "Done"
 
+findADCthreshold_singleRun.exe: findADCthreshold_singleRun.o
+	$(CXX) $(CXXFLAGS) -o findADCthreshold_singleRun.exe findADCthreshold_singleRun.o $(LIBS)
+	@echo "Done"
+
 findDiscriminatorThresh.exe: findDiscriminatorThresh.o MBUtils.o 
 	$(CXX) $(CXXFLAGS) -o findDiscriminatorThresh.exe findDiscriminatorThresh.o MBUtils.o $(LIBS)
 	@echo "Done"

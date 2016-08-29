@@ -15,8 +15,9 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
-# 20529 - very low statistics
+omittedRuns = [17950,17953,19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
+
+# 17950,17953,20529 - very low statistics
 # 20530,20531,20823-20827 - lost West event triggers
 omittedRanges = [(17923,18055), (20901, 20917)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
                                                # And also run period 15 which is useless
@@ -115,8 +116,7 @@ class CalReplayManager:
         os.system("mkdir -p %s"%self.triggerFuncPath)
         os.system("mkdir -p %s/sources/"%self.revCalSimPath)
         os.system("mkdir -p %s/beta/"%self.revCalSimPath)
-        os.system("mkdir -p %s/sources_1mil/"%self.revCalSimPath)
-        os.system("mkdir -p %s/beta_1mil/"%self.revCalSimPath)
+        os.system("mkdir -p %s/beta_highStatistics/"%self.revCalSimPath)
         os.system("mkdir -p %s/source_peaks/"%self.revCalSimPath)
         os.system("mkdir -p %s"%self.UKspecReplayPath)
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
@@ -239,6 +239,28 @@ class CalReplayManager:
             print "Making basic histograms for run %i"%run
             os.system("cd ../basic_histograms/; ./basic_histograms.exe %i"%run)
             os.system("root -l -b -q '../basic_histograms/plot_basic_histograms.C(\"%i\")'"%run)
+            
+        print "DONE"
+
+
+    ######## This will also calculate the PMT pedestals so that they are the same as those used in the triggers
+    def findTriggerFunctions(self, srcRunPeriod=1, sourceORxenon="source"):
+        print "Running trigger functions for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            runs.append(int(line))
+        
+        for run in runs:
+            os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%run)
             
         print "DONE"
 
@@ -903,7 +925,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -912,20 +934,21 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [16]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [13,14]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
-            rep.findPedestals(runPeriod)
-            #rep.runReplayPass1(runPeriod)
+            rep.findTriggerFunctions(runPeriod)
+            #rep.findPedestals(runPeriod)
+            rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            #rep.runReplayPass2(runPeriod)
+            rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
         
     
     ### Source Run Calibration Steps...
-    if 0: 
-        runPeriods = [1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods = [20]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -950,7 +973,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 1:
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             

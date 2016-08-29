@@ -93,6 +93,28 @@ class BetaReplayManager:
                 os.system("root -l -b -q '../basic_histograms/plot_basic_histograms.C(\"%i\")'"%run)
         print "DONE"
     
+
+    ######## This will also calculate the PMT pedestals so that they are the same as those used in the triggers
+    def findTriggerFunctions(self, runORoctet):
+        runs = []
+        if runORoctet > 16000:
+            print "Running trigger functions for run %i"%runORoctet
+            os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%runORoctet)
+        else: 
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
+        
+            for line in infile:  
+                words=line.split()
+                runs.append(int(words[1]))
+        
+            for run in runs:
+                print "Running pedestals for run %i"%run
+                os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%run)
+
+        print "DONE"
+
+
     def findPedestals(self, runORoctet):
         runs = []
         if runORoctet > 16000:
@@ -231,6 +253,25 @@ class BetaReplayManager:
                 os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, "Beta"))
 
             print "Finished reverse calibration for octet %s"%runORoctet
+
+
+    def runRootfileTranslator(self,runORoctet):
+        runs = []
+        if runORoctet > 16000:
+            print "Running rootfile translator for run %i"%runORoctet
+            os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%runORoctet)
+        else: 
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
+        
+            for line in infile:      
+                words=line.split()
+                runs.append(int(words[1]))
+        
+            for run in runs:
+                print "Running rootfile translator for run %i"%run
+                os.system("cd ../rootfile_translator/; ./rootfile_translator %i"%run)
+        print "DONE"
         
     
 
@@ -327,20 +368,21 @@ if __name__ == "__main__":
 
 
     if 0:
-        octet_range =[5,5]# [0,59]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[0,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
             #beta.runReplayPass1(octet)
-            beta.runGainBismuth(octet)
-            beta.runReplayPass2(octet)
-            beta.runReplayPass3(octet)
+            #beta.runGainBismuth(octet)
+            #beta.runReplayPass2(octet)
+            #beta.runReplayPass3(octet)
+            beta.runRootfileTranslator(octet)
            
 
 
     #Running reverse calibrations
     if 1:
-        octet_range = [47,47];
+        octet_range = [15,15];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             beta.runReverseCalibration(octet)

@@ -162,7 +162,8 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
   Char_t temp[500];
   std::vector < std::vector < Double_t > > peds (8,std::vector <Double_t> (2,0.));
-  sprintf(temp,"%s/pedestal_widths_%i.dat",getenv("PEDESTALS"),runNumber);
+  if (runNumber>20000) sprintf(temp,"%s/PMT_pedestals_%i.dat",getenv("PEDESTALS"),runNumber);
+  else sprintf(temp,"%s/pedestal_widths_%i.dat",getenv("PEDESTALS"),runNumber);
   ifstream infile;
   infile.open(temp);
 
@@ -172,6 +173,31 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
   while (infile >> run >> peds[i][0] >> peds[i][1]) { std::cout << "Pedestal " << i << ": " << peds[i][0] << " " << peds[i][1] << std::endl; i++; }
   return peds;
 
+};
+
+std::vector <Double_t> loadGainFactors(Int_t runNumber) {
+
+  // Read gain corrections file                                                                                                                
+  char tempFileGain[500];
+  sprintf(tempFileGain, "%s/gain_bismuth_%i.dat",getenv("GAIN_BISMUTH"), runNumber);
+  std::cout << "... Reading: " << tempFileGain << std::endl;
+
+  std::vector <Double_t> gainCorrection(8,1.);
+  std::vector <Double_t> fitMean(8,1.);
+  ifstream fileGain(tempFileGain);
+  for (int i=0; i<8; i++) {
+    fileGain >> fitMean[i] >> gainCorrection[i];
+  }
+  std::cout << "...   PMT E1: " << gainCorrection[0] << std::endl;
+  std::cout << "...   PMT E2: " << gainCorrection[1] << std::endl;
+  std::cout << "...   PMT E3: " << gainCorrection[2] << std::endl;
+  std::cout << "...   PMT E4: " << gainCorrection[3] << std::endl;
+  std::cout << "...   PMT W1: " << gainCorrection[4] << std::endl;
+  std::cout << "...   PMT W2: " << gainCorrection[5] << std::endl;
+  std::cout << "...   PMT W3: " << gainCorrection[6] << std::endl;
+  std::cout << "...   PMT W4: " << gainCorrection[7] << std::endl;
+
+  return gainCorrection;
 };
 
 
@@ -204,6 +230,8 @@ void revCalSimulation (Int_t runNumber, string source)
                             // Once a calibration is established (or if running on Betas), you can keep this false
 
   bool simProperStatistics = false; // If True, this uses the actual data run to determine the number of Type 0s to simulate
+
+  bool veryHighStatistics = true; // Run 24 million events per run
                             
   
   cout << "Running reverse calibration for run " << runNumber << " and source " << source << endl;
@@ -231,42 +259,48 @@ void revCalSimulation (Int_t runNumber, string source)
   UInt_t BetaEvents = 0; //Holds the number of electron like Type 0 events to process
 
   Char_t temp[500],tempE[500],tempW[500];
-
-  if ( simProperStatistics ) {
-
-    //First get the number of total electron events around the source position from the data file and also the length of the run
-    
-    //sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
-    sprintf(temp,"%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"),runNumber);
-    TFile *dataFile = new TFile(temp,"READ");
-    TTree *data = (TTree*)(dataFile->Get("pass2"));
-    
-    if (source!="Beta") {
-      sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
-      sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
-      outputBase = string(getenv("REVCALSIM")) + "sources/";
-    }
-    else if (source=="Beta") {
-      sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
-      sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
-      outputBase = string(getenv("REVCALSIM")) + "beta/";
-    }
-    BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
-    cout << "Electron Events in Data file: " << BetaEvents << endl;
-    cout << "East: " << data->GetEntries(tempE) << "\tWest: " << data->GetEntries(tempW) << endl;
-    delete data;
-    dataFile->Close();
-
-    //If we have a source run, simulate 3 times the number of events so the peaks can be better determined
-    if (source!="Beta") BetaEvents = 3.*BetaEvents;
+  
+  //First get the number of total electron events around the source position from the data file and also the length of the run
+  
+  //sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
+  sprintf(temp,"%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"),runNumber);
+  TFile *dataFile = new TFile(temp,"READ");
+  TTree *data = (TTree*)(dataFile->Get("pass2"));
+  
+  if (source!="Beta") {
+    sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));
+    sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center>(%f-2.*%f) && xW.center<(%f+2.*%f) && yW.center>(%f-2.*%f) && yW.center<(%f+2.*%f))",srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][0],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]),srcPos[1][1],fabs(srcPos[1][2]));
+    outputBase = string(getenv("REVCALSIM")) + "sources/";
+  }
+  else if (source=="Beta") {
+    sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
+    sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
+    outputBase = string(getenv("REVCALSIM")) + "beta/";
+  }
+  BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
+  cout << "Electron Events in Data file: " << BetaEvents << endl;
+  cout << "East: " << data->GetEntries(tempE) << "\tWest: " << data->GetEntries(tempW) << endl;
+  delete data;
+  dataFile->Close(); 
+  
+  //If we have a source run, simulate 3 times the number of events so the peaks can be better determined
+  if (source!="Beta") BetaEvents = 3*BetaEvents;
+  
+  //If we have a Beta run and we don't want exact statistics, simulate 16 times the number of events
+  if ( !simProperStatistics && source=="Beta" ) {
+    BetaEvents = 16*BetaEvents;
+    outputBase = string(getenv("REVCALSIM")) + "beta_highStatistics/";
+  } 
+  
+  // Check if we actually want a stupid high number of statistics... set to 24 million per run
+  if ( veryHighStatistics && source=="Beta" ) {
+    BetaEvents = 24000000;
+    outputBase = string(getenv("REVCALSIM")) + "beta_veryHighStatistics/";
   }
 
-  else {
-    if (source!="Beta") outputBase = string(getenv("REVCALSIM")) + "sources_1mil/";
-    else if (source=="Beta") outputBase = string(getenv("REVCALSIM")) + "beta_1mil/";
-    BetaEvents = 1000000;
-    std::cout << "Processing 1e6 events...\n";
-  }
+  std::cout << "Processing " << BetaEvents << " events...\n";
+
+
   
 
   //Create simulation output file
@@ -301,6 +335,7 @@ void revCalSimulation (Int_t runNumber, string source)
   TriggerFunctions trigger(runNumber);
 
   std::vector < std::vector <Double_t> > pedestals = loadPMTpedestals(runNumber);
+  std::vector < Double_t > PMTgain = loadGainFactors(runNumber);
 
   //vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
 
@@ -334,7 +369,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   //Read in simulated data and put in a TChain
   TRandom3 *randFile = new TRandom3(0);
-  int numFiles = source=="Beta" ? 200 : 250; //The 200 is for the 10 million events we are testing for each polarization state
+  int numFiles = source=="Beta" ? 2000 : 250; //The 200 is for the 10 million events we are testing for each polarization state
   int fileNum = (int)(randFile->Rndm()*numFiles);
   delete randFile;
   for (int i=0; i<numFiles; i++) {
@@ -412,6 +447,7 @@ void revCalSimulation (Int_t runNumber, string source)
   UInt_t evt = evtStart; //current event number
   vector < vector <Int_t> > gridPoint;
   
+  Int_t counter = 0;
 
   //Read in events and determine evt type based on triggers
   while (evtTally<=BetaEvents) {
@@ -457,36 +493,41 @@ void revCalSimulation (Int_t runNumber, string source)
 
     //East Side smeared PMT energies
     
+    
     for (UInt_t p=0; p<4; p++) {
-      //if ( edepQ.EdepQE>0. ) { //Check to make sure that there is light to see in the scintillator
-	//cout << p << " " << positionMap[p][intEastBinX][intEastBinY] << endl;
-	//if (p==1) g_d=8.;
-	//else g_d=16.;
-      if (eta[p]>0.) {
+      if ( edepQ.EdepQE>0. ) { //Check to make sure that there is light to see in the scintillator
+	
+	if (eta[p]>0.) {
 	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE)));
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-	  ADCvecE[p] = ADC;
+
+	  // Accounting for the fact that I'm currently calculating the trigger functions in pure ADC in 2012/2013
+	  // while in 2011/2012 I was using gain corrected and pedestal subtracted data
+	  if (runNumber>20000) ADCvecE[p] = ADC/PMTgain[p] + pedestals[p][0];
+	  else ADCvecE[p] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
+	}
+	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
+	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE)));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  if ( runNumber>20000 ) ADCvecE[p] = ADC/PMTgain[p] + pedestals[p][0];
+	  else ADCvecE[p] = ADC;
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  pmt.Evis[p] = pmt.etaEvis[p];
+	}
+	
+	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
       }
-      else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
-	//pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE)));
-	pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE))));
-	Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-	ADCvecE[p] = ADC;
-	pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
-	pmt.Evis[p] = pmt.etaEvis[p];
-      }
-      
-      pmt.nPE[p] = pmt.etaEvis[p]>0. ? alpha[p]*pmt.etaEvis[p] : 0.;
-    }	
-    /*  // If PMT quality failed, set the evis and the weight to zero for this PMT
+    // If PMT quality failed, set the evis and the weight to zero for this PMT
       else {
 	pmt.etaEvis[p] = 0.;
 	pmt.Evis[p] = 0.;
 	pmt.nPE[p] = 0.;
-	}*/
+      }
+    }
   
       
     //Calculate the weighted energy on a side
@@ -509,13 +550,15 @@ void revCalSimulation (Int_t runNumber, string source)
       
     //West Side
     for (UInt_t p=4; p<8; p++) {
-      if ( !(p==5 && runNumber>16983 && runNumber<17249) ) { //Check to make sure that there is light to see in the scintillator and that run isn't one where PMTW2 was dead
+      if ( !(p==5 && runNumber>16983 && runNumber<17249)  &&  edepQ.EdepQW>0. ) { //Check to make sure that there is light to see in the scintillator and that run isn't one where PMTW2 was dead
 	
 	if (eta[p]>0.) {
 	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW)));
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-	  ADCvecW[p-4] = ADC;
+	  if ( runNumber>20000 ) ADCvecW[p-4] = ADC/PMTgain[p] + pedestals[p][0];
+	  else ADCvecW[p-4] = ADC;
+	  //cout << ADCvecW[p-4] << endl;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
@@ -524,13 +567,16 @@ void revCalSimulation (Int_t runNumber, string source)
 	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW)));
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-	  ADCvecW[p-4] = ADC;
+	  if ( runNumber>20000 ) ADCvecW[p-4] = ADC/PMTgain[p] + pedestals[p][0];
+	  else ADCvecW[p-4] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];
+	  
+	  counter++;
 	}
-
-	pmt.nPE[p] = pmt.etaEvis[p]>0. ? alpha[p]*pmt.etaEvis[p] : 0.;
-      }	
+	
+	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
+      }
       // If PMT quality failed, set the evis and the weight to zero for this PMT
       else {
 	pmt.etaEvis[p] = 0.;
@@ -539,7 +585,8 @@ void revCalSimulation (Int_t runNumber, string source)
       }
     }
       
-    //Calculate the total weighted energy
+      
+     //Calculate the total weighted energy
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
       numer += pmtQuality[p] ? pmt.nPE[p] : 0.;
@@ -651,7 +698,7 @@ void revCalSimulation (Int_t runNumber, string source)
     Int_t typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
     if (side==0) {
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
-      if (totalEvis>0.) {
+      if (evis.EvisE>0. && totalEvis>0.) {
 	Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
 	if (type==0) finalEn[0]->Fill(Erecon); 
 	else if (type==1) finalEn[2]->Fill(Erecon); 
@@ -661,7 +708,7 @@ void revCalSimulation (Int_t runNumber, string source)
     }
     if (side==1) {
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
-      if (totalEvis>0.) {
+      if (evis.EvisW>0. && totalEvis>0.) {
 	Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
 	
 	if (type==0) finalEn[1]->Fill(Erecon); 
@@ -672,14 +719,14 @@ void revCalSimulation (Int_t runNumber, string source)
     }    
   
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
-    if ( PID==1 && ( !simProperStatistics || ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
-					 && sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut ) ) ) evtTally++;
+    if ( PID==1 && Erecon>0. && ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
+		     && sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut ) ) evtTally++;
 
     evt++;
 
     if (PID>=0) tree->Fill();
     //cout << evtTally << endl;
-    //if (evtTally%1000==0) {cout << evtTally << endl;}//cout << "filled event " << evt << endl;
+    if (evtTally%100000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
   }
   cout << endl;
 
@@ -689,7 +736,9 @@ void revCalSimulation (Int_t runNumber, string source)
   outfile->Write();
   outfile->Close();
   
-}
+
+  std::cout << counter << std::endl;
+    }
 
 int main(int argc, char *argv[]) {
   string source = string(argv[2]);

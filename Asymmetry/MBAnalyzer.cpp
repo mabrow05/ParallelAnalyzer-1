@@ -30,7 +30,7 @@ Maybe even add in writing the final answer to the database if the user wants to
 
 bool BLINDED = true;
 
-std::vector <Int_t> badOct = {7}; // Octet 7 had W anode dead for part of run
+std::vector <Int_t> badOct = {7,9,59}; // Octet 7 had W anode dead for part of run
                                   // Either need to discard, or apply the 
                                   // Charge cloud method to determine a 
                                   // coincidence
@@ -59,8 +59,8 @@ int main()
 {
 
   Int_t analysisChoice = 1;
-  Int_t octBegin = 1;
-  Int_t octEnd = 1;
+  Int_t octBegin = 0;
+  Int_t octEnd = 59;
   Double_t enBinWidth = 10.;
   Double_t Elow = 180.;
   Double_t Ehigh = 780.;
@@ -70,17 +70,17 @@ int main()
   
   try {
     
-    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
+    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
     //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm);
+    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm);
     
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    //PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
      
     //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
     //PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    //PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
     
   }
   catch(const char* ex){

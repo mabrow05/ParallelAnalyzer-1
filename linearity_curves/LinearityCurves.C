@@ -32,7 +32,7 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
 void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 {
 
-  bool quadratic = false;
+  bool quadratic = true;
   
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -355,7 +355,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   //fitADC->FixParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
-  fitADC->SetParLimits(2, -0.001, 0.001);
+  fitADC->SetParLimits(2, -0.0001, 0.0001);
   if (!quadratic) fitADC->FixParameter(2, 0.0);
   //fitADC->FixParameter(0, 0.0);
 

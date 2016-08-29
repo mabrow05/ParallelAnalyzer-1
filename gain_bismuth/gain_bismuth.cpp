@@ -149,20 +149,27 @@ int main(int argc, char *argv[])
   // counting from the end bin to avoid weird high peaks at lower energies
   
   for (int j=0; j<8; j++) {
-    int counter = 0;
+    //int counter = 0;
+    int maxCounter = 0;
+    int minCounter = 0;
     for (int i=nBin-1; i>0; i--) {
       binCenter[j] = his[j]->GetBinCenter(i);
       binCounts[j] = his[j]->GetBinContent(i);
 
-      if ( binCounts[j] > 50 && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
+      if ( binCounts[j] > 15 && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
 	if ( binCounts[j] >= maxCounts[j] ) {
 	  maxCounts[j] = binCounts[j];
 	  maxBin[j] = i;
 	  binCenterMax[j] = binCenter[j];
-	  counter = 0;
+	  
+	  if ( minCounter < 3 ) maxCounter++; //increment this when we have a new max. This is to make sure that we actually climb a peak
+	  minCounter = 0;
+
 	}
-	else counter++;
-	if ( counter>10 ) break; //Making sure we only get the high energy peak
+        
+	else minCounter++;
+	
+	if ( minCounter>10 && maxCounter>5 ) break; //Making sure we only get the high energy peak
       }
     }
   }
@@ -203,14 +210,14 @@ int main(int argc, char *argv[])
   if (runNumber<21274) {
     for (int n=0; n<8; n++) {
       for (int i=maxBin[n]; i<nBin; i++) {
-	if (his[n]->GetBinContent(i+1) < 0.4*maxCounts[n]) {
-	  xHigh[n] = his[n]->GetBinCenter(i+1);
+	if ( his[n]->GetBinContent(i+1) < 0.4*maxCounts[n] ) {
+	  xHigh[n] =  (his[n]->GetXaxis()->GetBinCenter(i+1) - binCenterMax[n]) > 225. ? his[n]->GetBinCenter(i+1) : (binCenterMax[n] + 300.);
 	  break;
 	}
       }
       for (int i=maxBin[n]; i>0; i--) {
-	if (his[n]->GetBinContent(i-1) < 0.65*maxCounts[n]) {
-	  xLow[n] = his[n]->GetBinCenter(i-1);
+	if (his[n]->GetBinContent(i-1) < 0.55*maxCounts[n]) {
+	  xLow[n] = ( binCenterMax[n] - his[n]->GetXaxis()->GetBinCenter(i-1) ) > 200. ? his[n]->GetBinCenter(i-1) : (binCenterMax[n] - 250.);
 	  break;
 	}
       }

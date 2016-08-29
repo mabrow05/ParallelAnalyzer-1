@@ -7,11 +7,11 @@ LinearityCurve::LinearityCurve(Int_t period, bool useTanhSmear) : sourceCalPerio
   
   if (useTanh) {
     nParams = 6;
-    linCurve = new TF1("linCurve","([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", -100., 4096.0);
+    linCurve = new TF1("linCurve","([0] + [1]*x + [2]*x*x)*(0.5+0.5*TMath::TanH((x-[4])/[5]))+([3]*x)*(0.5-0.5*TMath::TanH((x-[4])/[5]))", -200.5, 4096.5);
   }
   else {
     nParams = 3;
-    linCurve = new TF1("linCurve","([0] + [1]*x + [2]*x*x)", -100., 4096.0);
+    linCurve = new TF1("linCurve","([0] + [1]*x + [2]*x*x)", -200.5,4096.5);
   }
   
   pmtParams.resize(8, std::vector <Double_t> (nParams,0.));
@@ -72,7 +72,7 @@ Double_t LinearityCurve::applyLinCurve(Int_t pmt, Double_t x) {
 Double_t LinearityCurve::applyInverseLinCurve(Int_t pmt, Double_t y) {
   if (useTanh) linCurve->SetParameters(pmtParams[pmt][0], pmtParams[pmt][1], pmtParams[pmt][2], pmtParams[pmt][3], pmtParams[pmt][4], pmtParams[pmt][5]);
   else linCurve->SetParameters(pmtParams[pmt][0], pmtParams[pmt][1], pmtParams[pmt][2]);
-  return linCurve->GetX(y, -50., 4096.);
+  return linCurve->GetX(y, -50., 3000.);
 }
 
 
@@ -83,7 +83,7 @@ TriggerFunctions::TriggerFunctions(Int_t run) : currentRun(run) {
   triggerFuncs.resize(8,std::vector<Double_t>(8,0.));
   readTriggerFunctions(currentRun);
   
-  func = new TF1("func","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-80.,4096.);
+  func = new TF1("func","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-100.,4096.);
 
 }
 
