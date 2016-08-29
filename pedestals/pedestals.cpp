@@ -51,6 +51,10 @@ int main(int argc, char *argv[])
   TFile *fileOut = new TFile(tempOut,"RECREATE");
 
   // Define output histograms
+
+
+  // NOTE: These are not the PMT pedestals used in replay pass1!
+  //PMT pedestals are calculated when doing the trigger function
   TH1F *his11 = new TH1F("his11", "", 4000,0.5,4000.5); // East PMT #1
   TH1F *his12 = new TH1F("his12", "", 4000,0.5,4000.5); // East PMT #2
   TH1F *his13 = new TH1F("his13", "", 4000,0.5,4000.5); // East PMT #3
@@ -550,23 +554,6 @@ int main(int argc, char *argv[])
   outPedFile.close();
 
 
-  sprintf(tempPedFile, "%s/pedestal_widths_%s.dat", getenv("PEDESTALS"),argv[1]);
-  ofstream outWidthFile(tempPedFile);
-
-  outWidthFile << std::fixed << std::setprecision(7);
-
-
-  outWidthFile << argv[1] << " " << his11->GetMean() << " " << his11->GetRMS() << endl;
-  outWidthFile << argv[1] << " " << his12->GetMean() << " " << his12->GetRMS() << endl;
-  outWidthFile << argv[1] << " " << his13->GetMean() << " " << his13->GetRMS() << endl;
-  outWidthFile << argv[1] << " " << his14->GetMean() << " " << his14->GetRMS() << endl;
-  outWidthFile << argv[1] << " " << his15->GetMean() << " " << his15->GetRMS() << endl;
-  outWidthFile << argv[1] << " " << his16->GetMean() << " " << his16->GetRMS() << endl;
-  outWidthFile << argv[1] << " " << his17->GetMean() << " " << his17->GetRMS() << endl;
-  outWidthFile << argv[1] << " " << his18->GetMean() << " " << his18->GetRMS();
-  
-  outWidthFile.close();
-
   // Write output ntuple
   fileOut->Write();
   fileOut->Close();
@@ -631,99 +618,3 @@ void loadCuts(Int_t runNumber, cuts* Cuts) {
 }
 
 
-/*
-for (int i=0; i<500; i++) {
-    pedQadc[0] += (his11->GetBinCenter(i+1)) * (his11->GetBinContent(i+1));
-    pedQadc[1] += (his12->GetBinCenter(i+1)) * (his12->GetBinContent(i+1));
-    pedQadc[2] += (his13->GetBinCenter(i+1)) * (his13->GetBinContent(i+1));
-    pedQadc[3] += (his14->GetBinCenter(i+1)) * (his14->GetBinContent(i+1));
-    pedQadc[4] += (his15->GetBinCenter(i+1)) * (his15->GetBinContent(i+1));
-    pedQadc[5] += (his16->GetBinCenter(i+1)) * (his16->GetBinContent(i+1));
-    pedQadc[6] += (his17->GetBinCenter(i+1)) * (his17->GetBinContent(i+1));
-    pedQadc[7] += (his18->GetBinCenter(i+1)) * (his18->GetBinContent(i+1));
-
-    pedPdc2[0]  += (his101->GetBinCenter(i+1)) * (his101->GetBinContent(i+1));
-    pedPdc2[1]  += (his102->GetBinCenter(i+1)) * (his102->GetBinContent(i+1));
-    pedPdc2[2]  += (his103->GetBinCenter(i+1)) * (his103->GetBinContent(i+1));
-    pedPdc2[3]  += (his104->GetBinCenter(i+1)) * (his104->GetBinContent(i+1));
-    pedPdc2[4]  += (his105->GetBinCenter(i+1)) * (his105->GetBinContent(i+1));
-    pedPdc2[5]  += (his106->GetBinCenter(i+1)) * (his106->GetBinContent(i+1));
-    pedPdc2[6]  += (his107->GetBinCenter(i+1)) * (his107->GetBinContent(i+1));
-    pedPdc2[7]  += (his108->GetBinCenter(i+1)) * (his108->GetBinContent(i+1));
-    pedPdc2[8]  += (his109->GetBinCenter(i+1)) * (his109->GetBinContent(i+1));
-    pedPdc2[9]  += (his110->GetBinCenter(i+1)) * (his110->GetBinContent(i+1));
-    pedPdc2[10] += (his111->GetBinCenter(i+1)) * (his111->GetBinContent(i+1));
-    pedPdc2[11] += (his112->GetBinCenter(i+1)) * (his112->GetBinContent(i+1));
-    pedPdc2[12] += (his113->GetBinCenter(i+1)) * (his113->GetBinContent(i+1));
-    pedPdc2[13] += (his114->GetBinCenter(i+1)) * (his114->GetBinContent(i+1));
-    pedPdc2[14] += (his115->GetBinCenter(i+1)) * (his115->GetBinContent(i+1));
-    pedPdc2[15] += (his116->GetBinCenter(i+1)) * (his116->GetBinContent(i+1));
-    pedPdc2[16] += (his117->GetBinCenter(i+1)) * (his117->GetBinContent(i+1));
-    pedPdc2[17] += (his118->GetBinCenter(i+1)) * (his118->GetBinContent(i+1));
-    pedPdc2[18] += (his119->GetBinCenter(i+1)) * (his119->GetBinContent(i+1));
-    pedPdc2[19] += (his120->GetBinCenter(i+1)) * (his120->GetBinContent(i+1));
-    pedPdc2[20] += (his121->GetBinCenter(i+1)) * (his121->GetBinContent(i+1));
-    pedPdc2[21] += (his122->GetBinCenter(i+1)) * (his122->GetBinContent(i+1));
-    pedPdc2[22] += (his123->GetBinCenter(i+1)) * (his123->GetBinContent(i+1));
-    pedPdc2[23] += (his124->GetBinCenter(i+1)) * (his124->GetBinContent(i+1));
-    pedPdc2[24] += (his125->GetBinCenter(i+1)) * (his125->GetBinContent(i+1));
-    pedPdc2[25] += (his126->GetBinCenter(i+1)) * (his126->GetBinContent(i+1));
-    pedPdc2[26] += (his127->GetBinCenter(i+1)) * (his127->GetBinContent(i+1));
-    pedPdc2[27] += (his128->GetBinCenter(i+1)) * (his128->GetBinContent(i+1));
-    pedPdc2[28] += (his129->GetBinCenter(i+1)) * (his129->GetBinContent(i+1));
-    pedPdc2[29] += (his130->GetBinCenter(i+1)) * (his130->GetBinContent(i+1));
-    pedPdc2[30] += (his131->GetBinCenter(i+1)) * (his131->GetBinContent(i+1));
-    pedPdc2[31] += (his132->GetBinCenter(i+1)) * (his132->GetBinContent(i+1));
-
-    pedPadc[0]  += (his201->GetBinCenter(i+1)) * (his201->GetBinContent(i+1));
-    pedPadc[1]  += (his202->GetBinCenter(i+1)) * (his202->GetBinContent(i+1));
-    pedPadc[2]  += (his203->GetBinCenter(i+1)) * (his203->GetBinContent(i+1));
-    pedPadc[3]  += (his204->GetBinCenter(i+1)) * (his204->GetBinContent(i+1));
-    pedPadc[4]  += (his205->GetBinCenter(i+1)) * (his205->GetBinContent(i+1));
-    pedPadc[5]  += (his206->GetBinCenter(i+1)) * (his206->GetBinContent(i+1));
-    pedPadc[6]  += (his207->GetBinCenter(i+1)) * (his207->GetBinContent(i+1));
-    pedPadc[7]  += (his208->GetBinCenter(i+1)) * (his208->GetBinContent(i+1));
-    pedPadc[8]  += (his209->GetBinCenter(i+1)) * (his209->GetBinContent(i+1));
-    pedPadc[9]  += (his210->GetBinCenter(i+1)) * (his210->GetBinContent(i+1));
-    pedPadc[10] += (his211->GetBinCenter(i+1)) * (his211->GetBinContent(i+1));
-    pedPadc[11] += (his212->GetBinCenter(i+1)) * (his212->GetBinContent(i+1));
-    pedPadc[12] += (his213->GetBinCenter(i+1)) * (his213->GetBinContent(i+1));
-    pedPadc[13] += (his214->GetBinCenter(i+1)) * (his214->GetBinContent(i+1));
-    pedPadc[14] += (his215->GetBinCenter(i+1)) * (his215->GetBinContent(i+1));
-    pedPadc[15] += (his216->GetBinCenter(i+1)) * (his216->GetBinContent(i+1));
-    pedPadc[16] += (his217->GetBinCenter(i+1)) * (his217->GetBinContent(i+1));
-    pedPadc[17] += (his218->GetBinCenter(i+1)) * (his218->GetBinContent(i+1));
-    pedPadc[18] += (his219->GetBinCenter(i+1)) * (his219->GetBinContent(i+1));
-    pedPadc[19] += (his220->GetBinCenter(i+1)) * (his220->GetBinContent(i+1));
-    pedPadc[20] += (his221->GetBinCenter(i+1)) * (his221->GetBinContent(i+1));
-    pedPadc[21] += (his222->GetBinCenter(i+1)) * (his222->GetBinContent(i+1));
-    pedPadc[22] += (his223->GetBinCenter(i+1)) * (his223->GetBinContent(i+1));
-    pedPadc[23] += (his224->GetBinCenter(i+1)) * (his224->GetBinContent(i+1));
-    pedPadc[24] += (his225->GetBinCenter(i+1)) * (his225->GetBinContent(i+1));
-    pedPadc[25] += (his226->GetBinCenter(i+1)) * (his226->GetBinContent(i+1));
-    pedPadc[26] += (his227->GetBinCenter(i+1)) * (his227->GetBinContent(i+1));
-    pedPadc[27] += (his228->GetBinCenter(i+1)) * (his228->GetBinContent(i+1));
-    pedPadc[28] += (his229->GetBinCenter(i+1)) * (his229->GetBinContent(i+1));
-    pedPadc[29] += (his230->GetBinCenter(i+1)) * (his230->GetBinContent(i+1));
-    pedPadc[30] += (his231->GetBinCenter(i+1)) * (his231->GetBinContent(i+1));
-    pedPadc[31] += (his232->GetBinCenter(i+1)) * (his232->GetBinContent(i+1));
-
-    pedPdc30 += (his300->GetBinCenter(i+1)) * (his300->GetBinContent(i+1));
-    pedPdc34 += (his301->GetBinCenter(i+1)) * (his301->GetBinContent(i+1));
-  }
-
-  for (int i=0; i<4; i++) {
-    pedQadc[i] = pedQadc[i] / ((double) nEastPed);
-    //cout << pedQadc[i] << endl;
-  }
-  for (int i=4; i<8; i++) {
-    pedQadc[i] = pedQadc[i] / ((double) nWestPed);
-    //cout << pedQadc[i] << endl;
-  }
-  for (int i=0; i<32; i++) {
-    pedPdc2[i] = pedPdc2[i] / ((double) nEastPed);
-    pedPadc[i] = pedPadc[i] / ((double) nWestPed);
-  }
-  pedPdc30 = pedPdc30/((double) nEastPed);
-  pedPdc34 = pedPdc34/((double) nWestPed);
-*/

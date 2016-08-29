@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
+#include <vector>
 
 // ROOT libraries
 #include "TRandom3.h"
@@ -28,6 +29,22 @@
 #include "DataTree.hh"
 
 using namespace std;
+
+std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
+
+  Char_t temp[500];
+  std::vector < std::vector < Double_t > > peds (8,std::vector <Double_t> (2,0.));
+  sprintf(temp,"%s/PMT_pedestals_%i.dat",getenv("PEDESTALS"),runNumber);
+  ifstream infile;
+  infile.open(temp);
+
+  Int_t i = 0;
+  Int_t run;
+
+  while (infile >> run >> peds[i][0] >> peds[i][1]) { std::cout << "Pedestal " << i << ": " << peds[i][0] << " " << peds[i][1] << std::endl; i++; }
+  return peds;
+
+};
 
 int main(int argc, char *argv[])
 {
@@ -83,6 +100,9 @@ int main(int argc, char *argv[])
   cout << "... West Backing Veto QADC Cut: " << cutWestBackingVetoQADC << endl;
   cout << "... West Backing Veto TDC Cut: " << cutWestBackingVetoTDC << endl;
 
+  //First load separate PMT pedestals as produced by the trigger thresholds
+
+  std::vector < std::vector <Double_t> > pmtPedestals = loadPMTpedestals(atoi(argv[1]));
   
 
   // Read pedestals file
@@ -93,7 +113,8 @@ int main(int argc, char *argv[])
 
   ifstream filePed(tempFilePed);
   for (int i=0; i<8; i++) {
-    filePed >> iRun >> pedQadc[i];
+    filePed >> iRun >> pedQadc[i];   
+    pedQadc[i] = pmtPedestals[i][0]; //replace pedQadc[i] with the pedestals separately loaded
   }
   for (int i=0; i<32; i++) {
     filePed >> iRun >> pedPdc2[i];
@@ -101,8 +122,12 @@ int main(int argc, char *argv[])
   for (int i=0; i<32; i++) {
     filePed >> iRun >> pedPadc[i];
   }
-  //filePed >> iRun >> pedPdc30;
-  //filePed >> iRun >> pedPdc34;
+
+  
+  filePed >> iRun >> pedPdc30;
+  filePed >> iRun >> pedPdc34;
+
+  
 
   //cout << iRun << " " << pedPdc30 << endl;
   //cout << iRun << " " << pedPdc34 << endl;
@@ -110,8 +135,8 @@ int main(int argc, char *argv[])
   // Open output ntuple
   char tempOut[500];
   sprintf(tempOut, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
-  //sprintf(tempOut, "replay_pass1_%s.root", argv[1]);
-  DataTree t;// = new DataTree();
+  
+  DataTree t;
   t.makeOutputTree(std::string(tempOut),"pass1");  
   
   
@@ -460,8 +485,8 @@ int main(int argc, char *argv[])
 
     // Event PID logic
 
-    type = -1;
-    side = -1;
+    type = 4; //not an electron event
+    side = 2; //No scintillator triggers
 
     if (UCNMonitorTrigger) PID = 5;
     else if (LEDTrigger) PID = 3;
