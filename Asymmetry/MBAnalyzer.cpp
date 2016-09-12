@@ -70,16 +70,16 @@ int main()
   
   try {
     
-    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
+    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
     PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm);
     
-    //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
+    PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
     PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
      
-    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    //PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
+    PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
     PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
     
   }

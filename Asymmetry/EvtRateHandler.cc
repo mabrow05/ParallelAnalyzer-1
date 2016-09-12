@@ -123,7 +123,7 @@ std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
   if (side==0) {
     for (unsigned int j=0; j<4; j++) {
       for (unsigned int i=0; i<numEnergyBins; i++) {
-	rateEerr[j][i]=rateE[j]->GetBinContent(i)*runLength[0]>1. ? sqrt(rateE[j]->GetBinContent(i)/runLength[0]): 1./runLength[0];
+	rateEerr[j][i]=rateE[j]->GetBinContent(i)*runLength[0]>=1. ? sqrt(rateE[j]->GetBinContent(i)/runLength[0]): 0.;//1./runLength[0]; // How to handle low statistics?
       }
     }
     return rateEerr;
@@ -131,7 +131,7 @@ std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
   else if (side==1) {
     for (unsigned int j=0; j<4; j++) {
       for (unsigned int i=0; i<numEnergyBins; i++) {
-	rateWerr[j][i]=rateW[j]->GetBinContent(i)*runLength[1]>1. ? sqrt(rateW[j]->GetBinContent(i)/runLength[1]): 1./runLength[1];
+	rateWerr[j][i]=rateW[j]->GetBinContent(i)*runLength[1]>=1. ? sqrt(rateW[j]->GetBinContent(i)/runLength[1]): 0.;//1./runLength[1];
       }
     }
     return rateWerr;
@@ -474,7 +474,7 @@ void BGSubtractedRate::CalcFinalRate()  {
 	for (unsigned int i=0; i<BetaRateE[evtType].size(); i++)
 	  {
 	    FinalRateE[evtType][i] = BetaRateE[evtType][i]-BGRateE[evtType][i];
-	    FinalRateErrorE[evtType][i] = sqrt(pow(BetaRateErrorE[evtType][i],2.)+pow(BGRateErrorE[evtType][i],2.));
+	    FinalRateErrorE[evtType][i] = sqrt(power(BetaRateErrorE[evtType][i],2)+power(BGRateErrorE[evtType][i],2));
 	    //std::cout << BetaRateE[evtType][i] << " " << BGRateE[evtType][i] << " " << FinalRateE[evtType][i] << std::endl;
 	  }
       }
@@ -485,7 +485,7 @@ void BGSubtractedRate::CalcFinalRate()  {
 	for (unsigned int i=0; i<BetaRateW[evtType].size(); i++)
 	  {
 	    FinalRateW[evtType][i] = BetaRateW[evtType][i]-BGRateW[evtType][i];
-	    FinalRateErrorW[evtType][i] = sqrt(pow(BetaRateErrorW[evtType][i],2.)+pow(BGRateErrorW[evtType][i],2.));
+	    FinalRateErrorW[evtType][i] = sqrt(power(BetaRateErrorW[evtType][i],2)+power(BGRateErrorW[evtType][i],2));
 	    //std::cout << BetaRate[i] << " " << BGRate[i] << " " << FinalRate[i] << std::endl;
 	  }
       }
