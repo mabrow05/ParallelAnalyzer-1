@@ -2,7 +2,7 @@
 
 import os
 
-calibrationName = "08292016_quad_singleRunTriggFuncs_it4"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
+calibrationName = "08302016_quad_singleRunTriggFuncs_it5"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
 year = "2012-2013" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"

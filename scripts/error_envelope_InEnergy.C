@@ -34,7 +34,7 @@
  
   double dEn[5] = {0.};
 
-  double resEast[5];
+  /*double resEast[5];
   resEast[0] = 0.48;
   resEast[1] = -.44;
   resEast[2] =  -3.47;
@@ -47,6 +47,23 @@
   sigEast[2] = 3.5;
   sigEast[3] = 4.9;
   sigEast[4] = 5.96;
+  */
+
+  double resEast[5];
+  resEast[0] = -2.99714;
+  resEast[1] = 0.0934038;
+  resEast[2] = -0.931747;
+  resEast[3] = -1.95143;
+  resEast[4] = -2.5043;
+
+  double sigEast[5];
+  sigEast[0] = 2.10811;
+  sigEast[1] = 0.997703;
+  sigEast[2] = 3.63462;
+  sigEast[3] = 5.63478;
+  sigEast[4] = 7.55041;
+
+
 
   // Plot
   c1 = new TCanvas("c1", "canvas");

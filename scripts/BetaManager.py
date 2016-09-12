@@ -8,6 +8,7 @@ import MButils
 #import CalibrationManager
 
 ##### Set up list of runs which are to be omitted from the beta data sets
+##### ANYTIME RUNS ARE ADDED/SUBTRACTED FROM HERE, YOU MUST RERUN CREATEOCTETLISTS in this script
 omittedBetaRuns = [19232]
 omittedBetaRanges = [] 
 
@@ -94,7 +95,6 @@ class BetaReplayManager:
         print "DONE"
     
 
-    ######## This will also calculate the PMT pedestals so that they are the same as those used in the triggers
     def findTriggerFunctions(self, runORoctet):
         runs = []
         if runORoctet > 16000:
@@ -382,7 +382,7 @@ if __name__ == "__main__":
 
     #Running reverse calibrations
     if 1:
-        octet_range = [15,15];
+        octet_range = [47,47];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             beta.runReverseCalibration(octet)

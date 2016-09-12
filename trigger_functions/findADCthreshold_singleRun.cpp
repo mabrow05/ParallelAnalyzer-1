@@ -82,7 +82,7 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
   Char_t temp[500];
   std::vector < std::vector < Double_t > > peds (8,std::vector <Double_t> (2,0.));
-  sprintf(temp,"%s/pedestal_widths_%i.dat",getenv("PEDESTALS"),runNumber);
+  sprintf(temp,"%s/PMT_pedestals_%i.dat",getenv("PEDESTALS"),runNumber);
   ifstream infile;
   infile.open(temp);
 
@@ -104,10 +104,11 @@ void findDiscriminatorThresh(Int_t rn) {
   TFile *f = NULL;
   TTree *t = NULL;
 
-  Double_t lower_limit = 70.5;
+  Double_t lower_limit = -49.5;
   Int_t hisBinWidth = 2;
-  Double_t upper_limit = 400.5;
-  Int_t nBins = (int)(upper_limit/hisBinWidth);
+  Double_t upper_limit = 150.5;
+  Int_t nBins = (int)((upper_limit-lower_limit)/hisBinWidth);
+  //nBins = 100;
 
   TH1F *totalE1 = new TH1F("totalE1", "total events E1", nBins, lower_limit, upper_limit);
   TH1F *triggerE1 = new TH1F("triggerE1", "trigger events E1", nBins, lower_limit, upper_limit);
@@ -163,6 +164,8 @@ void findDiscriminatorThresh(Int_t rn) {
   cuts Cuts;
   loadCuts(run,&Cuts);
 
+  std::vector < std::vector <Double_t> > peds = loadPMTpedestals(run);
+  std::vector <Double_t> gain = loadGainFactors(run);
     
 	 
   f = new TFile(TString::Format("%s/full%i.root",getenv("UCNA_RAW_DATA"),run),"READ");
@@ -195,7 +198,7 @@ void findDiscriminatorThresh(Int_t rn) {
   t->SetBranchAddress("Qadc7",  &QadcW4);
 
   
-    
+  
     
   Int_t nevents = t->GetEntries();
     
@@ -204,12 +207,12 @@ void findDiscriminatorThresh(Int_t rn) {
   for (int evt=0; evt<nevents; evt++) {
       
     t->GetEvent(evt);
-      
+    Int_t iSis00 = (int)Sis00;
 
     if (evt%100000==0) std::cout << evt << " in run " << run << std::endl;
 
       
-    if ((int)Sis00>3) /* && !((int)Sis00>=32 && (int)Sis00<=35))*/ continue; //Not a beta trigger or Bi pulser event
+    //if ((int)Sis00>3) /* && !((int)Sis00>=32 && (int)Sis00<=35))*/ continue; //Not a beta trigger or Bi pulser event
 
     //Int_t side = (int)Sis00 - 1;
 
@@ -218,91 +221,135 @@ void findDiscriminatorThresh(Int_t rn) {
       
 
     // East Side Triggers (including backscatters)
-    if ( TdcEast2fold > 0.00001 ) {
+    if ( iSis00==1 ) {  //TdcEast2fold > 0.00001 ) {
 
       //Fill West side total histograms
       //if (PdcWest>Cuts.cutWestAnode) {
-      totalW1->Fill((QadcW1));//-pedW1)*gainW1);
-      totalW2->Fill((QadcW2));//-pedW2)*gainW2);
-      totalW3->Fill((QadcW3));//-pedW3)*gainW3);
-      totalW4->Fill((QadcW4));//-pedW4)*gainW4);
-	  
-      if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1));//-pedW1)*gainW1);
-      else pedW1->Fill(QadcW1);
-      if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2));//-pedW2)*gainW2);
-      else pedW2->Fill(QadcW2);
-      if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3));//-pedW3)*gainW3);
-      else pedW3->Fill(QadcW3);
-      if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4));//-pedW4)*gainW4);
-      else pedW4->Fill(QadcW4);
+      //std::cout <<  (QadcW1-peds[4][0])*gain[4] << std::endl;
+
+      totalW1->Fill((QadcW1-peds[4][0])*gain[4]);
+      totalW2->Fill((QadcW2-peds[5][0])*gain[5]);
+      totalW3->Fill((QadcW3-peds[6][0])*gain[6]);
+      totalW4->Fill((QadcW4-peds[7][0])*gain[7]);
+      
+      if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-peds[4][0])*gain[4]);//-pedW1)*gainW1);
+      else pedW1->Fill((QadcW1-peds[4][0])*gain[4]);
+      if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-peds[5][0])*gain[5]);//-pedW2)*gainW2);
+      else pedW2->Fill((QadcW2-peds[5][0])*gain[5]);
+      if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-peds[6][0])*gain[6]);//-pedW3)*gainW3);
+      else pedW3->Fill((QadcW3-peds[6][0])*gain[6]);
+      if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-peds[7][0])*gain[7]);//-pedW4)*gainW4);
+      else pedW4->Fill((QadcW4-peds[7][0])*gain[7]);
       //}
       
       
       
       
-
+      
       //3 PMTs trigger
-      /*if ( (TdcE1>0.00001 && TdcE2>0.00001 && TdcE3>0.00001) || (TdcE2>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE2>0.00001 && TdcE4>0.00001) ) { 
-	  
-	//East side 3-fold trigger events
-	totalE1->Fill((QadcE1));//-pedE1)*gainE1);
-	totalE2->Fill((QadcE2));//-pedE2)*gainE2);
-	totalE3->Fill((QadcE3));//-pedE3)*gainE3);
-	totalE4->Fill((QadcE4));//-pedE4)*gainE4);
-
-	if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1));//-pedE1)*gainE1);
-	else pedE1->Fill(QadcE1);
-	if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2));//-pedE2)*gainE2);
-	else pedE2->Fill(QadcE2);
-	if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3));//-pedE3)*gainE3);
-	else pedE3->Fill(QadcE3);
-	if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4));//-pedE4)*gainE4);
-	else pedE4->Fill(QadcE4);
-	}*/
+      if ( (TdcE1>0.00001 && TdcE2>0.00001 && TdcE3>0.00001) || (TdcE2>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE2>0.00001 && TdcE4>0.00001) ) { 
 	
+	//East side 3-fold trigger events
+	totalE1->Fill((QadcE1-peds[0][0])*gain[0]);
+	totalE2->Fill((QadcE2-peds[1][0])*gain[1]);
+	totalE3->Fill((QadcE3-peds[2][0])*gain[2]);
+	totalE4->Fill((QadcE4-peds[3][0])*gain[3]);
+	
+	if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-peds[0][0])*gain[0]);//-pedE1)*gainE1);
+	else pedE1->Fill((QadcE1-peds[0][0])*gain[0]);
+	if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-peds[1][0])*gain[1]);//-pedE2)*gainE2);
+	else pedE2->Fill((QadcE2-peds[1][0])*gain[1]);
+	if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-peds[2][0])*gain[2]);//-pedE3)*gainE3);
+	else pedE3->Fill((QadcE3-peds[2][0])*gain[2]);
+	if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-peds[3][0])*gain[3]);//-pedE4)*gainE4);
+	else pedE4->Fill((QadcE4-peds[3][0])*gain[3]);
+
+      }
+      
     }
-
+    
     // West Side Triggers (including backscatters)
-    if ( TdcWest2fold > 0.00001 ) {
-
+    if ( iSis00==2  )  { //TdcWest2fold > 0.00001 ) {
+      
       //Fill East side total histograms
       //if (PdcEast>Cuts.cutEastAnode) {
-      totalE1->Fill((QadcE1));//-pedE1)*gainE1);
-      totalE2->Fill((QadcE2));//-pedE2)*gainE2);
-      totalE3->Fill((QadcE3));//-pedE3)*gainE3);
-      totalE4->Fill((QadcE4));//-pedE4)*gainE4);
-	  
-      if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1));//-pedE1)*gainE1);
-      else pedE1->Fill(QadcE1);
-      if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2));//-pedE2)*gainE2);
-      else pedE2->Fill(QadcE2);
-      if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3));//-pedE3)*gainE3);
-      else pedE3->Fill(QadcE3);
-      if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4));//-pedE4)*gainE4);
-      else pedE4->Fill(QadcE4);
-      //}
-
-	
-      /*if ( (TdcW1>0.00001 && TdcW2>0.00001 && TdcW3>0.00001) || (TdcW2>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW2>0.00001 && TdcW4>0.00001) ) { 
-	  
-	//West side events
-	totalW1->Fill((QadcW1));//-pedW1)*gainW1);
-	totalW2->Fill((QadcW2));//-pedW2)*gainW2);
-	totalW3->Fill((QadcW3));//-pedW3)*gainW3);
-	totalW4->Fill((QadcW4));//-pedW4)*gainW4);
-	
-	if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1));//-pedW1)*gainW1);
-	else pedW1->Fill(QadcW1);
-	if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2));//-pedW2)*gainW2);
-	else pedW2->Fill(QadcW2);
-	if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3));//-pedW3)*gainW3);
-	else pedW3->Fill(QadcW3);
-	if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4));//-pedW4)*gainW4);
-	else pedW4->Fill(QadcW4);
-	  
-	}*/
-    }
+      totalE1->Fill((QadcE1-peds[0][0])*gain[0]);
+      totalE2->Fill((QadcE2-peds[1][0])*gain[1]);
+      totalE3->Fill((QadcE3-peds[2][0])*gain[2]);
+      totalE4->Fill((QadcE4-peds[3][0])*gain[3]);
       
+      if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-peds[0][0])*gain[0]);//-pedE1)*gainE1);
+      else pedE1->Fill((QadcE1-peds[0][0])*gain[0]);
+      if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-peds[1][0])*gain[1]);//-pedE2)*gainE2);
+      else pedE2->Fill((QadcE2-peds[1][0])*gain[1]);
+      if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-peds[2][0])*gain[2]);//-pedE3)*gainE3);
+      else pedE3->Fill((QadcE3-peds[2][0])*gain[2]);
+      if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-peds[3][0])*gain[3]);//-pedE4)*gainE4);
+      else pedE4->Fill((QadcE4-peds[3][0])*gain[3]);
+      //}
+      
+      
+      if ( (TdcW1>0.00001 && TdcW2>0.00001 && TdcW3>0.00001) || (TdcW2>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW2>0.00001 && TdcW4>0.00001) ) { 
+	
+	//West side events
+	totalW1->Fill((QadcW1-peds[4][0])*gain[4]);
+	totalW2->Fill((QadcW2-peds[5][0])*gain[5]);
+	totalW3->Fill((QadcW3-peds[6][0])*gain[6]);
+	totalW4->Fill((QadcW4-peds[7][0])*gain[7]);
+      
+	if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-peds[4][0])*gain[4]);//-pedW1)*gainW1);
+	else pedW1->Fill((QadcW1-peds[4][0])*gain[4]);
+	if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-peds[5][0])*gain[5]);//-pedW2)*gainW2);
+	else pedW2->Fill((QadcW2-peds[5][0])*gain[5]);
+	if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-peds[6][0])*gain[6]);//-pedW3)*gainW3);
+	else pedW3->Fill((QadcW3-peds[6][0])*gain[6]);
+	if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-peds[7][0])*gain[7]);//-pedW4)*gainW4);
+	else pedW4->Fill((QadcW4-peds[7][0])*gain[7]);
+	  
+      }
+    }
+
+    if (iSis00==3) {
+      
+      if ( (TdcE1>0.00001 && TdcE2>0.00001 && TdcE3>0.00001) || (TdcE2>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE2>0.00001 && TdcE4>0.00001) ) { 
+	
+	//East side 3-fold trigger events
+	totalE1->Fill((QadcE1-peds[0][0])*gain[0]);
+	totalE2->Fill((QadcE2-peds[1][0])*gain[1]);
+	totalE3->Fill((QadcE3-peds[2][0])*gain[2]);
+	totalE4->Fill((QadcE4-peds[3][0])*gain[3]);
+	
+	if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-peds[0][0])*gain[0]);//-pedE1)*gainE1);
+	else pedE1->Fill((QadcE1-peds[0][0])*gain[0]);
+	if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-peds[1][0])*gain[1]);//-pedE2)*gainE2);
+	else pedE2->Fill((QadcE2-peds[1][0])*gain[1]);
+	if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-peds[2][0])*gain[2]);//-pedE3)*gainE3);
+	else pedE3->Fill((QadcE3-peds[2][0])*gain[2]);
+	if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-peds[3][0])*gain[3]);//-pedE4)*gainE4);
+	else pedE4->Fill((QadcE4-peds[3][0])*gain[3]);
+	
+      }
+
+      
+      if ( (TdcW1>0.00001 && TdcW2>0.00001 && TdcW3>0.00001) || (TdcW2>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW2>0.00001 && TdcW4>0.00001) ) { 
+	
+	//West side events
+	totalW1->Fill((QadcW1-peds[4][0])*gain[4]);
+	totalW2->Fill((QadcW2-peds[5][0])*gain[5]);
+	totalW3->Fill((QadcW3-peds[6][0])*gain[6]);
+	totalW4->Fill((QadcW4-peds[7][0])*gain[7]);
+	
+	if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-peds[4][0])*gain[4]);//-pedW1)*gainW1);
+	else pedW1->Fill((QadcW1-peds[4][0])*gain[4]);
+	if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-peds[5][0])*gain[5]);//-pedW2)*gainW2);
+	else pedW2->Fill((QadcW2-peds[5][0])*gain[5]);
+	if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-peds[6][0])*gain[6]);//-pedW3)*gainW3);
+	else pedW3->Fill((QadcW3-peds[6][0])*gain[6]);
+	if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-peds[7][0])*gain[7]);//-pedW4)*gainW4);
+	else pedW4->Fill((QadcW4-peds[7][0])*gain[7]);
+      }
+    }
+    
   }
   f->Close();
 
@@ -540,7 +587,7 @@ void findDiscriminatorThresh(Int_t rn) {
   delete probW1; delete probW2; delete probW3; delete probW4;
 
 
-  //Process Pedestal Histograms
+  /*//Process Pedestal Histograms
 
   Double_t pedQadc[8] = {0.}; //PMT pedestals
   
@@ -570,6 +617,7 @@ void findDiscriminatorThresh(Int_t rn) {
   outWidthFile << run << " " << pedW4->GetMean() << " " << pedW4->GetRMS();
   
   outWidthFile.close();
+  */
 
   delete pedE1; delete pedE2; delete pedE3; delete pedE4;
   delete pedW1; delete pedW2; delete pedW3; delete pedW4;
@@ -638,14 +686,14 @@ std::vector <Double_t> fitThreshold(TGraphAsymmErrors *trigg, std::vector <Doubl
   bool defaultParams = true;
   if (params.size()==8) defaultParams = false;
 
-  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",100.,400.);
+  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-30.,150.);
   //TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))",-30.,150.);
 
   if (defaultParams) {
     params.resize(8);
     erf->SetParameter(0,0.5); //Constant offset of erf                                                                                       
     erf->SetParameter(1,0.5); //Scaling of erf                                                                                               
-    erf->SetParameter(2,185.); //Mean of gaussian integrated for erf                                                                          
+    erf->SetParameter(2,30.); //Mean of gaussian integrated for erf                                                                          
     erf->SetParameter(3,7.); //std. dev. of gaussian integrated for erf                                                                      
     erf->SetParameter(4,9.); //severity of transition function "turn on"                                                                     
     erf->SetParameter(5,0.5); //constant offset of second tanh                                                                               
@@ -681,7 +729,7 @@ std::vector <Double_t> fitThreshold(TGraphAsymmErrors *trigg, std::vector <Doubl
 
     TRandom3 rand(0);
                                                                                             
-    erf->SetParameter(2, rand.Gaus(185., 15.)); //Mean of gaussian integrated for erf                                                                         
+    erf->SetParameter(2, rand.Gaus(30., 15.)); //Mean of gaussian integrated for erf                                                                         
     erf->SetParameter(3, rand.Gaus(10.,2.)); //std. dev. of gaussian integrated for erf    
                                                                   
     erf->SetParameter(4, rand.Gaus(15.,7.)); //severity of transition function "turn on"                                                                     

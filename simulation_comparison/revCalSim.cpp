@@ -229,7 +229,7 @@ void revCalSimulation (Int_t runNumber, string source)
   bool allEvtsTrigg = false; //This just removes the use of the trigger function for an initial calibration. 
                             // Once a calibration is established (or if running on Betas), you can keep this false
 
-  bool simProperStatistics = false; // If True, this uses the actual data run to determine the number of Type 0s to simulate
+  bool simProperStatistics = true; // If True, this uses the actual data run to determine the number of Type 0s to simulate
 
   bool veryHighStatistics = true; // Run 24 million events per run
                             
@@ -325,11 +325,6 @@ void revCalSimulation (Int_t runNumber, string source)
   posmap.readPositionMap(XePeriod);
   vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
 
-  //TriggerMap triggMap(120., 8);
-  //triggMap.readTriggerMap(XePeriod);
-  //TF1 *triggFunc = new TF1("triggFunc","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-20.,150.);
-  //triggMap.setTriggerFunc(triggFunc);
-  //delete triggFunc;
 
   /////////////// Load trigger functions //////////////////
   TriggerFunctions trigger(runNumber);
@@ -337,7 +332,6 @@ void revCalSimulation (Int_t runNumber, string source)
   std::vector < std::vector <Double_t> > pedestals = loadPMTpedestals(runNumber);
   std::vector < Double_t > PMTgain = loadGainFactors(runNumber);
 
-  //vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,8); // 2D vector with trigger function for East side and West side in that order
 
   std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
   Int_t pol = getPolarization(runNumber);
@@ -365,11 +359,17 @@ void revCalSimulation (Int_t runNumber, string source)
   else if (runNumber>21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
   else simLocation = string(getenv("SIM_2012_2013"));
 
+  //*************************************************************************
+  // TAKE THIS OUT ASAP! IT'S FOR XUAN USING 2011/2012 CALIBRATIONS ON 
+  // LARGE 2012/2013 SIMS TO SHOW THIN WINDOW EFFECTS
+  simLocation = string(getenv("SIM_2012_2013"));
+  //*************************************************************************
+
   std::cout << "Using simulation from " << simLocation << "...\n";
 
   //Read in simulated data and put in a TChain
   TRandom3 *randFile = new TRandom3(0);
-  int numFiles = source=="Beta" ? 2000 : 250; //The 200 is for the 10 million events we are testing for each polarization state
+  int numFiles = source=="Beta" ? 2000 : 200; 
   int fileNum = (int)(randFile->Rndm()*numFiles);
   delete randFile;
   for (int i=0; i<numFiles; i++) {
@@ -418,7 +418,7 @@ void revCalSimulation (Int_t runNumber, string source)
   Double_t MWPCThreshold=0.5; // keV dep in the wirechamber.. 
 
   //Set random number generator
-  TRandom3 *seed = new TRandom3();
+  TRandom3 *seed = new TRandom3(0); // seed generator
   TRandom3 *rand0 = new TRandom3((int)seed->Rndm()*1000);
   TRandom3 *rand1 = new TRandom3((int)seed->Rndm()*1000);
   TRandom3 *rand2 = new TRandom3((int)seed->Rndm()*1000);
@@ -498,30 +498,28 @@ void revCalSimulation (Int_t runNumber, string source)
       if ( edepQ.EdepQE>0. ) { //Check to make sure that there is light to see in the scintillator
 	
 	if (eta[p]>0.) {
-	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE)));
+
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-
-	  // Accounting for the fact that I'm currently calculating the trigger functions in pure ADC in 2012/2013
-	  // while in 2011/2012 I was using gain corrected and pedestal subtracted data
-	  if (runNumber>20000) ADCvecE[p] = ADC/PMTgain[p] + pedestals[p][0];
-	  else ADCvecE[p] = ADC;
+	  ADCvecE[p] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
+
 	}
+
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
-	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE)));
+	  
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-	  if ( runNumber>20000 ) ADCvecE[p] = ADC/PMTgain[p] + pedestals[p][0];
-	  else ADCvecE[p] = ADC;
+	  ADCvecE[p] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];
+
 	}
 	
 	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
       }
-    // If PMT quality failed, set the evis and the weight to zero for this PMT
+    // If eQ is 0...
       else {
 	pmt.etaEvis[p] = 0.;
 	pmt.Evis[p] = 0.;
@@ -553,31 +551,29 @@ void revCalSimulation (Int_t runNumber, string source)
       if ( !(p==5 && runNumber>16983 && runNumber<17249)  &&  edepQ.EdepQW>0. ) { //Check to make sure that there is light to see in the scintillator and that run isn't one where PMTW2 was dead
 	
 	if (eta[p]>0.) {
-	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW)));
+
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-	  if ( runNumber>20000 ) ADCvecW[p-4] = ADC/PMTgain[p] + pedestals[p][0];
-	  else ADCvecW[p-4] = ADC;
+	  ADCvecW[p-4] = ADC;
 	  //cout << ADCvecW[p-4] << endl;
-	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
-	  
+	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);	  
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
+
 	}
+
 	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
-	  //pmt.etaEvis[p] = (1./(alpha[p]*g_d)) * (rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW)));
+
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
-	  if ( runNumber>20000 ) ADCvecW[p-4] = ADC/PMTgain[p] + pedestals[p][0];
-	  else ADCvecW[p-4] = ADC;
+	  ADCvecW[p-4] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p];
 	  
-	  counter++;
 	}
 	
 	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
       }
-      // If PMT quality failed, set the evis and the weight to zero for this PMT
+      // If PMT is dead and EQ=0...
       else {
 	pmt.etaEvis[p] = 0.;
 	pmt.Evis[p] = 0.;

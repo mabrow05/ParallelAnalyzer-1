@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
   sprintf(tempOut, "%s/pedestals_%s.root",getenv("PEDESTALS"),argv[1]);
   TFile *fileOut = new TFile(tempOut,"RECREATE");
 
+  Int_t run = atoi(argv[1]);
+
   // Define output histograms
 
 
@@ -248,139 +250,134 @@ int main(int argc, char *argv[])
   cout << "Run " << argv[1] << " ..." << endl;
   cout << "... Processing nEvents = " << nEvents << endl;
 
-  int nEastPed = 0;
-  int nWestPed = 0;
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
+
     Tin->GetEvent(i);
     int iSis00 = (int) Sis00;
 
     bool triggerEast = false;
     bool triggerWest = false;
     bool triggerUCN  = false;
+    bool triggerBiPulser = false;
 
     if (iSis00 == 1) triggerEast = true;
     if (iSis00 == 2) triggerWest = true;
+    if (iSis00 == 32) triggerBiPulser = true;
     if (iSis00 == 260 || iSis00 == 516 || iSis00 == 1028 || iSis00 == 2052) triggerUCN = true;
 
-    //Computing East PMT pedestals
-    if ( (triggerEast || triggerWest) && Pdc30>Cuts.cutEastAnode ) { //(triggerWest) { // || triggerUCN) {
+    //Computing  pedestals
+    if ( triggerBiPulser ) { // Choosing Bi Pulser events
 
-      if (TdcE1<0.0001) his11->Fill(Qadc[0]);
-      if (TdcE2<0.0001) his12->Fill(Qadc[1]);
-      if (TdcE3<0.0001) his13->Fill(Qadc[2]);
-      if (TdcE4<0.0001) his14->Fill(Qadc[3]);
-    }
+      //East
+      if (TdcE1<0.0001 && TdcE2<0.0001 && TdcE3<0.0001 && TdcE4<0.0001) {
 
-    if ( (triggerEast || triggerWest) && Pdc30>Cuts.cutWestAnode ) {
-      if (TdcW1<0.0001) his15->Fill(Qadc[4]);
-      if (TdcW2<0.0001) his16->Fill(Qadc[5]);
-      if (TdcW3<0.0001) his17->Fill(Qadc[6]);
-      if (TdcW4<0.0001) his18->Fill(Qadc[7]);
-  }
+	// East PMTs
+	his11->Fill(Qadc[0]);
+	his12->Fill(Qadc[1]);
+	his13->Fill(Qadc[2]);
+	his14->Fill(Qadc[3]);
+
+	//East Wirechambers
+	his101->Fill(Pdc2[0]);
+	his102->Fill(Pdc2[1]);
+	his103->Fill(Pdc2[2]);
+	his104->Fill(Pdc2[3]);
+	his105->Fill(Pdc2[4]);
+	his106->Fill(Pdc2[5]);
+	his107->Fill(Pdc2[6]);
+	his108->Fill(Pdc2[7]);
+	his109->Fill(Pdc2[8]);
+	his110->Fill(Pdc2[9]);
+	his111->Fill(Pdc2[10]);
+	his112->Fill(Pdc2[11]);
+	his113->Fill(Pdc2[12]);
+	his114->Fill(Pdc2[13]);
+	his115->Fill(Pdc2[14]);
+	his116->Fill(Pdc2[15]);
+	his117->Fill(Pdc2[16]);
+	his118->Fill(Pdc2[17]);
+	his119->Fill(Pdc2[18]);
+	his120->Fill(Pdc2[19]);
+	his121->Fill(Pdc2[20]);
+	his122->Fill(Pdc2[21]);
+	his123->Fill(Pdc2[22]);
+	his124->Fill(Pdc2[23]);
+	his125->Fill(Pdc2[24]);
+	his126->Fill(Pdc2[25]);
+	his127->Fill(Pdc2[26]);
+	his128->Fill(Pdc2[27]);
+	his129->Fill(Pdc2[28]);
+	his130->Fill(Pdc2[29]);
+	his131->Fill(Pdc2[30]);
+	his132->Fill(Pdc2[31]);
+
+	his300->Fill(Pdc30);
 
 
-    if (triggerWest || triggerUCN) {
+
+      }
+
+      //West 
+      if (TdcW1<0.0001 && TdcW2<0.0001 && TdcW3<0.0001 && TdcW4<0.0001) {
+
+	//West PMTs
+	his15->Fill(Qadc[4]);
+	his16->Fill(Qadc[5]);
+	his17->Fill(Qadc[6]);
+	his18->Fill(Qadc[7]);
+
+	//West Wirechamber
+	his201->Fill(Padc[0]);
+	his202->Fill(Padc[1]);
+	his203->Fill(Padc[2]);
+	his204->Fill(Padc[3]);
+	his205->Fill(Padc[4]);
+	his206->Fill(Padc[5]);
+	his207->Fill(Padc[6]);
+	his208->Fill(Padc[7]);
+	his209->Fill(Padc[8]);
+	his210->Fill(Padc[9]);
+	his211->Fill(Padc[10]);
+	his212->Fill(Padc[11]);
+	his213->Fill(Padc[12]);
+	his214->Fill(Padc[13]);
+	his215->Fill(Padc[14]);
+	his216->Fill(Padc[15]);
+	his217->Fill(Padc[16]);
+	his218->Fill(Padc[17]);
+	his219->Fill(Padc[18]);
+	his220->Fill(Padc[19]);
+	his221->Fill(Padc[20]);
+	his222->Fill(Padc[21]);
+	his223->Fill(Padc[22]);
+	his224->Fill(Padc[23]);
+	his225->Fill(Padc[24]);
+	his226->Fill(Padc[25]);
+	his227->Fill(Padc[26]);
+	his228->Fill(Padc[27]);
+	his229->Fill(Padc[28]);
+	his230->Fill(Padc[29]);
+	his231->Fill(Padc[30]);
+	his232->Fill(Padc[31]);
+
+	his301->Fill(Pdc34);
+      }
       
-      his101->Fill(Pdc2[0]);
-      his102->Fill(Pdc2[1]);
-      his103->Fill(Pdc2[2]);
-      his104->Fill(Pdc2[3]);
-      his105->Fill(Pdc2[4]);
-      his106->Fill(Pdc2[5]);
-      his107->Fill(Pdc2[6]);
-      his108->Fill(Pdc2[7]);
-      his109->Fill(Pdc2[8]);
-      his110->Fill(Pdc2[9]);
-      his111->Fill(Pdc2[10]);
-      his112->Fill(Pdc2[11]);
-      his113->Fill(Pdc2[12]);
-      his114->Fill(Pdc2[13]);
-      his115->Fill(Pdc2[14]);
-      his116->Fill(Pdc2[15]);
-      his117->Fill(Pdc2[16]);
-      his118->Fill(Pdc2[17]);
-      his119->Fill(Pdc2[18]);
-      his120->Fill(Pdc2[19]);
-      his121->Fill(Pdc2[20]);
-      his122->Fill(Pdc2[21]);
-      his123->Fill(Pdc2[22]);
-      his124->Fill(Pdc2[23]);
-      his125->Fill(Pdc2[24]);
-      his126->Fill(Pdc2[25]);
-      his127->Fill(Pdc2[26]);
-      his128->Fill(Pdc2[27]);
-      his129->Fill(Pdc2[28]);
-      his130->Fill(Pdc2[29]);
-      his131->Fill(Pdc2[30]);
-      his132->Fill(Pdc2[31]);
-
-      his300->Fill(Pdc30);
-
-      nEastPed++;
-    }
-
-    //Computing West PMT pedestals
-    
-    //if (iSis00==32 || iSis00==33 || triggerWest) { // || triggerUCN) {
-    //  if (TdcW1<0.0001) his15->Fill(Qadc[4]);
-    //  if (TdcW2<0.0001) his16->Fill(Qadc[5]);
-    //  if (TdcW3<0.0001) his17->Fill(Qadc[6]);
-    //  if (TdcW4<0.0001) his18->Fill(Qadc[7]);
-    //}
-
-    if (triggerWest || triggerUCN) {
-
-      his201->Fill(Padc[0]);
-      his202->Fill(Padc[1]);
-      his203->Fill(Padc[2]);
-      his204->Fill(Padc[3]);
-      his205->Fill(Padc[4]);
-      his206->Fill(Padc[5]);
-      his207->Fill(Padc[6]);
-      his208->Fill(Padc[7]);
-      his209->Fill(Padc[8]);
-      his210->Fill(Padc[9]);
-      his211->Fill(Padc[10]);
-      his212->Fill(Padc[11]);
-      his213->Fill(Padc[12]);
-      his214->Fill(Padc[13]);
-      his215->Fill(Padc[14]);
-      his216->Fill(Padc[15]);
-      his217->Fill(Padc[16]);
-      his218->Fill(Padc[17]);
-      his219->Fill(Padc[18]);
-      his220->Fill(Padc[19]);
-      his221->Fill(Padc[20]);
-      his222->Fill(Padc[21]);
-      his223->Fill(Padc[22]);
-      his224->Fill(Padc[23]);
-      his225->Fill(Padc[24]);
-      his226->Fill(Padc[25]);
-      his227->Fill(Padc[26]);
-      his228->Fill(Padc[27]);
-      his229->Fill(Padc[28]);
-      his230->Fill(Padc[29]);
-      his231->Fill(Padc[30]);
-      his232->Fill(Padc[31]);
-
-      his301->Fill(Pdc34);
-
-      nWestPed++;
     }
 
   }
 
 
-  pedQadc[0] = his11->GetXaxis()->GetBinCenter(his11->GetMaximumBin()); his11->GetXaxis()->SetRangeUser(pedQadc[0]-15., pedQadc[0]+15.);
-  pedQadc[1] = his12->GetXaxis()->GetBinCenter(his12->GetMaximumBin()); his12->GetXaxis()->SetRangeUser(pedQadc[1]-15., pedQadc[1]+15.);
-  pedQadc[2] = his13->GetXaxis()->GetBinCenter(his13->GetMaximumBin()); his13->GetXaxis()->SetRangeUser(pedQadc[2]-15., pedQadc[2]+15.);
-  pedQadc[3] = his14->GetXaxis()->GetBinCenter(his14->GetMaximumBin()); his14->GetXaxis()->SetRangeUser(pedQadc[3]-15., pedQadc[3]+15.);
-  pedQadc[4] = his15->GetXaxis()->GetBinCenter(his15->GetMaximumBin()); his15->GetXaxis()->SetRangeUser(pedQadc[4]-15., pedQadc[4]+15.);
-  pedQadc[5] = his16->GetXaxis()->GetBinCenter(his16->GetMaximumBin()); his16->GetXaxis()->SetRangeUser(pedQadc[5]-15., pedQadc[5]+15.);
-  pedQadc[6] = his17->GetXaxis()->GetBinCenter(his17->GetMaximumBin()); his17->GetXaxis()->SetRangeUser(pedQadc[6]-15., pedQadc[6]+15.);
-  pedQadc[7] = his18->GetXaxis()->GetBinCenter(his18->GetMaximumBin()); his18->GetXaxis()->SetRangeUser(pedQadc[7]-15., pedQadc[7]+15.);
+  pedQadc[0] = his11->GetXaxis()->GetBinCenter(his11->GetMaximumBin()); his11->GetXaxis()->SetRangeUser(pedQadc[0]-25., pedQadc[0]+25.);
+  pedQadc[1] = his12->GetXaxis()->GetBinCenter(his12->GetMaximumBin()); his12->GetXaxis()->SetRangeUser(pedQadc[1]-25., pedQadc[1]+25.);
+  pedQadc[2] = his13->GetXaxis()->GetBinCenter(his13->GetMaximumBin()); his13->GetXaxis()->SetRangeUser(pedQadc[2]-25., pedQadc[2]+25.);
+  pedQadc[3] = his14->GetXaxis()->GetBinCenter(his14->GetMaximumBin()); his14->GetXaxis()->SetRangeUser(pedQadc[3]-25., pedQadc[3]+25.);
+  pedQadc[4] = his15->GetXaxis()->GetBinCenter(his15->GetMaximumBin()); his15->GetXaxis()->SetRangeUser(pedQadc[4]-25., pedQadc[4]+25.);
+  pedQadc[5] = his16->GetXaxis()->GetBinCenter(his16->GetMaximumBin()); his16->GetXaxis()->SetRangeUser(pedQadc[5]-25., pedQadc[5]+25.);
+  pedQadc[6] = his17->GetXaxis()->GetBinCenter(his17->GetMaximumBin()); his17->GetXaxis()->SetRangeUser(pedQadc[6]-25., pedQadc[6]+25.);
+  pedQadc[7] = his18->GetXaxis()->GetBinCenter(his18->GetMaximumBin()); his18->GetXaxis()->SetRangeUser(pedQadc[7]-25., pedQadc[7]+25.);
 
   pedPdc2[0]  = his101->GetXaxis()->GetBinCenter(his101->GetMaximumBin()); his101->GetXaxis()->SetRangeUser(pedPdc2[0]-50., pedPdc2[0]+50.);
   pedPdc2[1]  = his102->GetXaxis()->GetBinCenter(his102->GetMaximumBin()); his102->GetXaxis()->SetRangeUser(pedPdc2[1]-50., pedPdc2[1]+50.);
@@ -552,6 +549,24 @@ int main(int argc, char *argv[])
   outPedFile << argv[1] << " " << pedPdc34 << endl;
 
   outPedFile.close();
+
+
+  ofstream outWidthFile(TString::Format("%s/PMT_pedestals_%i.dat", getenv("PEDESTALS"),run).Data());
+
+  outWidthFile << std::fixed << std::setprecision(7);
+
+
+  outWidthFile << run << " " << his11->GetMean() << " " << his11->GetRMS() << std::endl;
+  outWidthFile << run << " " << his12->GetMean() << " " << his12->GetRMS() << std::endl;
+  outWidthFile << run << " " << his13->GetMean() << " " << his13->GetRMS() << std::endl;
+  outWidthFile << run << " " << his14->GetMean() << " " << his14->GetRMS() << std::endl;
+  outWidthFile << run << " " << his15->GetMean() << " " << his15->GetRMS() << std::endl;
+  outWidthFile << run << " " << his16->GetMean() << " " << his16->GetRMS() << std::endl;
+  outWidthFile << run << " " << his17->GetMean() << " " << his17->GetRMS() << std::endl;
+  outWidthFile << run << " " << his18->GetMean() << " " << his18->GetRMS();
+  
+  outWidthFile.close();
+
 
 
   // Write output ntuple

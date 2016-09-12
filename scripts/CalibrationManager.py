@@ -243,7 +243,7 @@ class CalReplayManager:
         print "DONE"
 
 
-    ######## This will also calculate the PMT pedestals so that they are the same as those used in the triggers
+   
     def findTriggerFunctions(self, srcRunPeriod=1, sourceORxenon="source"):
         print "Running trigger functions for %s run period %i"%(sourceORxenon,srcRunPeriod)
         filename=None
@@ -925,7 +925,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [13,14,16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -934,13 +934,14 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [13,14]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [20,24,23]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
-            rep.findTriggerFunctions(runPeriod)
-            #rep.findPedestals(runPeriod)
+           
+            rep.findPedestals(runPeriod)
             rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
+            rep.findTriggerFunctions(runPeriod)
             rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
@@ -948,7 +949,7 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     if 1: 
-        runPeriods = [20]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [13]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
