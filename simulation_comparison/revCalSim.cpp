@@ -231,7 +231,7 @@ void revCalSimulation (Int_t runNumber, string source)
 
   bool simProperStatistics = true; // If True, this uses the actual data run to determine the number of Type 0s to simulate
 
-  bool veryHighStatistics = true; // Run 24 million events per run
+  bool veryHighStatistics = false; // Run 24 million events per run
                             
   
   cout << "Running reverse calibration for run " << runNumber << " and source " << source << endl;
@@ -362,7 +362,7 @@ void revCalSimulation (Int_t runNumber, string source)
   //*************************************************************************
   // TAKE THIS OUT ASAP! IT'S FOR XUAN USING 2011/2012 CALIBRATIONS ON 
   // LARGE 2012/2013 SIMS TO SHOW THIN WINDOW EFFECTS
-  simLocation = string(getenv("SIM_2012_2013"));
+  //simLocation = string(getenv("SIM_2012_2013"));
   //*************************************************************************
 
   std::cout << "Using simulation from " << simLocation << "...\n";

@@ -10,8 +10,18 @@ ppair, quartet, octet
 #include <cstdlib>
 #include <cmath>
 
-AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym) : UKdata(ukdata), Simulation(simulation), applyAsymmetry(applyAsym), octet(oct), energyBinWidth(enBinWidth), numEnBins(0), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0), analysisChoice(1) {
+AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : UKdata(ukdata), Simulation(simulation), applyAsymmetry(applyAsym), UNBLIND(unblind), octet(oct), energyBinWidth(enBinWidth), numEnBins(0), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0), analysisChoice(1) {
   numEnBins = (unsigned int)(1200./energyBinWidth);
+
+  if (UNBLIND) {
+    std::cout << "***************************************************************\n"
+	      << "***************************************************************\n\n"
+	      << "                UNBLINDING OCTET " << " " << octet << "\n\n"
+	      << "***************************************************************\n"
+	      << "***************************************************************\n\n";
+  }
+
+
   A2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
   B2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
   A5.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
@@ -153,7 +163,7 @@ void AsymmetryBase::loadRates() {
   while (it!=runType.end()) {
         
     if (checkIfBetaRun(it->second)) {
-      bgSubtr = new BGSubtractedRate(it->first,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
+      bgSubtr = new BGSubtractedRate(it->first,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry, UNBLIND); //UNBLIND defaults to false
 
       std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
 		<< bgSubtr->getBackgroundRun(it->first) << ") \n";
@@ -410,7 +420,7 @@ std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtr
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym), totalAsymmetry(0.), totalAsymmetryError(0.), boolSuperSum(false), boolAsymmetry(false) {
+OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym,unblind), totalAsymmetry(0.), totalAsymmetryError(0.), boolSuperSum(false), boolAsymmetry(false) {
   if (isFullOctet()) {
     //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
     asymmetry.resize(numEnBins,0.);
@@ -468,7 +478,7 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
       //}
     }
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
       deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
       asymmetry[bin] = (1.-sqrt(R))/(1+sqrt(R));
       asymmetryError[bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -561,7 +571,7 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int a
   }
   
   if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-    R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+    R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
     deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
     totalAsymmetry= (1.-sqrt(R))/(1+sqrt(R));
     totalAsymmetryError = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -635,9 +645,9 @@ void OctetAsymmetry::writeAsymToFile() {
   int anaChoice = getCurrentAnaChoice();
   std::string outpath;  
   
-  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
   std::ofstream outfile(outpath.c_str());
   
   if (isFullOctet()) {
@@ -662,9 +672,9 @@ void OctetAsymmetry::writeSuperSumToFile() {
   int anaChoice = getCurrentAnaChoice();
   std::string outpath;
 
-  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/superSum_Octet"+ (UNBLIND?"UNBLINDED_":"")+"" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
 
   
   std::ofstream outfile(outpath.c_str());
@@ -686,7 +696,7 @@ void OctetAsymmetry::writeSuperSumToFile() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-QuartetAsymmetry::QuartetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym), totalAsymmetryA(0.), totalAsymmetryErrorA(0.), totalAsymmetryB(0.), totalAsymmetryErrorB(0.), boolSuperSum(false), boolAsymmetry(false) {
+QuartetAsymmetry::QuartetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym,unblind), totalAsymmetryA(0.), totalAsymmetryErrorA(0.), totalAsymmetryB(0.), totalAsymmetryErrorB(0.), boolSuperSum(false), boolAsymmetry(false) {
 
   isGoodQuartet.push_back(isFullQuartet(0));
   isGoodQuartet.push_back(isFullQuartet(1));
@@ -751,7 +761,7 @@ void QuartetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	
       }
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
 	asymmetry[0][bin] = (1.-sqrt(R))/(1+sqrt(R));
 	asymmetryError[0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -796,7 +806,7 @@ void QuartetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	
       }
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
 	asymmetry[1][bin] = (1.-sqrt(R))/(1+sqrt(R));
 	asymmetryError[1][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -876,7 +886,7 @@ void QuartetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int
     }
     
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
       deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
       totalAsymmetryA = (1.-sqrt(R))/(1+sqrt(R));
       totalAsymmetryErrorA = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -917,7 +927,7 @@ void QuartetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int
     }
     
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
       deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
       totalAsymmetryB= (1.-sqrt(R))/(1+sqrt(R));
       totalAsymmetryErrorB = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1041,9 +1051,9 @@ void QuartetAsymmetry::writeAsymToFile() {
   int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
   std::string outpathA = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/QuartetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_A.dat";
+    "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_A.dat";
   std::string outpathB = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) 
-    + "Octet_" + itos(octet) + "/QuartetAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_B.dat";
+    + "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_B.dat";
   
 
   //Open and fill file for quartet A
@@ -1082,9 +1092,9 @@ void QuartetAsymmetry::writeSuperSumToFile() {
   int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
   std::string outpathA = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) + 
-    "Octet_" + itos(octet) + "/QuartetAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_A.dat";
+    "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_A.dat";
   std::string outpathB = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) 
-    + "Octet_" + itos(octet) + "/QuartetAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_B.dat";
+    + "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_B.dat";
 
   //Open and fill file for quartet A
   std::ofstream outfileA(outpathA.c_str()); 
@@ -1115,7 +1125,7 @@ void QuartetAsymmetry::writeSuperSumToFile() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-PairAsymmetry::PairAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym), totalAsymmetryA0(0.), totalAsymmetryErrorA0(0.), totalAsymmetryB0(0.), totalAsymmetryErrorB0(0.), totalAsymmetryA1(0.), totalAsymmetryErrorA1(0.), totalAsymmetryB1(0.), totalAsymmetryErrorB1(0.), boolSuperSum(false), boolAsymmetry(false) {
+PairAsymmetry::PairAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym,unblind), totalAsymmetryA0(0.), totalAsymmetryErrorA0(0.), totalAsymmetryB0(0.), totalAsymmetryErrorB0(0.), totalAsymmetryA1(0.), totalAsymmetryErrorA1(0.), totalAsymmetryB1(0.), totalAsymmetryErrorB1(0.), boolSuperSum(false), boolAsymmetry(false) {
 
   isGoodPair.resize(2,std::vector <bool> (2));
 
@@ -1184,7 +1194,7 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	
       }
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
 	asymmetry[0][0][bin] = (1.-sqrt(R))/(1+sqrt(R));
 	asymmetryError[0][0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1225,7 +1235,7 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	
       }
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
 	asymmetry[0][1][bin] = (1.-sqrt(R))/(1+sqrt(R));
 	asymmetryError[0][1][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1265,7 +1275,7 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	
       }
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
 	asymmetry[1][0][bin] = (1.-sqrt(R))/(1+sqrt(R));
 	asymmetryError[1][0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1307,7 +1317,7 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
       //std::cout << bin << " " << sfON[0] << " " << sfON[1] << " "  << sfOFF[0] << " " << sfOFF[1] << std::endl;
 
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
 	asymmetry[1][1][bin] = (1.-sqrt(R))/(1+sqrt(R));
 	asymmetryError[1][1][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1392,7 +1402,7 @@ void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int an
     }
     
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
       deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
       totalAsymmetryA0= (1.-sqrt(R))/(1+sqrt(R));
       totalAsymmetryErrorA0 = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1431,7 +1441,7 @@ void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int an
 	
     }
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
       deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
       totalAsymmetryA1= (1.-sqrt(R))/(1+sqrt(R));
       totalAsymmetryErrorA1 = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1471,7 +1481,7 @@ void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int an
     }
 
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
       deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
       totalAsymmetryB0= (1.-sqrt(R))/(1+sqrt(R));
       totalAsymmetryErrorB0 = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1512,7 +1522,7 @@ void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int an
     }
 
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
       deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
       totalAsymmetryB1= (1.-sqrt(R))/(1+sqrt(R));
       totalAsymmetryErrorB1 = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
@@ -1706,13 +1716,13 @@ void PairAsymmetry::writeAsymToFile() {
   int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
   std::string outpathA0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
   std::string outpathA1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
   std::string outpathB0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
   std::string outpathB1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
 
   //Open and fill file for quartet A
   std::ofstream outfileA0(outpathA0.c_str()); 
@@ -1772,13 +1782,13 @@ void PairAsymmetry::writeSuperSumToFile() {
   int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
   std::string outpathA0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
   std::string outpathA1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
   std::string outpathB0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
   std::string outpathB1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
   
   //Open and fill file for quartet A
   std::ofstream outfileA0(outpathA0.c_str()); 

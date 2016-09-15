@@ -21,8 +21,8 @@ objects = MBUtils.o Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRate
 .PHONY: all
 all: MBAnalyzer.exe UK2SIMcomparison.exe
 
-MBAnalyzer.exe: MBAnalyzer.o $(objects) 
-	$(CXX) $(CXXFLAGS) -o MBAnalyzer.exe MBAnalyzer.o $(objects) $(LIBS) 
+MBAnalyzer.exe: MBAnalyzer.o $(objects) BetaSpectrum.o
+	$(CXX) $(CXXFLAGS) -o MBAnalyzer.exe MBAnalyzer.o $(objects) BetaSpectrum.o $(LIBS) 
 	@echo "Done"
 
 UK2MPMcomparison.exe: UK2MPMcomparison.o $(objects) 
@@ -38,6 +38,8 @@ SuperSumComparison.exe: SuperSumComparison.o $(objects)
 	@echo "Done"
 
 Asymmetries.o: Asymmetries.hh
+
+BetaSpectrum.o: BetaSpectrum.hh
 
 EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh
 

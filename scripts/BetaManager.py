@@ -305,6 +305,10 @@ class BetaAsymmetryManager:
             os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.AnalysisResultsPath,octet))
             os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.AnalysisResultsPath,octet))
 
+            os.system("mkdir -p %s/Octet_%i/OctetAsymmetry/Systematics"%(self.AnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry/Systematics"%(self.AnalysisResultsPath,octet))
+            os.system("mkdir -p %s/Octet_%i/PairAsymmetry/Systematics"%(self.AnalysisResultsPath,octet))
+
             os.system("mkdir -p %s/Octet_%i/OctetAsymmetry"%(self.SimAnalysisResultsPath,octet))
             os.system("mkdir -p %s/Octet_%i/QuartetAsymmetry"%(self.SimAnalysisResultsPath,octet))
             os.system("mkdir -p %s/Octet_%i/PairAsymmetry"%(self.SimAnalysisResultsPath,octet))
@@ -382,7 +386,7 @@ if __name__ == "__main__":
 
     #Running reverse calibrations
     if 1:
-        octet_range = [47,47];
+        octet_range = [59,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             beta.runReverseCalibration(octet)

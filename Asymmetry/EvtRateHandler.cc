@@ -13,9 +13,9 @@ simulation data
 #include <cstdio>
 #include <fstream>
 
-EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWidth, double fidCut, bool ukdata, bool ub) : runNumber(run),inputDir(inDir),fiducialCut(fidCut),UKdata(ukdata), pol(0), unblinded(ub) {
-  rateE.resize(4,NULL);
-  rateW.resize(4,NULL);
+EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWidth, double fidCut, bool ukdata, bool ub, bool sep23) : runNumber(run),inputDir(inDir),fiducialCut(fidCut),UKdata(ukdata), pol(0), unblinded(ub), separate23(sep23) {
+  hisE.resize(4,NULL);
+  hisW.resize(4,NULL);
 
   numEnergyBins = (int)(1200./enBinWidth);
 
@@ -52,8 +52,8 @@ EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWi
 
 EvtRateHandler::~EvtRateHandler() {
   for (unsigned int i = 0; i<4; i++) {
-    if (rateE[i]) delete rateE[i];
-    if (rateW[i]) delete rateW[i]; 
+    if (hisE[i]) delete hisE[i];
+    if (hisW[i]) delete hisW[i]; 
   }
 };
 
@@ -83,69 +83,53 @@ void EvtRateHandler::CalcRates() {
   
   for (unsigned int evtType = 0; evtType<4; evtType++) {
  
-    sprintf(temp1,"East Type %i event rate",evtType);
+    sprintf(temp1,"East Type %i event hist",evtType);
     sprintf(temp2,"EastRate%i",evtType);
-    sprintf(temp3,"West Type %i event rate",evtType);
+    sprintf(temp3,"West Type %i event hist",evtType);
     sprintf(temp4,"WestRate%i",evtType);
     
     //rateE.push_back(new TH1D(temp2,temp1,numEnergyBins,0.,1200.));
     //rateW.push_back(new TH1D(temp4,temp3,numEnergyBins,0.,1200.));
          
-    rateE[evtType] = new TH1D(temp2,temp1,numEnergyBins,0.,1200.);
-    rateW[evtType] = new TH1D(temp4,temp3,numEnergyBins,0.,1200.);
+    hisE[evtType] = new TH1D(temp2,temp1,numEnergyBins,0.,1200.);
+    hisW[evtType] = new TH1D(temp4,temp3,numEnergyBins,0.,1200.);
   }
   this->dataReader();
+  
+  // Calculate rates from data histograms and run length
+  for (unsigned int j=0; j<3; j++) { //Right now we leave type 3 empty since no separation occurs
+    for (unsigned int i=0; i<numEnergyBins; i++) {
+      
+      rateEvec[j][i] = hisE[j]->GetBinContent(i) / runLength[0];
+      rateWvec[j][i] = hisW[j]->GetBinContent(i) / runLength[1];
+      //// How to handle low statistics?
+      rateEerr[j][i] = hisE[j]->GetBinError(i) / runLength[0]; // hisE[j]->GetBinError(i) > 1. ? hisE[j]->GetBinError(i) / runLength[0] : 1./runLength[0];
+      rateWerr[j][i] = hisW[j]->GetBinError(i) / runLength[1]; // hisW[j]->GetBinError(i) > 1. ? hisW[j]->GetBinError(i) / runLength[1] : 1./runLength[1];
+      
+    }
+  }
+
+  if ( separate23 ) {
+    for (unsigned int i=0; i<numEnergyBins; i++) {
+      rateEvec[3][i] = hisE[3]->GetBinContent(i) / runLength[0];
+      rateWvec[3][i] = hisW[3]->GetBinContent(i) / runLength[1];
+      //// How to handle low statistics?
+      rateEerr[3][i] = hisE[3]->GetBinError(i) / runLength[0];// hisE[3]->GetBinError(i) > 1. ? hisE[3]->GetBinError(i) / runLength[0] : 1./runLength[0];
+      rateWerr[3][i] = hisW[3]->GetBinError(i) / runLength[1];// hisW[3]->GetBinError(i) > 1. ? hisW[3]->GetBinError(i) / runLength[1] : 1./runLength[1];
+    }
+  }
       
 };
 
-std::vector< std::vector<double> > EvtRateHandler::getRateVectors(int side) {
 
-  if (side==0)
-    {
-      for (unsigned int j=0; j<4; j++) {
-	for (unsigned int i=0; i<numEnergyBins; i++) {rateEvec[j][i]=rateE[j]->GetBinContent(i);}
-      }
-      return rateEvec;
-    }
-  else if (side==1) {
-    for (unsigned int j=0; j<4; j++) {
-      for (unsigned int i=0; i<numEnergyBins; i++) {rateWvec[j][i]=rateW[j]->GetBinContent(i);}
-    }
-    return rateWvec;
-  }
-  else throw "Bad value for side thrown in getRateVector";
-};
 
-std::vector< std::vector<double> > EvtRateHandler::getRateErrors(int side) {
-  rateEerr.resize(4, std::vector<double> (numEnergyBins,0.)); 
-  rateWerr.resize(4,std::vector <double> (numEnergyBins,0.));
-
-  if (side==0) {
-    for (unsigned int j=0; j<4; j++) {
-      for (unsigned int i=0; i<numEnergyBins; i++) {
-	rateEerr[j][i]=rateE[j]->GetBinContent(i)*runLength[0]>=1. ? sqrt(rateE[j]->GetBinContent(i)/runLength[0]): 0.;//1./runLength[0]; // How to handle low statistics?
-      }
-    }
-    return rateEerr;
-  }
-  else if (side==1) {
-    for (unsigned int j=0; j<4; j++) {
-      for (unsigned int i=0; i<numEnergyBins; i++) {
-	rateWerr[j][i]=rateW[j]->GetBinContent(i)*runLength[1]>=1. ? sqrt(rateW[j]->GetBinContent(i)/runLength[1]): 0.;//1./runLength[1];
-      }
-    }
-    return rateWerr;
-  }
-  else throw "Bad value for side thrown in getRateErrors";
-};
-
-TH1D EvtRateHandler::getRateHist(int side, int evtType) {
+TH1D EvtRateHandler::getCountHist(int side, int evtType) {
   if (evtType==0 || evtType==1 || evtType==2 || evtType==3) {
-    if (side==0) return *rateE[evtType];
-    else if (side==1) return *rateW[evtType];
-    else throw "Bad value for side thrown in getRateHist";
+    if (side==0) return *hisE[evtType];
+    else if (side==1) return *hisW[evtType];
+    else throw "Bad value for side thrown in getCountHist";
   }
-  else throw "Bad Evt type when trying to get rate hist";
+  else throw "Bad Evt type when trying to get count hist";
 };
 
 void EvtRateHandler::dataReader() {
@@ -197,12 +181,8 @@ void EvtRateHandler::dataReader() {
   }
   unsigned int nevents = Tin->GetEntriesFast();
   std::cout << "Number of Events: " << nevents << std::endl;
+ 
   
-  double EastWeight = 1./runLength[0];
-  double WestWeight = 1./runLength[1];
-  
-  std::cout << EastWeight << std::endl;
-
   //Run over all events in file, fill output histogram with rate
   
   float r2 = 0.; //position of event squared
@@ -229,7 +209,7 @@ void EvtRateHandler::dataReader() {
 	      r2=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateE[Type]->Fill(Erecon, EastWeight);
+		  hisE[Type]->Fill(Erecon);
 		}
 	    }
 	  else if (Side==1)
@@ -237,7 +217,7 @@ void EvtRateHandler::dataReader() {
 	      r2=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateW[Type]->Fill(Erecon, WestWeight);
+		  hisW[Type]->Fill(Erecon);
 		}
 	    }
 	}
@@ -278,9 +258,6 @@ void SimEvtRateHandler::dataReader() {
   unsigned int nevents = Tin->GetEntriesFast();
   //std::cout << nevents << std::endl;
 
-  double EastWeight = 1./runLength[0];
-  double WestWeight = 1./runLength[1];
-
   //Run over all events in file, fill output histogram with rate
   
   double r2 = 0.; //position of event squared
@@ -299,7 +276,7 @@ void SimEvtRateHandler::dataReader() {
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateE[Type]->Fill(Erecon,AsymWeight*EastWeight);
+		  hisE[Type]->Fill(Erecon,AsymWeight);
 		  //std::cout << EreconSim << std::endl;
 		}
 	    }
@@ -309,7 +286,7 @@ void SimEvtRateHandler::dataReader() {
 	      //std::cout << r2 << std::endl;
 	      if (r2<(fiducialCut*fiducialCut))
 		{
-		  rateW[Type]->Fill(Erecon,AsymWeight*WestWeight);
+		  hisW[Type]->Fill(Erecon,AsymWeight);
 		  //std::cout << EreconSim << std::endl;
 		}
 	    }
@@ -322,7 +299,7 @@ void SimEvtRateHandler::dataReader() {
 };
 
 
-BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata, bool sim, bool applyAsym): runNumber(run), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim), applyAsymmetry(applyAsym) {
+BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata, bool sim, bool applyAsym, bool unblind): runNumber(run), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim), applyAsymmetry(applyAsym), UNBLIND(unblind) {
   int numBins = int(1200./double(EnergyBinWidth));
   BetaRateE.resize(4, std::vector <double> (numBins,0.));
   BGRateE.resize(4, std::vector <double> (numBins,0.));
@@ -347,7 +324,7 @@ void BGSubtractedRate::calcBGSubtRates() {
   if (Simulation) 
     {
       std::string indir = std::string(getenv("REVCALSIM"));
-      SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir, EnergyBinWidth,fiducialCut,applyAsymmetry);
+      SimEvtRateHandler *evt = new SimEvtRateHandler(runNumber, indir, EnergyBinWidth,fiducialCut,applyAsymmetry, UNBLIND);
       evt->CalcRates();
       FinalRateE = evt->getRateVectors(0);
       FinalRateW = evt->getRateVectors(1);
@@ -439,7 +416,7 @@ void BGSubtractedRate::LoadRatesByBin() {
   if (UKdata) indir = std::string(getenv("REPLAY_PASS3"));
   else indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
 
-  EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir, EnergyBinWidth, fiducialCut, UKdata);
+  EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
   evtBG->CalcRates();
   BGRateE = evtBG->getRateVectors(0);
   BGRateErrorE = evtBG->getRateErrors(0);
@@ -449,7 +426,7 @@ void BGSubtractedRate::LoadRatesByBin() {
   runLengthBG[1] = evtBG->returnRunLength(1);
   delete evtBG;
     
-  EvtRateHandler *evt = new EvtRateHandler(runNumber, indir, EnergyBinWidth, fiducialCut, UKdata);
+  EvtRateHandler *evt = new EvtRateHandler(runNumber, indir, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
   evt->CalcRates();
   BetaRateE = evt->getRateVectors(0);
   BetaRateErrorE = evt->getRateErrors(0);

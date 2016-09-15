@@ -27,25 +27,34 @@ Maybe even add in writing the final answer to the database if the user wants to
 #include <TF1.h>
 #include <TStyle.h>
 
+#include "BetaSpectrum.hh"
 
-bool BLINDED = true;
 
-std::vector <Int_t> badOct = {7,9,59}; // Octet 7 had W anode dead for part of run
+std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66}; 
+                                  // Octet 7 had W anode dead for part of run
                                   // Either need to discard, or apply the 
                                   // Charge cloud method to determine a 
                                   // coincidence
 
 // The Process functions will calculate all the raw asymmetries on a bin-by-bin basis and write them to file
-void ProcessOctets(Int_t octBegin, Int_t octEnd, Int_t anaChoice=1, Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true);
-void ProcessQuartets(Int_t octBegin, Int_t octEnd, Int_t anaChoice=1, Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true);
-void ProcessPairs(Int_t octBegin, Int_t octEnd, Int_t anaChoice=1, Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true); 
+void ProcessOctets(Int_t octBegin, Int_t octEnd, Int_t anaChoice=1, Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true, bool UNBLIND=false);
+void ProcessQuartets(Int_t octBegin, Int_t octEnd, Int_t anaChoice=1, Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true, bool UNBLIND=false);
+void ProcessPairs(Int_t octBegin, Int_t octEnd, Int_t anaChoice=1, Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true, bool UNBLIND=false); 
 
 // makes plots of 2*A/Beta for each octet (pair, quartet, and octet as a whole) and fits over the range specified, for whatever grouping provided ("Octet", "Quartet", "Pair")
-void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow=220., Double_t Ehigh=680., Double_t enBinWidth=10., bool UKdata=true, bool simulation=false);
+void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow=220., Double_t Ehigh=680., Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool UNBLIND=false);
+
+//Returns the values of the systematic corrections and statistical error on this for now
+std::vector < std::vector <Double_t> >  LoadOctetSystematics(Int_t octet, Int_t anaChoice, std::vector <Double_t> enBinMidpoint);
+
+//Returns a vector containing all the theory corrections to A0 for a particular bin
+std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint);
 
 // Collects all the asymmetries, bin-by-bin, and produces a final asymmetry plot, both A_SR and 2*A/Beta, for whatever grouping provided ("Octet", "Quartet", "Pair"). Also makes a plot of the 
 // integrated asymmetry vs octet/quartet/pair number
-void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow=220., Double_t Ehigh=680., Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true);
+void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow=220., Double_t Ehigh=680., Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool AsymmOn=true, bool UNBLIND=false);
+
+
 
 // Function to return beta when given the kinetic energy of an electron
 Double_t returnBeta(Double_t En) { 
@@ -58,29 +67,64 @@ Double_t returnBeta(Double_t En) {
 int main()
 {
 
-  Int_t analysisChoice = 1;
+  Int_t analysisChoice = 4;
   Int_t octBegin = 0;
   Int_t octEnd = 59;
   Double_t enBinWidth = 10.;
-  Double_t Elow = 180.;
-  Double_t Ehigh = 780.;
+  Double_t Elow = 220.;
+  Double_t Ehigh = 680.;
   bool UKdata = true;
   bool simulation = false;
-  bool applyAsymm = true;
+  bool applyAsymm = false;
+
+  //I should keep track of the raw asymmetry, Experimental systematic corrected asymmetry, and theoretical 
+  // Systematic asymmetry in a file each time I run to see the percent correction of each...
+
+  //NEED TO ADD IN ABILITY TO READ IN SYSTEMATICS FOR QUARTET AND PAIR
+
+  //****************************************************************
+  //****************************************************************
+  // ONLY TURN THIS ON WHEN READY TO UNBLIND. IT WILL USE THE TRUE 
+  // CLOCK TIMES.
+  //****************************************************************
+  //****************************************************************
+  bool UNBLIND = false;
+
+
+  if (UNBLIND) {
+    std::string decision;
+    std::cout << "YOU ARE ABOUT TO DO SOME SORT OF UNBLINDING!!!! \n\n";
+    std::cout << "To continue, type YES: ";
+    std::cin >> decision;
+
+    if (decision!=std::string("YES")) exit(0);
+
+  }
+
   
   try {
+
+    /*std::vector < Double_t > enBinMedian; //Holds the center of the energy bins
+    for (Int_t i=0; i<120; i++) {
+      Double_t En = i*enBinWidth+enBinWidth/2.;
+      enBinMedian.push_back(En);
+    }
     
-    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm);
+    std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
     
-    ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
+    
+    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
+    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
+    
+    //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
+    //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
      
-    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm);
-    PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
-    PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation);
+    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
+    //PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
   }
   catch(const char* ex){
@@ -92,11 +136,11 @@ int main()
 }
 
 
-void ProcessOctets(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn) {
+void ProcessOctets(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn, bool UNBLIND) {
 
   for (Int_t octet=octBegin; octet<=octEnd; octet++) {
     try {
-      OctetAsymmetry oct(octet,enBinWidth, 50., UKdata, simulation, AsymmOn);
+      OctetAsymmetry oct(octet,enBinWidth, 50., UKdata, simulation, AsymmOn, UNBLIND);
       oct.calcAsymmetryBinByBin(anaChoice);     
       oct.calcSuperSum(anaChoice);
       oct.writeAsymToFile();
@@ -108,11 +152,11 @@ void ProcessOctets(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBin
   }
 };
 
-void ProcessQuartets(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn) {
+void ProcessQuartets(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn, bool UNBLIND) {
   
   for (Int_t octet=octBegin; octet<=octEnd; octet++) {
     try {
-      QuartetAsymmetry quart(octet,enBinWidth, 50., UKdata, simulation, AsymmOn);
+      QuartetAsymmetry quart(octet,enBinWidth, 50., UKdata, simulation, AsymmOn, UNBLIND);
       quart.calcAsymmetryBinByBin(anaChoice);
       quart.calcSuperSum(anaChoice);
       quart.writeAsymToFile();
@@ -125,11 +169,11 @@ void ProcessQuartets(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enB
   
 };
 
-void ProcessPairs(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn) {
+void ProcessPairs(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn, bool UNBLIND) {
   
   for (Int_t octet=octBegin; octet<=octEnd; octet++) {
     try {
-      PairAsymmetry pair(octet,enBinWidth, 50., UKdata, simulation, AsymmOn);
+      PairAsymmetry pair(octet,enBinWidth, 50., UKdata, simulation, AsymmOn, UNBLIND);
       pair.calcAsymmetryBinByBin(anaChoice);
       pair.calcSuperSum(anaChoice);
       pair.writeAsymToFile();
@@ -143,7 +187,7 @@ void ProcessPairs(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t enBinW
 };
 
 
-void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow, Double_t Ehigh, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn) {
+void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow, Double_t Ehigh, Double_t enBinWidth, bool UKdata, bool simulation, bool AsymmOn, bool UNBLIND) {
 
   if (groupType!="Quartet" && groupType!="Octet" && groupType!="Pair") throw "Bad group type given to PlotFinalAsymmetries. Options are \"Octet\", \"Quartet\", or \"Pair\""; 
 
@@ -154,6 +198,9 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
     Double_t En = i*enBinWidth+enBinWidth/2.;
     enBinMedian.push_back(En);
   }
+
+  //Loading theory systematics... These aren't dependent on grouping, only energy of bin
+  std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
 
   std::vector < std::vector <Double_t> > rawAsymByGroup(3,std::vector <Double_t> (0));
   std::vector < std::vector <Double_t> > AsymByGroup(3,std::vector <Double_t> (0));
@@ -184,7 +231,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
 
       for (Int_t p=0; p<numPairLoops[groupType]; p++) {
 
-	std::string path = basePath+"Octet_"+itos(octet)+"/"+groupType+"Asymmetry/"+"FittedAsymmetry_Octet"+itos(octet)+"_AnaCh"+itos(anaChoice)+"_"+
+	std::string path = basePath+"Octet_"+itos(octet)+"/"+groupType+"Asymmetry/"+(UNBLIND?"UNBLINDED_":"")+"FittedAsymmetry_Octet"+itos(octet)+"_AnaCh"+itos(anaChoice)+"_"+
 	  (isQuartet?("Quartet_"+quartetName[q]+"_"):isPair?("Pair_"+quartetName[q]+itos(p)+"_"):"")+itos((int)Elow)+"-"+itos((int)Ehigh) + ".dat";
 	//std::cout << path << std::endl;
 
@@ -204,17 +251,23 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
 	  AsymByGroup[2].push_back(AsymError);
 	  infile.close();
 	
-	  path = basePath + "Octet_" + itos(octet) + "/" + groupType + "Asymmetry/" + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice)  +
+	  path = basePath + "Octet_" + itos(octet) + "/" + groupType + "Asymmetry/" + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice)  +
 	    (isQuartet?("_Quartet_"+quartetName[q]):isPair?("_Pair_"+quartetName[q]+itos(p)):"")+".dat"; 
 	  infile.open(path.c_str());
 	  //std::cout << path << std::endl;
 	  
+	  //Apply systematics if run is an octet
+	  //TODO: put in systematics for other types of runs...
+	  std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
+	  if (groupType=="Octet") deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
+	  
+	  
 	  Int_t i = 0;
 	  while (infile >> binEdge >> Asym >> AsymError) {
 	    groupRawAsymByBin[0][i] = binEdge;
-	    groupRawAsymByBin[1][i] += AsymError>0. ? 1./power(AsymError,2)*Asym : 0.;
-	    groupRawAsymByBin[2][i] += AsymError>0. ? 1/power(AsymError,2) : 0.;
-	    std::cout << binEdge << " " << groupRawAsymByBin[1][i] << " " << groupRawAsymByBin[2][i] << std::endl;
+	    groupRawAsymByBin[1][i] += AsymError>0. ? 1./power(AsymError*deltaSys[i][0]/theoryCorr[i],2)*Asym*deltaSys[i][0]/theoryCorr[i] : 0.; //Applying Delta_exp here.. Should this affect AsymError???
+	    groupRawAsymByBin[2][i] += AsymError>0. ? 1/power(AsymError*deltaSys[i][0]/theoryCorr[i],2) : 0.;         // Since Asym is multiplied by delta, AsymError would be as well...
+	    //std::cout << binEdge << " " << groupRawAsymByBin[1][i] << " " << groupRawAsymByBin[2][i] << std::endl;
 	    i++;
 	  }
 	  infile.close();
@@ -226,19 +279,19 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   }
   //Do final calculations of the rates in each bin and their associated errors
   for (unsigned int i=0; i<groupRawAsymByBin[1].size(); i++) {
-    groupRawAsymByBin[1][i] = groupRawAsymByBin[2][i]>0. ? -groupRawAsymByBin[1][i] / groupRawAsymByBin[2][i] : 0.; // This finishes the calculation of the weighted average and errors 
-    groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i]>0. ? 1./sqrt(groupRawAsymByBin[2][i]) : 0.;
+    groupRawAsymByBin[1][i] = groupRawAsymByBin[2][i]>0. ? groupRawAsymByBin[1][i] / groupRawAsymByBin[2][i] : 0.; // This is sum of weights*Asym / sum of weights 
+    groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i]>0. ? 1./sqrt(groupRawAsymByBin[2][i]) : 0.; // Sqrt of sum of weights
     
     groupAsymByBin[0][i] = groupRawAsymByBin[0][i];
-    groupAsymByBin[1][i] = 2*groupRawAsymByBin[1][i]/returnBeta(enBinMedian[i]);
+    groupAsymByBin[1][i] = 2*groupRawAsymByBin[1][i]/returnBeta(enBinMedian[i]); //Divide out the energy dependence...
     groupAsymByBin[2][i] = 2*groupRawAsymByBin[2][i]/returnBeta(enBinMedian[i]);
     
-    //std::cout << enBinMedian[i] << " " << groupAsymByBin[1][i] << " " << groupAsymByBin[2][i] << std::endl;
+    std::cout << enBinMedian[i] << " " << groupAsymByBin[1][i] << " " << groupAsymByBin[2][i] << std::endl;
   }
   
   // Plotting stuff
-  std::string pdfFile = basePath + "Asymmetries/"+groupType+"RawAsymmetries_AnaCh" + itos(anaChoice) 
-    + std::string("_") + itos((int)Elow) + std::string("-") + itos((int)Ehigh) +std::string(".pdf");
+  std::string pdfFile = basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"")+groupType+"Asymmetries_AnaCh" + itos(anaChoice) 
+    + std::string("_") + itos((int)Elow) + std::string("-") + itos((int)Ehigh) + "_Octets_" +itos(octBegin)+"-"+itos(octEnd) +std::string(".pdf");
   
   TCanvas *c1 = new TCanvas("c1", "c1", 1000., 1400.);
   c1->Divide(1,4);
@@ -264,7 +317,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   g->GetXaxis()->CenterTitle();
   g->GetYaxis()->CenterTitle();
   
-  TF1 *fit = new TF1("fit","[0]",rawAsymByGroup[0][0]-1., rawAsymByGroup[0][rawAsymByGroup[0].size()-1]+1.);
+  TF1 *fit = new TF1("fit","[0]",rawAsymByGroup[0][0], rawAsymByGroup[0][rawAsymByGroup[0].size()-1]);
   fit->SetLineColor(kRed);
   fit->SetLineWidth(3);
   fit->SetParameter(0,0.05);
@@ -272,14 +325,14 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   g->Fit("fit","R");
   
   g->Draw("AP");
-  g->SetMinimum((simulation && !AsymmOn) ? -0.05 : 0.03);
-  g->SetMaximum((simulation && !AsymmOn) ? 0.05 : 0.07);
+  g->SetMinimum(0.03);//((simulation && !AsymmOn) ? -0.05 : 0.03);
+  g->SetMaximum(0.07);//(simulation && !AsymmOn) ? 0.05 : 0.07);
   c1->Update();
   
   c1->cd(2);
   
   TGraphErrors *gBeta = new TGraphErrors(AsymByGroup[0].size(), &AsymByGroup[0][0],&AsymByGroup[1][0],&errorX[0], &AsymByGroup[2][0]);
-  title = groupType+"-By-"+groupType+" 2A_{SR}/^{}#beta " + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
+  title = groupType+"-By-"+groupType+" 2A_{SR}#upoint(1+#Delta_{exp})/#beta " + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
   gBeta->SetTitle(title.c_str());
   gBeta->SetMarkerStyle(20);
   gBeta->SetLineWidth(2);
@@ -297,8 +350,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   gBeta->Fit("fitBeta","R");
   
   gBeta->Draw("AP");
-  gBeta->SetMinimum((simulation && !AsymmOn) ? -0.5 : -0.14);
-  gBeta->SetMaximum((simulation && !AsymmOn) ? 0.5 : -0.09);
+  gBeta->SetMinimum(-0.14);//(simulation && !AsymmOn) ? -0.5 : -0.14);
+  gBeta->SetMaximum(-0.09);//(simulation && !AsymmOn) ? 0.5 : -0.09);
   c1->Update();
   
   
@@ -318,14 +371,14 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   g2->GetYaxis()->CenterTitle();
   
   g2->Draw("AP");
-  g2->SetMinimum((simulation && !AsymmOn) ? -0.05 : -0.08);
-  g2->SetMaximum((simulation && !AsymmOn) ? 0.05 : -0.01);
+  g2->SetMinimum(-0.08);//(simulation && !AsymmOn) ? -0.05 : -0.08);
+  g2->SetMaximum(-0.01);//(simulation && !AsymmOn) ? 0.05 : -0.01);
   c1->Update();
 	
   c1->cd(4);
 	
   TGraphErrors *gBeta2 = new TGraphErrors(enBinMedian.size()-offset, &enBinMedian[offset], &groupAsymByBin[1][offset], 0, &groupAsymByBin[2][offset]);
-  title = groupType + std::string(" 2A_{SR}/^{}#beta ") + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
+  title = groupType + std::string(" 2A_{SR}#upoint(1+#Delta_{exp})/#beta ") + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
   gBeta2->SetTitle(title.c_str());
   gBeta2->SetMarkerStyle(20);
   gBeta2->SetLineWidth(2);
@@ -343,8 +396,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   gBeta2->Fit("fitBeta2","R");
   
   gBeta2->Draw("AP");
-  gBeta2->SetMinimum((simulation && !AsymmOn) ? -0.5 : -0.16);
-  gBeta2->SetMaximum((simulation && !AsymmOn) ? 0.5 : -0.07);
+  gBeta2->SetMinimum(-0.16);//(simulation && !AsymmOn) ? -0.5 : -0.16);
+  gBeta2->SetMaximum(-0.07);//(simulation && !AsymmOn) ? 0.5 : -0.07);
   c1->Update();
   c1->Print(pdfFile.c_str());
   
@@ -358,8 +411,11 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
 //This will create asymmetry plots for each pair, quartet, and octet, and also write the raw integrated asymmetry and Beta corrected integrated asymmetry
 // to file for each grouping to be used by PlotFinalAsymmetries
 
-void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow, Double_t Ehigh, Double_t enBinWidth, bool UKdata, bool simulation) {
+void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double_t Elow, Double_t Ehigh, Double_t enBinWidth, bool UKdata, bool simulation, bool UNBLIND) {
   if (groupType!="Quartet" && groupType!="Octet" && groupType!="Pair") throw "Bad group type given to PlotAsymmetriesByGrouping. Options are \"Octet\", \"Quartet\", or \"Pair\""; 
+
+  //Load Systematic Corrections
+  
 
   std::string basePath = simulation ? getenv("SIM_ANALYSIS_RESULTS") : UKdata ? getenv("ANALYSIS_RESULTS") : getenv("MPM_ANALYSIS_RESULTS");
 
@@ -370,8 +426,8 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
     if (groupType=="Octet")
     {
       std::string basePath2 =basePath+ "Octet_"+itos(octet)+"/" + groupType + "Asymmetry/"; 
-      std::string infilePath = basePath2 + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + ".dat";
-      std::string outfilePath = basePath2 + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".dat";
+      std::string infilePath = basePath2 + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + ".dat";
+      std::string outfilePath = basePath2 + (UNBLIND?"UNBLINDED_":"") +"FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".dat";
       
       //Remove old output files in case they were created on accident and aren't filled with good values
       std::string command = "rm " + outfilePath; 
@@ -394,32 +450,47 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       std::vector < std::vector <Double_t > > AsymAndError;
       std::vector < std::vector <Double_t > > RawAsymAndError;
       std::vector < Double_t > enBinMedian;
-	
+      
       AsymAndError.resize(2,std::vector <Double_t> (0));
       RawAsymAndError.resize(2,std::vector <Double_t> (0));
 	
       Double_t eBinLow, Asym, AsymError;
-	
+
       infile.open(infilePath.c_str());
-	
+
+      Int_t bin = 0;
+      
       while (infile >> eBinLow >> Asym >> AsymError) {
 	Double_t En = eBinLow+enBinWidth/2.;
 	enBinMedian.push_back(En);
 	Double_t Beta = returnBeta(En);
-	AsymAndError[0].push_back(-Asym*2./Beta);
+	AsymAndError[0].push_back(Asym*2./Beta); 
 	AsymAndError[1].push_back(AsymError*2./Beta);
-	RawAsymAndError[0].push_back(-Asym);
+	RawAsymAndError[0].push_back(Asym);
 	RawAsymAndError[1].push_back(AsymError);
+	bin++;
       }
       
       infile.close();
-	
-      std::string pdfPath = basePath2 + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+
+      //Read in and apply the systematic corrections for this octet
+      std::vector < std::vector <Double_t> > deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
+
+      //Loading theory systematics... 
+      std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
+
+      for (UInt_t i=0 ; i<AsymAndError[0].size() ; i++) {
+	AsymAndError[0][i] *= (deltaSys[i][0] / theoryCorr[i]); //Here is where the corrections to Ameas are made.. Need to add in delta theory
+	AsymAndError[1][i] *= (deltaSys[i][0] / theoryCorr[i]); // the error should probably be propagated... TODO
+      }
+
+
+      std::string pdfPath = basePath2 + (UNBLIND?"UNBLINDED_":"") + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
       TCanvas *c1 = new TCanvas("c1", "c1",800, 400);
       gStyle->SetOptFit(1111);
       gStyle->SetTitleX(0.25);
 	
-      TGraphErrors *gOct = new TGraphErrors(enBinMedian.size()-5, &enBinMedian[5], &RawAsymAndError[0][5], 0, &RawAsymAndError[1][5]);
+      TGraphErrors *gOct = new TGraphErrors(enBinMedian.size(), &enBinMedian[0], &RawAsymAndError[0][0], 0, &RawAsymAndError[1][0]);
       std::string title = std::string("Raw Asymmetry A_{SR} ") + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
       gOct->SetTitle(title.c_str());
       gOct->SetMarkerStyle(20);
@@ -449,17 +520,17 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	
       delete c1; delete gOct; delete fitOct;
 	
-      pdfPath = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+      pdfPath = basePath2 + (UNBLIND?"UNBLINDED_":"") + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
       c1 = new TCanvas("c1", "c1",800, 400);
 	
-      gOct = new TGraphErrors(enBinMedian.size()-5, &enBinMedian[5], &AsymAndError[0][5], 0, &AsymAndError[1][5]);
-      title = std::string("#frac{2A_{SR}}{#beta} ") + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
+      gOct = new TGraphErrors(enBinMedian.size(), &enBinMedian[0], &AsymAndError[0][0], 0, &AsymAndError[1][0]);
+      title = std::string("#frac{2A_{SR}}{#beta}#upoint(1+#Delta_{exp}) ") + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
       gOct->SetTitle(title.c_str());
       gOct->SetMarkerStyle(20);
       gOct->SetLineWidth(2);
       gOct->GetXaxis()->SetLimits(0., 800.);
       gOct->GetXaxis()->SetTitle("Energy (keV)");
-      gOct->GetYaxis()->SetTitle("Uncorrected Asymmetry");
+      gOct->GetYaxis()->SetTitle("Corrected Asymmetry");
       gOct->GetXaxis()->CenterTitle();
       gOct->GetYaxis()->CenterTitle();
 	
@@ -491,20 +562,20 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       std::string basePath2 =basePath+ "Octet_"+itos(octet)+"/" + groupType + "Asymmetry/"; 
 
       std::string infilePath[2];
-      infilePath[0] = basePath2 + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + ".dat";
-      infilePath[1] = basePath2 + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + ".dat";
+      infilePath[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + ".dat";
+      infilePath[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + ".dat";
 
       std::string outfilePath[2];
-      outfilePath[0] = basePath2 + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +".dat";
-      outfilePath[1] = basePath2 + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +".dat";
+      outfilePath[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +".dat";
+      outfilePath[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +".dat";
 
       std::string pdfPathRaw[2];
-      pdfPathRaw[0] = basePath2 + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
-      pdfPathRaw[1] = basePath2 + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+      pdfPathRaw[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+      pdfPathRaw[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
 
       std::string pdfPathCorr[2];
-      pdfPathCorr[0] = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
-      pdfPathCorr[1] = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+      pdfPathCorr[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_A" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+      pdfPathCorr[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Quartet_B" + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
       
       for (int quart=0; quart<2; quart++) {
 
@@ -543,9 +614,9 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	  Double_t En = eBinLow+enBinWidth/2.;
 	  enBinMedian.push_back(En);
 	  Double_t Beta = returnBeta(En);
-	  AsymAndError[0].push_back(-Asym*2./Beta);
+	  AsymAndError[0].push_back(Asym*2./Beta);
 	  AsymAndError[1].push_back(AsymError*2./Beta);
-	  RawAsymAndError[0].push_back(-Asym);
+	  RawAsymAndError[0].push_back(Asym);
 	  RawAsymAndError[1].push_back(AsymError);
 	}
 
@@ -624,20 +695,20 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 
       for (int pair=0; pair<2; pair++) {
 	std::string infilePath[2];
-	infilePath[0] = basePath2 + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + ".dat";
-	infilePath[1] = basePath2 + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + ".dat";
+	infilePath[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") +"rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + ".dat";
+	infilePath[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + ".dat";
 
 	std::string outfilePath[2];
-	outfilePath[0] = basePath2 + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".dat";
-	outfilePath[1] = basePath2 + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".dat";
+	outfilePath[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".dat";
+	outfilePath[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".dat";
 
 	std::string pdfPathRaw[2];
-	pdfPathRaw[0] = basePath2 + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
-	pdfPathRaw[1] = basePath2 + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+	pdfPathRaw[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+	pdfPathRaw[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "Asymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
 	
 	std::string pdfPathCorr[2];
-	pdfPathCorr[0] = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
-	pdfPathCorr[1] = basePath2 + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+	pdfPathCorr[0] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_A" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
+	pdfPathCorr[1] = basePath2 + (UNBLIND?"UNBLINDED_":"") + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + itos(anaChoice) + "_Pair_B" + itos(pair) + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ".pdf";
 	
 
 	//Remove old output files in case they were created on accident and aren't filled with good values
@@ -682,9 +753,9 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	    Double_t En = eBinLow+enBinWidth/2.;
 	    enBinMedian.push_back(En);
 	    Double_t Beta = returnBeta(En);
-	    AsymAndError[0].push_back(-Asym*2./Beta);
+	    AsymAndError[0].push_back(Asym*2./Beta);
 	    AsymAndError[1].push_back(AsymError*2./Beta);
-	    RawAsymAndError[0].push_back(-Asym);
+	    RawAsymAndError[0].push_back(Asym);
 	    RawAsymAndError[1].push_back(AsymError);
 	  }
 
@@ -1025,3 +1096,57 @@ void ProduceRawAsymmetries(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double
 };
   
   
+std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, Int_t anaChoice, std::vector <Double_t> enBinMidpoint) {
+
+  TString filename = TString::Format("%s/Octet_%i/OctetAsymmetry/Systematics/PureOverProc_Octet-%i_Analysis-%i.txt",getenv("ANALYSIS_RESULTS"),octet,octet,anaChoice);
+  //std::cout << filename.Data() << std::endl;
+  std::vector < std::vector <Double_t> > syst(enBinMidpoint.size(), std::vector<Double_t>(2,0.));
+  
+  ifstream infile(filename.Data());
+
+  if (!infile.is_open()) throw "Couldn't open file in LoadOctetSystematics!";
+
+  //Read in the header crap
+  std::string firstline[8];
+  for (int i=0; i<8; i++) {
+    infile >> firstline[i];
+    std::cout << firstline[i] << " " ;
+  }
+  std::cout << "\n";
+
+  //Read in the systematics
+  Double_t mid; //midpoint of bin
+  Double_t ratio;  //systematics correction (Apure/Aproc)
+  Double_t midErr; //BinWidth/2
+  Double_t ratioErr; //Systematic error on ratio
+
+  Int_t it = 0;
+
+  while (infile >> mid >> ratio >> midErr >> ratioErr) {
+    if (mid==enBinMidpoint[it]) {
+      syst[it][0] = ratio>0. ? ratio : 1.;
+      syst[it][1] = ratioErr;
+      std::cout << mid << " " << ratio << " " << ratioErr << "\n";
+      it++;
+    }
+  }
+
+  std::cout << "Loaded Systematic Errors for Octet " << octet << " ...\n";
+
+  return syst;
+};
+
+std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint) {
+
+  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
+  return syst;
+
+  for (UInt_t i=0; i<syst.size(); i++) {
+   
+    syst[i] = asymmetryCorrectionFactor(enBinMidpoint[i]); //As defined in BetaSpectrum.hh by MPM
+
+  }
+
+  //return syst;
+
+};

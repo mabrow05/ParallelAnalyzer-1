@@ -10,7 +10,7 @@
 // base class for loading octet information
 class AsymmetryBase {
 public:
-  AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym);
+  AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind=false);
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
@@ -40,6 +40,12 @@ protected:
   bool Simulation; //Boolean to use simulated data
   bool applyAsymmetry; //Whether or not to apply the asymmetry weight to the simulated data.
                        // Should be false when using super-sum, true when using super-ratio.
+                       // LEGACY FROM WHEN SIMULATIONS DID NOT HAVE ASYMMETRY PRESENT!! SHOULD BE FALSE ALWAYS NOW
+
+  //*******************************
+  //       UNBLINDING BOOLEAN
+  bool UNBLIND;
+
   int octet; // Holds the octet being analyzed
   
   double energyBinWidth;
@@ -71,7 +77,7 @@ protected:
 
 class OctetAsymmetry : public AsymmetryBase {
 public:
-  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true);
+  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true, bool unblind=false);
   ~OctetAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();
@@ -104,7 +110,7 @@ private:
 
 class QuartetAsymmetry : public AsymmetryBase {
 public:
-  QuartetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true);
+  QuartetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true, bool unblind=false);
   ~QuartetAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();
@@ -143,7 +149,7 @@ private:
 /////////////////////////////////////////////////////////////////////////////////
 class PairAsymmetry : public AsymmetryBase {
 public:
-  PairAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true);
+  PairAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true, bool unblind=false);
   ~PairAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();
