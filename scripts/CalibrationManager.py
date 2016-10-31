@@ -46,7 +46,7 @@ EPMT4_runRanges = [(20121,23173)] #(17233,18055) not sure why these used to be r
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 WPMT3_runRanges = []
-WPMT4_runRanges = [(18370,18386),(19347,19960),(20000,23000)]
+WPMT4_runRanges = [(18370,18386),(19347,19960),(20000,24000)]
 #(18370,18385) there was a drastic change in the gain of WPMT4, and this calibration period only
 #applies to runs before it so these were removed...
 
@@ -314,7 +314,7 @@ class CalReplayManager:
                 source = srcFileInput[src][0:2]
                 if source=="Ce":
                     source = source+"139"
-                elif source=='Sn':
+                elif source=="Sn":
                     source = source + "113"
                 elif source=="Bi":
                     source = source + "207"
@@ -325,8 +325,9 @@ class CalReplayManager:
                 elif source == "Cs":
                     source = source+"137"
 
-                os.system("cd ../simulation_comparison/;./revCalSim.exe %i %s"%(run, source))
-                #print "./../simulation_comparison/revCalSim.exe %i %s"%(run, source)
+                if source in ["Ce139","Sn113","In114","Bi207"]:
+                    os.system("cd ../simulation_comparison/;./revCalSim.exe %i %s"%(run, source))
+                    #print "./../simulation_comparison/revCalSim.exe %i %s"%(run, source)
 
         print "Finished reverse calibration for " + sourceORxenon + "run period %i"%srcRunPeriod
 
@@ -925,7 +926,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [13,14,16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -948,8 +949,9 @@ if __name__ == "__main__":
         
     
     ### Source Run Calibration Steps...
-    if 1: 
-        runPeriods = [13]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    ### 13,14,15 all bad!
+    if 0: 
+        runPeriods = [16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -974,7 +976,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 1:#i<(iterations-1):
+                if 0:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             

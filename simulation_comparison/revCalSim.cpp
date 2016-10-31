@@ -31,6 +31,21 @@ of the detector. Also applies the trigger functions */
 
 using namespace std;
 
+std::string getRunTypeFromOctetFile(int octet, int run) {
+  char fileName[200];
+  sprintf(fileName,"%s/All_Octets/octet_list_%i.dat",getenv("OCTET_LIST"),octet);
+  std::ifstream infile(fileName);
+  std::string runTypeHold;
+  int runNumberHold;
+  int numRuns = 0;
+  // Populate the map with the runType and runNumber from this octet
+  while (infile >> runTypeHold >> runNumberHold) {
+    if ( runNumberHold == run ) { infile.close(); return runTypeHold; }
+  }
+  return "BAD";
+  
+};
+
 
 int getPolarization(int run) {
  
@@ -224,7 +239,7 @@ void SetUpTree(TTree *tree) {
 }
   
 
-void revCalSimulation (Int_t runNumber, string source) 
+void revCalSimulation (Int_t runNumber, string source, int octet=-1) 
 {
   bool allEvtsTrigg = false; //This just removes the use of the trigger function for an initial calibration. 
                             // Once a calibration is established (or if running on Betas), you can keep this false
@@ -232,7 +247,7 @@ void revCalSimulation (Int_t runNumber, string source)
   bool simProperStatistics = true; // If True, this uses the actual data run to determine the number of Type 0s to simulate
 
   bool veryHighStatistics = false; // Run 24 million events per run
-                            
+  if ( octet>=0 ) veryHighStatistics = true; //This will ensure the proper 24 million events are chosen and that they don't overlap
   
   cout << "Running reverse calibration for run " << runNumber << " and source " << source << endl;
 
@@ -292,22 +307,14 @@ void revCalSimulation (Int_t runNumber, string source)
     outputBase = string(getenv("REVCALSIM")) + "beta_highStatistics/";
   } 
   
-  // Check if we actually want a stupid high number of statistics... set to 24 million per run
+  // Check if we actually want a stupid high number of statistics... set to 20 million per run
   if ( veryHighStatistics && source=="Beta" ) {
-    BetaEvents = 24000000;
+    BetaEvents = 20000000;
     outputBase = string(getenv("REVCALSIM")) + "beta_veryHighStatistics/";
   }
 
   std::cout << "Processing " << BetaEvents << " events...\n";
 
-
-  
-
-  //Create simulation output file
-  Char_t outputfile[500];
-  sprintf(outputfile,"%s/revCalSim_%i_%s.root",outputBase.c_str(),runNumber,source.c_str());
-  
-  TFile *outfile = new TFile(outputfile, "RECREATE");
 
 
   ///////////////////////// SETTING GAIN OF FIRST and second DYNYODE
@@ -338,19 +345,6 @@ void revCalSimulation (Int_t runNumber, string source)
 
   LinearityCurve linCurve(calibrationPeriod,false);
 
-  //Setup the output tree
-  TTree *tree = new TTree("revCalSim", "revCalSim");
-  SetUpTree(tree); //Setup the output tree and branches
-
-  //Histograms of event types for quick checks
-  vector <TH1D*> finalEn (6,NULL);
-  finalEn[0] = new TH1D("finalE0", "Simulated Weighted Sum East Type 0", 400, 0., 1200.);
-  finalEn[1] = new TH1D("finalW0", "Simulated Weighted Sum West Type 0", 400, 0., 1200.);
-  finalEn[2] = new TH1D("finalE1", "Simulated Weighted Sum East Type 1", 400, 0., 1200.);
-  finalEn[3] = new TH1D("finalW1", "Simulated Weighted Sum West Type 1", 400, 0., 1200.);
-  finalEn[4] = new TH1D("finalE23", "Simulated Weighted Sum East Type 2/3", 400, 0., 1200.);
-  finalEn[5] = new TH1D("finalW23", "Simulated Weighted Sum West Type 2/3", 400, 0., 1200.);
-
   //Decide which simulation to use...
   std::string simLocation;
   TChain *chain = new TChain("anaTree");
@@ -368,7 +362,7 @@ void revCalSimulation (Int_t runNumber, string source)
   std::cout << "Using simulation from " << simLocation << "...\n";
 
   //Read in simulated data and put in a TChain
-  TRandom3 *randFile = new TRandom3(0);
+  TRandom3 *randFile = new TRandom3(runNumber*2);
   int numFiles = source=="Beta" ? 2000 : 200; 
   int fileNum = (int)(randFile->Rndm()*numFiles);
   delete randFile;
@@ -441,13 +435,51 @@ void revCalSimulation (Int_t runNumber, string source)
   UInt_t nevents = chain->GetEntries();
   cout << "events = " << nevents << endl;
  
-  //Start from random position in evt sequence
+  //Start from random position in evt sequence if we aren't simulating veryHighStatistics
   UInt_t evtStart = rand0->Rndm()*nevents;
+
+
+  // Now taking care of where to start the event chain when we are simulating veryHighStats
+  if ( veryHighStatistics && octet>-1) {
+
+    std::string runType = getRunTypeFromOctetFile(octet, runNumber);
+
+    if ( runType=="BAD" ) { std::cout << "BAD RUNTYPE FOUND FOR RUN\n"; exit(0); }
+
+    if ( runType=="A2" || runType=="A5" ) evtStart = 0;
+    if ( runType=="A7" || runType=="A10" ) evtStart = 25000000;
+    if ( runType=="B2" || runType=="B5" ) evtStart = 50000000;
+    if ( runType=="B7" || runType=="B10" ) evtStart = 75000000;
+    
+  }
+    
+  
   UInt_t evtTally = 0; //To keep track of the number of events 
   UInt_t evt = evtStart; //current event number
+
+
   vector < vector <Int_t> > gridPoint;
+
   
-  Int_t counter = 0;
+  //Create simulation output file
+  Char_t outputfile[500];
+  sprintf(outputfile,"%s/revCalSim_%i_%s.root",outputBase.c_str(),runNumber,source.c_str());
+  //sprintf(outputfile,"revCalSim_%i_%s.root",runNumber,source.c_str());
+  TFile *outfile = new TFile(outputfile, "RECREATE");
+
+  //Setup the output tree
+  TTree *tree = new TTree("revCalSim", "revCalSim");
+  SetUpTree(tree); //Setup the output tree and branches
+
+  //Histograms of event types for quick checks
+  vector <TH1D*> finalEn (6,NULL);
+  finalEn[0] = new TH1D("finalE0", "Simulated Weighted Sum East Type 0", 400, 0., 1200.);
+  finalEn[1] = new TH1D("finalW0", "Simulated Weighted Sum West Type 0", 400, 0., 1200.);
+  finalEn[2] = new TH1D("finalE1", "Simulated Weighted Sum East Type 1", 400, 0., 1200.);
+  finalEn[3] = new TH1D("finalW1", "Simulated Weighted Sum West Type 1", 400, 0., 1200.);
+  finalEn[4] = new TH1D("finalE23", "Simulated Weighted Sum East Type 2/3", 400, 0., 1200.);
+  finalEn[5] = new TH1D("finalW23", "Simulated Weighted Sum West Type 2/3", 400, 0., 1200.);
+
 
   //Read in events and determine evt type based on triggers
   while (evtTally<=BetaEvents) {
@@ -716,13 +748,13 @@ void revCalSimulation (Int_t runNumber, string source)
   
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
     if ( PID==1 && Erecon>0. && ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
-		     && sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut ) ) evtTally++;
+				  && sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut ) ) evtTally++;
 
     evt++;
 
     if (PID>=0) tree->Fill();
     //cout << evtTally << endl;
-    if (evtTally%100000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
+    if (evt%10000==0) {std::cout << evt << std::endl;}//cout << "filled event " << evt << endl;
   }
   cout << endl;
 
@@ -733,12 +765,15 @@ void revCalSimulation (Int_t runNumber, string source)
   outfile->Close();
   
 
-  std::cout << counter << std::endl;
-    }
+}
 
 int main(int argc, char *argv[]) {
   string source = string(argv[2]);
-  revCalSimulation(atoi(argv[1]),source);
+  int octet = -1;
+
+  if (argc==4) octet = atoi(argv[3]);
+
+  revCalSimulation(atoi(argv[1]),source, octet);
 
   //tests
   /*UInt_t XePeriod = getXeRunPeriod(atoi(argv[1]));

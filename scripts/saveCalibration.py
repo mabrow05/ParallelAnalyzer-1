@@ -2,7 +2,7 @@
 
 import os
 
-calibrationName = "08302016_quad_singleRunTriggFuncs_it5"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
+calibrationName = "10072016_quad_singleRunTriggFuncs_NoIn114_NEWk_vals_it3"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
 year = "2012-2013" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"
@@ -26,8 +26,10 @@ for per in calPeriods:
 
 if year=="2011-2012":
     os.system("cp %s/error_envelope/error_envelope_calPeriods_1-12.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
+    os.system("cp %s/residuals/global_residuals_Erecon_runPeriods_1-12.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
  
 if year=="2012-2013":
-    os.system("cp %s/error_envelope/error_envelope_calPeriods_13-24.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
+    os.system("cp %s/error_envelope/error_envelope_calPeriods_16-24.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
+    os.system("cp %s/residuals/global_residuals_Erecon_runPeriods_16-24.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
     
 

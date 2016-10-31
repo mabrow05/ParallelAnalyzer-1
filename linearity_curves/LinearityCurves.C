@@ -243,7 +243,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     else if (sourceName[i]=="Bi2") src_hold=2;
     else if (sourceName[i]=="Bi1") src_hold=3;*/
 
-    if (sourceName[i]=="Cd" || sourceName[i]=="Bi2" /*|| sourceName[i]=="In"*/) continue;
+    if (sourceName[i]=="Cd" || sourceName[i]=="Bi2" || sourceName[i]=="In") continue;
 
     //if (pmtQuality[runPos][0]) {
     runE1.push_back(run[i]);

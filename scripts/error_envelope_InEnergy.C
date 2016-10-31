@@ -24,6 +24,21 @@
   gStyle->SetPadRightMargin(0.05);
   gStyle->SetPadBottomMargin(0.12);
 
+  //gStyle->SetCanvasColor(-1); 
+  //gStyle->SetPadColor(-1); 
+  //gStyle->SetFrameFillColor(-1); 
+  //gStyle->SetHistFillColor(-1); 
+  //gStyle->SetTitleFillColor(-1); 
+  //gStyle->SetFillColor(-1); 
+  gStyle->SetFillStyle(0000); 
+  gStyle->SetStatStyle(0); 
+  gStyle->SetTitleStyle(0); 
+  gStyle->SetCanvasBorderSize(0); 
+  gStyle->SetFrameBorderSize(0); 
+  gStyle->SetLegendBorderSize(0); 
+  gStyle->SetStatBorderSize(0); 
+  gStyle->SetTitleBorderSize(0);
+  
   // East residuals
   double En[5];
   En[0] = peakCe;//98.2;
@@ -34,34 +49,36 @@
  
   double dEn[5] = {0.};
 
-  /*double resEast[5];
-  resEast[0] = 0.48;
-  resEast[1] = -.44;
-  resEast[2] =  -3.47;
-  resEast[3] = -0.46;
-  resEast[4] = -1.73;
+  //2011
+  double res2011[5];
+  res2011[0] = 0.48;
+  res2011[1] = -.44;
+  res2011[2] =  -3.47;
+  res2011[3] = -0.46;
+  res2011[4] = -1.73;
 
-  double sigEast[5];
-  sigEast[0] = 1.94;
-  sigEast[1] = 2.4;
-  sigEast[2] = 3.5;
-  sigEast[3] = 4.9;
-  sigEast[4] = 5.96;
-  */
+  double sig2011[5];
+  sig2011[0] = 1.94;
+  sig2011[1] = 2.4;
+  sig2011[2] = 3.5;
+  sig2011[3] = 4.9;
+  sig2011[4] = 5.96;
+  
 
-  double resEast[5];
-  resEast[0] = -2.99714;
-  resEast[1] = 0.0934038;
-  resEast[2] = -0.931747;
-  resEast[3] = -1.95143;
-  resEast[4] = -2.5043;
+  //2012
+  double res2012[5];
+  res2012[0] = -0.34;
+  res2012[1] = 2.9;
+  res2012[2] = -0.159;
+  res2012[3] = -1.88;
+  res2012[4] = -1.55;
 
-  double sigEast[5];
-  sigEast[0] = 2.10811;
-  sigEast[1] = 0.997703;
-  sigEast[2] = 3.63462;
-  sigEast[3] = 5.63478;
-  sigEast[4] = 7.55041;
+  double sig2012[5];
+  sig2012[0] = 1.5;
+  sig2012[1] = 1.08;
+  sig2012[2] = 2.85;
+  sig2012[3] = 4.4;
+  sig2012[4] = 6.97;
 
 
 
@@ -69,16 +86,32 @@
   c1 = new TCanvas("c1", "canvas");
   c1->SetLogy(0);
 
-  TGraphErrors *gr1 = new TGraphErrors(5,En,resEast,dEn,sigEast);
-  gr1->SetTitle("");
-  gr1->SetMarkerColor(1);
-  gr1->SetMarkerStyle(20);
-  gr1->SetMarkerSize(1.0);
+  TMultiGraph *mg = new TMultiGraph();
 
+  TGraphErrors *gr2011 = new TGraphErrors(5,En,res2011,dEn,sig2011);
+  gr2011->SetTitle("2011-2012");
+  gr2011->SetMarkerColor(3);
+  gr2011->SetLineColor(3);
+  gr2011->SetLineWidth(2);
+  gr2011->SetMarkerStyle(21);
+  gr2011->SetMarkerSize(1.5);
+  gr2011->SetFillStyle(0);
+
+  TGraphErrors *gr2012 = new TGraphErrors(5,En,res2012,dEn,sig2012);
+  gr2012->SetTitle("2012-2013");
+  gr2012->SetMarkerColor(4);
+  gr2012->SetLineColor(4);
+  gr2012->SetLineWidth(2);
+  gr2012->SetMarkerStyle(22);
+  gr2012->SetMarkerSize(1.5);
+  gr2012->SetFillStyle(0);
   
 
-  TMultiGraph *mg = new TMultiGraph();
-  mg->Add(gr1,"P");
+  
+  mg->Add(gr2011,"P");
+  //mg->Draw("A");
+  mg->Add(gr2012,"P");
+ 
   mg->Draw("A");
   mg->GetXaxis()->SetTitle("E_{recon} [keV]");
   mg->GetXaxis()->SetTitleOffset(1.2);
@@ -86,10 +119,13 @@
   mg->GetYaxis()->SetTitle("Calibration Residual [keV]");
   mg->GetYaxis()->SetTitleOffset(1.2);
   mg->GetYaxis()->CenterTitle();
+  c1->BuildLegend();
 
   mg->GetXaxis()->SetLimits(0.0,1200.0);
   mg->SetMinimum(-30.0);
   mg->SetMaximum( 30.0);
+
+  
 
  Int_t n = 2;
   Double_t x[n] = {0, 1200};
@@ -120,13 +156,13 @@
 
   TGraph *env_upper = new TGraph(nn,x2,y_upper);
   env_upper->Draw("Same");
-  env_upper->SetLineWidth(2);
+  env_upper->SetLineWidth(3);
   env_upper->SetLineColor(2);
-  env_upper->SetLineStyle(2);
+  env_upper->SetLineStyle(8);
   
   TGraph *env_lower = new TGraph(nn,x2,y_lower);
   env_lower->Draw("Same");
-  env_lower->SetLineWidth(2);
+  env_lower->SetLineWidth(3);
   env_lower->SetLineColor(2);
-  env_lower->SetLineStyle(2); 
+  env_lower->SetLineStyle(8); 
 }

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import shutil
 from optparse import OptionParser
 from math import *
 import MButils
@@ -71,7 +72,7 @@ class BetaReplayManager:
                             for idx, w in enumerate(words):
                                 if w[:1]=='A' or w[:1]=='B' and int(words[idx+2]) not in omittedBetaRuns:
                                     out.write(words[idx] + ' ' + words[idx+2] + '\n')
-                        shutil.copy(self.octetListPath+"%s-%s/octet_list_%i.dat"%(year[:4],year[4:],octet),self.octetListPath+"All_Octets/octet_list_%i.dat"%(year[:4],year[4:],octet))
+                        shutil.copy(self.octetListPath+"%s-%s/octet_list_%i.dat"%(year[:4],year[4:],octet),self.octetListPath+"All_Octets/octet_list_%i.dat"%(octet))
                         octet+=1
      
     def makeBasicHistograms(self, runORoctet):
@@ -97,6 +98,8 @@ class BetaReplayManager:
 
     def findTriggerFunctions(self, runORoctet):
         runs = []
+        runTypes = ["A2","A5","A7","A10","B2","B5","B7","B10"]
+
         if runORoctet > 16000:
             print "Running trigger functions for run %i"%runORoctet
             os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%runORoctet)
@@ -106,10 +109,11 @@ class BetaReplayManager:
         
             for line in infile:  
                 words=line.split()
-                runs.append(int(words[1]))
+                if words[0] in runTypes: # Avoids background and depol runs
+                    runs.append(int(words[1]))
         
             for run in runs:
-                print "Running pedestals for run %i"%run
+                print "Running Trigger Functions for run %i"%run
                 os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%run)
 
         print "DONE"
@@ -232,13 +236,16 @@ class BetaReplayManager:
         print "DONE"
 
     
-    def runReverseCalibration(self, runORoctet):
+    def runReverseCalibration(self, runORoctet, veryHighStatistics=False):
         runs = []
+
         runTypes = ["A2","A5","A7","A10","B2","B5","B7","B10"]
+
         if runORoctet > 16000:
             print "Running reverse calibration for run %i"%runORoctet
             os.system("./../simulation_comparison/revCalSim.exe %i %s"%(runORoctet, "Beta"))
             print "Finished reverse calibration for run %i"%runORoctet
+
         else: 
             filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
             infile = open(self.octetListPath+filename,'r')
@@ -247,10 +254,14 @@ class BetaReplayManager:
                 words=line.split()
                 if words[0] in runTypes: # Avoids background and depol runs
                     runs.append(int(words[1]))
-        
+            
+            
             for run in runs:
                 print "Running reverse calibration for run %i"%run
-                os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, "Beta"))
+                if veryHighStatistics:
+                    os.system("./../simulation_comparison/revCalSim.exe %i %s %i"%(run, "Beta", runORoctet))
+                else:
+                    os.system("./../simulation_comparison/revCalSim.exe %i %s"%(run, "Beta"))
 
             print "Finished reverse calibration for octet %s"%runORoctet
 
@@ -367,27 +378,28 @@ if __name__ == "__main__":
 
     if 0:
         beta = BetaReplayManager()
-        for octet in range(0,59,1):
+        for octet in range(110,111,1):
             beta.makeBasicHistograms(octet)
 
 
-    if 0:
-        octet_range =[0,59]#[20,28]#[45,50]#[38,40]#[0,59];
+    if 1:
+        octet_range =[91,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
             #beta.runReplayPass1(octet)
             #beta.runGainBismuth(octet)
             #beta.runReplayPass2(octet)
-            #beta.runReplayPass3(octet)
-            beta.runRootfileTranslator(octet)
+            beta.runReplayPass3(octet)
+            #beta.runRootfileTranslator(octet)
            
 
 
     #Running reverse calibrations
-    if 1:
-        octet_range = [59,59];
+    if 0:
+        octet_range = [50,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
+            #beta.findTriggerFunctions(octet)
             beta.runReverseCalibration(octet)
     

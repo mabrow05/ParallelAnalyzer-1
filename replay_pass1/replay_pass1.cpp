@@ -550,6 +550,8 @@ int main(int argc, char *argv[])
     yeRC=WCR->ResponseType(WCR->cathey);   //response class y co-ordinate, East. 
     xwRC=WCR->ResponseType(WCR->cathwx);   //response class x co-ordinate, West. 
     ywRC=WCR->ResponseType(WCR->cathwy);   //response class y co-ordinate, West.
+
+    delete WCR;
     /*
       End of swank's addtion (2 of 2)
     */

@@ -24,6 +24,9 @@ void srcPositionStudy(Int_t binWidth, TString source, TString geometry) {
     chain->AddFile(TString::Format("%s/%s/analyzed_%i.root",simLocation.Data(),source.Data(),i));
   }
   
+
+  Double_t maxEn = 1500.;
+  Double_t minEn = 0.;
   Double_t fidMax = 55.;
   Int_t nHists = (int)(fidMax/binWidth);
   
@@ -83,8 +86,8 @@ void srcPositionStudy(Int_t binWidth, TString source, TString geometry) {
 
     Int_t nBin = primPos[3]*1000./binWidth;
 
-    if (edepQ.EdepQE>0. && edepQ.EdepQE>800. && mwpcE.MWPCEnergyE>0.1) histsE[nBin]->Fill(edepQ.EdepQE);
-    if (edepQ.EdepQW>0. && edepQ.EdepQW>800. && mwpcE.MWPCEnergyW>0.1) histsW[nBin]->Fill(edepQ.EdepQW);
+    if (edepQ.EdepQE>0. && primKE<maxEn && primKE>minEn && mwpcE.MWPCEnergyE>0.1 && primTheta>TMath::Pi()/2.) histsE[nBin]->Fill(edepQ.EdepQE);
+    if (edepQ.EdepQW>0. && primKE<maxEn && primKE>minEn && mwpcE.MWPCEnergyW>0.1 && primTheta<TMath::Pi()/2.) histsW[nBin]->Fill(edepQ.EdepQW);
 
     if (i%100000==0) std::cout << "*";
   }
