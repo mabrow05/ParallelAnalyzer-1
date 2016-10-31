@@ -13,6 +13,9 @@ simulation data
 #include <cstdio>
 #include <fstream>
 
+bool setErrorFloor = false; //Set this to true to make the error on a zero bin 1
+                           // so that 0 bins have a contribution in weights
+
 EvtRateHandler::EvtRateHandler(int run, const std::string& inDir, double enBinWidth, double fidCut, bool ukdata, bool ub, bool sep23) : runNumber(run),inputDir(inDir),fiducialCut(fidCut),UKdata(ukdata), pol(0), unblinded(ub), separate23(sep23) {
   hisE.resize(4,NULL);
   hisW.resize(4,NULL);
@@ -100,22 +103,35 @@ void EvtRateHandler::CalcRates() {
   for (unsigned int j=0; j<3; j++) { //Right now we leave type 3 empty since no separation occurs
     for (unsigned int i=0; i<numEnergyBins; i++) {
       
-      rateEvec[j][i] = hisE[j]->GetBinContent(i) / runLength[0];
-      rateWvec[j][i] = hisW[j]->GetBinContent(i) / runLength[1];
+      rateEvec[j][i] = hisE[j]->GetBinContent(i+1) / runLength[0];
+      rateWvec[j][i] = hisW[j]->GetBinContent(i+1) / runLength[1];
       //// How to handle low statistics?
-      rateEerr[j][i] = hisE[j]->GetBinError(i) / runLength[0]; // hisE[j]->GetBinError(i) > 1. ? hisE[j]->GetBinError(i) / runLength[0] : 1./runLength[0];
-      rateWerr[j][i] = hisW[j]->GetBinError(i) / runLength[1]; // hisW[j]->GetBinError(i) > 1. ? hisW[j]->GetBinError(i) / runLength[1] : 1./runLength[1];
+
+      if ( setErrorFloor ) {
+	rateEerr[j][i] = hisE[j]->GetBinError(i+1) > 1. ? hisE[j]->GetBinError(i+1) / runLength[0] : 1./runLength[0];
+	rateWerr[j][i] = hisW[j]->GetBinError(i+1) > 1. ? hisW[j]->GetBinError(i+1) / runLength[1] : 1./runLength[1];
+      }
+      else {
+	rateEerr[j][i] = hisE[j]->GetBinError(i+1) / runLength[0]; 
+	rateWerr[j][i] = hisW[j]->GetBinError(i+1) / runLength[1]; 
+      }
       
     }
   }
 
   if ( separate23 ) {
     for (unsigned int i=0; i<numEnergyBins; i++) {
-      rateEvec[3][i] = hisE[3]->GetBinContent(i) / runLength[0];
-      rateWvec[3][i] = hisW[3]->GetBinContent(i) / runLength[1];
+      rateEvec[3][i] = hisE[3]->GetBinContent(i+1) / runLength[0];
+      rateWvec[3][i] = hisW[3]->GetBinContent(i+1) / runLength[1];
       //// How to handle low statistics?
-      rateEerr[3][i] = hisE[3]->GetBinError(i) / runLength[0];// hisE[3]->GetBinError(i) > 1. ? hisE[3]->GetBinError(i) / runLength[0] : 1./runLength[0];
-      rateWerr[3][i] = hisW[3]->GetBinError(i) / runLength[1];// hisW[3]->GetBinError(i) > 1. ? hisW[3]->GetBinError(i) / runLength[1] : 1./runLength[1];
+      if ( setErrorFloor ) {
+	rateEerr[3][i] = hisE[3]->GetBinError(i+1) > 1. ? hisE[3]->GetBinError(i) / runLength[0] : 1./runLength[0];
+	rateWerr[3][i] = hisW[3]->GetBinError(i+1) > 1. ? hisW[3]->GetBinError(i) / runLength[1] : 1./runLength[1];
+      }
+      else {
+	rateEerr[3][i] = hisE[3]->GetBinError(i+1) / runLength[0];
+	rateWerr[3][i] = hisW[3]->GetBinError(i+1) / runLength[1];
+      }
     }
   }
       
@@ -299,7 +315,7 @@ void SimEvtRateHandler::dataReader() {
 };
 
 
-BGSubtractedRate::BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata, bool sim, bool applyAsym, bool unblind): runNumber(run), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim), applyAsymmetry(applyAsym), UNBLIND(unblind) {
+BGSubtractedRate::BGSubtractedRate(int run, int bgRun, double enBin, double fidCut, bool ukdata, bool sim, bool applyAsym, bool unblind): runNumber(run), BGrunNumber(bgRun), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim), applyAsymmetry(applyAsym), UNBLIND(unblind) {
   int numBins = int(1200./double(EnergyBinWidth));
   BetaRateE.resize(4, std::vector <double> (numBins,0.));
   BGRateE.resize(4, std::vector <double> (numBins,0.));
@@ -410,13 +426,12 @@ void BGSubtractedRate::CreateRateHistograms() {
 };
 
 void BGSubtractedRate::LoadRatesByBin() {
-  int bgRun = getBackgroundRun(runNumber);
   std::string indir;
 
   if (UKdata) indir = std::string(getenv("REPLAY_PASS3"));
   else indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
 
-  EvtRateHandler *evtBG = new EvtRateHandler(bgRun, indir, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
+  EvtRateHandler *evtBG = new EvtRateHandler(BGrunNumber, indir, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
   evtBG->CalcRates();
   BGRateE = evtBG->getRateVectors(0);
   BGRateErrorE = evtBG->getRateErrors(0);

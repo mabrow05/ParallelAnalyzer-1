@@ -77,7 +77,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class BGSubtractedRate {
 public:
-  BGSubtractedRate(int run, double enBin, double fidCut, bool ukdata=true, bool sim=false, bool applyAsym=true, bool unblind=false);
+  BGSubtractedRate(int run, int bgRun, double enBin, double fidCut, bool ukdata=true, bool sim=false, bool applyAsym=true, bool unblind=false);
   ~BGSubtractedRate() {}
 
   std::vector<double> returnRunLengths(bool beta=true); // for BG do beta=false
@@ -91,6 +91,7 @@ public:
 private:
  
   int runNumber;
+  int BGrunNumber;
   double EnergyBinWidth; //Width of energy bins used
   double fiducialCut;
   //int evtType; //either 0, 1, or 23

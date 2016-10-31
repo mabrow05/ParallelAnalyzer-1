@@ -25,11 +25,13 @@
 #include <TLegend.h>
 #include <TPaveText.h>
 
+std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66}; 
+
 int main(int argc, char *argv[])
 {
   if (argc!=5) {
     std::cout << "Usage: ./SuperSumComparison.exe [octet start] [octet end] [energy bin width] [BOOL Sim Asymmetry Weight On]\n";
-    std::cout << "The code will produce comparisons for every octet in the range given, on an octet-by-octet basis,\nand as a whole, using the Super-Sum";
+    std::cout << "The code will produce comparisons for every octet in the range given,\non an octet-by-octet basis, and as a whole, using the Super-Sum\n";
     exit(0);
   }
 
@@ -61,6 +63,8 @@ int main(int argc, char *argv[])
 
 
   for (int octetNum=octetNumStart; octetNum<octetNumEnd+1; octetNum++) {
+    
+    if (std::find(badOct.begin(), badOct.end(),octetNum) != badOct.end()) { continue; } //Checking if octet should be ignored for data quality reasons
 
     std::vector < std::vector <double> > superSum_uk(4);//,std::vector <double>(numBins,0.));
     std::vector < std::vector <double> > superSumError_uk(4);//,std::vector <double>(numBins,0.));

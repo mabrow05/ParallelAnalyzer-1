@@ -10,6 +10,10 @@ ppair, quartet, octet
 #include <cstdlib>
 #include <cmath>
 
+std::map<int,int> BGrunReplace = {{23017,23006},{21175,21164},{21176,21187}};
+// 21175, 21176 beam out in runlog
+// 23017 very low statistics
+
 AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : UKdata(ukdata), Simulation(simulation), applyAsymmetry(applyAsym), UNBLIND(unblind), octet(oct), energyBinWidth(enBinWidth), numEnBins(0), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0), analysisChoice(1) {
   numEnBins = (unsigned int)(1200./energyBinWidth);
 
@@ -94,8 +98,27 @@ void AsymmetryBase::readOctetFile() {
   std::cout << "Read in octet file for octet " << octet << " with " << runsInOctet << " runs\n";
 };
 
+int AsymmetryBase::getBGrun(int run) {
+  std::string type = runType.at(run);
+  std::string bgType = type=="A2"?"A1" : ( type=="A5"?"A4" : ( type=="A7"?"A9" : ( type=="A10"?"A12" : ( type=="B2"?"B1" : ( type=="B5"?"B4" : ( type=="B7"?"B9" : ( type=="B10"?"B12" : "BAD" )))))));
+  
+  if (bgType=="BAD") { throw "PASSED RUN WITH BAD TYPE TO getBGrun() IN ASYMMETRY BASE!"; }
+  //std::map <int, std::string>::iterator it;
+  for ( auto& it: runType ) { //= runType.begin();it!=runType.end(); it++) {
+
+    if ( it.second==bgType ) {
+      if ( BGrunReplace.find(it.first)==BGrunReplace.end() ) return it.first;
+      else return BGrunReplace[it.first];
+    }
+  }
+
+  std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << run << "!\n";
+  throw "FAILED IN getBGrun(int run)";
+};
+
 bool AsymmetryBase::isFullOctet() {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
+  bool A2bg=false, B2bg=false, A5bg=false, B5bg=false, A7bg=false, B7bg=false, A10bg=false, B10bg=false;
   std::map <int, std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
     if (it->second=="A2") {A2=true; continue;}
@@ -106,12 +129,21 @@ bool AsymmetryBase::isFullOctet() {
     if (it->second=="B7") {B7=true; continue;}
     if (it->second=="A10") {A10=true; continue;}
     if (it->second=="B10") {B10=true; continue;}
+    if (it->second=="A1") {A2bg=true; continue;}
+    if (it->second=="B1") {B2bg=true; continue;}
+    if (it->second=="A4") {A5bg=true; continue;}
+    if (it->second=="B4") {B5bg=true; continue;}
+    if (it->second=="A9") {A7bg=true; continue;}
+    if (it->second=="B9") {B7bg=true; continue;}
+    if (it->second=="A12") {A10bg=true; continue;}
+    if (it->second=="B12") {B10bg=true; continue;}
   }
-  return (A2 && B2 && A5 && B5 && A7 && B7 && A10 && B10);
+  return (A2 && B2 && A5 && B5 && A7 && B7 && A10 && B10 && A2bg && B2bg && A5bg && B5bg && A7bg && B7bg && A10bg && B10bg);
 };
 
 bool AsymmetryBase::isPair(int quartNum, int pairNum) {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
+  bool A2bg=false, B2bg=false, A5bg=false, B5bg=false, A7bg=false, B7bg=false, A10bg=false, B10bg=false;
   std::map<int,std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
     if (it->second=="A2") {A2=true; continue;}
@@ -122,15 +154,23 @@ bool AsymmetryBase::isPair(int quartNum, int pairNum) {
     if (it->second=="B7") {B7=true; continue;}
     if (it->second=="A10") {A10=true; continue;}
     if (it->second=="B10") {B10=true; continue;}
+    if (it->second=="A1") {A2bg=true; continue;}
+    if (it->second=="B1") {B2bg=true; continue;}
+    if (it->second=="A4") {A5bg=true; continue;}
+    if (it->second=="B4") {B5bg=true; continue;}
+    if (it->second=="A9") {A7bg=true; continue;}
+    if (it->second=="B9") {B7bg=true; continue;}
+    if (it->second=="A12") {A10bg=true; continue;}
+    if (it->second=="B12") {B10bg=true; continue;}
   }
   if (quartNum==0) {
-    if (pairNum==0) return (A2 && A5);
-    if (pairNum==1) return (A7 && A10);
+    if (pairNum==0) return (A2 && A5 && A2bg && A5bg);
+    if (pairNum==1) return (A7 && A10 && A7bg && A10bg);
     else throw "BAD PAIR NUMBER GIVEN in AsymmetryBase::isPair(int QuartNum=0,1, int pairNum=0,1)";
   }
   else if (quartNum==1) {
-    if (pairNum==0) return (B2 && B5);
-    if (pairNum==1) return (B7 && B10);
+    if (pairNum==0) return (B2 && B5 && B2bg && B5bg);
+    if (pairNum==1) return (B7 && B10 && B7bg && B10bg);
     else throw "BAD PAIR NUMBER GIVEN in AsymmetryBase::isPair(int QuartNum=0,1, int pairNum=0,1)";
   }
   else throw "BAD QUARTET NUMBER GIVEN in AsymmetryBase::isPair(int QuartNum=0,1, int pairNum=0,1)";
@@ -139,6 +179,7 @@ bool AsymmetryBase::isPair(int quartNum, int pairNum) {
 
 bool AsymmetryBase::isFullQuartet(int quartNum) {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
+  bool A2bg=false, B2bg=false, A5bg=false, B5bg=false, A7bg=false, B7bg=false, A10bg=false, B10bg=false;
   std::map<int,std::string>::iterator it;
   for ( it = runType.begin();it!=runType.end(); it++) {
     if (it->second=="A2") {A2=true; continue;}
@@ -149,9 +190,17 @@ bool AsymmetryBase::isFullQuartet(int quartNum) {
     if (it->second=="B7") {B7=true; continue;}
     if (it->second=="A10") {A10=true; continue;}
     if (it->second=="B10") {B10=true; continue;}
+    if (it->second=="A1") {A2bg=true; continue;}
+    if (it->second=="B1") {B2bg=true; continue;}
+    if (it->second=="A4") {A5bg=true; continue;}
+    if (it->second=="B4") {B5bg=true; continue;}
+    if (it->second=="A9") {A7bg=true; continue;}
+    if (it->second=="B9") {B7bg=true; continue;}
+    if (it->second=="A12") {A10bg=true; continue;}
+    if (it->second=="B12") {B10bg=true; continue;}
   }
-  if (quartNum==0) return (A2 && A5 && A7 && A10);
-  else if (quartNum==1) return (B2 && B5 && B7 && B10);
+  if (quartNum==0) return (A2 && A5 && A7 && A10 && A2bg && A5bg && A7bg && A10bg);
+  else if (quartNum==1) return (B2 && B5 && B7 && B10 && B2bg && B5bg && B7bg && B10bg);
   else throw "BAD QUARTET NUMBER GIVEN in AsymemtryBase::isQuartet(int QuartNum)";
   
 };
@@ -163,10 +212,10 @@ void AsymmetryBase::loadRates() {
   while (it!=runType.end()) {
         
     if (checkIfBetaRun(it->second)) {
-      bgSubtr = new BGSubtractedRate(it->first,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry, UNBLIND); //UNBLIND defaults to false
+      bgSubtr = new BGSubtractedRate(it->first,getBGrun(it->first),energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry, UNBLIND); //UNBLIND defaults to false
 
       std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
-		<< bgSubtr->getBackgroundRun(it->first) << ") \n";
+		<< getBGrun(it->first) << ") \n";
 
       bgSubtr->calcBGSubtRates();
 
@@ -270,10 +319,10 @@ void AsymmetryBase::calcBGsubtractedEvts() {
   BGSubtractedRate *bg;
   while (it!=runType.end()) {
     if (checkIfBetaRun(it->second)) {
-      bg = new BGSubtractedRate(it->first,energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
+      bg = new BGSubtractedRate(it->first,getBGrun(it->first),energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
 
       std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
-		<< bg->getBackgroundRun(it->first) << ") \n";
+		<< getBGrun(it->first) << ") \n";
 
       bg->calcBGSubtRates();
       
@@ -347,7 +396,8 @@ void AsymmetryBase::makeAnalysisChoiceRateVectors(int anaChoice) {
   analysisChoice = anaChoice;
   //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   unsigned int type_low=0, type_high=0;
-  if (anaChoice==1 || anaChoice==3 || anaChoice==5) { type_low=0; type_high=3;}
+  if (anaChoice==1) { type_low=0; type_high=2; }
+  else if (anaChoice==3 || anaChoice==5) { type_low=0; type_high=3;}
   else if (anaChoice==2) { type_low=0; type_high=1;}
   else if (anaChoice==4) { type_low=0; type_high=0;}
   else if (anaChoice==6) { type_low=1; type_high=1;}
@@ -429,7 +479,7 @@ OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool u
     superSumError.resize(numEnBins,0.);
     loadRates(); // load the rates in the rate vectors for each run
     std::cout <<"//////////////////////////////////////////////////////////////////\n"
-	      <<"Initialized OctetAsymmetry for octet " << octet << std::endl;
+	      <<"OctetAsymmetry for octet " << octet << std::endl;
   }
   else { 
     boolAsymmetry=boolSuperSum=true; //Writing "bad octet" to all files so that it isn't used in the future
@@ -456,26 +506,48 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
     double R = 0.;
     double deltaR = 0.;
     for (unsigned int side=0; side<2; side++) {
+
       double weightsum=0.;
 
-      sfOFF[side] = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2)*anaChoice_A2[side][bin]:0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2)*anaChoice_A10[side][bin]:0.) + (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2)*anaChoice_B5[side][bin]:0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2)*anaChoice_B7[side][bin]:0.);
-      weightsum = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2):0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2):0.) + (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
+      if (anaChoice_A2[side][bin]>0. && anaChoice_A10[side][bin]>0. && anaChoice_B5[side][bin]>0. && anaChoice_B7[side][bin]>0. ) {
 
-      sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
+	sfOFF[side] = ( anaChoice_A2[side][bin]/power(anaChoice_A2err[side][bin],2) +
+			anaChoice_A10[side][bin]/power(anaChoice_A10err[side][bin],2) +
+			anaChoice_B5[side][bin]/power(anaChoice_B5err[side][bin],2) +
+			anaChoice_B7[side][bin]/power(anaChoice_B7err[side][bin],2) );
+
+	weightsum = ( 1./power(anaChoice_A2err[side][bin],2) + 
+		      1./power(anaChoice_A10err[side][bin],2) +
+		      1./power(anaChoice_B5err[side][bin],2) +
+		      1./power(anaChoice_B7err[side][bin],2) );
+
+      }
+      else weightsum = 0.;
+
+      sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
       sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 
-      weightsum=0.;
-      sfON[side] = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2)*anaChoice_A5[side][bin]:0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2)*anaChoice_A7[side][bin]:0.) + (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2)*anaChoice_B2[side][bin]:0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2)*anaChoice_B10[side][bin]:0.);
-      weightsum = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2):0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2):0.) + (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2):0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2):0.);
-      
-      
-      sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
+
+      if (anaChoice_A5[side][bin]>0. && anaChoice_A7[side][bin]>0. && anaChoice_B2[side][bin]>0. && anaChoice_B10[side][bin]>0. ) {
+
+	sfON[side] = ( anaChoice_A5[side][bin]/power(anaChoice_A5err[side][bin],2) +
+			anaChoice_A7[side][bin]/power(anaChoice_A7err[side][bin],2) +
+			anaChoice_B2[side][bin]/power(anaChoice_B2err[side][bin],2) +
+			anaChoice_B10[side][bin]/power(anaChoice_B10err[side][bin],2) );
+
+	weightsum = ( 1./power(anaChoice_A5err[side][bin],2) + 
+		      1./power(anaChoice_A7err[side][bin],2) +
+		      1./power(anaChoice_B2err[side][bin],2) +
+		      1./power(anaChoice_B10err[side][bin],2) );
+
+
+      }
+      else weightsum = 0.;
+      //if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
+      sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
       sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+
       
-      //if (bin==73 || bin==74) std::cout << sfOFF[side] << " " << sfON[side] << std::endl;
-      //if (side==1) {
-      //std::cout << anaChoice_A10[side][bin] << " " << anaChoice_A10err[side][bin] << std::endl;
-      //}
     }
     if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
       R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
@@ -621,12 +693,12 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
     }
 
     //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
-    double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? 0.5*sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -0.5*sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
-    double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? 0.5*sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -0.5*sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
-    double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.25*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
-      0.25*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
-    double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.25*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
-      0.25*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+    double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+    double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+    double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+      0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+    double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+      0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
 
     superSum[bin] = R1 + R2;
     //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;
@@ -709,7 +781,7 @@ QuartetAsymmetry::QuartetAsymmetry(int oct, double enBinWidth, double fidCut, bo
     superSumError.resize(2, std::vector<double> (numEnBins,0.));
     loadRates(); // load the rates in the rate vectors for each run
     std::cout <<"//////////////////////////////////////////////////////////////////\n"
-	      <<"Initialized QuartetAsymmetry for octet " << octet << std::endl
+	      <<"QuartetAsymmetry for octet " << octet << std::endl
 	      <<"\nQuartet Status (0=bad, 1=good): First: " << isGoodQuartet[0] << " " 
 	      <<"Second: " << isGoodQuartet[1] << std::endl;
   }
@@ -981,12 +1053,12 @@ void QuartetAsymmetry::calcSuperSum(int anaChoice) {
       }
       
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
-      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? 0.5*sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -0.5*sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
-      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? 0.5*sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -0.5*sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
-      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.25*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
-	0.25*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
-      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.25*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
-	0.25*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+	0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+	0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
       
       superSum[0][bin] = R1 + R2;
       //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;
@@ -1025,12 +1097,12 @@ void QuartetAsymmetry::calcSuperSum(int anaChoice) {
       }
 
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
-      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? 0.5*sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -0.5*sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
-      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? 0.5*sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -0.5*sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
-      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.25*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
-	0.25*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
-      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.25*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
-	0.25*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+	0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+	0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
       
       superSum[1][bin] = R1 + R2;
       //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;
@@ -1143,7 +1215,7 @@ PairAsymmetry::PairAsymmetry(int oct, double enBinWidth, double fidCut, bool ukd
     superSumError.resize(2, std::vector < std::vector <double> > (2, std::vector <double>(numEnBins,0.)));
     loadRates(); // load the rates in the rate vectors for each run
     std::cout <<"//////////////////////////////////////////////////////////////////\n"
-	      <<"Initialized PairAsymmetry for octet " << octet << std::endl
+	      <<"PairAsymmetry for octet " << octet << std::endl
 	      <<"\nPair Status (0=bad, 1=good): First: " << isGoodPair[0][0] << " " 
 	      <<"Second: " << isGoodPair[0][1]  << " " <<"Third: " << isGoodPair[1][0] << " "
 	      <<"Fourth: " << isGoodPair[1][1] << std::endl;
@@ -1574,12 +1646,12 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
-      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? 0.5*sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -0.5*sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
-      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? 0.5*sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -0.5*sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
-      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.25*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
-	0.25*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
-      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.25*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
-	0.25*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+	0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+	0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
       
       superSum[0][0][bin] = R1 + R2;
       //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;
@@ -1612,12 +1684,12 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
-      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? 0.5*sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -0.5*sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
-      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? 0.5*sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -0.5*sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
-      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.25*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
-	0.25*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
-      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.25*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
-	0.25*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+	0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+	0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
       
       superSum[0][1][bin] = R1 + R2;
       //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;
@@ -1651,12 +1723,12 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
-      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? 0.5*sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -0.5*sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
-      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? 0.5*sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -0.5*sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
-      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.25*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
-	0.25*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
-      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.25*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
-	0.25*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+	0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+	0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
       
       superSum[1][0][bin] = R1 + R2;
       //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;
@@ -1690,12 +1762,12 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
-      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? 0.5*sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -0.5*sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
-      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? 0.5*sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -0.5*sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
-      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.25*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
-	0.25*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
-      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.25*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
-	0.25*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+      double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+      double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+      double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+	0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+      double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+	0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
       
       superSum[1][1][bin] = R1 + R2;
       //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;

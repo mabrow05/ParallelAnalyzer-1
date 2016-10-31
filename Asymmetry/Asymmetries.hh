@@ -14,6 +14,7 @@ public:
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
+  int getBGrun(int run); //returns the BG runNumber of current Beta run
   int getRunsInOctet() {return runsInOctet;}
   bool isFullOctet(); //Checks whether the octet has all the necessary beta runs
   bool isPair(int quartNum, int pairNum); // There are 4 pairs in every Octet (A0,A1,B0,B1)->((0,0),(0,1),),(1,0),(1,1))

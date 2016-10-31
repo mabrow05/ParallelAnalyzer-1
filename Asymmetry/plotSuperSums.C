@@ -6,11 +6,14 @@
   int octetStart=0;
   int octetEnd=59;
 
-  TString normType = "ALL";
+  TString normType = "0";
 
-  Double_t normLow = 0.;
-  Double_t normHigh = 1200.;
+  Double_t normLow = 200.;
+  Double_t normHigh = 700.;
   
+  Double_t xAxisMax = 800.;
+
+
   TString fileBase = "superSumPlots/SuperSum_octets_";
   fileBase+=octetStart;
   fileBase+="-";
@@ -54,14 +57,29 @@
   Int_t nBins = ukALL->GetNbinsX();
   Double_t min = ukALL->GetXaxis()->GetBinLowEdge(ukALL->GetXaxis()->GetFirst());
   Double_t max = ukALL->GetXaxis()->GetBinUpEdge(ukALL->GetXaxis()->GetLast());
+
+  //residual
   TH1D *resid = new TH1D("resid","Residuals: MC-Data", nBins, min, max);
   resid->Add(simALL,ukALL,100,-100);
-  resid->GetXaxis()->SetRangeUser(0., 1200.);
+  resid->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  resid->SetMaximum(.2);
+  resid->SetMinimum(-.2);
   resid->SetLineWidth(2);
-  resid->Draw();
+
+  TH1D *perc_resid = new TH1D("perc_resid","Fractional Residuals: (MC-Data)/MC", nBins, min, max);
+  perc_resid->Add(simALL,ukALL,100,-100);
+  perc_resid->Divide(perc_resid,simALL,1.,100.);
+  perc_resid->GetXaxis()->SetRangeUser(0., xAxisMax);
+  //perc_resid->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  perc_resid->SetMaximum(.1);
+  perc_resid->SetMinimum(-.1);
+  perc_resid->SetLineWidth(2);
+
+
+  perc_resid->Draw();
   c1->Update();
-  TLine *l = new TLine(min, 0., 1200., 0.);
+  TLine *l = new TLine(min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
   l->Draw();
 
@@ -76,11 +94,11 @@
   simALL->SetLineColor(kRed);
   simALL->SetMarkerSize(0.75);
   simALL->SetMarkerStyle(20);
-  ukALL->GetXaxis()->SetRangeUser(0., 1200.);
+  ukALL->GetXaxis()->SetRangeUser(0., xAxisMax);
   ukALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
   ukALL->Scale(100.);
   simALL->Scale(100.);
-  simALL->GetXaxis()->SetRangeUser(0., 1200.);
+  simALL->GetXaxis()->SetRangeUser(0., xAxisMax);
   ukALL->Draw("BARE0");
   simALL->Draw("SAMEE0");
 
@@ -100,11 +118,11 @@
   sim0->SetLineColor(kRed);
   sim0->SetMarkerSize(0.75);
   sim0->SetMarkerStyle(20);
-  uk0->GetXaxis()->SetRangeUser(0., 1200.);
+  uk0->GetXaxis()->SetRangeUser(0., xAxisMax);
   uk0->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk0->Scale(100.);
   sim0->Scale(100.*normFactor);
-  sim0->GetXaxis()->SetRangeUser(0., 1200.);
+  sim0->GetXaxis()->SetRangeUser(0., xAxisMax);
   uk0->Draw("BARE0");
   sim0->Draw("SAMEE0");
   
@@ -116,15 +134,16 @@
   uk1->SetFillStyle(3002);
   uk1->SetFillColor(kBlue);
   uk1->SetLineWidth(3);
+  uk1->SetMinimum(0.);
   sim1->SetMarkerColor(kRed);
   sim1->SetLineColor(kRed);
   sim1->SetMarkerSize(0.75);
   sim1->SetMarkerStyle(20);
-  uk1->GetXaxis()->SetRangeUser(0., 1200.);
+  uk1->GetXaxis()->SetRangeUser(0., xAxisMax);
   uk1->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk1->Scale(100.);
   sim1->Scale(100.*normFactor);
-  sim1->GetXaxis()->SetRangeUser(0., 1200.);
+  sim1->GetXaxis()->SetRangeUser(0., xAxisMax);
   uk1->Draw("BARE0");
   sim1->Draw("SAMEE0");
   
@@ -139,20 +158,21 @@
   uk23->SetFillStyle(3002);
   uk23->SetFillColor(kBlue);
   uk23->SetLineWidth(3);
+  uk23->SetMinimum(0.);
   sim23->SetMarkerColor(kRed);
   sim23->SetLineColor(kRed);
   sim23->SetMarkerSize(0.75);
   sim23->SetMarkerStyle(20);
-  uk23->GetXaxis()->SetRangeUser(0., 1200.);
+  uk23->GetXaxis()->SetRangeUser(0., xAxisMax);
   uk23->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk23->Scale(100.);
   sim23->Scale(100.*normFactor);
-  sim23->GetXaxis()->SetRangeUser(0., 1200.);
+  sim23->GetXaxis()->SetRangeUser(0., xAxisMax);
   uk23->Draw("BARE0");
   sim23->Draw("SAMEE0");
 
 
-  TString pdfFile = TString::Format("%s_normType%s_%0.1f-%0.1f_.pdf",fileBase.Data(),normType.Data(), normLow, normHigh);
+  TString pdfFile = TString::Format("%s_normType%s_%0.1f-%0.1f.pdf",fileBase.Data(),normType.Data(), normLow, normHigh);
   //TString pdfFileStart = pdfFile + TString("(");
   //TString pdfFileEnd = pdfFile + TString
   c1->Print(TString::Format("%s[",pdfFile.Data()));
