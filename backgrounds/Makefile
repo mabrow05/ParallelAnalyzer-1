@@ -19,22 +19,12 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-backgroundSpectra.exe: backgroundSpectra.o positionMapHandler.o SQLinterface.o calibrationTools.o MBUtils.o TriggerMap.o 
-	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o MBUtils.o calibrationTools.o positionMapHandler.o TriggerMap.o ../Asymmetry/SQLinterface.o $(LIBS)
+backgroundSpectra.exe: backgroundSpectra.o MBUtils.o  
+	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o MBUtils.o $(LIBS)
 	@echo "Done"
 
 
 MBUtils.o: MBUtils.hh
-
-positionMapHandler.o: positionMapHandler.hh MBUtils.o
-
-TriggerMap.o: TriggerMap.hh MBUtils.o
-
-SQLinterface.o: ../Asymmetry/SQLinterface.hh
-
-calibrationTools.o: calibrationTools.hh
-
-#posMapReader.o: posMapReader.h
 
 
 
