@@ -86,11 +86,11 @@ int main(int argc, char* argv[])
 
   
   Int_t analysisChoice = argc>1 ? atoi(argv[1]) : 1;
-  Int_t octBegin = argc==4 ? atoi(argv[2]) : 0;
-  Int_t octEnd = argc==4 ? atoi(argv[3]) : 1;
+  Int_t octBegin = argc>2 ? atoi(argv[2]) : 0;
+  Int_t octEnd = argc>2 ? atoi(argv[3]) : 1;
   Double_t enBinWidth = 10.;
-  Double_t Elow = argc==6 ? atoi(argv[4]) : 220.;//220
-  Double_t Ehigh = argc==6 ? atoi(argv[5]) : 680.;//680
+  Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
+  Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   bool UKdata = false;//true;
   bool simulation = true;
   bool applyAsymm = false;

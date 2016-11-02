@@ -32,6 +32,7 @@
 #include <TSQLResult.h>
 #include <TSQLRow.h>
 #include <TString.h>
+#include <TStyle.h>
 
 
 using namespace std;
@@ -193,6 +194,7 @@ vector <Int_t> getPMTQuality(Int_t runNumber) {
 void doBackgroundSpectra (int octetMin, int octetMax) 
 {
 
+  gStyle->SetOptStat(0);
   double fiducialCut = 50.; //mm
  
   cout << "Calculating BG spectra..." << endl;
@@ -446,6 +448,31 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     if (input) delete input;
     cout << "Finished Run " << rn << endl;
   }
+  
+  // Scale by 10^3mHz / (10 keV per bin) / total Time
+  for (int s = 0; s<2; s++) {
+    for (int t=0; t<3; t++) {
+
+      histOFF[t][s]->SetYTitle("mHz/keV");
+      histON[t][s]->SetYTitle("mHz/keV");
+      
+      histOFF[t][s]->Scale(1.e2/totalTimeOFF);
+      histON[t][s]->Scale(1.e2/totalTimeON);
+    }
+
+    histON2[s]->SetYTitle("mHz/keV");
+    histON3[s]->SetYTitle("mHz/keV");
+    histOFF2[s]->SetYTitle("mHz/keV");
+    histOFF3[s]->SetYTitle("mHz/keV");
+
+    histON2[s]->Scale(1.e2/totalTimeON);
+    histON3[s]->Scale(1.e2/totalTimeON);
+    histOFF2[s]->Scale(1.e2/totalTimeOFF);
+    histOFF3[s]->Scale(1.e2/totalTimeOFF);
+  }
+  
+  
+  
 
   outfile->Write();
   outfile->Close();
