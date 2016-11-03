@@ -429,7 +429,7 @@ void BGSubtractedRate::LoadRatesByBin() {
   std::string indir;
 
   if (UKdata) indir = std::string(getenv("REPLAY_PASS3"));
-  else indir = std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
+  else indir = getenv("UK_SPEC_REPLAY");//std::string(getenv("UCNAOUTPUTDIR"))+"/hists";
 
   EvtRateHandler *evtBG = new EvtRateHandler(BGrunNumber, indir, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
   evtBG->CalcRates();

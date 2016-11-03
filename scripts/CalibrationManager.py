@@ -15,7 +15,8 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17950,17953,19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
+omittedRuns = [17588,17950,17953,19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
+#17588 is seemingly empty
 
 # 17950,17953,20529 - very low statistics
 # 20530,20531,20823-20827 - lost West event triggers
@@ -932,18 +933,18 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [20,24,23]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [1]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
-            rep.findPedestals(runPeriod)
-            rep.runReplayPass1(runPeriod)
-            #rep.runGainBismuth(runPeriod)
-            rep.findTriggerFunctions(runPeriod)
-            rep.runReplayPass2(runPeriod)
+            #rep.findPedestals(runPeriod)
+            #rep.runReplayPass1(runPeriod)
+            rep.runGainBismuth(runPeriod)
+            #rep.findTriggerFunctions(runPeriod)
+            #rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
         
@@ -984,17 +985,17 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 0: 
-        runPeriods = [8,9,10]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+    if 1: 
+        runPeriods = [1]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
-            rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
