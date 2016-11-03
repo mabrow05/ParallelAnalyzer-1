@@ -23,6 +23,9 @@ backgroundSpectra.exe: backgroundSpectra.o MBUtils.o
 	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o MBUtils.o $(LIBS)
 	@echo "Done"
 
+foregroundSpectra.exe: foregroundSpectra.o MBUtils.o  
+	$(CXX) $(CXXFLAGS) -o foregroundSpectra.exe foregroundSpectra.o MBUtils.o $(LIBS)
+	@echo "Done"
 
 MBUtils.o: MBUtils.hh
 
