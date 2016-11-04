@@ -102,7 +102,9 @@ class BetaReplayManager:
 
         if runORoctet > 16000:
             print "Running trigger functions for run %i"%runORoctet
-            os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%runORoctet)
+            if runORoctet>20000:
+                os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%runORoctet)
+
         else: 
             filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
             infile = open(self.octetListPath+filename,'r')
@@ -383,7 +385,7 @@ if __name__ == "__main__":
 
 
     if 1:
-        octet_range =[0,4]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[91,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)

@@ -43,11 +43,11 @@ WPMT4 = []
 EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 EPMT2_runRanges = []
 EPMT3_runRanges = []
-EPMT4_runRanges = [(20121,23173)] #(17233,18055) not sure why these used to be removed...
+EPMT4_runRanges = [(21274,23173)] #(17233,18055) not sure why these used to be removed...
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 WPMT3_runRanges = []
-WPMT4_runRanges = [(18370,18386),(19347,19960),(20000,24000)]
+WPMT4_runRanges = [(18370,18386),(19347,19999),(20000,24000)]
 #(18370,18385) there was a drastic change in the gain of WPMT4, and this calibration period only
 #applies to runs before it so these were removed...
 
@@ -933,10 +933,10 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [1]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [18,19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
@@ -952,7 +952,7 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 0: 
-        runPeriods = [16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [1]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -977,7 +977,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 0:#i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -985,8 +985,8 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 1: 
-        runPeriods = [1]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+    if 0: 
+        runPeriods = [8,9,10]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
