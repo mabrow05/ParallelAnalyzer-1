@@ -130,6 +130,7 @@ void plotGainTimeDependence(TString year) {
   east1->SetTitle("PMT East 1");
   east1->GetXaxis()->SetTitle("Run Number");
   east1->GetYaxis()->SetTitle("ADC Channels");
+  east1->SetMarkerStyle(7);
   // east1->SetMinimum(0.);
   //east1->SetMaximum(4096.);
   east1->Draw("AP");
@@ -141,6 +142,7 @@ void plotGainTimeDependence(TString year) {
   east2->SetTitle("PMT East 2");
   east2->GetXaxis()->SetTitle("Run Number");
   east2->GetYaxis()->SetTitle("ADC Channels");
+  east2->SetMarkerStyle(7);
   //east2->SetMinimum(0.);
   //east2->SetMaximum(4096.);
   east2->Draw("AP");
@@ -152,6 +154,7 @@ void plotGainTimeDependence(TString year) {
   east3->SetTitle("PMT East 3");
   east3->GetXaxis()->SetTitle("Run Number");
   east3->GetYaxis()->SetTitle("ADC Channels");
+  east3->SetMarkerStyle(7);
   //east3->SetMinimum(0.);
   //east3->SetMaximum(4096.);
   east3->Draw("AP");
@@ -163,6 +166,7 @@ void plotGainTimeDependence(TString year) {
   east4->SetTitle("PMT East 4");
   east4->GetXaxis()->SetTitle("Run Number");
   east4->GetYaxis()->SetTitle("ADC Channels");
+  east4->SetMarkerStyle(7);
   //east4->SetMinimum(0.);
   //east4->SetMaximum(4096.);
   east4->Draw("AP");
@@ -177,6 +181,7 @@ void plotGainTimeDependence(TString year) {
   west1->SetTitle("PMT West 1");
   west1->GetXaxis()->SetTitle("Run Number");
   west1->GetYaxis()->SetTitle("ADC Channels");
+  west1->SetMarkerStyle(7);
   //west1->SetMinimum(0.);
   //west1->SetMaximum(4096.);
   west1->Draw("AP");
@@ -188,6 +193,7 @@ void plotGainTimeDependence(TString year) {
   west2->SetTitle("PMT West 2");
   west2->GetXaxis()->SetTitle("Run Number");
   west2->GetYaxis()->SetTitle("ADC Channels");
+  west2->SetMarkerStyle(7);
   //west2->SetMinimum(0.);
   //west2->SetMaximum(4096.);
   west2->Draw("AP");
@@ -199,6 +205,7 @@ void plotGainTimeDependence(TString year) {
   west3->SetTitle("PMT West 3");
   west3->GetXaxis()->SetTitle("Run Number");
   west3->GetYaxis()->SetTitle("ADC Channels");
+  west3->SetMarkerStyle(7);
   //west3->SetMinimum(0.);
   //west3->SetMaximum(4096.);
   west3->Draw("AP");
@@ -210,6 +217,7 @@ void plotGainTimeDependence(TString year) {
   west4->SetTitle("PMT West 4");
   west4->GetXaxis()->SetTitle("Run Number");
   west4->GetYaxis()->SetTitle("ADC Channels");
+  west4->SetMarkerStyle(7);
   //west4->SetMinimum(0.);
   //west4->SetMaximum(4096.);
   west4->Draw("AP");
