@@ -156,20 +156,23 @@ int main(int argc, char *argv[])
       binCenter[j] = his[j]->GetBinCenter(i);
       binCounts[j] = his[j]->GetBinContent(i);
 
-      if ( binCounts[j] > 15 && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
+      Int_t fuzzCounts = 3.e-5*nEvents;
+
+      if ( binCounts[j] > fuzzCounts && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
 	if ( binCounts[j] >= maxCounts[j] ) {
 	  maxCounts[j] = binCounts[j];
 	  maxBin[j] = i;
 	  binCenterMax[j] = binCenter[j];
 	  
-	  if ( minCounter < 3 ) maxCounter++; //increment this when we have a new max. This is to make sure that we actually climb a peak
+	  //if ( minCounter < 3 ) maxCounter++; //increment this when we have a new max. This is to make sure that we actually climb a peak
+	  maxCounter++; //increment this when we have a new max. This is to make sure that we actually climb a peak
 	  minCounter = 0;
 
 	}
         
 	else minCounter++;
 	
-	if ( minCounter>10 && maxCounter>5 ) break; //Making sure we only get the high energy peak
+	if ( minCounter>10 && maxCounter>4 ) break; //Making sure we only get the high energy peak
       }
     }
   }
@@ -207,7 +210,7 @@ int main(int argc, char *argv[])
 
   // Define histogram fit ranges
   double xLow[8], xHigh[8];
-  if (runNumber<21274) {
+  //if (runNumber<21274) {
     for (int n=0; n<8; n++) {
       for (int i=maxBin[n]; i<nBin; i++) {
 	if ( his[n]->GetBinContent(i+1) < 0.4*maxCounts[n] ) {
@@ -222,8 +225,8 @@ int main(int argc, char *argv[])
 	}
       }
     }
-  }
-  else { // taking care of the odd Bi pulser shape in EPMT4
+    //}
+    /*else { // taking care of the odd Bi pulser shape in EPMT4
     for (int n=0; n<8; n++) {
       for (int i=maxBin[n]; i<nBin; i++) {
 	if (his[n]->GetBinContent(i+1) < 0.4*maxCounts[n]) {
@@ -240,7 +243,7 @@ int main(int argc, char *argv[])
     }
     xHigh[3] = binCenterMax[3]+400.;
     xLow[3] = binCenterMax[3]-300.;
-  }
+    }*/
 
   // Fit parameters
   double fitMean[8];
