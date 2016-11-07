@@ -116,6 +116,9 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("Type", &type);
   Tin->SetBranchAddress("Side", &side);
 
+  //count Bi pulser events for each PMT to scale the "fuzz" level below
+  std::vector <Int_t> nBiEvents(8,0);
+
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
@@ -133,6 +136,14 @@ int main(int argc, char *argv[])
     his[6]->Fill(ScintW.q3);
     his[7]->Fill(ScintW.q4);
 
+    if (ScintE.q1>500.) nBiEvents[0]++;
+    if (ScintE.q2>500.) nBiEvents[1]++;
+    if (ScintE.q3>500.) nBiEvents[2]++;
+    if (ScintE.q4>500.) nBiEvents[3]++;
+    if (ScintW.q1>500.) nBiEvents[4]++;
+    if (ScintW.q2>500.) nBiEvents[5]++;
+    if (ScintW.q3>500.) nBiEvents[6]++;
+    if (ScintW.q4>500.) nBiEvents[7]++;
   }
 
   // Find maximum bin
@@ -152,11 +163,12 @@ int main(int argc, char *argv[])
     //int counter = 0;
     int maxCounter = 0;
     int minCounter = 0;
+    cout << nBiEvents[j] << endl;
+    Int_t fuzzCounts = 0.004*nBiEvents[j];
+
     for (int i=nBin-1; i>0; i--) {
       binCenter[j] = his[j]->GetBinCenter(i);
-      binCounts[j] = his[j]->GetBinContent(i);
-
-      Int_t fuzzCounts = 3.e-5*nEvents;
+      binCounts[j] = his[j]->GetBinContent(i);      
 
       if ( binCounts[j] > fuzzCounts && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
 	if ( binCounts[j] >= maxCounts[j] ) {

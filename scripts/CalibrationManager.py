@@ -15,13 +15,16 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17588,17950,17953,19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
+omittedRuns = [17588,17950,17953,19232,21298]
 #17588 is seemingly empty
+#21298 has very few events in Bi Pulser
 
-# 17950,17953,20529 - very low statistics
-# 20530,20531,20823-20827 - lost West event triggers
-omittedRanges = [(17923,18055), (20901, 20917)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
-                                               # And also run period 15 which is useless
+
+
+omittedRanges = [(17923,18055),(20515,21086)] 
+#These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
+# (20515,21086) had bad West side 2 fold triggers, This is src periods 13,14 and octets 60-67
+#     and also the garbage from src period 16 and the bad octet right after that.
 
 for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -34,7 +37,7 @@ for Range in omittedRanges:
 EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
 EPMT2 = []#[17874,17877,17893,17903,17904,17917,17892,17918]
 EPMT3 = []
-EPMT4 = [20517,20519,20821,20822]
+EPMT4 = []
 WPMT1 = []
 WPMT2 = []
 WPMT3 = []
@@ -76,6 +79,15 @@ for Range in WPMT4_runRanges:
     for run in range(Range[0],Range[1]+1,1):
         WPMT4.append(run)
 
+for run in omittedRuns:
+    EPMT1.append(run)
+    EPMT2.append(run)
+    EPMT3.append(run)
+    EPMT4.append(run)
+    WPMT1.append(run)
+    WPMT2.append(run)
+    WPMT3.append(run)
+    WPMT4.append(run)
 
 class CalReplayManager:
     
@@ -951,12 +963,12 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 0: 
+    if 1: 
         runPeriods = [1]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 1 # number of times to run through the calibration
+        iterations = 2 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
