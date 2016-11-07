@@ -32,7 +32,7 @@ Maybe even add in writing the final answer to the database if the user wants to
 
 
 //Types of Corrections to apply
-std::string corr ("AllCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
+std::string corr ("UnCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
 Double_t POL_minus = 0.9981;
@@ -40,7 +40,7 @@ Double_t POL_plus = 0.9937;
 Double_t delta_POL = POL_plus-POL_minus;
 Double_t POL_ave = (POL_plus+POL_minus) / 2.;
 
-bool withPOL = true; //Set this to true to correct DATA for the polarimetry measurement
+bool withPOL = false; //Set this to true to correct DATA for the polarimetry measurement
 
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
-    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
+    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     
