@@ -37,7 +37,7 @@ void LinearityCurve::readLinearityCurveParams(Int_t srcPeriod) {
   if (useTanh) std::cout << "p0\tp1\tp2\tp3\tp4\tp5\n";
   else std::cout << "p0\tp1\tp2\n";
 
-  ifstream fileLinearityCurve(tempFileLinearityCurve);
+  std::ifstream fileLinearityCurve(tempFileLinearityCurve);
   //std::vector <Double_t> p(nParams);                                                           
   Double_t p;
 
@@ -96,7 +96,7 @@ TriggerFunctions::~TriggerFunctions() {
 
 void TriggerFunctions::readTriggerFunctions(Int_t run) {
 
-  ifstream file(TString::Format("%s/runs/%i_thresholds.dat",getenv("TRIGGER_FUNC"),run).Data());
+  std::ifstream file(TString::Format("%s/runs/%i_thresholds.dat",getenv("TRIGGER_FUNC"),run).Data());
 
   std::vector <Double_t> params(8,0.);
 

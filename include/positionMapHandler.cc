@@ -2,7 +2,6 @@
 
 #include <string>
 #include <fstream>
-#include <fstream>
 #include <cstdlib>
 #include "MBUtils.hh"
 
@@ -49,7 +48,7 @@ void PositionMap::setBinValues() {
 void PositionMap::readPositionMap(Int_t XeRunPeriod) {
   XePeriod = XeRunPeriod;
   std::string file = std::string(getenv("POSITION_MAPS")) + "/position_map_" + itos(XePeriod) + "_" + "RC_123_" + ftos(binWidth) +  "mm.dat";
-  ifstream infile(file.c_str());
+  std::ifstream infile(file.c_str());
   
   Int_t binValx, binValy;
   std::vector <Double_t> p(8,0.);

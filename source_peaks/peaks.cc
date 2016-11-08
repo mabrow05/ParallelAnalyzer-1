@@ -36,7 +36,7 @@ void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t hei
 
   func->SetParameters(heightGuess, meanGuess, sigGuess);
   
-  hist->Fit(func, "RQ");
+  hist->Fit(func, "LRQ");
 
   Double_t scaleCheck = func->GetParameter(0);  
   Double_t meanCheck = func->GetParameter(1);
@@ -114,7 +114,7 @@ void DoublePeakHist::FitHist(Double_t meanGuess1, Double_t sigGuess1, Double_t h
 
   func->SetParameters(heightGuess1, meanGuess1, sigGuess1, heightGuess2, meanGuess2, sigGuess2);
   
-  hist->Fit(func, "RQ");
+  hist->Fit(func, "LRQ");
 
   Int_t highPeak = func->GetParameter(1) > func->GetParameter(4) ? 0 : 1;
 
