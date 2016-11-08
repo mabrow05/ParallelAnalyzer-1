@@ -42,14 +42,22 @@
   c1->cd(1);
 
   TGraphErrors *UK = new TGraphErrors(oct_UK.size(), &oct_UK[0], &asym_UK[0], 0, &err_UK[0]);
+  UK->SetTitle("UK Asymmetry");
+  UK->GetXaxis()->SetTitle("Octet Number");
+  UK->GetYaxis()->SetTitle("Raw Asymmetry");
+  UK->GetXaxis()->CenterTitle();
+  UK->GetYaxis()->CenterTitle();
   UK->SetMarkerColor(kBlue);
   UK->SetMarkerStyle(20);
   UK->SetLineWidth(2);
   UK->SetLineColor(kBlue);
+  UK->SetMinimum(0.03);
+  UK->SetMaximum(0.07);
+  UK->GetXaxis()->SetLimits(oct_UK[0]-2., oct_UK[oct_UK.size()-1]+2.);
   UK->Draw("AP");
 
-  TF1 *fit = new TF1("fit","[0]",oct_UK[0], oct_UK[oct_UK.size()-1]);
-  //fit->SetLineColor(kRed);
+  TF1 *fit = new TF1("fit","[0]",oct_UK[0]-1., oct_UK[oct_UK.size()-1]+1.);
+  fit->SetLineColor(1);
   fit->SetLineWidth(3);
   fit->SetParameter(0,0.05);
   
@@ -61,14 +69,22 @@
   c1->cd(2);
 
   TGraphErrors *NCSU = new TGraphErrors(oct_NCSU.size(), &oct_NCSU[0], &asym_NCSU[0], 0, &err_NCSU[0]);
+  NCSU->SetTitle("NCSU Asymmetry");
+  NCSU->GetXaxis()->SetTitle("Octet Number");
+  NCSU->GetYaxis()->SetTitle("Raw Asymmetry");
+  NCSU->GetXaxis()->CenterTitle();
+  NCSU->GetYaxis()->CenterTitle();
   NCSU->SetMarkerColor(kRed);
   NCSU->SetMarkerStyle(20);
   NCSU->SetLineWidth(2);
   NCSU->SetLineColor(kRed);
+  NCSU->SetMinimum(0.03);
+  NCSU->SetMaximum(0.07);
+  NCSU->GetXaxis()->SetLimits(oct_NCSU[0]-2., oct_UK[oct_NCSU.size()-1]+2.);
   NCSU->Draw("AP");
 
-  TF1 *fit2 = new TF1("fit2","[0]",oct_NCSU[0], oct_NCSU[oct_NCSU.size()-1]);
-  //fit->SetLineColor(kRed);
+  TF1 *fit2 = new TF1("fit2","[0]",oct_NCSU[0]-1., oct_NCSU[oct_NCSU.size()-1]+1.);
+  fit2->SetLineColor(01);
   fit2->SetLineWidth(3);
   fit2->SetParameter(0,0.05);
   
@@ -77,6 +93,49 @@
   cout << "NCSU\t" << fit2->GetParameter(0) << "\t+/-\t" << fit2->GetParError(0) << std::endl;
 
   c1->Update();
+
+
+  ///////////////////////// PLOT Residual /////////////////////////
+
+  TCanvas *c2 = new TCanvas("c2","c2",1000,400);
+
+  //c1->Divide(1,2);
+
+  //c1->cd(1);
+
+  std::vector <Double_t> res(oct_UK.size(),0.);
+  std::vector <Double_t> resErr(oct_UK.size(),0.);
+  
+  for ( UInt_t i=0; i<oct_UK.size(); i++ ) {
+
+    res[i] = asym_UK[i] - asym_NCSU[i];
+    resErr[i] = TMath::Sqrt(err_UK[i]*err_UK[i] + err_NCSU[i]*err_NCSU[i]);
+
+  }
+  
+  TGraphErrors *resid = new TGraphErrors(oct_UK.size(), &oct_UK[0], &res[0], 0, &resErr[0]);
+  resid->SetTitle("Residual ( UK - NCSU )");
+  resid->GetXaxis()->SetTitle("Octet Number");
+  resid->GetYaxis()->SetTitle("Residual");
+  resid->GetXaxis()->CenterTitle();
+  resid->GetYaxis()->CenterTitle();
+  resid->SetMarkerColor(6);
+  resid->SetMarkerStyle(20);
+  resid->SetLineWidth(2);
+  resid->SetLineColor(6);
+  resid->SetMinimum(-0.03);
+  resid->SetMaximum(0.03);
+  resid->GetXaxis()->SetLimits(oct_UK[0]-2., oct_UK[oct_UK.size()-1]+2.);
+  resid->Draw("AP");
+
+  TF1 *fit3 = new TF1("fit3","[0]",oct_UK[0]-1., oct_UK[oct_UK.size()-1]+1.);
+  fit3->SetLineColor(1);
+  fit3->SetLineWidth(3);
+  fit3->SetParameter(0,0.05);
+  
+  resid->Fit("fit3","R");
+
+  cout << "resid\t" << fit3->GetParameter(0) << "\t+/-\t" << fit3->GetParError(0) << std::endl;
 }
   
 		  
