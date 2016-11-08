@@ -761,11 +761,18 @@ int main(int argc, char *argv[])
 
   // Write results to file
   char tempResults[500];
-  sprintf(tempResults, "%s/source_peaks_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  /*sprintf(tempResults, "%s/source_peaks_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResultsMean(tempResults);
   sprintf(tempResults, "%s/source_peaks_errors_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResultsMeanError(tempResults);
   sprintf(tempResults, "%s/source_widths_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  ofstream outResultsSigma(tempResults);*/
+
+  sprintf(tempResults, "%s/source_peaks_%s_Evis.dat","likelihoodCheck", argv[1]);
+  ofstream outResultsMean(tempResults);
+  sprintf(tempResults, "%s/source_peaks_errors_%s_Evis.dat","likelihoodCheck", argv[1]);
+  ofstream outResultsMeanError(tempResults);
+  sprintf(tempResults, "%s/source_widths_%s_Evis.dat","likelihoodCheck", argv[1]);
   ofstream outResultsSigma(tempResults);
 
   for (int n=0; n<nSources; n++) {
