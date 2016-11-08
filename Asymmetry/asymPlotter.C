@@ -1,5 +1,18 @@
 {
 
+  gStyle->SetTitleSize(0.08,"t");
+  gStyle->SetPadBottomMargin(0.15);
+  gStyle->SetTitleYSize(0.06);
+  gStyle->SetTitleYOffset(0.65);
+  gStyle->SetTitleXSize(0.06);
+  gStyle->SetTitleXOffset(0.9);
+  gStyle->SetLabelSize(0.05,"xyz");
+  
+  gStyle->SetOptFit(1111);
+  // gStyle->SetTitleX(0.25);
+  gStyle->SetStatX(0.85);
+  gStyle->SetStatY(0.85);
+  
   std::vector <Double_t> oct_NCSU;
   std::vector <Double_t> asym_NCSU;
   std::vector <Double_t> err_NCSU;
@@ -35,7 +48,7 @@
 
   std::vector <Double_t> diff;
 
-  TCanvas *c1 = new TCanvas("c1","c1",1000,800);
+  TCanvas *c1 = new TCanvas("c1","c1",750,600);
 
   c1->Divide(1,2);
 
@@ -97,7 +110,7 @@
 
   ///////////////////////// PLOT Residual /////////////////////////
 
-  TCanvas *c2 = new TCanvas("c2","c2",1000,400);
+  TCanvas *c2 = new TCanvas("c2","c2",750,300);
 
   //c1->Divide(1,2);
 
@@ -123,8 +136,8 @@
   resid->SetMarkerStyle(20);
   resid->SetLineWidth(2);
   resid->SetLineColor(6);
-  resid->SetMinimum(-0.03);
-  resid->SetMaximum(0.03);
+  resid->SetMinimum(-0.02);
+  resid->SetMaximum(0.02);
   resid->GetXaxis()->SetLimits(oct_UK[0]-2., oct_UK[oct_UK.size()-1]+2.);
   resid->Draw("AP");
 
@@ -136,6 +149,17 @@
   resid->Fit("fit3","R");
 
   cout << "resid\t" << fit3->GetParameter(0) << "\t+/-\t" << fit3->GetParError(0) << std::endl;
+
+  TString fnamePNG_both = "UK_NCSU_asymmetries.png";
+  TString fnamePNG_comp = "UK_NCSU_residuals.png";
+  TString fnamePDF = "UK_NCSU_asymmetryComparison.pdf";
+
+  c1->Print(fnamePNG_both.Data());
+  c1->Print(TString::Format("%s(",fnamePDF.Data()));
+
+  c2->Print(fnamePNG_comp.Data());
+  c2->Print(TString::Format("%s)",fnamePDF.Data()));
+
 }
   
 		  
