@@ -324,8 +324,7 @@ class CalReplayManager:
 
         for line in infile:      
           if int(line) not in omittedRuns:
-              if int(line)>21298:
-                  runs.append(int(line))
+              runs.append(int(line))
 
         for run in runs:
             filename = self.srcListPath+"source_list_%i.dat"%run
@@ -424,8 +423,7 @@ class CalibrationManager:
         runs = []
         for line in infile:  
             if int(line) not in omittedRuns:
-              if int(line)>21298:
-                  runs.append(int(line))
+                runs.append(int(line))
             
         for run in runs:
             os.system("cd ../source_peaks/; ./srcCalReplay.exe %i"%run)
