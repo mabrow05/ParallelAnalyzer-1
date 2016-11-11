@@ -15,9 +15,10 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17588,17950,17953,19232,21298]
+omittedRuns = [17588,17950,17953,19232,21298,21605]
 #17588 is seemingly empty
 #21298 has very few events in Bi Pulser
+#21605 has very few counts
 
 
 
@@ -148,7 +149,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
@@ -167,7 +169,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%run)
@@ -186,7 +189,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
@@ -206,7 +210,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%run)
@@ -225,7 +230,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
@@ -246,7 +252,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             print "Making basic histograms for run %i"%run
@@ -270,7 +277,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%run)
@@ -291,7 +299,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
@@ -312,8 +321,11 @@ class CalReplayManager:
             exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
+
         for line in infile:      
-            runs.append(int(line))
+          if int(line) not in omittedRuns:
+              if int(line)>21298:
+                  runs.append(int(line))
 
         for run in runs:
             filename = self.srcListPath+"source_list_%i.dat"%run
@@ -410,8 +422,10 @@ class CalibrationManager:
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
-        for line in infile:      
-            runs.append(int(line))
+        for line in infile:  
+            if int(line) not in omittedRuns:
+              if int(line)>21298:
+                  runs.append(int(line))
             
         for run in runs:
             os.system("cd ../source_peaks/; ./srcCalReplay.exe %i"%run)
@@ -948,7 +962,7 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [18,19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [16,17,18,19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
@@ -964,11 +978,11 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [1]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [17]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 2 # number of times to run through the calibration
+        iterations = 1 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -989,7 +1003,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1006,8 +1020,8 @@ if __name__ == "__main__":
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
