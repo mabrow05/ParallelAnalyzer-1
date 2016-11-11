@@ -15,12 +15,17 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17950,17953,19232, 20529, 20530, 20531, 20823, 20824, 20825, 20826, 20827, 21097]
+omittedRuns = [17588,17950,17953,19232,21298,21605]
+#17588 is seemingly empty
+#21298 has very few events in Bi Pulser
+#21605 has very few counts
 
-# 17950,17953,20529 - very low statistics
-# 20530,20531,20823-20827 - lost West event triggers
-omittedRanges = [(17923,18055), (20901, 20917)] #These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
-                                               # And also run period 15 which is useless
+
+
+omittedRanges = [(17923,18055),(20515,21086)] 
+#These runs are from Run period 4 and include very long runs and runs with no Sn or Bi
+# (20515,21086) had bad West side 2 fold triggers, This is src periods 13,14 and octets 60-67
+#     and also the garbage from src period 16 and the bad octet right after that.
 
 for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
@@ -33,7 +38,7 @@ for Range in omittedRanges:
 EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
 EPMT2 = []#[17874,17877,17893,17903,17904,17917,17892,17918]
 EPMT3 = []
-EPMT4 = [20517,20519,20821,20822]
+EPMT4 = []
 WPMT1 = []
 WPMT2 = []
 WPMT3 = []
@@ -42,11 +47,11 @@ WPMT4 = []
 EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 EPMT2_runRanges = []
 EPMT3_runRanges = []
-EPMT4_runRanges = [(20121,23173)] #(17233,18055) not sure why these used to be removed...
+EPMT4_runRanges = [(21274,23173)] #(17233,18055) not sure why these used to be removed...
 WPMT1_runRanges = [(17359,18055)]
 WPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 WPMT3_runRanges = []
-WPMT4_runRanges = [(18370,18386),(19347,19960),(20000,24000)]
+WPMT4_runRanges = [(18370,18386),(19347,19999),(20000,24000)]
 #(18370,18385) there was a drastic change in the gain of WPMT4, and this calibration period only
 #applies to runs before it so these were removed...
 
@@ -75,6 +80,15 @@ for Range in WPMT4_runRanges:
     for run in range(Range[0],Range[1]+1,1):
         WPMT4.append(run)
 
+for run in omittedRuns:
+    EPMT1.append(run)
+    EPMT2.append(run)
+    EPMT3.append(run)
+    EPMT4.append(run)
+    WPMT1.append(run)
+    WPMT2.append(run)
+    WPMT3.append(run)
+    WPMT4.append(run)
 
 class CalReplayManager:
     
@@ -135,7 +149,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
@@ -154,7 +169,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%run)
@@ -173,7 +189,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
@@ -193,7 +210,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%run)
@@ -212,7 +230,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
@@ -233,7 +252,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             print "Making basic histograms for run %i"%run
@@ -257,7 +277,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../trigger_functions/; ./findADCthreshold_singleRun.exe %i"%run)
@@ -278,7 +299,8 @@ class CalReplayManager:
         infile = open(self.runListPath+filename,'r')
         runs = []
         for line in infile:      
-            runs.append(int(line))
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
         
         for run in runs:
             os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
@@ -299,8 +321,10 @@ class CalReplayManager:
             exit();
         infile = open(self.runListPath+filename,'r')
         runs = []
+
         for line in infile:      
-            runs.append(int(line))
+          if int(line) not in omittedRuns:
+              runs.append(int(line))
 
         for run in runs:
             filename = self.srcListPath+"source_list_%i.dat"%run
@@ -397,8 +421,9 @@ class CalibrationManager:
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
-        for line in infile:      
-            runs.append(int(line))
+        for line in infile:  
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
             
         for run in runs:
             os.system("cd ../source_peaks/; ./srcCalReplay.exe %i"%run)
@@ -935,23 +960,23 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [20,24,23]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [16,17,18,19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
-            rep.findPedestals(runPeriod)
-            rep.runReplayPass1(runPeriod)
-            #rep.runGainBismuth(runPeriod)
-            rep.findTriggerFunctions(runPeriod)
-            rep.runReplayPass2(runPeriod)
+            #rep.findPedestals(runPeriod)
+            #rep.runReplayPass1(runPeriod)
+            rep.runGainBismuth(runPeriod)
+            #rep.findTriggerFunctions(runPeriod)
+            #rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
         
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 0: 
-        runPeriods = [16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods = [17]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -976,7 +1001,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 0:#i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -991,9 +1016,9 @@ if __name__ == "__main__":
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
-            rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")

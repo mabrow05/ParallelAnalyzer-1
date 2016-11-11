@@ -116,6 +116,9 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("Type", &type);
   Tin->SetBranchAddress("Side", &side);
 
+  //count Bi pulser events for each PMT to scale the "fuzz" level below
+  std::vector <Int_t> nBiEvents(8,0);
+
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
@@ -133,6 +136,14 @@ int main(int argc, char *argv[])
     his[6]->Fill(ScintW.q3);
     his[7]->Fill(ScintW.q4);
 
+    if (ScintE.q1>500.) nBiEvents[0]++;
+    if (ScintE.q2>500.) nBiEvents[1]++;
+    if (ScintE.q3>500.) nBiEvents[2]++;
+    if (ScintE.q4>500.) nBiEvents[3]++;
+    if (ScintW.q1>500.) nBiEvents[4]++;
+    if (ScintW.q2>500.) nBiEvents[5]++;
+    if (ScintW.q3>500.) nBiEvents[6]++;
+    if (ScintW.q4>500.) nBiEvents[7]++;
   }
 
   // Find maximum bin
@@ -152,24 +163,28 @@ int main(int argc, char *argv[])
     //int counter = 0;
     int maxCounter = 0;
     int minCounter = 0;
+    cout << nBiEvents[j] << endl;
+    Int_t fuzzCounts = 0.004*nBiEvents[j];
+
     for (int i=nBin-1; i>0; i--) {
       binCenter[j] = his[j]->GetBinCenter(i);
-      binCounts[j] = his[j]->GetBinContent(i);
+      binCounts[j] = his[j]->GetBinContent(i);      
 
-      if ( binCounts[j] > 15 && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
+      if ( binCounts[j] > fuzzCounts && his[j]->GetBinContent(i+1) > 0 ) { // use bins above the fuzz and ignore the overflow bin (which isn't the last bin after pedestal subtraction) 
 	if ( binCounts[j] >= maxCounts[j] ) {
 	  maxCounts[j] = binCounts[j];
 	  maxBin[j] = i;
 	  binCenterMax[j] = binCenter[j];
 	  
-	  if ( minCounter < 3 ) maxCounter++; //increment this when we have a new max. This is to make sure that we actually climb a peak
+	  //if ( minCounter < 3 ) maxCounter++; //increment this when we have a new max. This is to make sure that we actually climb a peak
+	  maxCounter++; //increment this when we have a new max. This is to make sure that we actually climb a peak
 	  minCounter = 0;
 
 	}
         
 	else minCounter++;
 	
-	if ( minCounter>10 && maxCounter>5 ) break; //Making sure we only get the high energy peak
+	if ( minCounter>10 && maxCounter>4 ) break; //Making sure we only get the high energy peak
       }
     }
   }
@@ -207,7 +222,7 @@ int main(int argc, char *argv[])
 
   // Define histogram fit ranges
   double xLow[8], xHigh[8];
-  if (runNumber<21274) {
+  //if (runNumber<21274) {
     for (int n=0; n<8; n++) {
       for (int i=maxBin[n]; i<nBin; i++) {
 	if ( his[n]->GetBinContent(i+1) < 0.4*maxCounts[n] ) {
@@ -222,8 +237,8 @@ int main(int argc, char *argv[])
 	}
       }
     }
-  }
-  else { // taking care of the odd Bi pulser shape in EPMT4
+    //}
+    /*else { // taking care of the odd Bi pulser shape in EPMT4
     for (int n=0; n<8; n++) {
       for (int i=maxBin[n]; i<nBin; i++) {
 	if (his[n]->GetBinContent(i+1) < 0.4*maxCounts[n]) {
@@ -240,7 +255,7 @@ int main(int argc, char *argv[])
     }
     xHigh[3] = binCenterMax[3]+400.;
     xLow[3] = binCenterMax[3]-300.;
-  }
+    }*/
 
   // Fit parameters
   double fitMean[8];

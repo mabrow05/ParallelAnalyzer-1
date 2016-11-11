@@ -32,7 +32,7 @@ Maybe even add in writing the final answer to the database if the user wants to
 
 
 //Types of Corrections to apply
-std::string corr ("AllCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
+std::string corr ("UnCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
 Double_t POL_minus = 0.9981;
@@ -40,7 +40,7 @@ Double_t POL_plus = 0.9937;
 Double_t delta_POL = POL_plus-POL_minus;
 Double_t POL_ave = (POL_plus+POL_minus) / 2.;
 
-bool withPOL = true; //Set this to true to correct DATA for the polarimetry measurement
+bool withPOL = false; //Set this to true to correct DATA for the polarimetry measurement
 
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   bool UKdata = false;//true;
-  bool simulation = true;
+  bool simulation = false;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = true;
+  bool UNBLIND = false;
 
 
   if (UNBLIND) {
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
-    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
+    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     
@@ -356,6 +356,21 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   g->Fit("fit","R");
 
   asymFile << "RawA_oct_by_oct\t" << fit->GetParameter(0) << "\t" << fit->GetParError(0) << std::endl;
+
+  //Writing to file the raw asymmetries of each octet
+  ofstream octval("octvalUK.dat");
+  octval << "oct" << "\t" 
+	 << "Asymm" << "\t" 
+	 << "Error" << "\t" 
+	 << "Pull" << "\n";
+  
+  for (UInt_t i=0; i<rawAsymByGroup[0].size(); i++) {
+    octval << rawAsymByGroup[0][i] << "\t" 
+	   << rawAsymByGroup[1][i] << "\t" 
+	   << rawAsymByGroup[2][i] << "\t" 
+	   << ( rawAsymByGroup[1][i] - fit->GetParameter(0) ) / rawAsymByGroup[2][i] << "\n";
+  } 
+  octval.close();
   
   g->Draw("AP");
   g->SetMinimum(fit->GetParameter(0)-0.02);//((simulation && !AsymmOn) ? -0.05 : 0.03);

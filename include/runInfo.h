@@ -119,7 +119,7 @@ unsigned int getGainReferenceRun(int runNumber) {
   refRun[14]=20820;
   refRun[15]=20905;
   refRun[16]=21091;
-  refRun[17]=21315;
+  refRun[17]=21315; // start weird EPMT4 Bi Pulser
   refRun[18]=21683;
   refRun[19]=21918;
   refRun[20]=22219;
