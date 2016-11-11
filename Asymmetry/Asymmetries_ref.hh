@@ -10,7 +10,7 @@
 // base class for loading octet information
 class AsymmetryBase {
 public:
-  AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind=false);
+  AsymmetryBase(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind=false);
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
@@ -54,21 +54,19 @@ protected:
   double fiducialCut;
   bool boolAnaChRtVecs;
   int runsInOctet;
-  int analysisChoice;
+  std::string analysisChoice;
   std::map < int, std::string > runType;
   //std::map <std::string,int> runType; // the key is the run type, mapped val is run number
 
   // The following vectors are bin by bin rates for each evt type on each side
-  // for ecample, A2[type][side][bin] (A2[0-3][0-1][0-nBins])
-  std::vector < std::vector < std::vector<double> > > A2, A5, A7, A10, B2, B5, B7, B10; //BG subtr rates for each beta run 
-  std::vector < std::vector < std::vector<double> > > A2err, A5err, A7err, A10err, B2err, B5err, B7err, B10err; //BG subtr rate errors for each beta run
+  // for ecample, A2[side][bin] (A2[0-1][0-nBins])
 
   //The following vectors store the length of the runs where A2len[0][0]=A2East length and A2[1][0] = A2East BG run length(A1)
   std::vector < std::vector < double > > A2len, A5len, A7len, A10len, B2len, B5len, B7len, B10len;
 
   // The following vectors sum over the appropriate event types for the analysisChoice [side][bin]
-  std::vector < std::vector <double> > anaChoice_A2, anaChoice_A5, anaChoice_A7, anaChoice_A10, anaChoice_B2, anaChoice_B5, anaChoice_B7, anaChoice_B10; //BG subtr rates for each beta run 
-  std::vector < std::vector <double> > anaChoice_A2err, anaChoice_A5err, anaChoice_A7err, anaChoice_A10err, anaChoice_B2err, anaChoice_B5err, anaChoice_B7err, anaChoice_B10err; //BG subtr rates for each beta run
+  std::vector < std::vector <double> > A2, A5, A7, A10, B2, B5, B7, B10; //BG subtr rates for each beta run 
+  std::vector < std::vector <double> > A2err, A5err, A7err, A10err, B2err, B5err, B7err, B10err; //BG subtr rates for each beta run
 
   std::vector<double> binLowerEdge;
   std::vector<double> binUpperEdge; //Hold the Energy of the upper and lower bin edges

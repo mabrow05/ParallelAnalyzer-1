@@ -35,22 +35,22 @@ public:
   int polarization(int run);       // determines the polarization. Assigns value to pol and returns polarization
                                    // This comes from the database. Flipper on -> 1, Flipper Off -> -1
 
-  double returnRunLength(int side) {return runLength[side];}       // Return the length of the run (s)
+  double returnRunLength(int side) { return side==0 ? totalRunLengthE : totalRunLengthW; }       // Return the length of the run (s)
 
   
   
-  std::vector< std::vector<double> > getRateVectors(int side) { 
+  std::vector <double> getRateVectors(int side) { 
     return side==0 ? rateEvec : ( side==1 ? rateWvec : throw "BAD SIDE GIVEN TO getRateVectors"); 
   } ;
 
-  std::vector< std::vector<double> > getRateErrors(int side) {
+  std::vector <double> getRateErrors(int side) {
     return side==0 ? rateEerr : ( side==1 ? rateWerr : throw "BAD SIDE GIVEN TO getRateErrors"); 
   } ;
 
 protected:
   virtual void dataReader();       //Read in data and fill histograms
   void CalcRates();       // Calculate the rates and use the reference spectra to fill in errors if necessary
-  void loadReferenceRate(); //Loads the reference rates from the proper files
+  void loadReferenceSpectra(); //Loads the reference rates from the proper files
   double referenceError(double en);       // goes to the proper reference spectra and returns the error
 
   std::vector <int> runs;       // runs
@@ -62,6 +62,11 @@ protected:
   int pol;       // polarization of the foreground run if polarization has been run;
   unsigned int numEnergyBins;
   std::vector < std::vector <double> > runLength;       // E/W for each run in run vector
+  double totalRunLengthE;       // Holds the sum of the run lengths of the applicable runs
+  double totalRunLengthW;
+  double totalCountsE;       // Holds the total number of events in the runs of interest
+  double totalCountsW;
+  
   std::vector <double>  UCNMonIntegral;
   
   TH1D *hisCounts[2];       // histogram for counts in an energy bin
@@ -72,8 +77,12 @@ protected:
   std::vector <double> rateEerr;       //Stores the statistical error for each Bin
   std::vector <double> rateWerr;
 
-  std::vector <double> refRateE;       //Stores the reference runs event rate per bin
-  std::vector <double> refRateW;       //Stores the reference runs event rate per bin
+  std::vector <double> refSpectraE;       //Stores the reference runs event rate per bin
+  std::vector <double> refSpectraW;       //Stores the reference runs event rate per bin
+  double totalRefTime;
+  double totalRefCountsE;
+  double totalRefCountsW;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
@@ -98,11 +107,8 @@ public:
   
   std::vector<double> returnRunLengths(bool beta=true);       // for BG do beta=false
   void calcBGSubtRates();       //Loads the rates and calculates BG subtr rates and errors
-  std::vector<double> returnBGSubtRate(int side, int etype);       //returns a vector holding all the BG subtracted rates.
-  std::vector<double> returnBGSubtRateError(int side, int etype);       //Returns background subtracted rate statistical error
-
-  int getBackgroundRun(int run);       //Returns the background run number for the run specified
-  void CreateRateHistograms();       //Create, fill, and save rate histograms to file.
+  std::vector<double> returnBGSubtRate(int side);       //returns a vector holding all the BG subtracted rates.
+  std::vector<double> returnBGSubtRateError(int side);       //Returns background subtracted rate statistical error
 
 private:
 
@@ -115,20 +121,20 @@ private:
   bool Simulation;       //Whether the rate is from simulation or not, in which case there is no background run
   bool UNBLIND;       //SHOULD BE FALSE UNTIL UNBLINDING
 
-  std::vector< std::vector<double> > BetaRateE;       //Save the rates here for beta run
-  std::vector< std::vector<double> > BetaRateErrorE;       //Save the error here for beta run
-  std::vector< std::vector<double> > BGRateE;         // Save the background rates here
-  std::vector< std::vector<double> > BGRateErrorE;         // Save the background rates here
-  std::vector< std::vector<double> > FinalRateE;       //This is the difference in the rates
-  std::vector< std::vector<double> > FinalRateErrorE;       //This is the statistical error in the difference in the rates
+  std::vector <double> BetaRateE;       //Save the rates here for beta run
+  std::vector <double> BetaRateErrorE;       //Save the error here for beta run
+  std::vector <double> BGRateE;         // Save the background rates here
+  std::vector <double> BGRateErrorE;         // Save the background rates here
+  std::vector <double> FinalRateE;       //This is the difference in the rates
+  std::vector <double> FinalRateErrorE;       //This is the statistical error in the difference in the rates
   
 
-  std::vector< std::vector<double> > BetaRateW;       //Save the rates here for beta run
-  std::vector< std::vector<double> > BetaRateErrorW;       //Save the error here for beta run
-  std::vector< std::vector<double> > BGRateW;         // Save the background rates here
-  std::vector< std::vector<double> > BGRateErrorW;         // Save the background rates here
-  std::vector< std::vector<double> > FinalRateW;       //This is the difference in the rates
-  std::vector< std::vector<double> > FinalRateErrorW;       //This is the statistical error in the difference in the rates
+  std::vector <double> BetaRateW;       //Save the rates here for beta run
+  std::vector <double> BetaRateErrorW;       //Save the error here for beta run
+  std::vector <double> BGRateW;         // Save the background rates here
+  std::vector <double> BGRateErrorW;         // Save the background rates here
+  std::vector <double> FinalRateW;       //This is the difference in the rates
+  std::vector <double> FinalRateErrorW;       //This is the statistical error in the difference in the rates
 
   std::vector <double> runLengthBG;       // E/W
   std::vector <double> runLengthBeta;
