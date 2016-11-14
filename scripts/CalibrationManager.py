@@ -966,9 +966,9 @@ if __name__ == "__main__":
            
             #rep.findPedestals(runPeriod)
             #rep.runReplayPass1(runPeriod)
-            rep.runGainBismuth(runPeriod)
-            #rep.findTriggerFunctions(runPeriod)
-            #rep.runReplayPass2(runPeriod)
+            #rep.runGainBismuth(runPeriod)
+            rep.findTriggerFunctions(runPeriod)
+            rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
         
@@ -976,7 +976,7 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [17]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [16]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
