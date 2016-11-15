@@ -34,6 +34,9 @@ using namespace std;
 std::map<Int_t,std::string> runType; //List of all runs in octet and their types
 std::vector <Int_t> fgRuns_SFon; //list of fg runs with spin flipper on 
 std::vector <Int_t> fgRuns_SFoff; //list of fg runs with spin flipper off
+Double_t totalTimeON=0.;
+Double_t totalTimeOFF=0.;
+TString anaChoice[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 std::vector < std::vector < std::vector <Double_t> > >  sfON(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
 std::vector < std::vector < std::vector <Double_t> > > sfON_err(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.)));
@@ -57,27 +60,30 @@ int separate23(int side, double mwpcEn) {
 };
 
 void writeRatesToFile(int octMin, int octMax) {
-
-  TString fn_base = TString::Format("foregroundRatesByAnaChoice/ReferenceRates_Octets-%i-%i_",octMin,octMax); 
+  
+  TString fn_base = TString::Format("foregroundRatesByAnaChoice/ReferenceSpectra_Octets-%i-%i_",octMin,octMax);
   ofstream sf_ON;
   ofstream sf_OFF;
- 
+  
+  for (int anaCh=0; anaCh<10; anaCh++) {
+    sf_ON.open(TString::Format("%ssfON-AnaCh-%s.txt",fn_base.Data(),anaChoice[anaCh].Data()).Data());
+    sf_OFF.open(TString::Format("%ssfOFF-AnaCh-%s.txt",fn_base.Data(),anaChoice[anaCh].Data()).Data());
+    
+    sf_ON << std::setprecision(9);
+    sf_OFF << std::setprecision(9);
 
-  for (int anaCh=1; anaCh<11; anaCh++) {
-    sf_ON.open(TString::Format("%ssfON-AnaCh-%i.txt",fn_base.Data(),anaCh));
-    sf_OFF.open(TString::Format("%ssfOFF-AnaCh-%i.txt",fn_base.Data(),anaCh));
+    sf_ON << "totalTime\t" << totalTimeON << std::endl;
+    sf_OFF << "totalTime\t" << totalTimeOFF << std::endl;
     
     for (int bin=0; bin<120; bin++) {
 
       Double_t binMidPoint = (double)bin*10.+5.;
 
-      sf_ON << std::setprecision(9);
-      sf_ON << binMidPoint << "\t\t" << sfON[anaCh-1][0][bin] << "\t\t" << sfON_err[anaCh-1][0][bin] << "\t\t" 
-	   << sfON[anaCh-1][1][bin] << "\t\t" << sfON_err[anaCh-1][1][bin] << "\n";
+      sf_ON << binMidPoint << "\t\t" << sfON[anaCh][0][bin] << "\t\t" << sfON_err[anaCh][0][bin] << "\t\t" 
+	   << sfON[anaCh][1][bin] << "\t\t" << sfON_err[anaCh][1][bin] << "\n";
 
-      sf_OFF << std::setprecision(9);
-      sf_OFF << binMidPoint << "\t\t" << sfOFF[anaCh-1][0][bin] << "\t\t" << sfOFF_err[anaCh-1][0][bin] << "\t\t" 
-	   << sfOFF[anaCh-1][1][bin] << "\t\t" << sfOFF_err[anaCh-1][1][bin] << "\n";
+      sf_OFF << binMidPoint << "\t\t" << sfOFF[anaCh][0][bin] << "\t\t" << sfOFF_err[anaCh][0][bin] << "\t\t" 
+	   << sfOFF[anaCh][1][bin] << "\t\t" << sfOFF_err[anaCh][1][bin] << "\n";
     
     }
     
@@ -185,9 +191,6 @@ void doForegroundSpectra (int octetMin, int octetMax)
   histON3[0] = new TH1D("Type3E_sfON","Type3E",120,0.,1200.);
   histON3[1] = new TH1D("Type3W_sfON","Type3W",120,0.,1200.);
   
-
-  double totalTimeOFF = 0.;
-  double totalTimeON = 0.; //TODO
 
   //Process SF off runs first
   for ( auto rn : fgRuns_SFoff ) {
@@ -437,11 +440,11 @@ void doForegroundSpectra (int octetMin, int octetMax)
 	
 	
 	// Now divide by the total time associated with that spin state's runs
-	sfON[anaCh-1][side][bin-1] /= totalTimeON;
-	sfON_err[anaCh-1][side][bin-1] /= totalTimeON;
+	//sfON[anaCh-1][side][bin-1] /= totalTimeON;
+	//sfON_err[anaCh-1][side][bin-1] /= totalTimeON;
 	
-	sfOFF[anaCh-1][side][bin-1] /= totalTimeOFF;
-	sfOFF_err[anaCh-1][side][bin-1] /= totalTimeOFF;
+	//sfOFF[anaCh-1][side][bin-1] /= totalTimeOFF;
+	//sfOFF_err[anaCh-1][side][bin-1] /= totalTimeOFF;
       }
     }
   }
