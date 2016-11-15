@@ -13,7 +13,6 @@
 #include <cstdlib>
 #include <cmath>
 #include <string>
-#include "SQLinterface.hh"
 
 //Function to separate type 2/3 based on energy cut on Wirechamber energy
 int separate23(int side, double mwpcEn) {

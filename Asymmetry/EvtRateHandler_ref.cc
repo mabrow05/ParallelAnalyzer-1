@@ -43,7 +43,7 @@ EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, 
 
   for (unsigned int i = 0; i<runs.size(); i++) {
     std::string logFilePath = std::string(getenv("RUN_INFO_FILES"))+"runInfo_"+itos(runs[i])+".dat";
-    ifstream logFile(logFilePath.c_str());
+    std::ifstream logFile(logFilePath.c_str());
     std::vector <std::string> title(4);
     std::vector <double> value(4);
     for (int i=0; i<4; i++) {

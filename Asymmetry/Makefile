@@ -16,7 +16,7 @@ LIBS		= $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS       += $(ROOTCFLAGS) -Iinclude
 LIBS	       += -lSpectrum -lMinuit
 
-objects = MBUtils.o Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o 
+objects = MBUtils.o Asymmetries_ref.o SQLinterface.o SystematicCorrections.o EvtRateHandler_ref.o 
 
 .PHONY: all
 all: MBAnalyzer.exe UK2SIMcomparison.exe
@@ -39,9 +39,13 @@ SuperSumComparison.exe: SuperSumComparison.o $(objects)
 
 Asymmetries.o: Asymmetries.hh
 
+Asymmetries_ref.o: Asymmetries_ref.hh
+
 BetaSpectrum.o: BetaSpectrum.hh
 
 EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh
+
+EvtRateHandler_ref.o: EvtRateHandler_ref.hh
 
 SQLinterface.o: SQLinterface.hh
 

@@ -14,34 +14,28 @@ public:
   ~AsymmetryBase() {}
 
   void readOctetFile(); //populates the map runType
-  int getBGrun(int run); //returns the BG runNumber of current Beta run
+  int getBGrunNumber(std::string runType); //returns the BG runNumber of current Beta run
+  int getBGrunNumber(int run); //returns the BG runNumber of current Beta run
+  std::string getBGrunLabel(std::string runType); //returns the BG run label of current Beta run
   int getRunsInOctet() {return runsInOctet;}
   bool isFullOctet(); //Checks whether the octet has all the necessary beta runs
   bool isPair(int quartNum, int pairNum); // There are 4 pairs in every Octet (A0,A1,B0,B1)->((0,0),(0,1),),(1,0),(1,1))
   bool isFullQuartet(int quartNum); //There are 2 quartets in every octet (0,1)
   void loadRates(); //Loads the BG subtracted rates for each run and side
+  std::vector <int> makeRunVec(std::string runType); // returns a vector of the runs associated with a run t
   bool checkIfBetaRun(std::string type); //Checks if run of type is a beta run or not
-  void calcBGsubtractedEvts(); // Simply calculates and fills numEvtsByTypeByBin vector
-  std::vector < double > getNumBGsubtrEvts(double enWinLow, double enWinHigh, int evtType); // returns the number of events summed over bin window
   void writeRatesToFile(); //For now this only uses type0 evts
-  bool isAnaChoiceRateVectors() {return boolAnaChRtVecs;}
   int getCurrentAnaChoice() {return analysisChoice;}
-  std::vector < std::vector < std::vector<double> > > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
-  std::vector < std::vector < std::vector<double> > > returnBGsubtractedRateError(std::string runType);
+  std::vector < std::vector<double> > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
+  std::vector < std::vector<double> > returnBGsubtractedRateError(std::string runType);
   std::vector < double > returnRunLength(std::string runType); //Returns both beta and BG run length
 
   
 
 protected:
-  void makeAnalysisChoiceRateVectors(int anaChoice); //Makes new vectors based on the analysis choice (1-8)
-  std::vector< std::vector<double> > numEvtsEastByTypeByBin; //number of events for each evt type, each bin summed 
-  std::vector< std::vector<double> > numEvtsWestByTypeByBin; //number of events for each evt type, each bin summed 
   
   bool UKdata; //Boolean which is true for UK data and false if mpm
   bool Simulation; //Boolean to use simulated data
-  bool applyAsymmetry; //Whether or not to apply the asymmetry weight to the simulated data.
-                       // Should be false when using super-sum, true when using super-ratio.
-                       // LEGACY FROM WHEN SIMULATIONS DID NOT HAVE ASYMMETRY PRESENT!! SHOULD BE FALSE ALWAYS NOW
 
   //*******************************
   //       UNBLINDING BOOLEAN
@@ -52,7 +46,6 @@ protected:
   double energyBinWidth;
   unsigned int numEnBins;
   double fiducialCut;
-  bool boolAnaChRtVecs;
   int runsInOctet;
   std::string analysisChoice;
   std::map < int, std::string > runType;
@@ -76,13 +69,13 @@ protected:
 
 class OctetAsymmetry : public AsymmetryBase {
 public:
-  OctetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true, bool unblind=false);
+  OctetAsymmetry(int oct, std::string anaCh, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool unblind=false);
   ~OctetAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();
-  void calcAsymmetryBinByBin(int anaChoice=1); //Calculates the raw asymmetry bin by bin to be written to file and plotted
-  void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
-  void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
+  void calcAsymmetryBinByBin(); //Calculates the raw asymmetry bin by bin to be written to file and plotted
+  void calcTotalAsymmetry(double enWinLow, double enWinHigh); //Returns total raw asymmetry over energy window
+  void calcSuperSum(); //Calculates the super sum over the entire octet for spectral comparisons
   void writeAsymToFile();
   void writeSuperSumToFile();
   double returnTotalAsymmetry() {return totalAsymmetry;}
@@ -94,7 +87,7 @@ public:
   std::vector <double> returnSuperSumError() {return superSumError;}
 
 private:
-  
+
   std::vector <double> asymmetry; //Raw asymmetry in bins
   std::vector <double> asymmetryError; //Raw Asymmetry error in bins
   std::vector <double> superSum; //Raw asymmetry in bins
@@ -109,13 +102,13 @@ private:
 
 class QuartetAsymmetry : public AsymmetryBase {
 public:
-  QuartetAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true, bool unblind=false);
+  QuartetAsymmetry(int oct, std::string anaCh, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool unblind=false);
   ~QuartetAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();
-  void calcAsymmetryBinByBin(int anaChoice=1); //Calculates the raw asymmetry bin by bin to be written to file and plotted
-  void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
-  void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
+  void calcAsymmetryBinByBin(); //Calculates the raw asymmetry bin by bin to be written to file and plotted
+  void calcTotalAsymmetry(double enWinLow, double enWinHigh); //Returns total raw asymmetry over energy window
+  void calcSuperSum(); //Calculates the super sum over the entire octet for spectral comparisons
   void writeAsymToFile();
   void writeSuperSumToFile();
   double returnTotalAsymmetry_QuartetA() {return totalAsymmetryA;}
@@ -148,13 +141,13 @@ private:
 /////////////////////////////////////////////////////////////////////////////////
 class PairAsymmetry : public AsymmetryBase {
 public:
-  PairAsymmetry(int oct, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool applyAsym=true, bool unblind=false);
+  PairAsymmetry(int oct, std::string anaCh, double enBinWidth=10., double fidCut=45., bool ukdata=true, bool simulation=false, bool unblind=false);
   ~PairAsymmetry() {std::cout << "\n\n\n";}
 
   void makePlots();
-  void calcAsymmetryBinByBin(int anaChoice=1); //Calculates the raw asymmetry bin by bin to be written to file and plotted
-  void calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice=1); //Returns total raw asymmetry over energy window
-  void calcSuperSum(int anaChoice=1); //Calculates the super sum over the entire octet for spectral comparisons
+  void calcAsymmetryBinByBin(); //Calculates the raw asymmetry bin by bin to be written to file and plotted
+  void calcTotalAsymmetry(double enWinLow, double enWinHigh); //Returns total raw asymmetry over energy window
+  void calcSuperSum(); //Calculates the super sum over the entire octet for spectral comparisons
   void writeAsymToFile();
   void writeSuperSumToFile();
   double returnTotalAsymmetry_PairA0() {return totalAsymmetryA0;}

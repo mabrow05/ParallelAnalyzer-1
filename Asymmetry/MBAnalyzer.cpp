@@ -255,7 +255,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
 	  (isQuartet?("Quartet_"+quartetName[q]+"_"):isPair?("Pair_"+quartetName[q]+itos(p)+"_"):"")+itos((int)Elow)+"-"+itos((int)Ehigh) + ".dat";
 	//std::cout << path << std::endl;
 
-	ifstream infile(path.c_str());  
+	std::ifstream infile(path.c_str());  
    
 	if (infile.is_open()) {
 	  infile >> txt >> Asym >> AsymError;
@@ -322,7 +322,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   std::string pdfFile = outFile+std::string(".pdf");
   std::string txtFile = outFile+std::string(".txt");
 
-  ofstream asymFile(txtFile.c_str());
+  std::ofstream asymFile(txtFile.c_str());
   
   TCanvas *c1 = new TCanvas("c1", "c1", 1000., 1400.);
   c1->Divide(1,4);
@@ -358,7 +358,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, I
   asymFile << "RawA_oct_by_oct\t" << fit->GetParameter(0) << "\t" << fit->GetParError(0) << std::endl;
 
   //Writing to file the raw asymmetries of each octet
-  ofstream octval("octvalUK.dat");
+  std::ofstream octval("octvalUK.dat");
   octval << "oct" << "\t" 
 	 << "Asymm" << "\t" 
 	 << "Error" << "\t" 
@@ -489,7 +489,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 
     if (std::find(badOct.begin(), badOct.end(),octet) != badOct.end()) {  continue; } //Checking if octet should be ignored for data quality reasons
 
-    ifstream infile;
+    std::ifstream infile;
 
     if (groupType=="Octet")
     {
@@ -583,7 +583,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	
       gOct->Fit("fitOct","R");
 	
-      ofstream ofile(outfilePath.c_str());
+      std::ofstream ofile(outfilePath.c_str());
       ofile << "RawA_SR " << -(fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
 	
       gOct->Draw("AP");
@@ -719,7 +719,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	
 	gOct->Fit("fitOct","R");
 	
-	ofstream ofile(outfilePath[quart].c_str());
+	std::ofstream ofile(outfilePath[quart].c_str());
 	ofile << "RawA_SR " << -(fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
       
 	gOct->Draw("AP");
@@ -859,7 +859,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	  
 	  gOct->Fit("fitOct","R");
 	  
-	  ofstream ofile(outfilePath[quart].c_str());
+	  std::ofstream ofile(outfilePath[quart].c_str());
 	  ofile << "RawA_SR " << -(fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
 	  
 	  gOct->Draw("AP");
@@ -924,9 +924,9 @@ void ProduceRawAsymmetries(Int_t octBegin, Int_t octEnd, Int_t anaChoice, Double
 
     
     //unsigned int octetNum = 1;
-  ofstream octAsym(octetFile.c_str());
-  ofstream quartAsym(quartetFile.c_str());
-  ofstream pairAsym(pairFile.c_str());
+  std::ofstream octAsym(octetFile.c_str());
+  std::ofstream quartAsym(quartetFile.c_str());
+  std::ofstream pairAsym(pairFile.c_str());
  
   Int_t numPair=0, numQuart=0;
   std::vector < std::vector <Double_t > > octetRawAsymAndError;
@@ -1179,7 +1179,7 @@ std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, Int_t a
 
   if ( corr!=std::string("DeltaExpOnly") && corr!=std::string("AllCorr") ) return syst;
   
-  ifstream infile(filename.Data());
+  std::ifstream infile(filename.Data());
 
   if (!infile.is_open()) throw "Couldn't open file in LoadOctetSystematics!";
 
