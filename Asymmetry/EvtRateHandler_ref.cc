@@ -410,9 +410,9 @@ void SimEvtRateHandler::dataReader() {
 	  if ( Type0 && Type==0 ) hisCounts[Side]->Fill(Erecon);
 	  //Type1
 	  if ( Type1 && Type==1 ) hisCounts[Side]->Fill(Erecon);
-	  //Type0
+	  //Type2
 	  if ( Type2 && Type==2 ) hisCounts[Side]->Fill(Erecon);
-	  //Type0
+	  //Type3
 	  if ( Type3 && Type==3 ) hisCounts[Side]->Fill(Erecon); 
 	  
 	}

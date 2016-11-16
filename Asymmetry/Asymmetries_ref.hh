@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include "EvtRateHandler_ref.hh"
+
 
 // base class for loading octet information
 class AsymmetryBase {
