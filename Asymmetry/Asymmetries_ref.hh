@@ -4,8 +4,7 @@
 #include <map>
 #include <string>
 
-#include "SQLinterface.hh"
-#include "EvtRateHandler.hh"
+#include "EvtRateHandler_ref.hh"
 
 // base class for loading octet information
 class AsymmetryBase {
@@ -25,7 +24,7 @@ public:
   std::vector <int> makeRunVec(std::string runType); // returns a vector of the runs associated with a run t
   bool checkIfBetaRun(std::string type); //Checks if run of type is a beta run or not
   void writeRatesToFile(); //For now this only uses type0 evts
-  int getCurrentAnaChoice() {return analysisChoice;}
+  std::string getCurrentAnaChoice() {return analysisChoice;}
   std::vector < std::vector<double> > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
   std::vector < std::vector<double> > returnBGsubtractedRateError(std::string runType);
   std::vector < double > returnRunLength(std::string runType); //Returns both beta and BG run length

@@ -3,6 +3,7 @@ Defines different types of Asymmetries to be calculated within an Octet.
 ppair, quartet, octet
 */
 
+#include "EvtRateHandler_ref.hh"
 #include "Asymmetries_ref.hh"
 #include "MBUtils.hh"
 
@@ -96,8 +97,8 @@ int AsymmetryBase::getBGrunNumber(std::string type) {
     }
   }
 
-  std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << run << "!\n";
-  throw "FAILED IN getBGrun(int run)";
+  std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << type << "!\n";
+  throw "FAILED IN getBGrunNumber()";
 };
 
 
@@ -226,8 +227,8 @@ std::vector <int> AsymmetryBase::makeRunVec(std::string rnType) {
    
   for ( auto& it: runType ) {
 
-    if ( it==rnType ) {
-      if ( BGrunReplace.find(it.first)==BGrunReplace.end() ) rns.push_back(it->first);
+    if ( it.second==rnType ) {
+      if ( BGrunReplace.find(it.first)==BGrunReplace.end() ) rns.push_back(it.first);
       else rns.push_back(BGrunReplace[it.first]);
     }
   }
@@ -236,8 +237,8 @@ std::vector <int> AsymmetryBase::makeRunVec(std::string rnType) {
 
   else {
 
-    std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << run << "!\n";
-    throw "FAILED IN getBGrun(int run)";
+    std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << rnType << "!\n";
+    throw "FAILED IN makeRunVec()";
   }
 };
 
@@ -258,84 +259,84 @@ void AsymmetryBase::loadRates() {
 
       typePrevRun.push_back(it->second);
 
-      std::vector fg_runs = makeRunVec(it->second);
-      std::vector bg_runs = makeRunVec(getBGrunLabel(it->second));
+      std::vector <int> fg_runs = makeRunVec(it->second);
+      std::vector <int> bg_runs = makeRunVec(getBGrunLabel(it->second));
 
       bgSubtr = new BGSubtractedRate(fg_runs,bg_runs,analysisChoice,energyBinWidth,fiducialCut,UKdata,Simulation, UNBLIND); //UNBLIND defaults to false
 
       std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
-		<< getBGrun(it->first) << ") \n";
+		<< getBGrunNumber(it->first) << ") \n";
 
       bgSubtr->calcBGSubtRates();
 	
       if ( it->second=="A2" ) {
-	A2[0] = bgSubtr->returnBGSubtrRate(0);
-	A2err[0] = bgSubtr->returnBGSubtrRateError(0);
-	A2[1] = bgSubtr->returnBGSubtrRate(1);
-	A2err[1] = bgSubtr->returnBGSubtrRateError(1);
+	A2[0] = bgSubtr->returnBGSubtRate(0);
+	A2err[0] = bgSubtr->returnBGSubtRateError(0);
+	A2[1] = bgSubtr->returnBGSubtRate(1);
+	A2err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	A2len[0] = bgSubtr->returnRunLengths(true);
 	A2len[1] = bgSubtr->returnRunLengths(false);
       }
-      if ( it->second=="A5" ) {
-	A5[0] = bgSubtr->returnBGSubtrRate(0);
-	A5err[0] = bgSubtr->returnBGSubtrRateError(0);
-	A5[1] = bgSubtr->returnBGSubtrRate(1);
-	A5err[1] = bgSubtr->returnBGSubtrRateError(1);
+      else if ( it->second=="A5" ) {
+	A5[0] = bgSubtr->returnBGSubtRate(0);
+	A5err[0] = bgSubtr->returnBGSubtRateError(0);
+	A5[1] = bgSubtr->returnBGSubtRate(1);
+	A5err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	A5len[0] = bgSubtr->returnRunLengths(true);
 	A5len[1] = bgSubtr->returnRunLengths(false);
       }
-      if ( it->second=="A7" ) {
-	A7[0] = bgSubtr->returnBGSubtrRate(0);
-	A7err[0] = bgSubtr->returnBGSubtrRateError(0);
-	A7[1] = bgSubtr->returnBGSubtrRate(1);
-	A7err[1] = bgSubtr->returnBGSubtrRateError(1);
+      else if ( it->second=="A7" ) {
+	A7[0] = bgSubtr->returnBGSubtRate(0);
+	A7err[0] = bgSubtr->returnBGSubtRateError(0);
+	A7[1] = bgSubtr->returnBGSubtRate(1);
+	A7err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	A7len[0] = bgSubtr->returnRunLengths(true);
 	A7len[1] = bgSubtr->returnRunLengths(false);
       }
-      if ( it->second=="A10" ) {
-	A10[0] = bgSubtr->returnBGSubtrRate(0);
-	A10err[0] = bgSubtr->returnBGSubtrRateError(0);
-	A10[1] = bgSubtr->returnBGSubtrRate(1);
-	A10err[1] = bgSubtr->returnBGSubtrRateError(1);
+      else if ( it->second=="A10" ) {
+	A10[0] = bgSubtr->returnBGSubtRate(0);
+	A10err[0] = bgSubtr->returnBGSubtRateError(0);
+	A10[1] = bgSubtr->returnBGSubtRate(1);
+	A10err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	A10len[0] = bgSubtr->returnRunLengths(true);
 	A10len[1] = bgSubtr->returnRunLengths(false);
       }
-      if ( it->second=="B2" ) {
-	B2[0] = bgSubtr->returnBGSubtrRate(0);
-	B2err[0] = bgSubtr->returnBGSubtrRateError(0);
-	B2[1] = bgSubtr->returnBGSubtrRate(1);
-	B2err[1] = bgSubtr->returnBGSubtrRateError(1);
+      else if ( it->second=="B2" ) {
+	B2[0] = bgSubtr->returnBGSubtRate(0);
+	B2err[0] = bgSubtr->returnBGSubtRateError(0);
+	B2[1] = bgSubtr->returnBGSubtRate(1);
+	B2err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	B2len[0] = bgSubtr->returnRunLengths(true);
 	B2len[1] = bgSubtr->returnRunLengths(false);
       }
-      if ( it->second=="B5" ) {
-	B5[0] = bgSubtr->returnBGSubtrRate(0);
-	B5err[0] = bgSubtr->returnBGSubtrRateError(0);
-	B5[1] = bgSubtr->returnBGSubtrRate(1);
-	B5err[1] = bgSubtr->returnBGSubtrRateError(1);
+      else if ( it->second=="B5" ) {
+	B5[0] = bgSubtr->returnBGSubtRate(0);
+	B5err[0] = bgSubtr->returnBGSubtRateError(0);
+	B5[1] = bgSubtr->returnBGSubtRate(1);
+	B5err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	B5len[0] = bgSubtr->returnRunLengths(true);
 	B5len[1] = bgSubtr->returnRunLengths(false);
       }
-      if ( it->second=="B7" ) {
-	B7[0] = bgSubtr->returnBGSubtrRate(0);
-	B7err[0] = bgSubtr->returnBGSubtrRateError(0);
-	B7[1] = bgSubtr->returnBGSubtrRate(1);
-	B7err[1] = bgSubtr->returnBGSubtrRateError(1);
+      else if ( it->second=="B7" ) {
+	B7[0] = bgSubtr->returnBGSubtRate(0);
+	B7err[0] = bgSubtr->returnBGSubtRateError(0);
+	B7[1] = bgSubtr->returnBGSubtRate(1);
+	B7err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	B7len[0] = bgSubtr->returnRunLengths(true);
 	B7len[1] = bgSubtr->returnRunLengths(false);
       }
-      if ( it->second=="B10" ) {
-	B10[0] = bgSubtr->returnBGSubtrRate(0);
-	B10err[0] = bgSubtr->returnBGSubtrRateError(0);
-	B10[1] = bgSubtr->returnBGSubtrRate(1);
-	B10err[1] = bgSubtr->returnBGSubtrRateError(1);
+      else if ( it->second=="B10" ) {
+	B10[0] = bgSubtr->returnBGSubtRate(0);
+	B10err[0] = bgSubtr->returnBGSubtRateError(0);
+	B10[1] = bgSubtr->returnBGSubtRate(1);
+	B10err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
 	B10len[0] = bgSubtr->returnRunLengths(true);
 	B10len[1] = bgSubtr->returnRunLengths(false);
@@ -384,7 +385,7 @@ std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateError(s
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-OctetAsymmetry::OctetAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetry(0.), totalAsymmetryError(0.), boolSuperSum(false), boolAsymmetry(false) {
+OctetAsymmetry::OctetAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetry(0.), totalAsymmetryError(0.), boolSuperSum(false), boolAsymmetry(false) {
   if (isFullOctet()) {
     //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
     asymmetry.resize(numEnBins,0.);
@@ -671,7 +672,7 @@ void OctetAsymmetry::writeSuperSumToFile() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-QuartetAsymmetry::QuartetAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetryA(0.), totalAsymmetryErrorA(0.), totalAsymmetryB(0.), totalAsymmetryErrorB(0.), boolSuperSum(false), boolAsymmetry(false) {
+QuartetAsymmetry::QuartetAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetryA(0.), totalAsymmetryErrorA(0.), totalAsymmetryB(0.), totalAsymmetryErrorB(0.), boolSuperSum(false), boolAsymmetry(false) {
 
   isGoodQuartet.push_back(isFullQuartet(0));
   isGoodQuartet.push_back(isFullQuartet(1));
@@ -713,23 +714,38 @@ void QuartetAsymmetry::calcAsymmetryBinByBin() {
       for (unsigned int side=0; side<2; side++) {
 	double weightsum=0.;
 	
-	// AFP Off
-	sfOFF[side] = (A2err[side][bin]>0.?power(1./A2err[side][bin],2)*A2[side][bin]:0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2)*A10[side][bin]:0.);
-	weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.);
+	if ( A2[side][bin]>0. && A10[side][bin]>0. ) {
+	  
+	  sfOFF[side] = ( A2[side][bin]/power(A2err[side][bin],2) +
+			  A10[side][bin]/power(A10err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(A2err[side][bin],2) + 
+			1./power(A10err[side][bin],2) );
+	  
+	}
 	
-	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
+	else weightsum = 0.;
+	
+	sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
-	weightsum=0.;
-	
-	// AFP ON
-	sfON[side] = (A5err[side][bin]>0.?power(1./A5err[side][bin],2)*A5[side][bin]:0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2)*A7[side][bin]:0.);
-	weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.);
-	
-	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
+	if ( A5[side][bin]>0. && A7[side][bin]>0. ) {
+	  
+	  sfON[side] = ( A5[side][bin]/power(A5err[side][bin],2) +
+			 A7[side][bin]/power(A7err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(A5err[side][bin],2) + 
+			1./power(A7err[side][bin],2) );
+	  
+	  
+	}
+	else weightsum = 0.;
+	//if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
+	sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
       }
+    
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
 	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
@@ -740,9 +756,12 @@ void QuartetAsymmetry::calcAsymmetryBinByBin() {
 	asymmetry[0][bin] = 0.;
 	asymmetryError[0][bin] = 0.;
       }
+      
     }
   }
-
+	
+  
+	
   // B type runs
   if (isGoodQuartet[1]) {
     for (unsigned int bin=0; bin<asymmetry[1].size(); bin++) {
@@ -755,26 +774,51 @@ void QuartetAsymmetry::calcAsymmetryBinByBin() {
 	sfOFF[side]=0.;
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
-	sfON_err[side]=0.;
-
-	// AFP Off
-	sfOFF[side] = (B5err[side][bin]>0.?power(1./B5err[side][bin],2)*B5[side][bin]:0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2)*B7[side][bin]:0.);
-	weightsum = (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
+	sfON_err[side]=0.;	
 	
-	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
+	if ( B5[side][bin]>0. && B7[side][bin]>0. ) {
+	  
+	  sfOFF[side] = ( B5[side][bin]/power(B5err[side][bin],2) +
+			  B7[side][bin]/power(B7err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(B5err[side][bin],2) + 
+			1./power(B7err[side][bin],2) );
+	  
+	}
+	else weightsum = 0.;
+	
+	sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
-	weightsum=0.;
 	
-	// AFP ON
-	sfON[side] = (B2err[side][bin]>0.?power(1./B2err[side][bin],2)*B2[side][bin]:0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2)*B10[side][bin]:0.);
-
-	weightsum = (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
-	
-	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
+	if ( B2[side][bin]>0. && B10[side][bin]>0. ) {
+	  
+	  sfON[side] = ( B2[side][bin]/power(B2err[side][bin],2) +
+			 B10[side][bin]/power(B10err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(B2err[side][bin],2) + 
+			1./power(B10err[side][bin],2) );
+	  
+	}
+	else weightsum = 0.;
+	//if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
+	sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
+	
+	if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
+	  R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
+	  deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	  asymmetry[0][bin] = (1.-sqrt(R))/(1+sqrt(R));
+	  asymmetryError[0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
+	}
+	else {
+	  asymmetry[0][bin] = 0.;
+	  asymmetryError[0][bin] = 0.;
+	}
       }
+    
+    
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
 	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
@@ -787,6 +831,7 @@ void QuartetAsymmetry::calcAsymmetryBinByBin() {
       }
     }
   }
+  
   boolAsymmetry = true;
 };
 
@@ -1090,7 +1135,7 @@ void QuartetAsymmetry::writeSuperSumToFile() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-PairAsymmetry::PairAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetryA0(0.), totalAsymmetryErrorA0(0.), totalAsymmetryB0(0.), totalAsymmetryErrorB0(0.), totalAsymmetryA1(0.), totalAsymmetryErrorA1(0.), totalAsymmetryB1(0.), totalAsymmetryErrorB1(0.), boolSuperSum(false), boolAsymmetry(false) {
+PairAsymmetry::PairAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetryA0(0.), totalAsymmetryErrorA0(0.), totalAsymmetryB0(0.), totalAsymmetryErrorB0(0.), totalAsymmetryA1(0.), totalAsymmetryErrorA1(0.), totalAsymmetryB1(0.), totalAsymmetryErrorB1(0.), boolSuperSum(false), boolAsymmetry(false) {
 
   isGoodPair.resize(2,std::vector <bool> (2));
 

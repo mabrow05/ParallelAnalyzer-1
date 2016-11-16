@@ -15,12 +15,7 @@
 #include <string>
 
 //Function to separate type 2/3 based on energy cut on Wirechamber energy
-int separate23(int side, double mwpcEn) {
-  int type = 2;
-  if (side==0)  type = ( mwpcEn>4.14 ) ? 3 : 2;  
-  if (side==1)  type = ( mwpcEn>4.14 ) ? 3 : 2;
-  return type;
-};
+//int separate23(int side, double mwpcEn); 
 
 
 class EvtRateHandler { // base clase for reading in runs and calculating rates and errors
@@ -36,6 +31,8 @@ public:
 
   double returnRunLength(int side) { return side==0 ? totalRunLengthE : totalRunLengthW; }       // Return the length of the run (s)
 
+  void CalcRates();       // Calculate the rates and use the reference spectra to fill in errors if necessary
+
   
   
   std::vector <double> getRateVectors(int side) { 
@@ -48,9 +45,8 @@ public:
 
 protected:
   virtual void dataReader();       //Read in data and fill histograms
-  void CalcRates();       // Calculate the rates and use the reference spectra to fill in errors if necessary
   void loadReferenceSpectra(); //Loads the reference rates from the proper files
-  double referenceError(double en);       // goes to the proper reference spectra and returns the error
+  double referenceError(int side, int bin);       // goes to the proper reference spectra and returns the error
 
   std::vector <int> runs;       // runs
   bool FG;        // holds whether the run is a Foreground or a background run
@@ -88,7 +84,7 @@ protected:
  
 class SimEvtRateHandler: public EvtRateHandler {
 public:
-  SimEvtRateHandler(std::vector <int> run, bool fg, double enBinWidth=10., double fidCut=100., bool unblind=false): EvtRateHandler(run, fg, enBinWidth, fidCut, true, unblind) {}
+  SimEvtRateHandler(std::vector <int> run, bool fg, std::string anaCh, double enBinWidth=10., double fidCut=100., bool unblind=false): EvtRateHandler(run, fg, anaCh, enBinWidth, fidCut, true, unblind) {}
 
 protected:
   void dataReader();       //Different set of variables for reverse calibrated simulated data

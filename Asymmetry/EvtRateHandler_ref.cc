@@ -16,7 +16,15 @@ simulation data
 #include <TString.h>
 
 
-EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth=10., double fidCut=100., bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata), pol(0), unblinded(ub) {
+int separate23(int side, double mwpcEn) {
+  int type = 2;
+  if (side==0)  type = ( mwpcEn>4.14 ) ? 3 : 2;  
+  if (side==1)  type = ( mwpcEn>4.14 ) ? 3 : 2;
+  return type;
+};
+
+
+EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
 
   numEnergyBins = (int)(1200./enBinWidth);
 
@@ -90,7 +98,7 @@ int EvtRateHandler::polarization(int run) {
     if ( rn == run ) { runFound = true; infile.close(); continue; }
   }
 
-  if ( !runFound ) throw "You didn't pick a run in an octet..."
+  if ( !runFound ) throw "You didn't pick a run in an octet...";
   //Flipper OFF is p = -1
   if ( type=="A1" || type=="A2" || type=="A10" || type=="A12" || type=="B4" || type=="B5" || type=="B7" || type=="B9" ) return -1;
   else if ( type=="B1" || type=="B2" || type=="B10" || type=="B12" || type=="A4" || type=="A5" || type=="A7" || type=="A9" ) return 1;
@@ -113,7 +121,7 @@ void EvtRateHandler::loadReferenceSpectra() {
 
   std::ifstream infile(filename.Data());
 
-  string label;
+  std::string label;
   infile >> label >> totalRefTime;
 
   double binMid=0., eastRef=0., eastErr=0., westRef=0., westErr=0.;
@@ -121,8 +129,8 @@ void EvtRateHandler::loadReferenceSpectra() {
 
   while ( infile >> binMid >> eastRef >> eastErr >> westRef >> westErr ) {
 
-    refSpectraE[i] = eastRef;
-    refSpectraW[i] = westRef;
+    refSpectraE[inc] = eastRef;
+    refSpectraW[inc] = westRef;
 
     totalRefCountsE += eastRef;
     totalRefCountsW += westRef;
@@ -137,9 +145,9 @@ void EvtRateHandler::loadReferenceSpectra() {
 
 double EvtRateHandler::referenceError(int side, int bin) {
 
-  if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[i] * ( totalCountsE / totalRefCountsE ) ) : 0.;
-  else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[i] * ( totalCountsW / totalRefCountsW ) ) : 0.;
-
+  if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[bin] * ( totalCountsE / totalRefCountsE ) ) : 0.;
+  else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[bin] * ( totalCountsW / totalRefCountsW ) ) : 0.;
+  else throw "BAD SIDE GIVEN TO referenceError(int side, int bin)";
 };
 
 void EvtRateHandler::CalcRates() {
@@ -168,29 +176,19 @@ void EvtRateHandler::CalcRates() {
 };
 
 
-
-TH1D EvtRateHandler::getCountHist(int side, int evtType) {
-  if (evtType==0 || evtType==1 || evtType==2 || evtType==3) {
-    if (side==0) return *hisE[evtType];
-    else if (side==1) return *hisW[evtType];
-    else throw "Bad value for side thrown in getCountHist";
-  }
-  else throw "Bad Evt type when trying to get count hist";
-};
-
 void EvtRateHandler::dataReader() {
 
   hisCounts[0] = new TH1D("East Event Hist","EastCounts",numEnergyBins,0.,1200.);
   hisCounts[1] = new TH1D("West Event Hist","WestCounts",numEnergyBins,0.,1200.);
 
-  bool separate23 = false;
+  bool sep23 = false;
 
   // 2/3 separation
   if ( analysisChoice==std::string("C") ||
        analysisChoice==std::string("H") ||
        analysisChoice==std::string("J") ||
        analysisChoice==std::string("K") )
-    separate23 = true;
+    sep23 = true;
 
   //Event types
   bool Type0=false, Type1=false, Type2=false, Type3=false;
@@ -283,7 +281,7 @@ void EvtRateHandler::dataReader() {
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  
 	  
-	  if ( separate23 ) {
+	  if ( sep23 ) {
 	    if (Erecon>0. && Type==2) {
 	      
 	      if (Side==0) {
@@ -309,13 +307,14 @@ void EvtRateHandler::dataReader() {
 	}
       }
     }
+    input->Close();
   }
 
   totalCountsE = (double) hisCounts[0]->Integral();
   totalCountsW = (double) hisCounts[1]->Integral();
     
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
-  input->Close();
+  
   if (input) delete input;
   
 };
@@ -325,14 +324,14 @@ void SimEvtRateHandler::dataReader() {
   hisCounts[0] = new TH1D("East Event Hist","EastCounts",numEnergyBins,0.,1200.);
   hisCounts[1] = new TH1D("West Event Hist","WestCounts",numEnergyBins,0.,1200.);
 
-  bool separate23 = false;
+  bool sep23 = false;
 
   // 2/3 separation
   if ( analysisChoice==std::string("C") ||
        analysisChoice==std::string("H") ||
        analysisChoice==std::string("J") ||
        analysisChoice==std::string("K") )
-    separate23 = true;
+    sep23 = true;
 
   //Event types
   bool Type0=false, Type1=false, Type2=false, Type3=false;
@@ -342,6 +341,9 @@ void SimEvtRateHandler::dataReader() {
   if ( analysisChoice=="A" || analysisChoice=="C" || analysisChoice=="G" || analysisChoice=="H" || analysisChoice=="K") Type3 = true;
   
   char temp[100];
+  std::string infile;
+  TFile *input;
+  TTree *Tin;
 
   double TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
   int PID, Side, Type;
@@ -353,9 +355,9 @@ void SimEvtRateHandler::dataReader() {
   for ( unsigned int i=0; i<runs.size(); i++ ) {
 
     sprintf(temp,"%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runs[i]);
-    std::string infile = std::string(temp);
-    TFile *input = new TFile(infile.c_str(), "READ");
-    TTree *Tin = (TTree*)input->Get("revCalSim");
+    infile = std::string(temp);
+    input = new TFile(infile.c_str(), "READ");
+    Tin = (TTree*)input->Get("revCalSim");
     //std::cout << "made it here in dataReader\n";
     //Set branch addresses
     
@@ -390,7 +392,7 @@ void SimEvtRateHandler::dataReader() {
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  
 	  
-	  if ( separate23 ) {
+	  if ( sep23 ) {
 	    if (Erecon>0. && Type==2) {
 	      
 	      if (Side==0) {
@@ -416,35 +418,35 @@ void SimEvtRateHandler::dataReader() {
 	}
       }
     }
+    input->Close();
   }
   totalCountsE = (double) hisCounts[0]->Integral();
   totalCountsW = (double) hisCounts[1]->Integral();
     
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
-  input->Close();
+
   if (input) delete input;
   
 };
 
 
 BGSubtractedRate::BGSubtractedRate(std::vector <int> fgruns, std::vector <int> bgruns, std::string anaCh,
-				   double enBin, double fidCut, bool ukdata, bool sim, bool unblind) :
-   FGruns(fgruns), BGruns(bgruns), analysisChoice(anaCh), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim), UNBLIND(unblind) {
+				   double enBin, double fidCut, bool ukdata, bool sim, bool unblind) : FGruns(fgruns), BGruns(bgruns), analysisChoice(anaCh), EnergyBinWidth(enBin), fiducialCut(fidCut), UKdata(ukdata), Simulation(sim), UNBLIND(unblind) {
   
   int numBins = int(1200./double(EnergyBinWidth));
 
-  BetaRateE.resize(numBins,0.));
-  BGRateE.resize(numBins,0.));
-  FinalRateE.resize(numBins,0.));
-  BetaRateW.resize(numBins,0.));
-  BGRateW.resize(numBins,0.));
-  FinalRateW.resize(numBins,0.));
-  BetaRateErrorE.resize(numBins,0.));
-  BGRateErrorE.resize(numBins,0.));
-  FinalRateErrorE.resize(numBins,0.));
-  BetaRateErrorW.resize(numBins,0.));
-  BGRateErrorW.resize(numBins,0.));
-  FinalRateErrorW.resize(numBins,0.));
+  BetaRateE.resize(numBins,0.);
+  BGRateE.resize(numBins,0.);
+  FinalRateE.resize(numBins,0.);
+  BetaRateW.resize(numBins,0.);
+  BGRateW.resize(numBins,0.);
+  FinalRateW.resize(numBins,0.);
+  BetaRateErrorE.resize(numBins,0.);
+  BGRateErrorE.resize(numBins,0.);
+  FinalRateErrorE.resize(numBins,0.);
+  BetaRateErrorW.resize(numBins,0.);
+  BGRateErrorW.resize(numBins,0.);
+  FinalRateErrorW.resize(numBins,0.);
 
   runLengthBeta.resize(2,0.);
   runLengthBG.resize(2,0.);
@@ -455,7 +457,7 @@ void BGSubtractedRate::calcBGSubtRates() {
 
   if (Simulation) 
     {
-      SimEvtRateHandler *evt = new SimEvtRateHandler(FGruns, true, EnergyBinWidth, fiducialCut, UNBLIND);
+      SimEvtRateHandler *evt = new SimEvtRateHandler(FGruns, true, analysisChoice, EnergyBinWidth, fiducialCut, UNBLIND);
       evt->CalcRates();
       FinalRateE = evt->getRateVectors(0);
       FinalRateW = evt->getRateVectors(1);
@@ -496,7 +498,7 @@ std::vector<double > BGSubtractedRate::returnBGSubtRateError(int side) {
 
 void BGSubtractedRate::LoadRatesByBin() {
   
-  EvtRateHandler *evtBG = new EvtRateHandler(BGruns, false, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
+  EvtRateHandler *evtBG = new EvtRateHandler(BGruns, false, analysisChoice, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
   evtBG->CalcRates();
   BGRateE = evtBG->getRateVectors(0);
   BGRateErrorE = evtBG->getRateErrors(0);
@@ -506,7 +508,7 @@ void BGSubtractedRate::LoadRatesByBin() {
   runLengthBG[1] = evtBG->returnRunLength(1);
   delete evtBG;
     
-  EvtRateHandler *evt = new EvtRateHandler(FGruns, true, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
+  EvtRateHandler *evt = new EvtRateHandler(FGruns, true, analysisChoice, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
   evt->CalcRates();
   BetaRateE = evt->getRateVectors(0);
   BetaRateErrorE = evt->getRateErrors(0);
@@ -527,7 +529,7 @@ void BGSubtractedRate::CalcFinalRate()  {
   std::cout << "Calculating Final Rates for run " << FGruns[0] << std::endl;
   
   if (BetaRateE.size()==BGRateE.size()) {
-    FinalRateE.resize(4,std::vector<double>(BetaRateE.size(),0.));
+    FinalRateE.resize(BetaRateE.size(),0.);
     for (unsigned int i=0; i<BetaRateE.size(); i++)
       {
 	FinalRateE[i] = BetaRateE[i]-BGRateE[i];
@@ -538,7 +540,7 @@ void BGSubtractedRate::CalcFinalRate()  {
   else throw "Number of energy bins do not agree between Beta and BG runs. Can't calculate final rate!";
   
   if (BetaRateW.size()==BGRateW.size()) {
-    FinalRateW.resize(4,std::vector<double>(BetaRateW.size(),0.));
+    FinalRateW.resize(BetaRateW.size(),0.);
     for (unsigned int i=0; i<BetaRateW.size(); i++)
       {
 	FinalRateW[i] = BetaRateW[i]-BGRateW[i];
