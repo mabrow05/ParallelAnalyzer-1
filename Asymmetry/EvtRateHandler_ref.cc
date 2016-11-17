@@ -123,6 +123,10 @@ void EvtRateHandler::loadReferenceSpectra() {
 
   std::string label;
   infile >> label >> totalRefTime;
+  infile >> label >> totalRefTimeE;
+  infile >> label >> totalRefTimeW;
+
+  if ( unblinded ) totalRefTimeE = totalRefTimeW = totalRefTime;
 
   double binMid=0., eastRef=0., eastErr=0., westRef=0., westErr=0.;
   int inc = 0;
@@ -145,8 +149,8 @@ void EvtRateHandler::loadReferenceSpectra() {
 
 double EvtRateHandler::referenceError(int side, int bin) {
 
-  if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[bin] ) * ( totalCountsE / totalRefCountsE )  : 0.;
-  else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[bin] ) * ( totalCountsW / totalRefCountsW )  : 0.;
+  if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[bin] ) * ( totalRunLengthE / totalRefTimeE )  : 0.;
+  else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[bin] ) * ( totalRunLengthW / totalRefTimeW )  : 0.;
   else throw "BAD SIDE GIVEN TO referenceError(int side, int bin)";
 };
 

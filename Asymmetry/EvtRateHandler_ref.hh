@@ -74,7 +74,9 @@ protected:
 
   std::vector <double> refSpectraE;       //Stores the reference runs event rate per bin
   std::vector <double> refSpectraW;       //Stores the reference runs event rate per bin
-  double totalRefTime;
+  double totalRefTime;       //UNBLINDED total reference time
+  double totalRefTimeE;       // BLINDED time
+  double totalRefTimeW;       // Blinded time
   double totalRefCountsE;
   double totalRefCountsW;
 
