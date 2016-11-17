@@ -232,6 +232,9 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     totalBLINDTimeOFF[0] += TimeE;
     totalBLINDTimeOFF[1] += TimeW;
 
+    double r2E = 0.; //position of event squared
+    double r2W = 0.;
+    
     for (unsigned int n=0 ; n<nevents ; n++ ) {
       
       
@@ -259,9 +262,10 @@ void doBackgroundSpectra (int octetMin, int octetMax)
       
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	double r2=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 
-	if ( r2<(fiducialCut*fiducialCut) )	  {
+	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
 	  if (type==0) histOFF[0][side]->Fill(Erecon);
@@ -331,11 +335,13 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     totalBLINDTimeON[0] += TimeE;
     totalBLINDTimeON[1] += TimeW;
 
+    double r2E = 0.; //position of event squared
+    double r2W = 0.;
+    
     for (unsigned int n=0 ; n<nevents ; n++ ) {
       
       
       Tin->GetEvent(n);
-
 
       //Type 2/3 separation
       /*if (Erecon>0. && type==2) {
@@ -358,9 +364,11 @@ void doBackgroundSpectra (int octetMin, int octetMax)
       
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	double r2=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
-
-	if ( r2<(fiducialCut*fiducialCut) )	  {
+	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+	
+	
+	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
 	  if (type==0) histON[0][side]->Fill(Erecon);

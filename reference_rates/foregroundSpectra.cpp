@@ -36,6 +36,9 @@ std::vector <Int_t> fgRuns_SFon; //list of fg runs with spin flipper on
 std::vector <Int_t> fgRuns_SFoff; //list of fg runs with spin flipper off
 Double_t totalTimeON=0.;
 Double_t totalTimeOFF=0.;
+Double_t totalBLINDTimeON[2]={0.,0.};
+Double_t totalBLINDTimeOFF[2]={0.,0.};
+
 TString anaChoice[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 std::vector < std::vector < std::vector <Double_t> > >  sfON(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
@@ -72,8 +75,14 @@ void writeRatesToFile(int octMin, int octMax) {
     sf_ON << std::setprecision(9);
     sf_OFF << std::setprecision(9);
 
-    sf_ON << "totalTime\t" << totalTimeON << std::endl;
-    sf_OFF << "totalTime\t" << totalTimeOFF << std::endl;
+    sf_ON << "totalTime\t" << totalTimeON << std::endl 
+ 	  << "totalTimeE\t" << totalBLINDTimeON[0] << std::endl
+	  << "totalTimeW\t" << totalBLINDTimeON[1] << std::endl;
+    
+    sf_OFF << "totalTime\t" << totalTimeOFF << std::endl
+	   << "totalTimeE\t" << totalBLINDTimeOFF[0] << std::endl
+	   << "totalTimeW\t" << totalBLINDTimeOFF[1] << std::endl;
+
     
     for (int bin=0; bin<120; bin++) {
 
@@ -221,6 +230,11 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
     Tin->GetEvent(nevents-1);
     totalTimeOFF += Time;
+    totalBLINDTimeOFF[0] += TimeE;
+    totalBLINDTimeOFF[1] += TimeW;
+
+    double r2E = 0.; //position of event squared
+    double r2W = 0.;
 
     for (unsigned int n=0 ; n<nevents ; n++ ) {
       
@@ -249,9 +263,10 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	double r2=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 
-	if ( r2<(fiducialCut*fiducialCut) )	  {
+	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
 	  if (type==0) histOFF[0][side]->Fill(Erecon);
@@ -318,6 +333,11 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
     Tin->GetEvent(nevents-1);
     totalTimeON += Time;
+    totalBLINDTimeON[0] += TimeE;
+    totalBLINDTimeON[1] += TimeW;
+
+    double r2E = 0.; //position of event squared
+    double r2W = 0.;
 
     for (unsigned int n=0 ; n<nevents ; n++ ) {
       
@@ -346,9 +366,11 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	double r2=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
-
-	if ( r2<(fiducialCut*fiducialCut) )	  {
+	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+	
+	
+	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
 	  if (type==0) histON[0][side]->Fill(Erecon);
