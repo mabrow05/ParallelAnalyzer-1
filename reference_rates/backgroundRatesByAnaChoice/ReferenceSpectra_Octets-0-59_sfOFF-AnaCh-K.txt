@@ -1,4 +1,6 @@
 totalTime	111109.06
+totalTimeE	111305.51
+totalTimeW	111079.185
 5		0		0		0		0
 15		0		0		0		0
 25		0		0		0		0
