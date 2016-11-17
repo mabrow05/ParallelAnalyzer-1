@@ -326,10 +326,18 @@ void EvtRateHandler::dataReader() {
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
 
   // Output the integrated crap to file
-  std::ofstream integrals("integrals.txt",std::ofstream::app);
-  integrals << runs[0] << "\t" << hisCounts[0]->Integral(18,78)/totalRunLengthE << "\t" << hisCounts[1]->Integral(18,78)/totalRunLengthW << std::endl;
+  std::ofstream integralsT("integrals_timeNorm.txt",std::ofstream::app);
+  integralsT << runs[0] << "\t\tE = " << hisCounts[0]->Integral(18,78)/totalRunLengthE 
+	    << "\t\tW = " << hisCounts[1]->Integral(18,78)/totalRunLengthW << std::endl;
 
-  integrals.close();
+  integralsT.close();
+
+  std::ofstream integralsC("integrals_counts.txt",std::ofstream::app);
+  integralsC << runs[0] << "\t\tE = " << hisCounts[0]->Integral(18,78) 
+	    << "\t\tW = " << hisCounts[1]->Integral(18,78) << std::endl;
+
+  integralsC.close();
+  
   
   if (input) delete input;
   

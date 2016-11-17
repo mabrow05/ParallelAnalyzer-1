@@ -134,8 +134,7 @@ int main(int argc, char* argv[])
     
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
-    EvtRateHandler evt(std::vector<int>(1,17736),true,"A",10.,50.,true,false);
-    evt.CalcRates();
+    OctetAsymmetry oct(10,"A",10., 50., false, false, false);
 		       
     //BGSubtractedRate bg(std::vector<int>(1,17150),std::vector<int>(1,17149), "A",10.,50.,true,false,false);
 		       
