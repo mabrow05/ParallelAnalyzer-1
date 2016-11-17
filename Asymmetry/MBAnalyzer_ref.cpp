@@ -133,14 +133,18 @@ int main(int argc, char* argv[])
     std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
     
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
-
-    //BGSubtractedRate bg(std::vector<int>(1,17150),std::vector<int>(1,17149), "A",10.,50.,true,false,false);
     
+    EvtRateHandler evt(std::vector<int>(1,17736),true,"A",10.,50.,true,false);
+    evt.CalcRates();
+		       
+    //BGSubtractedRate bg(std::vector<int>(1,17150),std::vector<int>(1,17149), "A",10.,50.,true,false,false);
+		       
     //bg.calcBGSubtRates();
     
-    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    
+    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
