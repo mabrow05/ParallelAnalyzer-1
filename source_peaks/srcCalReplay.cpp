@@ -30,30 +30,6 @@
 #include "replay_pass2.h"
 #include "replay_pass3.h"
 
-/*std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
-  ifstream infile;
-  Char_t temp[200];
-  if (runNumber<20000) {
-    sprintf(temp,"%s/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat", getenv("ANALYSIS_CODE"));
-    infile.open(temp);
-  }
-  else {
-    sprintf(temp,"%s/simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat", getenv("ANALYSIS_CODE"));
-    infile.open(temp);
-  }
-  
-  std::vector < std::vector < std::vector < double > > > params;
-  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
-
-  char holdType[10];
-  int side=0, type=0;
-  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
-    cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << endl;
-    type+=1;
-    if (type==3) {type=0; side=1;}
-  }
-  return params;
-  };*/
 
 //Get the conversion from EQ2Etrue                                                                                                            
 std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
@@ -761,19 +737,19 @@ int main(int argc, char *argv[])
 
   // Write results to file
   char tempResults[500];
-  /*sprintf(tempResults, "%s/source_peaks_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
+  sprintf(tempResults, "%s/source_peaks_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResultsMean(tempResults);
   sprintf(tempResults, "%s/source_peaks_errors_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
   ofstream outResultsMeanError(tempResults);
   sprintf(tempResults, "%s/source_widths_%s_Evis.dat",getenv("SOURCE_PEAKS"), argv[1]);
-  ofstream outResultsSigma(tempResults);*/
-
-  sprintf(tempResults, "%s/source_peaks_%s_Evis.dat","likelihoodCheck", argv[1]);
-  ofstream outResultsMean(tempResults);
-  sprintf(tempResults, "%s/source_peaks_errors_%s_Evis.dat","likelihoodCheck", argv[1]);
-  ofstream outResultsMeanError(tempResults);
-  sprintf(tempResults, "%s/source_widths_%s_Evis.dat","likelihoodCheck", argv[1]);
   ofstream outResultsSigma(tempResults);
+
+  //sprintf(tempResults, "%s/source_peaks_%s_Evis.dat","likelihoodCheck", argv[1]);
+  //ofstream outResultsMean(tempResults);
+  //sprintf(tempResults, "%s/source_peaks_errors_%s_Evis.dat","likelihoodCheck", argv[1]);
+  //ofstream outResultsMeanError(tempResults);
+  //sprintf(tempResults, "%s/source_widths_%s_Evis.dat","likelihoodCheck", argv[1]);
+  //ofstream outResultsSigma(tempResults);
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {

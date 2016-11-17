@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   Double_t enBinWidth = 10.;
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
-  bool UKdata = true;//true;
+  bool UKdata = false;//true;
   bool simulation = false;
   bool applyAsymm = false;
 
@@ -133,8 +133,12 @@ int main(int argc, char* argv[])
     std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
     
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
+
+    //BGSubtractedRate bg(std::vector<int>(1,17150),std::vector<int>(1,17149), "A",10.,50.,true,false,false);
     
-    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    //bg.calcBGSubtRates();
+    
+    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     

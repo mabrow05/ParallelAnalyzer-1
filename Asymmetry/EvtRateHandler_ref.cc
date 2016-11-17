@@ -170,6 +170,12 @@ void EvtRateHandler::CalcRates() {
 
     rateEerr[i] /= totalRunLengthE;
     rateWerr[i] /= totalRunLengthW;
+
+    /*if ( binContentE < 25. || binContentW < 25. ) {
+
+      std::cout << i << "\t" << binContentE << "\t" << rateEerr[i]*totalRunLengthE << "\t" 
+		<< binContentW << "\t" << rateWerr[i]*totalRunLengthW << "\n";
+		}*/
 	
   }
       
