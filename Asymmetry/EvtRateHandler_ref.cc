@@ -145,8 +145,8 @@ void EvtRateHandler::loadReferenceSpectra() {
 
 double EvtRateHandler::referenceError(int side, int bin) {
 
-  if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[bin] * ( totalCountsE / totalRefCountsE ) ) : 0.;
-  else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[bin] * ( totalCountsW / totalRefCountsW ) ) : 0.;
+  if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[bin] ) * ( totalCountsE / totalRefCountsE )  : 0.;
+  else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[bin] ) * ( totalCountsW / totalRefCountsW )  : 0.;
   else throw "BAD SIDE GIVEN TO referenceError(int side, int bin)";
 };
 
