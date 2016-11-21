@@ -10,15 +10,15 @@ meanBi1 = -2.44773
 sigma = 6.70621
 
 Results of Gaussian Fits:
-meanCe = -0.588597
+meanCeEast = -0.588597
 sigma = 1.79442
-meanIn = 1.37158
+meanInEast = 1.37158
 sigma = 0.916063
-meanSn = 0.675671
+meanSnEast = 0.675671
 sigma = 2.07771
-meanBi1 = 0.0783156
+meanBi1East = 0.0783156
 sigma = 6.38478
-meanBi2 = -2.9343
+meanBi2East = -2.9343
 sigma = 4.75425
 meanCeWest = -0.623817
 sigma = 1.62249

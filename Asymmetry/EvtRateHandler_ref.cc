@@ -149,8 +149,14 @@ void EvtRateHandler::loadReferenceSpectra() {
 
 double EvtRateHandler::referenceError(int side, int bin) {
 
-  if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[bin] ) * ( totalRunLengthE / totalRefTimeE )  : 0.;
-  else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[bin] ) * ( totalRunLengthW / totalRefTimeW )  : 0.;
+  //total Counts method
+  //if ( side == 0 ) return totalRefCountsE>0. ? sqrt( refSpectraE[bin] * ( totalCountsE / totalRefCountsE ) ) : 0.;
+  //else if ( side == 1 ) return totalRefCountsW>0. ? sqrt( refSpectraW[bin] * ( totalCountsW / totalRefCountsW ) ) : 0.;
+
+  // total time method
+  if ( side == 0 ) return totalRefTimeE>0. ? sqrt( refSpectraE[bin] ) * ( totalRunLengthE / totalRefTimeE )  : 0.;
+  else if ( side == 1 ) return totalRefTimeW>0. ? sqrt( refSpectraW[bin] ) * ( totalRunLengthW / totalRefTimeW )  : 0.;
+
   else throw "BAD SIDE GIVEN TO referenceError(int side, int bin)";
 };
 
@@ -169,8 +175,8 @@ void EvtRateHandler::CalcRates() {
     rateEvec[i] = binContentE / totalRunLengthE;
     rateWvec[i] = binContentW / totalRunLengthW;
 
-    rateEerr[i] = binContentE > 25. ? sqrt(binContentE) : referenceError(0,i);
-    rateWerr[i] = binContentW > 25. ? sqrt(binContentW) : referenceError(1,i);
+    rateEerr[i] = ( binContentE > 25. || FG ) ? sqrt(binContentE) : referenceError(0,i);
+    rateWerr[i] = ( binContentW > 25. || FG ) ? sqrt(binContentW) : referenceError(1,i);
 
     rateEerr[i] /= totalRunLengthE;
     rateWerr[i] /= totalRunLengthW;
@@ -308,11 +314,11 @@ void EvtRateHandler::dataReader() {
 	  //Type0
 	  if ( Type0 && Type==0 ) hisCounts[Side]->Fill(Erecon);
 	  //Type1
-	  if ( Type1 && Type==1 ) hisCounts[Side]->Fill(Erecon);
+	  else if ( Type1 && Type==1 ) hisCounts[Side]->Fill(Erecon);
 	  //Type0
-	  if ( Type2 && Type==2 ) hisCounts[Side]->Fill(Erecon);
+	  else if ( Type2 && Type==2 ) hisCounts[Side]->Fill(Erecon);
 	  //Type0
-	  if ( Type3 && Type==3 ) hisCounts[Side]->Fill(Erecon); 
+	  else if ( Type3 && Type==3 ) hisCounts[Side]->Fill(Erecon); 
 	  
 	}
       }
@@ -320,33 +326,66 @@ void EvtRateHandler::dataReader() {
     input->Close();
   }
 
-  totalCountsE = (double) hisCounts[0]->Integral();
-  totalCountsW = (double) hisCounts[1]->Integral();
+  totalCountsE = (double) hisCounts[0]->Integral(1,hisCounts[0]->GetNbinsX());
+  totalCountsW = (double) hisCounts[1]->Integral(1,hisCounts[1]->GetNbinsX());
     
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
 
   // Output the integrated crap to file
-  std::ofstream integralsT("integrals_timeNorm.txt",std::ofstream::app);
-  integralsT << runs[0] << "\t\tE = " << hisCounts[0]->Integral(18,78)/totalRunLengthE 
-	    << "\t\tW = " << hisCounts[1]->Integral(18,78)/totalRunLengthW << std::endl;
+  /*std::ofstream integralsT("integrals_timeNorm.txt",std::ofstream::app);
+  integralsT << runs[0] << "\t\tE = " << hisCounts[0]->Integral(18,77)/totalRunLengthE 
+	    << "\t\tW = " << hisCounts[1]->Integral(18,77)/totalRunLengthW << std::endl;
 
   integralsT.close();
 
   std::ofstream integralsC("integrals_counts.txt",std::ofstream::app);
-  integralsC << runs[0] << "\t\tE = " << hisCounts[0]->Integral(18,78) 
-	    << "\t\tW = " << hisCounts[1]->Integral(18,78) << std::endl;
+  integralsC << runs[0] << "\t\tE = " << hisCounts[0]->Integral(18,77) 
+	    << "\t\tW = " << hisCounts[1]->Integral(18,77) << std::endl;
 
   integralsC.close();
-  
+  */
   
   if (input) delete input;
   
+};
+
+void SimEvtRateHandler::CalcRates() {
+  
+  this->dataReader();
+
+  Double_t binContentE = 0., binContentW = 0.;
+
+  //NEED THE TOTAL NUMBER OF EVENTS IN EACH SIDES HISTOGRAM FOR SCALING
+  for (unsigned int i=0; i<numEnergyBins; i++) {
+
+    binContentE = hisCounts[0]->GetBinContent(i+1);
+    binContentW = hisCounts[1]->GetBinContent(i+1);
+    
+    rateEvec[i] = FG ? ( binContentE / totalRunLengthE ) : 0.;
+    rateWvec[i] = FG ? ( binContentW / totalRunLengthW ) : 0.;
+
+    rateEerr[i] = ( binContentE > 25. || FG ) ? sqrt(binContentE) : referenceError(0,i);
+    rateWerr[i] = ( binContentW > 25. || FG ) ? sqrt(binContentW) : referenceError(1,i);
+
+    rateEerr[i] /= totalRunLengthE;
+    rateWerr[i] /= totalRunLengthW;
+
+    /*if ( binContentE < 25. || binContentW < 25. ) {
+
+      std::cout << i << "\t" << binContentE << "\t" << rateEerr[i]*totalRunLengthE << "\t" 
+		<< binContentW << "\t" << rateWerr[i]*totalRunLengthW << "\n";
+		}*/
+	
+  }
+      
 };
 
 void SimEvtRateHandler::dataReader() {
 
   hisCounts[0] = new TH1D("East Event Hist","EastCounts",numEnergyBins,0.,1200.);
   hisCounts[1] = new TH1D("West Event Hist","WestCounts",numEnergyBins,0.,1200.);
+
+  if ( !FG ) return; // If we have a simulated BG run, we just want the errors, so we make the empty histos and return
 
   bool sep23 = false;
 
@@ -433,11 +472,11 @@ void SimEvtRateHandler::dataReader() {
 	  //Type0
 	  if ( Type0 && Type==0 ) hisCounts[Side]->Fill(Erecon);
 	  //Type1
-	  if ( Type1 && Type==1 ) hisCounts[Side]->Fill(Erecon);
+	  else if ( Type1 && Type==1 ) hisCounts[Side]->Fill(Erecon);
 	  //Type2
-	  if ( Type2 && Type==2 ) hisCounts[Side]->Fill(Erecon);
+	  else if ( Type2 && Type==2 ) hisCounts[Side]->Fill(Erecon);
 	  //Type3
-	  if ( Type3 && Type==3 ) hisCounts[Side]->Fill(Erecon); 
+	  else if ( Type3 && Type==3 ) hisCounts[Side]->Fill(Erecon); 
 	  
 	}
       }
@@ -479,7 +518,7 @@ BGSubtractedRate::BGSubtractedRate(std::vector <int> fgruns, std::vector <int> b
 
 void BGSubtractedRate::calcBGSubtRates() {
 
-  if (Simulation) 
+  /*if (Simulation) 
     {
       SimEvtRateHandler *evt = new SimEvtRateHandler(FGruns, true, analysisChoice, EnergyBinWidth, fiducialCut, UNBLIND);
       evt->CalcRates();
@@ -494,13 +533,12 @@ void BGSubtractedRate::calcBGSubtRates() {
       //  FinalRateErrorW[t][i] = sqrt(FinalRateW[t][i]);
       //}
       //}
-    }
-  else 
-    {
-      LoadRatesByBin();
-      std::cout << "Loaded Rates for run " << FGruns[0]  << std::endl;
-      CalcFinalRate();
-    }
+      }*/
+ 
+  LoadRatesByBin();
+  std::cout << "Loaded Rates for run " << FGruns[0]  << std::endl;
+  CalcFinalRate();
+  
 };
 
 std::vector<double > BGSubtractedRate::returnBGSubtRate(int side) {  
@@ -522,26 +560,53 @@ std::vector<double > BGSubtractedRate::returnBGSubtRateError(int side) {
 
 void BGSubtractedRate::LoadRatesByBin() {
   
-  EvtRateHandler *evtBG = new EvtRateHandler(BGruns, false, analysisChoice, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
-  evtBG->CalcRates();
-  BGRateE = evtBG->getRateVectors(0);
-  BGRateErrorE = evtBG->getRateErrors(0);
-  BGRateW = evtBG->getRateVectors(1);
-  BGRateErrorW = evtBG->getRateErrors(1);
-  runLengthBG[0] = evtBG->returnRunLength(0);
-  runLengthBG[1] = evtBG->returnRunLength(1);
-  delete evtBG;
+  if (!Simulation) {
     
-  EvtRateHandler *evt = new EvtRateHandler(FGruns, true, analysisChoice, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
-  evt->CalcRates();
-  BetaRateE = evt->getRateVectors(0);
-  BetaRateErrorE = evt->getRateErrors(0);
-  BetaRateW = evt->getRateVectors(1);
-  BetaRateErrorW = evt->getRateErrors(1);
-  runLengthBeta[0] = evt->returnRunLength(0);
-  runLengthBeta[1] = evt->returnRunLength(1);
-  delete evt;
-  
+    EvtRateHandler *evtBG = new EvtRateHandler(BGruns, false, analysisChoice, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
+    evtBG->CalcRates();
+    BGRateE = evtBG->getRateVectors(0);
+    BGRateErrorE = evtBG->getRateErrors(0);
+    BGRateW = evtBG->getRateVectors(1);
+    BGRateErrorW = evtBG->getRateErrors(1);
+    runLengthBG[0] = evtBG->returnRunLength(0);
+    runLengthBG[1] = evtBG->returnRunLength(1);
+    delete evtBG;
+    
+    EvtRateHandler *evt = new EvtRateHandler(FGruns, true, analysisChoice, EnergyBinWidth, fiducialCut, UKdata, UNBLIND);
+    evt->CalcRates();
+    BetaRateE = evt->getRateVectors(0);
+    BetaRateErrorE = evt->getRateErrors(0);
+    BetaRateW = evt->getRateVectors(1);
+    BetaRateErrorW = evt->getRateErrors(1);
+    runLengthBeta[0] = evt->returnRunLength(0);
+    runLengthBeta[1] = evt->returnRunLength(1);
+    delete evt;
+  }
+
+  else { 
+
+    SimEvtRateHandler *evtBG = new SimEvtRateHandler(BGruns, false, analysisChoice, EnergyBinWidth, fiducialCut, UNBLIND);
+    evtBG->CalcRates();
+    BGRateE = evtBG->getRateVectors(0);
+    BGRateErrorE = evtBG->getRateErrors(0);
+    BGRateW = evtBG->getRateVectors(1);
+    BGRateErrorW = evtBG->getRateErrors(1);
+    runLengthBG[0] = evtBG->returnRunLength(0);
+    runLengthBG[1] = evtBG->returnRunLength(1);
+    delete evtBG;
+    
+    SimEvtRateHandler *evt = new SimEvtRateHandler(FGruns, true, analysisChoice, EnergyBinWidth, fiducialCut, UNBLIND);
+    evt->CalcRates();
+    BetaRateE = evt->getRateVectors(0);
+    BetaRateErrorE = evt->getRateErrors(0);
+    BetaRateW = evt->getRateVectors(1);
+    BetaRateErrorW = evt->getRateErrors(1);
+    runLengthBeta[0] = evt->returnRunLength(0);
+    runLengthBeta[1] = evt->returnRunLength(1);
+    delete evt;
+
+  }
+
 };
 
 std::vector<double> BGSubtractedRate::returnRunLengths(bool beta) {

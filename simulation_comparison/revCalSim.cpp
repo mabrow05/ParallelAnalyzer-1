@@ -288,8 +288,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     outputBase = string(getenv("REVCALSIM")) + "sources/";
   }
   else if (source=="Beta") {
-    sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500.");
-    sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500.");
+    sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500. && (xW.center*xW.center+yW.center*yW.center)<2500.");
+    sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500. && (xE.center*xE.center+yE.center*yE.center)<2500.");
     outputBase = string(getenv("REVCALSIM")) + "beta/";
   }
   BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);

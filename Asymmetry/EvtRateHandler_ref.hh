@@ -31,7 +31,7 @@ public:
 
   double returnRunLength(int side) { return side==0 ? totalRunLengthE : totalRunLengthW; }       // Return the length of the run (s)
 
-  void CalcRates();       // Calculate the rates and use the reference spectra to fill in errors if necessary
+  virtual void CalcRates();       // Calculate the rates and use the reference spectra to fill in errors if necessary
 
   
   
@@ -87,6 +87,8 @@ protected:
 class SimEvtRateHandler: public EvtRateHandler {
 public:
   SimEvtRateHandler(std::vector <int> run, bool fg, std::string anaCh, double enBinWidth=10., double fidCut=100., bool unblind=false): EvtRateHandler(run, fg, anaCh, enBinWidth, fidCut, true, unblind) {}
+  void CalcRates();       // Calculate the rates and use the reference spectra to fill in errors if necessary, only if BG run, make BG rate 0 with appropriate error
+
 
 protected:
   void dataReader();       //Different set of variables for reverse calibrated simulated data

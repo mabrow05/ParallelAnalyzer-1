@@ -32,7 +32,7 @@ TString anaChoices[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 
 //Types of Corrections to apply
-std::string corr ("UnCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
+std::string corr ("AllCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
 Double_t POL_minus = 0.9981;
@@ -40,7 +40,7 @@ Double_t POL_plus = 0.9937;
 Double_t delta_POL = POL_plus-POL_minus;
 Double_t POL_ave = (POL_plus+POL_minus) / 2.;
 
-bool withPOL = false; //Set this to true to correct DATA for the polarimetry measurement
+bool withPOL = true; //Set this to true to correct DATA for the polarimetry measurement
 
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   bool UKdata = false;//true;
-  bool simulation = false;
+  bool simulation = true;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = false;
+  bool UNBLIND = true;
 
 
   if (UNBLIND) {
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
-    OctetAsymmetry oct(10,"A",10., 50., false, false, false);
+    //OctetAsymmetry oct(4,"A",10., 50., false, false, false);
 		       
     //BGSubtractedRate bg(std::vector<int>(1,17150),std::vector<int>(1,17149), "A",10.,50.,true,false,false);
 		       
@@ -142,8 +142,8 @@ int main(int argc, char* argv[])
     
     
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);

@@ -275,9 +275,9 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   hisCeE->SetLineColor(1);
   hisCeE->Draw();
   hisCeE->Fit("gaus", "", "", -8.0, 8.0);
-  cout << "meanCe = " << gaus->GetParameter(1) << endl;
+  cout << "meanCeEast = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanCe = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanCeEast = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   //In 
@@ -289,9 +289,9 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   hisInE->SetLineColor(1);
   hisInE->Draw();
   hisInE->Fit("gaus", "", "", -8.0, 8.0);
-  cout << "meanIn = " << gaus->GetParameter(1) << endl;
+  cout << "meanInEast = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanIn = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanInEast = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn 
@@ -303,9 +303,9 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   hisSnE->SetLineColor(1);
   hisSnE->Draw();
   hisSnE->Fit("gaus", "", "", -25.0, 25.0);
-  cout << "meanSn = " << gaus->GetParameter(1) << endl;
+  cout << "meanSnEast = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanSn = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanSnEast = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 
@@ -317,9 +317,9 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   hisBi1E->SetLineColor(1);
   hisBi1E->Draw();
   hisBi1E->Fit("gaus", "","", -46., 46.);
-  cout << "meanBi1 = " << gaus->GetParameter(1) << endl;
+  cout << "meanBi1East = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanBi1 = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanBi1East = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi2 
@@ -332,9 +332,9 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   hisBi2E->Draw();
   hisBi2E->Fit("gaus", "","", -46., 46.);
 
-  cout << "meanBi2 = " << gaus->GetParameter(1) << endl;
+  cout << "meanBi2East = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanBi2 = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanBi2East = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
   
   
