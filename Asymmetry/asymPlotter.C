@@ -39,7 +39,7 @@
 
   infile.close();
 
-  infile.open("octvalUK.dat");
+  infile.open("octvalUK_10212016.dat");
 
   infile >> hold[0] >> hold[1] >> hold[2] >> hold[3];
     
@@ -162,7 +162,8 @@
   
   for ( UInt_t i=0; i<oct_UK.size(); i++ ) {
 
-    err_res[i] = err_UK[i] / err_NCSU[i];
+    //err_res[i] = ( err_UK[i]/asym_UK[i] ) / ( err_NCSU[i]/asym_NCSU[i] );
+    err_res[i] = ( err_UK[i] ) / ( err_NCSU[i] );
     err_resErr[i] = 0.;//TMath::Sqrt(err_UK[i]*err_UK[i] + err_NCSU[i]*err_NCSU[i]);
 
   }
