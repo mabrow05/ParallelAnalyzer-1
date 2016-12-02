@@ -48,7 +48,7 @@ std::vector < std::vector < std::vector <Double_t> > >  sfOFF(10,std::vector < s
 std::vector < std::vector < std::vector <Double_t> > > sfOFF_err(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
 
 
-
+std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92};
 
 int separate23(int side, double mwpcEn) {
   int type = 2;
@@ -153,6 +153,7 @@ void doForegroundSpectra (int octetMin, int octetMax)
   
   for ( int i=octetMin ; i<=octetMax ; i++ ) {
 
+    if ( std::find(badOct.begin(), badOct.end(),i) != badOct.end() ) continue;  //Checking if octet should be ignored for data quality reasons
     readOctetFileForFGruns(i);
 
   }
@@ -204,15 +205,20 @@ void doForegroundSpectra (int octetMin, int octetMax)
   //Process SF off runs first
   for ( auto rn : fgRuns_SFoff ) {
     
+    std::string infile;
+    TFile *input;
+    TTree *Tin;
+
     sprintf(temp,"replay_pass3_%i.root",rn);
-    std::string infile = getenv("REPLAY_PASS3")+std::string("/")+std::string(temp);
-    TFile *input = new TFile(infile.c_str(), "READ");
-    TTree *Tin = (TTree*)input->Get("pass3");
+    infile = getenv("REPLAY_PASS3")+std::string("/")+std::string(temp);
+    input = new TFile(infile.c_str(), "READ");
+    Tin = (TTree*)input->Get("pass3");
 
 
     double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
     int PID, type, side; // basic analysis tags
 
+    
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("Type", &type);
     Tin->SetBranchAddress("Side", &side); 
@@ -224,7 +230,7 @@ void doForegroundSpectra (int octetMin, int octetMax)
     Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
     Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
     Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-
+    
 
     unsigned int nevents = Tin->GetEntriesFast();
 

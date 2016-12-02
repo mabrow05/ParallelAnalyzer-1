@@ -3,6 +3,7 @@ Defines different types of Asymmetries to be calculated within an Octet.
 ppair, quartet, octet
 */
 
+#include "EvtRateHandler.hh"
 #include "Asymmetries.hh"
 #include "MBUtils.hh"
 
@@ -14,7 +15,8 @@ std::map<int,int> BGrunReplace = {{23017,23006},{21175,21164},{21176,21187}};
 // 21175, 21176 beam out in runlog
 // 23017 very low statistics
 
-AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : UKdata(ukdata), Simulation(simulation), applyAsymmetry(applyAsym), UNBLIND(unblind), octet(oct), energyBinWidth(enBinWidth), numEnBins(0), fiducialCut(fidCut), boolAnaChRtVecs(false), runsInOctet(0), analysisChoice(1) {
+AsymmetryBase::AsymmetryBase(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind) : UKdata(ukdata), Simulation(simulation),  UNBLIND(unblind), octet(oct), energyBinWidth(enBinWidth), numEnBins(0), fiducialCut(fidCut), runsInOctet(0), analysisChoice(anaCh) {
+  
   numEnBins = (unsigned int)(1200./energyBinWidth);
 
   if (UNBLIND) {
@@ -26,40 +28,23 @@ AsymmetryBase::AsymmetryBase(int oct, double enBinWidth, double fidCut, bool ukd
   }
 
 
-  A2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B2.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  A5.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B5.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  A7.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B7.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  A10.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B10.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  A2err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B2err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  A5err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B5err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  A7err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B7err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  A10err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  B10err.resize(4,std::vector < std::vector <double> > (2,std::vector <double> (numEnBins,0.)));
-  anaChoice_A2.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B2.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_A5.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B5.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_A7.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B7.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_A10.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B10.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_A2err.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B2err.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_A5err.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B5err.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_A7err.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B7err.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_A10err.resize(2,std::vector <double> (numEnBins,0.));
-  anaChoice_B10err.resize(2,std::vector <double> (numEnBins,0.));
-  numEvtsEastByTypeByBin.resize(4,std::vector<double>(numEnBins,0.));
-  numEvtsWestByTypeByBin.resize(4,std::vector<double>(numEnBins,0.));
+  A2.resize(2,std::vector <double> (numEnBins,0.));
+  B2.resize(2,std::vector <double> (numEnBins,0.));
+  A5.resize(2,std::vector <double> (numEnBins,0.));
+  B5.resize(2,std::vector <double> (numEnBins,0.));
+  A7.resize(2,std::vector <double> (numEnBins,0.));
+  B7.resize(2,std::vector <double> (numEnBins,0.));
+  A10.resize(2,std::vector <double> (numEnBins,0.));
+  B10.resize(2,std::vector <double> (numEnBins,0.));
+  A2err.resize(2,std::vector <double> (numEnBins,0.));
+  B2err.resize(2,std::vector <double> (numEnBins,0.));
+  A5err.resize(2,std::vector <double> (numEnBins,0.));
+  B5err.resize(2,std::vector <double> (numEnBins,0.));
+  A7err.resize(2,std::vector <double> (numEnBins,0.));
+  B7err.resize(2,std::vector <double> (numEnBins,0.));
+  A10err.resize(2,std::vector <double> (numEnBins,0.));
+  B10err.resize(2,std::vector <double> (numEnBins,0.));
+  
   A2len.resize(2,std::vector <double> (2,0.));
   A5len.resize(2,std::vector <double> (2,0.));
   A7len.resize(2,std::vector <double> (2,0.));
@@ -98,7 +83,26 @@ void AsymmetryBase::readOctetFile() {
   std::cout << "Read in octet file for octet " << octet << " with " << runsInOctet << " runs\n";
 };
 
-int AsymmetryBase::getBGrun(int run) {
+int AsymmetryBase::getBGrunNumber(std::string type) {
+ 
+  std::string bgType = type=="A2"?"A1" : ( type=="A5"?"A4" : ( type=="A7"?"A9" : ( type=="A10"?"A12" : ( type=="B2"?"B1" : ( type=="B5"?"B4" : ( type=="B7"?"B9" : ( type=="B10"?"B12" : "BAD" )))))));
+  
+  if (bgType=="BAD") { throw "PASSED RUN WITH BAD TYPE TO getBGrun() IN ASYMMETRY BASE!"; }
+  //std::map <int, std::string>::iterator it;
+  for ( auto& it: runType ) { //= runType.begin();it!=runType.end(); it++) {
+
+    if ( it.second==bgType ) {
+      if ( BGrunReplace.find(it.first)==BGrunReplace.end() ) return it.first;
+      else return BGrunReplace[it.first];
+    }
+  }
+
+  std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << type << "!\n";
+  throw "FAILED IN getBGrunNumber()";
+};
+
+
+int AsymmetryBase::getBGrunNumber(int run) {
   std::string type = runType.at(run);
   std::string bgType = type=="A2"?"A1" : ( type=="A5"?"A4" : ( type=="A7"?"A9" : ( type=="A10"?"A12" : ( type=="B2"?"B1" : ( type=="B5"?"B4" : ( type=="B7"?"B9" : ( type=="B10"?"B12" : "BAD" )))))));
   
@@ -115,6 +119,17 @@ int AsymmetryBase::getBGrun(int run) {
   std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << run << "!\n";
   throw "FAILED IN getBGrun(int run)";
 };
+
+
+std::string AsymmetryBase::getBGrunLabel(std::string type) {
+ 
+  std::string bgType = type=="A2"?"A1" : ( type=="A5"?"A4" : ( type=="A7"?"A9" : ( type=="A10"?"A12" : ( type=="B2"?"B1" : ( type=="B5"?"B4" : ( type=="B7"?"B9" : ( type=="B10"?"B12" : "BAD" )))))));
+  
+  if (bgType=="BAD") { throw "PASSED RUN WITH BAD TYPE TO getBGrunLabel() IN ASYMMETRY BASE!"; }
+  else return bgType;
+ 
+};
+
 
 bool AsymmetryBase::isFullOctet() {
   bool A2=false, B2=false, A5=false, B5=false, A7=false, B7=false, A10=false, B10=false;
@@ -206,107 +221,134 @@ bool AsymmetryBase::isFullQuartet(int quartNum) {
 };
 
 
+std::vector <int> AsymmetryBase::makeRunVec(std::string rnType) {
+
+  std::vector <int> rns;
+   
+  for ( auto& it: runType ) {
+
+    if ( it.second==rnType ) {
+      if ( BGrunReplace.find(it.first)==BGrunReplace.end() ) rns.push_back(it.first);
+      else rns.push_back(BGrunReplace[it.first]);
+    }
+  }
+
+  if (rns.size()>0) return rns;
+
+  else {
+
+    std::cout<< "NO BACKGROUND RUN IN BG SUBTRACTED RATE FOR RUN " << rnType << "!\n";
+    throw "FAILED IN makeRunVec()";
+  }
+};
+
 void AsymmetryBase::loadRates() {
   std::map<int,std::string>::iterator it = runType.begin();
   BGSubtractedRate *bgSubtr;
+
+  std::vector <std::string> typePrevRun; // holds the runtypes that have already been run so that it doesnt try to run another one.
+
   while (it!=runType.end()) {
+    
+    bool skip = false;
+    for (auto ch : typePrevRun) {
+      if (ch==it->second) skip = true;
+    }
         
-    if (checkIfBetaRun(it->second)) {
-      bgSubtr = new BGSubtractedRate(it->first,getBGrun(it->first),energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry, UNBLIND); //UNBLIND defaults to false
+    if (checkIfBetaRun(it->second) && !skip) {
+
+      typePrevRun.push_back(it->second);
+
+      std::vector <int> fg_runs = makeRunVec(it->second);
+      std::vector <int> bg_runs = makeRunVec(getBGrunLabel(it->second));
+
+      bgSubtr = new BGSubtractedRate(fg_runs,bg_runs,analysisChoice,energyBinWidth,fiducialCut,UKdata,Simulation, UNBLIND); //UNBLIND defaults to false
 
       std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
-		<< getBGrun(it->first) << ") \n";
+		<< getBGrunNumber(it->first) << ") \n";
 
       bgSubtr->calcBGSubtRates();
-
-      for (int type=0;type<4;type++) {
-	for (int side=0; side<2; side++) {  
-
-	  // vectors to hold the rates bin by bin so that we can do addition of multiple beta runs of the same type.. dumb
-	  std::vector < double > rate (numEnBins, 0.);
-	  rate = bgSubtr->returnBGSubtRate(side,type);
-	  std::vector < double > rateErr (numEnBins, 0.);
-	  rateErr = bgSubtr->returnBGSubtRateError(side,type);	  
-
-	  // Note that the len vectors have the issue that they take on the length of the last beta run of that type when 
-	  // there are multiple (some octets have split runs, say 2 consecutive A2 runs...)
-	  // These lengths aren't currently used for anything though...
-
-	  for (unsigned int bin=0 ; bin<numEnBins ; bin++) {
-      
-	    if (it->second=="A2") {
-	      A2[type][side][bin] += rate[bin];
-	      A2err[type][side][bin] += power( rateErr[bin], 2 );
-	      A2len[0] = bgSubtr->returnRunLengths(true);
-	      A2len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else if (it->second=="B2") {
-	      B2[type][side][bin] += rate[bin];
-	      B2err[type][side][bin] += power( rateErr[bin], 2 );
-	      B2len[0] = bgSubtr->returnRunLengths(true);
-	      B2len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else if (it->second=="A5") {
-	      A5[type][side][bin] += rate[bin];
-	      A5err[type][side][bin] += power( rateErr[bin], 2 );
-	      A5len[0] = bgSubtr->returnRunLengths(true);
-	      A5len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else if (it->second=="B5") {
-	      B5[type][side][bin] += rate[bin];
-	      B5err[type][side][bin] += power( rateErr[bin], 2 );
-	      B5len[0] = bgSubtr->returnRunLengths(true);
-	      B5len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else if (it->second=="A7") {
-	      A7[type][side][bin] += rate[bin];
-	      A7err[type][side][bin] += power( rateErr[bin], 2 );
-	      A7len[0] = bgSubtr->returnRunLengths(true);
-	      A7len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else if (it->second=="B7") {
-	      B7[type][side][bin] += rate[bin];
-	      B7err[type][side][bin] += power( rateErr[bin], 2 );
-	      B7len[0] = bgSubtr->returnRunLengths(true);
-	      B7len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else if (it->second=="A10") {
-	      A10[type][side][bin] += rate[bin];
-	      A10err[type][side][bin] += power( rateErr[bin], 2 );
-	      A10len[0] = bgSubtr->returnRunLengths(true);
-	      A10len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else if (it->second=="B10") {
-	      B10[type][side][bin] += rate[bin];
-	      B10err[type][side][bin] += power( rateErr[bin], 2 );
-	      B10len[0] = bgSubtr->returnRunLengths(true);
-	      B10len[1] = bgSubtr->returnRunLengths(false);
-	    }
-	    else throw "Run misidentified in loadRates";
-
+	
+      if ( it->second=="A2" ) {
+	A2[0] = bgSubtr->returnBGSubtRate(0);
+	A2err[0] = bgSubtr->returnBGSubtRateError(0);
+	A2[1] = bgSubtr->returnBGSubtRate(1);
+	A2err[1] = bgSubtr->returnBGSubtRateError(1);
 	  
-	  }
-	}
+	A2len[0] = bgSubtr->returnRunLengths(true);
+	A2len[1] = bgSubtr->returnRunLengths(false);
       }
+      else if ( it->second=="A5" ) {
+	A5[0] = bgSubtr->returnBGSubtRate(0);
+	A5err[0] = bgSubtr->returnBGSubtRateError(0);
+	A5[1] = bgSubtr->returnBGSubtRate(1);
+	A5err[1] = bgSubtr->returnBGSubtRateError(1);
+	  
+	A5len[0] = bgSubtr->returnRunLengths(true);
+	A5len[1] = bgSubtr->returnRunLengths(false);
+      }
+      else if ( it->second=="A7" ) {
+	A7[0] = bgSubtr->returnBGSubtRate(0);
+	A7err[0] = bgSubtr->returnBGSubtRateError(0);
+	A7[1] = bgSubtr->returnBGSubtRate(1);
+	A7err[1] = bgSubtr->returnBGSubtRateError(1);
+	  
+	A7len[0] = bgSubtr->returnRunLengths(true);
+	A7len[1] = bgSubtr->returnRunLengths(false);
+      }
+      else if ( it->second=="A10" ) {
+	A10[0] = bgSubtr->returnBGSubtRate(0);
+	A10err[0] = bgSubtr->returnBGSubtRateError(0);
+	A10[1] = bgSubtr->returnBGSubtRate(1);
+	A10err[1] = bgSubtr->returnBGSubtRateError(1);
+	  
+	A10len[0] = bgSubtr->returnRunLengths(true);
+	A10len[1] = bgSubtr->returnRunLengths(false);
+      }
+      else if ( it->second=="B2" ) {
+	B2[0] = bgSubtr->returnBGSubtRate(0);
+	B2err[0] = bgSubtr->returnBGSubtRateError(0);
+	B2[1] = bgSubtr->returnBGSubtRate(1);
+	B2err[1] = bgSubtr->returnBGSubtRateError(1);
+	  
+	B2len[0] = bgSubtr->returnRunLengths(true);
+	B2len[1] = bgSubtr->returnRunLengths(false);
+      }
+      else if ( it->second=="B5" ) {
+	B5[0] = bgSubtr->returnBGSubtRate(0);
+	B5err[0] = bgSubtr->returnBGSubtRateError(0);
+	B5[1] = bgSubtr->returnBGSubtRate(1);
+	B5err[1] = bgSubtr->returnBGSubtRateError(1);
+	  
+	B5len[0] = bgSubtr->returnRunLengths(true);
+	B5len[1] = bgSubtr->returnRunLengths(false);
+      }
+      else if ( it->second=="B7" ) {
+	B7[0] = bgSubtr->returnBGSubtRate(0);
+	B7err[0] = bgSubtr->returnBGSubtRateError(0);
+	B7[1] = bgSubtr->returnBGSubtRate(1);
+	B7err[1] = bgSubtr->returnBGSubtRateError(1);
+	  
+	B7len[0] = bgSubtr->returnRunLengths(true);
+	B7len[1] = bgSubtr->returnRunLengths(false);
+      }
+      else if ( it->second=="B10" ) {
+	B10[0] = bgSubtr->returnBGSubtRate(0);
+	B10err[0] = bgSubtr->returnBGSubtRateError(0);
+	B10[1] = bgSubtr->returnBGSubtRate(1);
+	B10err[1] = bgSubtr->returnBGSubtRateError(1);
+	  
+	B10len[0] = bgSubtr->returnRunLengths(true);
+	B10len[1] = bgSubtr->returnRunLengths(false);
+      }
+	
+      else throw "Run misidentified in loadRates"; 
 	  
       delete bgSubtr;
     }
     it++;
   }
-  for (int type=0;type<4;type++) {
-    for (int side=0; side<2; side++) {  
-      for (unsigned int bin=0 ; bin<numEnBins ; bin++) {
-	A2err[type][side][bin] = sqrt(A2err[type][side][bin]);
-	B2err[type][side][bin] = sqrt(B2err[type][side][bin]);
-	A5err[type][side][bin] = sqrt(A5err[type][side][bin]);
-	B5err[type][side][bin] = sqrt(B5err[type][side][bin]);
-	A7err[type][side][bin] = sqrt(A7err[type][side][bin]);
-	B7err[type][side][bin] = sqrt(B7err[type][side][bin]);
-	A10err[type][side][bin] = sqrt(A10err[type][side][bin]);
-	B10err[type][side][bin] = sqrt(B10err[type][side][bin]);
-      }
-    }
-  }
+  
 };
 
 bool AsymmetryBase::checkIfBetaRun(std::string type) {
@@ -314,135 +356,8 @@ bool AsymmetryBase::checkIfBetaRun(std::string type) {
   else return false;
 };
 
-void AsymmetryBase::calcBGsubtractedEvts() {
-  std::map<int,std::string>::iterator it = runType.begin();
-  BGSubtractedRate *bg;
-  while (it!=runType.end()) {
-    if (checkIfBetaRun(it->second)) {
-      bg = new BGSubtractedRate(it->first,getBGrun(it->first),energyBinWidth,fiducialCut,UKdata,Simulation,applyAsymmetry);
 
-      std::cout << "initialized BGStubtractedRate for run " << it->first << " (BG run " 
-		<< getBGrun(it->first) << ") \n";
-
-      bg->calcBGSubtRates();
-      
-      if (!Simulation) {
-	std::vector<double> runLengthBeta = bg->returnRunLengths(true);
-	std::vector<double> runLengthBG = bg->returnRunLengths(false);
-	std::cout << "RunLength: \tE\tW\n\t\t" 
-		  << runLengthBeta[0] << "\t" << runLengthBeta[1] << std::endl
-		  << "\t\t" << runLengthBG[0] << "\t" << runLengthBG[1] << std::endl;
-	
-	for (int type=0;type<4;type++) {
-	  std::vector <double> evecbg = bg->returnBGSubtRate(0,type);
-	  std::vector <double> wvecbg = bg->returnBGSubtRate(1,type);
-	  for (unsigned int bin=0; bin<evecbg.size(); bin++) {
-	    numEvtsEastByTypeByBin[type][bin]+=runLengthBeta[0]*evecbg[bin];
-	    numEvtsWestByTypeByBin[type][bin]+=runLengthBeta[1]*wvecbg[bin];
-	  }
-	}
-      }
-      else {
-	for (int type=0;type<4;type++) {
-	  std::vector <double> evecbg = bg->returnBGSubtRate(0,type);
-	  std::vector <double> wvecbg = bg->returnBGSubtRate(1,type);
-	  for (unsigned int bin=0; bin<evecbg.size(); bin++) {
-	    numEvtsEastByTypeByBin[type][bin]+=evecbg[bin];
-	    numEvtsWestByTypeByBin[type][bin]+=wvecbg[bin];
-	  }
-	}
-      }
-      delete bg;
-    }
-    it++;
-  }
-};
-
-std::vector <double> AsymmetryBase::getNumBGsubtrEvts(double enWinLow, double enWinHigh, int evtType) {
-  unsigned int binLow = (unsigned int)(enWinLow/energyBinWidth);
-  unsigned int binHigh = (unsigned int)(enWinHigh/energyBinWidth)-1;
-
-  std::vector <double> numEvts(2,0.);
-
-  std::cout << "Number of Type " << evtType << " events for energy window " << binLowerEdge[binLow] << " - " << binUpperEdge[binHigh] << ": ";
- 
-  for (unsigned int i=binLow; i<=binHigh; i++) {
-    numEvts[0]+=numEvtsEastByTypeByBin[evtType][i];
-    numEvts[1]+=numEvtsWestByTypeByBin[evtType][i];
-  }
-  std::cout << "E->" << numEvts[0] << "  W->" << numEvts[1] << std::endl;
-  return numEvts;
-};
-
-void AsymmetryBase::makeAnalysisChoiceRateVectors(int anaChoice) {
-  if (isAnaChoiceRateVectors()) {
-    for (auto &elem : anaChoice_A2) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B2) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_A5) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B5) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_A7) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B7) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_A10) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B10) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_A2err) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B2err) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_A5err) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B5err) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_A7err) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B7err) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_A10err) std::fill(elem.begin(), elem.end(), 0.);
-    for (auto &elem : anaChoice_B10err) std::fill(elem.begin(), elem.end(), 0.);    
-  }
-  analysisChoice = anaChoice;
-  //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
-  unsigned int type_low=0, type_high=0;
-  if (anaChoice==1) { type_low=0; type_high=2; }
-  else if (anaChoice==3 || anaChoice==5) { type_low=0; type_high=3;}
-  else if (anaChoice==2) { type_low=0; type_high=1;}
-  else if (anaChoice==4) { type_low=0; type_high=0;}
-  else if (anaChoice==6) { type_low=1; type_high=1;}
-  else if (anaChoice==7 || anaChoice==8 || anaChoice==9) { type_low=2; type_high=3;}
-  else throw "Bad Analysis Choice";
-  
-  for (unsigned int side=0; side<2; side++) {
-    for (unsigned int bin=0; bin<numEnBins; bin++) {
-      for (unsigned int type=type_low; type<=type_high; type++) {	 
-	anaChoice_A2[side][bin]+=A2[type][side][bin];
-	anaChoice_A5[side][bin]+=A5[type][side][bin];
-	anaChoice_A7[side][bin]+=A7[type][side][bin];
-	anaChoice_A10[side][bin]+=A10[type][side][bin];
-	anaChoice_B2[side][bin]+=B2[type][side][bin];
-	anaChoice_B5[side][bin]+=B5[type][side][bin];
-	anaChoice_B7[side][bin]+=B7[type][side][bin];
-	anaChoice_B10[side][bin]+=B10[type][side][bin];
-	
-	anaChoice_A2err[side][bin]+=power(A2err[type][side][bin],2);
-	anaChoice_A5err[side][bin]+=power(A5err[type][side][bin],2);
-	anaChoice_A7err[side][bin]+=power(A7err[type][side][bin],2);
-	anaChoice_A10err[side][bin]+=power(A10err[type][side][bin],2);
-	anaChoice_B2err[side][bin]+=power(B2err[type][side][bin],2);
-	anaChoice_B5err[side][bin]+=power(B5err[type][side][bin],2);
-	anaChoice_B7err[side][bin]+=power(B7err[type][side][bin],2);
-	anaChoice_B10err[side][bin]+=power(B10err[type][side][bin],2);
-      }
-    
-      anaChoice_A2err[side][bin]=sqrt(anaChoice_A2err[side][bin]);
-      anaChoice_A5err[side][bin]=sqrt(anaChoice_A5err[side][bin]);
-      anaChoice_A7err[side][bin]=sqrt(anaChoice_A7err[side][bin]);
-      anaChoice_A10err[side][bin]=sqrt(anaChoice_A10err[side][bin]);
-      anaChoice_B2err[side][bin]=sqrt(anaChoice_B2err[side][bin]);
-      anaChoice_B5err[side][bin]=sqrt(anaChoice_B5err[side][bin]);
-      anaChoice_B7err[side][bin]=sqrt(anaChoice_B7err[side][bin]);
-      anaChoice_B10err[side][bin]=sqrt(anaChoice_B10err[side][bin]);
-      //std::cout << anaChoice_A2[side][bin] << " " << anaChoice_A2err[side][bin] << std::endl;
-    }
-  }
-  boolAnaChRtVecs = true;
-  std::cout << "Constructed rate vectors for analysis choice " << anaChoice << ".\n";	  
-};
-
-
-std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtractedRate(std::string runType) {
+std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRate(std::string runType) {
   if (runType=="A2") return A2;
   else if (runType=="A5") return A5;
   else if (runType=="A7") return A7;
@@ -455,7 +370,7 @@ std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtr
 
 };
 
-std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtractedRateError(std::string runType) {
+std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateError(std::string runType) {
   if (runType=="A2") return A2err;
   else if (runType=="A5") return A5err;
   else if (runType=="A7") return A7err;
@@ -470,7 +385,7 @@ std::vector < std::vector < std::vector<double> > > AsymmetryBase::returnBGsubtr
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym,unblind), totalAsymmetry(0.), totalAsymmetryError(0.), boolSuperSum(false), boolAsymmetry(false) {
+OctetAsymmetry::OctetAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetry(0.), totalAsymmetryError(0.), boolSuperSum(false), boolAsymmetry(false) {
   if (isFullOctet()) {
     //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
     asymmetry.resize(numEnBins,0.);
@@ -483,20 +398,15 @@ OctetAsymmetry::OctetAsymmetry(int oct, double enBinWidth, double fidCut, bool u
   }
   else { 
     boolAsymmetry=boolSuperSum=true; //Writing "bad octet" to all files so that it isn't used in the future
-    for (int anach=1; anach<10; anach++) {
-      analysisChoice = anach;
-      writeAsymToFile();
-      writeSuperSumToFile();
-    }
+    writeAsymToFile();
+    writeSuperSumToFile();
+  
     throw "OCTET NOT A COMPLETE OCTET";
   }
-};
+}; 
 
-void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
-
+void OctetAsymmetry::calcAsymmetryBinByBin() {
+  
   double sfON[2]={0.};
   double sfOFF[2]={0.};
   double sfON_err[2]={0.};
@@ -509,17 +419,17 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 
       double weightsum=0.;
 
-      if (anaChoice_A2[side][bin]>0. && anaChoice_A10[side][bin]>0. && anaChoice_B5[side][bin]>0. && anaChoice_B7[side][bin]>0. ) {
+      if (A2[side][bin]>0. && A10[side][bin]>0. && B5[side][bin]>0. && B7[side][bin]>0. ) {
 
-	sfOFF[side] = ( anaChoice_A2[side][bin]/power(anaChoice_A2err[side][bin],2) +
-			anaChoice_A10[side][bin]/power(anaChoice_A10err[side][bin],2) +
-			anaChoice_B5[side][bin]/power(anaChoice_B5err[side][bin],2) +
-			anaChoice_B7[side][bin]/power(anaChoice_B7err[side][bin],2) );
+	sfOFF[side] = ( A2[side][bin]/power(A2err[side][bin],2) +
+			A10[side][bin]/power(A10err[side][bin],2) +
+			B5[side][bin]/power(B5err[side][bin],2) +
+			B7[side][bin]/power(B7err[side][bin],2) );
 
-	weightsum = ( 1./power(anaChoice_A2err[side][bin],2) + 
-		      1./power(anaChoice_A10err[side][bin],2) +
-		      1./power(anaChoice_B5err[side][bin],2) +
-		      1./power(anaChoice_B7err[side][bin],2) );
+	weightsum = ( 1./power(A2err[side][bin],2) + 
+		      1./power(A10err[side][bin],2) +
+		      1./power(B5err[side][bin],2) +
+		      1./power(B7err[side][bin],2) );
 
       }
       else weightsum = 0.;
@@ -528,17 +438,17 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
       sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 
 
-      if (anaChoice_A5[side][bin]>0. && anaChoice_A7[side][bin]>0. && anaChoice_B2[side][bin]>0. && anaChoice_B10[side][bin]>0. ) {
+      if (A5[side][bin]>0. && A7[side][bin]>0. && B2[side][bin]>0. && B10[side][bin]>0. ) {
 
-	sfON[side] = ( anaChoice_A5[side][bin]/power(anaChoice_A5err[side][bin],2) +
-			anaChoice_A7[side][bin]/power(anaChoice_A7err[side][bin],2) +
-			anaChoice_B2[side][bin]/power(anaChoice_B2err[side][bin],2) +
-			anaChoice_B10[side][bin]/power(anaChoice_B10err[side][bin],2) );
+	sfON[side] = ( A5[side][bin]/power(A5err[side][bin],2) +
+			A7[side][bin]/power(A7err[side][bin],2) +
+			B2[side][bin]/power(B2err[side][bin],2) +
+			B10[side][bin]/power(B10err[side][bin],2) );
 
-	weightsum = ( 1./power(anaChoice_A5err[side][bin],2) + 
-		      1./power(anaChoice_A7err[side][bin],2) +
-		      1./power(anaChoice_B2err[side][bin],2) +
-		      1./power(anaChoice_B10err[side][bin],2) );
+	weightsum = ( 1./power(A5err[side][bin],2) + 
+		      1./power(A7err[side][bin],2) +
+		      1./power(B2err[side][bin],2) +
+		      1./power(B10err[side][bin],2) );
 
 
       }
@@ -565,10 +475,8 @@ void OctetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
   boolAsymmetry = true;
 };
 
-void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh) {
+
   unsigned int binLow = (unsigned int)(enWinLow/energyBinWidth);
   unsigned int binHigh = (unsigned int)(enWinHigh/energyBinWidth)-1;
 
@@ -582,25 +490,25 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int a
 
   for (unsigned int side=0; side<2; side++) {
     for (unsigned int bin=binLow; bin<=binHigh; bin++) {
-      sumA2[side]+=anaChoice_A2[side][bin];
-      sumA2_err[side]+=power(anaChoice_A2err[side][bin],2);
-      sumA5[side]+=anaChoice_A5[side][bin];
-      sumA5_err[side]+=power(anaChoice_A5err[side][bin],2);
-      sumA7[side]+=anaChoice_A7[side][bin];
-      sumA7_err[side]+=power(anaChoice_A7err[side][bin],2);
-      sumA10[side]+=anaChoice_A10[side][bin];
-      sumA10_err[side]+=power(anaChoice_A10err[side][bin],2);
-      sumB2[side]+=anaChoice_B2[side][bin];
-      sumB2_err[side]+=power(anaChoice_B2err[side][bin],2);
-      sumB5[side]+=anaChoice_B5[side][bin];
-      sumB5_err[side]+=power(anaChoice_B5err[side][bin],2);
-      sumB7[side]+=anaChoice_B7[side][bin];
-      sumB7_err[side]+=power(anaChoice_B7err[side][bin],2);
-      sumB10[side]+=anaChoice_B10[side][bin];
-      sumB10_err[side]+=power(anaChoice_B10err[side][bin],2);
+      sumA2[side]+=A2[side][bin];
+      sumA2_err[side]+=power(A2err[side][bin],2);
+      sumA5[side]+=A5[side][bin];
+      sumA5_err[side]+=power(A5err[side][bin],2);
+      sumA7[side]+=A7[side][bin];
+      sumA7_err[side]+=power(A7err[side][bin],2);
+      sumA10[side]+=A10[side][bin];
+      sumA10_err[side]+=power(A10err[side][bin],2);
+      sumB2[side]+=B2[side][bin];
+      sumB2_err[side]+=power(B2err[side][bin],2);
+      sumB5[side]+=B5[side][bin];
+      sumB5_err[side]+=power(B5err[side][bin],2);
+      sumB7[side]+=B7[side][bin];
+      sumB7_err[side]+=power(B7err[side][bin],2);
+      sumB10[side]+=B10[side][bin];
+      sumB10_err[side]+=power(B10err[side][bin],2);
 
       /*if (side==1) {
-	std::cout << anaChoice_A10[side][bin] << " " << anaChoice_A10err[side][bin] << std::endl;
+	std::cout << A10[side][bin] << " " << A10err[side][bin] << std::endl;
 	}*/ 
     }
     sumA2_err[side] = sqrt(sumA2_err[side]);
@@ -658,10 +566,8 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int a
 };
 
 
-void OctetAsymmetry::calcSuperSum(int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void OctetAsymmetry::calcSuperSum() {
+
   //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   superSum.resize(numEnBins,0.);
   superSumError.resize(numEnBins,0.);
@@ -676,15 +582,15 @@ void OctetAsymmetry::calcSuperSum(int anaChoice) {
     for (unsigned int side=0; side<2; side++) {
       double weightsum=0.;
 
-      sfOFF[side] = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2)*anaChoice_A2[side][bin]:0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2)*anaChoice_A10[side][bin]:0.) + (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2)*anaChoice_B5[side][bin]:0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2)*anaChoice_B7[side][bin]:0.);
-      weightsum = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2):0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2):0.) + (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
+      sfOFF[side] = (A2err[side][bin]>0.?power(1./A2err[side][bin],2)*A2[side][bin]:0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2)*A10[side][bin]:0.) + (B5err[side][bin]>0.?power(1./B5err[side][bin],2)*B5[side][bin]:0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2)*B7[side][bin]:0.);
+      weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.) + (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
 
       sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
       sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 
       weightsum=0.;
-      sfON[side] = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2)*anaChoice_A5[side][bin]:0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2)*anaChoice_A7[side][bin]:0.) + (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2)*anaChoice_B2[side][bin]:0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2)*anaChoice_B10[side][bin]:0.);
-      weightsum = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2):0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2):0.) + (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2):0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2):0.);
+      sfON[side] = (A5err[side][bin]>0.?power(1./A5err[side][bin],2)*A5[side][bin]:0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2)*A7[side][bin]:0.) + (B2err[side][bin]>0.?power(1./B2err[side][bin],2)*B2[side][bin]:0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2)*B10[side][bin]:0.);
+      weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.) + (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
       
       
       sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
@@ -714,12 +620,11 @@ void OctetAsymmetry::writeAsymToFile() {
     return;
   }
 
-  int anaChoice = getCurrentAnaChoice();
   std::string outpath;  
   
-  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
+  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
+  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
   std::ofstream outfile(outpath.c_str());
   
   if (isFullOctet()) {
@@ -732,7 +637,7 @@ void OctetAsymmetry::writeAsymToFile() {
     outfile << "BAD OCTET";
   }
   outfile.close();
-  std::cout << "Wrote Asymmetry to file for " << anaChoice << " in " << outpath << "\n";
+  std::cout << "Wrote Asymmetry to file for " << analysisChoice << " in " << outpath << "\n";
 };
 
 void OctetAsymmetry::writeSuperSumToFile() {
@@ -741,12 +646,11 @@ void OctetAsymmetry::writeSuperSumToFile() {
     return;
   }
 
-  int anaChoice = getCurrentAnaChoice();
   std::string outpath;
 
-  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
-  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/superSum_Octet"+ (UNBLIND?"UNBLINDED_":"")+"" + itos(octet)+"_AnaCh"+itos(anaChoice)+".dat";
+  if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
+  else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
+  else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/superSum_Octet"+ (UNBLIND?"UNBLINDED_":"")+"" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
 
   
   std::ofstream outfile(outpath.c_str());
@@ -768,7 +672,7 @@ void OctetAsymmetry::writeSuperSumToFile() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-QuartetAsymmetry::QuartetAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym,unblind), totalAsymmetryA(0.), totalAsymmetryErrorA(0.), totalAsymmetryB(0.), totalAsymmetryErrorB(0.), boolSuperSum(false), boolAsymmetry(false) {
+QuartetAsymmetry::QuartetAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetryA(0.), totalAsymmetryErrorA(0.), totalAsymmetryB(0.), totalAsymmetryErrorB(0.), boolSuperSum(false), boolAsymmetry(false) {
 
   isGoodQuartet.push_back(isFullQuartet(0));
   isGoodQuartet.push_back(isFullQuartet(1));
@@ -787,19 +691,14 @@ QuartetAsymmetry::QuartetAsymmetry(int oct, double enBinWidth, double fidCut, bo
   }
   else {
     boolAsymmetry=boolSuperSum=true; //Writing "bad quartet" to all files so that it isn't used in the future
-    for (int anach=1; anach<10; anach++) {
-      analysisChoice = anach;
-      writeAsymToFile();
-      writeSuperSumToFile();
-    }
+    writeAsymToFile();
+    writeSuperSumToFile();
+    
     throw "NO QUARTETS IN THIS OCTET";
   }
 };
 
-void QuartetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void QuartetAsymmetry::calcAsymmetryBinByBin() {
 
   double sfON[2]={0.};
   double sfOFF[2]={0.};
@@ -815,23 +714,38 @@ void QuartetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
       for (unsigned int side=0; side<2; side++) {
 	double weightsum=0.;
 	
-	// AFP Off
-	sfOFF[side] = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2)*anaChoice_A2[side][bin]:0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2)*anaChoice_A10[side][bin]:0.);
-	weightsum = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2):0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2):0.);
+	if ( A2[side][bin]>0. && A10[side][bin]>0. ) {
+	  
+	  sfOFF[side] = ( A2[side][bin]/power(A2err[side][bin],2) +
+			  A10[side][bin]/power(A10err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(A2err[side][bin],2) + 
+			1./power(A10err[side][bin],2) );
+	  
+	}
 	
-	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
+	else weightsum = 0.;
+	
+	sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
-	weightsum=0.;
-	
-	// AFP ON
-	sfON[side] = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2)*anaChoice_A5[side][bin]:0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2)*anaChoice_A7[side][bin]:0.);
-	weightsum = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2):0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2):0.);
-	
-	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
+	if ( A5[side][bin]>0. && A7[side][bin]>0. ) {
+	  
+	  sfON[side] = ( A5[side][bin]/power(A5err[side][bin],2) +
+			 A7[side][bin]/power(A7err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(A5err[side][bin],2) + 
+			1./power(A7err[side][bin],2) );
+	  
+	  
+	}
+	else weightsum = 0.;
+	//if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
+	sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
       }
+    
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
 	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
@@ -842,9 +756,12 @@ void QuartetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	asymmetry[0][bin] = 0.;
 	asymmetryError[0][bin] = 0.;
       }
+      
     }
   }
-
+	
+  
+	
   // B type runs
   if (isGoodQuartet[1]) {
     for (unsigned int bin=0; bin<asymmetry[1].size(); bin++) {
@@ -857,26 +774,51 @@ void QuartetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	sfOFF[side]=0.;
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
-	sfON_err[side]=0.;
-
-	// AFP Off
-	sfOFF[side] = (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2)*anaChoice_B5[side][bin]:0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2)*anaChoice_B7[side][bin]:0.);
-	weightsum = (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
+	sfON_err[side]=0.;	
 	
-	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
+	if ( B5[side][bin]>0. && B7[side][bin]>0. ) {
+	  
+	  sfOFF[side] = ( B5[side][bin]/power(B5err[side][bin],2) +
+			  B7[side][bin]/power(B7err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(B5err[side][bin],2) + 
+			1./power(B7err[side][bin],2) );
+	  
+	}
+	else weightsum = 0.;
+	
+	sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
-	weightsum=0.;
 	
-	// AFP ON
-	sfON[side] = (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2)*anaChoice_B2[side][bin]:0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2)*anaChoice_B10[side][bin]:0.);
-
-	weightsum = (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2):0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2):0.);
-	
-	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
+	if ( B2[side][bin]>0. && B10[side][bin]>0. ) {
+	  
+	  sfON[side] = ( B2[side][bin]/power(B2err[side][bin],2) +
+			 B10[side][bin]/power(B10err[side][bin],2) );
+	  
+	  weightsum = ( 1./power(B2err[side][bin],2) + 
+			1./power(B10err[side][bin],2) );
+	  
+	}
+	else weightsum = 0.;
+	//if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
+	sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
+	
+	if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
+	  R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
+	  deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	  asymmetry[0][bin] = (1.-sqrt(R))/(1+sqrt(R));
+	  asymmetryError[0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
+	}
+	else {
+	  asymmetry[0][bin] = 0.;
+	  asymmetryError[0][bin] = 0.;
+	}
       }
+    
+    
       if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
 	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
 	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
@@ -889,13 +831,12 @@ void QuartetAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
       }
     }
   }
+  
   boolAsymmetry = true;
 };
 
-void QuartetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void QuartetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh) {
+
   unsigned int binLow = (unsigned int)(enWinLow/energyBinWidth);
   unsigned int binHigh = (unsigned int)(enWinHigh/energyBinWidth)-1;
 
@@ -906,22 +847,22 @@ void QuartetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int
 
   for (unsigned int side=0; side<2; side++) {
     for (unsigned int bin=binLow; bin<=binHigh; bin++) {
-      sumA2[side]+=anaChoice_A2[side][bin];
-      sumA2_err[side]+=power(anaChoice_A2err[side][bin],2);
-      sumA5[side]+=anaChoice_A5[side][bin];
-      sumA5_err[side]+=power(anaChoice_A5err[side][bin],2);
-      sumA7[side]+=anaChoice_A7[side][bin];
-      sumA7_err[side]+=power(anaChoice_A7err[side][bin],2);
-      sumA10[side]+=anaChoice_A10[side][bin];
-      sumA10_err[side]+=power(anaChoice_A10err[side][bin],2);
-      sumB2[side]+=anaChoice_B2[side][bin];
-      sumB2_err[side]+=power(anaChoice_B2err[side][bin],2);
-      sumB5[side]+=anaChoice_B5[side][bin];
-      sumB5_err[side]+=power(anaChoice_B5err[side][bin],2);
-      sumB7[side]+=anaChoice_B7[side][bin];
-      sumB7_err[side]+=power(anaChoice_B7err[side][bin],2);
-      sumB10[side]+=anaChoice_B10[side][bin];
-      sumB10_err[side]+=power(anaChoice_B10err[side][bin],2);
+      sumA2[side]+=A2[side][bin];
+      sumA2_err[side]+=power(A2err[side][bin],2);
+      sumA5[side]+=A5[side][bin];
+      sumA5_err[side]+=power(A5err[side][bin],2);
+      sumA7[side]+=A7[side][bin];
+      sumA7_err[side]+=power(A7err[side][bin],2);
+      sumA10[side]+=A10[side][bin];
+      sumA10_err[side]+=power(A10err[side][bin],2);
+      sumB2[side]+=B2[side][bin];
+      sumB2_err[side]+=power(B2err[side][bin],2);
+      sumB5[side]+=B5[side][bin];
+      sumB5_err[side]+=power(B5err[side][bin],2);
+      sumB7[side]+=B7[side][bin];
+      sumB7_err[side]+=power(B7err[side][bin],2);
+      sumB10[side]+=B10[side][bin];
+      sumB10_err[side]+=power(B10err[side][bin],2);
 
     }
     sumA2_err[side] = sqrt(sumA2_err[side]);
@@ -1015,10 +956,8 @@ void QuartetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int
 };
 
 
-void QuartetAsymmetry::calcSuperSum(int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void QuartetAsymmetry::calcSuperSum() {
+
   //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   superSum.resize(2, std::vector<double> (numEnBins,0.));
   superSumError.resize(2, std::vector<double> (numEnBins,0.));
@@ -1035,8 +974,8 @@ void QuartetAsymmetry::calcSuperSum(int anaChoice) {
 	double weightsum=0.;
 
 	// AFP Off
-	sfOFF[side] = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2)*anaChoice_A2[side][bin]:0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2)*anaChoice_A10[side][bin]:0.);
-	weightsum = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2):0.) + (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2):0.);
+	sfOFF[side] = (A2err[side][bin]>0.?power(1./A2err[side][bin],2)*A2[side][bin]:0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2)*A10[side][bin]:0.);
+	weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.);
 	
 	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
@@ -1044,8 +983,8 @@ void QuartetAsymmetry::calcSuperSum(int anaChoice) {
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2)*anaChoice_A5[side][bin]:0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2)*anaChoice_A7[side][bin]:0.);
-	weightsum = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2):0.) + (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2):0.);
+	sfON[side] = (A5err[side][bin]>0.?power(1./A5err[side][bin],2)*A5[side][bin]:0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2)*A7[side][bin]:0.);
+	weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.);
 	
 	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
@@ -1078,8 +1017,8 @@ void QuartetAsymmetry::calcSuperSum(int anaChoice) {
 	double weightsum=0.;
 
 	// AFP Off
-	sfOFF[side] = (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2)*anaChoice_B5[side][bin]:0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2)*anaChoice_B7[side][bin]:0.);
-	weightsum = (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.) + (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
+	sfOFF[side] = (B5err[side][bin]>0.?power(1./B5err[side][bin],2)*B5[side][bin]:0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2)*B7[side][bin]:0.);
+	weightsum = (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
 	
 	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
@@ -1087,9 +1026,9 @@ void QuartetAsymmetry::calcSuperSum(int anaChoice) {
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2)*anaChoice_B2[side][bin]:0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2)*anaChoice_B10[side][bin]:0.);
+	sfON[side] = (B2err[side][bin]>0.?power(1./B2err[side][bin],2)*B2[side][bin]:0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2)*B10[side][bin]:0.);
 
-	weightsum = (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2):0.) + (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2):0.);
+	weightsum = (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
 	
 	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
@@ -1120,12 +1059,12 @@ void QuartetAsymmetry::writeAsymToFile() {
     return;
   }
 
-  int anaChoice = getCurrentAnaChoice();
+ 
   //Setting paths to output files
   std::string outpathA = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_A.dat";
+    "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quartet_A.dat";
   std::string outpathB = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) 
-    + "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_B.dat";
+    + "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quartet_B.dat";
   
 
   //Open and fill file for quartet A
@@ -1152,7 +1091,7 @@ void QuartetAsymmetry::writeAsymToFile() {
   else outfileB << "BAD QUARTET";
   outfileB.close();
 
-  std::cout << "Wrote Asymmetry to file for anaChoice " << anaChoice << " in:\n" << outpathA << std::endl << outpathB << "\n";
+  std::cout << "Wrote Asymmetry to file for anaChoice " << analysisChoice << " in:\n" << outpathA << std::endl << outpathB << "\n";
 };
 
 void QuartetAsymmetry::writeSuperSumToFile() {
@@ -1161,12 +1100,11 @@ void QuartetAsymmetry::writeSuperSumToFile() {
     return;
   }
 
-  int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
   std::string outpathA = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) + 
-    "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_A.dat";
+    "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quartet_A.dat";
   std::string outpathB = Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS")) 
-    + "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Quartet_B.dat";
+    + "Octet_" + itos(octet) + "/QuartetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quartet_B.dat";
 
   //Open and fill file for quartet A
   std::ofstream outfileA(outpathA.c_str()); 
@@ -1197,7 +1135,7 @@ void QuartetAsymmetry::writeSuperSumToFile() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-PairAsymmetry::PairAsymmetry(int oct, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool applyAsym, bool unblind) : AsymmetryBase(oct,enBinWidth,fidCut,ukdata,simulation,applyAsym,unblind), totalAsymmetryA0(0.), totalAsymmetryErrorA0(0.), totalAsymmetryB0(0.), totalAsymmetryErrorB0(0.), totalAsymmetryA1(0.), totalAsymmetryErrorA1(0.), totalAsymmetryB1(0.), totalAsymmetryErrorB1(0.), boolSuperSum(false), boolAsymmetry(false) {
+PairAsymmetry::PairAsymmetry(int oct, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool simulation, bool unblind) : AsymmetryBase(oct,anaCh,enBinWidth,fidCut,ukdata,simulation,unblind), totalAsymmetryA0(0.), totalAsymmetryErrorA0(0.), totalAsymmetryB0(0.), totalAsymmetryErrorB0(0.), totalAsymmetryA1(0.), totalAsymmetryErrorA1(0.), totalAsymmetryB1(0.), totalAsymmetryErrorB1(0.), boolSuperSum(false), boolAsymmetry(false) {
 
   isGoodPair.resize(2,std::vector <bool> (2));
 
@@ -1222,19 +1160,14 @@ PairAsymmetry::PairAsymmetry(int oct, double enBinWidth, double fidCut, bool ukd
   }
   else {
     boolAsymmetry=boolSuperSum=true; //Writing "bad pair" to all files so that it isn't used in the future
-    for (int anach=1; anach<10; anach++) {
-      analysisChoice = anach;
-      writeAsymToFile();
-      writeSuperSumToFile();
-    }
+    writeAsymToFile();
+    writeSuperSumToFile();
+    
     throw "NO PAIRS IN THIS OCTET";
   }
 };
 
-void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void PairAsymmetry::calcAsymmetryBinByBin() {
 
   double sfON[2]={0.};
   double sfOFF[2]={0.};
@@ -1251,16 +1184,16 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_A2[side][bin];
-	weightsum = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2):0.);
+	sfOFF[side] = A2[side][bin];
+	weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_A5[side][bin];
-	weightsum = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2):0.);
+	sfON[side] = A5[side][bin];
+	weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
@@ -1292,16 +1225,16 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_A10[side][bin];
-	weightsum = (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2):0.);
+	sfOFF[side] = A10[side][bin];
+	weightsum = (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_A7[side][bin];
-	weightsum = (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2):0.);
+	sfON[side] = A7[side][bin];
+	weightsum = (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
@@ -1332,16 +1265,16 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_B5[side][bin];
-	weightsum = (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.);
+	sfOFF[side] = B5[side][bin];
+	weightsum = (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_B2[side][bin];
-	weightsum = (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2):0.);
+	sfON[side] = B2[side][bin];
+	weightsum = (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
@@ -1372,16 +1305,16 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_B7[side][bin];
-	weightsum = (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
+	sfOFF[side] = B7[side][bin];
+	weightsum = (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_B10[side][bin];
-	weightsum = (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2):0.);
+	sfON[side] = B10[side][bin];
+	weightsum = (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
       }
@@ -1404,10 +1337,8 @@ void PairAsymmetry::calcAsymmetryBinByBin(int anaChoice) {
   boolAsymmetry = true;
 };
 
-void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh) {
+  
   unsigned int binLow = (unsigned int)(enWinLow/energyBinWidth);
   unsigned int binHigh = (unsigned int)(enWinHigh/energyBinWidth)-1;
 
@@ -1418,22 +1349,22 @@ void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int an
 
   for (unsigned int side=0; side<2; side++) {
     for (unsigned int bin=binLow; bin<=binHigh; bin++) {
-      sumA2[side]+=anaChoice_A2[side][bin];
-      sumA2_err[side]+=power(anaChoice_A2err[side][bin],2);
-      sumA5[side]+=anaChoice_A5[side][bin];
-      sumA5_err[side]+=power(anaChoice_A5err[side][bin],2);
-      sumA7[side]+=anaChoice_A7[side][bin];
-      sumA7_err[side]+=power(anaChoice_A7err[side][bin],2);
-      sumA10[side]+=anaChoice_A10[side][bin];
-      sumA10_err[side]+=power(anaChoice_A10err[side][bin],2);
-      sumB2[side]+=anaChoice_B2[side][bin];
-      sumB2_err[side]+=power(anaChoice_B2err[side][bin],2);
-      sumB5[side]+=anaChoice_B5[side][bin];
-      sumB5_err[side]+=power(anaChoice_B5err[side][bin],2);
-      sumB7[side]+=anaChoice_B7[side][bin];
-      sumB7_err[side]+=power(anaChoice_B7err[side][bin],2);
-      sumB10[side]+=anaChoice_B10[side][bin];
-      sumB10_err[side]+=power(anaChoice_B10err[side][bin],2);
+      sumA2[side]+=A2[side][bin];
+      sumA2_err[side]+=power(A2err[side][bin],2);
+      sumA5[side]+=A5[side][bin];
+      sumA5_err[side]+=power(A5err[side][bin],2);
+      sumA7[side]+=A7[side][bin];
+      sumA7_err[side]+=power(A7err[side][bin],2);
+      sumA10[side]+=A10[side][bin];
+      sumA10_err[side]+=power(A10err[side][bin],2);
+      sumB2[side]+=B2[side][bin];
+      sumB2_err[side]+=power(B2err[side][bin],2);
+      sumB5[side]+=B5[side][bin];
+      sumB5_err[side]+=power(B5err[side][bin],2);
+      sumB7[side]+=B7[side][bin];
+      sumB7_err[side]+=power(B7err[side][bin],2);
+      sumB10[side]+=B10[side][bin];
+      sumB10_err[side]+=power(B10err[side][bin],2);
 
     }
     sumA2_err[side] = sqrt(sumA2_err[side]);
@@ -1609,10 +1540,8 @@ void PairAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh, int an
 };
 
 
-void PairAsymmetry::calcSuperSum(int anaChoice) {
-  if (!isAnaChoiceRateVectors() || getCurrentAnaChoice()!=anaChoice) {
-    makeAnalysisChoiceRateVectors(anaChoice);
-  }
+void PairAsymmetry::calcSuperSum() {
+
   //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
   superSum.resize(2, std::vector < std::vector <double> > (2,std::vector <double> (numEnBins, 0.)));
   superSumError.resize(2, std::vector < std::vector <double> > (2,std::vector <double> (numEnBins, 0.)));;
@@ -1631,16 +1560,16 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_A2[side][bin];
-	weightsum = (anaChoice_A2err[side][bin]>0.?power(1./anaChoice_A2err[side][bin],2):0.);
+	sfOFF[side] = A2[side][bin];
+	weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_A5[side][bin];
-	weightsum = (anaChoice_A5err[side][bin]>0.?power(1./anaChoice_A5err[side][bin],2):0.);
+	sfON[side] = A5[side][bin];
+	weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
@@ -1669,16 +1598,16 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_A10[side][bin];
-	weightsum = (anaChoice_A10err[side][bin]>0.?power(1./anaChoice_A10err[side][bin],2):0.);
+	sfOFF[side] = A10[side][bin];
+	weightsum = (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_A7[side][bin];
-	weightsum = (anaChoice_A7err[side][bin]>0.?power(1./anaChoice_A7err[side][bin],2):0.);
+	sfON[side] = A7[side][bin];
+	weightsum = (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
@@ -1708,16 +1637,16 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_B5[side][bin];
-	weightsum = (anaChoice_B5err[side][bin]>0.?power(1./anaChoice_B5err[side][bin],2):0.);
+	sfOFF[side] = B5[side][bin];
+	weightsum = (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_B2[side][bin];
-	weightsum = (anaChoice_B2err[side][bin]>0.?power(1./anaChoice_B2err[side][bin],2):0.);
+	sfON[side] = B2[side][bin];
+	weightsum = (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
@@ -1747,16 +1676,16 @@ void PairAsymmetry::calcSuperSum(int anaChoice) {
 	double weightsum=0.;
 	
 	// AFP Off
-	sfOFF[side] = anaChoice_B7[side][bin];
-	weightsum = (anaChoice_B7err[side][bin]>0.?power(1./anaChoice_B7err[side][bin],2):0.);
+	sfOFF[side] = B7[side][bin];
+	weightsum = (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
 	
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	weightsum=0.;
 	
 	// AFP ON
-	sfON[side] = anaChoice_B10[side][bin];
-	weightsum = (anaChoice_B10err[side][bin]>0.?power(1./anaChoice_B10err[side][bin],2):0.);
+	sfON[side] = B10[side][bin];
+	weightsum = (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
 	
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
@@ -1785,16 +1714,15 @@ void PairAsymmetry::writeAsymToFile() {
     return;
   }
 
-  int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
   std::string outpathA0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_A0.dat";
   std::string outpathA1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_A1.dat";
   std::string outpathB0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_B0.dat";
   std::string outpathB1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_B1.dat";
 
   //Open and fill file for quartet A
   std::ofstream outfileA0(outpathA0.c_str()); 
@@ -1842,7 +1770,7 @@ void PairAsymmetry::writeAsymToFile() {
   outfileB1.close();
 
   
-  std::cout << "Wrote Asymmetry to file for anaChoice " << anaChoice << "\n";
+  std::cout << "Wrote Asymmetry to file for anaChoice " << analysisChoice << "\n";
 };
 
 void PairAsymmetry::writeSuperSumToFile() {
@@ -1851,16 +1779,15 @@ void PairAsymmetry::writeSuperSumToFile() {
     return;
   }
 
-  int anaChoice = getCurrentAnaChoice();
   //Setting paths to output files
   std::string outpathA0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_A0.dat";
   std::string outpathA1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) + 
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_A1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_A1.dat";
   std::string outpathB0 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B0.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_B0.dat";
   std::string outpathB1 = (Simulation ? std::string(getenv("SIM_ANALYSIS_RESULTS")) : UKdata ? std::string(getenv("ANALYSIS_RESULTS")) : std::string(getenv("MPM_ANALYSIS_RESULTS"))) +
-    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+itos(anaChoice)+"_Pair_B1.dat";
+    "Octet_" + itos(octet) + "/PairAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"superSum_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Pair_B1.dat";
   
   //Open and fill file for quartet A
   std::ofstream outfileA0(outpathA0.c_str()); 
@@ -1905,7 +1832,7 @@ void PairAsymmetry::writeSuperSumToFile() {
   outfileB1.close();
   
   
-  std::cout << "Wrote Super-Sum to file for anaChoice " << anaChoice << "\n";
+  std::cout << "Wrote Super-Sum to file for anaChoice " << analysisChoice << "\n";
   //std::cout << "Wrote to " << outpathB1 << "\n";
 };
 

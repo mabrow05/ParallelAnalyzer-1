@@ -3,13 +3,13 @@
 {
   gStyle->SetOptStat(0);
 
-  int octetStart=0;
-  int octetEnd=59;
+  int octetStart=60;
+  int octetEnd=121;
 
-  TString normType = "0";
+  TString normType = "ALL";
 
-  Double_t normLow = 200.;
-  Double_t normHigh = 700.;
+  Double_t normLow = 150.;
+  Double_t normHigh = 680.;
   
   Double_t xAxisMax = 800.;
 

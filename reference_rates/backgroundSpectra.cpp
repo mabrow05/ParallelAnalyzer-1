@@ -48,7 +48,7 @@ std::vector < std::vector < std::vector <Double_t> > >  sfOFF(10,std::vector < s
 std::vector < std::vector < std::vector <Double_t> > > sfOFF_err(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
 
 
-
+std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
 
 int separate23(int side, double mwpcEn) {
   int type = 2;
@@ -153,6 +153,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
   
   for ( int i=octetMin ; i<=octetMax ; i++ ) {
 
+    if ( std::find(badOct.begin(), badOct.end(),i) != badOct.end() ) continue;  //Checking if octet should be ignored for data quality reasons
     readOctetFileForBGruns(i);
 
   }
@@ -202,6 +203,8 @@ void doBackgroundSpectra (int octetMin, int octetMax)
   
   //Process SF off runs first
   for ( auto rn : bgRuns_SFoff ) {
+
+    std::cout << "Processing run " << rn << "... ";
     
     sprintf(temp,"replay_pass3_%i.root",rn);
     std::string infile = getenv("REPLAY_PASS3")+std::string("/")+std::string(temp);
@@ -305,6 +308,8 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 
   //Process SF ON runs now
   for ( auto rn : bgRuns_SFon ) {
+
+    std::cout << "Processing run " << rn << "... ";
     
     sprintf(temp,"replay_pass3_%i.root",rn);
     std::string infile = getenv("REPLAY_PASS3")+std::string("/")+std::string(temp);

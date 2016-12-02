@@ -66,24 +66,32 @@ int main(int argc, char *argv[])
     
     if (std::find(badOct.begin(), badOct.end(),octetNum) != badOct.end()) { continue; } //Checking if octet should be ignored for data quality reasons
 
-    std::vector < std::vector <double> > superSum_uk(4);//,std::vector <double>(numBins,0.));
-    std::vector < std::vector <double> > superSumError_uk(4);//,std::vector <double>(numBins,0.));
-    std::vector < std::vector <double> > superSum_sim(4);//,std::vector <double>(numBins,0.));
-    std::vector < std::vector <double> > superSumError_sim(4);//,std::vector <double>(numBins,0.));
+    std::vector < std::vector <double> > superSum_uk(4, std::vector <double>(numBins,0.));//,std::vector <double>(numBins,0.));
+    std::vector < std::vector <double> > superSumError_uk(4, std::vector <double>(numBins,0.));//,std::vector <double>(numBins,0.));
+    std::vector < std::vector <double> > superSum_sim(4, std::vector <double>(numBins,0.));//,std::vector <double>(numBins,0.));
+    std::vector < std::vector <double> > superSumError_sim(4, std::vector <double>(numBins,0.));//,std::vector <double>(numBins,0.));
    
  
     try {
       
       //double normFactor = 0., ukIntegral=0., simIntegral=0.;
 
+      ifstream infile;
+      double binLow, rate, rateErr;
+      int inc;
 
       { //Setting scope for first OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry UK(octetNum, enBinWidth, 50., true, false);
 	
-	//All event types
-	UK.calcSuperSum(1);
-	superSum_uk[3] = UK.returnSuperSum();
-	superSumError_uk[3] = UK.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChA.dat",getenv("ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_uk[3][inc] = rate;
+	  superSumError_uk[3][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
 
 	for (int n=0; n<numBins;n++) {
 	  superSumTotal_uk[3][n]+=superSumError_uk[3][n]>0.?(1./power(superSumError_uk[3][n],2))*superSum_uk[3][n]:0.;
@@ -92,9 +100,16 @@ int main(int argc, char *argv[])
 	}
 
 	//Type 0 events
-	UK.calcSuperSum(4);
-	superSum_uk[0] = UK.returnSuperSum();
-	superSumError_uk[0] = UK.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChD.dat",getenv("ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_uk[0][inc] = rate;
+	  superSumError_uk[0][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
 
 	for (int n=0; n<numBins;n++) {
 	  //std::cout << enBins[n] << " " << superSum[n] << " " << superSumError[n] << std::endl; 
@@ -105,9 +120,16 @@ int main(int argc, char *argv[])
        
 
 	//Type 1 events
-	UK.calcSuperSum(6);
-	superSum_uk[1] = UK.returnSuperSum();
-	superSumError_uk[1] = UK.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChF.dat",getenv("ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_uk[1][inc] = rate;
+	  superSumError_uk[1][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
 
 	for (int n=0; n<numBins;n++) {
 	  superSumTotal_uk[1][n]+=superSumError_uk[1][n]>0.?(1./power(superSumError_uk[1][n],2))*superSum_uk[1][n]:0.;
@@ -116,9 +138,16 @@ int main(int argc, char *argv[])
 	
 
 	//Type 2/3 events
-	UK.calcSuperSum(7);
-	superSum_uk[2] = UK.returnSuperSum();
-	superSumError_uk[2] = UK.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChG.dat",getenv("ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_uk[2][inc] = rate;
+	  superSumError_uk[2][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
 
 	for (int n=0; n<numBins;n++) {
 	  superSumTotal_uk[2][n]+=superSumError_uk[2][n]>0.?(1./power(superSumError_uk[2][n],2))*superSum_uk[2][n]:0.;
@@ -133,12 +162,18 @@ int main(int argc, char *argv[])
       // SIMULATION
 
       { //Setting scope for second OctetAsymmetry so that it will be deleted to clear memory
-	OctetAsymmetry SIM(octetNum, enBinWidth, 50., true, true, asymOn);
 
-	//All event types
-	SIM.calcSuperSum(1);
-	superSum_sim[3] = SIM.returnSuperSum();
-	superSumError_sim[3] = SIM.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChA.dat",getenv("SIM_ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_sim[3][inc] = rate;
+	  superSumError_sim[3][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
+
 
 	//for (int n=0; n<numBins; n++) {
 	// if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum_sim[3][n];
@@ -153,9 +188,16 @@ int main(int argc, char *argv[])
 	}
 
 	//Type 0 events
-	SIM.calcSuperSum(4);
-	superSum_sim[0] = SIM.returnSuperSum();
-	superSumError_sim[0] = SIM.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChD.dat",getenv("SIM_ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_sim[0][inc] = rate;
+	  superSumError_sim[0][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
 
 	/*for (int n=0; n<numBins; n++) {
 	  if (enBins[n]>=enWinLow && enBins[n]<=enWinHigh) simIntegral+=superSum_sim[0][n];
@@ -172,9 +214,16 @@ int main(int argc, char *argv[])
        
 
 	//Type 1 events
-	SIM.calcSuperSum(6);
-	superSum_sim[1] = SIM.returnSuperSum();
-	superSumError_sim[1] = SIM.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChF.dat",getenv("SIM_ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_sim[1][inc] = rate;
+	  superSumError_sim[1][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
 
 	for (int n=0; n<numBins;n++) {
 	  //superSum_sim[1][n] = normFactor*superSum_sim[1][n];
@@ -185,9 +234,16 @@ int main(int argc, char *argv[])
 	
 
 	//Type 2/3 events
-	SIM.calcSuperSum(7);
-	superSum_sim[2] = SIM.returnSuperSum();
-	superSumError_sim[2] = SIM.returnSuperSumError();
+	infile.open(TString::Format("%s/Octet_%i/OctetAsymmetry/superSum_Octet%i_AnaChG.dat",getenv("SIM_ANALYSIS_RESULTS"),octetNum,octetNum).Data());
+	
+	inc = 0;
+
+	while ( infile >> binLow >> rate >> rateErr ) {
+	  superSum_sim[2][inc] = rate;
+	  superSumError_sim[2][inc] = rateErr;
+	  inc++;
+	}
+	infile.close();
 
 	for (int n=0; n<numBins;n++) {
 	  //superSum_sim[2][n] = normFactor*superSum_sim[2][n];
