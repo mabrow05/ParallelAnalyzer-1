@@ -15,6 +15,9 @@ simulation data
 
 #include <TString.h>
 
+const bool useRCclasses = true;      // If this is true, we only use "good" response class 
+                                     // events as defined by C. Swank (triangular MWPC responses)
+
 
 int separate23(int side, double mwpcEn) {
   int type = 2;
@@ -225,6 +228,8 @@ void EvtRateHandler::dataReader() {
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
   float EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0., MWPCEnergyE_f=0., MWPCEnergyW_f=0.; // For reading in data from MPM replays
 
+  int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
+
   int PID, Side, Type;
 
   for ( unsigned int i=0; i<runs.size(); i++ ) {
@@ -246,6 +251,11 @@ void EvtRateHandler::dataReader() {
       Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
       Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
       Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+
+      Tin->SetBranchAddress("xeRC", &xeRC);
+      Tin->SetBranchAddress("yeRC", &yeRC);
+      Tin->SetBranchAddress("xwRC", &xwRC);
+      Tin->SetBranchAddress("ywRC", &ywRC);
       
       //NEED TO ADD IN WIRECHAMBER ENERGY FOR 2/3 SEPARATION
     }
@@ -265,6 +275,11 @@ void EvtRateHandler::dataReader() {
       Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY_f);
       Tin->GetBranch("xWmpm")->GetLeaf("center")->SetAddress(&WmwpcX_f);
       Tin->GetBranch("yWmpm")->GetLeaf("center")->SetAddress(&WmwpcY_f);
+
+      Tin->SetBranchAddress("xeRC", &xeRC);
+      Tin->SetBranchAddress("yeRC", &yeRC);
+      Tin->SetBranchAddress("xwRC", &xwRC);
+      Tin->SetBranchAddress("ywRC", &ywRC);
     }
     unsigned int nevents = Tin->GetEntriesFast();
     std::cout << "Number of Events: " << nevents << std::endl;
@@ -290,14 +305,22 @@ void EvtRateHandler::dataReader() {
 	TimeW = (double) TimeW_f;
       }
       
-      if (PID==1) {
+      if (PID==1) {       // Cut on electrons
+
+	//  If the flag at the top of this file is set to true, also cut on the wirechamber
+	//  event type according to C. Swanks classifications in ELOG 629 attachment 2
+	if ( useRCclasses ) {
+	  if ( Side==0 && ( xeRC<1 || yeRC>3 ) ) continue;
+	  else if ( Side==1 && ( xwRC<1 || ywRC>3 ) ) continue;
+	}
 	
+	// Determine radial event position squared for cutting on fiducial volume
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  
-	  
+	  // If the analysis choice calls for separation of 2/3, do it here
 	  if ( sep23 ) {
 	    if (Erecon>0. && Type==2) {
 	      
@@ -312,6 +335,9 @@ void EvtRateHandler::dataReader() {
 	    }
 	  }
 	  
+
+	  // Fill histograms according to event types in this analysis choice
+
 	  //Type0
 	  if ( Type0 && Type==0 ) hisCounts[Side]->Fill(Erecon);
 	  //Type1

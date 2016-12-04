@@ -31,6 +31,8 @@
 #include "replay_pass3.h"
 
 
+const bool useRCclasses = true;
+
 //Get the conversion from EQ2Etrue                                                                                                            
 std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
   ifstream infile;
@@ -426,6 +428,13 @@ int main(int argc, char *argv[])
     // Now for filling the individual peak histograms using only type 0 events
     //////////////////////////////////////////////////////////////////////////
     if (t->Type != 0 || t->PID!=1) continue;
+
+    //  If the flag at the top of this file is set to true, also cut on the wirechamber
+    //  event type according to C. Swanks classifications in ELOG 629 attachment 2
+    if ( useRCclasses ) {
+      if ( t->Side==0 && ( t->xeRC<1 || t->yeRC>3 ) ) continue;
+      else if ( t->Side==1 && ( t->xwRC<1 || t->ywRC>3 ) ) continue;
+    }
 
     if (useSource[0]) {
       
