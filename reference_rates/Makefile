@@ -27,6 +27,10 @@ foregroundSpectra.exe: foregroundSpectra.o MBUtils.o
 	$(CXX) $(CXXFLAGS) -o foregroundSpectra.exe foregroundSpectra.o MBUtils.o $(LIBS)
 	@echo "Done"
 
+SIM_foregroundSpectra.exe: SIM_foregroundSpectra.o MBUtils.o  
+	$(CXX) $(CXXFLAGS) -o SIM_foregroundSpectra.exe SIM_foregroundSpectra.o MBUtils.o $(LIBS)
+	@echo "Done"
+
 MBUtils.o: MBUtils.hh
 
 

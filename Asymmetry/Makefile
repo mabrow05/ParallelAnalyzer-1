@@ -28,11 +28,6 @@ MBAnalyzer.exe: MBAnalyzer.o $(objects) BetaSpectrum.o
 	$(CXX) $(CXXFLAGS) -o MBAnalyzer.exe MBAnalyzer.o $(objects) BetaSpectrum.o $(LIBS) 
 	@echo "Done"
 
-MBAnalyzer_ref.exe: MBAnalyzer_ref.o $(objects_ref) BetaSpectrum.o
-	$(CXX) $(CXXFLAGS) -o MBAnalyzer_ref.exe MBAnalyzer_ref.o $(objects_ref) BetaSpectrum.o $(LIBS) 
-	@echo "Done"
-
-
 UK2MPMcomparison.exe: UK2MPMcomparison.o $(objects) 
 	$(CXX) $(CXXFLAGS) -o UK2MPMcomparison.exe UK2MPMcomparison.o $(objects) $(LIBS) 
 	@echo "Done"
@@ -43,6 +38,10 @@ UK2SIMcomparison.exe: UK2SIMcomparison.o $(objects)
 
 SuperSumComparison.exe: SuperSumComparison.o $(objects) 
 	$(CXX) $(CXXFLAGS) -o SuperSumComparison.exe SuperSumComparison.o $(objects) $(LIBS) 
+	@echo "Done"
+
+SuperSumComparison_ref.exe: SuperSumComparison_ref.o $(objects) 
+	$(CXX) $(CXXFLAGS) -o SuperSumComparison_ref.exe SuperSumComparison_ref.o $(objects) $(LIBS) 
 	@echo "Done"
 
 Asymmetries.o: Asymmetries.hh
