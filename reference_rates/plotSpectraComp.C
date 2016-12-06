@@ -6,10 +6,10 @@
   int octetStart=0;
   int octetEnd=59;
 
-  TString normType = "ALL";
+  TString normType = "0";
 
-  Double_t normLow = 100.;
-  Double_t normHigh = 800..;
+  Double_t normLow = 200.;
+  Double_t normHigh = 680.;
   
   Double_t xAxisMax = 1200.;
 
@@ -196,8 +196,8 @@
   ukALL_E->SetMarkerStyle(22);
   ukALL_E->SetMarkerSize(0.75);
   ukALL_E->SetLineColor(kBlue);
-  ukALL_E->SetFillStyle(3002);
-  ukALL_E->SetFillColor(kBlue);
+  //ukALL_E->SetFillStyle(3002);
+  //ukALL_E->SetFillColor(kBlue);
   ukALL_E->SetLineWidth(3);
   simALL_E->SetMarkerColor(kRed);
   simALL_E->SetLineColor(kRed);
@@ -220,8 +220,8 @@
   uk0_E->SetMarkerStyle(22);
   uk0_E->SetMarkerSize(0.75);
   uk0_E->SetLineColor(kBlue);
-  uk0_E->SetFillStyle(3002);
-  uk0_E->SetFillColor(kBlue);
+  //uk0_E->SetFillStyle(3002);
+  //uk0_E->SetFillColor(kBlue);
   uk0_E->SetLineWidth(3);
   sim0_E->SetMarkerColor(kRed);
   sim0_E->SetLineColor(kRed);
@@ -231,7 +231,7 @@
   uk0_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim0_E->Scale(normFactorE);
   sim0_E->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk0_E->Draw("P0");
+  uk0_E->Draw("HIST");
   sim0_E->Draw("SAMEP0");
   
   c2E->cd(2);
@@ -241,8 +241,8 @@
   uk1_E->SetMarkerStyle(22);
   uk1_E->SetMarkerSize(0.75);
   uk1_E->SetLineColor(kBlue);
-  uk1_E->SetFillStyle(3002);
-  uk1_E->SetFillColor(kBlue);
+  //uk1_E->SetFillStyle(3002);
+  //uk1_E->SetFillColor(kBlue);
   uk1_E->SetLineWidth(3);
   uk1_E->SetMinimum(0.);
   sim1_E->SetMarkerColor(kRed);
@@ -253,7 +253,7 @@
   uk1_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim1_E->Scale(normFactorE);
   sim1_E->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk1_E->Draw("P0");
+  uk1_E->Draw("HIST");
   sim1_E->Draw("SAMEP0");
   
 
@@ -264,8 +264,8 @@
   uk23_E->SetMarkerStyle(22);
   uk23_E->SetMarkerSize(0.75);
   uk23_E->SetLineColor(kBlue);
-  uk23_E->SetFillStyle(3002);
-  uk23_E->SetFillColor(kBlue);
+  //uk23_E->SetFillStyle(3002);
+  //uk23_E->SetFillColor(kBlue);
   uk23_E->SetLineWidth(3);
   uk23_E->SetMinimum(0.);
   sim23_E->SetMarkerColor(kRed);
@@ -276,7 +276,7 @@
   uk23_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim23_E->Scale(normFactorE);
   sim23_E->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk23_E->Draw("P0");
+  uk23_E->Draw("HIST");
   sim23_E->Draw("SAMEP0");
 
 
@@ -324,8 +324,8 @@
   ukALL_W->SetMarkerStyle(22);
   ukALL_W->SetMarkerSize(0.75);
   ukALL_W->SetLineColor(kBlue);
-  ukALL_W->SetFillStyle(3002);
-  ukALL_W->SetFillColor(kBlue);
+  //ukALL_W->SetFillStyle(3002);
+  //ukALL_W->SetFillColor(kBlue);
   ukALL_W->SetLineWidth(3);
   simALL_W->SetMarkerColor(kRed);
   simALL_W->SetLineColor(kRed);
@@ -334,7 +334,7 @@
   ukALL_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   ukALL_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   simALL_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  ukALL_W->Draw("P0");
+  ukALL_W->Draw("HIST");
   simALL_W->Draw("SAMEP0");
 
 
@@ -348,8 +348,8 @@
   uk0_W->SetMarkerStyle(22);
   uk0_W->SetMarkerSize(0.75);
   uk0_W->SetLineColor(kBlue);
-  uk0_W->SetFillStyle(3002);
-  uk0_W->SetFillColor(kBlue);
+  //uk0_W->SetFillStyle(3002);
+  //uk0_W->SetFillColor(kBlue);
   uk0_W->SetLineWidth(3);
   sim0_W->SetMarkerColor(kRed);
   sim0_W->SetLineColor(kRed);
@@ -359,7 +359,7 @@
   uk0_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim0_W->Scale(normFactorW);
   sim0_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk0_W->Draw("P0");
+  uk0_W->Draw("HIST");
   sim0_W->Draw("SAMEP0");
   
   c2W->cd(2);
@@ -369,8 +369,8 @@
   uk1_W->SetMarkerStyle(22);
   uk1_W->SetMarkerSize(0.75);
   uk1_W->SetLineColor(kBlue);
-  uk1_W->SetFillStyle(3002);
-  uk1_W->SetFillColor(kBlue);
+  //uk1_W->SetFillStyle(3002);
+  //uk1_W->SetFillColor(kBlue);
   uk1_W->SetLineWidth(3);
   uk1_W->SetMinimum(0.);
   sim1_W->SetMarkerColor(kRed);
@@ -381,7 +381,7 @@
   uk1_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim1_W->Scale(normFactorW);
   sim1_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk1_W->Draw("P0");
+  uk1_W->Draw("HIST");
   sim1_W->Draw("SAMEP0");
   
 
@@ -392,8 +392,8 @@
   uk23_W->SetMarkerStyle(22);
   uk23_W->SetMarkerSize(0.75);
   uk23_W->SetLineColor(kBlue);
-  uk23_W->SetFillStyle(3002);
-  uk23_W->SetFillColor(kBlue);
+  //uk23_W->SetFillStyle(3002);
+  //uk23_W->SetFillColor(kBlue);
   uk23_W->SetLineWidth(3);
   uk23_W->SetMinimum(0.);
   sim23_W->SetMarkerColor(kRed);
@@ -404,7 +404,7 @@
   uk23_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim23_W->Scale(normFactorW);
   sim23_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk23_W->Draw("P0");
+  uk23_W->Draw("HIST");
   sim23_W->Draw("SAMEP0");
 
 

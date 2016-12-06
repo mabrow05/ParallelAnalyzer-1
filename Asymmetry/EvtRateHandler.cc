@@ -310,8 +310,8 @@ void EvtRateHandler::dataReader() {
 	//  If the flag at the top of this file is set to true, also cut on the wirechamber
 	//  event type according to C. Swanks classifications in ELOG 629 attachment 2
 	if ( useRCclasses ) {
-	  if ( Side==0 && ( xeRC<1 || yeRC>3 ) ) continue;
-	  else if ( Side==1 && ( xwRC<1 || ywRC>3 ) ) continue;
+	  if ( Side==0 && ( xeRC<1 || xeRC>3 || yeRC<1 || yeRC>3 ) ) continue;
+	  else if ( Side==1 && ( xwRC<1 || xwRC>3 || ywRC<1 || ywRC>3 ) ) continue;
 	}
 	
 	// Determine radial event position squared for cutting on fiducial volume

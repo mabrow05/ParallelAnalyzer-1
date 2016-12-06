@@ -432,8 +432,8 @@ int main(int argc, char *argv[])
     //  If the flag at the top of this file is set to true, also cut on the wirechamber
     //  event type according to C. Swanks classifications in ELOG 629 attachment 2
     if ( useRCclasses ) {
-      if ( t->Side==0 && ( t->xeRC<1 || t->yeRC>3 ) ) continue;
-      else if ( t->Side==1 && ( t->xwRC<1 || t->ywRC>3 ) ) continue;
+      if ( t->Side==0 && ( t->xeRC<1 || t->xeRC>3 || t->yeRC<1 || t->yeRC>3 ) ) continue;
+      else if ( t->Side==1 && ( t->xwRC<1 || t->xwRC>3 || t->ywRC<1 || t->ywRC>3 ) ) continue;
     }
 
     if (useSource[0]) {

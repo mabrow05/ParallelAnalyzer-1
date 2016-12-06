@@ -29,7 +29,8 @@
 #include <TStyle.h>
 
 
-using namespace std;
+const bool useRCclasses = true;      // If this is true, we only use "good" response class 
+                                     // events as defined by C. Swank (triangular MWPC responses)
 
 std::map<Int_t,std::string> runType; //List of all runs in octet and their types
 std::vector <Int_t> fgRuns_SFon; //list of fg runs with spin flipper on 
@@ -147,7 +148,7 @@ void doForegroundSpectra (int octetMin, int octetMax)
   gStyle->SetOptStat(0);
   double fiducialCut = 50.; //mm
  
-  cout << "Calculating FG spectra..." << endl;
+  std::cout << "Calculating FG spectra..." << std::endl;
 
   //Load all the fg run numbers
   
@@ -218,7 +219,8 @@ void doForegroundSpectra (int octetMin, int octetMax)
     double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
     int PID, type, side; // basic analysis tags
 
-    
+    int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
+
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("Type", &type);
     Tin->SetBranchAddress("Side", &side); 
@@ -231,6 +233,10 @@ void doForegroundSpectra (int octetMin, int octetMax)
     Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
     Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
     
+    Tin->SetBranchAddress("xeRC", &xeRC);
+    Tin->SetBranchAddress("yeRC", &yeRC);
+    Tin->SetBranchAddress("xwRC", &xwRC);
+    Tin->SetBranchAddress("ywRC", &ywRC);
 
     unsigned int nevents = Tin->GetEntriesFast();
 
@@ -268,6 +274,11 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
       
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
+
+	if ( useRCclasses ) {
+	  if ( side==0 && ( xeRC<1 || xeRC>3 || yeRC<1 || yeRC>3 ) ) continue;
+	  else if ( side==1 && ( xwRC<1 || xwRC>3 || ywRC<1 || ywRC>3 ) ) continue;
+	}
 
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
@@ -307,7 +318,7 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
     input->Close();
     if (input) delete input;
-    cout << "Finished Run " << rn << endl;
+    std::cout << "Finished Run " << rn << std::endl;
   }
 
   //Process SF ON runs now
@@ -322,6 +333,8 @@ void doForegroundSpectra (int octetMin, int octetMax)
     double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
     int PID, type, side; // basic analysis tags
 
+    int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
+
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("Type", &type);
     Tin->SetBranchAddress("Side", &side); 
@@ -334,6 +347,10 @@ void doForegroundSpectra (int octetMin, int octetMax)
     Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
     Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
 
+    Tin->SetBranchAddress("xeRC", &xeRC);
+    Tin->SetBranchAddress("yeRC", &yeRC);
+    Tin->SetBranchAddress("xwRC", &xwRC);
+    Tin->SetBranchAddress("ywRC", &ywRC);
 
     unsigned int nevents = Tin->GetEntriesFast();
 
@@ -371,6 +388,11 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
       
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
+
+	if ( useRCclasses ) {
+	  if ( side==0 && ( xeRC<1 || xeRC>3 || yeRC<1 || yeRC>3 ) ) continue;
+	  else if ( side==1 && ( xwRC<1 || xwRC>3 || ywRC<1 || ywRC>3 ) ) continue;
+	}
 
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
@@ -412,7 +434,7 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
     input->Close();
     if (input) delete input;
-    cout << "Finished Run " << rn << endl;
+    std::cout << "Finished Run " << rn << std::endl;
   }
 
   //Fill vectors with bin contents
@@ -505,7 +527,7 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
   outfile->Write();
   outfile->Close();
-  cout << endl;
+  std::cout << std::endl;
 
 
   /*for (int side = 0; side<2; side++) {
@@ -534,7 +556,7 @@ int main(int argc, char *argv[]) {
   vector < vector <Double_t> > triggerFunc = getTriggerFunctionParams(XePeriod,7);
   Double_t triggProbE = triggerProbability(triggerFunc[0],25.);
   Double_t triggProbW = triggerProbability(triggerFunc[1],25.);
-  cout << triggProbE << " " << triggProbW << endl;*/
+  std::cout << triggProbE << " " << triggProbW << std::endl;*/
 
 
 }
