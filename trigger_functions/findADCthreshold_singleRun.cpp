@@ -83,7 +83,7 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
   Char_t temp[500];
   std::vector < std::vector < Double_t > > peds (8,std::vector <Double_t> (2,0.));
   sprintf(temp,"%s/PMT_pedestals_%i.dat",getenv("PEDESTALS"),runNumber);
-  ifstream infile;
+  std::ifstream infile;
   infile.open(temp);
 
   Int_t i = 0;
@@ -451,7 +451,7 @@ void findDiscriminatorThresh(Int_t rn) {
   
   //Fit the probability histograms and write to file
   TString filename = TString::Format("%s/runs/%i_thresholds.dat",getenv("TRIGGER_FUNC"),run);
-  ofstream funcfile(filename.Data());
+  std::ofstream funcfile(filename.Data());
   
   std::vector <Double_t> params(8,0);
   
@@ -602,7 +602,7 @@ void findDiscriminatorThresh(Int_t rn) {
 
   //calc mean again after Adjusting Range
 
-  ofstream outWidthFile(TString::Format("%s/PMT_pedestals_%i.dat", getenv("PEDESTALS"),run).Data());
+  std::ofstream outWidthFile(TString::Format("%s/PMT_pedestals_%i.dat", getenv("PEDESTALS"),run).Data());
 
   outWidthFile << std::fixed << std::setprecision(7);
 
@@ -632,7 +632,7 @@ void loadCuts(Int_t runNumber, cuts* Cuts) {
   sprintf(tempFileCuts, "%s/cuts_%i.dat", getenv("CUTS"),runNumber);
   std::cout << "... Reading: " << tempFileCuts << std::endl;
 
-  ifstream fileCuts(tempFileCuts);
+  std::ifstream fileCuts(tempFileCuts);
   Char_t comment[500];
   fileCuts >> Cuts->cutBeamBurstTime >> comment;
   fileCuts >> Cuts->nCutsTimeWindows >> comment;
@@ -759,7 +759,7 @@ std::vector <Double_t> loadGainFactors(Int_t runNumber) {
 
   std::vector <Double_t> gainCorrection(8,1.);
   std::vector <Double_t> fitMean(8,1.);
-  ifstream fileGain(tempFileGain);
+  std::ifstream fileGain(tempFileGain);
   for (int i=0; i<8; i++) {
     fileGain >> fitMean[i] >> gainCorrection[i];
   }

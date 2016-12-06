@@ -3,13 +3,13 @@
 {
   gStyle->SetOptStat(0);
 
-  int octetStart=0;
-  int octetEnd=59;
+  int octetStart=60;
+  int octetEnd=121;
 
   TString normType = "0";
 
-  Double_t normLow = 200.;
-  Double_t normHigh = 680.;
+  Double_t normLow = 0.;
+  Double_t normHigh = 1200.;
   
   Double_t xAxisMax = 1200.;
 
@@ -156,11 +156,11 @@
   c1E->Divide(2,1);
   c1E->cd(2);
   Int_t nBins = ukALL_E->GetNbinsX();
-  Double_t min = ukALL_E->GetXaxis()->GetBinLowEdge(ukALL_E->GetXaxis()->GetFirst());
-  Double_t max = ukALL_E->GetXaxis()->GetBinUpEdge(ukALL_E->GetXaxis()->GetLast());
+  Double_t Min = ukALL_E->GetXaxis()->GetBinLowEdge(ukALL_E->GetXaxis()->GetFirst());
+  Double_t Max = ukALL_E->GetXaxis()->GetBinUpEdge(ukALL_E->GetXaxis()->GetLast());
 
   //residual
-  TH1D *residE = new TH1D("residE","East Residuals: MC-Data", nBins, min, max);
+  TH1D *residE = new TH1D("residE","East Residuals: MC-Data", nBins, Min, Max);
   residE->Add(simALL_E,ukALL_E,1,-1);
   residE->GetXaxis()->SetRangeUser(0., xAxisMax);
   residE->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -171,7 +171,7 @@
   residE->SetMarkerStyle(34);
   residE->SetMarkerSize(1.);
 
-  TH1D *perc_residE = new TH1D("perc_residE","East Fractional Residuals: (MC-Data)/MC", nBins, min, max);
+  TH1D *perc_residE = new TH1D("perc_residE","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_residE->Add(simALL_E,ukALL_E,1,-1);
   perc_residE->Divide(perc_residE,simALL_E,1.,1.);
   perc_residE->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -185,7 +185,7 @@
   //perc_residE->Draw();
   residE->Draw("P0");
   c1E->Update();
-  TLine *l = new TLine(min, 0., xAxisMax, 0.);
+  TLine *l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
   l->Draw();
 
@@ -284,12 +284,12 @@
   TCanvas *c1W = new TCanvas("c1W","c1W", 1600., 600.);
   c1W->Divide(2,1);
   c1W->cd(2);
-  Int_t nBins = ukALL_W->GetNbinsX();
-  Double_t min = ukALL_W->GetXaxis()->GetBinLowEdge(ukALL_W->GetXaxis()->GetFirst());
-  Double_t max = ukALL_W->GetXaxis()->GetBinUpEdge(ukALL_W->GetXaxis()->GetLast());
+  nBins = ukALL_W->GetNbinsX();
+  Min = ukALL_W->GetXaxis()->GetBinLowEdge(ukALL_W->GetXaxis()->GetFirst());
+  Max = ukALL_W->GetXaxis()->GetBinUpEdge(ukALL_W->GetXaxis()->GetLast());
 
   //residual
-  TH1D *residW = new TH1D("residW","West Residuals: MC-Data", nBins, min, max);
+  TH1D *residW = new TH1D("residW","West Residuals: MC-Data", nBins, Min, Max);
   residW->Add(simALL_W,ukALL_W,1.,-1.);
   residW->GetXaxis()->SetRangeUser(0., xAxisMax);
   residW->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -300,7 +300,7 @@
   residW->SetMarkerStyle(34);
   residW->SetMarkerSize(1.);
 
-  TH1D *perc_residW = new TH1D("perc_residW","West Fractional Residuals: (MC-Data)/MC", nBins, min, max);
+  TH1D *perc_residW = new TH1D("perc_residW","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_residW->Add(simALL_W,ukALL_W,1.,-1.);
   perc_residW->Divide(perc_residW,simALL_W,1.,1.);
   perc_residW->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -313,7 +313,7 @@
   //perc_residW->Draw();
   residW->Draw("P0");
   c1W->Update();
-  TLine *l2 = new TLine(min, 0., xAxisMax, 0.);
+  TLine *l2 = new TLine(Min, 0., xAxisMax, 0.);
   l2->SetLineStyle(8);
   l2->Draw();
 
