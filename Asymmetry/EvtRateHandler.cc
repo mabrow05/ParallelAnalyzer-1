@@ -321,9 +321,10 @@ void EvtRateHandler::dataReader() {
 
 	//  If the flag at the top of this file is set to true, also cut on the wirechamber
 	//  event type according to C. Swanks classifications in ELOG 629 attachment 2
+	// Right now we are only cutting RC0 events, as these are the only ones
+	// which cannot be accounted for in simulation easily
 	if ( useRCclasses ) {
-	  if ( Side==0 && ( xeRC<1 || xeRC>4 || yeRC<1 || yeRC>4 ) ) continue;
-	  else if ( Side==1 && ( xwRC<1 || xwRC>4 || ywRC<1 || ywRC>4 ) ) continue;
+	  if ( xeRC==0 || yeRC==0 || xwRC==0 || ywRC==0 ) continue;
 	}
 	
 	// Determine radial event position squared for cutting on fiducial volume
@@ -423,7 +424,10 @@ void SimEvtRateHandler::dataReader() {
   double AsymWeight=1.;
   double mwpcPosE[3]={0.};
   double mwpcPosW[3]={0.}; //holds the position of the event in the MWPC for simulated data
+  int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
 
+  nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
+  
   for ( unsigned int i=0; i<runs.size(); i++ ) {
     
     sprintf(temp,"%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runs[i]);
@@ -442,6 +446,10 @@ void SimEvtRateHandler::dataReader() {
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcPosE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcPosW);
     Tin->SetBranchAddress("AsymWeight",&AsymWeight);
+    Tin->SetBranchAddress("nClipped_EX",&nClipped_EX);
+    Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
+    Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
+    Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
     // ADD IN WIRECHAMBER ENERGY DEPOSITION
     
 
@@ -459,6 +467,9 @@ void SimEvtRateHandler::dataReader() {
 
 
       if (PID==1) {
+
+	//Clipped events
+	if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;
         
 	r2E=mwpcPosE[0]*mwpcPosE[0]+mwpcPosE[1]*mwpcPosE[1];
 	r2W=mwpcPosW[0]*mwpcPosW[0]+mwpcPosW[1]*mwpcPosW[1];

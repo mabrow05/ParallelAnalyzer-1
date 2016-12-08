@@ -162,13 +162,13 @@ int separate23(int side, double mwpcEn) {
 
 void writeCorrectionFactorsToFile(Int_t octet) {
   TString fn_base = TString::Format("DeltaExp_OctetByOctetCorrections/ThOverProc_Octet-%i_Analysis-",octet); 
-  ofstream oct; 
-  ofstream quartA;
-  ofstream quartB; 
-  ofstream pairA1; 
-  ofstream pairA2; 
-  ofstream pairB1; 
-  ofstream pairB2; 
+  std::ofstream oct; 
+  std::ofstream quartA;
+  std::ofstream quartB; 
+  std::ofstream pairA1; 
+  std::ofstream pairA2; 
+  std::ofstream pairB1; 
+  std::ofstream pairB2; 
 
   for (int i=1; i<11; i++) {
     oct.open(TString::Format("%s%i.txt",fn_base.Data(),i));
@@ -465,7 +465,7 @@ void calcDeltaExp (int octet)
 
   for (auto& runNumber : betaRuns) {
   
-    UInt_t BetaEvents = 20000000; //Number of Beta events for each beta run
+    UInt_t BetaEvents = 18000000; //Number of Beta events for each beta run
     
 
     std::cout << "Processing " << BetaEvents << " events for run " << runNumber << "...\n";
@@ -536,6 +536,10 @@ void calcDeltaExp (int octet)
     chain->SetBranchAddress("ScintPos",&scint_pos);
     chain->SetBranchAddress("primKE",&primKE);
     chain->SetBranchAddress("primTheta",&primTheta);
+    chain->SetBranchAddress("Cath_EX",Cath_EX);
+    chain->SetBranchAddress("Cath_EY",Cath_EY);
+    chain->SetBranchAddress("Cath_WX",Cath_WX);
+    chain->SetBranchAddress("Cath_WY",Cath_WY);
     //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
     //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
     //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
@@ -556,7 +560,7 @@ void calcDeltaExp (int octet)
     
     //Trigger booleans
     bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-    Double_t MWPCThreshold=0.5; // keV dep in the wirechamber.. 
+    Double_t MWPCThreshold=0.2; // keV dep in the wirechamber.. 
 
     //Set random number generator
     TRandom3 *seed = new TRandom3(runNumber); // seed generator, always same for given run for reproducibility
@@ -662,6 +666,31 @@ void calcDeltaExp (int octet)
       if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
       if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
 
+
+      // Checking for what would be seen as a clipped event in the Cathodes. Right now, this is a hard cut on 6 keV deposited on 
+      // a single wire, as was determined by just looking for where the Cathode ADC spectra started to clip as compared to 
+      // the simulated energy spectrum (done by eye, set at 6 keV for now)
+      nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
+      
+      Double_t clip_threshE = 5.;
+      Double_t clip_threshW = 4.;
+      
+      for ( UInt_t j=0; j<16; j++ ) {
+	if ( Cath_EX[j] > clip_threshE ) nClipped_EX++;
+	if ( Cath_EY[j] > clip_threshE ) nClipped_EY++;
+	if ( Cath_WX[j] > clip_threshW ) nClipped_WX++;
+	if ( Cath_WY[j] > clip_threshW ) nClipped_WY++;
+      }
+
+      //If there is clipping, or no wirechamber trigger, skip the event
+      if ( nClipped_EX>0 || nClipped_EY>0 ||
+	   nClipped_WX>0 || nClipped_WY>0 ||
+	   !(EMWPCTrigger || WMWPCTrigger) ) {
+	evt++;
+	if (evt%100000==0) {std::cout << evt << std::endl;}
+	continue;
+      }
+      
       Double_t pmtEnergyLowerLimit = 1.; //To put a hard cut on the weight
     
       std::vector<Double_t> ADCvecE(4,0.);
@@ -907,7 +936,7 @@ void calcDeltaExp (int octet)
       // Filling rate histograms with "good" events to calculate the corrections
 
       
-      if ( PID==1 && side<2 && type<4 && Erecon>0.) {
+      if ( PID==1 && side<2 && type<4 && Erecon>0. ) {
 
 	evtTally++;
 

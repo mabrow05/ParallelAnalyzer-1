@@ -42,7 +42,7 @@ void TriggerMap::setBinValues() {
 void TriggerMap::readTriggerMap(Int_t XeRunPeriod) {
   XePeriod = XeRunPeriod;
   std::string file = std::string(getenv("TRIGGER_FUNC")) + "/trigger_functions_XePeriod_"+itos(XePeriod)+"_"+ftos(binWidth)+"mm_East" + ".dat";
-  ifstream infile(file.c_str());
+  std::ifstream infile(file.c_str());
 
   Int_t binValx, binValy;
   std::vector <Double_t> p(8,0.);
@@ -124,7 +124,7 @@ void TriggerMap::writeTriggerMap(Int_t XeRunPeriod) {
   XePeriod = XeRunPeriod;
   std::string file = std::string(getenv("TRIGGER_FUNC")) + "/trigger_functions_XePeriod_"+itos(XePeriod)+"_"+ftos(binWidth)+"mm_East" + ".dat";
   std::cout << file << std::endl;
-  ofstream ofile(file.c_str());
+  std::ofstream ofile(file.c_str());
   
   for (Int_t xbin=0; xbin<nBinsXY; xbin++) {
     for (Int_t ybin=0; ybin<nBinsXY; ybin++) {

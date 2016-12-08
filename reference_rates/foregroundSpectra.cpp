@@ -67,8 +67,8 @@ int separate23(int side, double mwpcEn) {
 void writeRatesToFile(int octMin, int octMax) {
   
   TString fn_base = TString::Format("foregroundRatesByAnaChoice/ReferenceSpectra_Octets-%i-%i_",octMin,octMax);
-  ofstream sf_ON;
-  ofstream sf_OFF;
+  std::ofstream sf_ON;
+  std::ofstream sf_OFF;
   
   for (int anaCh=0; anaCh<10; anaCh++) {
     sf_ON.open(TString::Format("%ssfON-AnaCh-%s.txt",fn_base.Data(),anaChoice[anaCh].Data()).Data());
@@ -256,8 +256,12 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0.) {
 	
-	if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
+	//if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
+	if (t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue; //Clipped events
 
+	if ( useRCclasses ) {
+	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
+	}
 	
 	r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
 	r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
@@ -350,8 +354,12 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0.) {
 	
-	if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
+	//if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
+	if (t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue; //Clipped events
 
+	if ( useRCclasses ) {
+	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
+	}
 	
 	r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
 	r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
