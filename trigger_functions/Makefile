@@ -27,8 +27,8 @@ findADCthreshold.exe: findADCthreshold.o
 	$(CXX) $(CXXFLAGS) -o findADCthreshold.exe findADCthreshold.o $(LIBS)
 	@echo "Done"
 
-findADCthreshold_singleRun.exe: findADCthreshold_singleRun.o
-	$(CXX) $(CXXFLAGS) -o findADCthreshold_singleRun.exe findADCthreshold_singleRun.o $(LIBS)
+findADCthreshold_singleRun.exe: findADCthreshold_singleRun.o DataTree.o
+	$(CXX) $(CXXFLAGS) -o findADCthreshold_singleRun.exe findADCthreshold_singleRun.o DataTree.o $(LIBS)
 	@echo "Done"
 
 findDiscriminatorThresh.exe: findDiscriminatorThresh.o MBUtils.o 
@@ -40,6 +40,8 @@ MBUtils.o: MBUtils.hh
 calibrationTools.o: calibrationTools.hh
 
 TriggerMap.o: TriggerMap.hh MBUtils.o
+
+DataTree.o: DataTree.hh
 
 
 

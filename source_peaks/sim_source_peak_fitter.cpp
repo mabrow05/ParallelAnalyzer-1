@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
     Int_t PID, type, side;
     Double_t Evis[2];
     ScintPosAdjusted pos;
-
+    Int_t nClipped_EX=0, nClipped_EY=0, nClipped_WX=0, nClipped_WY=0;
     // Variables
     Tin->SetBranchAddress("PMT",&pmt);
     Tin->SetBranchAddress("Erecon", &Erecon); 
@@ -221,6 +221,10 @@ int main(int argc, char *argv[])
     Tin->SetBranchAddress("PID",  &PID);
     Tin->SetBranchAddress("type", &type);
     Tin->SetBranchAddress("side", &side);
+    Tin->SetBranchAddress("nClipped_EX", &nClipped_EX);
+    Tin->SetBranchAddress("nClipped_EY", &nClipped_EY);
+    Tin->SetBranchAddress("nClipped_WX", &nClipped_WX);
+    Tin->SetBranchAddress("nClipped_WY", &nClipped_WY);
 
     int nEvents = Tin->GetEntries();
     cout << "Processing " << argv[1] << " ... " << endl;
@@ -232,6 +236,9 @@ int main(int argc, char *argv[])
       
       // Use Type 0 events
       if (type != 0 || PID!=1) continue;
+
+      // Cut the clipped events
+      if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue; 
 
       eta = posmap.getInterpolatedEta(pos.ScintPosAdjE[0], pos.ScintPosAdjE[1], pos.ScintPosAdjW[0], pos.ScintPosAdjW[1]);
       

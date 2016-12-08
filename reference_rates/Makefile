@@ -19,12 +19,12 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-backgroundSpectra.exe: backgroundSpectra.o MBUtils.o  
-	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o MBUtils.o $(LIBS)
+backgroundSpectra.exe: backgroundSpectra.o MBUtils.o DataTree.o 
+	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o MBUtils.o DataTree.o $(LIBS)
 	@echo "Done"
 
-foregroundSpectra.exe: foregroundSpectra.o MBUtils.o  
-	$(CXX) $(CXXFLAGS) -o foregroundSpectra.exe foregroundSpectra.o MBUtils.o $(LIBS)
+foregroundSpectra.exe: foregroundSpectra.o MBUtils.o DataTree.o
+	$(CXX) $(CXXFLAGS) -o foregroundSpectra.exe foregroundSpectra.o MBUtils.o DataTree.o $(LIBS)
 	@echo "Done"
 
 SIM_foregroundSpectra.exe: SIM_foregroundSpectra.o MBUtils.o  
@@ -32,6 +32,8 @@ SIM_foregroundSpectra.exe: SIM_foregroundSpectra.o MBUtils.o
 	@echo "Done"
 
 MBUtils.o: MBUtils.hh
+
+DataTree.o: DataTree.hh
 
 
 

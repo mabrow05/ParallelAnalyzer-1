@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 		       
     //bg.calcBGSubtRates();
     
-    /*TString aCh[3] = {"D","F","G"};
+    /*TString aCh[4] = {"A","D","F","G"};
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);

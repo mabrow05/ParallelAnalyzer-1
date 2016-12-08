@@ -3,6 +3,8 @@
 
 #include <map>
 #include <string>
+#include <vector>
+#include <iostream>
 
 
 
@@ -114,7 +116,7 @@ public:
   double returnTotalAsymmetryError_QuartetA() {return totalAsymmetryErrorA;}
   double returnTotalAsymmetry_QuartetB() {return totalAsymmetryB;}
   double returnTotalAsymmetryError_QuartetB() {return totalAsymmetryErrorB;}
-  bool boolGoodQuartet(Int_t quart) {return isGoodQuartet[quart];}
+  bool boolGoodQuartet(int quart) {return isGoodQuartet[quart];}
   bool isSuperSum() {return boolSuperSum;}
   bool isAsymmetry() {return boolAsymmetry;}
 
@@ -157,7 +159,7 @@ public:
   double returnTotalAsymmetryError_PairA1() {return totalAsymmetryErrorA1;}
   double returnTotalAsymmetry_PairB1() {return totalAsymmetryB1;}
   double returnTotalAsymmetryError_PairB1() {return totalAsymmetryErrorB1;}
-  bool boolGoodPair(Int_t quart, Int_t pair) {return isGoodPair[quart][pair];}
+  bool boolGoodPair(int quart, int pair) {return isGoodPair[quart][pair];}
   bool isSuperSum() {return boolSuperSum;}
   bool isAsymmetry() {return boolAsymmetry;}
   

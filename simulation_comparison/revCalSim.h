@@ -5,6 +5,8 @@ double primKE, AsymWeight, primTheta; // initial energy from simulation
 
 double Erecon; // smeared, weighted, and trigger func corrected energy summed over two sides scint and MWPC energy
 
+int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY; // Clipping numbers
+
 struct Evis {
   double EvisE;
   double EvisW;

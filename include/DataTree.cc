@@ -42,10 +42,10 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   outputTree->Branch("yE",&yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
   outputTree->Branch("xW",&xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
   outputTree->Branch("yW",&yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
-  outputTree->Branch("Cathodes_Ex",&Cathodes_Ex,"Cathodes_Ex/D");
-  outputTree->Branch("Cathodes_Ey",&Cathodes_Ey,"Cathodes_Ey/D");
-  outputTree->Branch("Cathodes_Wx",&Cathodes_Wx,"Cathodes_Wx/D");
-  outputTree->Branch("Cathodes_Wy",&Cathodes_Wy,"Cathodes_Wy/D");
+  outputTree->Branch("Cathodes_Ex",&Cathodes_Ex,"Cathodes_Ex[16]/D");
+  outputTree->Branch("Cathodes_Ey",&Cathodes_Ey,"Cathodes_Ey[16]/D");
+  outputTree->Branch("Cathodes_Wx",&Cathodes_Wx,"Cathodes_Wx[16]/D");
+  outputTree->Branch("Cathodes_Wy",&Cathodes_Wy,"Cathodes_Wy[16]/D");
   outputTree->Branch("ScintE", &ScintE, "q1/D:q2:q3:q4:e1:de1:e2:de2:e3:de3:e4:de4:energy:denergy:nPE1:nPE2:nPE3:nPE4");
   outputTree->Branch("ScintW", &ScintW, "q1/D:q2:q3:q4:e1:de1:e2:de2:e3:de3:e4:de4:energy:denergy:nPE1:nPE2:nPE3:nPE4");
   outputTree->Branch("EvisE",&EvisE,"EvisE/D");

@@ -8,10 +8,10 @@
 
   TString normType = "ALL";
 
-  Double_t normLow = 150.;
-  Double_t normHigh = 680.;
+  Double_t normLow = 0.;
+  Double_t normHigh = 1200.;
   
-  Double_t xAxisMax = 800.;
+  Double_t xAxisMax = 1200.;
 
 
   TString fileBase = "superSumPlots/SuperSum_octets_";
@@ -63,8 +63,8 @@
   resid->Add(simALL,ukALL,100,-100);
   resid->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  resid->SetMaximum(.2);
-  resid->SetMinimum(-.2);
+  //resid->SetMaximum(1.2);
+  //resid->SetMinimum(-1.2);
   resid->SetLineWidth(2);
 
   TH1D *perc_resid = new TH1D("perc_resid","Fractional Residuals: (MC-Data)/MC", nBins, min, max);
@@ -77,7 +77,7 @@
   perc_resid->SetLineWidth(2);
 
 
-  perc_resid->Draw();
+  resid->Draw();
   c1->Update();
   TLine *l = new TLine(min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
@@ -87,8 +87,8 @@
   
   ukALL->SetMarkerColor(kBlue);
   ukALL->SetLineColor(kBlue);
-  ukALL->SetFillStyle(3002);
-  ukALL->SetFillColor(kBlue);
+  //ukALL->SetFillStyle(3002);
+  //ukALL->SetFillColor(kBlue);
   ukALL->SetLineWidth(3);
   simALL->SetMarkerColor(kRed);
   simALL->SetLineColor(kRed);
@@ -98,8 +98,9 @@
   ukALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
   ukALL->Scale(100.);
   simALL->Scale(100.);
+  ukALL->SetMaximum(ukALL->GetMaximum()*1.2);
   simALL->GetXaxis()->SetRangeUser(0., xAxisMax);
-  ukALL->Draw("BARE0");
+  ukALL->Draw("HISTE0");
   simALL->Draw("SAMEE0");
 
 
@@ -111,8 +112,8 @@
 
   uk0->SetMarkerColor(kBlue);
   uk0->SetLineColor(kBlue);
-  uk0->SetFillStyle(3002);
-  uk0->SetFillColor(kBlue);
+  //uk0->SetFillStyle(3002);
+  //uk0->SetFillColor(kBlue);
   uk0->SetLineWidth(3);
   sim0->SetMarkerColor(kRed);
   sim0->SetLineColor(kRed);
@@ -122,8 +123,9 @@
   uk0->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk0->Scale(100.);
   sim0->Scale(100.*normFactor);
+  uk0->SetMaximum(uk0->GetMaximum()*1.2);
   sim0->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk0->Draw("BARE0");
+  uk0->Draw("HISTE0");
   sim0->Draw("SAMEE0");
   
   c2->cd(2);
@@ -131,8 +133,8 @@
 
   uk1->SetMarkerColor(kBlue);
   uk1->SetLineColor(kBlue);
-  uk1->SetFillStyle(3002);
-  uk1->SetFillColor(kBlue);
+  //uk1->SetFillStyle(3002);
+  //uk1->SetFillColor(kBlue);
   uk1->SetLineWidth(3);
   uk1->SetMinimum(0.);
   sim1->SetMarkerColor(kRed);
@@ -143,8 +145,9 @@
   uk1->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk1->Scale(100.);
   sim1->Scale(100.*normFactor);
+  uk1->SetMaximum(uk1->GetMaximum()*1.2);
   sim1->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk1->Draw("BARE0");
+  uk1->Draw("HISTE0");
   sim1->Draw("SAMEE0");
   
 
@@ -155,8 +158,8 @@
   
   uk23->SetMarkerColor(kBlue);
   uk23->SetLineColor(kBlue);
-  uk23->SetFillStyle(3002);
-  uk23->SetFillColor(kBlue);
+  //uk23->SetFillStyle(3002);
+  //uk23->SetFillColor(kBlue);
   uk23->SetLineWidth(3);
   uk23->SetMinimum(0.);
   sim23->SetMarkerColor(kRed);
@@ -167,8 +170,9 @@
   uk23->GetYaxis()->SetTitle("event rate (mHz/keV)");
   uk23->Scale(100.);
   sim23->Scale(100.*normFactor);
+  uk23->SetMaximum(uk23->GetMaximum()*1.2);
   sim23->GetXaxis()->SetRangeUser(0., xAxisMax);
-  uk23->Draw("BARE0");
+  uk23->Draw("HISTE0");
   sim23->Draw("SAMEE0");
 
 

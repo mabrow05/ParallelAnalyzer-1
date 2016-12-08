@@ -19,19 +19,10 @@
 #include <TLeaf.h>
 #include <TMath.h>
 
+#include "DataTree.hh"
 
-struct MWPC {
-  Double_t center;
-  Double_t width;
-  Double_t cathSum;
-  Double_t maxValue;
-  Int_t maxWire;
-  Int_t mult;
-  Int_t nClipped;
-  Int_t err;
-  Double_t rawCenter;
-  Double_t height;
-};
+
+
 
 struct cuts {
   double cutBeamBurstTime; // Beam Burst T0
@@ -101,12 +92,12 @@ void findDiscriminatorThresh(Int_t rn) {
 
   Int_t run = rn;
   
-  TFile *f = NULL;
-  TTree *t = NULL;
+  //TFile *f = NULL;
+  //TTree *t = NULL;
 
-  Double_t lower_limit = -49.5;
+  Double_t lower_limit = -59.5;
   Int_t hisBinWidth = 2;
-  Double_t upper_limit = 150.5;
+  Double_t upper_limit = 159.5;
   Int_t nBins = (int)((upper_limit-lower_limit)/hisBinWidth);
   //nBins = 100;
 
@@ -154,12 +145,12 @@ void findDiscriminatorThresh(Int_t rn) {
     
 
   // All pertinent variables to be read in from data files
-  Float_t QadcE1, QadcE2, QadcE3, QadcE4, QadcW1, QadcW2, QadcW3, QadcW4;
+  /*  Float_t QadcE1, QadcE2, QadcE3, QadcE4, QadcW1, QadcW2, QadcW3, QadcW4;
   Float_t PdcWest, PdcEast; //Wirechamber Anode values
   Float_t TdcE1, TdcE2, TdcE3, TdcE4, TdcW1, TdcW2, TdcW3, TdcW4; 
   Float_t TdcEast2fold, TdcWest2fold;
   Float_t Sis00;
-  
+  */
   //Load cuts for this run
   cuts Cuts;
   loadCuts(run,&Cuts);
@@ -168,46 +159,24 @@ void findDiscriminatorThresh(Int_t rn) {
   std::vector <Double_t> gain = loadGainFactors(run);
     
 	 
-  f = new TFile(TString::Format("%s/full%i.root",getenv("UCNA_RAW_DATA"),run),"READ");
-  t = (TTree*)(f->Get("h1"));
+  DataTree *t = new DataTree();
 
-  // Variables
-  t->SetBranchAddress("Pdc30",  &PdcEast);
-  t->SetBranchAddress("Pdc34",  &PdcWest);
-    
-  t->SetBranchAddress("Tdc016", &TdcEast2fold);
-  t->SetBranchAddress("Tdc017", &TdcWest2fold);
-  t->SetBranchAddress("Tdc00", &TdcE1);
-  t->SetBranchAddress("Tdc01", &TdcE2);
-  t->SetBranchAddress("Tdc02", &TdcE3);
-  t->SetBranchAddress("Tdc03", &TdcE4);
-  t->SetBranchAddress("Tdc08", &TdcW1);
-  t->SetBranchAddress("Tdc09", &TdcW2);
-  t->SetBranchAddress("Tdc014", &TdcW3);
-  t->SetBranchAddress("Tdc011", &TdcW4);
-    
-  t->SetBranchAddress("Sis00",  &Sis00);
-    
-  t->SetBranchAddress("Qadc0",  &QadcE1);
-  t->SetBranchAddress("Qadc1",  &QadcE2);
-  t->SetBranchAddress("Qadc2",  &QadcE3);
-  t->SetBranchAddress("Qadc3",  &QadcE4);
-  t->SetBranchAddress("Qadc4",  &QadcW1);
-  t->SetBranchAddress("Qadc5",  &QadcW2);
-  t->SetBranchAddress("Qadc6",  &QadcW3);
-  t->SetBranchAddress("Qadc7",  &QadcW4);
+  char tempIn[500];
+  sprintf(tempIn, "%s/replay_pass1_%i.root", getenv("REPLAY_PASS1"),rn);
+  //sprintf(tempIn, "../replay_pass1/replay_pass1_%s.root", argv[1]);
+  t->setupInputTree(std::string(tempIn),"pass1");
 
   
   
     
-  Int_t nevents = t->GetEntries();
+  Int_t nevents = t->getEntries();
     
   std::cout << "nEvents = " << nevents << std::endl;
 
   for (int evt=0; evt<nevents; evt++) {
       
-    t->GetEvent(evt);
-    Int_t iSis00 = (int)Sis00;
+    t->getEvent(evt);
+    Int_t iSis00 = t->Sis00;
 
     if (evt%100000==0) std::cout << evt << " in run " << run << std::endl;
 
@@ -221,25 +190,25 @@ void findDiscriminatorThresh(Int_t rn) {
       
 
     // East Side Triggers (including backscatters)
-    if ( iSis00==1 ) {  //TdcEast2fold > 0.00001 ) {
+    if ( iSis00==1 ) { //&& t->xeRC>0 && t->xeRC<4 && t->yeRC>0 && t->yeRC<4 ) {  //TdcEast2fold > 0.00001 ) {
 
       //Fill West side total histograms
       //if (PdcWest>Cuts.cutWestAnode) {
       //std::cout <<  (QadcW1-peds[4][0])*gain[4] << std::endl;
 
-      totalW1->Fill((QadcW1-peds[4][0])*gain[4]);
-      totalW2->Fill((QadcW2-peds[5][0])*gain[5]);
-      totalW3->Fill((QadcW3-peds[6][0])*gain[6]);
-      totalW4->Fill((QadcW4-peds[7][0])*gain[7]);
+      totalW1->Fill((t->ScintW.q1)*gain[4]);
+      totalW2->Fill((t->ScintW.q2)*gain[5]);
+      totalW3->Fill((t->ScintW.q3)*gain[6]);
+      totalW4->Fill((t->ScintW.q4)*gain[7]);
       
-      if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-peds[4][0])*gain[4]);//-pedW1)*gainW1);
-      else pedW1->Fill((QadcW1-peds[4][0])*gain[4]);
-      if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-peds[5][0])*gain[5]);//-pedW2)*gainW2);
-      else pedW2->Fill((QadcW2-peds[5][0])*gain[5]);
-      if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-peds[6][0])*gain[6]);//-pedW3)*gainW3);
-      else pedW3->Fill((QadcW3-peds[6][0])*gain[6]);
-      if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-peds[7][0])*gain[7]);//-pedW4)*gainW4);
-      else pedW4->Fill((QadcW4-peds[7][0])*gain[7]);
+      if ( t->TDCW1>0.00001 ) triggerW1->Fill((t->ScintW.q1)*gain[4]);//-pedW1)*gainW1);
+      else pedW1->Fill((t->ScintW.q1)*gain[4]);
+      if ( t->TDCW2>0.00001 ) triggerW2->Fill((t->ScintW.q2)*gain[5]);//-pedW2)*gainW2);
+      else pedW2->Fill((t->ScintW.q2)*gain[5]);
+      if ( t->TDCW3>0.00001 ) triggerW3->Fill((t->ScintW.q3)*gain[6]);//-pedW3)*gainW3);
+      else pedW3->Fill((t->ScintW.q3)*gain[6]);
+      if ( t->TDCW4>0.00001 ) triggerW4->Fill((t->ScintW.q4)*gain[7]);//-pedW4)*gainW4);
+      else pedW4->Fill((t->ScintW.q4)*gain[7]);
       //}
       
       
@@ -247,111 +216,111 @@ void findDiscriminatorThresh(Int_t rn) {
       
       
       //3 PMTs trigger
-      if ( (TdcE1>0.00001 && TdcE2>0.00001 && TdcE3>0.00001) || (TdcE2>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE2>0.00001 && TdcE4>0.00001) ) { 
+      if ( (t->TDCE1>0.00001 && t->TDCE2>0.00001 && t->TDCE3>0.00001) || (t->TDCE2>0.00001 && t->TDCE3>0.00001 && t->TDCE4>0.00001) || (t->TDCE1>0.00001 && t->TDCE3>0.00001 && t->TDCE4>0.00001) || (t->TDCE1>0.00001 && t->TDCE2>0.00001 && t->TDCE4>0.00001) ) { 
 	
 	//East side 3-fold trigger events
-	totalE1->Fill((QadcE1-peds[0][0])*gain[0]);
-	totalE2->Fill((QadcE2-peds[1][0])*gain[1]);
-	totalE3->Fill((QadcE3-peds[2][0])*gain[2]);
-	totalE4->Fill((QadcE4-peds[3][0])*gain[3]);
+	totalE1->Fill((t->ScintE.q1)*gain[0]);
+	totalE2->Fill((t->ScintE.q2)*gain[1]);
+	totalE3->Fill((t->ScintE.q3)*gain[2]);
+	totalE4->Fill((t->ScintE.q4)*gain[3]);
 	
-	if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-peds[0][0])*gain[0]);//-pedE1)*gainE1);
-	else pedE1->Fill((QadcE1-peds[0][0])*gain[0]);
-	if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-peds[1][0])*gain[1]);//-pedE2)*gainE2);
-	else pedE2->Fill((QadcE2-peds[1][0])*gain[1]);
-	if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-peds[2][0])*gain[2]);//-pedE3)*gainE3);
-	else pedE3->Fill((QadcE3-peds[2][0])*gain[2]);
-	if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-peds[3][0])*gain[3]);//-pedE4)*gainE4);
-	else pedE4->Fill((QadcE4-peds[3][0])*gain[3]);
+	if ( t->TDCE1>0.00001 ) triggerE1->Fill((t->ScintE.q1)*gain[0]);//-pedE1)*gainE1);
+	else pedE1->Fill((t->ScintE.q1)*gain[0]);
+	if ( t->TDCE2>0.00001 ) triggerE2->Fill((t->ScintE.q2)*gain[1]);//-pedE2)*gainE2);
+	else pedE2->Fill((t->ScintE.q2)*gain[1]);
+	if ( t->TDCE3>0.00001 ) triggerE3->Fill((t->ScintE.q3)*gain[2]);//-pedE3)*gainE3);
+	else pedE3->Fill((t->ScintE.q3)*gain[2]);
+	if ( t->TDCE4>0.00001 ) triggerE4->Fill((t->ScintE.q4)*gain[3]);//-pedE4)*gainE4);
+	else pedE4->Fill((t->ScintE.q4)*gain[3]);
 
       }
       
     }
     
     // West Side Triggers (including backscatters)
-    if ( iSis00==2  )  { //TdcWest2fold > 0.00001 ) {
+    if ( iSis00==2 ) { //&& t->xwRC>0 && t->xwRC<4 && t->ywRC>0 && t->ywRC<4 )  { //t->TDCWest2fold > 0.00001 ) {
       
       //Fill East side total histograms
       //if (PdcEast>Cuts.cutEastAnode) {
-      totalE1->Fill((QadcE1-peds[0][0])*gain[0]);
-      totalE2->Fill((QadcE2-peds[1][0])*gain[1]);
-      totalE3->Fill((QadcE3-peds[2][0])*gain[2]);
-      totalE4->Fill((QadcE4-peds[3][0])*gain[3]);
+      totalE1->Fill((t->ScintE.q1)*gain[0]);
+      totalE2->Fill((t->ScintE.q2)*gain[1]);
+      totalE3->Fill((t->ScintE.q3)*gain[2]);
+      totalE4->Fill((t->ScintE.q4)*gain[3]);
       
-      if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-peds[0][0])*gain[0]);//-pedE1)*gainE1);
-      else pedE1->Fill((QadcE1-peds[0][0])*gain[0]);
-      if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-peds[1][0])*gain[1]);//-pedE2)*gainE2);
-      else pedE2->Fill((QadcE2-peds[1][0])*gain[1]);
-      if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-peds[2][0])*gain[2]);//-pedE3)*gainE3);
-      else pedE3->Fill((QadcE3-peds[2][0])*gain[2]);
-      if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-peds[3][0])*gain[3]);//-pedE4)*gainE4);
-      else pedE4->Fill((QadcE4-peds[3][0])*gain[3]);
+      if ( t->TDCE1>0.00001 ) triggerE1->Fill((t->ScintE.q1)*gain[0]);//-pedE1)*gainE1);
+      else pedE1->Fill((t->ScintE.q1)*gain[0]);
+      if ( t->TDCE2>0.00001 ) triggerE2->Fill((t->ScintE.q2)*gain[1]);//-pedE2)*gainE2);
+      else pedE2->Fill((t->ScintE.q2)*gain[1]);
+      if ( t->TDCE3>0.00001 ) triggerE3->Fill((t->ScintE.q3)*gain[2]);//-pedE3)*gainE3);
+      else pedE3->Fill((t->ScintE.q3)*gain[2]);
+      if ( t->TDCE4>0.00001 ) triggerE4->Fill((t->ScintE.q4)*gain[3]);//-pedE4)*gainE4);
+      else pedE4->Fill((t->ScintE.q4)*gain[3]);
       //}
       
       
-      if ( (TdcW1>0.00001 && TdcW2>0.00001 && TdcW3>0.00001) || (TdcW2>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW2>0.00001 && TdcW4>0.00001) ) { 
+      if ( (t->TDCW1>0.00001 && t->TDCW2>0.00001 && t->TDCW3>0.00001) || (t->TDCW2>0.00001 && t->TDCW3>0.00001 && t->TDCW4>0.00001) || (t->TDCW1>0.00001 && t->TDCW3>0.00001 && t->TDCW4>0.00001) || (t->TDCW1>0.00001 && t->TDCW2>0.00001 && t->TDCW4>0.00001) ) { 
 	
 	//West side events
-	totalW1->Fill((QadcW1-peds[4][0])*gain[4]);
-	totalW2->Fill((QadcW2-peds[5][0])*gain[5]);
-	totalW3->Fill((QadcW3-peds[6][0])*gain[6]);
-	totalW4->Fill((QadcW4-peds[7][0])*gain[7]);
+	totalW1->Fill((t->ScintW.q1)*gain[4]);
+	totalW2->Fill((t->ScintW.q2)*gain[5]);
+	totalW3->Fill((t->ScintW.q3)*gain[6]);
+	totalW4->Fill((t->ScintW.q4)*gain[7]);
       
-	if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-peds[4][0])*gain[4]);//-pedW1)*gainW1);
-	else pedW1->Fill((QadcW1-peds[4][0])*gain[4]);
-	if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-peds[5][0])*gain[5]);//-pedW2)*gainW2);
-	else pedW2->Fill((QadcW2-peds[5][0])*gain[5]);
-	if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-peds[6][0])*gain[6]);//-pedW3)*gainW3);
-	else pedW3->Fill((QadcW3-peds[6][0])*gain[6]);
-	if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-peds[7][0])*gain[7]);//-pedW4)*gainW4);
-	else pedW4->Fill((QadcW4-peds[7][0])*gain[7]);
+	if ( t->TDCW1>0.00001 ) triggerW1->Fill((t->ScintW.q1)*gain[4]);//-pedW1)*gainW1);
+	else pedW1->Fill((t->ScintW.q1)*gain[4]);
+	if ( t->TDCW2>0.00001 ) triggerW2->Fill((t->ScintW.q2)*gain[5]);//-pedW2)*gainW2);
+	else pedW2->Fill((t->ScintW.q2)*gain[5]);
+	if ( t->TDCW3>0.00001 ) triggerW3->Fill((t->ScintW.q3)*gain[6]);//-pedW3)*gainW3);
+	else pedW3->Fill((t->ScintW.q3)*gain[6]);
+	if ( t->TDCW4>0.00001 ) triggerW4->Fill((t->ScintW.q4)*gain[7]);//-pedW4)*gainW4);
+	else pedW4->Fill((t->ScintW.q4)*gain[7]);
 	  
       }
     }
 
-    if (iSis00==3) {
+    if (iSis00==3) { // && t->xeRC>0 && t->xeRC<4 && t->yeRC>0 && t->yeRC<4 && t->xwRC>0 && t->xwRC<4 && t->ywRC>0 && t->ywRC<4) {
       
-      if ( (TdcE1>0.00001 && TdcE2>0.00001 && TdcE3>0.00001) || (TdcE2>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE3>0.00001 && TdcE4>0.00001) || (TdcE1>0.00001 && TdcE2>0.00001 && TdcE4>0.00001) ) { 
+      if ( (t->TDCE1>0.00001 && t->TDCE2>0.00001 && t->TDCE3>0.00001) || (t->TDCE2>0.00001 && t->TDCE3>0.00001 && t->TDCE4>0.00001) || (t->TDCE1>0.00001 && t->TDCE3>0.00001 && t->TDCE4>0.00001) || (t->TDCE1>0.00001 && t->TDCE2>0.00001 && t->TDCE4>0.00001) ) { 
 	
 	//East side 3-fold trigger events
-	totalE1->Fill((QadcE1-peds[0][0])*gain[0]);
-	totalE2->Fill((QadcE2-peds[1][0])*gain[1]);
-	totalE3->Fill((QadcE3-peds[2][0])*gain[2]);
-	totalE4->Fill((QadcE4-peds[3][0])*gain[3]);
+	totalE1->Fill((t->ScintE.q1)*gain[0]);
+	totalE2->Fill((t->ScintE.q2)*gain[1]);
+	totalE3->Fill((t->ScintE.q3)*gain[2]);
+	totalE4->Fill((t->ScintE.q4)*gain[3]);
 	
-	if ( TdcE1>0.00001 ) triggerE1->Fill((QadcE1-peds[0][0])*gain[0]);//-pedE1)*gainE1);
-	else pedE1->Fill((QadcE1-peds[0][0])*gain[0]);
-	if ( TdcE2>0.00001 ) triggerE2->Fill((QadcE2-peds[1][0])*gain[1]);//-pedE2)*gainE2);
-	else pedE2->Fill((QadcE2-peds[1][0])*gain[1]);
-	if ( TdcE3>0.00001 ) triggerE3->Fill((QadcE3-peds[2][0])*gain[2]);//-pedE3)*gainE3);
-	else pedE3->Fill((QadcE3-peds[2][0])*gain[2]);
-	if ( TdcE4>0.00001 ) triggerE4->Fill((QadcE4-peds[3][0])*gain[3]);//-pedE4)*gainE4);
-	else pedE4->Fill((QadcE4-peds[3][0])*gain[3]);
+	if ( t->TDCE1>0.00001 ) triggerE1->Fill((t->ScintE.q1)*gain[0]);//-pedE1)*gainE1);
+	else pedE1->Fill((t->ScintE.q1)*gain[0]);
+	if ( t->TDCE2>0.00001 ) triggerE2->Fill((t->ScintE.q2)*gain[1]);//-pedE2)*gainE2);
+	else pedE2->Fill((t->ScintE.q2)*gain[1]);
+	if ( t->TDCE3>0.00001 ) triggerE3->Fill((t->ScintE.q3)*gain[2]);//-pedE3)*gainE3);
+	else pedE3->Fill((t->ScintE.q3)*gain[2]);
+	if ( t->TDCE4>0.00001 ) triggerE4->Fill((t->ScintE.q4)*gain[3]);//-pedE4)*gainE4);
+	else pedE4->Fill((t->ScintE.q4)*gain[3]);
 	
       }
 
       
-      if ( (TdcW1>0.00001 && TdcW2>0.00001 && TdcW3>0.00001) || (TdcW2>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW3>0.00001 && TdcW4>0.00001) || (TdcW1>0.00001 && TdcW2>0.00001 && TdcW4>0.00001) ) { 
+      if ( (t->TDCW1>0.00001 && t->TDCW2>0.00001 && t->TDCW3>0.00001) || (t->TDCW2>0.00001 && t->TDCW3>0.00001 && t->TDCW4>0.00001) || (t->TDCW1>0.00001 && t->TDCW3>0.00001 && t->TDCW4>0.00001) || (t->TDCW1>0.00001 && t->TDCW2>0.00001 && t->TDCW4>0.00001) ) { 
 	
 	//West side events
-	totalW1->Fill((QadcW1-peds[4][0])*gain[4]);
-	totalW2->Fill((QadcW2-peds[5][0])*gain[5]);
-	totalW3->Fill((QadcW3-peds[6][0])*gain[6]);
-	totalW4->Fill((QadcW4-peds[7][0])*gain[7]);
+	totalW1->Fill((t->ScintW.q1)*gain[4]);
+	totalW2->Fill((t->ScintW.q2)*gain[5]);
+	totalW3->Fill((t->ScintW.q3)*gain[6]);
+	totalW4->Fill((t->ScintW.q4)*gain[7]);
 	
-	if ( TdcW1>0.00001 ) triggerW1->Fill((QadcW1-peds[4][0])*gain[4]);//-pedW1)*gainW1);
-	else pedW1->Fill((QadcW1-peds[4][0])*gain[4]);
-	if ( TdcW2>0.00001 ) triggerW2->Fill((QadcW2-peds[5][0])*gain[5]);//-pedW2)*gainW2);
-	else pedW2->Fill((QadcW2-peds[5][0])*gain[5]);
-	if ( TdcW3>0.00001 ) triggerW3->Fill((QadcW3-peds[6][0])*gain[6]);//-pedW3)*gainW3);
-	else pedW3->Fill((QadcW3-peds[6][0])*gain[6]);
-	if ( TdcW4>0.00001 ) triggerW4->Fill((QadcW4-peds[7][0])*gain[7]);//-pedW4)*gainW4);
-	else pedW4->Fill((QadcW4-peds[7][0])*gain[7]);
+	if ( t->TDCW1>0.00001 ) triggerW1->Fill((t->ScintW.q1)*gain[4]);//-pedW1)*gainW1);
+	else pedW1->Fill((t->ScintW.q1)*gain[4]);
+	if ( t->TDCW2>0.00001 ) triggerW2->Fill((t->ScintW.q2)*gain[5]);//-pedW2)*gainW2);
+	else pedW2->Fill((t->ScintW.q2)*gain[5]);
+	if ( t->TDCW3>0.00001 ) triggerW3->Fill((t->ScintW.q3)*gain[6]);//-pedW3)*gainW3);
+	else pedW3->Fill((t->ScintW.q3)*gain[6]);
+	if ( t->TDCW4>0.00001 ) triggerW4->Fill((t->ScintW.q4)*gain[7]);//-pedW4)*gainW4);
+	else pedW4->Fill((t->ScintW.q4)*gain[7]);
       }
     }
     
   }
-  f->Close();
+  delete t;
 
 
 
@@ -686,7 +655,7 @@ std::vector <Double_t> fitThreshold(TGraphAsymmErrors *trigg, std::vector <Doubl
   bool defaultParams = true;
   if (params.size()==8) defaultParams = false;
 
-  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-30.,150.);
+  TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))*(0.5-.5*TMath::TanH((x-[2])/[4]))+(0.5+.5*TMath::TanH((x-[2])/[4]))*([5]+[6]*TMath::TanH((x-[2])/[7]))",-50.,150.);
   //TF1 *erf = new TF1("erf","([0]+[1]*TMath::Erf((x-[2])/[3]))",-30.,150.);
 
   if (defaultParams) {

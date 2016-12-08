@@ -18,8 +18,6 @@ LIBS	       += -lSpectrum -lMinuit
 
 objects = MBUtils.o Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o  
 
-objects_ref = MBUtils.o Asymmetries_ref.o SystematicCorrections.o EvtRateHandler_ref.o 
-
 
 .PHONY: all
 all: MBAnalyzer.exe UK2SIMcomparison.exe
@@ -40,19 +38,11 @@ SuperSumComparison.exe: SuperSumComparison.o $(objects)
 	$(CXX) $(CXXFLAGS) -o SuperSumComparison.exe SuperSumComparison.o $(objects) $(LIBS) 
 	@echo "Done"
 
-SuperSumComparison_ref.exe: SuperSumComparison_ref.o $(objects) 
-	$(CXX) $(CXXFLAGS) -o SuperSumComparison_ref.exe SuperSumComparison_ref.o $(objects) $(LIBS) 
-	@echo "Done"
-
 Asymmetries.o: Asymmetries.hh
-
-Asymmetries_ref.o: Asymmetries_ref.hh
 
 BetaSpectrum.o: BetaSpectrum.hh
 
 EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh
-
-EvtRateHandler_ref.o: EvtRateHandler_ref.hh
 
 SQLinterface.o: SQLinterface.hh
 

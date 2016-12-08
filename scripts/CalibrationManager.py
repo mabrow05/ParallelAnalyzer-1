@@ -960,12 +960,12 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [16,17,18,19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
             #rep.findPedestals(runPeriod)
-            #rep.runReplayPass1(runPeriod)
+            rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
             rep.findTriggerFunctions(runPeriod)
             rep.runReplayPass2(runPeriod)
@@ -975,8 +975,8 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 0: 
-        runPeriods = [24,23]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods = [16,18,19,21]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1001,7 +1001,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1017,9 +1017,9 @@ if __name__ == "__main__":
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 

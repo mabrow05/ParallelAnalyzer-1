@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
   Tin->SetBranchAddress("Tdc03", &Tdc03);
   Tin->SetBranchAddress("Tdc08", &Tdc08);
   Tin->SetBranchAddress("Tdc09", &Tdc09);
-  Tin->SetBranchAddress("Tdc010", &Tdc010);
+  Tin->SetBranchAddress("Tdc014", &Tdc010); //Note that what used to be TDC10 is now TDC14
   Tin->SetBranchAddress("Tdc011", &Tdc011);
 
   Tin->SetBranchAddress("Sis00",  &Sis00);
@@ -366,10 +366,15 @@ int main(int argc, char *argv[])
   t.UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., (float)nbins*binWidth);
   t.UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., (float)nbins*binWidth);
   
+  t.xE.nClipped = t.yE.nClipped = t.xW.nClipped = t.yW.nClipped = 0;
+
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
+    
+    t.xE.nClipped = t.yE.nClipped = t.xW.nClipped = t.yW.nClipped = 0;
+
     Int_t iSis00 = (int) Sis00;
 
     // Calculate pedestal-subtracted PMT QADC values
@@ -377,11 +382,26 @@ int main(int argc, char *argv[])
       pmt[j] = ((double) Qadc[j]) - pedQadc[j];
     }
     
-
+    
     // Calculate pedestal-subtracted MWPC cathode PADC values
     for (int j=0; j<32; j++) {
+      
       cathodeEast[j] = ((double) Pdc2[j]) - pedPdc2[j];
       cathodeWest[j] = ((double) Padc[j]) - pedPadc[j];
+
+      // Calculate number of clipped wires
+      if (j<16) {
+	if ( Pdc2[j] > 4000. ) t.yE.nClipped++;
+	if ( Padc[j] > 4000. ) t.yW.nClipped++;
+	t.Cathodes_Ey[j] = Pdc2[j];
+	t.Cathodes_Wy[j] = Padc[j];
+      }
+      else {
+	if ( Pdc2[j] > 4000. ) t.xE.nClipped++;
+	if ( Padc[j] > 4000. ) t.xW.nClipped++;
+	t.Cathodes_Ex[j-16] = Pdc2[j];
+	t.Cathodes_Wx[j-16] = Padc[j];
+      }
     }
 
     // Calculate pedestal-subtracted MWPC Anode PADC values
@@ -582,7 +602,7 @@ int main(int argc, char *argv[])
 	if (cathodeEast[j+16] > 100.) {
 	  xMWPCEast += cathodeEast[j+16]*posPdc2[j+16];
 	  xMWPCEastSum += cathodeEast[j+16];
-	  t.Cathodes_Ex[j] = cathodeEast[j+16];
+	  //t.Cathodes_Ex[j] = cathodeEast[j+16];
 	  xEmult++;
 	  if (cathodeEast[j+16]>xEmax) {
 	    xEmax = cathodeEast[j+16];
@@ -592,7 +612,7 @@ int main(int argc, char *argv[])
 	if (cathodeEast[j] > 100.) {
 	  yMWPCEast += cathodeEast[j]*posPdc2[j];
 	  yMWPCEastSum += cathodeEast[j];
-	  t.Cathodes_Ey[j] = cathodeEast[j];
+	  //t.Cathodes_Ey[j] = cathodeEast[j];
 	  yEmult++;
 	  if (cathodeEast[j]>yEmax) {
 	    yEmax = cathodeEast[j];
@@ -602,7 +622,7 @@ int main(int argc, char *argv[])
 	if (cathodeWest[j+16] > 100.) {
 	  xMWPCWest += cathodeWest[j+16]*posPadc[j+16];
 	  xMWPCWestSum += cathodeWest[j+16];
-	  t.Cathodes_Wx[j] = cathodeWest[j+16];
+	  //t.Cathodes_Wx[j] = cathodeWest[j+16];
 	  xWmult++;
 	  if (cathodeWest[j+16]>xWmax) {
 	    xWmax = cathodeWest[j+16];
@@ -612,7 +632,7 @@ int main(int argc, char *argv[])
 	if (cathodeWest[j] > 100.) {
 	  yMWPCWest += cathodeWest[j]*posPadc[j];
 	  yMWPCWestSum += cathodeWest[j];
-	  t.Cathodes_Wy[j] = cathodeEast[j];
+	  //t.Cathodes_Wy[j] = cathodeEast[j];
 	  yWmult++;
 	  if (cathodeWest[j]>yWmax) {
 	    yWmax = cathodeWest[j];
@@ -668,7 +688,7 @@ int main(int argc, char *argv[])
     t.xE.maxValue = xEmax;
     t.xE.maxWire = xEmaxWire;
     t.xE.mult = xEmult;
-    t.xE.nClipped = 0;
+    //t.xE.nClipped = 0; //This is now implemented above
     t.xE.err = 0.;
     t.xE.rawCenter = 0.;
     t.xE.height = 0.;
@@ -679,7 +699,7 @@ int main(int argc, char *argv[])
     t.yE.maxValue = yEmax;
     t.yE.maxWire = yEmaxWire;
     t.yE.mult = yEmult;
-    t.yE.nClipped = 0;
+    //t.yE.nClipped = 0;
     t.yE.err = 0.;
     t.yE.rawCenter = 0.;
     t.yE.height = 0.;
@@ -690,7 +710,7 @@ int main(int argc, char *argv[])
     t.xW.maxValue = xWmax;
     t.xW.maxWire = xWmaxWire;
     t.xW.mult = xWmult;
-    t.xW.nClipped = 0;
+    //t.xW.nClipped = 0;
     t.xW.err = 0.;
     t.xW.rawCenter = 0.;
     t.xW.height = 0.;
@@ -701,7 +721,7 @@ int main(int argc, char *argv[])
     t.yW.maxValue = yWmax;
     t.yW.maxWire = yWmaxWire;
     t.yW.mult = yWmult;
-    t.yW.nClipped = 0;
+    //t.yW.nClipped = 0;
     t.yW.err = 0.;
     t.yW.rawCenter = 0.;
     t.yW.height = 0.;

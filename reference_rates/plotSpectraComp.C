@@ -164,8 +164,8 @@
   residE->Add(simALL_E,ukALL_E,1,-1);
   residE->GetXaxis()->SetRangeUser(0., xAxisMax);
   residE->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  residE->SetMaximum(2.);
-  residE->SetMinimum(-2.);
+  //residE->SetMaximum(2.);
+  //residE->SetMinimum(-2.);
   residE->SetLineWidth(2);
   residE->SetMarkerColor(kBlue);
   residE->SetMarkerStyle(34);
@@ -204,6 +204,7 @@
   simALL_E->SetMarkerSize(0.75);
   simALL_E->SetMarkerStyle(20);
   ukALL_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  ukALL_E->SetMaximum(ukALL_E->GetMaximum()*1.2);
   ukALL_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
   simALL_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   ukALL_E->Draw("HIST");
@@ -228,6 +229,7 @@
   sim0_E->SetMarkerSize(0.75);
   sim0_E->SetMarkerStyle(20);
   uk0_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  uk0_E->SetMaximum(uk0_E->GetMaximum()*1.2);
   uk0_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim0_E->Scale(normFactorE);
   sim0_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -250,6 +252,7 @@
   sim1_E->SetMarkerSize(0.75);
   sim1_E->SetMarkerStyle(20);
   uk1_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  uk1_E->SetMaximum(uk1_E->GetMaximum()*1.2);
   uk1_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim1_E->Scale(normFactorE);
   sim1_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -273,6 +276,7 @@
   sim23_E->SetMarkerSize(0.75);
   sim23_E->SetMarkerStyle(20);
   uk23_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  uk23_E->SetMaximum(uk23_E->GetMaximum()*1.2);
   uk23_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim23_E->Scale(normFactorE);
   sim23_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -293,8 +297,8 @@
   residW->Add(simALL_W,ukALL_W,1.,-1.);
   residW->GetXaxis()->SetRangeUser(0., xAxisMax);
   residW->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  residW->SetMaximum(2.);
-  residW->SetMinimum(-2.);
+  //residW->SetMaximum(2.);
+  //residW->SetMinimum(-2.);
   residW->SetLineWidth(2);
   residW->SetMarkerColor(kBlue);
   residW->SetMarkerStyle(34);
@@ -332,6 +336,7 @@
   simALL_W->SetMarkerSize(0.75);
   simALL_W->SetMarkerStyle(20);
   ukALL_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  ukALL_W->SetMaximum(ukALL_W->GetMaximum()*1.2);
   ukALL_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   simALL_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   ukALL_W->Draw("HIST");
@@ -356,6 +361,7 @@
   sim0_W->SetMarkerSize(0.75);
   sim0_W->SetMarkerStyle(20);
   uk0_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  uk0_W->SetMaximum(uk0_W->GetMaximum()*1.2);
   uk0_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim0_W->Scale(normFactorW);
   sim0_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -378,6 +384,7 @@
   sim1_W->SetMarkerSize(0.75);
   sim1_W->SetMarkerStyle(20);
   uk1_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  uk1_W->SetMaximum(uk1_W->GetMaximum()*1.2);
   uk1_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim1_W->Scale(normFactorW);
   sim1_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -401,6 +408,7 @@
   sim23_W->SetMarkerSize(0.75);
   sim23_W->SetMarkerStyle(20);
   uk23_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  uk23_W->SetMaximum(uk23_W->GetMaximum()*1.2);
   uk23_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim23_W->Scale(normFactorW);
   sim23_W->GetXaxis()->SetRangeUser(0., xAxisMax);

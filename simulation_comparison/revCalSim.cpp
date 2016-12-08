@@ -232,6 +232,10 @@ void SetUpTree(TTree *tree) {
   tree->Branch("time",&Time,"timeE/D:timeW");
   tree->Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
   tree->Branch("MWPCPos",&mwpc_pos,"MWPCPosE[3]/D:MWPCPosW[3]");
+  tree->Branch("nClipped_EX",&nClipped_EX,"nClipped_EX/I");
+  tree->Branch("nClipped_EY",&nClipped_EY,"nClipped_EY/I");
+  tree->Branch("nClipped_WX",&nClipped_WX,"nClipped_WX/I");
+  tree->Branch("nClipped_WY",&nClipped_WY,"nClipped_WY/I");
   tree->Branch("ScintPos",&scint_pos,"ScintPosE[3]/D:ScintPosW[3]");
   tree->Branch("ScintPosAdjusted",&scint_pos_adj,"ScintPosAdjE[3]/D:ScintPosAdjW[3]");
   tree->Branch("PMT",&pmt,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:etaEvis0/D:etaEvis1:etaEvis2:etaEvis3:etaEvis4:etaEvis5:etaEvis6:etaEvis7:nPE0/D:nPE1:nPE2:nPE3:nPE4:nPE5:nPE6:nPE7");
@@ -309,7 +313,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   
   // Check if we actually want a stupid high number of statistics... set to 20 million per run
   if ( veryHighStatistics && source=="Beta" ) {
-    BetaEvents = 20000000;
+    BetaEvents = 18000000;
     outputBase = string(getenv("REVCALSIM")) + "beta_veryHighStatistics/";
   }
 
@@ -379,6 +383,11 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   }
 
   
+  Float_t Cath_EX[16] = {0.};
+  Float_t Cath_EY[16] = {0.}; 
+  Float_t Cath_WX[16] = {0.};
+  Float_t Cath_WY[16] = {0.}; 
+
   // Set the addresses of the information read in from the simulation file
   chain->SetBranchAddress("MWPCEnergy",&mwpcE);
   chain->SetBranchAddress("time",&Time);
@@ -388,6 +397,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   chain->SetBranchAddress("ScintPos",&scint_pos);
   chain->SetBranchAddress("primKE",&primKE);
   chain->SetBranchAddress("primTheta",&primTheta);
+  chain->SetBranchAddress("Cath_EX",Cath_EX);
+  chain->SetBranchAddress("Cath_EY",Cath_EY);
+  chain->SetBranchAddress("Cath_WX",Cath_WX);
+  chain->SetBranchAddress("Cath_WY",Cath_WY);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
   //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
   //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
@@ -517,6 +530,21 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     //MWPC triggers
     if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
     if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
+
+    // Checking for what would be seen as a clipped event in the Cathodes. Right now, this is a hard cut on 6 keV deposited on 
+    // a single wire, as was determined by just looking for where the Cathode ADC spectra started to clip as compared to 
+    // the simulated energy spectrum (done by eye, set at 6 keV for now)
+    nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
+
+    for ( UInt_t j=0; j<16; j++ ) {
+      if ( Cath_EX[j] > 6. ) nClipped_EX++;
+      if ( Cath_EY[j] > 6. ) nClipped_EY++;
+      if ( Cath_WX[j] > 6. ) nClipped_WX++;
+      if ( Cath_WY[j] > 6. ) nClipped_WY++;
+    }
+
+
+
 
     Double_t pmtEnergyLowerLimit = 1.; //To put a hard cut on the weight
     

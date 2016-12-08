@@ -5,6 +5,7 @@
 
 
 #include "MBUtils.hh"
+#include "DataTree.hh"
 
 #include <vector>
 #include <cstdlib>
@@ -207,43 +208,23 @@ void doBackgroundSpectra (int octetMin, int octetMax)
   for ( auto rn : bgRuns_SFoff ) {
 
     std::cout << "Processing run " << rn << "... ";
+
+    // DataTree structure
+    DataTree t;
+
+    // Input ntuple
+    char tempIn[500];
+    sprintf(tempIn, "%s/replay_pass3_%i.root", getenv("REPLAY_PASS3"),rn);
     
-    sprintf(temp,"replay_pass3_%i.root",rn);
-    std::string infile = getenv("REPLAY_PASS3")+std::string("/")+std::string(temp);
-    TFile *input = new TFile(infile.c_str(), "READ");
-    TTree *Tin = (TTree*)input->Get("pass3");
+    t.setupInputTree(std::string(tempIn),"pass3");
 
 
-    double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
-    int PID, type, side; // basic analysis tags
+    unsigned int nevents = t.getEntries();
 
-    int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
-      
-
-    Tin->SetBranchAddress("PID", &PID);
-    Tin->SetBranchAddress("Type", &type);
-    Tin->SetBranchAddress("Side", &side); 
-    Tin->SetBranchAddress("Erecon",&Erecon);
-    Tin->SetBranchAddress("TimeE",&TimeE);
-    Tin->SetBranchAddress("TimeW",&TimeW);
-    Tin->SetBranchAddress("Time",&Time);
-    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-
-    Tin->SetBranchAddress("xeRC", &xeRC);
-    Tin->SetBranchAddress("yeRC", &yeRC);
-    Tin->SetBranchAddress("xwRC", &xwRC);
-    Tin->SetBranchAddress("ywRC", &ywRC);
-
-
-    unsigned int nevents = Tin->GetEntriesFast();
-
-    Tin->GetEvent(nevents-1);
-    totalTimeOFF += Time;
-    totalBLINDTimeOFF[0] += TimeE;
-    totalBLINDTimeOFF[1] += TimeW;
+    t.getEvent(nevents-1);
+    totalTimeOFF += t.Time;
+    totalBLINDTimeOFF[0] += t.TimeE;
+    totalBLINDTimeOFF[1] += t.TimeW;
 
     double r2E = 0.; //position of event squared
     double r2W = 0.;
@@ -251,19 +232,19 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     for (unsigned int n=0 ; n<nevents ; n++ ) {
       
       
-      Tin->GetEvent(n);
+      t.getEvent(n);
 
 
       //Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
-      /*if (Erecon>0. && type==2) {
+      /*if (t.Erecon>0. && t.Type==2) {
   
 	if (side==0) {
-	  type = separate23(side,mwpcE.MWPCEnergyE);
-	  side = type==2 ? 1 : 0;
+	  t.Type = separate23(t.Side,t.EMWPC_E);
+	  t.Side = t.Type==2 ? 1 : 0;
 	}
-	else if (side==1) {
-	  type = separate23(side,mwpcE.MWPCEnergyW);
-	  side = type==2 ? 0 : 1;
+	else if (t.Side==1) {
+	  t.Type = separate23(t.Side,t.EMWPC_W);
+	  t.Side = t.Type==2 ? 0 : 1;
 	}
 	
 	}*/
@@ -273,51 +254,46 @@ void doBackgroundSpectra (int octetMin, int octetMax)
       // Filling rate histograms with "good" events to calculate the corrections
 
       
-      if ( PID==1 && side<2 && type<4 && Erecon>0.) {
+      if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0. ) {
 	
-	if ( useRCclasses ) {
-	  if ( side==0 && ( xeRC<1 || xeRC>3 || yeRC<1 || yeRC>3 ) ) continue;
-	  else if ( side==1 && ( xwRC<1 || xwRC>3 || ywRC<1 || ywRC>3 ) ) continue;
-	}
+	if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
 	
-	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
-	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+	r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
+	r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
 
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (type==0) histOFF[0][side]->Fill(Erecon);
+	  if (t.Type==0) histOFF[0][t.Side]->Fill(t.Erecon);
 	
 	  //Type 1
-	  if (type==1) histOFF[1][side]->Fill(Erecon);
+	  if (t.Type==1) histOFF[1][t.Side]->Fill(t.Erecon);
 	
 	  //Type 23
-	  if (type==2 || type==3) {
-	    if (side==0) { 
-	      histOFF[2][0]->Fill(Erecon);
-	      //if (type==3) histOFF[2][0]->Fill(Erecon);
-	      //else histOFF[2][1]->Fill(Erecon);
+	  if (t.Type==2 || t.Type==3) {
+	    if (t.Side==0) { 
+	      histOFF[2][0]->Fill(t.Erecon);
+	      //if (type==3) histOFF[2][0]->Fill(t.Erecon);
+	      //else histOFF[2][1]->Fill(t.Erecon);
 	    }
-	    else if (side==1) {
-	      histOFF[2][1]->Fill(Erecon);
-	      //if (type==3) histOFF[2][1]->Fill(Erecon);
-	      //else histOFF[2][0]->Fill(Erecon);
+	    else if (t.Side==1) {
+	      histOFF[2][1]->Fill(t.Erecon);
+	      //if (type==3) histOFF[2][1]->Fill(t.Erecon);
+	      //else histOFF[2][0]->Fill(t.Erecon);
 	    }
 	  }
 	
 	  //Type 2
-	  //if (type==2) histOFF2[side]->Fill(Erecon);
+	  //if (t.Type==2) histOFF2[t.Side]->Fill(t.Erecon);
 	
 	  //Type 3
-	  //if (type==3) histOFF3[side]->Fill(Erecon);
+	  //if (t.Type==3) histOFF3[t.Side]->Fill(t.Erecon);
 
 	}
       }
       
     }
 
-    input->Close();
-    if (input) delete input;
     std::cout << "Finished Run " << rn << std::endl;
   }
 
@@ -326,40 +302,22 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 
     std::cout << "Processing run " << rn << "... ";
     
-    sprintf(temp,"replay_pass3_%i.root",rn);
-    std::string infile = getenv("REPLAY_PASS3")+std::string("/")+std::string(temp);
-    TFile *input = new TFile(infile.c_str(), "READ");
-    TTree *Tin = (TTree*)input->Get("pass3");
+    // DataTree structure
+    DataTree t;
+
+    // Input ntuple
+    char tempIn[500];
+    sprintf(tempIn, "%s/replay_pass3_%i.root", getenv("REPLAY_PASS3"),rn);
+    
+    t.setupInputTree(std::string(tempIn),"pass3");
 
 
-    double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
-    int PID, type, side; // basic analysis tags
+    unsigned int nevents = t.getEntries();
 
-    int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
-
-    Tin->SetBranchAddress("PID", &PID);
-    Tin->SetBranchAddress("Type", &type);
-    Tin->SetBranchAddress("Side", &side); 
-    Tin->SetBranchAddress("Erecon",&Erecon);
-    Tin->SetBranchAddress("TimeE",&TimeE);
-    Tin->SetBranchAddress("TimeW",&TimeW);
-    Tin->SetBranchAddress("Time",&Time);
-    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-
-    Tin->SetBranchAddress("xeRC", &xeRC);
-    Tin->SetBranchAddress("yeRC", &yeRC);
-    Tin->SetBranchAddress("xwRC", &xwRC);
-    Tin->SetBranchAddress("ywRC", &ywRC);
-
-    unsigned int nevents = Tin->GetEntriesFast();
-
-    Tin->GetEvent(nevents-1);
-    totalTimeON += Time;
-    totalBLINDTimeON[0] += TimeE;
-    totalBLINDTimeON[1] += TimeW;
+    t.getEvent(nevents-1);
+    totalTimeON += t.Time;
+    totalBLINDTimeON[0] += t.TimeE;
+    totalBLINDTimeON[1] += t.TimeW;
 
     double r2E = 0.; //position of event squared
     double r2W = 0.;
@@ -367,18 +325,19 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     for (unsigned int n=0 ; n<nevents ; n++ ) {
       
       
-      Tin->GetEvent(n);
+      t.getEvent(n);
 
-      //Type 2/3 separation
-      /*if (Erecon>0. && type==2) {
+
+      //Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
+      /*if (t.Erecon>0. && t.Type==2) {
   
 	if (side==0) {
-	  type = separate23(side,mwpcE.MWPCEnergyE);
-	  side = type==2 ? 1 : 0;
+	  t.Type = separate23(t.Side,t.EMWPC_E);
+	  t.Side = t.Type==2 ? 1 : 0;
 	}
-	else if (side==1) {
-	  type = separate23(side,mwpcE.MWPCEnergyW);
-	  side = type==2 ? 0 : 1;
+	else if (t.Side==1) {
+	  t.Type = separate23(t.Side,t.EMWPC_W);
+	  t.Side = t.Type==2 ? 0 : 1;
 	}
 	
 	}*/
@@ -388,53 +347,48 @@ void doBackgroundSpectra (int octetMin, int octetMax)
       // Filling rate histograms with "good" events to calculate the corrections
 
       
-      if ( PID==1 && side<2 && type<4 && Erecon>0.) {
-
-	if ( useRCclasses ) {
-	  if ( side==0 && ( xeRC<1 || xeRC>3 || yeRC<1 || yeRC>3 ) ) continue;
-	  else if ( side==1 && ( xwRC<1 || xwRC>3 || ywRC<1 || ywRC>3 ) ) continue;
-	}
-
-	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
-	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+      if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0.) {
 	
+	if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
+
 	
+	r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
+	r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
+
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (type==0) histON[0][side]->Fill(Erecon);
+	  if (t.Type==0) histON[0][t.Side]->Fill(t.Erecon);
 	
 	  //Type 1
-	  if (type==1) histON[1][side]->Fill(Erecon);
+	  if (t.Type==1) histON[1][t.Side]->Fill(t.Erecon);
 	
 	  //Type 23
-	  if (type==2 || type==3) {
-	    histON[2][side]->Fill(Erecon);
-	    //if (side==0) { 
-	    //histON[2][0]->Fill(Erecon);
-	      //if (type==3) histON[2][0]->Fill(Erecon);
-	      //else histON[2][1]->Fill(Erecon);
-	    //}
-	  //else if (side==1) {
-	  //  histON[2][1]->Fill(Erecon);
-	      //if (type==3) histON[2][1]->Fill(Erecon);
-	      //else histON[2][0]->Fill(Erecon);
-	    //}
+	  if (t.Type==2 || t.Type==3) {
+	    if (t.Side==0) { 
+	      histON[2][0]->Fill(t.Erecon);
+	      //if (type==3) histON[2][0]->Fill(t.Erecon);
+	      //else histON[2][1]->Fill(t.Erecon);
+	    }
+	    else if (t.Side==1) {
+	      histON[2][1]->Fill(t.Erecon);
+	      //if (type==3) histON[2][1]->Fill(t.Erecon);
+	      //else histON[2][0]->Fill(t.Erecon);
+	    }
 	  }
 	
 	  //Type 2
-	  //if (type==2) histON2[side]->Fill(Erecon);
+	  //if (t.Type==2) histON2[t.Side]->Fill(t.Erecon);
 	
 	  //Type 3
-	  //if (type==3) histON3[side]->Fill(Erecon);
-    
+	  //if (t.Type==3) histON3[t.Side]->Fill(t.Erecon);
+
 	}
       }
       
     }
 
-    input->Close();
-    if (input) delete input;
+    
     std::cout << "Finished Run " << rn << std::endl;
   }
 

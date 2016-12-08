@@ -227,6 +227,7 @@ void EvtRateHandler::dataReader() {
 
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
   float EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0., MWPCEnergyE_f=0., MWPCEnergyW_f=0.; // For reading in data from MPM replays
+  int xE_nClipped=0, yE_nClipped=0, xW_nClipped=0, yW_nClipped=0;
 
   int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
 
@@ -251,6 +252,10 @@ void EvtRateHandler::dataReader() {
       Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
       Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
       Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+      Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
+      Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
+      Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
+      Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
 
       Tin->SetBranchAddress("xeRC", &xeRC);
       Tin->SetBranchAddress("yeRC", &yeRC);
@@ -275,6 +280,10 @@ void EvtRateHandler::dataReader() {
       Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY_f);
       Tin->GetBranch("xWmpm")->GetLeaf("center")->SetAddress(&WmwpcX_f);
       Tin->GetBranch("yWmpm")->GetLeaf("center")->SetAddress(&WmwpcY_f);
+      Tin->GetBranch("xEmpm")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
+      Tin->GetBranch("yEmpm")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
+      Tin->GetBranch("xWmpm")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
+      Tin->GetBranch("yWmpm")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
 
       Tin->SetBranchAddress("xeRC", &xeRC);
       Tin->SetBranchAddress("yeRC", &yeRC);
@@ -305,13 +314,16 @@ void EvtRateHandler::dataReader() {
 	TimeW = (double) TimeW_f;
       }
       
-      if (PID==1) {       // Cut on electrons
+      if (PID==1) {       // Cut on electrons 
+	
+	//Cut out clipped events
+	if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
 
 	//  If the flag at the top of this file is set to true, also cut on the wirechamber
 	//  event type according to C. Swanks classifications in ELOG 629 attachment 2
 	if ( useRCclasses ) {
-	  if ( Side==0 && ( xeRC<1 || xeRC>3 || yeRC<1 || yeRC>3 ) ) continue;
-	  else if ( Side==1 && ( xwRC<1 || xwRC>3 || ywRC<1 || ywRC>3 ) ) continue;
+	  if ( Side==0 && ( xeRC<1 || xeRC>4 || yeRC<1 || yeRC>4 ) ) continue;
+	  else if ( Side==1 && ( xwRC<1 || xwRC>4 || ywRC<1 || ywRC>4 ) ) continue;
 	}
 	
 	// Determine radial event position squared for cutting on fiducial volume
