@@ -232,6 +232,10 @@ void SetUpTree(TTree *tree) {
   tree->Branch("time",&Time,"timeE/D:timeW");
   tree->Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
   tree->Branch("MWPCPos",&mwpc_pos,"MWPCPosE[3]/D:MWPCPosW[3]");
+  tree->Branch("Cath_EX",Cath_EX,"Cath_EX[16]/D");
+  tree->Branch("Cath_EY",Cath_EY,"Cath_EY[16]/D");
+  tree->Branch("Cath_WX",Cath_WX,"Cath_WX[16]/D");
+  tree->Branch("Cath_WY",Cath_WY,"Cath_WY[16]/D");
   tree->Branch("nClipped_EX",&nClipped_EX,"nClipped_EX/I");
   tree->Branch("nClipped_EY",&nClipped_EY,"nClipped_EY/I");
   tree->Branch("nClipped_WX",&nClipped_WX,"nClipped_WX/I");
@@ -383,10 +387,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   }
 
   
-  Float_t Cath_EX[16] = {0.};
-  Float_t Cath_EY[16] = {0.}; 
-  Float_t Cath_WX[16] = {0.};
-  Float_t Cath_WY[16] = {0.}; 
+  //Float_t Cath_EX[16] = {0.};
+  //Float_t Cath_EY[16] = {0.}; 
+  //Float_t Cath_WX[16] = {0.};
+  //Float_t Cath_WY[16] = {0.}; 
 
   // Set the addresses of the information read in from the simulation file
   chain->SetBranchAddress("MWPCEnergy",&mwpcE);
@@ -536,11 +540,13 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     // the simulated energy spectrum (done by eye, set at 6 keV for now)
     nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
 
+    Double_t clip_thresh = 5.;
+    
     for ( UInt_t j=0; j<16; j++ ) {
-      if ( Cath_EX[j] > 6. ) nClipped_EX++;
-      if ( Cath_EY[j] > 6. ) nClipped_EY++;
-      if ( Cath_WX[j] > 6. ) nClipped_WX++;
-      if ( Cath_WY[j] > 6. ) nClipped_WY++;
+      if ( Cath_EX[j] > clip_thresh ) nClipped_EX++;
+      if ( Cath_EY[j] > clip_thresh ) nClipped_EY++;
+      if ( Cath_WX[j] > clip_thresh ) nClipped_WX++;
+      if ( Cath_WY[j] > clip_thresh ) nClipped_WY++;
     }
 
 

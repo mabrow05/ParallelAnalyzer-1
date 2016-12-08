@@ -7,6 +7,8 @@ double Erecon; // smeared, weighted, and trigger func corrected energy summed ov
 
 int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY; // Clipping numbers
 
+double Cath_EX[16], Cath_EY[16], Cath_WX[16], Cath_WY[16];
+
 struct Evis {
   double EvisE;
   double EvisW;
