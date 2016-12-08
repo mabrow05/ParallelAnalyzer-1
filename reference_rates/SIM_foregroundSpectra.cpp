@@ -327,12 +327,16 @@ void doForegroundSpectra (int octetMin, int octetMax)
     double mwpcW[3] = {0.};
     double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
     int PID, type, side; // basic analysis tags
-
+    int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
     
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("type", &type);
     Tin->SetBranchAddress("side", &side); 
     Tin->SetBranchAddress("Erecon",&Erecon);
+    Tin->SetBranchAddress("nClipped_EX",&nClipped_EX);
+    Tin->SetBranchAddress("nClipped_EY",&nClipped_EY); 
+    Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
+    Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);  
    
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcW);
@@ -375,6 +379,10 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
       
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
+
+	//Clipped events
+	if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
+
 
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
