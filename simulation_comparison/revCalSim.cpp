@@ -426,7 +426,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
   //Trigger booleans
   bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-  Double_t MWPCThreshold=0.5; // keV dep in the wirechamber.. 
+  Double_t MWPCThreshold=0.2; // keV dep in the wirechamber.. 
 
   //Set random number generator
   TRandom3 *seed = new TRandom3(0); // seed generator
@@ -540,13 +540,14 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     // the simulated energy spectrum (done by eye, set at 6 keV for now)
     nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
 
-    Double_t clip_thresh = 5.;
+    Double_t clip_threshE = 5.;
+    Double_t clip_threshW = 4.;
     
     for ( UInt_t j=0; j<16; j++ ) {
-      if ( Cath_EX[j] > clip_thresh ) nClipped_EX++;
-      if ( Cath_EY[j] > clip_thresh ) nClipped_EY++;
-      if ( Cath_WX[j] > clip_thresh ) nClipped_WX++;
-      if ( Cath_WY[j] > clip_thresh ) nClipped_WY++;
+      if ( Cath_EX[j] > clip_threshE ) nClipped_EX++;
+      if ( Cath_EY[j] > clip_threshE ) nClipped_EY++;
+      if ( Cath_WX[j] > clip_threshW ) nClipped_WX++;
+      if ( Cath_WY[j] > clip_threshW ) nClipped_WY++;
     }
 
 

@@ -400,7 +400,7 @@ if __name__ == "__main__":
 
     #Running reverse calibrations
     if 1:
-        octet_range = [67,94];
+        octet_range = [103,121];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
         #    beta.findTriggerFunctions(octet)
