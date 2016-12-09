@@ -957,30 +957,30 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [16,17,18,19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
             #rep.findPedestals(runPeriod)
             rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            rep.findTriggerFunctions(runPeriod)
-            rep.runReplayPass2(runPeriod)
+            #rep.findTriggerFunctions(runPeriod)
+            #rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
         
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 1: 
-        runPeriods = [17]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 0: 
+        runPeriods = [24,23]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 1 # number of times to run through the calibration
+        iterations = 2 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -1009,7 +1009,7 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 0: 
+    if 1: 
         runPeriods = [8,9,10]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
