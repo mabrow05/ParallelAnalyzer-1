@@ -10,10 +10,12 @@ DataTree::~DataTree() {
   //if (UCN_Mon_2_Rate) delete UCN_Mon_2_Rate;
   //if (UCN_Mon_3_Rate) delete UCN_Mon_3_Rate;
   //if (UCN_Mon_4_Rate) delete UCN_Mon_4_Rate;
+  
   if (outputTree) delete outputTree;
-  if (outputFile) {outputFile->Close();  delete outputFile;}
-  if (inputTree) delete inputTree;
-  if (inputFile) { inputFile->Close(); delete inputFile;}
+  if (outputFile) delete outputFile;
+  if (inputFile) delete inputFile;
+  
+  
 };
 
 void DataTree::makeOutputTree(std::string outputFileName, std::string outputTreeName) {

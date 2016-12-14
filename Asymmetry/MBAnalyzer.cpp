@@ -32,7 +32,7 @@ TString anaChoices[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 
 //Types of Corrections to apply
-std::string corr ("AllCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
+std::string corr ("DeltaTheoryOnly");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
 Double_t POL_minus = 0.9981;
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 		       
     //bg.calcBGSubtRates();
     
-    /*TString aCh[4] = {"A","D","F","G"};
+    /*TString aCh[4] = {"A","D","F","G"};//,"F","G"};
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);

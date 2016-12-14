@@ -136,8 +136,8 @@ int main(int argc, char *argv[])
   char tempOut[500];
   sprintf(tempOut, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
   
-  DataTree t;
-  t.makeOutputTree(std::string(tempOut),"pass1");  
+  DataTree *t = new DataTree();
+  t->makeOutputTree(std::string(tempOut),"pass1");  
   
   
   // East MWPC y                                                                  
@@ -361,19 +361,17 @@ int main(int argc, char *argv[])
   //Histograms to hold UCNMonRate
   int binWidth = 10;
   int nbins = (int)(runLengthTrue+20.)/binWidth;
-  t.UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., (float)nbins*binWidth);
-  t.UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., (float)nbins*binWidth);
-  t.UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., (float)nbins*binWidth);
-  t.UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., (float)nbins*binWidth);
-  
-  t.xE.nClipped = t.yE.nClipped = t.xW.nClipped = t.yW.nClipped = 0;
+  t->UCN_Mon_1_Rate = new TH1F("UCN_Mon_1_Rate","UCN Mon 1 Rate",nbins, 0., (float)nbins*binWidth);
+  t->UCN_Mon_2_Rate = new TH1F("UCN_Mon_2_Rate","UCN Mon 2 Rate",nbins, 0., (float)nbins*binWidth);
+  t->UCN_Mon_3_Rate = new TH1F("UCN_Mon_3_Rate","UCN Mon 3 Rate",nbins, 0., (float)nbins*binWidth);
+  t->UCN_Mon_4_Rate = new TH1F("UCN_Mon_4_Rate","UCN Mon 4 Rate",nbins, 0., (float)nbins*binWidth);
 
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     Tin->GetEvent(i);
     
-    t.xE.nClipped = t.yE.nClipped = t.xW.nClipped = t.yW.nClipped = 0;
+    t->xE.nClipped = t->yE.nClipped = t->xW.nClipped = t->yW.nClipped = 0;
 
     Int_t iSis00 = (int) Sis00;
 
@@ -391,16 +389,16 @@ int main(int argc, char *argv[])
 
       // Calculate number of clipped wires
       if (j<16) {
-	if ( Pdc2[j] > 4000. ) t.yE.nClipped++;
-	if ( Padc[j] > 4000. ) t.yW.nClipped++;
-	t.Cathodes_Ey[j] = Pdc2[j];
-	t.Cathodes_Wy[j] = Padc[j];
+	if ( Pdc2[j] > 4000. ) t->yE.nClipped++;
+	if ( Padc[j] > 4000. ) t->yW.nClipped++;
+	t->Cathodes_Ey[j] = Pdc2[j];
+	t->Cathodes_Wy[j] = Padc[j];
       }
       else {
-	if ( Pdc2[j] > 4000. ) t.xE.nClipped++;
-	if ( Padc[j] > 4000. ) t.xW.nClipped++;
-	t.Cathodes_Ex[j-16] = Pdc2[j];
-	t.Cathodes_Wx[j-16] = Padc[j];
+	if ( Pdc2[j] > 4000. ) t->xE.nClipped++;
+	if ( Padc[j] > 4000. ) t->xW.nClipped++;
+	t->Cathodes_Ex[j-16] = Pdc2[j];
+	t->Cathodes_Wx[j-16] = Padc[j];
       }
     }
 
@@ -413,10 +411,10 @@ int main(int argc, char *argv[])
     bool UCNMonitorTrigger = false;
     
     float time = S83028*scalerCountsToTime;
-    if (iSis00==260) {t.UCN_Mon_1_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
-    else if (iSis00==516) {t.UCN_Mon_2_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
-    else if (iSis00==1028) {t.UCN_Mon_3_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
-    else if (iSis00==2052) {t.UCN_Mon_4_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    if (iSis00==260) {t->UCN_Mon_1_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    else if (iSis00==516) {t->UCN_Mon_2_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    else if (iSis00==1028) {t->UCN_Mon_3_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
+    else if (iSis00==2052) {t->UCN_Mon_4_Rate->Fill(time,1./binWidth); UCNMonitorTrigger = true;}
     
 
     // Events with a muon hit
@@ -435,21 +433,21 @@ int main(int argc, char *argv[])
       muonHitWest = true;
     }
     
-    t.TaggedBackE = (((double) Qadc8)  > cutEastBackingVetoQADC || ((double) Tdc018) > cutEastBackingVetoTDC)?true:false;
-    t.TaggedBackW = (((double) Qadc10)  > cutWestBackingVetoQADC || ((double) Tdc020) > cutEastBackingVetoTDC)?true:false;
-    t.TaggedTopE = (((double) Qadc9)  > cutEastTopVetoQADC || ((double) Tdc019) > cutEastTopVetoTDC)?true:false;
-    t.TaggedTopW = false;
-    t.TaggedDriftE = (((double) Pdc313)  > cutEastDriftTubeTAC)?true:false;
-    t.TaggedDriftW = (((double) Pdc315)  > cutWestDriftTubeTAC)?true:false;
+    t->TaggedBackE = (((double) Qadc8)  > cutEastBackingVetoQADC || ((double) Tdc018) > cutEastBackingVetoTDC)?true:false;
+    t->TaggedBackW = (((double) Qadc10)  > cutWestBackingVetoQADC || ((double) Tdc020) > cutEastBackingVetoTDC)?true:false;
+    t->TaggedTopE = (((double) Qadc9)  > cutEastTopVetoQADC || ((double) Tdc019) > cutEastTopVetoTDC)?true:false;
+    t->TaggedTopW = false;
+    t->TaggedDriftE = (((double) Pdc313)  > cutEastDriftTubeTAC)?true:false;
+    t->TaggedDriftW = (((double) Pdc315)  > cutWestDriftTubeTAC)?true:false;
 
-    t.EastBackADC = (double) Qadc8;
-    t.WestBackADC = (double) Qadc10;
-    t.EastBackTDC = (double) Tdc018;
-    t.WestBackTDC = (double) Tdc020;
-    t.EastDriftVetoADC = (double) Pdc313;
-    t.WestDriftVetoADC = (double) Pdc315;
-    t.EastTopVetoADC = (double) Qadc9;
-    t.EastTopVetoTDC = (double) Tdc019;
+    t->EastBackADC = (double) Qadc8;
+    t->WestBackADC = (double) Qadc10;
+    t->EastBackTDC = (double) Tdc018;
+    t->WestBackTDC = (double) Tdc020;
+    t->EastDriftVetoADC = (double) Pdc313;
+    t->WestDriftVetoADC = (double) Pdc315;
+    t->EastTopVetoADC = (double) Qadc9;
+    t->EastTopVetoTDC = (double) Tdc019;
     
 
     // LED trigger events
@@ -476,8 +474,8 @@ int main(int argc, char *argv[])
     bool triggerEast = false;
     bool triggerWest = false;
 
-    if ( ((double) Pdc30)  > cutEastAnode) {mwpcHitEast = true; t.PassedAnoE=true;}
-    if ( ((double) Pdc34)  > cutWestAnode) {mwpcHitWest = true; t.PassedAnoW=true;}
+    if ( ((double) Pdc30)  > cutEastAnode) {mwpcHitEast = true; t->PassedAnoE=true;}
+    if ( ((double) Pdc34)  > cutWestAnode) {mwpcHitWest = true; t->PassedAnoW=true;}
 
     double timeEastTwoFold = ((double) Tdc016)*tdcChannelToTime;
     double timeWestTwoFold = ((double) Tdc017)*tdcChannelToTime;
@@ -602,7 +600,7 @@ int main(int argc, char *argv[])
 	if (cathodeEast[j+16] > 100.) {
 	  xMWPCEast += cathodeEast[j+16]*posPdc2[j+16];
 	  xMWPCEastSum += cathodeEast[j+16];
-	  //t.Cathodes_Ex[j] = cathodeEast[j+16];
+	  //t->Cathodes_Ex[j] = cathodeEast[j+16];
 	  xEmult++;
 	  if (cathodeEast[j+16]>xEmax) {
 	    xEmax = cathodeEast[j+16];
@@ -612,7 +610,7 @@ int main(int argc, char *argv[])
 	if (cathodeEast[j] > 100.) {
 	  yMWPCEast += cathodeEast[j]*posPdc2[j];
 	  yMWPCEastSum += cathodeEast[j];
-	  //t.Cathodes_Ey[j] = cathodeEast[j];
+	  //t->Cathodes_Ey[j] = cathodeEast[j];
 	  yEmult++;
 	  if (cathodeEast[j]>yEmax) {
 	    yEmax = cathodeEast[j];
@@ -622,7 +620,7 @@ int main(int argc, char *argv[])
 	if (cathodeWest[j+16] > 100.) {
 	  xMWPCWest += cathodeWest[j+16]*posPadc[j+16];
 	  xMWPCWestSum += cathodeWest[j+16];
-	  //t.Cathodes_Wx[j] = cathodeWest[j+16];
+	  //t->Cathodes_Wx[j] = cathodeWest[j+16];
 	  xWmult++;
 	  if (cathodeWest[j+16]>xWmax) {
 	    xWmax = cathodeWest[j+16];
@@ -632,7 +630,7 @@ int main(int argc, char *argv[])
 	if (cathodeWest[j] > 100.) {
 	  yMWPCWest += cathodeWest[j]*posPadc[j];
 	  yMWPCWestSum += cathodeWest[j];
-	  //t.Cathodes_Wy[j] = cathodeEast[j];
+	  //t->Cathodes_Wy[j] = cathodeEast[j];
 	  yWmult++;
 	  if (cathodeWest[j]>yWmax) {
 	    yWmax = cathodeWest[j];
@@ -662,117 +660,117 @@ int main(int argc, char *argv[])
     }
 
     // Pass Everything to output tree
-    t.TriggerNum = (int) Number;
-    t.EvtN = i;
-    t.Sis00 = iSis00;
-    t.DeltaT = ((double)Delt0)*scalerCountsToTime;
-    t.Tof = (double) S8200;
-    t.TimeE = Clk0*scalerCountsToTime;
-    t.TimeW = Clk1*scalerCountsToTime;
-    t.Time = S83028*scalerCountsToTime;
-    t.TDCE = (double) Tdc016;
-    t.TDCW = (double) Tdc017;
-    t.TDCE1 = (double) Tdc00;
-    t.TDCE2 = (double) Tdc01;
-    t.TDCE3 = (double) Tdc02;
-    t.TDCE4 = (double) Tdc03;
-    t.TDCW1 = (double) Tdc08;
-    t.TDCW2 = (double) Tdc09;
-    t.TDCW3 = (double) Tdc010;
-    t.TDCW4 = (double) Tdc011;
+    t->TriggerNum = (int) Number;
+    t->EvtN = i;
+    t->Sis00 = iSis00;
+    t->DeltaT = ((double)Delt0)*scalerCountsToTime;
+    t->Tof = (double) S8200;
+    t->TimeE = Clk0*scalerCountsToTime;
+    t->TimeW = Clk1*scalerCountsToTime;
+    t->Time = S83028*scalerCountsToTime;
+    t->TDCE = (double) Tdc016;
+    t->TDCW = (double) Tdc017;
+    t->TDCE1 = (double) Tdc00;
+    t->TDCE2 = (double) Tdc01;
+    t->TDCE3 = (double) Tdc02;
+    t->TDCE4 = (double) Tdc03;
+    t->TDCW1 = (double) Tdc08;
+    t->TDCW2 = (double) Tdc09;
+    t->TDCW3 = (double) Tdc010;
+    t->TDCW4 = (double) Tdc011;
     
     //Wirechambers
-    t.xE.center = xE;
-    t.xE.width = 0.;
-    t.xE.cathSum = xMWPCEastSum;
-    t.xE.maxValue = xEmax;
-    t.xE.maxWire = xEmaxWire;
-    t.xE.mult = xEmult;
-    //t.xE.nClipped = 0; //This is now implemented above
-    t.xE.err = 0.;
-    t.xE.rawCenter = 0.;
-    t.xE.height = 0.;
+    t->xE.center = xE;
+    t->xE.width = 0.;
+    t->xE.cathSum = xMWPCEastSum;
+    t->xE.maxValue = xEmax;
+    t->xE.maxWire = xEmaxWire;
+    t->xE.mult = xEmult;
+    //t->xE.nClipped = 0; //This is now implemented above
+    t->xE.err = 0.;
+    t->xE.rawCenter = 0.;
+    t->xE.height = 0.;
     
-    t.yE.center = yE;
-    t.yE.width = 0.;
-    t.yE.cathSum = yMWPCEastSum;
-    t.yE.maxValue = yEmax;
-    t.yE.maxWire = yEmaxWire;
-    t.yE.mult = yEmult;
-    //t.yE.nClipped = 0;
-    t.yE.err = 0.;
-    t.yE.rawCenter = 0.;
-    t.yE.height = 0.;
+    t->yE.center = yE;
+    t->yE.width = 0.;
+    t->yE.cathSum = yMWPCEastSum;
+    t->yE.maxValue = yEmax;
+    t->yE.maxWire = yEmaxWire;
+    t->yE.mult = yEmult;
+    //t->yE.nClipped = 0;
+    t->yE.err = 0.;
+    t->yE.rawCenter = 0.;
+    t->yE.height = 0.;
     
-    t.xW.center = xW;
-    t.xW.width = 0.;
-    t.xW.cathSum = xMWPCWestSum;
-    t.xW.maxValue = xWmax;
-    t.xW.maxWire = xWmaxWire;
-    t.xW.mult = xWmult;
-    //t.xW.nClipped = 0;
-    t.xW.err = 0.;
-    t.xW.rawCenter = 0.;
-    t.xW.height = 0.;
+    t->xW.center = xW;
+    t->xW.width = 0.;
+    t->xW.cathSum = xMWPCWestSum;
+    t->xW.maxValue = xWmax;
+    t->xW.maxWire = xWmaxWire;
+    t->xW.mult = xWmult;
+    //t->xW.nClipped = 0;
+    t->xW.err = 0.;
+    t->xW.rawCenter = 0.;
+    t->xW.height = 0.;
     
-    t.yW.center = yW;
-    t.yW.width = 0.;
-    t.yW.cathSum = yMWPCWestSum;
-    t.yW.maxValue = yWmax;
-    t.yW.maxWire = yWmaxWire;
-    t.yW.mult = yWmult;
-    //t.yW.nClipped = 0;
-    t.yW.err = 0.;
-    t.yW.rawCenter = 0.;
-    t.yW.height = 0.;
+    t->yW.center = yW;
+    t->yW.width = 0.;
+    t->yW.cathSum = yMWPCWestSum;
+    t->yW.maxValue = yWmax;
+    t->yW.maxWire = yWmaxWire;
+    t->yW.mult = yWmult;
+    //t->yW.nClipped = 0;
+    t->yW.err = 0.;
+    t->yW.rawCenter = 0.;
+    t->yW.height = 0.;
     
-    t.ScintE.q1 = pmt[0];
-    t.ScintE.q2 = pmt[1];
-    t.ScintE.q3 = pmt[2];
-    t.ScintE.q4 = pmt[3]; 
-    t.ScintE.e1=t.ScintE.de1=t.ScintE.e2=t.ScintE.de2=t.ScintE.e3=t.ScintE.de3=t.ScintE.e4=t.ScintE.de4=0.;
-    t.ScintE.energy=t.ScintE.denergy=0.;
-    t.ScintE.nPE1=t.ScintE.nPE2=t.ScintE.nPE3=t.ScintE.nPE4=0.;
+    t->ScintE.q1 = pmt[0];
+    t->ScintE.q2 = pmt[1];
+    t->ScintE.q3 = pmt[2];
+    t->ScintE.q4 = pmt[3]; 
+    t->ScintE.e1=t->ScintE.de1=t->ScintE.e2=t->ScintE.de2=t->ScintE.e3=t->ScintE.de3=t->ScintE.e4=t->ScintE.de4=0.;
+    t->ScintE.energy=t->ScintE.denergy=0.;
+    t->ScintE.nPE1=t->ScintE.nPE2=t->ScintE.nPE3=t->ScintE.nPE4=0.;
     
-    t.ScintW.q1 = pmt[4];
-    t.ScintW.q2 = pmt[5];
-    t.ScintW.q3 = pmt[6];
-    t.ScintW.q4 = pmt[7]; 
-    t.ScintW.e1=t.ScintW.de1=t.ScintW.e2=t.ScintW.de2=t.ScintW.e3=t.ScintW.de3=t.ScintW.e4=t.ScintW.de4=0.;
-    t.ScintW.energy=t.ScintW.denergy=0.;
-    t.ScintW.nPE1=t.ScintW.nPE2=t.ScintW.nPE3=t.ScintW.nPE4=0.;
+    t->ScintW.q1 = pmt[4];
+    t->ScintW.q2 = pmt[5];
+    t->ScintW.q3 = pmt[6];
+    t->ScintW.q4 = pmt[7]; 
+    t->ScintW.e1=t->ScintW.de1=t->ScintW.e2=t->ScintW.de2=t->ScintW.e3=t->ScintW.de3=t->ScintW.e4=t->ScintW.de4=0.;
+    t->ScintW.energy=t->ScintW.denergy=0.;
+    t->ScintW.nPE1=t->ScintW.nPE2=t->ScintW.nPE3=t->ScintW.nPE4=0.;
     
-    t.EvisE = t.EvisW = 0.;
+    t->EvisE = t->EvisW = 0.;
     
-    t.CathSumE =  t.xE.cathSum+t.yE.cathSum;
-    t.CathSumW =  t.xW.cathSum+t.yW.cathSum;
+    t->CathSumE =  t->xE.cathSum+t->yE.cathSum;
+    t->CathSumW =  t->xW.cathSum+t->yW.cathSum;
     
-    t.CathMaxE = (t.xE.maxValue>t.yE.maxValue)?t.yE.maxValue:t.xE.maxValue;
-    t.CathMaxW = (t.xW.maxValue>t.yW.maxValue)?t.yW.maxValue:t.xW.maxValue;
+    t->CathMaxE = (t->xE.maxValue>t->yE.maxValue)?t->yE.maxValue:t->xE.maxValue;
+    t->CathMaxW = (t->xW.maxValue>t->yW.maxValue)?t->yW.maxValue:t->xW.maxValue;
     
-    t.EMWPC_E = t.EMWPC_W = 0.;
+    t->EMWPC_E = t->EMWPC_W = 0.;
     
-    t.AnodeE = (double) Pdc30;
-    t.AnodeW = (double) Pdc34;
+    t->AnodeE = (double) Pdc30;
+    t->AnodeW = (double) Pdc34;
     
-    t.PassedCathE = t.PassedCathW = PID==1?true:false; //temporary holder for this
+    t->PassedCathE = t->PassedCathW = PID==1?true:false; //temporary holder for this
     
-    t.EvnbGood = t.BkhfGood = true;
+    t->EvnbGood = t->BkhfGood = true;
     for (Int_t i = 0; i<5; i++) {
-      if ((int)Evnb[i]-t.TriggerNum) t.EvnbGood = false;
-      if ((int)Bkhf[i]!=17) t.BkhfGood = false;
+      if ((int)Evnb[i]-t->TriggerNum) t->EvnbGood = false;
+      if ((int)Bkhf[i]!=17) t->BkhfGood = false;
     }
     
-    t.xeRC = xeRC;
-    t.yeRC = yeRC;
-    t.xwRC = xwRC;
-    t.ywRC = ywRC;
+    t->xeRC = xeRC;
+    t->yeRC = yeRC;
+    t->xwRC = xwRC;
+    t->ywRC = ywRC;
     
-    t.PID = PID;
-    t.Type = type;
-    t.Side = side;
-    t.ProbIII = 0.;
-    t.Erecon = 0.;
+    t->PID = PID;
+    t->Type = type;
+    t->Side = side;
+    t->ProbIII = 0.;
+    t->Erecon = 0.;
 
 
       /*timeE_BB = Clk2*scalerCountsToTime;
@@ -782,7 +780,7 @@ int main(int argc, char *argv[])
       twoFoldE = Tdc016;
       twoFoldW = Tdc017;*/
   
-    t.fillOutputTree();
+    t->fillOutputTree();
     
   }
   
@@ -797,12 +795,13 @@ int main(int argc, char *argv[])
   runInfo << "RunLengthEast\t" << std::setprecision(9) << runLengthBlind[0] << std::endl;
   runInfo << "RunLengthWest\t" << std::setprecision(9) << runLengthBlind[1] << std::endl;
   runInfo << "RunLengthTrue\t" << std::setprecision(9) << runLengthTrue << std::endl;
-  runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t.UCN_Mon_4_Rate->Integral("width");
+  runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t->UCN_Mon_4_Rate->Integral("width");
 
   runInfo.close();
   // Write output ntuple
-  t.writeOutputFile();
-  //fileOut->Close();
+  t->writeOutputFile();
+  delete t;
+  
 
   return 0;
 }

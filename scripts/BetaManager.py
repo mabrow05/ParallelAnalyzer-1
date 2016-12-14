@@ -13,6 +13,9 @@ import MButils
 omittedBetaRuns = [19232]
 omittedBetaRanges = [] 
 
+betaRunTypes = ["A2","A5","A7","A10","B2","B5","B7","B10"]
+bgRunTypes = ["A1","A4","A9","A12","B1","B4","B9","B12"]
+
 for Range in omittedBetaRanges:
     for run in range(Range[0],Range[1]+1,1):
         omittedBetaRuns.append(run)
@@ -98,7 +101,6 @@ class BetaReplayManager:
 
     def findTriggerFunctions(self, runORoctet):
         runs = []
-        runTypes = ["A2","A5","A7","A10","B2","B5","B7","B10"]
 
         if runORoctet > 16000:
             print "Running trigger functions for run %i"%runORoctet
@@ -111,7 +113,7 @@ class BetaReplayManager:
         
             for line in infile:  
                 words=line.split()
-                if words[0] in runTypes: # Avoids background and depol runs
+                if words[0] in betaRunTypes: # Avoids background and depol runs
                     runs.append(int(words[1]))
         
             for run in runs:
@@ -132,7 +134,8 @@ class BetaReplayManager:
         
             for line in infile:  
                 words=line.split()
-                runs.append(int(words[1]))
+                if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                    runs.append(int(words[1]))
         
             for run in runs:
                 print "Running pedestals for run %i"%run
@@ -153,7 +156,9 @@ class BetaReplayManager:
         
             for line in infile:      
                 words=line.split()
-                runs.append(int(words[1]))
+                if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                    runs.append(int(words[1]))
+                    
         
             for run in runs:
                 print "Running gain_bismuth for run %i"%run
@@ -173,7 +178,10 @@ class BetaReplayManager:
         
             for line in infile:  
                 words=line.split()
-                runs.append(int(words[1]))
+                if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                #if words[0] in bgRunTypes: # Avoids depol runs
+                    runs.append(int(words[1]))
+
         
             for run in runs:
                 print "Running replay_pass1 for run %i"%run
@@ -192,7 +200,10 @@ class BetaReplayManager:
         
             for line in infile:     
                 words=line.split()
-                runs.append(int(words[1]))
+                if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                #if words[0] in bgRunTypes: # Avoids depol runs
+                    runs.append(int(words[1]))
+
         
             for run in runs:
                 print "Running replay_pass2 for run %i"%run
@@ -211,7 +222,10 @@ class BetaReplayManager:
         
             for line in infile:      
                 words=line.split()
-                runs.append(int(words[1]))
+                if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                #if words[0] in bgRunTypes: # Avoids depol runs
+                    runs.append(int(words[1]))
+
         
             for run in runs:
                 print "Running replay_pass3 for run %i"%run
@@ -219,29 +233,27 @@ class BetaReplayManager:
         print "DONE"
 
     
-    def runReplayPass4(self,runORoctet):
+    def removeDepolRunFiles(self,runORoctet):
         runs = []
-        if runORoctet > 16000:
-            print "Running replay_pass4 for run %i"%runORoctet
-            os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%runORoctet)
-        else: 
-            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
-            infile = open(self.octetListPath+filename,'r')
         
-            for line in infile:      
-                words=line.split()
-                runs.append(int(words[1]))
         
-            for run in runs:
-                print "Running replay_pass4 for run %i"%run
-                os.system("cd ../replay_pass4/; ./replay_pass4.exe %i"%run)
-        print "DONE"
+        filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+        infile = open(self.octetListPath+filename,'r')
+        
+        for line in infile:      
+            words=line.split()
+            if words[0] not in betaRunTypes and words[0] not in bgRunTypes: # Avoids depol runs
+                os.system("rm %s/*%s*"%(os.getenv("PEDESTALS"),words[1]))
+                os.system("rm %s/*%s*"%(self.gainBismuthPath,words[1]))
+                os.system("rm %s/*%s*"%(self.replayPass1,words[1]))
+                os.system("rm %s/*%s*"%(self.replayPass2,words[1]))
+                os.system("rm %s/*%s*"%(self.replayPass3,words[1]))
+
+            
 
     
     def runReverseCalibration(self, runORoctet, veryHighStatistics=False):
         runs = []
-
-        runTypes = ["A2","A5","A7","A10","B2","B5","B7","B10"]
 
         if runORoctet > 16000:
             print "Running reverse calibration for run %i"%runORoctet
@@ -254,7 +266,7 @@ class BetaReplayManager:
         
             for line in infile:      
                 words=line.split()
-                if words[0] in runTypes: # Avoids background and depol runs
+                if words[0] in betaRunTypes: # Avoids background and depol runs
                     runs.append(int(words[1]))
             
             
@@ -385,24 +397,25 @@ if __name__ == "__main__":
 
 
     if 1:
-        octet_range =[109,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[0,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
             #beta.runReplayPass1(octet)
             #beta.runGainBismuth(octet)
            # beta.findTriggerFunctions(octet)
-            beta.runReplayPass2(octet)
+            #beta.runReplayPass2(octet)
             #beta.runReplayPass3(octet)
             #beta.runRootfileTranslator(octet)
+            beta.removeDepolRunFiles(octet)
            
 
 
     #Running reverse calibrations
     if 0:
-        octet_range = [103,121];
+        octet_range = [115,121];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
-        #    beta.findTriggerFunctions(octet)
+            beta.findTriggerFunctions(octet)
             beta.runReverseCalibration(octet)
     

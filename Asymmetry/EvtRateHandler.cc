@@ -15,7 +15,7 @@ simulation data
 
 #include <TString.h>
 
-const bool useRCclasses = true;      // If this is true, we only use "good" response class 
+const bool useRCclasses = false;      // If this is true, we only use "good" response class 
                                      // events as defined by C. Swank (triangular MWPC responses)
 
 
@@ -222,7 +222,7 @@ void EvtRateHandler::dataReader() {
   char temp[100];
   
   std::string infile;
-  TFile *input;
+  TFile *input = new TFile();
   TTree *Tin;
 
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
@@ -239,7 +239,7 @@ void EvtRateHandler::dataReader() {
     if (UKdata) {
       sprintf(temp,"%s/replay_pass3_%i.root",getenv("REPLAY_PASS3"),runs[i]);
       std::string infile = std::string(temp);
-      input = new TFile(infile.c_str(), "READ");
+      input = TFile::Open(infile.c_str(), "READ");
       Tin = (TTree*)input->Get("pass3");
       
       Tin->SetBranchAddress("PID", &PID);
@@ -267,7 +267,7 @@ void EvtRateHandler::dataReader() {
     else {
       sprintf(temp,"%s/spec_%i.root",getenv("UK_SPEC_REPLAY"),runs[i]);
       std::string infile = std::string(temp);
-      input = new TFile(infile.c_str(), "READ");
+      input = TFile::Open(infile.c_str(), "READ");
       Tin = (TTree*)input->Get("phys");
       
       Tin->SetBranchAddress("PID", &PID);
@@ -317,8 +317,14 @@ void EvtRateHandler::dataReader() {
       if (PID==1) {       // Cut on electrons 
 	
 	//Cut out clipped events
-	if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
-
+	if ( Type==1 ) {
+	  if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
+	}
+	else {
+	  if ( Side==0 && ( xE_nClipped>0 || yE_nClipped>0 ) ) continue;
+	  else if ( Side==1 && ( xW_nClipped>0 || yW_nClipped>0 ) ) continue;
+	}
+	
 	//  If the flag at the top of this file is set to true, also cut on the wirechamber
 	//  event type according to C. Swanks classifications in ELOG 629 attachment 2
 	// Right now we are only cutting RC0 events, as these are the only ones
@@ -415,7 +421,7 @@ void SimEvtRateHandler::dataReader() {
   
   char temp[100];
   std::string infile;
-  TFile *input;
+  TFile *input = new TFile();
   TTree *Tin;
 
   double TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
@@ -432,7 +438,7 @@ void SimEvtRateHandler::dataReader() {
     
     sprintf(temp,"%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runs[i]);
     infile = std::string(temp);
-    input = new TFile(infile.c_str(), "READ");
+    input = TFile::Open(infile.c_str(), "READ");
     Tin = (TTree*)input->Get("revCalSim");
     //std::cout << "made it here in dataReader\n";
     //Set branch addresses
@@ -468,9 +474,16 @@ void SimEvtRateHandler::dataReader() {
 
       if (PID==1) {
 
-	//Clipped events
-	if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;
-        
+	//Cut out clipped events
+	if ( Type==1 ) {
+	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+	}
+	else {
+	  if ( Side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
+	  else if ( Side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	}
+
+	
 	r2E=mwpcPosE[0]*mwpcPosE[0]+mwpcPosE[1]*mwpcPosE[1];
 	r2W=mwpcPosW[0]*mwpcPosW[0]+mwpcPosW[1]*mwpcPosW[1];
 	

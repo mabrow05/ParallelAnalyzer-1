@@ -1,6 +1,6 @@
-totalTime	599979.132
-totalTimeE	601039.941
-totalTimeW	599817.807
+totalTime	563850.593
+totalTimeE	564847.524
+totalTimeW	563698.983
 5		0		0		0		0
 15		0		0		0		0
 25		0		0		0		0

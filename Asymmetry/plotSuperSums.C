@@ -6,10 +6,10 @@
   int octetStart=60;
   int octetEnd=121;
 
-  TString normType = "ALL";
+  TString normType = "0";
 
-  Double_t normLow = 0.;
-  Double_t normHigh = 1200.;
+  Double_t normLow = 50.;
+  Double_t normHigh = 800.;
   
   Double_t xAxisMax = 1200.;
 
