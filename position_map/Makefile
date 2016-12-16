@@ -19,7 +19,7 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o MBUtils.o positionMapHandler.o
+objects = DataTree.o MBUtils.o positionMapHandler.o ../source_peaks/peaks.o
 
 position_map.exe: position_map.o $(objects)
 	$(CXX) $(CXXFLAGS) -o position_map.exe position_map.o $(objects) $(LIBS)
@@ -38,6 +38,8 @@ compare_swank_maps.exe: compare_swank_maps.o $(objects)
 	@echo "Done"
 
 DataTree.o: DataTree.hh
+
+../source_peaks/peaks.o: ../source_peaks/peaks.hh
 
 MBUtils.o: MBUtils.hh
 

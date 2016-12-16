@@ -32,6 +32,8 @@ private:
   TFile *inputFile, *outputFile; 
   TTree *inputTree, *outputTree;
 
+  bool bInputTreeIsGood;
+
 public:
   DataTree(); //Constructor
   ~DataTree();
@@ -40,6 +42,7 @@ public:
   void fillOutputTree() {if (outputTree) outputTree->Fill();};
   void writeOutputFile(); 
   void setupInputTree(std::string inputFile, std::string inputTree);
+  bool inputTreeIsGood() { return bInputTreeIsGood; }
   void getEvent(UInt_t N) {inputTree->GetEvent(N);}
   Int_t getEntries() {return inputTree->GetEntriesFast();}
 

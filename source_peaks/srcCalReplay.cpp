@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
   //Reading position map...
   UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
   //GetPositionMap(XePeriod);
-  PositionMap posmap(5.0);
+  PositionMap posmap(5.0,50.);
   posmap.readPositionMap(XePeriod);
 
   

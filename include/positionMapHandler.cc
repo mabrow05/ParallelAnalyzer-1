@@ -9,7 +9,7 @@
 
 
 
-PositionMap::PositionMap(Double_t bin_width, Double_t r_max) : binWidth(bin_width), rmax(r_max) {
+PositionMap::PositionMap(Double_t bin_width, Double_t r_max) : binWidth(bin_width), rmax(r_max), bUseRC(useRC) {
   
   Int_t nBinsHold = (int)(110./binWidth);
   nBinsXY = ((int)nBinsHold%2)==0 ? (int)nBinsHold+1 : (int)nBinsHold;
@@ -47,7 +47,9 @@ void PositionMap::setBinValues() {
 
 void PositionMap::readPositionMap(Int_t XeRunPeriod) {
   XePeriod = XeRunPeriod;
-  std::string file = std::string(getenv("POSITION_MAPS")) + "/position_map_" + itos(XePeriod) + "_" + "RC_123_" + ftos(binWidth) +  "mm.dat";
+  std::string file = "";
+  if ( bUseRC ) file = std::string(getenv("POSITION_MAPS")) + "/position_map_" + itos(XePeriod) + "_" + "RC_123_" + ftos(binWidth) +  "mm.dat";
+  else file = std::string(getenv("POSITION_MAPS")) + "/position_map_" + itos(XePeriod) + "_" + ftos(binWidth) +  "mm.dat";
   std::ifstream infile(file.c_str());
   
   Int_t binValx, binValy;

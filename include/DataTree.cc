@@ -1,7 +1,8 @@
 #include "DataTree.hh"
+#include <TSystem.h>
 
 
-DataTree::DataTree() : inputFile(NULL), outputFile(NULL), inputTree(NULL), outputTree(NULL) {
+DataTree::DataTree() : inputFile(NULL), outputFile(NULL), inputTree(NULL), outputTree(NULL), bInputTreeIsGood(false) {
   
 };
 
@@ -108,6 +109,12 @@ void DataTree::writeOutputFile() {
 };
 
 void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeName) {
+  
+  // Check that the file exists... note that gSystem->AccessPathName() returns true if it can't access the path name!
+  if ( gSystem->AccessPathName(inputFileName.c_str()) ) return;
+  
+  bInputTreeIsGood = true;
+
   inputFile = new TFile(inputFileName.c_str(),"READ");
   inputTree = (TTree*)(inputFile->Get(inputTreeName.c_str()));
   //inputTree = (TTree*)(gROOT->FindObject(inputTreeName.c_str()));

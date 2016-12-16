@@ -1,16 +1,20 @@
 #include <vector>
 #include <TF1.h>
 
+static const bool useRC = false;
+
 class PositionMap {
 
 public:
 
-  PositionMap(Double_t bin_width, Double_t r_max=50.); //Constructor
+  PositionMap(Double_t bin_width, Double_t r_max); //Constructor
   ~PositionMap();
 
   void readPositionMap(Int_t XeRunPeriod); //Read in a trigger map
   //void writePositionMap(Int_t XeRunPeriod); //Write trigger map
   void setPositionMapPoint(Int_t xBin, Int_t yBin, std::vector <Double_t> vals); //Set a trigger map val
+
+  void setRCflag(bool rc) { bUseRC = rc; }
 
   std::vector <Double_t> getInterpolatedEta(Double_t xE, Double_t yE, Double_t xW, Double_t yW); //return interpolated value from position map
 
@@ -30,6 +34,8 @@ private:
 
   Double_t binWidth; //x and y width of position bins
   Double_t rmax; //Maximum r where an interpolation can faithfully be constructed
+  bool bUseRC; // Flag which defaults to const value at top of file, but can be set to whatever
+  
   Int_t nBinsXY, nBinsTotal;
   Int_t XePeriod;
   std::vector <Double_t> xyBinLower;

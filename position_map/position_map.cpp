@@ -23,6 +23,7 @@
 #include "basic_reconstruction.h"
 #include "DataTree.hh"
 #include "MBUtils.hh"
+#include "../source_peaks/peaks.hh"
 
 #include "positionMapHandler.hh"
 
@@ -38,15 +39,14 @@ int main(int argc, char *argv[])
 
   // Prompt for filename of run numbers
   int iXeRunPeriod;
-  bool allResponseClasses = true;
-  int numResponseClasses = 0;
-  vector <int> responseClasses;
-  int nRuns = 0;
-  int runList[500];
   cout << "Enter Xenon run period: " << endl;
   cin  >> iXeRunPeriod;
   cout << endl;
 
+  /*bool allResponseClasses = true;
+  int numResponseClasses = 0;
+  vector <int> responseClasses;
+  
   cout << "All Response Classes? (true=1/false=0): " << endl;
   cin  >> allResponseClasses;
   cout << endl;
@@ -74,8 +74,11 @@ int main(int argc, char *argv[])
 	exit(1);
       }
     }
-  }
+    }*/
 
+
+  int nRuns = 0;
+  int runList[500];
 
   char temp[500];
   sprintf(temp, "%s/run_lists/Xenon_Calibration_Run_Period_%i.dat", getenv("ANALYSIS_CODE"),iXeRunPeriod);
@@ -94,7 +97,8 @@ int main(int argc, char *argv[])
 
   
   double xyBinWidth = 5.; //2.5;
-  PositionMap posmap(xyBinWidth);
+  PositionMap posmap(xyBinWidth,50.);
+  posmap.setRCflag(false); //telling the position map to not use the RC choices
   Int_t nBinsXY = posmap.getNbinsXY();
   
 
@@ -103,13 +107,13 @@ int main(int argc, char *argv[])
   string tempOut;
   //sprintf(tempOut, "position_map_%s.root", argv[1]);
   tempOutBase = "position_map_" + itos(iXeRunPeriod);
-  if (!allResponseClasses) {
+  /*if (!allResponseClasses) {
     tempOutBase+="_RC_";
     for (int i=0; i< numResponseClasses; i++) {
       tempOutBase+=itos(responseClasses[i]);
     }
-  }
-  tempOut =  getenv("POSITION_MAPS")+tempOutBase+".root";
+    }*/
+  tempOut =  getenv("POSITION_MAPS")+tempOutBase+"_"+ftos(xyBinWidth)+"mm.root";
   TFile *fileOut = new TFile(tempOut.c_str(),"RECREATE");
 
   // Output histograms
@@ -153,8 +157,12 @@ int main(int argc, char *argv[])
     sprintf(tempIn, "%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"), runList[i]);
     DataTree *t = new DataTree();
     t->setupInputTree(std::string(tempIn),"pass2");
-    //TFile *fileIn = new TFile(tempIn, "READ");
-    //TTree *Tin = (TTree*)(fileIn->Get("pass2"));
+
+    if ( !t->inputTreeIsGood() ) { 
+      std::cout << "Skipping " << tempIn << "... Doesn't exist or couldn't be opened.\n";
+      continue;
+    }
+
     int nEvents = t->getEntries();
     cout << "Processing " << runList[i] << " ... " << endl;
     cout << "... nEvents = " << nEvents << endl;
@@ -166,23 +174,32 @@ int main(int argc, char *argv[])
 
       // Select Type 0 events
       if (t->PID != 1) continue;
-      if (t->Type > 0) continue;
+      if (t->Type != 0) continue;
+
+      //Cut out clipped events
+      if ( t->Side==0 && ( t->xE.nClipped>0 || t->yE.nClipped>0 ) ) continue;
+      else if ( t->Side==1 && ( t->xW.nClipped>0 || t->yW.nClipped>0 ) ) continue;
+	
 
 	  
 		
 
-      // Type 0 East Trigger
-      int intBinX, intBinY; 
-      bool moveOnX = true, moveOnY=true; // Determining if the event is of the correct response class in x and y
-      if (t->Side == 0) {
+      
+      /*bool moveOnX = true, moveOnY=true; // Determining if the event is of the correct response class in x and y
+     
 	//Swank addition: Wire Chamber Response class. 
 	for (int j=0; j<numResponseClasses; j++) {
 	  if (t->xeRC == responseClasses[j]) {moveOnX=false;}
 	  if (t->yeRC == responseClasses[j]) {moveOnY=false;}
 	}
       
-	if (moveOnX || moveOnY) continue;
+	if (moveOnX || moveOnY) continue;*/
 
+      // Type 0 East Trigger
+      int intBinX, intBinY; 
+      
+      if (t->Side == 0) {
+	
 	intBinX = posmap.getBinNumber(t->xE.center);
         intBinY = posmap.getBinNumber(t->yE.center);
 
@@ -194,15 +211,16 @@ int main(int argc, char *argv[])
       }
 
       // Type 0 West Trigger
-      moveOnX=moveOnY=true;
-      if (t->Side == 1) {
+      //moveOnX=moveOnY=true;
+      else if (t->Side == 1) {
+
 	//Swank Only Allow triangles!!!	  	
-	for (int j=0; j<numResponseClasses; j++) {
-	  if (t->xwRC == responseClasses[j]) {moveOnX=false;}
-	  if (t->ywRC == responseClasses[j]) {moveOnY=false;}
-	}
+	//for (int j=0; j<numResponseClasses; j++) {
+	// if (t->xwRC == responseClasses[j]) {moveOnX=false;}
+	// if (t->ywRC == responseClasses[j]) {moveOnY=false;}
+	//}
       
-	if (moveOnX || moveOnY) continue;
+	//if (moveOnX || moveOnY) continue;
 	
         intBinX = posmap.getBinNumber(t->xW.center);
         intBinY = posmap.getBinNumber(t->yW.center);
@@ -227,12 +245,14 @@ int main(int argc, char *argv[])
   // Define fit ranges
   double xLowBin[nPMT][nBinsXY][nBinsXY];
   double xHighBin[nPMT][nBinsXY][nBinsXY];
+  double xLow[nPMT][nBinsXY][nBinsXY];
+  double xHigh[nPMT][nBinsXY][nBinsXY];
   int maxBin[nPMT][nBinsXY][nBinsXY];
   double maxCounts[nPMT][nBinsXY][nBinsXY];
   double binCenterMax[nPMT][nBinsXY][nBinsXY];
   double meanVal[nPMT][nBinsXY][nBinsXY];
 
-  for (int p=0; p<nPMT; p++) {
+  /*for (int p=0; p<nPMT; p++) {
     for (int i=0; i<nBinsXY; i++) {
       for (int j=0; j<nBinsXY; j++) {	
 	
@@ -269,30 +289,32 @@ int main(int argc, char *argv[])
 	
       }
     }
-  }
+    }*/
 
 
-	  /*TSpectrum *spec;
+  TSpectrum *spec;
 
   for (int p=0; p<nPMT; p++) {
-    for (int i=0; i<nPosBinsX; i++) {
-      for (int j=0; j<nPosBinsY; j++) {	
+    for (int i=0; i<nBinsXY; i++) {
+      for (int j=0; j<nBinsXY; j++) {	
 	
-	double r = sqrt(yBinCenter[j]*yBinCenter[j]+xBinCenter[i]*xBinCenter[i]);
+	double r = sqrt(power(posmap.getBinCenter(j),2)+power(posmap.getBinCenter(i),2));
+	
         // Find bin with maximum content
+	hisxy[p][i][j]->GetXaxis()->SetRange(2,nBinHist);
         maxBin[p][i][j] = hisxy[p][i][j]->GetMaximumBin();
         maxCounts[p][i][j] = hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]);
         binCenterMax[p][i][j] = hisxy[p][i][j]->GetBinCenter(maxBin[p][i][j]);
 	
 	  
-	if (r<=(50.+2*xBinWidth))
+	if (r<=(50.+2*xyBinWidth))
 	      {
 		spec = new TSpectrum(20);
 		Int_t npeaks = spec->Search(hisxy[p][i][j],1.5,"",0.5);
 		
 		if (npeaks==0)
 		  {
-		    cout << "No peaks identified at PMT" << p << " position " << xBinCenter[i] << ", " << yBinCenter[j] << endl;
+		    cout << "No peaks identified at PMT" << p << " position " << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << endl;
 		  }
 		else
 		  {
@@ -315,24 +337,65 @@ int main(int argc, char *argv[])
 		  }
 		delete spec;
 	      }
-	xLow[p][i][j] = binCenterMax[p][i][j]/3.;
-	xHigh[p][i][j] = 2.*binCenterMax[p][i][j];
+	xLow[p][i][j] = binCenterMax[p][i][j]*2./3.;
+	xHigh[p][i][j] = 1.5*binCenterMax[p][i][j];
 
 	
       }
     }
-    }
+  }
   
   // Fit histograms
-  TF1 *gaussian_fit[nPMT][nPosBinsX][nPosBinsY];
-  double fitMean[nPMT][nPosBinsX][nPosBinsY];
+  //TF1 *gaussian_fit[nPMT][nPosBinsX][nPosBinsY];
+  //double fitMean[nPMT][nPosBinsX][nPosBinsY];
 
   double sigmaMax[8] = {400.,250.,250.,250.,250.,300.,300.,500};
 
   for (int p=0; p<nPMT; p++) {
-    for (int i=0; i<nPosBinsX; i++) {
-      for (int j=0; j<nPosBinsY; j++) {
+    for (int i=0; i<nBinsXY; i++) {
+      for (int j=0; j<nBinsXY; j++) {
 
+	double r = sqrt(power(posmap.getBinCenter(j),2)+power(posmap.getBinCenter(i),2));
+	
+
+	if ( hisxy[p][i][j]->Integral() > 500.) {// && r<=(50.+2*xBinWidth)) {
+
+	  SinglePeakHist sing(hisxy[p][i][j], xLow[p][i][j], xHigh[p][i][j]);
+
+	  if (sing.isGoodFit() && sing.ReturnMean()>xLow[p][i][j] && sing.ReturnMean()<xHigh[p][i][j]) {
+	    meanVal[p][i][j] = sing.ReturnMean();
+	  }
+
+	  else  {
+	    cout << "Can't converge on peak in PMT " << p << "at (" << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << "). Trying one more time......" << endl;
+	    sing.SetRangeMin(xLow[p][i][j]);
+	    sing.SetRangeMax(xHigh[p][i][j]);
+	    sing.FitHist((double)maxBin[p][i][j], hisxy[p][i][j]->GetMean()/5., hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]));
+
+	    if (sing.isGoodFit() && sing.ReturnMean()>xLow[p][i][j] && sing.ReturnMean()<xHigh[p][i][j]) { 
+	      meanVal[p][i][j] = sing.ReturnMean();
+	    }
+	    else {
+	      meanVal[p][i][j] = hisxy[p][i][j]->GetMean()/1.8;
+	      cout << "Can't converge on peak in PMT " << p << "at bin (" << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << "). ";
+	      cout << "**** replaced fit mean with hist_mean/1.8 " << meanVal[p][i][j] << endl;
+	    }
+	  }
+	}
+	else { 
+	  meanVal[p][i][j] = hisxy[p][i][j]->GetMean()/1.8;
+	  if ( meanVal[p][i][j]>xLow[p][i][j] && meanVal[p][i][j]<xHigh[p][i][j] ) 
+	    cout << "**** replaced fit mean with hist_mean/1.8 " << meanVal[p][i][j] << endl;
+	  else { 
+	    meanVal[p][i][j] = binCenterMax[p][i][j];
+	    cout << "**** replaced fit mean with binCenterMax " << meanVal[p][i][j] << endl;
+	  }
+	}
+      }
+    }
+  }
+
+	  /*
         char fitName[500];
         sprintf(fitName, "gaussian_fit_%i_%i_%i.root", p, i, j);
 
@@ -346,7 +409,7 @@ int main(int argc, char *argv[])
 	gaussian_fit[p][i][j]->SetParLimits(1,0.,4000.);	
 	gaussian_fit[p][i][j]->SetParLimits(2,0.,500.);
 
-	double r = sqrt(xBinCenter[i]*xBinCenter[i]+yBinCenter[j]*yBinCenter[j]);
+	
 
         if (maxCounts[p][i][j] > 0. && r<=(50.+2*xBinWidth)) {
           hisxy[p][i][j]->Fit(fitName, "LRQ");
@@ -394,10 +457,10 @@ int main(int argc, char *argv[])
 		      cout << "**** replaced fit mean with max bin " << fitMean[p][i][j] << endl;
 		    }
 		}
-	    }	      
+		}	      
         }
         else {
-          fitMean[p][i][j] = 0.;
+          meanVal[p][i][j] = 0.;
         }
 	//cout << "PMT " << p << " at " << xBinCenter[i] << ", " << yBinCenter[j] << " fitMean = " << fitMean[p][i][j] << endl;
 
@@ -410,6 +473,18 @@ int main(int argc, char *argv[])
   for (int p=0; p<nPMT; p++) {
     norm[p] = meanVal[p][nBinsXY/2][nBinsXY/2];
     cout << norm[p] << endl;
+  }
+
+  //Checking for weird outliers
+  for (int p=0; p<nPMT; p++) {
+    for (int i=0; i<nBinsXY; i++) {
+      for (int j=0; j<nBinsXY; j++) {
+	
+	if ( meanVal[p][i][j]<(0.25*norm[p]) || meanVal[p][i][j]>(5.*norm[p]) ) 
+	  meanVal[p][i][j] = (0.25*norm[p]);
+
+      }
+    }
   }
 
   double positionMap[nPMT][nBinsXY][nBinsXY];
@@ -454,7 +529,7 @@ int main(int argc, char *argv[])
 
   // Write output ntuple
   fileOut->Write();
-  fileOut->Close();
+  delete fileOut;
 
   return 0;
 }

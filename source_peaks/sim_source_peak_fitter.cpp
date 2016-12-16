@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
   
 
   // Load calibration info
-  PositionMap posmap(5.0);
+  PositionMap posmap(5.0,50.);
   posmap.readPositionMap(getXeRunPeriod(runNumber));
   
   vector < Double_t > eta;

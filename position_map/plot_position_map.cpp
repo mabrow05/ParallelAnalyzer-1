@@ -1,4 +1,4 @@
-// Usage: root[0] .x plot_position_map.C("runPeriod")
+
 
 #include <string>
 #include <cstdlib>
@@ -76,11 +76,13 @@ void plot_position_map(int XePeriod, double binWidth)
   //gROOT->ForceStyle();
 
   
-  PositionMap posmap(binWidth);
+  PositionMap posmap(binWidth, 50.);
+  posmap.setRCflag(false); // plotting non RC maps
   posmap.readPositionMap(XePeriod);
 
   
-  PositionMap plotMap(0.5);
+  PositionMap plotMap(0.5,50.);
+  plotMap.setRCflag(false); // plotting non RC maps
 
   int nPosBinsXY = plotMap.getNbinsXY();
   double xyMin = plotMap.getBinLower(0);
@@ -126,7 +128,7 @@ void plot_position_map(int XePeriod, double binWidth)
   TString filenameOut;
   Char_t runPeriodString[10];
   sprintf(runPeriodString,"%i",XePeriod);
-  filenameOut = TString(getenv("POSITION_MAPS")) + "position_map_"+TString(runPeriodString)+"_RC_123"+TString::Format("_%0.1fmm.pdf",binWidth);
+  filenameOut = TString(getenv("POSITION_MAPS")) + "position_map_"+TString(runPeriodString)+TString::Format("_%0.1fmm.pdf",binWidth);
   
   /*if (iRunPeriod == 1) filenameOut  = "position_map_1_RC_123.pdf";
   if (iRunPeriod == 2) filenameOut  = "position_map_2_RC_123.pdf";

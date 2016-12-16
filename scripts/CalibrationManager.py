@@ -15,8 +15,9 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17588,17950,17953,21298,21605]
+omittedRuns = [17588,17950,17953,18749,21298,21605]
 #17588, 17950, 17953 are seemingly empty
+#18749 - just an outlier on its west side... messes up fits in WPMT3 & 4
 #19232 has abnormally high Bi peak energies on West side... no explanation
 #21298 has very few events in Bi Pulser
 #21605 has very few counts
@@ -497,12 +498,16 @@ class CalibrationManager:
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
-        for line in infile:       
-            #checking if peaks have already been fit
-            filepath = self.srcPeakPath +"source_peaks_%i.dat"%int(line)
-            print filepath
-            if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
-                runs.append(int(line))
+
+        for line in infile:  
+            if int(line) not in omittedRuns:
+                #checking if peaks have already been fit
+                filepath = self.srcPeakPath +"source_peaks_%i.dat"%int(line)
+                print filepath
+                if not MButils.fileExistsAndNotEmpty(filepath) or overwrite:
+                    runs.append(int(line))
+             
+            
 
         for run in runs:
             
@@ -951,7 +956,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -976,7 +981,7 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [8]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1010,16 +1015,16 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [10]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
-            rep.findPedestals(runPeriod, sourceORxenon="xenon")
+            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
