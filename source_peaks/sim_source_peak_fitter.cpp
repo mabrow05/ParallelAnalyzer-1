@@ -843,10 +843,13 @@ int main(int argc, char *argv[])
   
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
+
+      std::string srcName = sourceName[n];
+      
+      if (sourceName[n]=="Bi") srcName=sourceName[n]+"1";
      
       outResultsEreconTot << runNumber << " "
-		       << sourceName[n] << " "
+		       << srcName << " "
 		       << fitMeanEreconTot[n][0] << " "
 		       << fitSigmaEreconTot[n][0] << " "
 		       << fitMeanEreconTot[n][1] << " " 
@@ -875,16 +878,19 @@ int main(int argc, char *argv[])
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
 
+      std::string srcName = sourceName[n];
+      
+      if (sourceName[n]=="Bi") srcName=sourceName[n]+"1";
+
       std::vector < std::vector <Double_t> > pos = returnSourcePosition(runNumber, sourceName[n]); //Holds the average value of eta for the the data being read in for each source and each PMT
       std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][1]);
 
       for (int p=0; p<8; p++) {
-	std::cout << "Source " << sourceName[n] << " PMT " << p << " aveEta :" << eta0[p] << std::endl;
+	std::cout << "Source " << srcName << " PMT " << p << " aveEta :" << eta0[p] << std::endl;
       }
 
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
       outResultsEtaEvis << runNumber << " "
-			<< sourceName[n] << " "
+			<< srcName << " "
 			<< fitMean[n][0]*eta0[0] << " "
 			<< fitMean[n][1]*eta0[1] << " "
 			<< fitMean[n][2]*eta0[2] << " "
@@ -894,7 +900,7 @@ int main(int argc, char *argv[])
 			<< fitMean[n][6]*eta0[6] << " "
 			<< fitMean[n][7]*eta0[7] << " " << endl;
       outResultsEtaEvisError << runNumber << " "
-			<< sourceName[n] << " "
+			<< srcName << " "
 			<< fitMeanError[n][0]*eta0[0] << " "
 			<< fitMeanError[n][1]*eta0[1] << " "
 			<< fitMeanError[n][2]*eta0[2] << " "
