@@ -35,6 +35,44 @@ struct PMT {
   double nPE[8]; 
 };
 
+// Return the source position for a source in a given run
+std::vector <std::vector <double> > returnSourcePosition (Int_t runNumber, string src) {
+  Char_t temp[500];
+  sprintf(temp,"%s/source_list_%i.dat",getenv("SOURCE_LIST"),runNumber);
+  std::ifstream file(temp);
+  std::cout << src << std::endl;
+  int num = 0;
+  file >> num;
+  std::cout << num << std::endl;
+  int srcNum = 0;
+  string src_check;
+  for (int i=0; i<num;srcNum++,i++) {
+    file >> src_check;
+    std::cout << src_check << std::endl;
+    if (src_check==src) break;   
+  }
+  std::cout << "The source Number is: " << srcNum << std::endl;
+  if (srcNum==num) {
+    std::cout << "Didn't find source in that run\n"; exit(0);
+  }
+  file.close();
+  
+  sprintf(temp,"%s/source_positions_%i.dat",getenv("SOURCE_POSITIONS"),runNumber);
+  file.open(temp);
+  
+  std::vector < std::vector < double > > srcPos;
+  srcPos.resize(2,std::vector <double> (3,0.));
+  
+  for (int i=0; i<srcNum+1; i++) {
+    for (int j=0; j<2; j++) {
+      for (int jj=0; jj<3; jj++) {
+	file >> srcPos[j][jj];
+      }
+    }
+  }
+  return srcPos;
+}
+
 //Returns the average eta value from the position map
 vector < vector < Double_t > > getMeanEtaForSources(Int_t run) 
 {
@@ -196,6 +234,7 @@ int main(int argc, char *argv[])
   vector < Double_t > eta;
   std::vector < std::vector <Int_t> > numDataPoints(3, std::vector <Int_t>(2,0)); //Holds the number of data points for each side for each source
   std::vector < std::vector <Double_t> > aveEta(3, std::vector <Double_t>(8,0.)); //Holds the average value of eta for the the data being read in for each source and each PMT
+  std::vector < std::vector < Double_t > > etaCenter(3, std::vector <Double_t> (8,0.));
 
   for (Int_t src=0; src<nSources; src++) {
     if (!useSource[src]) continue;
@@ -827,14 +866,6 @@ int main(int argc, char *argv[])
   outResultsEreconTot.close();
   
 
-  // NOW I CALCULATE THE ADJUSTED Evis value for calibration purposes
-  //std::vector < std::vector < Double_t > > ADCbar(nSources, std::vector <Double_t> (8,0.));
-  for (int n=0; n<nSources; n++) {
-    for (int p=0; p<8; p++) {
-      //ADCbar[n][p] = linearityCurve.applyInverseLinCurve(p,fitMean[n][p]*aveEta[n][p<4?0:1]);
-      std::cout << "Source " << n << " PMT " << p << " aveEta :" << meanEta[n][p] << std::endl;
-    }
-  }
  
   sprintf(tempResults, "%s/source_peaks/source_peaks_%s_etaEvis.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsEtaEvis(tempResults);
@@ -843,51 +874,67 @@ int main(int argc, char *argv[])
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
+
+      std::vector < std::vector <Double_t> > pos = returnSourcePosition(runNumber, sourceName[n]); //Holds the average value of eta for the the data being read in for each source and each PMT
+      std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][1]);
+
+      for (int p=0; p<8; p++) {
+	std::cout << "Source " << sourceName[n] << " PMT " << p << " aveEta :" << eta0[p] << std::endl;
+      }
+
       if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
       outResultsEtaEvis << runNumber << " "
 			<< sourceName[n] << " "
-			<< fitMean[n][0]*meanEta[n][0] << " "
-			<< fitMean[n][1]*meanEta[n][1] << " "
-			<< fitMean[n][2]*meanEta[n][2] << " "
-			<< fitMean[n][3]*meanEta[n][3] << " "
-			<< fitMean[n][4]*meanEta[n][4] << " "
-			<< fitMean[n][5]*meanEta[n][5] << " "
-			<< fitMean[n][6]*meanEta[n][6] << " "
-			<< fitMean[n][7]*meanEta[n][7] << " " << endl;
+			<< fitMean[n][0]*eta0[0] << " "
+			<< fitMean[n][1]*eta0[1] << " "
+			<< fitMean[n][2]*eta0[2] << " "
+			<< fitMean[n][3]*eta0[3] << " "
+			<< fitMean[n][4]*eta0[4] << " "
+			<< fitMean[n][5]*eta0[5] << " "
+			<< fitMean[n][6]*eta0[6] << " "
+			<< fitMean[n][7]*eta0[7] << " " << endl;
       outResultsEtaEvisError << runNumber << " "
 			<< sourceName[n] << " "
-			<< fitMeanError[n][0]*meanEta[n][0] << " "
-			<< fitMeanError[n][1]*meanEta[n][1] << " "
-			<< fitMeanError[n][2]*meanEta[n][2] << " "
-			<< fitMeanError[n][3]*meanEta[n][3] << " "
-			<< fitMeanError[n][4]*meanEta[n][4] << " "
-			<< fitMeanError[n][5]*meanEta[n][5] << " "
-			<< fitMeanError[n][6]*meanEta[n][6] << " "
-			<< fitMeanError[n][7]*meanEta[n][7] << " " << endl;
+			<< fitMeanError[n][0]*eta0[0] << " "
+			<< fitMeanError[n][1]*eta0[1] << " "
+			<< fitMeanError[n][2]*eta0[2] << " "
+			<< fitMeanError[n][3]*eta0[3] << " "
+			<< fitMeanError[n][4]*eta0[4] << " "
+			<< fitMeanError[n][5]*eta0[5] << " "
+			<< fitMeanError[n][6]*eta0[6] << " "
+			<< fitMeanError[n][7]*eta0[7] << " " << endl;
     }
   }
 
   if (useLowBiPeak) {
+
+    std::vector < std::vector <Double_t> > pos = returnSourcePosition(runNumber, "Bi"); //Holds the average value of eta for the the data being read in for each source and each PMT
+    std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][1]);
+    
+    for (int p=0; p<8; p++) {
+      std::cout << "Source " << "Bi2" << " PMT " << p << " aveEta :" << eta0[p] << std::endl;
+    }
+
     outResultsEtaEvis << runNumber << " "
 		      << "Bi2" << " "
-		      << lowBiFitMean[0]*meanEta[BiPeakIndex][0] << " "
-		      << lowBiFitMean[1]*meanEta[BiPeakIndex][1] << " "
-		      << lowBiFitMean[2]*meanEta[BiPeakIndex][2] << " "
-		      << lowBiFitMean[3]*meanEta[BiPeakIndex][3] << " "
-		      << lowBiFitMean[4]*meanEta[BiPeakIndex][4] << " "
-		      << lowBiFitMean[5]*meanEta[BiPeakIndex][5] << " "
-		      << lowBiFitMean[6]*meanEta[BiPeakIndex][6] << " "
-		      << lowBiFitMean[7]*meanEta[BiPeakIndex][7] << " " << endl;
+		      << lowBiFitMean[0]*eta0[0] << " "
+		      << lowBiFitMean[1]*eta0[1] << " "
+		      << lowBiFitMean[2]*eta0[2] << " "
+		      << lowBiFitMean[3]*eta0[3] << " "
+		      << lowBiFitMean[4]*eta0[4] << " "
+		      << lowBiFitMean[5]*eta0[5] << " "
+		      << lowBiFitMean[6]*eta0[6] << " "
+		      << lowBiFitMean[7]*eta0[7] << " " << endl;
     outResultsEtaEvisError << runNumber << " "
 		      << "Bi2" << " "
-		      << lowBiFitMeanError[0]*meanEta[BiPeakIndex][0] << " "
-		      << lowBiFitMeanError[1]*meanEta[BiPeakIndex][1] << " "
-		      << lowBiFitMeanError[2]*meanEta[BiPeakIndex][2] << " "
-		      << lowBiFitMeanError[3]*meanEta[BiPeakIndex][3] << " "
-		      << lowBiFitMeanError[4]*meanEta[BiPeakIndex][4] << " "
-		      << lowBiFitMeanError[5]*meanEta[BiPeakIndex][5] << " "
-		      << lowBiFitMeanError[6]*meanEta[BiPeakIndex][6] << " "
-		      << lowBiFitMeanError[7]*meanEta[BiPeakIndex][7] << " " << endl;
+		      << lowBiFitMeanError[0]*eta0[0] << " "
+		      << lowBiFitMeanError[1]*eta0[1] << " "
+		      << lowBiFitMeanError[2]*eta0[2] << " "
+		      << lowBiFitMeanError[3]*eta0[3] << " "
+		      << lowBiFitMeanError[4]*eta0[4] << " "
+		      << lowBiFitMeanError[5]*eta0[5] << " "
+		      << lowBiFitMeanError[6]*eta0[6] << " "
+		      << lowBiFitMeanError[7]*eta0[7] << " " << endl;
 		   
   }
   outResultsEtaEvis.close();

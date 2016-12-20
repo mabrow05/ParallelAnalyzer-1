@@ -391,21 +391,21 @@ int main(int argc, char *argv[])
       if (j<16) {
 	if ( Pdc2[j] > 4000. ) t->yE.nClipped++;
 	if ( Padc[j] > 4000. ) t->yW.nClipped++;
-	t->Cathodes_Ey[j] = Pdc2[j];
-	t->Cathodes_Wy[j] = Padc[j];
+	t->Cathodes_Ey[j] = (double)Pdc2[j] - pedPdc2[j];
+	t->Cathodes_Wy[j] = (double)Padc[j] - pedPadc[j];
       }
       else {
 	if ( Pdc2[j] > 4000. ) t->xE.nClipped++;
 	if ( Padc[j] > 4000. ) t->xW.nClipped++;
-	t->Cathodes_Ex[j-16] = Pdc2[j];
-	t->Cathodes_Wx[j-16] = Padc[j];
+	t->Cathodes_Ex[j-16] = (double)Pdc2[j] - pedPdc2[j];
+	t->Cathodes_Wx[j-16] = (double)Padc[j] - pedPadc[j];
       }
     }
 
     // Calculate pedestal-subtracted MWPC Anode PADC values
     //Took this out for now. We are comparing against a cut instead...
-    //AnodeE = ((double) Pdc30) - pedPdc30;
-    //AnodeW = ((double) Pdc34) - pedPdc34;
+    AnodeE = ((double) Pdc30) - pedPdc30;
+    AnodeW = ((double) Pdc34) - pedPdc34;
 
     // UCN monitor events
     bool UCNMonitorTrigger = false;
@@ -474,6 +474,7 @@ int main(int argc, char *argv[])
     bool triggerEast = false;
     bool triggerWest = false;
 
+    t->PassedAnoE = t->PassedAnoW = false;
     if ( ((double) Pdc30)  > cutEastAnode) {mwpcHitEast = true; t->PassedAnoE=true;}
     if ( ((double) Pdc34)  > cutWestAnode) {mwpcHitWest = true; t->PassedAnoW=true;}
 
@@ -750,8 +751,8 @@ int main(int argc, char *argv[])
     
     t->EMWPC_E = t->EMWPC_W = 0.;
     
-    t->AnodeE = (double) Pdc30;
-    t->AnodeW = (double) Pdc34;
+    t->AnodeE = AnodeE;
+    t->AnodeW = AnodeW;
     
     t->PassedCathE = t->PassedCathW = PID==1?true:false; //temporary holder for this
     
