@@ -882,7 +882,7 @@ int main(int argc, char *argv[])
       std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][1]);
 
       for (int p=0; p<8; p++) {
-	std::cout << "Source " << srcName << " PMT " << p << " aveEta :" << eta0[p] << std::endl;
+	std::cout << "Source " << sourceName[n] << " PMT " << p << " aveEta :" << eta0[p] << std::endl;
       }
 
       std::string srcName = sourceName[n];
