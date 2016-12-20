@@ -467,9 +467,11 @@ int main(int argc, char *argv[])
 
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
+      std::string srcName = sourceName[n];
+      
+      if (sourceName[n]=="Bi") srcName=sourceName[n]+"1";
       outResultsMean << runNumber << " "
-		     << sourceName[n] << " "
+		     << srcName << " "
 		     << fitMean[n][0] << " "
 		     << fitMean[n][1] << " "
 		     << fitMean[n][2] << " "
@@ -479,7 +481,7 @@ int main(int argc, char *argv[])
 		     << fitMean[n][6] << " "
 		     << fitMean[n][7] << endl;
       outResultsMeanError << runNumber << " "
-		     << sourceName[n] << " "
+		     << srcName << " "
 		     << fitMeanError[n][0] << " "
 		     << fitMeanError[n][1] << " "
 		     << fitMeanError[n][2] << " "
@@ -489,7 +491,7 @@ int main(int argc, char *argv[])
 		     << fitMeanError[n][6] << " "
 		     << fitMeanError[n][7] << endl;
       outResultsSigma << runNumber << " "
-		     << sourceName[n] << " "
+		     << srcName << " "
 		     << fitSigma[n][0] << " "
 		     << fitSigma[n][1] << " "
 		     << fitSigma[n][2] << " "
@@ -678,10 +680,12 @@ int main(int argc, char *argv[])
   
   for (int n=0; n<nSources; n++) {
     if (useSource[n]) {
-      if (sourceName[n]=="Bi") sourceName[n]=sourceName[n]+"1";
+      std::string srcName = sourceName[n];
+      
+      if (sourceName[n]=="Bi") srcName=sourceName[n]+"1";
      
       outResultsEvisTot << runNumber << " "
-		       << sourceName[n] << " "
+		       << srcName << " "
 		       << fitMeanEvisTot[n][0] << " "
 		       << fitSigmaEvisTot[n][0] << " "
 		       << fitMeanEvisTot[n][1] << " " 
