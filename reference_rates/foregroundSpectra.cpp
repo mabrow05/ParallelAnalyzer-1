@@ -234,34 +234,39 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       t.getEvent(n);
 
-
-      //Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
-      /*if (t.Erecon>0. && t.Type==2) {
-  
-	if (side==0) {
-	  t.Type = separate23(t.Side,t.EMWPC_E);
-	  t.Side = t.Type==2 ? 1 : 0;
-	}
-	else if (t.Side==1) {
-	  t.Type = separate23(t.Side,t.EMWPC_W);
-	  t.Side = t.Type==2 ? 0 : 1;
-	}
-	
-	}*/
-
-      
-      //***********************************************************************************************************************
-      // Filling rate histograms with "good" events to calculate the corrections
-
-      
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0.) {
 	
-	//if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
-	if (t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue; //Clipped events
-
-	if ( useRCclasses ) {
-	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
+	//Clipped events
+	if ( t.Type==1 ) {
+	  if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
 	}
+	else {
+	  if ( t.Side==0 && ( t.xE.nClipped>0 || t.yE.nClipped>0 ) ) continue; 
+	  else if ( t.Side==1 && ( t.xW.nClipped>0 || t.yW.nClipped>0 ) ) continue;
+	}
+
+	/*if ( useRCclasses ) {
+	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
+	  }*/
+	
+	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
+	/*if (t.Erecon>0. && t.Type==2) {
+	  
+	  if (side==0) {
+	  t.Type = separate23(t.Side,t.EMWPC_E);
+	  t.Side = t.Type==2 ? 1 : 0;
+	  }
+	  else if (t.Side==1) {
+	  t.Type = separate23(t.Side,t.EMWPC_W);
+	  t.Side = t.Type==2 ? 0 : 1;
+	  }
+	  
+	  }*/
+	
+	
+	//***********************************************************************************************************************
+	// Filling rate histograms with "good" events to calculate the corrections
+	
 	
 	r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
 	r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
@@ -332,38 +337,43 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       t.getEvent(n);
 
-
-      //Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
-      /*if (t.Erecon>0. && t.Type==2) {
-  
-	if (side==0) {
-	  t.Type = separate23(t.Side,t.EMWPC_E);
-	  t.Side = t.Type==2 ? 1 : 0;
-	}
-	else if (t.Side==1) {
-	  t.Type = separate23(t.Side,t.EMWPC_W);
-	  t.Side = t.Type==2 ? 0 : 1;
-	}
-	
-	}*/
-
-      
-      //***********************************************************************************************************************
-      // Filling rate histograms with "good" events to calculate the corrections
-
-      
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0.) {
 	
-	//if ( t.xE.maxValue > 3600. || t.xW.maxValue > 3600. || t.yE.maxValue > 3600. || t.yW.maxValue > 3600. ) continue;
-	if (t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue; //Clipped events
-
-	if ( useRCclasses ) {
-	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
+	//Clipped events
+	if ( t.Type==1 ) {
+	  if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
 	}
+	else {
+	  if ( t.Side==0 && ( t.xE.nClipped>0 || t.yE.nClipped>0 ) ) continue; 
+	  else if ( t.Side==1 && ( t.xW.nClipped>0 || t.yW.nClipped>0 ) ) continue;
+	}
+	
+	
+	/*if ( useRCclasses ) {
+	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
+	  }*/
+
+	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
+	/*if (t.Erecon>0. && t.Type==2) {
+	  
+	  if (side==0) {
+	  t.Type = separate23(t.Side,t.EMWPC_E);
+	  t.Side = t.Type==2 ? 1 : 0;
+	  }
+	  else if (t.Side==1) {
+	  t.Type = separate23(t.Side,t.EMWPC_W);
+	  t.Side = t.Type==2 ? 0 : 1;
+	  }
+	  
+	  }*/
+	
+	
+	//***********************************************************************************************************************
+	// Filling rate histograms with "good" events to calculate the corrections
 	
 	r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
 	r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
-
+	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0

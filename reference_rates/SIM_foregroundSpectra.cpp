@@ -248,31 +248,35 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       Tin->GetEvent(n);
 
-
-      //Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
-      /*if (Erecon>0. && type==2) {
-  
-	if (side==0) {
-	  type = separate23(side,mwpcE.MWPCEnergyE);
-	  side = type==2 ? 1 : 0;
-	}
-	else if (side==1) {
-	  type = separate23(side,mwpcE.MWPCEnergyW);
-	  side = type==2 ? 0 : 1;
-	}
-	
-	}*/
-
-      
-      //***********************************************************************************************************************
-      // Filling rate histograms with "good" events to calculate the corrections
-
-      
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
 	//Clipped events
-	if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
+	if ( type==1 ) {
+	  if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
+	}
+	else { 
+	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
+	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	}
 
+	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
+	/*if (Erecon>0. && type==2) {
+	  
+	  if (side==0) {
+	  type = separate23(side,mwpcE.MWPCEnergyE);
+	  side = type==2 ? 1 : 0;
+	  }
+	  else if (side==1) {
+	  type = separate23(side,mwpcE.MWPCEnergyW);
+	  side = type==2 ? 0 : 1;
+	  }
+	  
+	  }*/
+	
+	
+	//***********************************************************************************************************************
+	// Filling rate histograms with "good" events to calculate the corrections
+	
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 
@@ -358,32 +362,36 @@ void doForegroundSpectra (int octetMin, int octetMax)
       
       Tin->GetEvent(n);
 
+      if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-      //Type 2/3 separation
-      /*if (Erecon>0. && type==2) {
-  
-	if (side==0) {
+	//Clipped events
+	if ( type==1 ) {
+	  if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
+	}
+	else { 
+	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
+	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	}
+
+	//Type 2/3 separation
+	/*if (Erecon>0. && type==2) {
+	  
+	  if (side==0) {
 	  type = separate23(side,mwpcE.MWPCEnergyE);
 	  side = type==2 ? 1 : 0;
-	}
-	else if (side==1) {
+	  }
+	  else if (side==1) {
 	  type = separate23(side,mwpcE.MWPCEnergyW);
 	  side = type==2 ? 0 : 1;
-	}
-	
-	}*/
+	  }
+	  
+	  }*/
 
       
       //***********************************************************************************************************************
       // Filling rate histograms with "good" events to calculate the corrections
 
-      
-      if ( PID==1 && side<2 && type<4 && Erecon>0.) {
-
-	//Clipped events
-	if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
-
-
+    
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
 	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 	
