@@ -428,6 +428,12 @@ int main(int argc, char *argv[])
     // Now for filling the individual peak histograms using only type 0 events
     //////////////////////////////////////////////////////////////////////////
     if (t->Type != 0 || t->PID!=1) continue;
+
+    double r2E = t->xE.center*t->xE.center + t->yE.center*t->yE.center;
+    double r2W = t->xW.center*t->xW.center + t->yW.center*t->yW.center;
+    double fiducialCut = 50.;
+
+    if ( r2E>(fiducialCut*fiducialCut) || r2W>(fiducialCut*fiducialCut) ) continue; // get rid of events which are outside fiducial cut
     
     if (t->xE.nClipped>0 || t->yE.nClipped>0 || t->xW.nClipped>0 || t->yW.nClipped>0 ) continue; //Clipped events
 

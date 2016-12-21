@@ -276,6 +276,12 @@ int main(int argc, char *argv[])
       // Use Type 0 events
       if (type != 0 || PID!=1) continue;
 
+      double r2E = pos.ScintPosAdjE[0]*pos.ScintPosAdjE[0] + pos.ScintPosAdjE[1]*pos.ScintPosAdjE[1];
+      double r2W = pos.ScintPosAdjW[0]*pos.ScintPosAdjW[0] + pos.ScintPosAdjW[1]*pos.ScintPosAdjW[1];
+      double fiducialCut = 50.;
+      
+      if ( r2E>(fiducialCut*fiducialCut) || r2W>(fiducialCut*fiducialCut) ) continue; // get rid of events which are outside fiducial cut
+      
       // Cut the clipped events
       if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue; 
 

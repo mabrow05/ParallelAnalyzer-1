@@ -507,11 +507,16 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
     //Checking that the event occurs within the fiducial volume in the simulation to minimize
     // contamination from edge effects and interactions with detector walls
-    Double_t fidCut = 45.;
-    if (source=="Beta") fidCut=50.; //Since I cut at 50 when determining the number of beta events
-    else if (sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>fidCut
-	     || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>fidCut) {evt++; continue;} //For source events, 
-    // We don't want edge contamination, and I use a cut of 45 mm when selecting what sources are present in calibration runs.
+    // This is also the fiducial cut used in extracting asymmetries and doing calibrations
+    Double_t fidCut = 50.;
+    
+    if (source!="Beta")  {
+      if ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>45.
+	   || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>45. ) { evt++; continue; }
+    }
+      //For source events, 
+    // We don't want edge contamination since they are only used in calibrations
+    // and I use a cut of 45 mm when selecting what sources are present in calibration runs.
 
 
     //Calculate event weight
