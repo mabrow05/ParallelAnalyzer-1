@@ -13,6 +13,10 @@
   
   Double_t xAxisMax = 1200.;
 
+  //Storing event fractions for data, E/W and sfON/OFF
+  Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t23E_sfON, t23E_sfOFF, t0W_sfON, t0W_sfOFF, t1W_sfON, t1W_sfOFF, t23W_sfON, t23W_sfOFF;
+  t0E_sfON = t0E_sfOFF = t1E_sfON = t1E_sfOFF = t23E_sfON = t23E_sfOFF = t0W_sfON = t0W_sfOFF = t1W_sfON = t1W_sfOFF = t23W_sfON = t23W_sfOFF = 0.;
+  
   TFile *fg_file = new TFile(TString::Format("ForegroundSpectra_%i-%i.root",octetStart,octetEnd),"READ");
   TFile *bg_file = new TFile(TString::Format("BackgroundSpectra_%i-%i.root",octetStart,octetEnd),"READ");
   TFile *sim_file = new TFile(TString::Format("SIM_ForegroundSpectra_%i-%i.root",octetStart,octetEnd),"READ");
@@ -83,6 +87,36 @@
   fg23E_sfOFF->Add(bg23E_sfOFF,-1.);
   fg23W_sfOFF->Add(bg23W_sfOFF,-1.);
 
+  t0E_sfOFF = fg0E_sfOFF->Integral(18,79);
+  t0E_sfON = fg0E_sfON->Integral(18,79);
+  t1E_sfOFF = fg1E_sfOFF->Integral(18,79);
+  t1E_sfON = fg1E_sfON->Integral(18,79);
+  t23E_sfOFF = fg23E_sfOFF->Integral(18,79);
+  t23E_sfON = fg23E_sfON->Integral(18,79);
+  t0W_sfOFF = fg0W_sfOFF->Integral(18,79);
+  t0W_sfON = fg0W_sfON->Integral(18,79);
+  t1W_sfOFF = fg1W_sfOFF->Integral(18,79);
+  t1W_sfON = fg1W_sfON->Integral(18,79);
+  t23W_sfOFF = fg23W_sfOFF->Integral(18,79);
+  t23W_sfON = fg23W_sfON->Integral(18,79);
+
+  double totalE_sfOFF = t0E_sfOFF + t1E_sfOFF + t23E_sfOFF;
+  double totalE_sfON = t0E_sfON + t1E_sfON + t23E_sfON;
+  double totalW_sfOFF = t0W_sfOFF + t1W_sfOFF + t23W_sfOFF;
+  double totalW_sfON = t0W_sfON + t1W_sfON + t23W_sfON;
+
+  
+  std::cout << "********************************************\n"
+	    << "          Event ratios (180-780 keV)\n\n"
+	    << "\t\tsfON\t\t\tsfOFF\n"
+	    << "Type 0E:\t" << t0E_sfON/totalE_sfON << "\t\t" << t0E_sfOFF/totalE_sfOFF << "\n"
+	    << "Type 0W:\t" << t0W_sfON/totalW_sfON << "\t\t" << t0W_sfOFF/totalW_sfOFF << "\n\n"
+	    << "Type 1E:\t" << t1E_sfON/totalE_sfON << "\t\t" << t1E_sfOFF/totalE_sfOFF << "\n"
+	    << "Type 1W:\t" << t1W_sfON/totalW_sfON << "\t\t" << t1W_sfOFF/totalW_sfOFF << "\n\n"
+	    << "Type 23E:\t" << t23E_sfON/totalE_sfON << "\t\t" << t23E_sfOFF/totalE_sfOFF << "\n"
+	    << "Type 23W:\t" << t23W_sfON/totalW_sfON << "\t\t" << t23W_sfOFF/totalW_sfOFF << "\n\n"
+	    << "********************************************\n";
+    
   //make copies of sfON and then add sfOFF
   
   TH1D *uk0_E = (TH1D*)fg0E_sfON->Clone("uk0_E");
