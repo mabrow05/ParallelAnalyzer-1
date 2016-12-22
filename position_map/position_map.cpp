@@ -177,8 +177,9 @@ int main(int argc, char *argv[])
       if (t->Type != 0) continue;
 
       //Cut out clipped events
-      if ( t->Side==0 && ( t->xE.nClipped>0 || t->yE.nClipped>0 ) ) continue;
-      else if ( t->Side==1 && ( t->xW.nClipped>0 || t->yW.nClipped>0 ) ) continue;
+      if ( t->Side==0 && ( t->xE.nClipped>0 || t->yE.nClipped>0 || t->xeRC<1 || t->xeRC>4 || t->yeRC<1 || t->yeRC>4 ) ) continue;
+      else if ( t->Side==1 && ( t->xW.nClipped>0 || t->yW.nClipped>0 || t->xwRC<1 || t->xwRC>4 || t->ywRC<1 || t->ywRC>4) ) continue;
+
 		
       
       /*bool moveOnX = true, moveOnY=true; // Determining if the event is of the correct response class in x and y
@@ -245,7 +246,9 @@ int main(int argc, char *argv[])
 	hisxy[p][i][j]->GetXaxis()->SetRange(1,nBinHist);
 	Double_t mean = hisxy[p][i][j]->GetMean();
 	hisxy[p][i][j]->GetXaxis()->SetRange(0,nBinHist);
-	hisxy[p][i][j]->Rebin((int)(4.*mean/200.));
+	double nGroup = 4.*mean/200.;
+	nGroup = nGroup>1. ? nGroup : 1.;
+	hisxy[p][i][j]->Rebin((int)nGroup);
 	
       }
     }
@@ -380,7 +383,7 @@ int main(int argc, char *argv[])
 	  }
 
 	  else  {
-	    cout << "Can't converge on peak in PMT " << p << "at (" << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << "). Trying one more time......" << endl;
+	    cout << "Can't converge on peak in PMT " << p << " at (" << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << "). Trying one more time......" << endl;
 	    sing.SetRangeMin(xLow[p][i][j]);
 	    sing.SetRangeMax(xHigh[p][i][j]);
 	    sing.FitHist((double)maxBin[p][i][j], hisxy[p][i][j]->GetMean()/5., hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]));
@@ -391,40 +394,50 @@ int main(int argc, char *argv[])
 	    }
 	    else {
 	      fitMean[p][i][j] = hisxy[p][i][j]->GetMean()/1.8;
-	      int counts = maxCounts[p][i][j];
+	      int meanBin = hisxy[p][i][j]->GetXaxis()->FindBin(fitMean[p][i][j]);
+	      int counts_check = hisxy[p][i][j]->GetBinContent(meanBin);
+	      int counts = counts_check;
 	      int bin=0;
-	      while (counts>0.6*maxCounts[p][i][j]) {
-		bin++;
-		counts = hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]+bin);
+	      if ( counts_check > 10 ) {
+		while (counts>0.6*counts_check) {
+		  bin++;
+		  counts = hisxy[p][i][j]->GetBinContent(meanBin+bin);
+		}
 	      }
-	      xHighBin[p][i][j] = (maxBin[p][i][j]+bin) < nBinHist ? (maxBin[p][i][j]+bin): nBinHist-1;
+	  
+	      xHighBin[p][i][j] = (meanBin+bin) < hisxy[p][i][j]->GetNbinsX()/3 ? (meanBin+bin): meanBin;
 	      fitSigma[p][i][j] = hisxy[p][i][j]->GetBinCenter(xHighBin[p][i][j]) - fitMean[p][i][j];
-	      cout << "Can't converge on peak in PMT " << p << "at bin (" << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << "). ";
+
+	      cout << "Can't converge on peak in PMT " << p << " at bin (" << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << "). ";
 	      cout << "**** replaced fit mean with hist_mean/1.8 " << fitMean[p][i][j] << endl;
 	    }
 	  }
 	}
 	else { 
 	  fitMean[p][i][j] = hisxy[p][i][j]->GetMean()/1.8;
-	  if ( fitMean[p][i][j]>xLow[p][i][j] && fitMean[p][i][j]<xHigh[p][i][j] ) 
-	    cout << "**** replaced fit mean with hist_mean/1.8 " << fitMean[p][i][j] << endl;
-	  else { 
-	    fitMean[p][i][j] = binCenterMax[p][i][j];
-	    cout << "**** replaced fit mean with binCenterMax " << fitMean[p][i][j] << endl;
-	  }
-	  /*int counts = maxCounts[p][i][j];
+	  //if ( fitMean[p][i][j]>xLow[p][i][j] && fitMean[p][i][j]<xHigh[p][i][j] ) 
+	  cout << "**** replaced fit mean with hist_mean/1.8 " << fitMean[p][i][j] << endl;
+	  //else { 
+	  //fitMean[p][i][j] = binCenterMax[p][i][j];
+	  //cout << "**** replaced fit mean with binCenterMax " << fitMean[p][i][j] << endl;
+	  //}
+	  int meanBin = hisxy[p][i][j]->GetXaxis()->FindBin(fitMean[p][i][j]);
+	  int counts_check = hisxy[p][i][j]->GetBinContent(meanBin);
+	  int counts = counts_check;
 	  int bin=0;
-	  while (counts>0.6*maxCounts[p][i][j]) {
-	    bin++;
-	    counts = hisxy[p][i][j]->GetBinContent(maxBin[p][i][j]+bin);
+	  if ( counts_check > 10 ) {
+	    while (counts>0.6*counts_check) {
+	      bin++;
+	      counts = hisxy[p][i][j]->GetBinContent(meanBin+bin);
+	    }
 	  }
-	  xHighBin[p][i][j] = (maxBin[p][i][j]+bin) < nBinHist ? (maxBin[p][i][j]+bin): nBinHist-1;
+	  
+	  xHighBin[p][i][j] = (meanBin+bin) < hisxy[p][i][j]->GetNbinsX()/3 ? (meanBin+bin): meanBin;
 	  fitSigma[p][i][j] = hisxy[p][i][j]->GetBinCenter(xHighBin[p][i][j]) - fitMean[p][i][j];
-	  cout << "Can't converge on peak in PMT " << p << "at bin (" << posmap.getBinCenter(i) << ", " << posmap.getBinCenter(j) << "). ";
-	  cout << "**** replaced fit mean with hist_mean/1.8 " << fitMean[p][i][j] << endl;*/
+	 
 	}
 
-	hisxy[p][i][j]->GetXaxis()->SetRange(hisxy[p][i][j]->GetXaxis()->FindBin(fitMean[p][i][j]), hisxy[p][i][j]->GetNbinsX());
+	hisxy[p][i][j]->GetXaxis()->SetRange(hisxy[p][i][j]->GetXaxis()->FindBin(fitMean[p][i][j]+fitSigma[p][i][j]), hisxy[p][i][j]->GetNbinsX());
 	meanVal[p][i][j] = hisxy[p][i][j]->GetMean();
       }
     }

@@ -316,22 +316,27 @@ void EvtRateHandler::dataReader() {
       
       if (PID==1) {       // Cut on electrons 
 	
-	//Cut out clipped events
-	if ( Type==1 ) {
+	//Cut out clipped events and bad Wirechamber signals
+	if ( Type!=0 ) {
 	  if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
+	  else if ( xeRC<1 || yeRC<1 || xeRC>6 || yeRC>6 || xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue; //Must look at both sides
 	}
 	else {
-	  if ( Side==0 && ( xE_nClipped>0 || yE_nClipped>0 ) ) continue;
-	  else if ( Side==1 && ( xW_nClipped>0 || yW_nClipped>0 ) ) continue;
+	  if ( Side==0 ) {
+	    if ( xE_nClipped>0 || yE_nClipped>0 ) continue;
+	    else if ( xeRC<1 || yeRC<1 || xeRC>6 || yeRC>6 ) continue; //only look at MWPC signal on East
+	  }
+	  else if ( Side==1 ) {
+	    if ( xW_nClipped>0 || yW_nClipped>0 ) continue;
+	    else if ( xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on East
+	  }
 	}
 	
-	//  If the flag at the top of this file is set to true, also cut on the wirechamber
+	//  also cut on the wirechamber
 	//  event type according to C. Swanks classifications in ELOG 629 attachment 2
 	// Right now we are only cutting RC0 events, as these are the only ones
 	// which cannot be accounted for in simulation easily
-	if ( useRCclasses ) {
-	  if ( xeRC==0 || yeRC==0 || xwRC==0 || ywRC==0 ) continue;
-	}
+	if ( xeRC<1 || yeRC<1 || xeRC>4 || yeRC>4 || xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue;
 	
 	// Determine radial event position squared for cutting on fiducial volume
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
@@ -475,7 +480,7 @@ void SimEvtRateHandler::dataReader() {
       if (PID==1) {
 
 	//Cut out clipped events
-	if ( Type==1 ) {
+	if ( Type!=0 ) {
 	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
 	}
 	else {

@@ -31,7 +31,6 @@
 #include "replay_pass3.h"
 
 
-const bool useRCclasses = true;
 
 //Get the conversion from EQ2Etrue                                                                                                            
 std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
@@ -437,11 +436,13 @@ int main(int argc, char *argv[])
     
     if (t->xE.nClipped>0 || t->yE.nClipped>0 || t->xW.nClipped>0 || t->yW.nClipped>0 ) continue; //Clipped events
 
-    //  If the flag at the top of this file is set to true, also cut on the wirechamber
+
+    //  also cut on the wirechamber
     //  event type according to C. Swanks classifications in ELOG 629 attachment 2
-    if ( useRCclasses ) {
-      if ( t->xeRC==0 || t->yeRC==0 || t->xwRC==0 || t->ywRC==0 ) continue;
-    }
+  
+    if ( t->Side==0 && ( t->xeRC<1 || t->yeRC<1 || t->xeRC>4 || t->yeRC>4 ) ) continue;
+    else if ( t->Side==1 && (t->xwRC<1 || t->ywRC<1 || t->xwRC>4 || t->ywRC>4 ) ) continue;
+    
 
     if (useSource[0]) {
       

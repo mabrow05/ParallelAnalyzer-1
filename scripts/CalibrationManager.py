@@ -956,7 +956,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [5,6,7,8,9,10,11,12]#[16,17,18,19,20,21,22,23,24]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -981,11 +981,11 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [3]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [19,20,21,22,24,23]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]#[1,2,3,4,5,6,7,8,9,10,11,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 1 # number of times to run through the calibration
+        iterations = 3 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         

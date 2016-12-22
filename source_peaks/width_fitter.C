@@ -112,7 +112,7 @@ void width_fitter(Int_t calPeriod)
 	    dataRatio[p][num[p]] = dataRatio_hold;
 	    simRatio[p][num[p]] = simRatio_hold;
 
-	    if (srcNameData!="Cd" && srcNameData!="Bi1"/* && srcNameData!="Ce"*/) num[p]++; //Put peaks to exclude here
+	    if (srcNameData!="Cd" /*&& srcNameData!="Bi1" && srcNameData!="Ce"*/) num[p]++; //Put peaks to exclude here
 	    //num[p]++; 
 	  }
 	}
