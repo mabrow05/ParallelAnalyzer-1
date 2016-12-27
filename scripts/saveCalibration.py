@@ -2,8 +2,8 @@
 
 import os
 
-calibrationName = "12212016_singleRunTriggFuncs_NoIn114_SPECTRA_AV_POSMAPS"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
-year = "2012-2013" #"2011-2012" or "2012-2013"
+calibrationName = "12222016_singleRunTriggFuncs_NoIn114_SPECTRA_AV_POSMAPS"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
+year = "2011-2012" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"
 
