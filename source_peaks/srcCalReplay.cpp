@@ -1195,7 +1195,7 @@ int main(int argc, char *argv[])
 
       for (Int_t ii=0; ii<8; ii++) {
 	//if (aveEta[n][ii] > 2.5 || aveEta[n][ii] < 0.25) aveEta[n][ii] = eta0[ii];
-	aveEta[n][ii] = eta0[ii];
+	//aveEta[n][ii] = eta0[ii];
 	std::cout << "Source " << sourceName[n] << " PMT " << ii << " aveEta :" << aveEta[n][ii] << std::endl;
       }
 
@@ -1231,7 +1231,7 @@ int main(int argc, char *argv[])
     std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][1]);
     
     for (Int_t ii=0; ii<8; ii++) {
-      aveEta[BiPeakIndex][ii] = eta0[ii];
+      //aveEta[BiPeakIndex][ii] = eta0[ii];
       std::cout << "Source " << "Bi2" << " PMT " << ii << " aveEta :" << aveEta[BiPeakIndex][ii] << std::endl;
     }
 
