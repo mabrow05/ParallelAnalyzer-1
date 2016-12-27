@@ -215,6 +215,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     // Input ntuple
     char tempIn[500];
     sprintf(tempIn, "%s/replay_pass3_%i.root", getenv("REPLAY_PASS3"),rn);
+    //sprintf(tempIn, "%s/replay_pass3_%i.root", getenv("SPEC_REPLAY_FILES"),rn);
     
     t.setupInputTree(std::string(tempIn),"pass3");
 
