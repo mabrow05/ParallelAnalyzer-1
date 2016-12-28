@@ -29,10 +29,55 @@ unsigned int find_vec_location_double(std::vector<Double_t> vec, Double_t val)
   
 }
 
+vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
+  Char_t temp[500];
+  sprintf(temp,"%s/source_list_%i.dat",getenv("SOURCE_LIST"),runNumber);
+  ifstream file(temp);
+  cout << src << endl;
+  int num = 0;
+  file >> num;
+  cout << num << endl;
+  int srcNum = 0;
+  string src_check;
+  for (int i=0; i<num;srcNum++,i++) {
+    file >> src_check;
+    cout << src_check << endl;
+    if (src_check==src) break;   
+  }
+  cout << "The source Number is: " << srcNum << endl;
+  if (srcNum==num) {
+    cout << "Didn't find source in that run\n"; exit(0);
+  }
+  file.close();
+  
+  sprintf(temp,"%s/source_positions_%i.dat",getenv("SOURCE_POSITIONS"),runNumber);
+  file.open(temp);
+  
+  vector < vector < double > > srcPos;
+  srcPos.resize(2,vector <double> (3,0.));
+  
+  for (int i=0; i<srcNum+1; i++) {
+    for (int j=0; j<2; j++) {
+      for (int jj=0; jj<3; jj++) {
+	file >> srcPos[j][jj];
+      }
+    }
+  }
+  return srcPos;
+}
+
+bool isSourceInFidCut(Int_t run, string src, Double_t fidCut, Int_t side) {
+
+  std::vector < std::vector <Double_t> > pos = returnSourcePosition(run,src);
+
+  return ( fidCut*fidCut > ( pos[side][0]*pos[side][0] + pos[side][1]*pos[side][1] ) ) ? true : false;
+
+}
+
 void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 {
 
-  bool quadratic = true;
+  bool quadratic = false;
   
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
@@ -233,6 +278,10 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   vector<Double_t> ADCW1_err, ADCW2_err, ADCW3_err, ADCW4_err;
   vector<Double_t> ResE1, ResE2, ResE3, ResE4;
   vector<Double_t> ResW1, ResW2, ResW3, ResW4;
+
+  Double_t fiducialCut = 35.; //This is the cut for the center of the source position,
+                              // but only for inclusion in the linearity curve
+
   // Fill run, adc, and eQ vectors
   for (Int_t i=0; i<num;i++) {
     UInt_t runPos = find_vec_location_int(pmtRun,run[i]);
@@ -245,70 +294,80 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     if (sourceName[i]=="Cd" || sourceName[i]=="Bi2" || sourceName[i]=="In") continue;
 
-    //if (pmtQuality[runPos][0]) {
-    runE1.push_back(run[i]);
-    EQE1.push_back(EqE1[i]);
-    EQE1_err.push_back(EqE1_err[i]);
-    nameE1.push_back(sourceName[i]);
-    ADCE1.push_back(adcE1[i]);
-    ADCE1_err.push_back(adcE1_err[i]);
-    //}
-    //if (pmtQuality[runPos][1]) {
-    runE2.push_back(run[i]);
-    EQE2.push_back(EqE2[i]);
-    EQE2_err.push_back(EqE2_err[i]);
-    nameE2.push_back(sourceName[i]);
-    ADCE2.push_back(adcE2[i]);
-    ADCE2_err.push_back(adcE2_err[i]);
-    //}
-    //if (pmtQuality[runPos][2]) {
-    runE3.push_back(run[i]);
-    EQE3.push_back(EqE3[i]);
-    EQE3_err.push_back(EqE3_err[i]);
-    nameE3.push_back(sourceName[i]);
-    ADCE3.push_back(adcE3[i]);
-    ADCE3_err.push_back(adcE3_err[i]);
-    //}
-    //if (pmtQuality[runPos][3]) {
-    runE4.push_back(run[i]);
-    EQE4.push_back(EqE4[i]);
-    EQE4_err.push_back(EqE4_err[i]);
-    nameE4.push_back(sourceName[i]);
-    ADCE4.push_back(adcE4[i]);
-    ADCE4_err.push_back(adcE4_err[i]);
-    //}
-    //if (pmtQuality[runPos][4]) {
-    runW1.push_back(run[i]);
-    EQW1.push_back(EqW1[i]);
-    EQW1_err.push_back(EqW1_err[i]);
-    nameW1.push_back(sourceName[i]);
-    ADCW1.push_back(adcW1[i]);
-    ADCW1_err.push_back(adcW1_err[i]);
-    //}
-    if (run[i]<16983 || run[i]>17249) { //pmtQuality[runPos][5]) {
-      runW2.push_back(run[i]);
-      EQW2.push_back(EqW2[i]);
-      EQW2_err.push_back(EqW2_err[i]);
-      nameW2.push_back(sourceName[i]);
-      ADCW2.push_back(adcW2[i]);
-      ADCW2_err.push_back(adcW2_err[i]);
+    
+    if ( isSourceInFidCut(run[i],sourceName[i].substr(0,2), fiducialCut, 0) ) {
+
+      //if (pmtQuality[runPos][0]) {
+      runE1.push_back(run[i]);
+      EQE1.push_back(EqE1[i]);
+      EQE1_err.push_back(EqE1_err[i]);
+      nameE1.push_back(sourceName[i]);
+      ADCE1.push_back(adcE1[i]);
+      ADCE1_err.push_back(adcE1_err[i]);
+      //}
+
+      //if (pmtQuality[runPos][1]) {
+      runE2.push_back(run[i]);
+      EQE2.push_back(EqE2[i]);
+      EQE2_err.push_back(EqE2_err[i]);
+      nameE2.push_back(sourceName[i]);
+      ADCE2.push_back(adcE2[i]);
+      ADCE2_err.push_back(adcE2_err[i]);
+      //}
+      //if (pmtQuality[runPos][2]) {
+      runE3.push_back(run[i]);
+      EQE3.push_back(EqE3[i]);
+      EQE3_err.push_back(EqE3_err[i]);
+      nameE3.push_back(sourceName[i]);
+      ADCE3.push_back(adcE3[i]);
+      ADCE3_err.push_back(adcE3_err[i]);
+      //}
+      //if (pmtQuality[runPos][3]) {
+      runE4.push_back(run[i]);
+      EQE4.push_back(EqE4[i]);
+      EQE4_err.push_back(EqE4_err[i]);
+      nameE4.push_back(sourceName[i]);
+      ADCE4.push_back(adcE4[i]);
+      ADCE4_err.push_back(adcE4_err[i]);
+      //}
     }
-    //if (pmtQuality[runPos][6]) {
-    runW3.push_back(run[i]);
-    EQW3.push_back(EqW3[i]);
-    EQW3_err.push_back(EqW3_err[i]);
-    nameW3.push_back(sourceName[i]);
-    ADCW3.push_back(adcW3[i]);
-    ADCW3_err.push_back(adcW3_err[i]);
-    //}
-    //if (pmtQuality[runPos][7]) {
-    runW4.push_back(run[i]);
-    EQW4.push_back(EqW4[i]);
-    EQW4_err.push_back(EqW4_err[i]);
-    nameW4.push_back(sourceName[i]);
-    ADCW4.push_back(adcW4[i]);
-    ADCW4_err.push_back(adcW4_err[i]);
-    //}
+
+    if ( isSourceInFidCut(run[i],sourceName[i].substr(0,2), fiducialCut, 1) ) {
+
+      //if (pmtQuality[runPos][4]) {
+      runW1.push_back(run[i]);
+      EQW1.push_back(EqW1[i]);
+      EQW1_err.push_back(EqW1_err[i]);
+      nameW1.push_back(sourceName[i]);
+      ADCW1.push_back(adcW1[i]);
+      ADCW1_err.push_back(adcW1_err[i]);
+      //}
+      if (run[i]<16983 || run[i]>17249) { //pmtQuality[runPos][5]) {
+	runW2.push_back(run[i]);
+	EQW2.push_back(EqW2[i]);
+	EQW2_err.push_back(EqW2_err[i]);
+	nameW2.push_back(sourceName[i]);
+	ADCW2.push_back(adcW2[i]);
+	ADCW2_err.push_back(adcW2_err[i]);
+      }
+      //if (pmtQuality[runPos][6]) {
+      runW3.push_back(run[i]);
+      EQW3.push_back(EqW3[i]);
+      EQW3_err.push_back(EqW3_err[i]);
+      nameW3.push_back(sourceName[i]);
+      ADCW3.push_back(adcW3[i]);
+      ADCW3_err.push_back(adcW3_err[i]);
+      //}
+      //if (pmtQuality[runPos][7]) {
+      runW4.push_back(run[i]);
+      EQW4.push_back(EqW4[i]);
+      EQW4_err.push_back(EqW4_err[i]);
+      nameW4.push_back(sourceName[i]);
+      ADCW4.push_back(adcW4[i]);
+      ADCW4_err.push_back(adcW4_err[i]);
+      //}
+    }
+
   }
 
 
@@ -854,7 +913,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grE3r->SetMaximum( 10.0);
     grE3r->Draw("AP");
 
-    Int_t n = 2;
+    static const Int_t n = 2;
     Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
@@ -1012,7 +1071,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grE4r->SetMaximum( 10.0);
     grE4r->Draw("AP");
 
-    Int_t n = 2;
+    static const Int_t n = 2;
     Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 

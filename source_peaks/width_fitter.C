@@ -23,6 +23,51 @@ std::vector <Int_t> getPMTQuality(Int_t runNumber) {
   return pmtQuality;
 };
 
+vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
+  Char_t temp[500];
+  sprintf(temp,"%s/source_list_%i.dat",getenv("SOURCE_LIST"),runNumber);
+  ifstream file(temp);
+  cout << src << endl;
+  int num = 0;
+  file >> num;
+  cout << num << endl;
+  int srcNum = 0;
+  string src_check;
+  for (int i=0; i<num;srcNum++,i++) {
+    file >> src_check;
+    cout << src_check << endl;
+    if (src_check==src) break;   
+  }
+  cout << "The source Number is: " << srcNum << endl;
+  if (srcNum==num) {
+    cout << "Didn't find source in that run\n"; exit(0);
+  }
+  file.close();
+  
+  sprintf(temp,"%s/source_positions_%i.dat",getenv("SOURCE_POSITIONS"),runNumber);
+  file.open(temp);
+  
+  vector < vector < double > > srcPos;
+  srcPos.resize(2,vector <double> (3,0.));
+  
+  for (int i=0; i<srcNum+1; i++) {
+    for (int j=0; j<2; j++) {
+      for (int jj=0; jj<3; jj++) {
+	file >> srcPos[j][jj];
+      }
+    }
+  }
+  return srcPos;
+}
+
+bool isSourceInFidCut(Int_t run, string src, Double_t fidCut, Int_t side) {
+
+  std::vector < std::vector <Double_t> > pos = returnSourcePosition(run,src);
+
+  return ( fidCut*fidCut > ( pos[side][0]*pos[side][0] + pos[side][1]*pos[side][1] ) ) ? true : false;
+
+}
+
 
 void width_fitter(Int_t calPeriod)
 {
@@ -98,10 +143,19 @@ void width_fitter(Int_t calPeriod)
 
       std::vector <Int_t> pmtQuality = getPMTQuality(Run); //Not using this right now
 
+      Double_t fiducialCut = 35.;
+      bool passFidCutEast = isSourceInFidCut(Run, srcNameData.substr(0,2), fiducialCut, 0);
+      bool passFidCutWest = isSourceInFidCut(Run, srcNameData.substr(0,2), fiducialCut, 1);
+
       for (Int_t p=0; p<8; p++) {
+
+	if ( p<4 && !passFidCutEast ) continue;
+	else if ( p>3 && !passFidCutWest ) continue;
+
 	if ( !(p==5 && Run>16983 && Run<17249) ) { //Checking if run is in range where PMTW2 was dead 
 	  Double_t dataRatio_hold = dataWidths_hold[p]/sqrt(dataPeaks_hold[p]);
 	  Double_t simRatio_hold = simWidths_hold[p]/sqrt(simPeaks_hold[p]);
+	  
 
 	  if ( (TMath::Abs(simWidths_hold[p]-dataWidths_hold[p])/dataWidths_hold[p] < .25) ) { //Checking for outliers
 

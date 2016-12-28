@@ -929,30 +929,30 @@ int main(int argc, char *argv[])
     std::vector < Double_t > eta0 = posmap.getInterpolatedEta(pos[0][0], pos[0][1], pos[1][0], pos[1][1]);
 
     for (Int_t p=0; p<8; p++) {
-      //aveEta[n][p] = eta0[p];
-      std::cout << "Source " << "Bi2" << " PMT " << p << " aveEta :" << aveEta[n][p] << std::endl;
+      //aveEta[BiPeakIndex][p] = eta0[p];
+      std::cout << "Source " << "Bi2" << " PMT " << p << " aveEta :" << aveEta[BiPeakIndex][p] << std::endl;
     }
 
     outResultsEtaEvis << runNumber << " "
 		      << "Bi2" << " "
-		      << lowBiFitMean[0]*aveEta[n][0] << " "
-		      << lowBiFitMean[1]*aveEta[n][1] << " "
-		      << lowBiFitMean[2]*aveEta[n][2] << " "
-		      << lowBiFitMean[3]*aveEta[n][3] << " "
-		      << lowBiFitMean[4]*aveEta[n][4] << " "
-		      << lowBiFitMean[5]*aveEta[n][5] << " "
-		      << lowBiFitMean[6]*aveEta[n][6] << " "
-		      << lowBiFitMean[7]*aveEta[n][7] << " " << endl;
+		      << lowBiFitMean[0]*aveEta[BiPeakIndex][0] << " "
+		      << lowBiFitMean[1]*aveEta[BiPeakIndex][1] << " "
+		      << lowBiFitMean[2]*aveEta[BiPeakIndex][2] << " "
+		      << lowBiFitMean[3]*aveEta[BiPeakIndex][3] << " "
+		      << lowBiFitMean[4]*aveEta[BiPeakIndex][4] << " "
+		      << lowBiFitMean[5]*aveEta[BiPeakIndex][5] << " "
+		      << lowBiFitMean[6]*aveEta[BiPeakIndex][6] << " "
+		      << lowBiFitMean[7]*aveEta[BiPeakIndex][7] << " " << endl;
     outResultsEtaEvisError << runNumber << " "
 		      << "Bi2" << " "
-		      << lowBiFitMeanError[0]*aveEta[n][0] << " "
-		      << lowBiFitMeanError[1]*aveEta[n][1] << " "
-		      << lowBiFitMeanError[2]*aveEta[n][2] << " "
-		      << lowBiFitMeanError[3]*aveEta[n][3] << " "
-		      << lowBiFitMeanError[4]*aveEta[n][4] << " "
-		      << lowBiFitMeanError[5]*aveEta[n][5] << " "
-		      << lowBiFitMeanError[6]*aveEta[n][6] << " "
-		      << lowBiFitMeanError[7]*aveEta[n][7] << " " << endl;
+		      << lowBiFitMeanError[0]*aveEta[BiPeakIndex][0] << " "
+		      << lowBiFitMeanError[1]*aveEta[BiPeakIndex][1] << " "
+		      << lowBiFitMeanError[2]*aveEta[BiPeakIndex][2] << " "
+		      << lowBiFitMeanError[3]*aveEta[BiPeakIndex][3] << " "
+		      << lowBiFitMeanError[4]*aveEta[BiPeakIndex][4] << " "
+		      << lowBiFitMeanError[5]*aveEta[BiPeakIndex][5] << " "
+		      << lowBiFitMeanError[6]*aveEta[BiPeakIndex][6] << " "
+		      << lowBiFitMeanError[7]*aveEta[BiPeakIndex][7] << " " << endl;
 		   
   }
   outResultsEtaEvis.close();
