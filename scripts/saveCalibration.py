@@ -2,7 +2,7 @@
 
 import os
 
-calibrationName = "12272016_AverageEtaVal"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
+calibrationName = "12292016_NoIn_AveEta_specAvePosmap"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
 year = "2011-2012" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"
@@ -32,4 +32,6 @@ if year=="2012-2013":
     os.system("cp %s/error_envelope/error_envelope_calPeriods_16-24.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
     os.system("cp %s/residuals/global_residuals_Erecon_runPeriods_16-24.dat %s"%(os.getenv("ANALYSIS_CODE"),location))
     
+os.system("cp final_residuals.pdf %s"%location)
+
 
