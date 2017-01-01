@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     cout << "  " << sourceName[n] << endl;
   }
 
-  vector < vector <Double_t> > meanEta = getMeanEtaForSources(runNumber); // fill vector with the calculated mean position correction for the source
+  //vector < vector <Double_t> > meanEta = getMeanEtaForSources(runNumber); // fill vector with the calculated mean position correction for the source
 
   
   //Checking if one of the sources is Bi so we can add in that we will fit the second Bi peak as well
@@ -802,8 +802,8 @@ int main(int argc, char *argv[])
 	  
 	  
 	  //DoublePeakHist doub(hisEreconTot[n][j], xLowEreconTot[n][j], xHighEreconTot[n][j]);
-	  SinglePeakHist singBi1(hisEreconTot[n][j], 850., xHighEreconTot[n][j]);
-	  SinglePeakHist singBi2(hisEreconTot[n][j], 390., 580.);
+	  SinglePeakHist singBi1(hisEreconTot[n][j], 850., xHighEreconTot[n][j], true, 5, 1.25, 1.75);
+	  SinglePeakHist singBi2(hisEreconTot[n][j], 390., 580., true, 5, 1.75, 1.25);
 	  
 	  if (singBi1.isGoodFit()) {	    
 	    fitMeanEreconTot[n][j] = singBi1.ReturnMean();	 

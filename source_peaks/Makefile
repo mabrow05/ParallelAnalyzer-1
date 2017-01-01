@@ -22,7 +22,8 @@ LIBS         += -lSpectrum -lMinuit
 objects = DataTree.o MBUtils.o peaks.o positionMapHandler.o calibrationTools.o
 
 .PHONY: all
-all: source_peaks.exe source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.exe 
+all: srcCalReplay.exe sim_source_peak_fitter.exe
+#source_peaks.exe source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EvisPMTbyPMT.exe sim_source_peaks_EnergyPeak.exe source_peaks_EnergyPeak.exe 
 
 source_peaks.exe: source_peaks.o $(objects)
 	$(CXX) $(CXXFLAGS) -o source_peaks.exe source_peaks.o $(objects) $(LIBS)
