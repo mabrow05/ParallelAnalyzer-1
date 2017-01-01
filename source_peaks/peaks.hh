@@ -14,7 +14,7 @@ class SinglePeakHist {
 
 public:
 
-  SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=5);
+  SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=5, Double_t minScaleFac=1.25, Double_t maxScaleFac=1.75);
   ~SinglePeakHist();
 
   void FitHist(Double_t meanGuess=0., Double_t sigGuess=1., Double_t heightGuess=1.);
@@ -23,7 +23,7 @@ public:
   Double_t ReturnMeanError()  { return meanErr; }
   Double_t ReturnSigma() { return sigma; }
   Double_t ReturnScale() { return scale; }
-  bool isGoodFit()       { return goodFit; }
+  bool isGoodFit()       { return goodFit_new; }
   
   void SetRangeMin(Double_t m) { min = m; }
   void SetRangeMax(Double_t m) { max = m; }
@@ -39,8 +39,11 @@ private:
   Double_t min; 
   Double_t max;
   Double_t iters;
-  bool goodFit;
+  bool goodFit_prev;  // the previous fit is good or bad
+  bool goodFit_new;  // the new fit is good or bad
   TString status;
+  Double_t minScaleFactor;
+  Double_t maxScaleFactor;
 };
 
 
@@ -61,7 +64,7 @@ public:
   Double_t ReturnMean2Error()  { return mean2Err; }
   Double_t ReturnSigma2() { return sigma2; }
   Double_t ReturnScale2() { return scale2; }
-  bool isGoodFit()       { return goodFit; }
+  bool isGoodFit()       { return goodFit_new; }
 
   void SetRangeMin(Double_t m) { min = m; }
   void SetRangeMax(Double_t m) { max = m; }
@@ -81,7 +84,8 @@ private:
   Double_t min; 
   Double_t max;
   Double_t iters;
-  bool goodFit;
+  bool goodFit_prev;  // the previous fit is good or bad
+  bool goodFit_new;
   TString status;
 };
 

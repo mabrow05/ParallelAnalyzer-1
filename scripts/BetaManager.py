@@ -396,8 +396,8 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
-    if 1:
-        octet_range =[0,121]#[20,28]#[45,50]#[38,40]#[0,59];
+    if 0:
+        octet_range =[49,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
@@ -405,15 +405,15 @@ if __name__ == "__main__":
             #beta.runGainBismuth(octet)
            # beta.findTriggerFunctions(octet)
             #beta.runReplayPass2(octet)
-            #beta.runReplayPass3(octet)
+            beta.runReplayPass3(octet)
             #beta.runRootfileTranslator(octet)
-            beta.removeDepolRunFiles(octet)
+            #beta.removeDepolRunFiles(octet)
            
 
 
     #Running reverse calibrations
-    if 0:
-        octet_range = [115,121];
+    if 1:
+        octet_range = [46,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             beta.findTriggerFunctions(octet)

@@ -328,15 +328,10 @@ void EvtRateHandler::dataReader() {
 	  }
 	  else if ( Side==1 ) {
 	    if ( xW_nClipped>0 || yW_nClipped>0 ) continue;
-	    else if ( xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on East
+	    else if ( xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on West
 	  }
 	}
 	
-	//  also cut on the wirechamber
-	//  event type according to C. Swanks classifications in ELOG 629 attachment 2
-	// Right now we are only cutting RC0 events, as these are the only ones
-	// which cannot be accounted for in simulation easily
-	if ( xeRC<1 || yeRC<1 || xeRC>4 || yeRC>4 || xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue;
 	
 	// Determine radial event position squared for cutting on fiducial volume
 	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;

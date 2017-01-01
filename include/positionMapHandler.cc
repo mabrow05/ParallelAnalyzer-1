@@ -50,6 +50,7 @@ void PositionMap::readPositionMap(Int_t XeRunPeriod) {
   std::string file = "";
   if ( bUseRC ) file = std::string(getenv("POSITION_MAPS")) + "/position_map_" + itos(XePeriod) + "_" + "RC_123_" + ftos(binWidth) +  "mm.dat";
   else file = std::string(getenv("POSITION_MAPS")) + "/position_map_" + itos(XePeriod) + "_" + ftos(binWidth) +  "mm.dat";
+  std::cout << "Reading position map from " << file << std::endl;
   std::ifstream infile(file.c_str());
   
   Int_t binValx, binValy;

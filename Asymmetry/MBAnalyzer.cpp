@@ -32,7 +32,7 @@ TString anaChoices[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 
 //Types of Corrections to apply
-std::string corr ("DeltaTheoryOnly");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
+std::string corr ("UnCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
 Double_t POL_minus = 0.9981;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   bool UKdata = true;//true;
-  bool simulation = true;
+  bool simulation = false;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = true;
+  bool UNBLIND = false;
 
 
   if (UNBLIND) {

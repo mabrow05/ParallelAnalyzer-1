@@ -95,9 +95,9 @@ void findDiscriminatorThresh(Int_t rn) {
   //TFile *f = NULL;
   //TTree *t = NULL;
 
-  Double_t lower_limit = -59.5;
+  Double_t lower_limit = -60.1;
   Int_t hisBinWidth = 2;
-  Double_t upper_limit = 159.5;
+  Double_t upper_limit = 159.9;
   Int_t nBins = (int)((upper_limit-lower_limit)/hisBinWidth);
   //nBins = 100;
 

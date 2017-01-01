@@ -19,6 +19,10 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
+.PHONY: all
+
+all: backgroundSpectra.exe foregroundSpectra.exe SIM_foregroundSpectra.exe
+
 backgroundSpectra.exe: backgroundSpectra.o MBUtils.o DataTree.o 
 	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o MBUtils.o DataTree.o $(LIBS)
 	@echo "Done"

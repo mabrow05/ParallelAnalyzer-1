@@ -365,6 +365,7 @@ int main(int argc, char *argv[])
   //TF1 *gaussian_fit[nPMT][nPosBinsX][nPosBinsY];
   //double fitMean[nPMT][nPosBinsX][nPosBinsY];
 
+  double nSigmaFromMean = 1.5; // This is how far over from the peak we are starting the sum of the spectra
 
   for (int p=0; p<nPMT; p++) {
     for (int i=0; i<nBinsXY; i++) {
@@ -375,7 +376,7 @@ int main(int argc, char *argv[])
 
 	if ( hisxy[p][i][j]->Integral() > 500.) {// && r<=(50.+2*xBinWidth)) {
 
-	  SinglePeakHist sing(hisxy[p][i][j], xLow[p][i][j], xHigh[p][i][j]);
+	  SinglePeakHist sing(hisxy[p][i][j], xLow[p][i][j], xHigh[p][i][j], true, 5, 0.8, 1.);
 
 	  if (sing.isGoodFit() && sing.ReturnMean()>xLow[p][i][j] && sing.ReturnMean()<xHigh[p][i][j]) {
 	    fitMean[p][i][j] = sing.ReturnMean();
@@ -425,8 +426,9 @@ int main(int argc, char *argv[])
 	  int counts_check = hisxy[p][i][j]->GetBinContent(meanBin);
 	  int counts = counts_check;
 	  int bin=0;
+	  double frac = exp(-nSigmaFromMean*nSigmaFromMean/2.);
 	  if ( counts_check > 10 ) {
-	    while (counts>0.6*counts_check) {
+	    while (counts>frac*counts_check) {
 	      bin++;
 	      counts = hisxy[p][i][j]->GetBinContent(meanBin+bin);
 	    }
@@ -437,8 +439,9 @@ int main(int argc, char *argv[])
 	 
 	}
 
-	hisxy[p][i][j]->GetXaxis()->SetRange(hisxy[p][i][j]->GetXaxis()->FindBin(fitMean[p][i][j]+fitSigma[p][i][j]), hisxy[p][i][j]->GetNbinsX());
+	hisxy[p][i][j]->GetXaxis()->SetRange(hisxy[p][i][j]->GetXaxis()->FindBin(fitMean[p][i][j]+nSigmaFromMean*fitSigma[p][i][j]), hisxy[p][i][j]->GetNbinsX()-1);
 	meanVal[p][i][j] = hisxy[p][i][j]->GetMean();
+	hisxy[p][i][j]->GetXaxis()->SetRange(0, hisxy[p][i][j]->GetNbinsX());
       }
     }
   }
