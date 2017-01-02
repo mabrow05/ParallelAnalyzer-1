@@ -3,8 +3,8 @@
 {
   gStyle->SetOptStat(0);
 
-  int octetStart=60;
-  int octetEnd=121;
+  int octetStart=0;
+  int octetEnd=59;
 
   TString normType = "0";
 
