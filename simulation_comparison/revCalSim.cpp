@@ -546,8 +546,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
 
     // 2011-2012 Cathode Threshold
-    Double_t clip_threshE = 6.;
-    Double_t clip_threshW = 6.;
+    Double_t clip_threshE = 8.;
+    Double_t clip_threshW = 8.;
 
     // 2012-2013 Cathode Threshold
     if ( runNumber > 20000 ) clip_threshE = 5., clip_threshW = 4.;
