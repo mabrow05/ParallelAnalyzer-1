@@ -8,8 +8,8 @@
 
   TString normType = "0";
 
-  Double_t normLow = 220.;
-  Double_t normHigh = 680.;
+  Double_t normLow = 0.;
+  Double_t normHigh = 1200.;
   
   Double_t xAxisMax = 1200.;
 

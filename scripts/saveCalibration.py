@@ -2,7 +2,7 @@
 
 import os
 
-calibrationName = "12302016_OLDRC123posmaps_GREATRESIDS_NeedsIters"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
+calibrationName = "01022017_NEWPosmaps"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
 year = "2012-2013" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"
