@@ -484,8 +484,8 @@ void SimEvtRateHandler::dataReader() {
 	}
 
 	
-	r2E=mwpcPosE[0]*mwpcPosE[0]+mwpcPosE[1]*mwpcPosE[1];
-	r2W=mwpcPosW[0]*mwpcPosW[0]+mwpcPosW[1]*mwpcPosW[1];
+	r2E = ( mwpcPosE[0]*mwpcPosE[0] + mwpcPosE[1]*mwpcPosE[1] ) * 0.6 * 100.; //Transforming to decay trap coords
+	r2W = ( mwpcPosW[0]*mwpcPosW[0] + mwpcPosW[1]*mwpcPosW[1] ) * 0.6 * 100.;
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  

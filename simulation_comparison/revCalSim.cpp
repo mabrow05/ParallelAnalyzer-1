@@ -791,8 +791,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     }    
   
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
-    if ( PID==1 && Erecon>0. && ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
-				  && sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut ) ) evtTally++;
+    if ( PID==1 && Erecon>0. && ( sqrt( scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0] + scint_pos.ScintPosE[1]*scint_pos.ScintPosE[1] )*sqrt(0.6)*10.<fidCut
+				  && sqrt( scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0] + scint_pos.ScintPosW[1]*scint_pos.ScintPosW[1] )*sqrt(0.6)*10.<fidCut ) ) evtTally++;
 
     evt++;
 

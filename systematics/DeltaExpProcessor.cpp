@@ -427,6 +427,10 @@ void SetUpTree(TTree *tree) {
   tree->Branch("time",&Time,"timeE/D:timeW");
   tree->Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
   tree->Branch("MWPCPos",&mwpc_pos,"MWPCPosE[3]/D:MWPCPosW[3]");
+  tree->Branch("nClipped_EX",&nClipped_EX,"nClipped_EX/I");
+  tree->Branch("nClipped_EY",&nClipped_EY,"nClipped_EY/I");
+  tree->Branch("nClipped_WX",&nClipped_WX,"nClipped_WX/I");
+  tree->Branch("nClipped_WY",&nClipped_WY,"nClipped_WY/I");
   tree->Branch("ScintPos",&scint_pos,"ScintPosE[3]/D:ScintPosW[3]");
   tree->Branch("ScintPosAdjusted",&scint_pos_adj,"ScintPosAdjE[3]/D:ScintPosAdjW[3]");
   tree->Branch("PMT",&pmt,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:etaEvis0/D:etaEvis1:etaEvis2:etaEvis3:etaEvis4:etaEvis5:etaEvis6:etaEvis7:nPE0/D:nPE1:nPE2:nPE3:nPE4:nPE5:nPE6:nPE7");
@@ -483,7 +487,7 @@ void calcDeltaExp (int octet)
     UInt_t calibrationPeriod = getSrcRunPeriod(runNumber); // retrieve the calibration period for this run
     UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
     //GetPositionMap(XePeriod);
-    PositionMap posmap(5.0); //Load position map with 5 mm bins
+    PositionMap posmap(5.0, 50.); //Load position map with 5 mm bins
     posmap.readPositionMap(XePeriod);
     vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
 
@@ -540,10 +544,7 @@ void calcDeltaExp (int octet)
     chain->SetBranchAddress("Cath_EY",Cath_EY);
     chain->SetBranchAddress("Cath_WX",Cath_WX);
     chain->SetBranchAddress("Cath_WY",Cath_WY);
-    //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
-    //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
-    //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
-    //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
+    
     
     //These are for feeding in Xuan's simulations... this needs to be updated so that I can pass a flag and change these on the fly
     //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
@@ -671,10 +672,14 @@ void calcDeltaExp (int octet)
       // a single wire, as was determined by just looking for where the Cathode ADC spectra started to clip as compared to 
       // the simulated energy spectrum (done by eye, set at 6 keV for now)
       nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
+
+      // 2011-2012 Cathode Threshold
+      Double_t clip_threshE = 8.;
+      Double_t clip_threshW = 8.;
       
-      Double_t clip_threshE = 5.;
-      Double_t clip_threshW = 4.;
-      
+      // 2012-2013 Cathode Threshold
+      if ( runNumber > 20000 ) clip_threshE = 5., clip_threshW = 4.;
+    
       for ( UInt_t j=0; j<16; j++ ) {
 	if ( Cath_EX[j] > clip_threshE ) nClipped_EX++;
 	if ( Cath_EY[j] > clip_threshE ) nClipped_EY++;
@@ -682,10 +687,10 @@ void calcDeltaExp (int octet)
 	if ( Cath_WY[j] > clip_threshW ) nClipped_WY++;
       }
 
+
+
       //If there is clipping, or no wirechamber trigger, skip the event
-      if ( nClipped_EX>0 || nClipped_EY>0 ||
-	   nClipped_WX>0 || nClipped_WY>0 ||
-	   !(EMWPCTrigger || WMWPCTrigger) ) {
+      if ( !(EMWPCTrigger || WMWPCTrigger) ) {
 	evt++;
 	if (evt%100000==0) {std::cout << evt << std::endl;}
 	continue;
@@ -915,11 +920,25 @@ void calcDeltaExp (int octet)
       //Write to tree so Xuan can also process it
       //if (PID>=0) tree->Fill();
 	    
-
       
+
+      //Cut out clipped events
+      if ( type!=0 ) {
+	if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+      }
+      else {
+	if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
+	else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+      }
+      
+      
+      double r2E = ( mwpc_pos.MWPCPosE[0]*mwpc_pos.MWPCPosE[0] + mwpc_pos.MWPCPosE[1]*mwpc_pos.MWPCPosE[1] ) * 0.6 * 100.; //Transforming to decay trap coords
+      double r2W = ( mwpc_pos.MWPCPosW[0]*mwpc_pos.MWPCPosW[0] + mwpc_pos.MWPCPosW[1]*mwpc_pos.MWPCPosW[1] ) * 0.6 * 100.;
+      
+	
       //Type 2/3 separation
       if (Erecon>0. && type==2) {
-  
+	
 	if (side==0) {
 	  type = separate23(side,mwpcE.MWPCEnergyE);
 	  side = type==2 ? 1 : 0;
@@ -940,8 +959,7 @@ void calcDeltaExp (int octet)
 
 	evtTally++;
 
-	if ( ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.<fidCut
-					      && sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.<fidCut ) ) {
+	if ( r2E<(fidCut*fidCut) && r2W<(fidCut*fidCut ) ) {
 	
 	
 	  //Type 0

@@ -956,7 +956,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#,[16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]#,5,6,7,8,9,10,11,12]#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
+        runPeriods = [16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]#,#[[1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12]]
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -985,7 +985,7 @@ if __name__ == "__main__":
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 3 # number of times to run through the calibration
+        iterations = 2 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -993,7 +993,7 @@ if __name__ == "__main__":
             for runPeriod in runPeriods:
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 1:
+                if 0:
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1015,7 +1015,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 0:#i<(iterations-1):
+                if i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
