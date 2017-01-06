@@ -8,7 +8,8 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
-VPATH = ./:../include/:../Asymmetry/
+VPATH = ./:../include/
+#:../Asymmetry/
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -23,13 +24,13 @@ revCalSim.exe: revCalSim.o positionMapHandler.o SQLinterface.o calibrationTools.
 	$(CXX) $(CXXFLAGS) -o revCalSim.exe revCalSim.o MBUtils.o calibrationTools.o positionMapHandler.o TriggerMap.o ../Asymmetry/SQLinterface.o $(LIBS)
 	@echo "Done"
 
+MBUtils.o: MBUtils.hh
+
 positionMapHandler.o: positionMapHandler.hh MBUtils.o
 
 TriggerMap.o: TriggerMap.hh MBUtils.o
 
-MBUtils.o: MBUtils.hh
-
-../Asymmetry/SQLinterface.o: ../Asymmetry/SQLinterface.hh
+SQLinterface.o: ../Asymmetry/SQLinterface.hh
 
 calibrationTools.o: calibrationTools.hh
 
