@@ -1,13 +1,18 @@
 meanCe = -0.24102
 sigma = 1.72024
+rms = 1.73704
 meanIn = -0.174215
 sigma = 2.4296
+rms = 2.43584
 meanSn = -2.78345
 sigma = 3.88655
+rms = 4.78047
 meanBi2 = 0.211101
 sigma = 5.56723
+rms = 5.57123
 meanBi1 = -0.587707
 sigma = 9.20636
+rms = 9.2251
 
 Results of Gaussian Fits:
 meanCeEast = -0.603856
@@ -24,7 +29,7 @@ meanCeWest = 0.357144
 sigma = 1.76872
 meanInWest = 0.585796
 sigma = 2.13756
-meanCeWest = -2.64803
+meanSnWest = -2.64803
 sigma = 3.23918
 meanBi1West = -2.22554
 sigma = 8.36141

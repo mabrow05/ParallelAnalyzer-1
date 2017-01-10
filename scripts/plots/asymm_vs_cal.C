@@ -2,31 +2,29 @@
 
 //Should make an array of all the calibration periods and the
 // runs they apply to, and then put vertical lines at each of these
+#include <fstream>
+#include <cstdlib>
+#include <iostream>
 #include <vector>
+#include <algorithm>
 
-std::vector <Int_t> getPMTQuality(Int_t runNumber) {
-  //Read in PMT quality file
-  //cout << "Reading in PMT Quality file ...\n";
-  vector <Int_t>  pmtQuality (8,0);
-  Char_t temp[200];
-  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
-  ifstream pmt;
-  //std::cout << temp << std::endl;
-  pmt.open(temp);
-  Int_t run_hold;
-  while (pmt >> run_hold >> pmtQuality[0] >> pmtQuality[1] >> pmtQuality[2]
-	 >> pmtQuality[3] >> pmtQuality[4] >> pmtQuality[5]
-	 >> pmtQuality[6] >> pmtQuality[7]) {
-    if (run_hold==runNumber) break;
-    if (pmt.fail()) break;
-  }
-  pmt.close();
-  if (run_hold!=runNumber) {
-    cout << "Run not found in PMT quality file!" << endl;
-    exit(0);
-  }
-  return pmtQuality;
-}
+#include <TString.h>
+#include <TH1D.h>
+#include <TGraphErrors.h>
+#include <TGraph.h>
+#include <TMultiGraph.h>
+#include <TCanvas.h>
+#include <TLine.h>
+#include <TStyle.h>
+#include <TF1.h>
+#include <TList.h>
+#include <TPaveStats.h>
+
+const static double peakCe = 130.3;// 131.5956;//80.5;
+const static double peakIn = 174.35;
+const static double peakSn = 368.4938;//317.8;
+const static double peakBiLow = 498.;//501.420;//448.8;
+const static double peakBiHigh = 993.789;//926.;
 
 std::vector < Double_t > getOctetAsym(Int_t octet) {
 
@@ -35,801 +33,420 @@ std::vector < Double_t > getOctetAsym(Int_t octet) {
   TString path = TString::Format("%s/Octet_%i/OctetAsymmetry/UnCorr_withPOL_FittedAsymmetry_Octet%i_AnaChA_220-680.dat", getenv("ANALYSIS_RESULTS"),octet,octet);
   std::cout << path << std::endl;
 
-  std::ifstream infile(path.c_str());  
+  std::ifstream infile(path.Data());  
   string txt = "";
   Double_t Asym = 0., AsymError = 0.;
 
   if (infile.is_open()) {
     infile >> txt >> Asym >> AsymError;
     ret.push_back(Asym);
-    ret.push_back(Asym);
+    ret.push_back(AsymError);
+    infile.close();
   }
+  else { 
+    std::cout << "Couldn't open Asymmetry File!!\n";
+    ret.push_back(0.); 
+    ret.push_back(0.);
+  }
+  
   return ret;
 }
 
 //This returns a vector or RMS values, where the order is Ce,In,Sn,Bi2,Bi1
 std::vector < Double_t > getXePeriodEnvelope(Int_t XePeriod) {
 
-  // NEED TO READ IN THE PROPER ERROR ENVELOPE FILE FOR EACH XENON PERIOD
-  // THESE HAVE ALL ALREADY BEEN RUN, SO JUST WRITE THE CODE
-  // I THINK WE SHOULD USE THE RMS VALUES ONLY...
+  
   std::vector <Double_t> ret;
+  Int_t lowCal, highCal;
+  lowCal = highCal = 0;
 
-  TString path = TString::Format("%s/Octet_%i/OctetAsymmetry/UnCorr_withPOL_FittedAsymmetry_Octet%i_AnaChA_220-680.dat", getenv("ANALYSIS_RESULTS"),octet,octet);
+  if ( XePeriod == 2 ) lowCal = 1, highCal = 4;
+  else if (XePeriod == 3 ) lowCal = 5, highCal = 5;
+  else if (XePeriod == 4 ) lowCal = 6, highCal = 6;
+  else if (XePeriod == 5 ) lowCal = 7, highCal = 8;
+  else if (XePeriod == 7 ) lowCal = 9, highCal = 12;
+  else if (XePeriod == 8 ) lowCal = 16, highCal = 17;
+  else if (XePeriod == 9 ) lowCal = 18, highCal = 20;
+  else if (XePeriod == 10 ) lowCal = 21, highCal = 24;
+  else std::cout << "Bad Xe Period\n", exit(0);
+
+  TString path = TString::Format("%s/error_envelope/error_envelope_calPeriods_%i-%i.dat", getenv("ANALYSIS_CODE"),lowCal,highCal);
   std::cout << path << std::endl;
 
-  std::ifstream infile(path.c_str());  
+  std::ifstream infile(path.Data());  
   string txt = "";
-  Double_t Asym = 0., AsymError = 0.;
 
   if (infile.is_open()) {
-    infile >> txt >> Asym >> AsymError;
-    ret.push_back(Asym);
-    ret.push_back(Asym);
+    for ( UInt_t i = 1; i<16; ++i ) {
+      infile >> txt >> txt >> txt;
+      if ( i%3 == 0 && i!=6) ret.push_back(atoi(txt.c_str()));
+    }
   }
+  else {
+    std::cout << "Couldn't open error envelope file!!\n";
+    exit(0);
+  }
+  infile.close();
   return ret;
 }
 
 
-void asym_vs_cal(TString year) {
+void asymm_vs_cal(TString year) {
 
   gStyle->SetTitleSize(0.08,"t");
   gStyle->SetPadBottomMargin(0.15);
-  gStyle->SetTitleYSize(0.06);
-  gStyle->SetTitleYOffset(0.6);
+  gStyle->SetTitleYSize(0.05);
+  gStyle->SetTitleYOffset(0.8);
   gStyle->SetTitleXSize(0.06);
   gStyle->SetTitleXOffset(0.9);
   gStyle->SetLabelSize(0.06,"xyz");
-  
-  std::vector <Int_t> calPeriodRunEnd; // TO BE IMPLEMENTED LATER
-  std::vector <Int_t> calPeriodRefRun;
+  gStyle->SetOptFit(1111);
+  gStyle->SetStatY(0.85);
+  gStyle->SetStatX(0.975);
+  gStyle->SetStatW(.09);
 
+  gStyle->SetFillStyle(0000); 
+  //gStyle->SetStatStyle(0); 
+  //gStyle->SetTitleStyle(0); 
+  //gStyle->SetCanvasBorderSize(0); 
+  //gStyle->SetFrameBorderSize(0); 
+  gStyle->SetLegendBorderSize(0); 
+  //gStyle->SetStatBorderSize(0); 
+  //gStyle->SetTitleBorderSize(0);
 
+  std::vector <Int_t> badOct;
+  Int_t octs[] = {7,9,59,60,61,62,63,64,65,66,70,92};
+  badOct.assign(octs, octs+12);
 
-  Int_t runMin, runMax;
+  std::vector <Int_t> XePeriodOctetEnd; 
+  std::vector <Int_t> XePeriod;
+  std::vector <Int_t> SrcPeriodOctetEnd; 
+  std::vector <Int_t> SrcPeriod;
+
+  Int_t octMin, octMax;
 
   if (year==TString("2011-2012") ) {
-    runMin = 17000;
-    runMax = 20000;
+    octMin = 0;
+    octMax = 59;
     
-    calPeriodRefRun.push_back(17238); calPeriodRunEnd.push_back(17298);
-    calPeriodRefRun.push_back(17370); calPeriodRunEnd.push_back(17440);
-    calPeriodRefRun.push_back(17521); calPeriodRunEnd.push_back(17735);
-    calPeriodRefRun.push_back(17892); calPeriodRunEnd.push_back(17956);
-    calPeriodRefRun.push_back(18361); calPeriodRunEnd.push_back(18387);
-    calPeriodRefRun.push_back(18621); calPeriodRunEnd.push_back(18684);
-    calPeriodRefRun.push_back(18749); calPeriodRunEnd.push_back(18995);
-    calPeriodRefRun.push_back(19232); calPeriodRunEnd.push_back(19240);
-    calPeriodRefRun.push_back(19359); calPeriodRunEnd.push_back(19545);
-    calPeriodRefRun.push_back(19857); calPeriodRunEnd.push_back(20000);
+    XePeriodOctetEnd.push_back(14); XePeriod.push_back(2);
+    XePeriodOctetEnd.push_back(23); XePeriod.push_back(3);
+    XePeriodOctetEnd.push_back(31); XePeriod.push_back(4);
+    XePeriodOctetEnd.push_back(46); XePeriod.push_back(5);
+    XePeriodOctetEnd.push_back(59); XePeriod.push_back(7);
+
+    SrcPeriodOctetEnd.push_back(4); SrcPeriod.push_back(1);
+    SrcPeriodOctetEnd.push_back(6); SrcPeriod.push_back(2);
+    SrcPeriodOctetEnd.push_back(9); SrcPeriod.push_back(3);
+    SrcPeriodOctetEnd.push_back(14); SrcPeriod.push_back(4);
+    SrcPeriodOctetEnd.push_back(23); SrcPeriod.push_back(5);
+    SrcPeriodOctetEnd.push_back(31); SrcPeriod.push_back(6);
+    SrcPeriodOctetEnd.push_back(39); SrcPeriod.push_back(7);
+    SrcPeriodOctetEnd.push_back(46); SrcPeriod.push_back(8);
+    SrcPeriodOctetEnd.push_back(50); SrcPeriod.push_back(9);
+    SrcPeriodOctetEnd.push_back(59); SrcPeriod.push_back(11);
   }
   else {
-    runMin = 21000;
-    runMax = 23300;
+    octMin = 60;
+    octMax = 121;
 
-    calPeriodRefRun.push_back(20519); calPeriodRunEnd.push_back(20742);
-    calPeriodRefRun.push_back(20820); calPeriodRunEnd.push_back(20838);
-    calPeriodRefRun.push_back(21091); calPeriodRunEnd.push_back(21238);
-    calPeriodRefRun.push_back(21315); calPeriodRunEnd.push_back(21606);
-    calPeriodRefRun.push_back(21683); calPeriodRunEnd.push_back(21864);
-    calPeriodRefRun.push_back(21918); calPeriodRunEnd.push_back(22119);
-    calPeriodRefRun.push_back(22219); calPeriodRunEnd.push_back(22239);
-    calPeriodRefRun.push_back(22441); calPeriodRunEnd.push_back(22631);
-    calPeriodRefRun.push_back(22771); calPeriodRunEnd.push_back(23174);
+    XePeriodOctetEnd.push_back(79); XePeriod.push_back(8);
+    XePeriodOctetEnd.push_back(95); XePeriod.push_back(9); 
+    XePeriodOctetEnd.push_back(121); XePeriod.push_back(10);
+
+    SrcPeriodOctetEnd.push_back(71); SrcPeriod.push_back(16);
+    SrcPeriodOctetEnd.push_back(79); SrcPeriod.push_back(17);
+    SrcPeriodOctetEnd.push_back(85); SrcPeriod.push_back(18);
+    SrcPeriodOctetEnd.push_back(91); SrcPeriod.push_back(19);
+    SrcPeriodOctetEnd.push_back(95); SrcPeriod.push_back(20);
+    SrcPeriodOctetEnd.push_back(105); SrcPeriod.push_back(22);
+    SrcPeriodOctetEnd.push_back(121); SrcPeriod.push_back(23);
+    
   }
 
+  
 
-  // making all of the TLines to reperesent the calibration periods
 
-  std::vector <TLine*> linesE1(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesE2(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesE3(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesE4(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW1(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW2(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW3(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW4(calPeriodRunEnd.size(),0);
+  // making all of the TLines to reperesent the Xe calibration periods
 
-  std::vector <TLine*> linesE1_fac(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesE2_fac(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesE3_fac(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesE4_fac(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW1_fac(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW2_fac(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW3_fac(calPeriodRunEnd.size(),0);
-  std::vector <TLine*> linesW4_fac(calPeriodRunEnd.size(),0);
+  std::vector <TLine*> linesXe(XePeriodOctetEnd.size(),0);
+  std::vector <TLine*> linesSrc(SrcPeriodOctetEnd.size(),0);
 
+  std::vector <Double_t> dOctetList;
+  std::vector < std::vector <Double_t> > AsymAndError(2,std::vector<Double_t>(0));
+
+  //Read in the Asymmetries
+
+  for ( Int_t oct = octMin; oct<=octMax; ++oct ) {
+
+    if ( std::find(badOct.begin(), badOct.end(),oct) != badOct.end() ) continue;  //Checking if octet should be ignored for data quality reasons
+    
+    std::vector <Double_t> vec = getOctetAsym(oct); 
+    
+    if ( vec[1]>0. ) {
+      dOctetList.push_back(oct);
+      AsymAndError[0].push_back(vec[0]);
+      AsymAndError[1].push_back(vec[1]);
+    }
+  }
+    
+  TCanvas *c1 = new TCanvas("c1","c1",1600,1200);
+  c1->Divide(1,2);
+  c1->cd(1);
 
   //Plotting Asymmetries
-  /*TGraphErrors *g = new TGraphErrors(rawAsymByGroup[0].size(), &rawAsymByGroup[0][0],&rawAsymByGroup[1][0],&errorX[0], &rawAsymByGroup[2][0]);
-  title = groupType+"-By-"+groupType+" Raw Measured Asymmetry " + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
-  g->SetTitle(title.c_str());
+  TGraphErrors *g = new TGraphErrors(dOctetList.size(), &dOctetList[0], &AsymAndError[0][0], 0, &AsymAndError[1][0]);
+  TString title = TString::Format("%s Raw Measured Asymmetry 220-680 keV Window",year.Data());
+  g->SetTitle(title);
   g->SetMarkerStyle(20);
   g->SetLineWidth(2);
-  g->GetXaxis()->SetLimits(rawAsymByGroup[0][0]-2., rawAsymByGroup[0][rawAsymByGroup[0].size()-1]+2.);
+  g->GetXaxis()->SetLimits(dOctetList[0]-2., dOctetList[dOctetList.size()-1]+2.);
   g->GetXaxis()->SetTitle("Number");
   g->GetYaxis()->SetTitle("Raw Asymmetry");
   g->GetXaxis()->CenterTitle();
   g->GetYaxis()->CenterTitle();
+  g->Draw("APZ");
   
-  TF1 *fit = new TF1("fit","[0]",rawAsymByGroup[0][0], rawAsymByGroup[0][rawAsymByGroup[0].size()-1]);
+  c1->Update();
+  TF1 *fit = new TF1("fit","[0]",dOctetList[0], dOctetList[dOctetList.size()-1]);
   fit->SetLineColor(kRed);
   fit->SetLineWidth(3);
   fit->SetParameter(0,0.05);
   
-  g->Fit("fit","R");*/
+  g->Fit("fit","R");
 
+  /* TPaveStats *ps = (TPaveStats *)g->GetListOfFunctions()->FindObject("stats");
+  ps->SetX1NDC(0.75);
+  ps->SetX2NDC(0.95);
+
+  c1->Update();
+  c1->Modified();*/
 
   Double_t min = 0., max = 0.;
-  
-
-  //EAST SIDE
-  TCanvas *cEast = new TCanvas("cEast","East PMTs",1000, 1200);
-  cEast->Divide(1,4);
-
-  cEast->cd(1);
-
-  TGraph *east1 = new TGraph(numRuns[0],&runNumber[0][0],&eastGain[0][0]);
-  east1->SetTitle("PMT East 1");
-  east1->GetXaxis()->SetTitle("Run Number");
-  east1->GetYaxis()->SetTitle("ADC Channels");
-  east1->GetXaxis()->SetLimits(runMin, runMax);
-  east1->SetMarkerStyle(8);
-  // east1->SetMinimum(0.);
-  //east1->SetMaximum(4096.);
-  east1->Draw("AP");
-  
-  cEast->Update();
-  
   min = gPad->GetUymin();
   max = gPad->GetUymax();
 
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE1[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE1[i]->SetLineStyle(2);
-    linesE1[i]->SetLineColor(kRed);
-    linesE1[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[0][0] && (double)calPeriodRunEnd[i] < runNumber[0][numRuns[0]-1] ) {
-      linesE1[i]->Draw();
-    }
-  } 
   
-  TGraph *east1_ref = new TGraph(numRuns_ref[0],&runNumber_ref[0][0],&eastGain_ref[0][0]);
-  east1_ref->SetTitle("PMT East 1");
-  east1_ref->GetXaxis()->SetTitle("Run Number");
-  east1_ref->GetYaxis()->SetTitle("ADC Channels");
-  east1_ref->SetMarkerStyle(8);
-  east1_ref->SetMarkerColor(kRed);
-  // east1_ref->SetMinimum(0.);
-  //east1_ref->SetMaximum(4096.);
-  east1_ref->Draw("P SAME");
-
-  
-
-  
-
-  cEast->cd(2);
-
-  TGraph *east2 = new TGraph(numRuns[1],&runNumber[1][0],&eastGain[1][0]);
-  east2->SetTitle("PMT East 2");
-  east2->GetXaxis()->SetTitle("Run Number");
-  east2->GetYaxis()->SetTitle("ADC Channels");
-  east2->GetXaxis()->SetLimits(runMin, runMax);
-  east2->SetMarkerStyle(8);
-  //east2->SetMinimum(0.);
-  //east2->SetMaximum(4096.);
-  east2->Draw("AP");
-
-  cEast->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
+  for (UInt_t i=0; i<SrcPeriodOctetEnd.size(); i++) {
     
-    linesE2[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE2[i]->SetLineStyle(2);
-    linesE2[i]->SetLineColor(kRed);
-    linesE2[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[1][0] && (double)calPeriodRunEnd[i] < runNumber[1][numRuns[1]-1] ) {
-      linesE2[i]->Draw();
-    }
-  }
-
-  TGraph *east2_ref = new TGraph(numRuns_ref[1],&runNumber_ref[1][0],&eastGain_ref[1][0]);
-  east2_ref->SetTitle("PMT East 2");
-  east2_ref->GetXaxis()->SetTitle("Run Number");
-  east2_ref->GetYaxis()->SetTitle("ADC Channels");
-  east2_ref->SetMarkerStyle(8);
-  east2_ref->SetMarkerColor(kRed);
-  // east2_ref->SetMinimum(0.);
-  //east2_ref->SetMaximum(4096.);
-  east2_ref->Draw("P SAME");
-
-
-  cEast->cd(3);
-
-  TGraph *east3 = new TGraph(numRuns[2],&runNumber[2][0],&eastGain[2][0]);
-  east3->SetTitle("PMT East 3");
-  east3->GetXaxis()->SetTitle("Run Number");
-  east3->GetYaxis()->SetTitle("ADC Channels");
-  east3->GetXaxis()->SetLimits(runMin, runMax);
-  east3->SetMarkerStyle(8);
-  //east3->SetMinimum(0.);
-  //east3->SetMaximum(4096.);
-  east3->Draw("AP");
-
-  cEast->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE3[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE3[i]->SetLineStyle(2);
-    linesE3[i]->SetLineColor(kRed);
-    linesE3[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[2][0] && (double)calPeriodRunEnd[i] < runNumber[2][numRuns[2]-1] ) {
-      linesE3[i]->Draw();
-    }
-  }
-
-  TGraph *east3_ref = new TGraph(numRuns_ref[2],&runNumber_ref[2][0],&eastGain_ref[2][0]);
-  east3_ref->SetTitle("PMT East 3");
-  east3_ref->GetXaxis()->SetTitle("Run Number");
-  east3_ref->GetYaxis()->SetTitle("ADC Channels");
-  east3_ref->SetMarkerStyle(8);
-  east3_ref->SetMarkerColor(kRed);
-  // east3_ref->SetMinimum(0.);
-  //east3_ref->SetMaximum(4096.);
-  east3_ref->Draw("P SAME");
-  
-
-  cEast->cd(4);
-
-  TGraph *east4 = new TGraph(numRuns[3],&runNumber[3][0],&eastGain[3][0]);
-  east4->SetTitle("PMT East 4");
-  east4->GetXaxis()->SetTitle("Run Number");
-  east4->GetYaxis()->SetTitle("ADC Channels");
-  east4->GetXaxis()->SetLimits(runMin, runMax);
-  east4->SetMarkerStyle(8);
-  //east4->SetMinimum(0.);
-  //east4->SetMaximum(4096.);
-  east4->Draw("AP");
-
-  cEast->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE4[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE4[i]->SetLineStyle(2);
-    linesE4[i]->SetLineColor(kRed);
-    linesE4[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[3][0] && (double)calPeriodRunEnd[i] < runNumber[3][numRuns[3]-1] ) {
-      linesE4[i]->Draw();
-    }
-  }
-
-  TGraph *east4_ref = new TGraph(numRuns_ref[3],&runNumber_ref[3][0],&eastGain_ref[3][0]);
-  east4_ref->SetTitle("PMT East 4");
-  east4_ref->GetXaxis()->SetTitle("Run Number");
-  east4_ref->GetYaxis()->SetTitle("ADC Channels");
-  east4_ref->SetMarkerStyle(8);
-  east4_ref->SetMarkerColor(kRed);
-  // east4_ref->SetMinimum(0.);
-  //east4_ref->SetMaximum(4096.);
-  east4_ref->Draw("P SAME");
-
-
-
-  //WEST SIDE
-  TCanvas *cWest = new TCanvas("cWest","West PMTs",1000, 1200);
-  cWest->Divide(1,4);
-
-  cWest->cd(1);
-
-  TGraph *west1 = new TGraph(numRuns[4],&runNumber[4][0],&westGain[0][0]);
-  west1->SetTitle("PMT West 1");
-  west1->GetXaxis()->SetTitle("Run Number");
-  west1->GetYaxis()->SetTitle("ADC Channels");
-  west1->GetXaxis()->SetLimits(runMin, runMax);
-  west1->SetMarkerStyle(8);
-  //west1->SetMinimum(0.);
-  //west1->SetMaximum(4096.);
-  west1->Draw("AP");
-
-  cWest->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesW1[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW1[i]->SetLineStyle(2);
-    linesW1[i]->SetLineColor(kRed);
-    linesW1[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[4][0] && (double)calPeriodRunEnd[i] < runNumber[4][numRuns[4]-1] ) {
-      linesW1[i]->Draw();
-    }
-  }
-
-  TGraph *west1_ref = new TGraph(numRuns_ref[4],&runNumber_ref[4][0],&westGain_ref[0][0]);
-  west1_ref->SetTitle("PMT West 1");
-  west1_ref->GetXaxis()->SetTitle("Run Number");
-  west1_ref->GetYaxis()->SetTitle("ADC Channels");
-  west1_ref->SetMarkerStyle(8);
-  west1_ref->SetMarkerColor(kRed);
-  // west1_ref->SetMinimum(0.);
-  //west1_ref->SetMaximum(4096.);
-  west1_ref->Draw("P SAME");
-
-
-
-  cWest->cd(2);
-
-  TGraph *west2 = new TGraph(numRuns[5],&runNumber[5][0],&westGain[1][0]);
-  west2->SetTitle("PMT West 2");
-  west2->GetXaxis()->SetTitle("Run Number");
-  west2->GetYaxis()->SetTitle("ADC Channels");
-  west2->GetXaxis()->SetLimits(runMin, runMax);
-  west2->SetMarkerStyle(8);
-  //west2->SetMinimum(0.);
-  //west2->SetMaximum(4096.);
-  west2->Draw("AP");
-
-  cWest->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesW2[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW2[i]->SetLineStyle(2);
-    linesW2[i]->SetLineColor(kRed);
-    linesW2[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[5][0] && (double)calPeriodRunEnd[i] < runNumber[5][numRuns[5]-1] ) {
-      linesW2[i]->Draw();
-    }
-  }
-
-  TGraph *west2_ref = new TGraph(numRuns_ref[5],&runNumber_ref[5][0],&westGain_ref[1][0]);
-  west2_ref->SetTitle("PMT West 2");
-  west2_ref->GetXaxis()->SetTitle("Run Number");
-  west2_ref->GetYaxis()->SetTitle("ADC Channels");
-  west2_ref->SetMarkerStyle(8);
-  west2_ref->SetMarkerColor(kRed);
-  // west2_ref->SetMinimum(0.);
-  //west2_ref->SetMaximum(4096.);
-  west2_ref->Draw("P SAME");
-
-
-
-  cWest->cd(3);
-
-  TGraph *west3 = new TGraph(numRuns[6],&runNumber[6][0],&westGain[2][0]);
-  west3->SetTitle("PMT West 3");
-  west3->GetXaxis()->SetTitle("Run Number");
-  west3->GetYaxis()->SetTitle("ADC Channels");
-  west3->GetXaxis()->SetLimits(runMin, runMax);
-  west3->SetMarkerStyle(8);
-  //west3->SetMinimum(0.);
-  //west3->SetMaximum(4096.);
-  west3->Draw("AP");
-
-  cWest->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesW3[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW3[i]->SetLineStyle(2);
-    linesW3[i]->SetLineColor(kRed);
-    linesW3[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[6][0] && (double)calPeriodRunEnd[i] < runNumber[6][numRuns[6]-1] ) {
-      linesW3[i]->Draw();
-    }
-  }
-
-  TGraph *west3_ref = new TGraph(numRuns_ref[6],&runNumber_ref[6][0],&westGain_ref[2][0]);
-  west3_ref->SetTitle("PMT West 3");
-  west3_ref->GetXaxis()->SetTitle("Run Number");
-  west3_ref->GetYaxis()->SetTitle("ADC Channels");
-  west3_ref->SetMarkerStyle(8);
-  west3_ref->SetMarkerColor(kRed);
-  // west3_ref->SetMinimum(0.);
-  //west3_ref->SetMaximum(4096.);
-  west3_ref->Draw("P SAME");
-
-
-
-  if (numRuns[7]>0) {
-    cWest->cd(4);
-    
-    
-    TGraph *west4 = new TGraph(numRuns[7],&runNumber[7][0],&westGain[3][0]);
-    west4->SetTitle("PMT West 4");
-    west4->GetXaxis()->SetTitle("Run Number");
-    west4->GetYaxis()->SetTitle("ADC Channels");
-    west4->GetXaxis()->SetLimits(runMin, runMax);
-    west4->SetMarkerStyle(8);
-    //west4->SetMinimum(0.);
-    //west4->SetMaximum(4096.);
-    west4->Draw("AP");
-
-    cWest->Update();
-  
-    min = gPad->GetUymin();
-    max = gPad->GetUymax();
-    
-    for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-      
-      linesW4[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-      linesW4[i]->SetLineStyle(2);
-      linesW4[i]->SetLineColor(kRed);
-      linesW4[i]->SetLineWidth(2);
-      if ( (double)calPeriodRunEnd[i] > runNumber[7][0] && (double)calPeriodRunEnd[i] < runNumber[7][numRuns[7]-1] ) {
-	linesW4[i]->Draw();
-      }
-    }
-
-    TGraph *west4_ref = new TGraph(numRuns_ref[7],&runNumber_ref[7][0],&westGain_ref[3][0]);
-    west4_ref->SetTitle("PMT West 4");
-    west4_ref->GetXaxis()->SetTitle("Run Number");
-    west4_ref->GetYaxis()->SetTitle("ADC Channels");
-    west4_ref->SetMarkerStyle(8);
-    west4_ref->SetMarkerColor(kRed);
-    // west4_ref->SetMinimum(0.);
-    //west4_ref->SetMaximum(4096.);
-    west4_ref->Draw("P SAME");
-
-    
-  }
-    
-  
-    ///////////////////////////// Plotting the gain factors //////////////////////////////////
-
-
-    //EAST SIDE
-  TCanvas *cEast_Fac = new TCanvas("cEast_Fac","East PMTs",1000, 1200);
-  cEast_Fac->Divide(1,4);
-
-  cEast_Fac->cd(1);
-
-  TGraph *east_fac1 = new TGraph(numRuns[0],&runNumber[0][0],&eastGainFactor[0][0]);
-  east_fac1->SetTitle("PMT East 1");
-  east_fac1->GetXaxis()->SetTitle("Run Number");
-  east_fac1->GetYaxis()->SetTitle("Gain Factor");
-  east_fac1->GetXaxis()->SetLimits(runMin, runMax);
-  east_fac1->SetMarkerStyle(8);
-  // east_fac1->SetMinimum(0.);
-  //east_fac1->SetMaximum(4096.);
-  east_fac1->Draw("AP");
-
-  cEast_Fac->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE1_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE1_fac[i]->SetLineStyle(2);
-    linesE1_fac[i]->SetLineColor(kRed);
-    linesE1_fac[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[0][0] && (double)calPeriodRunEnd[i] < runNumber[0][numRuns[0]-1] ) {
-      linesE1_fac[i]->Draw();
+    linesSrc[i] = new TLine((double)SrcPeriodOctetEnd[i]+0.5,min,(double)SrcPeriodOctetEnd[i]+0.5,max);
+    linesSrc[i]->SetLineStyle(2);
+    //linesSrc[i]->SetLineColor(kRed);
+    linesSrc[i]->SetLineWidth(1);
+    if ( SrcPeriodOctetEnd[i] > octMin && SrcPeriodOctetEnd[i] < octMax ) {
+      linesSrc[i]->Draw();
     }
   } 
 
-  TGraph *east_fac1_ref = new TGraph(numRuns_ref[0],&runNumber_ref[0][0],&eastGainFactor_ref[0][0]);
-  east_fac1_ref->SetTitle("PMT East 1");
-  east_fac1_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac1_ref->GetYaxis()->SetTitle("Gain Factor");
-  east_fac1_ref->SetMarkerStyle(8);
-  east_fac1_ref->SetMarkerColor(kRed);
-  // east_fac1_ref->SetMinimum(0.);
-  //east_fac1_ref->SetMaximum(4096.);
-  east_fac1_ref->Draw("P SAME");
-
-
-
-  cEast_Fac->cd(2);
-
-  TGraph *east_fac2 = new TGraph(numRuns[1],&runNumber[1][0],&eastGainFactor[1][0]);
-  east_fac2->SetTitle("PMT East 2");
-  east_fac2->GetXaxis()->SetTitle("Run Number");
-  east_fac2->GetYaxis()->SetTitle("Gain Factor");
-  east_fac2->GetXaxis()->SetLimits(runMin, runMax);
-  east_fac2->SetMarkerStyle(8);
-  //east_fac2->SetMinimum(0.);
-  //east_fac2->SetMaximum(4096.);
-  east_fac2->Draw("AP");
-
-  cEast_Fac->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
+  for (UInt_t i=0; i<XePeriodOctetEnd.size(); i++) {
     
-    linesE2_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE2_fac[i]->SetLineStyle(2);
-    linesE2_fac[i]->SetLineColor(kRed);
-    linesE2_fac[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[1][0] && (double)calPeriodRunEnd[i] < runNumber[1][numRuns[1]-1] ) {
-      linesE2_fac[i]->Draw();
+    linesXe[i] = new TLine((double)XePeriodOctetEnd[i]+0.5,min,(double)XePeriodOctetEnd[i]+0.5,max);
+    linesXe[i]->SetLineStyle(2);
+    linesXe[i]->SetLineColor(kBlue);
+    linesXe[i]->SetLineWidth(3);
+    if ( XePeriodOctetEnd[i] > octMin && XePeriodOctetEnd[i] < octMax ) {
+      linesXe[i]->Draw();
     }
   } 
 
-  TGraph *east_fac2_ref = new TGraph(numRuns_ref[1],&runNumber_ref[1][0],&eastGainFactor_ref[1][0]);
-  east_fac2_ref->SetTitle("PMT East 2");
-  east_fac2_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac2_ref->GetYaxis()->SetTitle("Gain Factor");
-  east_fac2_ref->SetMarkerStyle(8);
-  east_fac2_ref->SetMarkerColor(kRed);
-  // east_fac2_ref->SetMinimum(0.);
-  //east_fac2_ref->SetMaximum(4096.);
-  east_fac2_ref->Draw("P SAME");
+  c1->Update();
 
+  c1->cd(2);
   
+  gPad->Divide(XePeriod.size(),1);
 
-  cEast_Fac->cd(3);
-
-  TGraph *east_fac3 = new TGraph(numRuns[2],&runNumber[2][0],&eastGainFactor[2][0]);
-  east_fac3->SetTitle("PMT East 3");
-  east_fac3->GetXaxis()->SetTitle("Run Number");
-  east_fac3->GetYaxis()->SetTitle("Gain Factor");
-  east_fac3->GetXaxis()->SetLimits(runMin, runMax);
-  east_fac3->SetMarkerStyle(8);
-  //east_fac3->SetMinimum(0.);
-  //east_fac3->SetMaximum(4096.);
-  east_fac3->Draw("AP");
-
-  cEast_Fac->Update();
+  // Now making the error envelope plots
   
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE3_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE3_fac[i]->SetLineStyle(2);
-    linesE3_fac[i]->SetLineColor(kRed);
-    linesE3_fac[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[2][0] && (double)calPeriodRunEnd[i] < runNumber[2][numRuns[2]-1] ) {
-      linesE3_fac[i]->Draw();
-    }
-  } 
-
-  TGraph *east_fac3_ref = new TGraph(numRuns_ref[2],&runNumber_ref[2][0],&eastGainFactor_ref[2][0]);
-  east_fac3_ref->SetTitle("PMT East 3");
-  east_fac3_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac3_ref->GetYaxis()->SetTitle("Gain Factor");
-  east_fac3_ref->SetMarkerStyle(8);
-  east_fac3_ref->SetMarkerColor(kRed);
-  // east_fac3_ref->SetMinimum(0.);
-  //east_fac3_ref->SetMaximum(4096.);
-  east_fac3_ref->Draw("P SAME");
-
-
-  cEast_Fac->cd(4);
-
-  TGraph *east_fac4 = new TGraph(numRuns[3],&runNumber[3][0],&eastGainFactor[3][0]);
-  east_fac4->SetTitle("PMT East 4");
-  east_fac4->GetXaxis()->SetTitle("Run Number");
-  east_fac4->GetYaxis()->SetTitle("Gain Factor");
-  east_fac4->GetXaxis()->SetLimits(runMin, runMax);
-  east_fac4->SetMarkerStyle(8);
-  //east_fac4->SetMinimum(0.);
-  //east_fac4->SetMaximum(4096.);
-  east_fac4->Draw("AP");
-
-  cEast_Fac->Update();
+  Double_t xval[] = {peakCe, peakSn, peakBiLow, peakBiHigh};
+  Double_t yval[] = {0,0,0,0};
   
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE4_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE4_fac[i]->SetLineStyle(2);
-    linesE4_fac[i]->SetLineColor(kRed);
-    linesE4_fac[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[3][0] && (double)calPeriodRunEnd[i] < runNumber[3][numRuns[3]-1] ) {
-      linesE4_fac[i]->Draw();
-    }
-  } 
-
-  TGraph *east_fac4_ref = new TGraph(numRuns_ref[3],&runNumber_ref[3][0],&eastGainFactor_ref[3][0]);
-  east_fac4_ref->SetTitle("PMT East 4");
-  east_fac4_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac4_ref->GetYaxis()->SetTitle("Gain Factor");
-  east_fac4_ref->SetMarkerStyle(8);
-  east_fac4_ref->SetMarkerColor(kRed);
-  // east_fac4_ref->SetMinimum(0.);
-  //east_fac4_ref->SetMaximum(4096.);
-  east_fac4_ref->Draw("P SAME");
-
-
-  //WEST SIDE
-  TCanvas *cWest_Fac = new TCanvas("cWest_Fac","West PMTs",1000, 1200);
-  cWest_Fac->Divide(1,4);
-
-  cWest_Fac->cd(1);
-
-  TGraph *west_fac1 = new TGraph(numRuns[4],&runNumber[4][0],&westGainFactor[0][0]);
-  west_fac1->SetTitle("PMT West 1");
-  west_fac1->GetXaxis()->SetTitle("Run Number");
-  west_fac1->GetYaxis()->SetTitle("Gain Factor");
-  west_fac1->GetXaxis()->SetLimits(runMin, runMax);
-  west_fac1->SetMarkerStyle(8);
-  //west_fac1->SetMinimum(0.);
-  //west_fac1->SetMaximum(4096.);
-  west_fac1->Draw("AP");
-
-  cWest_Fac->Update();
+  std::vector <TGraphErrors*> gEnv(XePeriod.size());
   
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
+  Double_t xmin = 0.0;
+  Double_t xmax = 1200.;
+  TLine *zeroLine = new TLine(xmin,0.,xmax,0.);
 
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
+  for ( UInt_t ii=0; ii<XePeriod.size(); ++ii ) {
+
+    c1->cd(2); gPad->cd(ii+1);
     
-    linesW1_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW1_fac[i]->SetLineStyle(2);
-    linesW1_fac[i]->SetLineColor(kRed);
-    linesW1_fac[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[4][0] && (double)calPeriodRunEnd[i] < runNumber[4][numRuns[4]-1] ) {
-      linesW1_fac[i]->Draw();
-    }
-  } 
+    std::vector <Double_t> env = getXePeriodEnvelope(XePeriod[ii]);
 
-  TGraph *west_fac1_ref = new TGraph(numRuns_ref[4],&runNumber_ref[4][0],&westGainFactor_ref[0][0]);
-  west_fac1_ref->SetTitle("PMT West 1");
-  west_fac1_ref->GetXaxis()->SetTitle("Run Number");
-  west_fac1_ref->GetYaxis()->SetTitle("Gain Factor");
-  west_fac1_ref->SetMarkerStyle(8);
-  west_fac1_ref->SetMarkerColor(kRed);
-  // west_fac1_ref->SetMinimum(0.);
-  //west_fac1_ref->SetMaximum(4096.);
-  west_fac1_ref->Draw("P SAME");
+    gEnv[ii] = new TGraphErrors(4, xval, yval, 0, &env[0]);
+    title = TString::Format("Error Envelope Xe Period %i",XePeriod[ii]);
+    gEnv[ii]->SetTitle(title);
+    gEnv[ii]->SetMarkerStyle(21);
+    gEnv[ii]->SetMarkerSize(0);
+    gEnv[ii]->SetMarkerColor(kBlue);
+    gEnv[ii]->SetLineWidth(3);
+    gEnv[ii]->SetLineColor(kBlue);
+    gEnv[ii]->SetMinimum(-12.);
+    gEnv[ii]->SetMaximum(12.);
+    gEnv[ii]->GetXaxis()->SetLimits(xmin,xmax);
+    gEnv[ii]->GetXaxis()->SetTitle("Energy (keV)");
+    gEnv[ii]->GetYaxis()->SetTitle("Residual (keV)");
+    gEnv[ii]->GetXaxis()->CenterTitle();
+    gEnv[ii]->GetYaxis()->CenterTitle();
+    //gEnv[ii]->SetFillStyle(3002);
+    gEnv[ii]->Draw("APZ");
+    
+    c1->Update();
+
+    zeroLine->Draw();
+
+  }
+
+  c1->Update();
+
+  TString filename = TString::Format("errEnv_vs_XePeriod_%s",year.Data());
+  c1->Print(TString::Format("%s.pdf(",filename.Data()));
+  c1->Print(TString::Format("%s.jpg(",filename.Data()));
+
+  ////////////////////////////////////////////////////////////////////////////////
+  //Now do the total error envelope
+  ////////////////////////////////////////////////////////////////////////////////
 
 
-
-  cWest_Fac->cd(2);
-
-  TGraph *west_fac2 = new TGraph(numRuns[5],&runNumber[5][0],&westGainFactor[1][0]);
-  west_fac2->SetTitle("PMT West 2");
-  west_fac2->GetXaxis()->SetTitle("Run Number");
-  west_fac2->GetYaxis()->SetTitle("Gain Factor");
-  west_fac2->GetXaxis()->SetLimits(runMin, runMax);
-  west_fac2->SetMarkerStyle(8);
-  //west_fac2->SetMinimum(0.);
-  //west_fac2->SetMaximum(4096.);
-  west_fac2->Draw("AP");
-
-  cWest_Fac->Update();
+  TCanvas *c2 = new TCanvas("c2","c2",1600,1200);
   
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesW2_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW2_fac[i]->SetLineStyle(2);
-    linesW2_fac[i]->SetLineColor(kRed);
-    linesW2_fac[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[5][0] && (double)calPeriodRunEnd[i] < runNumber[5][numRuns[5]-1] ) {
-      linesW2_fac[i]->Draw();
-    }
-  } 
-
-  TGraph *west_fac2_ref = new TGraph(numRuns_ref[5],&runNumber_ref[5][0],&westGainFactor_ref[1][0]);
-  west_fac2_ref->SetTitle("PMT West 2");
-  west_fac2_ref->GetXaxis()->SetTitle("Run Number");
-  west_fac2_ref->GetYaxis()->SetTitle("Gain Factor");
-  west_fac2_ref->SetMarkerStyle(8);
-  west_fac2_ref->SetMarkerColor(kRed);
-  // west_fac2_ref->SetMinimum(0.);
-  //west_fac2_ref->SetMaximum(4096.);
-  west_fac2_ref->Draw("P SAME");
-
-
-  cWest_Fac->cd(3);
-
-  TGraph *west_fac3 = new TGraph(numRuns[6],&runNumber[6][0],&westGainFactor[2][0]);
-  west_fac3->SetTitle("PMT West 3");
-  west_fac3->GetXaxis()->SetTitle("Run Number");
-  west_fac3->GetYaxis()->SetTitle("Gain Factor");
-  west_fac3->GetXaxis()->SetLimits(runMin, runMax);
-  west_fac3->SetMarkerStyle(8);
-  //west_fac3->SetMinimum(0.);
-  //west_fac3->SetMaximum(4096.);
-  west_fac3->Draw("AP");
-
-  cWest_Fac->Update();
+  double En[5];
+  En[0] = peakCe;//98.2;
+  En[1] = peakIn;
+  En[2] = peakSn;//331.2;
+  En[3] = peakBiLow; //443.0;
+  En[4] = peakBiHigh;//928.0;
+ 
+  double dEn[5] = {0.};
   
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
+  double res[5];
+  double sig[5];
+  double rms[5];
+  double rmsY[5] = {0.};
 
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
+  if ( year == TString("2011-2012") ) {
+    res[0] = 0.25;
+    res[1] = -.4;
+    res[2] =  -3.0;
+    res[3] = 0.75;
+    res[4] = -1.69;
     
-    linesW3_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW3_fac[i]->SetLineStyle(2);
-    linesW3_fac[i]->SetLineColor(kRed);
-    linesW3_fac[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[6][0] && (double)calPeriodRunEnd[i] < runNumber[6][numRuns[6]-1] ) {
-      linesW3_fac[i]->Draw();
-    }
-  } 
+    sig[0] = 1.95;
+    sig[1] = 1.9;
+    sig[2] = 3.9;
+    sig[3] = 5.7;
+    sig[4] = 8.;
 
-  TGraph *west_fac3_ref = new TGraph(numRuns_ref[6],&runNumber_ref[6][0],&westGainFactor_ref[2][0]);
-  west_fac3_ref->SetTitle("PMT West 3");
-  west_fac3_ref->GetXaxis()->SetTitle("Run Number");
-  west_fac3_ref->GetYaxis()->SetTitle("Gain Factor");
-  west_fac3_ref->SetMarkerStyle(8);
-  west_fac3_ref->SetMarkerColor(kRed);
-  // west_fac3_ref->SetMinimum(0.);
-  //west_fac3_ref->SetMaximum(4096.);
-  west_fac3_ref->Draw("P SAME");
+    rms[0] = 1.737;
+    rms[1] = 2.436;
+    rms[2] = 3.89;
+    rms[3] = 5.57;
+    rms[4] = 9.22;
+  }
+  else {
 
-
-  if (numRuns[7]>0) {
-    cWest_Fac->cd(4);
+    res[0] = -0.34;
+    res[1] = 2.8;
+    res[2] = 0.64;
+    res[3] = -1.79;
+    res[4] = -3.9;
     
-    
-    TGraph *west_fac4 = new TGraph(numRuns[7],&runNumber[7][0],&westGainFactor[3][0]);
-    west_fac4->SetTitle("PMT West 4");
-    west_fac4->GetXaxis()->SetTitle("Run Number");
-    west_fac4->GetYaxis()->SetTitle("Gain Factor");
-    west_fac4->GetXaxis()->SetLimits(runMin, runMax);
-    west_fac4->SetMarkerStyle(8);
-    //west_fac4->SetMinimum(0.);
-    //west_fac4->SetMaximum(4096.);
-    west_fac4->Draw("AP");
+    sig[0] = 1.72;
+    sig[1] = 2.1;
+    sig[2] = 2.93;
+    sig[3] = 3.8;
+    sig[4] = 5.52;
 
-    cWest_Fac->Update();
-  
-    min = gPad->GetUymin();
-    max = gPad->GetUymax();
-    
-    for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-      
-      linesW4_fac[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-      linesW4_fac[i]->SetLineStyle(2);
-      linesW4_fac[i]->SetLineColor(kRed);
-      linesW4_fac[i]->SetLineWidth(2);
-      if ( (double)calPeriodRunEnd[i] > runNumber[7][0] && (double)calPeriodRunEnd[i] < runNumber[7][numRuns[7]-1] ) {
-	linesW4_fac[i]->Draw();
-      }
-    } 
-
-    TGraph *west_fac4_ref = new TGraph(numRuns_ref[7],&runNumber_ref[7][0],&westGainFactor_ref[3][0]);
-    west_fac4_ref->SetTitle("PMT West 4");
-    west_fac4_ref->GetXaxis()->SetTitle("Run Number");
-    west_fac4_ref->GetYaxis()->SetTitle("Gain Factor");
-    west_fac4_ref->SetMarkerStyle(8);
-    west_fac4_ref->SetMarkerColor(kRed);
-    // west_fac4_ref->SetMinimum(0.);
-    //west_fac4_ref->SetMaximum(4096.);
-    west_fac4_ref->Draw("P SAME");
-    
+    rms[0] = 2.21;
+    rms[1] = 3.17;
+    rms[2] = 3.29;
+    rms[3] = 4.76;
+    rms[4] = 8.08;
   }
     
 
-  TString fnamebase = TString::Format("%s_gain.pdf",year.Data());
-  cEast->Print(TString::Format("%s(",fnamebase.Data()));
-  cWest->Print(TString::Format("%s",fnamebase.Data()));
-  cEast_Fac->Print(TString::Format("%s",fnamebase.Data()));
-  cWest_Fac->Print(TString::Format("%s)",fnamebase.Data()));
+  TMultiGraph *mg = new TMultiGraph();
+
+  TGraphErrors *RMS = new TGraphErrors(5,En,rmsY,dEn,rms);
+  RMS->SetTitle(TString::Format("RMS"));
+  RMS->SetMarkerColor(8);
+  RMS->SetLineColor(8);
+  RMS->SetLineWidth(15);
+  RMS->SetMarkerStyle(21);
+  RMS->SetMarkerSize(0);
+  RMS->SetFillStyle(0);
+
+  TGraphErrors *gr = new TGraphErrors(5,En,res,dEn,sig);
+  gr->SetTitle(TString::Format("Mean & Sigma"));
+  gr->SetMarkerColor(kBlue);
+  gr->SetLineColor(kBlue);
+  gr->SetLineWidth(2);
+  gr->SetMarkerStyle(21);
+  gr->SetMarkerSize(1.25);
+  gr->SetFillStyle(0);
   
 
+  
+  mg->Add(RMS,"PZ");
+  //mg->Draw("A");
+  mg->Add(gr,"P");
+ 
+  mg->Draw("A");
+  mg->SetTitle(TString::Format("Error Envelope %s",year.Data()));
+  mg->GetXaxis()->SetTitle("E_{recon} [keV]");
+  mg->GetXaxis()->SetTitleOffset(1.2);
+  mg->GetXaxis()->CenterTitle();
+  mg->GetYaxis()->SetTitle("Calibration Residual [keV]");
+  // mg->GetYaxis()->SetTitleOffset(1.2);
+  mg->GetYaxis()->CenterTitle();
+  c2->BuildLegend();
+
+  mg->GetXaxis()->SetLimits(0.0,1200.0);
+  mg->SetMinimum(-30.0);
+  mg->SetMaximum( 30.0);
+
+  
+
+  const Int_t n = 2;
+  Double_t x[n] = {0, 1200};
+  Double_t y[n] = {0.0, 0.0};
+
+  TGraph *gr0 = new TGraph(n,x,y);
+  gr0->Draw("Same");
+  gr0->SetLineWidth(2);
+  gr0->SetLineColor(1);
+  gr0->SetLineStyle(2);
+
+  const Int_t nn = 5;
+  Double_t perc1=0.017;
+  Double_t perc2=0.014;
+  Double_t perc3=0.007;
+  Double_t perc4=0.007;
+  Double_t x2[nn] = {0., peakCe, peakSn, peakBiHigh, 1200.};
+  Double_t percent[nn] = {1., perc1, perc2, perc3, peakBiHigh/1200.*perc4};
+  Double_t y_upper[nn], y_lower[nn];
+  for (int i=1; i<nn; i++) {
+    Double_t val = x2[i]*percent[i];
+    y_upper[i]=val;
+    y_lower[i]=-val;
+  }
+  y_upper[0]=y_upper[1];
+  y_lower[0]=y_lower[1];
+    
+
+  TGraph *env_upper = new TGraph(nn,x2,y_upper);
+  env_upper->Draw("Same");
+  env_upper->SetLineWidth(3);
+  env_upper->SetLineColor(2);
+  env_upper->SetLineStyle(8);
+  
+  TGraph *env_lower = new TGraph(nn,x2,y_lower);
+  env_lower->Draw("Same");
+  env_lower->SetLineWidth(3);
+  env_lower->SetLineColor(2);
+  env_lower->SetLineStyle(8); 
+
+  c2->Update();
+
+  c2->Print(TString::Format("%s.pdf)",filename.Data()));
+  c2->Print(TString::Format("%s.jpg)",filename.Data()));
 }
