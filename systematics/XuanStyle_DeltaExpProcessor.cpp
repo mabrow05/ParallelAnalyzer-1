@@ -502,7 +502,7 @@ void calcDeltaExp (int octet)
     hist3[1] = new TH1D("Type3W","Type3W",120,0.,1200.);
 
 
-    TFile *f = new TFile(TString::Format("%s/beta_veryHighStatistics/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runNumber),"READ");
+    TFile *f = new TFile(TString::Format("%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runNumber),"READ");
     TTree *tree = (TTree*)f->Get("revCalSim");
 
     tree->SetBranchAddress("PID", &PID);
@@ -523,6 +523,12 @@ void calcDeltaExp (int octet)
     tree->SetBranchAddress("ScintPos",&scint_pos);
     tree->SetBranchAddress("ScintPosAdjusted",&scint_pos_adj);
     tree->SetBranchAddress("PMT",&pmt);   
+
+    int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
+    tree->SetBranchAddress("nClipped_EX",&nClipped_EX);
+    tree->SetBranchAddress("nClipped_EY",&nClipped_EY);
+    tree->SetBranchAddress("nClipped_WX",&nClipped_WX);
+    tree->SetBranchAddress("nClipped_WY",&nClipped_WY);
     
     Int_t nEvents = tree->GetEntriesFast();
 
@@ -539,10 +545,19 @@ void calcDeltaExp (int octet)
 
       if (Erecon<=0.) continue;
 
-      //if ( sqrt(mwpc_pos.MWPCPosE[0]*mwpc_pos.MWPCPosE[0]+mwpc_pos.MWPCPosE[1]+mwpc_pos.MWPCPosE[1])*sqrt(0.6)*10.>fidCut
-      //	   || sqrt(mwpc_pos.MWPCPosW[0]*mwpc_pos.MWPCPosW[0]+mwpc_pos.MWPCPosW[1]+mwpc_pos.MWPCPosW[1])*sqrt(0.6)*10.>fidCut ) continue;
-      if ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>fidCut
-      	   || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>fidCut ) continue;
+      //Cut clipped events
+      if ( type!=0 ) {
+	if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+      }
+      else {
+	if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
+	else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+      }
+
+      if ( sqrt(mwpc_pos.MWPCPosE[0]*mwpc_pos.MWPCPosE[0] + mwpc_pos.MWPCPosE[1]*mwpc_pos.MWPCPosE[1])*sqrt(0.6)*10.>fidCut
+      	   || sqrt(mwpc_pos.MWPCPosW[0]*mwpc_pos.MWPCPosW[0] + mwpc_pos.MWPCPosW[1]*mwpc_pos.MWPCPosW[1])*sqrt(0.6)*10.>fidCut ) continue;
+      //if ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>fidCut
+      //	   || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]*scint_pos.ScintPosW[1])*sqrt(0.6)*10.>fidCut ) continue;
 
       
       
