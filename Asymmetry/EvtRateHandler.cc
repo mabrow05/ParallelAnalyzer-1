@@ -471,7 +471,8 @@ void SimEvtRateHandler::dataReader() {
       
       Tin->GetEvent(i);
 
-
+      if ( Type>3  || Side>1 || Erecon<=0. ) continue;
+      
       if (PID==1) {
 
 	//Cut out clipped events
@@ -491,7 +492,7 @@ void SimEvtRateHandler::dataReader() {
 	  
 	  
 	  if ( sep23 ) {
-	    if (Erecon>0. && Type==2) {
+	    if (Type==2) {
 	      
 	      if (Side==0) {
 		Type = separate23(Side,MWPCEnergyE);
