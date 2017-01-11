@@ -160,6 +160,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   }
   meanCe = meanCe / (double) (2*nCe);
 
+  double rmsCe = 0.;
+  for (int j=0; j<nCe; j++) {
+    rmsCe += ( resCeE[j]*resCeE[j] + resCeW[j]*resCeW[j] );
+  }
+  rmsCe = rmsCe / (double) (2*nCe);
+  rmsCe = sqrt( rmsCe );
+
   double sigmaCe = 0.;
   for (int j=0; j<nCe; j++) {
     sigmaCe += (resCeE[j] - meanCe)*(resCeE[j] - meanCe);
@@ -170,8 +177,10 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
 
   cout << "meanCe = " << meanCe << endl;
   cout << "     sigma = " << sigmaCe << endl;
+  cout << "     rms = " << rmsCe << endl;
   errEnv << "meanCe = " << meanCe << endl;
   errEnv << "sigma = " << sigmaCe << endl;
+  errEnv << "rms = " << rmsCe << endl;
 
   
   double meanIn = 0.;
@@ -180,6 +189,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
     meanIn += resInW[j];
   }
   meanIn = meanIn / (double) (2*nIn);
+
+  double rmsIn = 0.;
+  for (int j=0; j<nIn; j++) {
+    rmsIn += ( resInE[j]*resInE[j] + resInW[j]*resInW[j] );
+  }
+  rmsIn = rmsIn / (double) (2*nIn);
+  rmsIn = sqrt( rmsIn );
 
   double sigmaIn = 0.;
   for (int j=0; j<nIn; j++) {
@@ -191,8 +207,10 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
 
   cout << "meanIn = " << meanIn << endl;
   cout << "     sigma = " << sigmaIn << endl;
+  cout << "     rms = " << rmsIn << endl;
   errEnv << "meanIn = " << meanIn << endl;
   errEnv << "sigma = " << sigmaIn << endl;
+  errEnv << "rms = " << rmsIn << endl;
 
   double meanSn = 0.;
   for (int j=0; j<nSn; j++) {
@@ -200,6 +218,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
     meanSn += resSnW[j];
   }
   meanSn = meanSn / (double) (2*nSn);
+
+  double rmsSn = 0.;
+  for (int j=0; j<nSn; j++) {
+    rmsSn += ( resSnE[j]*resSnE[j] + resSnW[j]*resSnW[j] );
+  }
+  rmsSn = rmsSn / (double) (2*nSn);
+  rmsSn = sqrt( rmsSn );
 
   double sigmaSn = 0.;
   for (int j=0; j<nSn; j++) {
@@ -211,8 +236,10 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
 
   cout << "meanSn = " << meanSn << endl;
   cout << "     sigma = " << sigmaSn << endl;
+  cout << "     rms = " << rmsSn << endl;
   errEnv << "meanSn = " << meanSn << endl;
   errEnv << "sigma = " << sigmaSn << endl;
+  errEnv << "rms = " << rmsSn << endl;
 
   ofstream check("check.dat");
 
@@ -226,6 +253,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   meanBi2 = meanBi2 / (double) (2*nBi2);
   check << meanBi2;
   check.close();
+
+  double rmsBi2 = 0.;
+  for (int j=0; j<nBi2; j++) {
+    rmsBi2 += ( resBi2E[j]*resBi2E[j] + resBi2W[j]*resBi2W[j] );
+  }
+  rmsBi2 = rmsBi2 / (double) (2*nBi2);
+  rmsBi2 = sqrt( rmsBi2 );
    
   double sigmaBi2 = 0.;
   for (int j=0; j<nBi2; j++) {
@@ -237,8 +271,10 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
 
   cout << "meanBi2 = " << meanBi2 << endl;
   cout << "     sigma = " << sigmaBi2 << endl;
+  cout << "     rms = " << rmsBi2 << endl;
   errEnv << "meanBi2 = " << meanBi2 << endl;
   errEnv << "sigma = " << sigmaBi2 << endl;
+  errEnv << "rms = " << rmsBi2 << endl;
 
   double meanBi1 = 0.;
   for (int j=0; j<nBi1; j++) {
@@ -246,6 +282,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
     meanBi1 += resBi1W[j];
   }
   meanBi1 = meanBi1 / (double) (2*nBi1);
+
+  double rmsBi1 = 0.;
+  for (int j=0; j<nBi1; j++) {
+    rmsBi1 += ( resBi1E[j]*resBi1E[j] + resBi1W[j]*resBi1W[j] );
+  }
+  rmsBi1 = rmsBi1 / (double) (2*nBi1);
+  rmsBi1 = sqrt( rmsBi1 );
 
   double sigmaBi1 = 0.;
   for (int j=0; j<nBi1; j++) {
@@ -257,8 +300,10 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
 
   cout << "meanBi1 = " << meanBi1 << endl;
   cout << "     sigma = " << sigmaBi1 << endl;
+  cout << "     rms = " << rmsBi1 << endl;
   errEnv << "meanBi1 = " << meanBi1 << endl;
   errEnv << "sigma = " << sigmaBi1 << endl;
+  errEnv << "rms = " << rmsBi1 << endl;
 
   
   TString pdffile = "final_residuals.pdf";
@@ -376,9 +421,9 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   hisSnW->SetLineColor(1);
   hisSnW->Draw();
   hisSnW->Fit("gaus", "", "", -25., 25.);
-  cout << "meanCeWest = " << gaus->GetParameter(1) << endl;
+  cout << "meanSnWest = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
-  errEnv << "meanCeWest = " << gaus->GetParameter(1) << endl;
+  errEnv << "meanSnWest = " << gaus->GetParameter(1) << endl;
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 West
