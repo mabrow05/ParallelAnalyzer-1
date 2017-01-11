@@ -12,15 +12,15 @@ octet_range = []
 
 if year==2011:
     octet_file_base = "%s/2011-2012/"%os.getenv("OCTET_LIST")
-    octet_range = [21,39]
+    octet_range = [50,59]
 elif year==2012:
     octet_file_base = "%s/2012-2013/"%os.getenv("OCTET_LIST")
-    octet_range = [112,121]
+    octet_range = [96,121]
 else:
     exit
 
 for oct in range(octet_range[0],octet_range[1]+1,1):
     if oct not in octIgnore:
-        #os.system("./XuanStyle_DeltaExpProcessor.exe %i"%oct)
-        os.system("./DeltaExpProcessor.exe %i"%oct)
+        os.system("./XuanStyle_DeltaExpProcessor.exe %i"%oct)
+        #os.system("./DeltaExpProcessor.exe %i"%oct)
 
