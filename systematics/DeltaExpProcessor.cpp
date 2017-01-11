@@ -673,7 +673,7 @@ void calcDeltaExp (int octet)
       // the simulated energy spectrum (done by eye, set at 6 keV for now)
       nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
 
-      // 2011-2012 Cathode Threshold
+      // 2011-2012 Cathode Clipping Threshold
       Double_t clip_threshE = 8.;
       Double_t clip_threshW = 8.;
       
@@ -924,11 +924,11 @@ void calcDeltaExp (int octet)
 
       //Cut out clipped events
       if ( type!=0 ) {
-	if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+	if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) { evt++; continue; }
       }
       else {
-	if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
-	else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) { evt++; continue; }
+	else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) { evt++; continue; }
       }
       
       
