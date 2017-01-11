@@ -920,20 +920,33 @@ void calcDeltaExp (int octet)
       //Write to tree so Xuan can also process it
       //if (PID>=0) tree->Fill();
 	    
-      
 
       //Cut out clipped events
-      if ( type!=0 ) {
-	if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) { evt++; continue; }
-      }
-      else {
-	if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) { evt++; continue; }
-	else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) { evt++; continue; }
+      if ( type==1 || type==2 ) {
+	if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) {
+	  evt++;
+	  if (evt%100000==0) std::cout << evt << std::endl;
+	  continue;
+	}
+	else {
+	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) {
+	    evt++;
+	    if (evt%100000==0) std::cout << evt << std::endl;
+	    continue;
+	  }
+	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) {
+	    evt++;
+	    if (evt%100000==0) std::cout << evt << std::endl;
+	    continue;
+	  }
+	}
       }
       
       
       double r2E = ( mwpc_pos.MWPCPosE[0]*mwpc_pos.MWPCPosE[0] + mwpc_pos.MWPCPosE[1]*mwpc_pos.MWPCPosE[1] ) * 0.6 * 100.; //Transforming to decay trap coords
       double r2W = ( mwpc_pos.MWPCPosW[0]*mwpc_pos.MWPCPosW[0] + mwpc_pos.MWPCPosW[1]*mwpc_pos.MWPCPosW[1] ) * 0.6 * 100.;
+
+      //std::cout << "Made it to clipping cut... " << r2E << "\t" << r2W\n";
       
 	
       //Type 2/3 separation

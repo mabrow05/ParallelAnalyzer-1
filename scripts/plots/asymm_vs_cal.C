@@ -19,6 +19,7 @@
 #include <TF1.h>
 #include <TList.h>
 #include <TPaveStats.h>
+#include <TLegend.h>
 
 const static double peakCe = 130.3;// 131.5956;//80.5;
 const static double peakIn = 174.35;
@@ -34,7 +35,7 @@ std::vector < Double_t > getOctetAsym(Int_t octet) {
   std::cout << path << std::endl;
 
   std::ifstream infile(path.Data());  
-  string txt = "";
+  std::string txt = "";
   Double_t Asym = 0., AsymError = 0.;
 
   if (infile.is_open()) {
@@ -53,10 +54,10 @@ std::vector < Double_t > getOctetAsym(Int_t octet) {
 }
 
 //This returns a vector or RMS values, where the order is Ce,In,Sn,Bi2,Bi1
-std::vector < Double_t > getXePeriodEnvelope(Int_t XePeriod) {
+std::vector < std::vector < Double_t > > getXePeriodEnvelope(Int_t XePeriod) {
 
   
-  std::vector <Double_t> ret;
+  std::vector < std::vector <Double_t> > ret(2,std::vector<Double_t>(0));
   Int_t lowCal, highCal;
   lowCal = highCal = 0;
 
@@ -74,12 +75,13 @@ std::vector < Double_t > getXePeriodEnvelope(Int_t XePeriod) {
   std::cout << path << std::endl;
 
   std::ifstream infile(path.Data());  
-  string txt = "";
+  std::string txt = "";
 
   if (infile.is_open()) {
     for ( UInt_t i = 1; i<16; ++i ) {
       infile >> txt >> txt >> txt;
-      if ( i%3 == 0 && i!=6) ret.push_back(atoi(txt.c_str()));
+      if ( (i+2)%3 == 0 && (i+2)!=6 ) ret[1].push_back(atoi(txt.c_str()));
+      if ( i%3 == 0 && i!=6 ) ret[0].push_back(atoi(txt.c_str()));
     }
   }
   else {
@@ -261,6 +263,7 @@ void asymm_vs_cal(TString year) {
   Double_t yval[] = {0,0,0,0};
   
   std::vector <TGraphErrors*> gEnv(XePeriod.size());
+  std::vector <TGraph*> gEnv_mean(XePeriod.size());
   
   Double_t xmin = 0.0;
   Double_t xmax = 1200.;
@@ -270,9 +273,9 @@ void asymm_vs_cal(TString year) {
 
     c1->cd(2); gPad->cd(ii+1);
     
-    std::vector <Double_t> env = getXePeriodEnvelope(XePeriod[ii]);
+    std::vector < std::vector <Double_t> > env = getXePeriodEnvelope(XePeriod[ii]);
 
-    gEnv[ii] = new TGraphErrors(4, xval, yval, 0, &env[0]);
+    gEnv[ii] = new TGraphErrors(4, xval, yval, 0, &env[0][0]);
     title = TString::Format("Error Envelope Xe Period %i",XePeriod[ii]);
     gEnv[ii]->SetTitle(title);
     gEnv[ii]->SetMarkerStyle(21);
@@ -292,6 +295,29 @@ void asymm_vs_cal(TString year) {
     
     c1->Update();
 
+
+    gEnv_mean[ii] = new TGraph(4, xval, &env[1][0]);
+    title = TString::Format("Error Envelope Xe Period %i",XePeriod[ii]);
+    //gEnv_mean[ii]->SetTitle(title);
+    gEnv_mean[ii]->SetMarkerStyle(21);
+    gEnv_mean[ii]->SetMarkerSize(1);
+    gEnv_mean[ii]->SetMarkerColor(kRed);
+    //gEnv_mean[ii]->SetLineWidth(3);
+    //gEnv_mean[ii]->SetLineColor(kBlue);
+    //gEnv_mean[ii]->SetMinimum(-12.);
+    //gEnv_mean[ii]->SetMaximum(12.);
+    //gEnv_mean[ii]->GetXaxis()->SetLimits(xmin,xmax);
+    //gEnv_mean[ii]->GetXaxis()->SetTitle("Energy (keV)");
+    //gEnv_mean[ii]->GetYaxis()->SetTitle("Residual (keV)");
+    //gEnv_mean[ii]->GetXaxis()->CenterTitle();
+    //gEnv_mean[ii]->GetYaxis()->CenterTitle();
+    //gEnv_mean[ii]->SetFillStyle(3002);
+    gEnv_mean[ii]->Draw("PSAME");
+    
+    c1->Update();
+
+    
+
     zeroLine->Draw();
 
   }
@@ -300,7 +326,7 @@ void asymm_vs_cal(TString year) {
 
   TString filename = TString::Format("errEnv_vs_XePeriod_%s",year.Data());
   c1->Print(TString::Format("%s.pdf(",filename.Data()));
-  c1->Print(TString::Format("%s.jpg(",filename.Data()));
+ 
 
   ////////////////////////////////////////////////////////////////////////////////
   //Now do the total error envelope
@@ -398,11 +424,16 @@ void asymm_vs_cal(TString year) {
   mg->GetYaxis()->SetTitle("Calibration Residual [keV]");
   // mg->GetYaxis()->SetTitleOffset(1.2);
   mg->GetYaxis()->CenterTitle();
-  c2->BuildLegend();
+  
 
   mg->GetXaxis()->SetLimits(0.0,1200.0);
   mg->SetMinimum(-30.0);
   mg->SetMaximum( 30.0);
+
+  TLegend *leg = new TLegend(0.65,0.70,0.875,0.875);
+  leg->AddEntry(RMS,0,"l");
+  leg->AddEntry(gr,0,"lp");
+  leg->Draw();
 
   
 
@@ -448,5 +479,5 @@ void asymm_vs_cal(TString year) {
   c2->Update();
 
   c2->Print(TString::Format("%s.pdf)",filename.Data()));
-  c2->Print(TString::Format("%s.jpg)",filename.Data()));
+ 
 }

@@ -6,16 +6,16 @@ import shutil
 octIgnore = [7,9,59,60,61,62,63,64,65,66] 
 
 
-year = 2011
+year = 2012
 octet_file_base = None
 octet_range = []
 
 if year==2011:
     octet_file_base = "%s/2011-2012/"%os.getenv("OCTET_LIST")
-    octet_range = [40,59]
+    octet_range = [21,39]
 elif year==2012:
     octet_file_base = "%s/2012-2013/"%os.getenv("OCTET_LIST")
-    octet_range = [114,121]
+    octet_range = [112,121]
 else:
     exit
 
