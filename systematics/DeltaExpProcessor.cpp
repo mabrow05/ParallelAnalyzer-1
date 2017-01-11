@@ -928,19 +928,20 @@ void calcDeltaExp (int octet)
 	  if (evt%100000==0) std::cout << evt << std::endl;
 	  continue;
 	}
-	else {
-	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) {
-	    evt++;
-	    if (evt%100000==0) std::cout << evt << std::endl;
-	    continue;
-	  }
-	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) {
-	    evt++;
-	    if (evt%100000==0) std::cout << evt << std::endl;
-	    continue;
-	  }
+      }
+      else {
+	if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) {
+	  evt++;
+	  if (evt%100000==0) std::cout << evt << std::endl;
+	  continue;
+	}
+	else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) {
+	  evt++;
+	  if (evt%100000==0) std::cout << evt << std::endl;
+	  continue;
 	}
       }
+    
       
       
       double r2E = ( mwpc_pos.MWPCPosE[0]*mwpc_pos.MWPCPosE[0] + mwpc_pos.MWPCPosE[1]*mwpc_pos.MWPCPosE[1] ) * 0.6 * 100.; //Transforming to decay trap coords
