@@ -231,10 +231,10 @@ void doForegroundSpectra (int octetMin, int octetMax)
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcW);
     
-    EmwpcX = mwpcE[0];
-    EmwpcY = mwpcE[1];
-    WmwpcX = mwpcW[0];
-    WmwpcY = mwpcW[1];
+    EmwpcX = mwpcE[0]*sqrt(0.6)*10.;
+    EmwpcY = mwpcE[1]*sqrt(0.6)*10.;
+    WmwpcX = mwpcW[0]*sqrt(0.6)*10.;
+    WmwpcY = mwpcW[1]*sqrt(0.6)*10.;
 
     
 
@@ -250,14 +250,24 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	//Clipped events
+	//Cut out clipped events
+	if ( type!=0 ) {
+	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+	}
+	else {
+	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
+	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	}
+
+
+	/*//Clipped events
 	if ( type==1 ) {
 	  if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
 	}
 	else { 
 	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
 	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
-	}
+	  }*/
 
 	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
 	/*if (Erecon>0. && type==2) {
@@ -345,10 +355,10 @@ void doForegroundSpectra (int octetMin, int octetMax)
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcW);
     
-    EmwpcX = mwpcE[0];
-    EmwpcY = mwpcE[1];
-    WmwpcX = mwpcW[0];
-    WmwpcY = mwpcW[1];  
+    EmwpcX = mwpcE[0]*sqrt(0.6)*10.;
+    EmwpcY = mwpcE[1]*sqrt(0.6)*10.;
+    WmwpcX = mwpcW[0]*sqrt(0.6)*10.;
+    WmwpcY = mwpcW[1]*sqrt(0.6)*10.;  
 
 
     unsigned int nevents = Tin->GetEntriesFast();
@@ -364,14 +374,24 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	//Clipped events
+	//Cut out clipped events
+	if ( type!=0 ) {
+	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+	}
+	else {
+	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
+	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	}
+
+	
+	/*//Clipped events
 	if ( type==1 ) {
 	  if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
 	}
 	else { 
 	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
 	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
-	}
+	  }*/
 
 	//Type 2/3 separation
 	/*if (Erecon>0. && type==2) {
@@ -392,8 +412,8 @@ void doForegroundSpectra (int octetMin, int octetMax)
       // Filling rate histograms with "good" events to calculate the corrections
 
     
-	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
-	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+	r2E = EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2W = WmwpcX*WmwpcX+WmwpcY*WmwpcY;
 	
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {

@@ -39,7 +39,7 @@
 
   infile.close();
 
-  infile.open("octvalUK_10212016.dat");
+  infile.open("octvalUK.dat");
 
   infile >> hold[0] >> hold[1] >> hold[2] >> hold[3];
     

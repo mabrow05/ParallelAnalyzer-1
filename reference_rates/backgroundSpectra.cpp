@@ -237,15 +237,24 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 
       
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0. ) {
+
+	//Clipped events                                                                                                                       
+        if ( t.Type!=0 ) {
+          if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
+          else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 || t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //Mu
+	}
+        else {
+          if ( t.Side==0 ) {
+            if ( t.xE.nClipped>0 || t.yE.nClipped>0 ) continue;
+            else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East       
+          }
+          else if ( t.Side==1 ) {
+            if ( t.xW.nClipped>0 || t.yW.nClipped>0  ) continue;
+            else if ( t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West       
+          }
+	}
 	
-	//Clipped events
-	if ( t.Type==1 ) {
-	  if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
-	}
-	else {
-	  if ( t.Side==0 && ( t.xE.nClipped>0 || t.yE.nClipped>0 ) ) continue; 
-	  else if ( t.Side==1 && ( t.xW.nClipped>0 || t.yW.nClipped>0 ) ) continue;
-	}
+	
 
 
 	/*if ( useRCclasses ) {
@@ -342,14 +351,21 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0. ) {
 	
-	//Clipped events
-	if ( t.Type==1 ) {
-	  if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
+	if ( t.Type!=0 ) {
+          if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
+          else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 || t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //Mu
 	}
-	else {
-	  if ( t.Side==0 && ( t.xE.nClipped>0 || t.yE.nClipped>0 ) ) continue; 
-	  else if ( t.Side==1 && ( t.xW.nClipped>0 || t.yW.nClipped>0 ) ) continue;
+        else {
+          if ( t.Side==0 ) {
+            if ( t.xE.nClipped>0 || t.yE.nClipped>0 ) continue;
+            else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East       
+          }
+          else if ( t.Side==1 ) {
+            if ( t.xW.nClipped>0 || t.yW.nClipped>0  ) continue;
+            else if ( t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West       
+          }
 	}
+
 
 
 	/*if ( useRCclasses ) {

@@ -15,9 +15,6 @@ simulation data
 
 #include <TString.h>
 
-const bool useRCclasses = false;      // If this is true, we only use "good" response class 
-                                     // events as defined by C. Swank (triangular MWPC responses)
-
 
 int separate23(int side, double mwpcEn) {
   int type = 2;
@@ -334,8 +331,8 @@ void EvtRateHandler::dataReader() {
 	
 	
 	// Determine radial event position squared for cutting on fiducial volume
-	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
-	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+	r2E = EmwpcX*EmwpcX + EmwpcY*EmwpcY;
+	r2W = WmwpcX*WmwpcX + WmwpcY*WmwpcY;
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  
@@ -467,7 +464,7 @@ void SimEvtRateHandler::dataReader() {
     double r2E = 0.; //position of event squared
     double r2W = 0.;
     
-    for (unsigned int i=0; i<nevents; i++) {
+    for (unsigned int i=0; i<nevents; ++i) {
       
       Tin->GetEvent(i);
 
@@ -641,6 +638,21 @@ void BGSubtractedRate::LoadRatesByBin() {
     runLengthBeta[1] = evt->returnRunLength(1);
     delete evt;
 
+  }
+
+  if ( !Simulation ) {
+
+    std::ofstream ofileE(TString::Format("BinByBinComparison/UK_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+    std::ofstream ofileW(TString::Format("BinByBinComparison/UK_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+    
+    ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+    ofileW << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+
+    for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
+      ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;
+      ofileW << i*10.+5. << "\t" << BetaRateW[i] << "\t" << BGRateW[i] << std::endl;
+    }
+    ofileE.close(), ofileW.close();
   }
 
 };

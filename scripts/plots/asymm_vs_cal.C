@@ -101,7 +101,7 @@ void asymm_vs_cal(TString year) {
   gStyle->SetTitleYOffset(0.8);
   gStyle->SetTitleXSize(0.06);
   gStyle->SetTitleXOffset(0.9);
-  gStyle->SetLabelSize(0.06,"xyz");
+  gStyle->SetLabelSize(0.04,"xyz");
   gStyle->SetOptFit(1111);
   gStyle->SetStatY(0.85);
   gStyle->SetStatX(0.975);
@@ -449,7 +449,7 @@ void asymm_vs_cal(TString year) {
 
   const Int_t nn = 5;
   Double_t perc1=0.017;
-  Double_t perc2=0.014;
+  Double_t perc2=0.010;
   Double_t perc3=0.007;
   Double_t perc4=0.007;
   Double_t x2[nn] = {0., peakCe, peakSn, peakBiHigh, 1200.};

@@ -32,7 +32,7 @@ TString anaChoices[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 
 //Types of Corrections to apply
-std::string corr ("AllCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
+std::string corr ("UnCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
 Double_t POL_minus = 0.9981;
@@ -40,7 +40,7 @@ Double_t POL_plus = 0.9937;
 Double_t delta_POL = POL_plus-POL_minus;
 Double_t POL_ave = (POL_plus+POL_minus) / 2.;
 
-bool withPOL = true; //Set this to true to correct DATA for the polarimetry measurement
+bool withPOL = false; //Set this to true to correct DATA for the polarimetry measurement
 
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   bool UKdata = true;//true;
-  bool simulation = true;
+  bool simulation = false;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = true;
+  bool UNBLIND = false;
 
 
   if (UNBLIND) {
@@ -128,17 +128,10 @@ int main(int argc, char* argv[])
     for (Int_t i=0; i<120; i++) {
       Double_t En = i*enBinWidth+enBinWidth/2.;
       enBinMedian.push_back(En);
-    }
-    
-    std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
-    
+    }    
+    std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);    
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
-    //OctetAsymmetry oct(4,"A",10., 50., false, false, false);
-		       
-    //BGSubtractedRate bg(std::vector<int>(1,17150),std::vector<int>(1,17149), "A",10.,50.,true,false,false);
-		       
-    //bg.calcBGSubtRates();
     
     /*TString aCh[4] = {"A","D","F","G"};//,"F","G"};
     for (auto ach : aCh) {
@@ -149,8 +142,8 @@ int main(int argc, char* argv[])
 
    
     ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
@@ -325,6 +318,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 
     // Apply polarimetry correction if necessary
     if (withPOL) {
+      groupRawAsymByBin[1][i] = groupRawAsymByBin[1][i] / ( POL_ave ); 
+      groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i] / ( POL_ave );
       groupAsymByBin[1][i] = groupAsymByBin[1][i] / ( POL_ave ); 
       groupAsymByBin[2][i] = groupAsymByBin[2][i] / ( POL_ave );
     }
@@ -428,10 +423,14 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   
   //c1->Print(pdfFile.c_str());
 
+  std::string corrText2 = corr=="UnCorr" ? " A_{SR} " : ( corr=="DeltaExpOnly" ? " A_{SR}#upoint(1+#Delta_{exp}) " : 
+								( corr=="DeltaTheoryOnly" ? " A_{SR}#upoint(1+#Delta_{Th})/ " : 
+								  ( " A_{SR}#upoint(1+#Delta_{exp})/(#upoint(1+#Delta_{Th})) ")));
+
   c1->cd(3);
   Int_t offset = 0;
   TGraphErrors *g2 = new TGraphErrors(enBinMedian.size()-offset, &enBinMedian[offset], &groupRawAsymByBin[1][offset], 0, &groupRawAsymByBin[2][offset]);
-  title = groupType + std::string(" Raw Asymmetry A_{SR} ") + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
+  title = groupType + corrText2 + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
   g2->SetTitle(title.c_str());
   g2->SetMarkerStyle(20);
   g2->SetLineWidth(2);
@@ -475,6 +474,15 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   c1->Update();
   c1->Print(pdfFile.c_str());
 
+  asymFile.close();
+
+  //Write out corrected (but energy dependent) bin-by-bin asymmetry for use in calculating effect from doing corrections
+  txtFile = outFile+std::string("_BinByBin_withEnergyDependence.txt");
+  asymFile.open(txtFile.c_str());
+
+  for (UInt_t n=0; n<enBinMedian.size(); n++) {
+    asymFile << enBinMedian[n] << "\t" << groupRawAsymByBin[1][n] << "\t" << groupRawAsymByBin[2][n] << "\n";
+  }
   asymFile.close();
 
   //Write out corrected bin-by-bin asymmetry for use in calculating effect from doing corrections

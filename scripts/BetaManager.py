@@ -266,7 +266,7 @@ class BetaReplayManager:
         
             for line in infile:      
                 words=line.split()
-                if words[0] in betaRunTypes: # Avoids background and depol runs
+                if words[0] in betaRunTypes:
                     runs.append(int(words[1]))
             
             
@@ -291,7 +291,7 @@ class BetaReplayManager:
         
             for line in infile:      
                 words=line.split()
-                if words[0] in betaRunTypes: # Avoids background and depol runs
+                if words[0] in bgRunTypes: #or words[0] in betaRunTypes: 
                     runs.append(int(words[1]))
         
             for run in runs:
@@ -398,7 +398,7 @@ if __name__ == "__main__":
 
 
     if 1:
-        octet_range =[94,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[91,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
@@ -406,17 +406,17 @@ if __name__ == "__main__":
             #beta.runGainBismuth(octet)
            # beta.findTriggerFunctions(octet)
             #beta.runReplayPass2(octet)
-            beta.runReplayPass3(octet)
+            #beta.runReplayPass3(octet)
             beta.runRootfileTranslator(octet)
             #beta.removeDepolRunFiles(octet)
            
 
 
     #Running reverse calibrations
-    if 1:
+    if 0:
         octet_range = [94,121];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
-            #beta.findTriggerFunctions(octet)
-            beta.runReverseCalibration(octet)
+            beta.findTriggerFunctions(octet)
+            #beta.runReverseCalibration(octet)
     
