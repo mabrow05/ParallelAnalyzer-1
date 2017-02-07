@@ -7,8 +7,8 @@ from math import *
 neutronBetaEp = 782.347				# neutron beta decay endpoint, keV
 m_e = 511.00						# electron mass, keV/c^2
 m_p = 938272.046					# proton mass, keV/c^2
-lmbda = abs(-1.2694) 				# +/-0.0028, PDG 2010 value lambda, Wilkinson sign convention
-A0_PDG = -0.1173					# +/-0.0013, PDG 2010 value
+lmbda = abs(-1.2723) 				# +/-0.0023, PDG 2010 value lambda, Wilkinson sign convention
+A0_PDG = -0.1184					# +/-0.0010, PDG 2016 value
 
 def beta(KE, m = m_e):
 	"""beta = v/c as a function of kinetic energy"""
