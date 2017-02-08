@@ -147,10 +147,10 @@ def plotEnergyErrors(year=2011):
         gCx.plot(graph.data.points(gdat,x=1,y=2,title="%i Monte Carlo"%year),
                  [ graph.style.line([style.linewidth.THick]),])
 	#gCx.plot(graph.data.points(gdat2010,x=1,y=2,title="2010"),
-                 #        [ graph.style.line([style.linewidth.THick]),])
-        #gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012 Parallel Analyzer"),
+         #        [ graph.style.line([style.linewidth.THick]),])
+        #gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
-	#gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013 Parallel Analyzer"),
+	#gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
 			 
 	#print "Eavg MC MPM 2010=",weightStats(gdat2010,220,670)
@@ -193,8 +193,8 @@ def plotGainfluctErrors():
 
 
 if __name__=="__main__":
-	year = 2012
-	linearityUncertaintyTable(year)
+	year = 2010
+	#linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
 	plotEnergyErrors(year)
 	#plotGainfluctErrors()
