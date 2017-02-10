@@ -391,13 +391,13 @@ if __name__ == "__main__":
         #for octet in range(0,60,1):
         beta.findPedestals(5)
 
-    if 0:
+    if 1:
         beta = BetaReplayManager()
-        for octet in range(110,111,1):
+        for octet in range(0,122,1):
             beta.makeBasicHistograms(octet)
 
 
-    if 1:
+    if 0:
         octet_range =[91,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):

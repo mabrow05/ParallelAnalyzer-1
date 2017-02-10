@@ -1,15 +1,13 @@
 
-
+void plotSuperSums(int octetStart, int octetEnd) 
 {
   gStyle->SetOptStat(0);
-
-  int octetStart=0;
-  int octetEnd=59;
+  
 
   TString normType = "0";
 
-  Double_t normLow = 220.;
-  Double_t normHigh = 680.;
+  Double_t normLow = 200.;
+  Double_t normHigh = 700.;
   
   Double_t xAxisMax = 1200.;
 
@@ -63,8 +61,8 @@
   resid->Add(simALL,ukALL,100,-100);
   resid->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  //resid->SetMaximum(1.2);
-  //resid->SetMinimum(-1.2);
+  resid->SetMaximum(1.8);
+  resid->SetMinimum(-1.8);
   resid->SetLineWidth(2);
 
   TH1D *perc_resid = new TH1D("perc_resid","Fractional Residuals: (MC-Data)/MC", nBins, min, max);

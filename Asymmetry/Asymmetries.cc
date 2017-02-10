@@ -10,6 +10,7 @@ ppair, quartet, octet
 #include <fstream>
 #include <cstdlib>
 #include <cmath>
+#include <TMath.h>
 
 std::map<int,int> BGrunReplace = {{23017,23006},{21175,21164},{21176,21187}};
 // 21175, 21176 beam out in runlog
@@ -407,67 +408,169 @@ OctetAsymmetry::OctetAsymmetry(int oct, std::string anaCh, double enBinWidth, do
 
 void OctetAsymmetry::calcAsymmetryBinByBin() {
   
+  //arrays to hold the weighted averages of the rates for each spin state and side
   double sfON[2]={0.};
   double sfOFF[2]={0.};
   double sfON_err[2]={0.};
   double sfOFF_err[2]={0.};
 
   for (unsigned int bin=0; bin<asymmetry.size(); bin++) {
+
     double R = 0.;
     double deltaR = 0.;
+
     for (unsigned int side=0; side<2; side++) {
 
-      double weightsum=0.;
+      double weightsum=0.; // Holds the sum of the weights for the denominator of the weighted av
+      
+      //Start with flipper off... Only use rate if it has an error to avoid dividing by 0
+      sfOFF[side] = ( ( A2err[side][bin] > 0. ? A2[side][bin]/power(A2err[side][bin],2)   : 0. ) +
+		      ( A10err[side][bin]> 0. ? A10[side][bin]/power(A10err[side][bin],2) : 0. ) +
+		      (	B5err[side][bin] > 0. ? B5[side][bin]/power(B5err[side][bin],2)   : 0. ) +
+		      ( B7err[side][bin] > 0. ? B7[side][bin]/power(B7err[side][bin],2)   : 0. ) );
 
-      if (A2[side][bin]>0. && A10[side][bin]>0. && B5[side][bin]>0. && B7[side][bin]>0. ) {
+      weightsum = ( ( A2err[side][bin] > 0. ? 1./power(A2err[side][bin],2)  : 0. ) + 
+		    ( A10err[side][bin]> 0. ? 1./power(A10err[side][bin],2) : 0. ) +
+		    ( B5err[side][bin] > 0. ? 1./power(B5err[side][bin],2)  : 0. ) +
+		    ( B7err[side][bin] > 0. ? 1./power(B7err[side][bin],2)  : 0. ) );
 
-	sfOFF[side] = ( A2[side][bin]/power(A2err[side][bin],2) +
-			A10[side][bin]/power(A10err[side][bin],2) +
-			B5[side][bin]/power(B5err[side][bin],2) +
-			B7[side][bin]/power(B7err[side][bin],2) );
-
-	weightsum = ( 1./power(A2err[side][bin],2) + 
-		      1./power(A10err[side][bin],2) +
-		      1./power(B5err[side][bin],2) +
-		      1./power(B7err[side][bin],2) );
-
-      }
-      else weightsum = 0.;
-
-      sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
+      sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
       sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 
 
-      if (A5[side][bin]>0. && A7[side][bin]>0. && B2[side][bin]>0. && B10[side][bin]>0. ) {
+      weightsum=0.;
 
-	sfON[side] = ( A5[side][bin]/power(A5err[side][bin],2) +
-			A7[side][bin]/power(A7err[side][bin],2) +
-			B2[side][bin]/power(B2err[side][bin],2) +
-			B10[side][bin]/power(B10err[side][bin],2) );
+      // Now for flipper on
+      sfON[side] = ( ( B2err[side][bin] > 0. ? B2[side][bin]/power(B2err[side][bin],2)   : 0. ) +
+		      ( B10err[side][bin]> 0. ? B10[side][bin]/power(B10err[side][bin],2) : 0. ) +
+		      (	A5err[side][bin] > 0. ? A5[side][bin]/power(A5err[side][bin],2)   : 0. ) +
+		      ( A7err[side][bin] > 0. ? A7[side][bin]/power(A7err[side][bin],2)   : 0. ) );
 
-	weightsum = ( 1./power(A5err[side][bin],2) + 
-		      1./power(A7err[side][bin],2) +
-		      1./power(B2err[side][bin],2) +
-		      1./power(B10err[side][bin],2) );
-
-
-      }
-      else weightsum = 0.;
-      //if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
-      sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
+      weightsum = ( ( B2err[side][bin] > 0. ? 1./power(B2err[side][bin],2)  : 0. ) + 
+		    ( B10err[side][bin]> 0. ? 1./power(B10err[side][bin],2) : 0. ) +
+		    ( A5err[side][bin] > 0. ? 1./power(A5err[side][bin],2)  : 0. ) +
+		    ( A7err[side][bin] > 0. ? 1./power(A7err[side][bin],2)  : 0. ) );
+      
+      sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
       sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+      
 
       
     }
-    if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-      R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-      deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-      asymmetry[bin] = (1.-sqrt(R))/(1+sqrt(R));
+    
+    //Calculate super-ratio, R. Note that any of the rates that go into this could be negative 
+    R = (sfOFF[1]*sfON[0]) / (sfON[1]*sfOFF[0]) ;
+    
+    //Only use rates which are real and not zero to avoid nan (couldn't get TMath::IsNaN() to work properly :( ...)
+    if ( R!=0. && sfON[1]!=0. && sfOFF[0]!=0.) { 
+     
+      deltaR = sqrt( power( sfOFF_err[1]*sfON[0]/(sfOFF[0]*sfON[1]), 2 ) + 
+		     power( sfON_err[0]*sfOFF[1]/(sfOFF[0]*sfON[1]), 2 ) +
+		     power( sfOFF_err[0]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfOFF[0]*sfON[1]), 2 ) +
+		     power( sfON_err[1]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfON[1]*sfON[1]), 2 ) );
+      //deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+      asymmetry[bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
       asymmetryError[bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
     }
     else {
       asymmetry[bin] = 0.;
-      asymmetryError[bin] = 0.;
+      asymmetryError[bin] = 1.;
+    }
+
+  } 
+ 
+  boolAsymmetry = true;
+};
+
+void OctetAsymmetry::calcNCSUSumAsymmetryBinByBin() {
+  
+  //These are the rates and their errors that go into the Super-ratio
+  double sfON[2]={0.};
+  double sfOFF[2]={0.};
+  double sfON_err[2]={0.};
+  double sfOFF_err[2]={0.};
+
+
+  for (unsigned int bin=0; bin<asymmetry.size(); bin++) {
+
+    double R = 0.;
+    double deltaR = 0.;
+
+    for (unsigned int side=0; side<2; side++) {
+
+      double numer = 0.;
+      double denom = 0.;
+      double numer_Err = 0.;
+
+      if ( A2err[side][bin] > 0. && A2[side][bin] > 0. ) {
+	numer += A2[side][bin]*A2len[0][side];
+	numer_Err += power(A2err[side][bin]*A2len[0][side],2);
+	denom += A2len[0][side];
+      }
+      if ( A10err[side][bin] > 0. && A10[side][bin] > 0. ) {
+	numer += A10[side][bin]*A10len[0][side];
+	numer_Err += power(A10err[side][bin]*A10len[0][side],2);
+	denom += A10len[0][side];
+      }
+      if ( B5err[side][bin] > 0. && B5[side][bin] > 0. ) {
+	numer += B5[side][bin]*B5len[0][side];
+	numer_Err += power(B5err[side][bin]*B5len[0][side],2);
+	denom += B5len[0][side];
+      }
+      if ( B7err[side][bin] > 0. && B7[side][bin] > 0. ) {
+	numer += B7[side][bin]*B7len[0][side];
+	numer_Err += power(B7err[side][bin]*B7len[0][side],2);
+	denom += B7len[0][side];
+      }
+
+      sfOFF[side] = denom > 0. ? numer/denom : 0.;
+      sfOFF_err[side] = denom > 0. ? sqrt(numer_Err)/denom : 0.;
+
+      // Flipper On
+      numer = denom = numer_Err = 0.;
+
+      if ( B2err[side][bin] > 0. && B2[side][bin] > 0. ) {
+	numer += B2[side][bin]*B2len[0][side];
+	numer_Err += power(B2err[side][bin]*B2len[0][side],2);
+	denom += B2len[0][side];
+      }
+      if ( B10err[side][bin] > 0. && B10[side][bin] > 0. ) {
+	numer += B10[side][bin]*B10len[0][side];
+	numer_Err += power(B10err[side][bin]*B10len[0][side],2);
+	denom += B10len[0][side];
+      }
+      if ( A5err[side][bin] > 0. && A5[side][bin] > 0. ) {
+	numer += A5[side][bin]*A5len[0][side];
+	numer_Err += power(A5err[side][bin]*A5len[0][side],2);
+	denom += A5len[0][side];
+      }
+      if ( A7err[side][bin] > 0. && A7[side][bin] > 0. ) {
+	numer += A7[side][bin]*A7len[0][side];
+	numer_Err += power(A7err[side][bin]*A7len[0][side],2);
+	denom += A7len[0][side];
+      }
+
+      sfON[side] = denom > 0. ? numer/denom : 0.;
+      sfON_err[side] = denom > 0. ? sqrt(numer_Err)/denom : 0.;
+
+      
+    }
+
+    R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+
+    if ( R!=0. && sfON[0]>0. && sfOFF[1]>0. ) { 
+     
+      deltaR = sqrt( power( sfOFF_err[0]*sfON[1]/(sfOFF[1]*sfON[0]), 2 ) + 
+		     power( sfON_err[1]*sfOFF[0]/(sfOFF[1]*sfON[0]), 2 ) +
+		     power( sfOFF_err[1]*sfON[1]*sfOFF[0]/(sfOFF[1]*sfOFF[1]*sfON[0]), 2 ) +
+		     power( sfON_err[0]*sfON[1]*sfOFF[0]/(sfOFF[1]*sfON[0]*sfON[0]), 2 ) );
+      //deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+      asymmetry[bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
+      asymmetryError[bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
+    }
+    else {
+      asymmetry[bin] = 0.;
+      asymmetryError[bin] = 1.;
     }
 
   } 
@@ -520,48 +623,105 @@ void OctetAsymmetry::calcTotalAsymmetry(double enWinLow, double enWinHigh) {
     sumB7_err[side] = sqrt(sumB7_err[side]);
     sumB10_err[side] = sqrt(sumB10_err[side]);
     
-    /*if (side==1) {
-      std::cout << sumA2[side] << " " << sumA2_err[side] << std::endl;
-      //std::cout << sumA5[side] << " " << sumA5_err[side] << std::endl;
-      //std::cout << sumA7[side] << " " << sumA7_err[side] << std::endl;
-      std::cout << sumA10[side] << " " << sumA10_err[side] << std::endl;
-      //std::cout << sumB2[side] << " " << sumB2_err[side] << std::endl;
-      std::cout << sumB5[side] << " " << sumB5_err[side] << std::endl;
-      std::cout << sumB7[side] << " " << sumB7_err[side] << std::endl;
-      //   std::cout << sumB10[side] << " " << sumB10_err[side] << std::endl << std::endl;
-      }*/
   }
     		   
   for (unsigned int side=0; side<2; side++) {
   
-    double weightsum=0.;
-    sfOFF[side] = (power(1./sumA2_err[side],2)*sumA2[side]+power(1./sumA10_err[side],2)*sumA10[side] + power(1./sumB5_err[side],2)*sumB5[side]+power(1./sumB7_err[side],2)*sumB7[side]);
-    weightsum = power(1./sumA2_err[side],2)+power(1./sumA10_err[side],2) + power(1./sumB5_err[side],2)+power(1./sumB7_err[side],2);
-    
-    sfOFF[side] = sfOFF[side]/weightsum;
-    sfOFF_err[side] = 1./sqrt(weightsum);
-    
-    weightsum=0.;
-    sfON[side] = (power(1./sumA5_err[side],2)*sumA5[side]+power(1./sumA7_err[side],2)*sumA7[side] + power(1./sumB2_err[side],2)*sumB2[side]+power(1./sumB10_err[side],2)*sumB10[side]);
-    weightsum = power(1./sumA5_err[side],2)+power(1./sumA7_err[side],2) + power(1./sumB2_err[side],2)+power(1./sumB10_err[side],2);
-    
-    sfON[side] = sfON[side]/weightsum;
-    sfON_err[side] = 1./sqrt(weightsum);
-    std::cout << sfOFF[side] << " " << sfON[side] << std::endl;
+   double numer = 0.;
+   double denom = 0.;
+   double numer_Err = 0.;
+   
+   if ( sumA2_err[side] > 0. && sumA2[side] > 0. ) {
+     numer += sumA2[side]*A2len[0][side];
+     numer_Err += power(sumA2_err[side]*A2len[0][side],2);
+     denom += A2len[0][side];
+   }
+   if ( sumA10_err[side] > 0. && sumA10[side] > 0. ) {
+     numer += sumA10[side]*A10len[0][side];
+     numer_Err += power(sumA10_err[side]*A10len[0][side],2);
+     denom += A10len[0][side];
+   }
+   if ( sumB5_err[side] > 0. && sumB5[side] > 0. ) {
+     numer += sumB5[side]*B5len[0][side];
+     numer_Err += power(sumB5_err[side]*B5len[0][side],2);
+     denom += B5len[0][side];
+   }
+   if ( sumB7_err[side] > 0. && sumB7[side] > 0. ) {
+     numer += sumB7[side]*B7len[0][side];
+     numer_Err += power(sumB7_err[side]*B7len[0][side],2);
+     denom += B7len[0][side];
+   }
+   
+   sfOFF[side] = denom > 0. ? numer/denom : 0.;
+   sfOFF_err[side] = denom > 0. ? sqrt(numer_Err)/denom : 0.;
+   
+   // Flipper On
+   numer = denom = numer_Err = 0.;
+   
+   if ( sumB2_err[side] > 0. && sumB2[side] > 0. ) {
+     numer += sumB2[side]*B2len[0][side];
+     numer_Err += power(sumB2_err[side]*B2len[0][side],2);
+     denom += B2len[0][side];
+   }
+   if ( sumB10_err[side] > 0. && sumB10[side] > 0. ) {
+     numer += sumB10[side]*B10len[0][side];
+     numer_Err += power(sumB10_err[side]*B10len[0][side],2);
+     denom += B10len[0][side];
+   }
+   if ( sumA5_err[side] > 0. && sumA5[side] > 0. ) {
+     numer += sumA5[side]*A5len[0][side];
+     numer_Err += power(sumA5_err[side]*A5len[0][side],2);
+     denom += A5len[0][side];
+   }
+   if ( sumA7_err[side] > 0. && sumA7[side] > 0. ) {
+     numer += sumA7[side]*A7len[0][side];
+     numer_Err += power(sumA7_err[side]*A7len[0][side],2);
+     denom += A7len[0][side];
+   }
+   
+   sfON[side] = denom > 0. ? numer/denom : 0.;
+   sfON_err[side] = denom > 0. ? sqrt(numer_Err)/denom : 0.;
+   
+   
   }
-  
-  if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-    R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-    deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-    totalAsymmetry= (1.-sqrt(R))/(1+sqrt(R));
+
+  R = sfOFF[0]*sfON[1]/(sfON[0]*sfOFF[1]);
+
+  if ( R!=0. && sfON[0]>0. && sfOFF[1]>0. ) { 
+     
+    deltaR = sqrt( power( sfOFF_err[0]*sfON[1]/(sfOFF[1]*sfON[0]), 2 ) + 
+		   power( sfON_err[1]*sfOFF[0]/(sfOFF[1]*sfON[0]), 2 ) +
+		   power( sfOFF_err[1]*sfON[1]*sfOFF[0]/(sfOFF[1]*sfOFF[1]*sfON[0]), 2 ) +
+		   power( sfON_err[0]*sfON[1]*sfOFF[0]/(sfOFF[1]*sfON[0]*sfON[0]), 2 ) );
+    //deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+    totalAsymmetry = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
     totalAsymmetryError = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
   }
   else {
     totalAsymmetry = 0.;
-    totalAsymmetryError= 0.;
-  }
+    totalAsymmetryError = 1.;
+  }  
+  
+  std::ofstream ofile(TString::Format("OctetAveRateFiles/UKOctetAvg_%i.txt",octet).Data());
+  
+  ofile << "RunType\tEast_bgSubt\tWest_bgSubt\tEast_time\tWest_time\n";
+  ofile << "A2\t" << sumA2[0] << "\t" << sumA2[1] << "\t" << A2len[0][0] << "\t" << A2len[0][1] << std::endl;
+  ofile << "A5\t" << sumA5[0] << "\t" << sumA5[1] << "\t" << A5len[0][0] << "\t" << A5len[0][1] << std::endl;
+  ofile << "A7\t" << sumA7[0] << "\t" << sumA7[1] << "\t" << A7len[0][0] << "\t" << A7len[0][1] << std::endl;
+  ofile << "A10\t" << sumA10[0] << "\t" << sumA10[1] << "\t" << A10len[0][0] << "\t" << A10len[0][1] << std::endl;
+  ofile << "B2\t" << sumB2[0] << "\t" << sumB2[1] << "\t" << B2len[0][0] << "\t" << B2len[0][1] << std::endl;
+  ofile << "B5\t" << sumB5[0] << "\t" << sumB5[1] << "\t" << B5len[0][0] << "\t" << B5len[0][1] << std::endl;
+  ofile << "B7\t" << sumB7[0] << "\t" << sumB7[1] << "\t" << B7len[0][0] << "\t" << B7len[0][1] << std::endl;
+  ofile << "B10\t" << sumB10[0] << "\t" << sumB10[1] << "\t" << B10len[0][0] << "\t" << B10len[0][1] << "\n\n";
+  ofile << "sfOFF_E\t" << sfOFF[0] <<"\n";
+  ofile << "sfON_W\t" << sfON[1] <<"\n";
+  ofile << "sfOFF_W\t" << sfOFF[1] <<"\n";
+  ofile << "sfON_E\t" << sfON[0] <<"\n\n";
+  ofile << "R\t" << R << "\n\n";
+  ofile << "A_ave\t" << totalAsymmetry << "\n";
 
-  std::cout << std::endl << R << " " << deltaR << "\n";
+  ofile.close();
+  //std::cout << std::endl << R << " " << deltaR << "\n";
   
 };
 
@@ -582,19 +742,121 @@ void OctetAsymmetry::calcSuperSum() {
     for (unsigned int side=0; side<2; side++) {
       double weightsum=0.;
 
-      sfOFF[side] = (A2err[side][bin]>0.?power(1./A2err[side][bin],2)*A2[side][bin]:0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2)*A10[side][bin]:0.) + (B5err[side][bin]>0.?power(1./B5err[side][bin],2)*B5[side][bin]:0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2)*B7[side][bin]:0.);
-      weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.) + (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.) + (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.) + (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
+      sfOFF[side] = ( ( A2err[side][bin]>0. ? power(1./A2err[side][bin],2)*A2[side][bin]  :0. ) + 
+		      ( A10err[side][bin]>0.? power(1./A10err[side][bin],2)*A10[side][bin]:0. ) + 
+		      ( B5err[side][bin]>0. ? power(1./B5err[side][bin],2)*B5[side][bin]  :0. ) + 
+		      ( B7err[side][bin]>0. ? power(1./B7err[side][bin],2)*B7[side][bin]  :0. ) );
+      weightsum = ( ( A2err[side][bin]>0. ? power(1./A2err[side][bin],2):0. ) +
+		    ( A10err[side][bin]>0.? power(1./A10err[side][bin],2):0.) + 
+		    ( B5err[side][bin]>0. ? power(1./B5err[side][bin],2):0. ) + 
+		    ( B7err[side][bin]>0. ? power(1./B7err[side][bin],2):0. ) );
 
       sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
       sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 
       weightsum=0.;
-      sfON[side] = (A5err[side][bin]>0.?power(1./A5err[side][bin],2)*A5[side][bin]:0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2)*A7[side][bin]:0.) + (B2err[side][bin]>0.?power(1./B2err[side][bin],2)*B2[side][bin]:0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2)*B10[side][bin]:0.);
-      weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.) + (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.) + (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.) + (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
-      
+
+      sfON[side] = ( ( B2err[side][bin] > 0. ? B2[side][bin]/power(B2err[side][bin],2)   : 0. ) +
+		      ( B10err[side][bin]> 0. ? B10[side][bin]/power(B10err[side][bin],2) : 0. ) +
+		      (	A5err[side][bin] > 0. ? A5[side][bin]/power(A5err[side][bin],2)   : 0. ) +
+		      ( A7err[side][bin] > 0. ? A7[side][bin]/power(A7err[side][bin],2)   : 0. ) );
+
+      weightsum = ( ( B2err[side][bin] > 0. ? 1./power(B2err[side][bin],2)  : 0. ) + 
+		    ( B10err[side][bin]> 0. ? 1./power(B10err[side][bin],2) : 0. ) +
+		    ( A5err[side][bin] > 0. ? 1./power(A5err[side][bin],2)  : 0. ) +
+		    ( A7err[side][bin] > 0. ? 1./power(A7err[side][bin],2)  : 0. ) );
       
       sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
       sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+
+    }
+
+    //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
+    double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
+    double R2 = (sfON[0]>0. && sfOFF[1]>0.) ? sqrt(sfOFF[1]*sfON[0]) : (sfON[0]<0. && sfOFF[1]<0.) ? -sqrt(sfOFF[1]*sfON[0]) : 0.5*(sfOFF[1]+sfON[0]);
+    double deltaR1 = ((sfON[1]>0. && sfOFF[0]>0.) || (sfON[1]<0. && sfOFF[0]<0.)) ? 0.5*sqrt((power(sfOFF[0]*sfON_err[1],2)+power(sfON[1]*sfOFF_err[0],2))/(sfON[1]*sfOFF[0])) : 
+      0.5*sqrt(power(sfON_err[1],2) + power(sfOFF_err[0],2));
+    double deltaR2 = ((sfON[0]>0. && sfOFF[1]>0.) || (sfON[0]<0. && sfOFF[1]<0.)) ? 0.5*sqrt((power(sfOFF[1]*sfON_err[0],2)+power(sfON[0]*sfOFF_err[1],2))/(sfON[0]*sfOFF[1])) : 
+      0.5*sqrt(power(sfON_err[0],2) + power(sfOFF_err[1],2));
+
+    superSum[bin] = R1 + R2;
+    //std::cout << sfOFF[0] << " " << sfOFF_err[0] << std::endl;
+    superSumError[bin] = sqrt(power(deltaR1,2) + power(deltaR2,2));
+    
+  } 
+  boolSuperSum = true;
+};
+
+void OctetAsymmetry::calcSuperSumNCSUstyle() {
+
+  //unsigned int numBins = (unsigned int)(1200./energyBinWidth);
+  superSum.resize(numEnBins,0.);
+  superSumError.resize(numEnBins,0.);
+
+  double sfON[2]={0.};
+  double sfOFF[2]={0.};
+  double sfON_err[2]={0.};
+  double sfOFF_err[2]={0.};
+
+  for (unsigned int bin=0; bin<superSum.size(); bin++) {
+ 
+    for (unsigned int side=0; side<2; side++) {
+
+      double numer = 0.;
+      double denom = 0.;
+      double numer_Err = 0.;
+
+      if ( A2err[side][bin] > 0. ) {
+	numer += A2[side][bin]*A2len[0][side];
+	numer_Err += power(A2err[side][bin]*A2len[0][side],2);
+	denom += A2len[0][side];
+      }
+      if ( A10err[side][bin] > 0. ) {
+	numer += A10[side][bin]*A10len[0][side];
+	numer_Err += power(A10err[side][bin]*A10len[0][side],2);
+	denom += A10len[0][side];
+      }
+      if ( B5err[side][bin] > 0. ) {
+	numer += B5[side][bin]*B5len[0][side];
+	numer_Err += power(B5err[side][bin]*B5len[0][side],2);
+	denom += B5len[0][side];
+      }
+      if ( B7err[side][bin] > 0. ) {
+	numer += B7[side][bin]*B7len[0][side];
+	numer_Err += power(B7err[side][bin]*B7len[0][side],2);
+	denom += B7len[0][side];
+      }
+
+      sfOFF[side] = denom > 0. ? numer/denom : 0.;
+      sfOFF_err[side] = denom > 0. ? sqrt(numer_Err)/denom : 1.;
+
+      // Flipper On
+      numer = denom = numer_Err = 0.;
+
+      if ( B2err[side][bin] > 0. ) {
+	numer += B2[side][bin]*B2len[0][side];
+	numer_Err += power(B2err[side][bin]*B2len[0][side],2);
+	denom += B2len[0][side];
+      }
+      if ( B10err[side][bin] > 0. ) {
+	numer += B10[side][bin]*B10len[0][side];
+	numer_Err += power(B10err[side][bin]*B10len[0][side],2);
+	denom += B10len[0][side];
+      }
+      if ( A5err[side][bin] > 0. ) {
+	numer += A5[side][bin]*A5len[0][side];
+	numer_Err += power(A5err[side][bin]*A5len[0][side],2);
+	denom += A5len[0][side];
+      }
+      if ( A7err[side][bin] > 0. ) {
+	numer += A7[side][bin]*A7len[0][side];
+	numer_Err += power(A7err[side][bin]*A7len[0][side],2);
+	denom += A7len[0][side];
+      }
+
+      sfON[side] = denom > 0. ? numer/denom : 0.;
+      sfON_err[side] = denom > 0. ? sqrt(numer_Err)/denom : 1.;
+
 
     }
 
@@ -713,50 +975,52 @@ void QuartetAsymmetry::calcAsymmetryBinByBin() {
       
       for (unsigned int side=0; side<2; side++) {
 	double weightsum=0.;
+
+	//Start with flipper off... Only use rate if it has an error to avoid dividing by 0
+	sfOFF[side] = ( ( A2err[side][bin] > 0. ? A2[side][bin]/power(A2err[side][bin],2)   : 0. ) +
+			( A10err[side][bin]> 0. ? A10[side][bin]/power(A10err[side][bin],2) : 0. ) );
 	
-	if ( A2[side][bin]>0. && A10[side][bin]>0. ) {
-	  
-	  sfOFF[side] = ( A2[side][bin]/power(A2err[side][bin],2) +
-			  A10[side][bin]/power(A10err[side][bin],2) );
-	  
-	  weightsum = ( 1./power(A2err[side][bin],2) + 
-			1./power(A10err[side][bin],2) );
-	  
-	}
-	
-	else weightsum = 0.;
-	
-	sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
+	weightsum = ( ( A2err[side][bin] > 0. ? 1./power(A2err[side][bin],2)  : 0. ) + 
+		      ( A10err[side][bin]> 0. ? 1./power(A10err[side][bin],2) : 0. ) ) ;
+		      
+	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+		      
+		      
+	weightsum=0.;
+
+	// Now for flipper on
+	sfON[side] = (  ( A5err[side][bin] > 0. ? A5[side][bin]/power(A5err[side][bin],2)   : 0. ) +
+			( A7err[side][bin] > 0. ? A7[side][bin]/power(A7err[side][bin],2)   : 0. ) );
 	
-	if ( A5[side][bin]>0. && A7[side][bin]>0. ) {
-	  
-	  sfON[side] = ( A5[side][bin]/power(A5err[side][bin],2) +
-			 A7[side][bin]/power(A7err[side][bin],2) );
-	  
-	  weightsum = ( 1./power(A5err[side][bin],2) + 
-			1./power(A7err[side][bin],2) );
-	  
-	  
-	}
-	else weightsum = 0.;
-	//if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
-	sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
+	weightsum = ( ( A5err[side][bin] > 0. ? 1./power(A5err[side][bin],2)  : 0. ) +
+		      ( A7err[side][bin] > 0. ? 1./power(A7err[side][bin],2)  : 0. ) );
+	
+	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
 	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
+	
+	
       }
-    
-      if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-	asymmetry[0][bin] = (1.-sqrt(R))/(1+sqrt(R));
+      
+      //Calculate super-ratio, R. Note that any of the rates that go into this could be negative 
+      R = (sfOFF[1]*sfON[0]) / (sfON[1]*sfOFF[0]) ;
+      
+      //Only use rates which are real and not zero to avoid nan (couldn't get TMath::IsNaN() to work properly :( ...)
+      if ( R!=0. && sfON[1]!=0. && sfOFF[0]!=0.) { 
+	
+	deltaR = sqrt( power( sfOFF_err[1]*sfON[0]/(sfOFF[0]*sfON[1]), 2 ) + 
+		       power( sfON_err[0]*sfOFF[1]/(sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfOFF_err[0]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfON_err[1]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfON[1]*sfON[1]), 2 ) );
+	//deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	asymmetry[0][bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
 	asymmetryError[0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
       }
       else {
 	asymmetry[0][bin] = 0.;
-	asymmetryError[0][bin] = 0.;
-      }
-      
+	asymmetryError[0][bin] = 1.;
+      } 
     }
   }
 	
@@ -774,61 +1038,54 @@ void QuartetAsymmetry::calcAsymmetryBinByBin() {
 	sfOFF[side]=0.;
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
-	sfON_err[side]=0.;	
+	sfON_err[side]=0.;
+
+
+	//Start with flipper off... Only use rate if it has an error to avoid dividing by 0
+	sfON[side] = ( ( B2err[side][bin] > 0. ? B2[side][bin]/power(B2err[side][bin],2)   : 0. ) +
+			( B10err[side][bin]> 0. ? B10[side][bin]/power(B10err[side][bin],2) : 0. ) );
 	
-	if ( B5[side][bin]>0. && B7[side][bin]>0. ) {
-	  
-	  sfOFF[side] = ( B5[side][bin]/power(B5err[side][bin],2) +
-			  B7[side][bin]/power(B7err[side][bin],2) );
-	  
-	  weightsum = ( 1./power(B5err[side][bin],2) + 
-			1./power(B7err[side][bin],2) );
-	  
-	}
-	else weightsum = 0.;
+	weightsum = ( ( B2err[side][bin] > 0. ? 1./power(B2err[side][bin],2)  : 0. ) + 
+		      ( B10err[side][bin]> 0. ? 1./power(B10err[side][bin],2) : 0. ) ) ;
+		      
+	sfON[side] = weightsum>0. ? sfON[side]/weightsum : 0.;
+	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+		      
+		      
+	weightsum=0.;
+
+	// Now for flipper on
+	sfOFF[side] = (  ( B5err[side][bin] > 0. ? B5[side][bin]/power(B5err[side][bin],2)   : 0. ) +
+			 ( B7err[side][bin] > 0. ? B7[side][bin]/power(B7err[side][bin],2)   : 0. ) );
 	
-	sfOFF[side] = weightsum>0. ? sfOFF[side] / weightsum : 0.;
+	weightsum = ( ( B5err[side][bin] > 0. ? 1./power(B5err[side][bin],2)  : 0. ) +
+		      ( B7err[side][bin] > 0. ? 1./power(B7err[side][bin],2)  : 0. ) );
+	
+	sfOFF[side] = weightsum>0. ? sfOFF[side]/weightsum : 0.;
 	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
 	
-	if ( B2[side][bin]>0. && B10[side][bin]>0. ) {
-	  
-	  sfON[side] = ( B2[side][bin]/power(B2err[side][bin],2) +
-			 B10[side][bin]/power(B10err[side][bin],2) );
-	  
-	  weightsum = ( 1./power(B2err[side][bin],2) + 
-			1./power(B10err[side][bin],2) );
-	  
-	}
-	else weightsum = 0.;
-	//if (anaCh==1 && bin<80) std::cout << weightsum << std::endl;                                                                         
-	sfON[side] = weightsum>0. ? sfON[side] / weightsum : 0.;
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
 	
-	
-	if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	  R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-	  deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-	  asymmetry[0][bin] = (1.-sqrt(R))/(1+sqrt(R));
-	  asymmetryError[0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
-	}
-	else {
-	  asymmetry[0][bin] = 0.;
-	  asymmetryError[0][bin] = 0.;
-	}
       }
-    
-    
-      if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-	asymmetry[1][bin] = (1.-sqrt(R))/(1+sqrt(R));
+      
+      //Calculate super-ratio, R. Note that any of the rates that go into this could be negative 
+      R = (sfOFF[1]*sfON[0]) / (sfON[1]*sfOFF[0]) ;
+      
+      //Only use rates which are real and not zero to avoid nan (couldn't get TMath::IsNaN() to work properly :( ...)
+      if ( R!=0. && sfON[1]!=0. && sfOFF[0]!=0.) { 
+	
+	deltaR = sqrt( power( sfOFF_err[1]*sfON[0]/(sfOFF[0]*sfON[1]), 2 ) + 
+		       power( sfON_err[0]*sfOFF[1]/(sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfOFF_err[0]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfON_err[1]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfON[1]*sfON[1]), 2 ) );
+	//deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	asymmetry[1][bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
 	asymmetryError[1][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
       }
       else {
 	asymmetry[1][bin] = 0.;
-	asymmetryError[1][bin] = 0.;
-      }
+	asymmetryError[1][bin] = 1.;
+      } 
     }
   }
   
@@ -1173,7 +1430,7 @@ void PairAsymmetry::calcAsymmetryBinByBin() {
   double sfOFF[2]={0.};
   double sfON_err[2]={0.};
   double sfOFF_err[2]={0.};
-
+      
   // A type runs, pair 0
   if (isGoodPair[0][0]) {
     for (unsigned int bin=0; bin<asymmetry[0][0].size(); bin++) {
@@ -1181,33 +1438,36 @@ void PairAsymmetry::calcAsymmetryBinByBin() {
       double deltaR = 0.;
       
       for (unsigned int side=0; side<2; side++) {
-	double weightsum=0.;
-	
+
 	// AFP Off
 	sfOFF[side] = A2[side][bin];
-	weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = A2err[side][bin];
 	
 	// AFP ON
 	sfON[side] = A5[side][bin];
-	weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.);
-	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+	sfON_err[side] = A5err[side][bin];
 	
       }
-      if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-	asymmetry[0][0][bin] = (1.-sqrt(R))/(1+sqrt(R));
+
+      //Calculate super-ratio, R. Note that any of the rates that go into this could be negative 
+      R = (sfOFF[1]*sfON[0]) / (sfON[1]*sfOFF[0]) ;
+      
+      //Only use rates which are real and not zero to avoid nan (couldn't get TMath::IsNaN() to work properly :( ...)
+      if ( R!=0. && sfON[1]!=0. && sfOFF[0]!=0.) { 
+	
+	deltaR = sqrt( power( sfOFF_err[1]*sfON[0]/(sfOFF[0]*sfON[1]), 2 ) + 
+		       power( sfON_err[0]*sfOFF[1]/(sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfOFF_err[0]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfON_err[1]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfON[1]*sfON[1]), 2 ) );
+	//deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	asymmetry[0][0][bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
 	asymmetryError[0][0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
       }
       else {
 	asymmetry[0][0][bin] = 0.;
-	asymmetryError[0][0][bin] = 0.;
-      }
+	asymmetryError[0][0][bin] = 1.;
+      } 
+
     }
   }
 
@@ -1222,33 +1482,35 @@ void PairAsymmetry::calcAsymmetryBinByBin() {
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
 	sfON_err[side]=0.;
-	double weightsum=0.;
-	
+
 	// AFP Off
 	sfOFF[side] = A10[side][bin];
-	weightsum = (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = A10err[side][bin];
 	
 	// AFP ON
 	sfON[side] = A7[side][bin];
-	weightsum = (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.);
-	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+	sfON_err[side] = A7err[side][bin];
 	
       }
-      if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-	asymmetry[0][1][bin] = (1.-sqrt(R))/(1+sqrt(R));
+
+      //Calculate super-ratio, R. Note that any of the rates that go into this could be negative 
+      R = (sfOFF[1]*sfON[0]) / (sfON[1]*sfOFF[0]) ;
+      
+      //Only use rates which are real and not zero to avoid nan (couldn't get TMath::IsNaN() to work properly :( ...)
+      if ( R!=0. && sfON[1]!=0. && sfOFF[0]!=0.) { 
+	
+	deltaR = sqrt( power( sfOFF_err[1]*sfON[0]/(sfOFF[0]*sfON[1]), 2 ) + 
+		       power( sfON_err[0]*sfOFF[1]/(sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfOFF_err[0]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfON_err[1]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfON[1]*sfON[1]), 2 ) );
+	//deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	asymmetry[0][1][bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
 	asymmetryError[0][1][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
       }
       else {
 	asymmetry[0][1][bin] = 0.;
-	asymmetryError[0][1][bin] = 0.;
-      }
+	asymmetryError[0][1][bin] = 1.;
+      } 
     }
   }
 
@@ -1262,33 +1524,35 @@ void PairAsymmetry::calcAsymmetryBinByBin() {
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
 	sfON_err[side]=0.;
-	double weightsum=0.;
-	
+
 	// AFP Off
 	sfOFF[side] = B5[side][bin];
-	weightsum = (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = B5err[side][bin];
 	
 	// AFP ON
 	sfON[side] = B2[side][bin];
-	weightsum = (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.);
-	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+	sfON_err[side] = B2err[side][bin];
 	
       }
-      if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-	asymmetry[1][0][bin] = (1.-sqrt(R))/(1+sqrt(R));
+
+      //Calculate super-ratio, R. Note that any of the rates that go into this could be negative 
+      R = (sfOFF[1]*sfON[0]) / (sfON[1]*sfOFF[0]) ;
+      
+      //Only use rates which are real and not zero to avoid nan (couldn't get TMath::IsNaN() to work properly :( ...)
+      if ( R!=0. && sfON[1]!=0. && sfOFF[0]!=0.) { 
+	
+	deltaR = sqrt( power( sfOFF_err[1]*sfON[0]/(sfOFF[0]*sfON[1]), 2 ) + 
+		       power( sfON_err[0]*sfOFF[1]/(sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfOFF_err[0]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfON_err[1]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfON[1]*sfON[1]), 2 ) );
+	//deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	asymmetry[1][0][bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
 	asymmetryError[1][0][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
       }
       else {
 	asymmetry[1][0][bin] = 0.;
-	asymmetryError[1][0][bin] = 0.;
-      }
+	asymmetryError[1][0][bin] = 1.;
+      } 
     }
   }
 
@@ -1302,35 +1566,35 @@ void PairAsymmetry::calcAsymmetryBinByBin() {
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
 	sfON_err[side]=0.;
-	double weightsum=0.;
-	
+
 	// AFP Off
 	sfOFF[side] = B7[side][bin];
-	weightsum = (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = B7err[side][bin];
 	
 	// AFP ON
 	sfON[side] = B10[side][bin];
-	weightsum = (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
+	sfON_err[side] = B10err[side][bin];
 	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
       }
 
-      //std::cout << bin << " " << sfON[0] << " " << sfON[1] << " "  << sfOFF[0] << " " << sfOFF[1] << std::endl;
-
-      if (sfOFF[0]>0. && sfOFF[1]>0. && sfON[0]>0. && sfON[1]>0.) { 
-	R = sfOFF[1]*sfON[0]/(sfON[1]*sfOFF[0]);
-	deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
-	asymmetry[1][1][bin] = (1.-sqrt(R))/(1+sqrt(R));
+      //Calculate super-ratio, R. Note that any of the rates that go into this could be negative 
+      R = (sfOFF[1]*sfON[0]) / (sfON[1]*sfOFF[0]) ;
+      
+      //Only use rates which are real and not zero to avoid nan (couldn't get TMath::IsNaN() to work properly :( ...)
+      if ( R!=0. && sfON[1]!=0. && sfOFF[0]!=0.) { 
+	
+	deltaR = sqrt( power( sfOFF_err[1]*sfON[0]/(sfOFF[0]*sfON[1]), 2 ) + 
+		       power( sfON_err[0]*sfOFF[1]/(sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfOFF_err[0]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfOFF[0]*sfON[1]), 2 ) +
+		       power( sfON_err[1]*sfON[0]*sfOFF[1]/(sfOFF[0]*sfON[1]*sfON[1]), 2 ) );
+	//deltaR = sqrt(R*R*(power(sfOFF_err[0]/sfOFF[0],2)+power(sfON_err[1]/sfON[1],2)+power(sfOFF_err[1]/sfOFF[1],2)+power(sfON_err[0]/sfON[0],2)));
+	asymmetry[1][1][bin] = (1.-sqrt(std::abs(R)))/(1+sqrt(std::abs(R)));
 	asymmetryError[1][1][bin] = (deltaR)/(sqrt(std::abs(R))*power((sqrt(std::abs(R))+1.),2));
       }
       else {
 	asymmetry[1][1][bin] = 0.;
-	asymmetryError[1][1][bin] = 0.;
-      }
+	asymmetryError[1][1][bin] = 1.;
+      } 
     }
   }
   
@@ -1557,22 +1821,16 @@ void PairAsymmetry::calcSuperSum() {
   if (isGoodPair[0][0]) {
     for (unsigned int bin=0; bin<asymmetry[0][0].size(); bin++) {     
       for (unsigned int side=0; side<2; side++) {
-	double weightsum=0.;
+	
 	
 	// AFP Off
 	sfOFF[side] = A2[side][bin];
-	weightsum = (A2err[side][bin]>0.?power(1./A2err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = A2err[side][bin];
 	
 	// AFP ON
 	sfON[side] = A5[side][bin];
-	weightsum = (A5err[side][bin]>0.?power(1./A5err[side][bin],2):0.);
-	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
+	sfON_err[side] = A5err[side][bin];
+
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
       double R1 = (sfON[1]>0. && sfOFF[0]>0.) ? sqrt(sfOFF[0]*sfON[1]) : (sfON[1]<0. && sfOFF[0]<0.) ? -sqrt(sfOFF[0]*sfON[1]) : 0.5*(sfOFF[0]+sfON[1]); 
@@ -1595,21 +1853,15 @@ void PairAsymmetry::calcSuperSum() {
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
 	sfON_err[side]=0.;
-	double weightsum=0.;
-	
+        
+
 	// AFP Off
 	sfOFF[side] = A10[side][bin];
-	weightsum = (A10err[side][bin]>0.?power(1./A10err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = A10err[side][bin];
 	
 	// AFP ON
 	sfON[side] = A7[side][bin];
-	weightsum = (A7err[side][bin]>0.?power(1./A7err[side][bin],2):0.);
-	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+	sfON_err[side] = A7err[side][bin];
 	
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
@@ -1634,21 +1886,14 @@ void PairAsymmetry::calcSuperSum() {
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
 	sfON_err[side]=0.;
-	double weightsum=0.;
-	
+        
 	// AFP Off
 	sfOFF[side] = B5[side][bin];
-	weightsum = (B5err[side][bin]>0.?power(1./B5err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = B5err[side][bin];
 	
 	// AFP ON
 	sfON[side] = B2[side][bin];
-	weightsum = (B2err[side][bin]>0.?power(1./B2err[side][bin],2):0.);
-	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+	sfON_err[side] = B2err[side][bin];
 	
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf
@@ -1673,21 +1918,14 @@ void PairAsymmetry::calcSuperSum() {
 	sfON[side]=0.;
 	sfOFF_err[side]=0.;
 	sfON_err[side]=0.;
-	double weightsum=0.;
 	
 	// AFP Off
 	sfOFF[side] = B7[side][bin];
-	weightsum = (B7err[side][bin]>0.?power(1./B7err[side][bin],2):0.);
-	
-	sfOFF_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
-	
-	weightsum=0.;
+	sfOFF_err[side] = B7err[side][bin];
 	
 	// AFP ON
 	sfON[side] = B10[side][bin];
-	weightsum = (B10err[side][bin]>0.?power(1./B10err[side][bin],2):0.);
-	
-	sfON_err[side] = weightsum>0. ? 1./sqrt(weightsum) : 0.;
+	sfON_err[side] = B10err[side][bin];
 	
       }
       //The geometric mean as defined by http://www.arpapress.com/Volumes/Vol11Issue3/IJRRAS_11_3_08.pdf

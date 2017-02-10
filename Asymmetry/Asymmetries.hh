@@ -29,7 +29,7 @@ public:
   std::string getCurrentAnaChoice() {return analysisChoice;}
   std::vector < std::vector<double> > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
   std::vector < std::vector<double> > returnBGsubtractedRateError(std::string runType);
-  std::vector < double > returnRunLength(std::string runType); //Returns both beta and BG run length
+  //std::vector < double > returnRunLength(std::string runType); //Returns both beta and BG run length
 
   
 
@@ -75,8 +75,10 @@ public:
 
   void makePlots();
   void calcAsymmetryBinByBin(); //Calculates the raw asymmetry bin by bin to be written to file and plotted
+  void calcNCSUSumAsymmetryBinByBin(); //Checking the NCSU analyzer sum method
   void calcTotalAsymmetry(double enWinLow, double enWinHigh); //Returns total raw asymmetry over energy window
   void calcSuperSum(); //Calculates the super sum over the entire octet for spectral comparisons
+   void calcSuperSumNCSUstyle(); //Calculates the super sum using the NCSU rate summing method
   void writeAsymToFile();
   void writeSuperSumToFile();
   double returnTotalAsymmetry() {return totalAsymmetry;}

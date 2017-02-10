@@ -7,8 +7,6 @@ asymmetry, what type of data, and what octet/runs to use.
 The code should be able to do BG subtraction, construct asymmetries, 
 or do both depending on the flags passed.
 
-Maybe even add in writing the final answer to the database if the user wants to
-
 */
 
 #include "EvtRateHandler.hh"
@@ -92,7 +90,7 @@ int main(int argc, char* argv[])
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   bool UKdata = true;//true;
-  bool simulation = false;
+  bool simulation = true;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -133,17 +131,17 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    /*TString aCh[4] = {"A","D","F","G"};//,"F","G"};
+    TString aCh[2] = {"A","D"};//"F","G"
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
       PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-      }*/
+    }
 
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
@@ -165,19 +163,39 @@ int main(int argc, char* argv[])
 
 void ProcessOctets(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool UNBLIND) {
 
+  //std::ofstream octval("octvalUK.dat");
+  //octval << "oct" << "\t" 
+  //	 << "Asymm" << "\t" 
+  //	 << "Error" << "\t" 
+  //	 << "Pull" << "\n";
+  
+
   for ( Int_t octet=octBegin; octet<=octEnd; octet++ ) {
     if ( std::find(badOct.begin(), badOct.end(),octet) != badOct.end() ) continue;  //Checking if octet should be ignored for data quality reasons
     try {
       OctetAsymmetry oct(octet,anaChoice,enBinWidth, 50., UKdata, simulation, UNBLIND);
-      oct.calcAsymmetryBinByBin();     
-      oct.calcSuperSum();
+      //oct.calcTotalAsymmetry(180.,780.);
+      oct.calcAsymmetryBinByBin(); 
+      //oct.calcNCSUSumAsymmetryBinByBin(); 
+      //oct.calcSuperSum();
+      oct.calcSuperSumNCSUstyle();
       oct.writeAsymToFile();
-      oct.writeSuperSumToFile();
+      oct.writeSuperSumToFile(); 
+      
+      //  octval << octet << "\t" 
+      //     << oct.returnTotalAsymmetry() << "\t" 
+      //     << oct.returnTotalAsymmetryError() << "\t" 
+      //     << 0. << "\n";
+      
     }
     catch(const char* ex){
       std::cerr << "Error: " << ex << std::endl;
     }
+
   }
+
+  //octval.close();
+
 };
 
 void ProcessQuartets(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t enBinWidth, bool UKdata, bool simulation, bool UNBLIND) {
@@ -270,7 +288,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	if (infile.is_open()) {
 	  infile >> txt >> Asym >> AsymError;
 	  rawAsymByGroup[0].push_back(isQuartet?quartet:isPair?pair:octet);
-	  rawAsymByGroup[1].push_back(Asym);
+	  rawAsymByGroup[1].push_back(-Asym); // Note the negative sign here to turn the raw asymmetry into purely a positive number (by definition, it is negative)
 	  rawAsymByGroup[2].push_back(AsymError);
 
 	  //std::cout << octet << " " << Asym << " " << AsymError << std::endl;
@@ -370,7 +388,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   asymFile << "RawA_oct_by_oct\t" << fit->GetParameter(0) << "\t" << fit->GetParError(0) << std::endl;
 
   //Writing to file the raw asymmetries of each octet
-  std::ofstream octval("octvalUK.dat");
+  /*std::ofstream octval("octvalUK.dat");
   octval << "oct" << "\t" 
 	 << "Asymm" << "\t" 
 	 << "Error" << "\t" 
@@ -382,7 +400,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	   << rawAsymByGroup[2][i] << "\t" 
 	   << ( rawAsymByGroup[1][i] - fit->GetParameter(0) ) / rawAsymByGroup[2][i] << "\n";
   } 
-  octval.close();
+  octval.close();*/
   
   g->Draw("AP");
   g->SetMinimum(fit->GetParameter(0)-0.02);//((simulation && !AsymmOn) ? -0.05 : 0.03);
@@ -609,7 +627,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       gOct->Fit("fitOct","R");
 	
       std::ofstream ofile(outfilePath.c_str());
-      ofile << "RawA_SR " << -(fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
+      ofile << "RawA_SR " << (fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
 	
       gOct->Draw("AP");
       gOct->SetMinimum(-0.1);

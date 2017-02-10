@@ -35,7 +35,7 @@ void plot_basic_histograms(TString runNumber)
 
   // Open input file
   TString filenameIn;
-  filenameIn  = TString(getenv("BASIC_HISTOGRAMS"))+"/beta/basic_histograms_";
+  filenameIn  = TString(getenv("BASIC_HISTOGRAMS"))+"/basic_histograms_";
   filenameIn += runNumber;
   filenameIn += ".root";
   cout << "Processing ... " << filenameIn << endl;
@@ -43,7 +43,7 @@ void plot_basic_histograms(TString runNumber)
 
   // Output file
   TString filenameOut;
-  filenameOut  = TString(getenv("BASIC_HISTOGRAMS"))+"/beta/basic_histograms_";
+  filenameOut  = TString(getenv("BASIC_HISTOGRAMS"))+"/basic_histograms_";
   filenameOut += runNumber;
   filenameOut += ".pdf";
 

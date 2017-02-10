@@ -35,31 +35,31 @@ unsigned int getSrcRunPeriod(int runNumber) {
   else if (runNumber <= 20000) {
     calibrationPeriod=11;
   }
-  else if (runNumber <= 20741) {
+  else if (runNumber <= 20741) { // Octets 60-65
     calibrationPeriod=13;
   }
-  else if (runNumber <= 20837) {
+  else if (runNumber <= 20837) { // Octets 66
     calibrationPeriod=14;
   }
-  else if (runNumber <= 21237) {
+  else if (runNumber <= 21237) { // Octets 67-71
     calibrationPeriod=16;
   }
-  else if (runNumber <= 21605) {
+  else if (runNumber <= 21605) { // Octets 72-79
     calibrationPeriod=17;
   }
-  else if (runNumber <= 21863) {
+  else if (runNumber <= 21863) { // Octets 80-85
     calibrationPeriod=18;
   }
-  else if (runNumber <= 22118) {
+  else if (runNumber <= 22118) { // Octets 86-91
     calibrationPeriod=19;
   }
-  else if (runNumber <= 22238) {
+  else if (runNumber <= 22238) { // Octets 92-95
     calibrationPeriod=20;
   }
-  else if (runNumber <= 22630) {
+  else if (runNumber <= 22630) { // Octets 96-105
     calibrationPeriod=22;
   }
-  else if (runNumber <= 23173) {
+  else if (runNumber <= 23173) { // Octets 106-121
     calibrationPeriod=23;
   }
   return calibrationPeriod;
