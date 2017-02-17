@@ -315,17 +315,17 @@ void EvtRateHandler::dataReader() {
 	
 	//Cut out clipped events and bad Wirechamber signals
 	if ( Type!=0 ) {
-	  if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
-	  else if ( xeRC<1 || yeRC<1 || xeRC>6 || yeRC>6 || xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue; //Must look at both sides
+	  if ( xE_nClipped>1 || yE_nClipped>1 || xW_nClipped>1 || yW_nClipped>1 ) continue;
+	  else if ( xeRC>6 || yeRC>6 || xwRC>6 || ywRC>6 ) continue; //Must look at both sides
 	}
 	else {
 	  if ( Side==0 ) {
-	    if ( xE_nClipped>0 || yE_nClipped>0 ) continue;
-	    else if ( xeRC<1 || yeRC<1 || xeRC>6 || yeRC>6 ) continue; //only look at MWPC signal on East
+	    if ( xE_nClipped>1 || yE_nClipped>1 ) continue;
+	    else if ( xeRC>6 || yeRC>6 ) continue; //only look at MWPC signal on East
 	  }
 	  else if ( Side==1 ) {
-	    if ( xW_nClipped>0 || yW_nClipped>0 ) continue;
-	    else if ( xwRC<1 || ywRC<1 || xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on West
+	    if ( xW_nClipped>1 || yW_nClipped>1 ) continue;
+	    else if ( xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on West
 	  }
 	}
 	
@@ -425,6 +425,8 @@ void SimEvtRateHandler::dataReader() {
   int PID, Side, Type;
 
   double AsymWeight=1.;
+  double scintPosE[3]={0.};
+  double scintPosW[3]={0.};
   double mwpcPosE[3]={0.};
   double mwpcPosW[3]={0.}; //holds the position of the event in the MWPC for simulated data
   int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
@@ -446,6 +448,8 @@ void SimEvtRateHandler::dataReader() {
     Tin->SetBranchAddress("Erecon",&Erecon);
     Tin->GetBranch("time")->GetLeaf("timeE")->SetAddress(&TimeE);
     Tin->GetBranch("time")->GetLeaf("timeW")->SetAddress(&TimeW);
+    Tin->GetBranch("ScintPosAdjusted")->GetLeaf("ScintPosAdjE")->SetAddress(scintPosE);
+    Tin->GetBranch("ScintPosAdjusted")->GetLeaf("ScintPosAdjW")->SetAddress(scintPosW);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcPosE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcPosW);
     Tin->SetBranchAddress("AsymWeight",&AsymWeight);
@@ -473,19 +477,21 @@ void SimEvtRateHandler::dataReader() {
       if (PID==1) {
 
 	//Cut out clipped events
-	if ( Type!=0 ) {
+	/*if ( Type!=0 ) {
 	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
 	}
 	else {
 	  if ( Side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
 	  else if ( Side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
-	}
+	  }*/
 
-	
+	//r2E = scintPosE[0]*scintPosE[0] + scintPosE[1]*scintPosE[1];
+	//r2W = scintPosW[0]*scintPosW[0] + scintPosW[1]*scintPosW[1];
 	r2E = ( mwpcPosE[0]*mwpcPosE[0] + mwpcPosE[1]*mwpcPosE[1] ) * 0.6 * 100.; //Transforming to decay trap coords
 	r2W = ( mwpcPosW[0]*mwpcPosW[0] + mwpcPosW[1]*mwpcPosW[1] ) * 0.6 * 100.;
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
+	  //if ( r2E<(60.*60.) && r2W<(60.*60.) ) {
 	  
 	  
 	  if ( sep23 ) {
@@ -640,20 +646,25 @@ void BGSubtractedRate::LoadRatesByBin() {
 
   }
 
+  std::ofstream ofileE, ofileW;
   if ( !Simulation ) {
 
-    std::ofstream ofileE(TString::Format("BinByBinComparison/UK_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-    std::ofstream ofileW(TString::Format("BinByBinComparison/UK_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-    
-    ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-    ofileW << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-
-    for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
-      ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;
-      ofileW << i*10.+5. << "\t" << BetaRateW[i] << "\t" << BGRateW[i] << std::endl;
-    }
-    ofileE.close(), ofileW.close();
+    ofileE.open(TString::Format("BinByBinComparison/UK_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+    ofileW.open(TString::Format("BinByBinComparison/UK_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
   }
+  else {
+    ofileE.open(TString::Format("BinByBinComparison/SIM_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+    ofileW.open(TString::Format("BinByBinComparison/SIM_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+  }
+    
+  ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+  ofileW << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+
+  for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
+    ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;
+    ofileW << i*10.+5. << "\t" << BetaRateW[i] << "\t" << BGRateW[i] << std::endl;
+  }
+  ofileE.close(), ofileW.close();
 
 };
 

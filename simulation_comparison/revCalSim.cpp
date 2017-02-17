@@ -530,9 +530,23 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2]*10.;
     scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2]*10.;
 
+    //Adding in an adjusted wirechamber position to test whether using the exact location of the 
+    // scintillator hit is causing the strange effects I see with backscattering events in the beta decay data
+    Double_t mwpcAdjE[3] = {0.};
+    Double_t mwpcAdjW[3] = {0.};
+    mwpcAdjE[0] = source=="Beta"?mwpc_pos.MWPCPosE[0]*sqrt(0.6)*10.: 0.;
+    mwpcAdjE[1] = source=="Beta"?mwpc_pos.MWPCPosE[1]*sqrt(0.6)*10.: 0.;
+    mwpcAdjW[0] = source=="Beta"?mwpc_pos.MWPCPosW[0]*sqrt(0.6)*10.: 0.;
+    mwpcAdjW[1] = source=="Beta"?mwpc_pos.MWPCPosW[1]*sqrt(0.6)*10.: 0.;
+    mwpcAdjE[2] = source=="Beta"?mwpc_pos.MWPCPosE[2]*10. : 0.;
+    mwpcAdjW[2] = source=="Beta"?mwpc_pos.MWPCPosW[2]*10. : 0.;
 
-    std::vector <Double_t> eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
 
+    std::vector <Double_t> eta; 
+    if ( source!="Beta" ) eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],
+							  scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
+    else eta = posmap.getInterpolatedEta(mwpcAdjE[0],mwpcAdjE[1],
+					 mwpcAdjW[0],mwpcAdjW[1]);
     //for (UInt_t iii=0; iii<eta.size(); iii++) std::cout << eta[iii] << std::endl;
     
       
@@ -550,7 +564,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     Double_t clip_threshW = 8.;
 
     // 2012-2013 Cathode Threshold
-    if ( runNumber > 20000 ) clip_threshE = 5., clip_threshW = 4.;
+    if ( runNumber > 20000 ) clip_threshE = 6., clip_threshW = 6.;
     
     for ( UInt_t j=0; j<16; j++ ) {
       if ( Cath_EX[j] > clip_threshE ) nClipped_EX++;
@@ -791,8 +805,11 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     }    
   
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
-    if ( PID==1 && Erecon>0. && ( sqrt( scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0] + scint_pos.ScintPosE[1]*scint_pos.ScintPosE[1] )*sqrt(0.6)*10.<fidCut
-				  && sqrt( scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0] + scint_pos.ScintPosW[1]*scint_pos.ScintPosW[1] )*sqrt(0.6)*10.<fidCut ) ) evtTally++;
+    if ( PID==1 && Erecon>0. && ( sqrt( mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1] )<fidCut
+				  && sqrt( mwpcAdjW[0]*mwpcAdjW[0] + mwpcAdjW[1]*mwpcAdjW[1] )<fidCut ) ) evtTally++;
+
+    /*    if ( PID==1 && Erecon>0. && ( sqrt( scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0] + scint_pos.ScintPosE[1]*scint_pos.ScintPosE[1] )*sqrt(0.6)*10.<fidCut
+	  && sqrt( scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0] + scint_pos.ScintPosW[1]*scint_pos.ScintPosW[1] )*sqrt(0.6)*10.<fidCut ) ) evtTally++;*/
 
     evt++;
 

@@ -389,14 +389,14 @@ int main(int argc, char *argv[])
 
       // Calculate number of clipped wires
       if (j<16) {
-	if ( Pdc2[j] > 4000. ) t->yE.nClipped++;
-	if ( Padc[j] > 4000. ) t->yW.nClipped++;
+	if ( Pdc2[j] > 4090. ) t->yE.nClipped++;
+	if ( Padc[j] > 4090. ) t->yW.nClipped++;
 	t->Cathodes_Ey[j] = (double)Pdc2[j] - pedPdc2[j];
 	t->Cathodes_Wy[j] = (double)Padc[j] - pedPadc[j];
       }
       else {
-	if ( Pdc2[j] > 4000. ) t->xE.nClipped++;
-	if ( Padc[j] > 4000. ) t->xW.nClipped++;
+	if ( Pdc2[j] > 4090. ) t->xE.nClipped++;
+	if ( Padc[j] > 4090. ) t->xW.nClipped++;
 	t->Cathodes_Ex[j-16] = (double)Pdc2[j] - pedPdc2[j];
 	t->Cathodes_Wx[j-16] = (double)Padc[j] - pedPadc[j];
       }

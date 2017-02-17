@@ -4,7 +4,7 @@ void plotSuperSums(int octetStart, int octetEnd)
   gStyle->SetOptStat(0);
   
 
-  TString normType = "0";
+  TString normType = "ALL";
 
   Double_t normLow = 200.;
   Double_t normHigh = 700.;

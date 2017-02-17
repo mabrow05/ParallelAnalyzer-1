@@ -1,6 +1,6 @@
 {
 
-  bool removeOct10 = false;
+  bool removeOct10 = true;
    
   gStyle->SetTitleSize(0.08,"t");
   gStyle->SetPadBottomMargin(0.15);

@@ -18,7 +18,7 @@ def getBinEnergyMid(b):
 
 def weightRealStats(data,stats,e0,e1):
         """Weight the given data array by the real experimental statistics"""
-        
+
         numer = sum([(1./stats[i])**2 * data[i] 
                      for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
         denom = sum([(1./stats[i])**2  
@@ -27,12 +27,16 @@ def weightRealStats(data,stats,e0,e1):
         return numer/denom
 
 def totalStatErr(data,dataErr,e0,e1):
+
+    if len(data)!=len(dataErr):
+        return 0
+
     numer = sum([(1./dataErr[i])**2 * data[i] 
                  for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
     weightsum = sum([(1./dataErr[i])**2 
                      for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
-    A = numer/weightsum;
-    return fabs( ( 1./sqrt(weightsum) ) / A )
+    A = numer/weightsum if weightsum>0. else 1.
+    return fabs( ( 1./sqrt(weightsum) ) / A ) if weightsum>0. and fabs(A)>0. else 1.
 
 def sumErrors(err):
     return sqrt(sum([er**2 for er in err]))
@@ -51,6 +55,10 @@ class analysisWindow:
         self.realAerr = []
         self.stat_percent_err = []
         self.energy_err = []
+        self.theory_err = []
+        self.theory_corr = []
+        self.syst_err = []
+        self.syst_corr = []
 
         self.year = year
         print(self.year)
@@ -73,7 +81,7 @@ class analysisWindow:
         infile = open( os.environ["ANALYSIS_RESULTS"]+"/Asymmetries/"+
                        "UnCorr_OctetAsymmetries_AnaChA_180-780_Octets_%i-%i_BinByBin.txt"
                        %(self.octLow,self.octHigh),'r' )
-
+        A_en = []
         A = []
         Aerr = []
         percErr = []
@@ -81,13 +89,15 @@ class analysisWindow:
         if infile:
             for line in infile:
                 l = line.split()
-                A.append(float(l[1]))
-                Aerr.append(float(l[2]))
-                if float(l[1])!=0.: 
-                    percErr.append( fabs( float(l[2])/float(l[1]) ) )
+                if float(l[0])<1000.:
+                    A_en.append(float(l[0]))
+                    A.append(float(l[1]))
+                    Aerr.append(float(l[2]))
+                    if float(l[1])!=0.: 
+                        percErr.append( fabs( float(l[2])/float(l[1]) ) )
                     
-                else:
-                    percErr.append( 1. )
+                    else:
+                        percErr.append( 1. )
 
         else: 
             print("Couldn't open file for statistical uncertainties")
@@ -121,13 +131,68 @@ class analysisWindow:
 
         self.energy_err = percErr
 
-    def readSystematicUncertainties(self,errFac=0.2):
+    def makeSystematicCorrections(self,errFac=0.2):
         """Read in the systematic correction bin-by-bin for final
         asymmetries, calculates delta_A/A, and then multiplies by the 
         error factor before filling the percent error for every bin."""
-        
-        
+
+        A_uncorr = []
+        A_corr = []
+
+        # begin with uncorrected asymmetry
+        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Asymmetries/"+
+                       "UnCorr_OctetAsymmetries_AnaChA_Octets_%i-%i_BinByBin.txt"
+                       %(self.octLow,self.octHigh),'r' )
+
+        if infile:
+            for line in infile:
+                l = line.split()
+                if float(l[0])<1000.:
+                    A_uncorr.append(float(l[1]))
+
+        else: 
+            print("Couldn't open file for statistical uncertainties")
+            exit(0)
+
+         
+
+        infile.close()
+
+        # Now read in corrected asymmetry
+        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Asymmetries/"+
+                       "DeltaExpOnly_OctetAsymmetries_AnaChA_Octets_%i-%i_BinByBin.txt"
+                       %(self.octLow,self.octHigh),'r' )
+
+        if infile:
+            for line in infile:
+                l = line.split()
+                if float(l[0])<1000.:
+                    A_corr.append(float(l[1]))
+
+        else: 
+            print("Couldn't open file for statistical uncertainties")
+            exit(0)
+
+        infile.close()
+
+        for x in A_corr:
+            print(x)
+
+        # Calculate the percent error on the correction
+        corr = []
         percErr = []
+        
+        for i in range( 0, len(A_corr) ):
+            correction = 100.
+            if fabs(A_uncorr[i])>0.:
+                correction = A_corr[i]/A_uncorr[i] - 1. 
+            
+            corr.append(correction)
+            percErr.append( fabs(correction*errFac) )
+
+        self.syst_err = percErr
+        self.syst_corr = corr
+
 
     def makeTheoryUncertainties(self,lambda_err=0.):
         """Calculate the theory uncertainties given the error in lambda provided"""
@@ -140,21 +205,24 @@ class analysisWindow:
         
         self.statUncertainties()
         self.readEnergyUncertainties()
+        self.makeSystematicCorrections()
         
-        for x in self.energy_err:
-            print(x)        
 
         minErr = 100.
+        minEnergyErr = 0.
+        minStatisticalErr = 0.
+        minSystematicErr = 0.
         enBinLow = None
         enBinHigh = None
 
-        for lowBin in range(5,120-1):
-            for highBin in range(lowBin+1,120):
+        for lowBin in range(0,79-1):
+            for highBin in range(lowBin+1,79):
 
                 Errors = []
 
-                Errors.append( weightRealStats(self.energy_err,self.stat_percent_err,220.,670.) )
-                Errors.append( totalStatErr(self.realA,self.realAerr,220.,670.) )
+                Errors.append( weightRealStats(self.energy_err,self.stat_percent_err,getBinEnergyMid(lowBin),getBinEnergyMid(highBin)) )
+                Errors.append( totalStatErr(self.realA,self.realAerr,getBinEnergyMid(lowBin),getBinEnergyMid(highBin)) )
+                Errors.append( weightRealStats(self.syst_err,self.stat_percent_err,getBinEnergyMid(lowBin),getBinEnergyMid(highBin)) )
 
                 errSum = sumErrors(Errors)
                 
@@ -162,14 +230,22 @@ class analysisWindow:
                     minErr = errSum
                     enBinLow = lowBin
                     enBinHigh = highBin
+                    minEnergyErr = Errors[0]
+                    minStatisticalErr = Errors[1]
+                    minSystematicErr = Errors[2]
 
 
-        #print("Weighted Energy Error: %f"%weightRealStats(self.energy_err,self.stat_percent_err,220.,670.))
-        #print("Total Statistical Error: %f"%totalStatErr(self.realA,self.realAerr,220.,670.))
+        minSystCorrTotal = weightRealStats(self.syst_corr,self.stat_percent_err,getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh))
+        print
+        print("Systematic Correction: %f"%minSystCorrTotal)
+        print
+        print("Weighted Energy Error: %f"%minEnergyErr)
+        print("Total Statistical Error: %f"%minStatisticalErr)
+        print("Total Systematic Error: %f"%minSystematicErr)
         print("Min total Err = %f"%minErr)
         print("Energy Range = %f-%f"%(getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh)))
 
 if __name__ == "__main__":
     
-    minim = analysisWindow(2011)
+    minim = analysisWindow(2012)
     minim.minimizer()

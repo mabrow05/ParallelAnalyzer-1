@@ -89,8 +89,9 @@ int main(int argc, char* argv[])
   Double_t enBinWidth = 10.;
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
+  if ( argc==7 ) corr = std::string(argv[6]);
   bool UKdata = true;//true;
-  bool simulation = true;
+  bool simulation = false;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -131,12 +132,13 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    TString aCh[2] = {"A","D"};//"F","G"
+    /*TString aCh[2] = {"F","G"};//"A","D"
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
-      PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-      PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-    }
+      ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+      //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+      //PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+      }*/
 
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
@@ -147,7 +149,7 @@ int main(int argc, char* argv[])
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
      
-    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
+    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
@@ -178,9 +180,9 @@ void ProcessOctets(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t
       oct.calcAsymmetryBinByBin(); 
       //oct.calcNCSUSumAsymmetryBinByBin(); 
       //oct.calcSuperSum();
-      oct.calcSuperSumNCSUstyle();
+      //oct.calcSuperSumNCSUstyle();
       oct.writeAsymToFile();
-      oct.writeSuperSumToFile(); 
+      //oct.writeSuperSumToFile(); 
       
       //  octval << octet << "\t" 
       //     << oct.returnTotalAsymmetry() << "\t" 
@@ -205,9 +207,9 @@ void ProcessQuartets(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double
     try {
       QuartetAsymmetry quart(octet,anaChoice,enBinWidth, 50., UKdata, simulation, UNBLIND);
       quart.calcAsymmetryBinByBin();
-      quart.calcSuperSum();
+      //quart.calcSuperSum();
       quart.writeAsymToFile();
-      quart.writeSuperSumToFile();
+      //quart.writeSuperSumToFile();
     }
     catch(const char* ex){
       std::cerr << "Error: " << ex << std::endl;
@@ -222,10 +224,10 @@ void ProcessPairs(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t 
     if ( std::find(badOct.begin(), badOct.end(),octet) != badOct.end() ) continue;  //Checking if octet should be ignored for data quality reasons
     try {
       PairAsymmetry pair(octet, anaChoice, enBinWidth, 50., UKdata, simulation, UNBLIND);
-      pair.calcAsymmetryBinByBin();
-      pair.calcSuperSum();
-      pair.writeAsymToFile();
-      pair.writeSuperSumToFile();
+      //pair.calcAsymmetryBinByBin();
+      //pair.calcSuperSum();
+      //pair.writeAsymToFile();
+      //pair.writeSuperSumToFile();
     }
     catch(const char* ex){
       std::cerr << "Error: " << ex << std::endl;
@@ -495,6 +497,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   asymFile.close();
 
   //Write out corrected (but energy dependent) bin-by-bin asymmetry for use in calculating effect from doing corrections
+  outFile = basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"") + corr + "_" + (withPOL?"withPOL_":"") + groupType +"Asymmetries_AnaCh" + anaChoice 
+    + std::string("_")  + "Octets_" +itos(octBegin)+"-"+itos(octEnd);
   txtFile = outFile+std::string("_BinByBin_withEnergyDependence.txt");
   asymFile.open(txtFile.c_str());
 
