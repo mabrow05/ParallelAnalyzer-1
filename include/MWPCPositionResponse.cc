@@ -118,9 +118,12 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
 
   unsigned int numWires = wires.size();
   unsigned int nClipped = clip.size();
-  
+
+  /////////////////// 0 wires //////////////////////
   if ( numWires==0 ) return 0.;
+  /////////////////// 1 wire //////////////////////
   else if ( numWires==1 ) return pos[wires[0]];
+  /////////////////// 2 wires //////////////////////
   else if ( numWires==2 ) {
     
     if ( nClipped==2 ) return ( pos[wires[0]] + pos[wires[1]] ) / 2.;
@@ -148,10 +151,11 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
     return fitGaus(posFit, valFit);
   }
 
+  ///////////////////// 3 wires ///////////////////////////////////////////////////////////
   else { // At least 3 wires above threshold
 
     int max = getMaxWire(wires, sig);
-    
+    ///////// less than 2 clipped ///////////
     if ( nClipped < 2 ) { // Less than 2 clipped, use max wire, and maxWire-1 and +1
       if ( max==0 ) {
 	valFit[0] = sig[wires[0]]; posFit[0] = pos[wires[0]];
@@ -170,10 +174,11 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
       }
       return fitGaus(posFit, valFit);
     }
-
-    else if ( nClipped==2 ) { // 2 clipped and at least 1 other signal 
-
-      if ( numWires>3 ) { // 2 or more other wires over threshold
+    
+    ///////////////// 2 clipped exactly //////////////
+    else if ( nClipped==2 ) { 
+      //////// more than 3 wires with 2 clipped ///////
+      if ( numWires>3 ) { 
 
 	if (clip[0]==0) {
 	  valFit[0] = sig[wires[2]]; posFit[0] = pos[wires[2]];
@@ -192,8 +197,8 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
 	}
 	return fitGaus(posFit, valFit);
       }
-
-      else { // 1 other wire over threshold
+      ////// exactly 3 wires, with two of them clipped /////////
+      else { 
 	
 	if ( clip[0]==wires[0] ) {
 	  valFit[0] = sig[wires[2]]; posFit[0] = pos[wires[2]];
@@ -208,8 +213,10 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
 	return fitGaus(posFit, valFit);
       }
     }
-      
+
+    ////////// more than 2 clipped and at least 3 wires /////////////
     else {
+      //////// at least 2 non-clipped wires with the clipped wires ////////////
       if ( (numWires - nClipped) > 2 ) { // Check that there are at least 3 points that aren't overflow. Use average of
                               // clipped*nClipped and the other wires above thresh
 	double ave = 0.;
