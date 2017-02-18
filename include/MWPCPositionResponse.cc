@@ -1,26 +1,29 @@
 #include "MWPCPositionResponse.hh" 
+#include <TGraph.h>
+#include <TF1.h>
+#include <cmath>
 
 
+MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *wy,
+				       double *pedex,double *pedey,double *pedwx,double *pedwy) {
 
-MWPCCathodeHandler::MWPCCathodeHandler() {
-
-  posEX = posEY = posWX = posWY = 0.;
-  boolPedSubtr = false;
-
-};
-
-void MWPCCathodeHandler::setCathResponse(double *ex,double *ey,double *wx,double *wy) {
   cathEX = ex;
   cathEY = ey;
   cathWX = wx;
   cathWY = wy;
+
+  pedEX = pedex;
+  pedEY = pedey;
+  pedWX = pedwx;
+  pedWY = pedwy;
+
 };
+
+void MWPCCathodeHandler::PrintSignals() {
   
-void MWPCCathodeHandler::setPedestalValues(double *ex,double *ey,double *wx,double *wy) {
-  pedEX = ex;
-  pedEY = ey;
-  pedWX = wx;
-  pedWY = wy;
+  for (int i=0; i<16; i++) {
+    std::cout << pedSubtrEX[i] << std::endl;
+  }
 };
 
 
@@ -36,6 +39,18 @@ void MWPCCathodeHandler::doPedestalSubtraction() {
 };
 
 
+void MWPCCathodeHandler::doThresholdCheck() {
+  
+  for ( int i=0; i<16; i++ ) {   
+    if ( pedSubtrEX[i] > cathodeThreshold ) signalEX.push_back(i);
+    if ( pedSubtrEY[i] > cathodeThreshold ) signalEY.push_back(i);
+    if ( pedSubtrWX[i] > cathodeThreshold ) signalWX.push_back(i);
+    if ( pedSubtrWY[i] > cathodeThreshold ) signalWY.push_back(i);
+  }  
+  boolThresholdCheck = true;
+};
+
+
 std::vector<int> MWPCCathodeHandler::doClipping(std::vector<int> wires, double* signal) {
 
   std::vector <int> clipped;
@@ -45,16 +60,7 @@ std::vector<int> MWPCCathodeHandler::doClipping(std::vector<int> wires, double* 
   return clipped;
 };
 
-void MWPCCathodeHandler::doThresholdCheck() {
-  
-  for ( int i=0; i<16; i++ ) {   
-    if ( pedSubtrEX[i] > cathodeThreshold ) signalEX.push_back(i);
-    if ( pedSubtrEY[i] > cathodeThreshold ) signalEY.push_back(i);
-    if ( pedSubtrWX[i] > cathodeThreshold ) signalWX.push_back(i);
-    if ( pedSubtrWY[i] > cathodeThreshold ) signalWY.push_back(i);
-  }
-  
-};
+
 
 
 
@@ -65,7 +71,8 @@ void MWPCCathodeHandler::findAllPositions() {
 
   //East X
   clippedEX = doClipping(signalEX, cathEX);
-  posEX = fitCathResponse(signalEX, clippedEX, pedSubtrEX,wireposEX);
+  //std::cout << clippedEX.size() << "\n";
+  posEX = fitCathResponse(signalEX, clippedEX, pedSubtrEX, wireposEX);
   
   //East Y
   clippedEY = doClipping(signalEY, cathEY);
@@ -73,15 +80,15 @@ void MWPCCathodeHandler::findAllPositions() {
   
   //West X
   clippedWX = doClipping(signalWX, cathWX);
-  posWX = fitCathResponse(signalWX, clippedWX, pedSubtrWX,wireposWX);
+  posWX = fitCathResponse(signalWX, clippedWX, pedSubtrWX, wireposWX);
   
   //West Y
   clippedWY = doClipping(signalWY, cathWY);
-  posWY = fitCathResponse(signalWY, clippedWY, pedSubtrWY,wireposWY);
+  posWY = fitCathResponse(signalWY, clippedWY, pedSubtrWY, wireposWY);
 
 };
 
-int getMaxWire(std::vector <int> wires, double *sig) {
+int MWPCCathodeHandler::getMaxWire(std::vector <int> wires, double *sig) {
   int maxWire = 0;
   double max = 0.;
   for ( unsigned int i=0; i<wires.size(); ++i ) {
@@ -110,7 +117,9 @@ int MWPCCathodeHandler::getMaxWireNotClipped(std::vector <int> wires, std::vecto
 };
   
 
-double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<int> clip, double *sig, double *pos) {
+std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<int> clip, double *sig, const double *pos) {
+
+  std::vector <double> finalPos(3,0.);
 
   std::vector <double> posFit(3,0.);
   std::vector <double> valFit(3,0.);
@@ -120,13 +129,23 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
   unsigned int nClipped = clip.size();
 
   /////////////////// 0 wires //////////////////////
-  if ( numWires==0 ) return 0.;
+  if ( numWires==0 ) return finalPos;
   /////////////////// 1 wire //////////////////////
-  else if ( numWires==1 ) return pos[wires[0]];
+  else if ( numWires==1 ) { 
+    finalPos[0] = pos[wires[0]];
+    finalPos[1] = 0.;
+    finalPos[2] = 4096.;
+    return finalPos;
+  }
   /////////////////// 2 wires //////////////////////
   else if ( numWires==2 ) {
     
-    if ( nClipped==2 ) return ( pos[wires[0]] + pos[wires[1]] ) / 2.;
+    if ( nClipped==2 ) { 
+      finalPos[0] = ( pos[wires[0]] + pos[wires[1]] ) / 2.;
+      finalPos[1] = posInc/2.;
+      finalPos[2] = 2.*4096.;
+      return finalPos;
+    }
     
     int max = getMaxWire(wires, sig);
     
@@ -151,7 +170,7 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
     return fitGaus(posFit, valFit);
   }
 
-  ///////////////////// 3 wires ///////////////////////////////////////////////////////////
+  ///////////////////// 3 wires or more ///////////////////////////////////////////////////////////
   else { // At least 3 wires above threshold
 
     int max = getMaxWire(wires, sig);
@@ -172,6 +191,8 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
 	valFit[1] = sig[max]; posFit[1] = pos[max];
 	valFit[2] = sig[max+1]; posFit[2] = pos[max+1];
       }
+      std::cout << posFit[0] << "\t" << posFit[1] << "\t" << posFit[2] << "\n";
+      std::cout << valFit[0] << "\t" << valFit[1] << "\t" << valFit[2] << "\n";
       return fitGaus(posFit, valFit);
     }
     
@@ -238,13 +259,55 @@ double MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<
 	for ( unsigned int i=0; i<nClipped; ++i ) {
 	  ave += pos[clip[i]];
 	}
-	return ave/nClipped;
+	finalPos[0] = ave/nClipped;
+	finalPos[1] = fabs( pos[clip[0]] - pos[clip[nClipped]] )/2.;
+	finalPos[2] = nClipped*4096.;
+	return finalPos;
       }
     }
   }
 };
+
   
+std::vector<double> MWPCCathodeHandler::fitGaus(std::vector<double> x, std::vector<double> y) {
+ 
+  std::vector <double> params;
+  //First making sure all points in y are above threshold. If they aren't for some odd reason,
+  // I'll set them equal to threshold..
+  for ( auto &i : y ) {
+    if ( i<cathodeThreshold ) i=cathodeThreshold;
+  }
+  //std::cout << x.size() << std::endl;
+  //std::cout << y[0] << "\t" << y[1] << "\t" << y[2] <<"\n";
+  TGraph g(x.size(), &x[0], &y[0]);
+  TF1 func("func","gaus(0)", -87.,87.);
+  func.SetParameters(2000., 0., 20.);
+  g.Fit(&func,"RQ");
+
+  if ( fabs(func.GetParameter(1)) < 87. ) {
+    params.push_back(func.GetParameter(1)); //mean
+    params.push_back(func.GetParameter(2)); //width
+    params.push_back(func.GetParameter(0)); //height
+    return params;
+  }
+
+  else  {
+    func.SetParameters(1000., 0., 20.);
+    func.SetParLimits(1,-87., 87.);
+    g.Fit(&func,"RQ");
+
+    if ( fabs(func.GetParameter(1)) < 87. ) {
+
+      params.push_back(func.GetParameter(1)); //mean
+      params.push_back(func.GetParameter(2)); //width
+      params.push_back(func.GetParameter(0)); //height
+    }
+    else { 
+      params.push_back(0.);
+      params.push_back(0.);
+      params.push_back(0.);
+    }
+    return params;
+  }
   
-void MWPCCathodeHandler::fitGaus(double *wires) {
-  //make sure all three points are positive
 };

@@ -27,6 +27,7 @@
 #include "basic_reconstruction.h"
 #include "WireChamberResponse.h"
 #include "DataTree.hh"
+#include "MWPCPositionResponse.hh"
 
 using namespace std;
 
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
   t->makeOutputTree(std::string(tempOut),"pass1");  
   
   
-  // East MWPC y                                                                  
+  /*// East MWPC y                                                                  
   posPdc2[0]  =  76.20;
   posPdc2[1]  =  66.04;
   posPdc2[2]  =  55.88;
@@ -211,7 +212,7 @@ int main(int argc, char *argv[])
   posPadc[29] =  55.88;
   posPadc[30] =  66.04;
   posPadc[31] =  76.20;
-
+  */
   // Open input ntuple
   char tempIn[500];
   sprintf(tempIn, "/extern/mabrow05/ucna/rawdata/full%s.root", argv[1]);
@@ -369,7 +370,10 @@ int main(int argc, char *argv[])
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
+
     Tin->GetEvent(i);
+
+    if ( i%10000==0 ) std::cout << i << std::endl;
     
     t->xE.nClipped = t->yE.nClipped = t->xW.nClipped = t->yW.nClipped = 0;
 
@@ -380,9 +384,14 @@ int main(int argc, char *argv[])
       pmt[j] = ((double) Qadc[j]) - pedQadc[j];
     }
     
-    
-    // Calculate pedestal-subtracted MWPC cathode PADC values
     for (int j=0; j<32; j++) {
+      
+      cathodeEast[j] = ((double) Pdc2[j]) ;
+      cathodeWest[j] = ((double) Padc[j]) ;
+
+    }
+    // Calculate pedestal-subtracted MWPC cathode PADC values
+    /*for (int j=0; j<32; j++) {
       
       cathodeEast[j] = ((double) Pdc2[j]) - pedPdc2[j];
       cathodeWest[j] = ((double) Padc[j]) - pedPadc[j];
@@ -400,7 +409,10 @@ int main(int argc, char *argv[])
 	t->Cathodes_Ex[j-16] = (double)Pdc2[j] - pedPdc2[j];
 	t->Cathodes_Wx[j-16] = (double)Padc[j] - pedPadc[j];
       }
-    }
+      }*/
+
+    
+   
 
     // Calculate pedestal-subtracted MWPC Anode PADC values
     //Took this out for now. We are comparing against a cut instead...
@@ -583,6 +595,11 @@ int main(int argc, char *argv[])
     yW = 0.;
     posError = 0.;
 
+    std::vector <double> posex(3,0.);
+    std::vector <double> poswx(3,0.);
+    std::vector <double> posey(3,0.);
+    std::vector <double> poswy(3,0.);
+
     double xMWPCEast = 0.;
     double yMWPCEast = 0.;
     double xMWPCWest = 0.;
@@ -594,9 +611,59 @@ int main(int argc, char *argv[])
     double xEmax = 0., yEmax = 0., xWmax = 0., yWmax = 0.; //max adc on wire
     int xEmaxWire=0, yEmaxWire =0, xWmaxWire=0, yWmaxWire=0;  // max wire number
     int xEmult = 0, yEmult = 0, xWmult = 0, yWmult = 0; //Num of wires over threshold
+    double widthEX = 0., widthEY = 0., widthWX = 0., widthWY = 0.;
+    double heightEX = 0., heightEY = 0., heightWX = 0., heightWY = 0.;
+    int nclippedEX = 0, nclippedEY = 0, nclippedWX = 0, nclippedWY = 0;
 
+    //If it's an electron, process it's cathode response
     if (PID==1) {
-      for (int j=0; j<16; j++) {
+
+      MWPCCathodeHandler cathResp(&cathodeEast[16],&cathodeEast[0],&cathodeWest[16],&cathodeWest[0],&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
+      
+      cathResp.findAllPositions();
+
+      posex = cathResp.getPosEX();
+      posey = cathResp.getPosEY();
+      poswx = cathResp.getPosWX();
+      poswy = cathResp.getPosWY();
+
+      xE = posex[0] * positionProjection;
+      yE = posey[0] * positionProjection;
+      xW = poswx[0] * positionProjection;
+      yW = poswy[0] * positionProjection;
+
+      widthEX = posex[1];
+      widthEY = posey[1];
+      widthWX = poswx[1];
+      widthWY = poswy[1];
+      
+      heightEX = posex[2];
+      heightEY = posey[2];
+      heightWX = poswx[2];
+      heightWY = poswy[2];
+
+      xEmult = cathResp.getMultEX();
+      yEmult = cathResp.getMultEY();
+      xWmult = cathResp.getMultWX();
+      yWmult = cathResp.getMultWY();
+
+      nclippedEX = cathResp.getnClippedEX();
+      nclippedEY = cathResp.getnClippedEY();
+      nclippedWX = cathResp.getnClippedWX();
+      nclippedWY = cathResp.getnClippedWY();
+
+      xEmaxWire = cathResp.getMaxWireEX();
+      yEmaxWire = cathResp.getMaxWireEY();
+      xWmaxWire = cathResp.getMaxWireWX();
+      yWmaxWire = cathResp.getMaxWireWY();
+
+      xEmax = cathodeEast[16+xEmaxWire];
+      yEmax = cathodeEast[yEmaxWire];
+      xWmax = cathodeWest[16+xWmaxWire];
+      yWmax = cathodeWest[yWmaxWire];
+
+      //std::cout << xE << "\t" << yE << "\t" << xW << "\t" << yW << "\n";
+      /*for (int j=0; j<16; j++) {
       
 	if (cathodeEast[j+16] > 100.) {
 	  xMWPCEast += cathodeEast[j+16]*posPdc2[j+16];
@@ -657,7 +724,7 @@ int main(int argc, char *argv[])
 	xW = xMWPCWest * positionProjection;
       if (mwpcHitWest && yMWPCWestSum > 0.)
 	yW = yMWPCWest * positionProjection;
-      
+      */
     }
 
     // Pass Everything to output tree
@@ -682,48 +749,48 @@ int main(int argc, char *argv[])
     
     //Wirechambers
     t->xE.center = xE;
-    t->xE.width = 0.;
+    t->xE.width = widthEX;
     t->xE.cathSum = xMWPCEastSum;
     t->xE.maxValue = xEmax;
     t->xE.maxWire = xEmaxWire;
     t->xE.mult = xEmult;
-    //t->xE.nClipped = 0; //This is now implemented above
+    t->xE.nClipped = nclippedEX; //This is now implemented above
     t->xE.err = 0.;
     t->xE.rawCenter = 0.;
-    t->xE.height = 0.;
+    t->xE.height = heightEX;
     
     t->yE.center = yE;
-    t->yE.width = 0.;
+    t->yE.width = widthEY;
     t->yE.cathSum = yMWPCEastSum;
     t->yE.maxValue = yEmax;
     t->yE.maxWire = yEmaxWire;
     t->yE.mult = yEmult;
-    //t->yE.nClipped = 0;
+    t->yE.nClipped = nclippedEY;
     t->yE.err = 0.;
     t->yE.rawCenter = 0.;
-    t->yE.height = 0.;
+    t->yE.height = heightEY;
     
     t->xW.center = xW;
-    t->xW.width = 0.;
+    t->xW.width = widthWX;
     t->xW.cathSum = xMWPCWestSum;
     t->xW.maxValue = xWmax;
     t->xW.maxWire = xWmaxWire;
     t->xW.mult = xWmult;
-    //t->xW.nClipped = 0;
+    t->xW.nClipped = nclippedWX;
     t->xW.err = 0.;
     t->xW.rawCenter = 0.;
-    t->xW.height = 0.;
+    t->xW.height = heightWX;
     
     t->yW.center = yW;
-    t->yW.width = 0.;
+    t->yW.width = widthWY;
     t->yW.cathSum = yMWPCWestSum;
     t->yW.maxValue = yWmax;
     t->yW.maxWire = yWmaxWire;
     t->yW.mult = yWmult;
-    //t->yW.nClipped = 0;
+    t->yW.nClipped = nclippedWY;
     t->yW.err = 0.;
     t->yW.rawCenter = 0.;
-    t->yW.height = 0.;
+    t->yW.height = heightWY;
     
     t->ScintE.q1 = pmt[0];
     t->ScintE.q2 = pmt[1];
