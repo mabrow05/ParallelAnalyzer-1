@@ -25,3 +25,46 @@ double power(double num, int pow) {
   }
   else throw "Error in power somewhere";
 };
+
+std::vector <int> sortVecInt(std::vector<int> vec,
+			     bool hightolow) {
+
+  unsigned int veclen = vec.size();
+  
+  for ( unsigned int i=1; i<veclen; ++i ) {
+    
+    for ( unsigned int j=0; j<i; ++j ) {
+
+      if ( (hightolow && vec[i]>vec[j]) || (!hightolow && vec[i]<vec[j]) ) {
+	vec.insert(vec.begin()+j,1,vec[i]);
+	std::cout << i << " " << j << std::endl;
+	vec.erase(vec.begin()+i+1);
+	continue;
+      }
+    }
+  }
+
+  return vec;
+};
+
+std::vector <double> sortVecDouble(std::vector<double> vec,
+			     bool hightolow) {
+
+  unsigned int veclen = vec.size();
+  
+  for ( unsigned int i=1; i<veclen; ++i ) {
+    
+    for ( unsigned int j=0; j<i; ++j ) {
+
+      if ( (hightolow && vec[i]>vec[j]) || (!hightolow && vec[i]<vec[j]) ) {
+	vec.insert(vec.begin()+j,1,vec[i]);
+	std::cout << i << " " << j << std::endl;
+	vec.erase(vec.begin()+i+1);
+	continue;
+      }
+    }
+  }
+
+  return vec;
+};
+    

@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
   */
   // Open input ntuple
   char tempIn[500];
-  sprintf(tempIn, "/extern/mabrow05/ucna/rawdata/full%s.root", argv[1]);
+  sprintf(tempIn, "%s/full%s.root",getenv("UCNA_RAW_DATA"), argv[1]);
 
   TFile *fileIn = new TFile(tempIn, "READ");
   TTree *Tin = (TTree*)(fileIn->Get("h1"));
@@ -384,32 +384,25 @@ int main(int argc, char *argv[])
       pmt[j] = ((double) Qadc[j]) - pedQadc[j];
     }
     
-    for (int j=0; j<32; j++) {
+    /*for (int j=0; j<32; j++) {
       
       cathodeEast[j] = ((double) Pdc2[j]) ;
       cathodeWest[j] = ((double) Padc[j]) ;
-
-    }
-    // Calculate pedestal-subtracted MWPC cathode PADC values
-    /*for (int j=0; j<32; j++) {
       
-      cathodeEast[j] = ((double) Pdc2[j]) - pedPdc2[j];
-      cathodeWest[j] = ((double) Padc[j]) - pedPadc[j];
-
-      // Calculate number of clipped wires
+      }*/
+    
+    // Calculate pedestal-subtracted MWPC cathode PADC values
+    for (int j=0; j<32; j++) {
+      
       if (j<16) {
-	if ( Pdc2[j] > 4090. ) t->yE.nClipped++;
-	if ( Padc[j] > 4090. ) t->yW.nClipped++;
-	t->Cathodes_Ey[j] = (double)Pdc2[j] - pedPdc2[j];
-	t->Cathodes_Wy[j] = (double)Padc[j] - pedPadc[j];
+	t->Cathodes_Ey[j] = (double)Pdc2[j];
+	t->Cathodes_Wy[j] = (double)Padc[j];
       }
       else {
-	if ( Pdc2[j] > 4090. ) t->xE.nClipped++;
-	if ( Padc[j] > 4090. ) t->xW.nClipped++;
-	t->Cathodes_Ex[j-16] = (double)Pdc2[j] - pedPdc2[j];
-	t->Cathodes_Wx[j-16] = (double)Padc[j] - pedPadc[j];
+	t->Cathodes_Ex[j-16] = (double)Pdc2[j];
+	t->Cathodes_Wx[j-16] = (double)Padc[j];
       }
-      }*/
+    }
 
     
    
@@ -618,7 +611,7 @@ int main(int argc, char *argv[])
     //If it's an electron, process it's cathode response
     if (PID==1) {
 
-      MWPCCathodeHandler cathResp(&cathodeEast[16],&cathodeEast[0],&cathodeWest[16],&cathodeWest[0],&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
+      MWPCCathodeHandler cathResp(t->Cathodes_Ex,t->Cathodes_Ey,t->Cathodes_Wx,t->Cathodes_Wy,&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
       
       cathResp.findAllPositions();
 

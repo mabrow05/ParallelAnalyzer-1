@@ -9,14 +9,14 @@ ROOTCFLAGS	= $(shell root-config --cflags)
 VPATH = ./:../include
 
 CXX		= g++
-CXXFLAGS	= -O2 -Wall -fPIC -std=c++11 -g
+CXXFLAGS	= -O2 -Wall -fPIC -std=c++11
 LD		= g++
 SOFLAGS		= -shared
 LIBS		= $(ROOTLIBS) $(ROOTGLIBS)
-CXXFLAGS       += $(ROOTCFLAGS) -Iinclude
+CXXFLAGS       += $(ROOTCFLAGS) -I../include
 LIBS	       += -lSpectrum -lMinuit
 
-objects = MBUtils.o Asymmetries.o SQLinterface.o SystematicCorrections.o EvtRateHandler.o  
+objects = Asymmetries.o SQLinterface.o SystematicCorrections.o MBUtils.o EvtRateHandler.o  
 
 
 .PHONY: all
@@ -38,11 +38,11 @@ SuperSumComparison.exe: SuperSumComparison.o $(objects)
 	$(CXX) $(CXXFLAGS) -o SuperSumComparison.exe SuperSumComparison.o $(objects) $(LIBS) 
 	@echo "Done"
 
-Asymmetries.o: Asymmetries.hh
+Asymmetries.o: Asymmetries.hh MBUtils.o
 
 BetaSpectrum.o: BetaSpectrum.hh
 
-EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh
+EvtRateHandler.o: EvtRateHandler.hh SQLinterface.hh MBUtils.o
 
 SQLinterface.o: SQLinterface.hh
 

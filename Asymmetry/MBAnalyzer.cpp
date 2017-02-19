@@ -82,7 +82,23 @@ int main(int argc, char* argv[])
   
   //if ( corr.size()>7 && corr.compare(corr.size()-8,8,"_withPOL") == 0 ) withPOL = true; 
 
-  
+  std::cout << "Is this thing broken???\n";
+  std::vector<double> vec{1.,3.,2.,7.,8.,4.,5.,6.,5.,10.};
+
+    for ( auto i : vec ) {
+      std::cout << i << " ";
+    }
+    std::cout << std::endl;
+    
+    std::vector<double> vecSorted = sortVecDouble(vec,true);
+
+    for ( auto i : vecSorted ) {
+      std::cout << i << " ";
+    }
+
+    std::cout << std::endl;
+	
+    
   std::string analysisChoice = argc>1 ? std::string(argv[1]) : "A";
   Int_t octBegin = argc>2 ? atoi(argv[2]) : 0;
   Int_t octEnd = argc>2 ? atoi(argv[3]) : 1;
@@ -122,7 +138,7 @@ int main(int argc, char* argv[])
 
   
   try {
-
+    
     /*std::vector < Double_t > enBinMedian; //Holds the center of the energy bins
     for (Int_t i=0; i<120; i++) {
       Double_t En = i*enBinWidth+enBinWidth/2.;
@@ -149,7 +165,7 @@ int main(int argc, char* argv[])
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
      
-    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
