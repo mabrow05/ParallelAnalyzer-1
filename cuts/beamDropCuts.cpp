@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  aveBefore = aveBefore/nBins;
+  aveBefore = aveBefore/(nBins-2);
   aveAfter = aveAfter/binsAfter;
   
   delete t;

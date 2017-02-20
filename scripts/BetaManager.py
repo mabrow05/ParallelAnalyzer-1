@@ -143,6 +143,26 @@ class BetaReplayManager:
                 #os.system("cd ../pedestals/; ./pedestal_widths.exe %i"%run)
         print "DONE"
 
+    def findBeamDrops(self, runORoctet):
+        runs = []
+        if runORoctet > 16000:
+            print "Running beamDropCuts for run %i"%runORoctet
+            os.system("cd ../cuts/; ./beamDropCuts.exe %i"%runORoctet)
+        else: 
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
+        
+            for line in infile:  
+                words=line.split()
+                if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                    runs.append(int(words[1]))
+        
+            for run in runs:
+                print "Running pedestals for run %i"%run
+                os.system("cd ../cuts/; ./beamDropCuts.exe %i"%run)
+                #os.system("cd ../pedestals/; ./pedestal_widths.exe %i"%run)
+        print "DONE"
+
 
     def runGainBismuth(self,runORoctet):
         runs = []
@@ -397,23 +417,24 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
-    if 0:
-        octet_range =[91,121]#[20,28]#[45,50]#[38,40]#[0,59];
+    if 1:
+        octet_range =[0,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
+            beta.findBeamDrops(octet)
             #beta.runReplayPass1(octet)
             #beta.runGainBismuth(octet)
            # beta.findTriggerFunctions(octet)
             #beta.runReplayPass2(octet)
             #beta.runReplayPass3(octet)
-            beta.runRootfileTranslator(octet)
+            #beta.runRootfileTranslator(octet)
             #beta.removeDepolRunFiles(octet)
            
 
 
     #Running reverse calibrations
-    if 1:
+    if 0:
         octet_range = [105,111];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
