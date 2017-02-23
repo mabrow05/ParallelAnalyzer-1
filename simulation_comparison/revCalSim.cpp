@@ -9,7 +9,8 @@ of the detector. Also applies the trigger functions */
 #include "runInfo.h"
 #include "calibrationTools.hh"
 #include "TriggerMap.hh"
-#include "../Asymmetry/SQLinterface.hh"
+//#include "../Asymmetry/SQLinterface.hh"
+#include "MWPCPositionResponse.hh"
 
 #include <vector>
 #include <cstdlib>
@@ -46,8 +47,30 @@ std::string getRunTypeFromOctetFile(int octet, int run) {
   
 };
 
-
 int getPolarization(int run) {
+
+  std::ifstream infile(TString::Format("%s/masterBetaRunList.txt",getenv("OCTET_LIST")).Data());
+
+  int rn = 0;
+  std::string type = "";
+  bool runFound = false;
+
+  while ( infile >> rn >> type ) {
+    if ( rn == run ) { runFound = true; infile.close(); continue; }
+  }
+
+  if ( !runFound ) throw "You didn't pick a run in an octet...";
+  //Flipper OFF is p = -1
+  if ( type=="A1" || type=="A2" || type=="A10" || type=="A12" || type=="B4" || type=="B5" || type=="B7" || type=="B9" ) return -1;
+  else if ( type=="B1" || type=="B2" || type=="B10" || type=="B12" || type=="A4" || type=="A5" || type=="A7" || type=="A9" ) return 1;
+  
+  else {
+    std::cout << "You chose a Depol Run.. no polarization\n";
+    return 0;
+  }
+};
+
+/*int getPolarization(int run) {
  
   std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
   std::string dbname = std::string(getenv("UCNADB"));
@@ -69,7 +92,7 @@ int getPolarization(int run) {
     std::cout <<  "Polarization isn't applicaple or you chose a Depol Run";
     return 0;
   }
-};
+  };*/
 
 
 vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
@@ -232,16 +255,17 @@ void SetUpTree(TTree *tree) {
   tree->Branch("time",&Time,"timeE/D:timeW");
   tree->Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
   tree->Branch("MWPCPos",&mwpc_pos,"MWPCPosE[3]/D:MWPCPosW[3]");
-  tree->Branch("Cath_EX",Cath_EX,"Cath_EX[16]/D");
-  tree->Branch("Cath_EY",Cath_EY,"Cath_EY[16]/D");
-  tree->Branch("Cath_WX",Cath_WX,"Cath_WX[16]/D");
-  tree->Branch("Cath_WY",Cath_WY,"Cath_WY[16]/D");
+  tree->Branch("Cath_EX",Cath_EX,"Cath_EX[16]/F");
+  tree->Branch("Cath_EY",Cath_EY,"Cath_EY[16]/F");
+  tree->Branch("Cath_WX",Cath_WX,"Cath_WX[16]/F");
+  tree->Branch("Cath_WY",Cath_WY,"Cath_WY[16]/F");
   tree->Branch("nClipped_EX",&nClipped_EX,"nClipped_EX/I");
   tree->Branch("nClipped_EY",&nClipped_EY,"nClipped_EY/I");
   tree->Branch("nClipped_WX",&nClipped_WX,"nClipped_WX/I");
   tree->Branch("nClipped_WY",&nClipped_WY,"nClipped_WY/I");
   tree->Branch("ScintPos",&scint_pos,"ScintPosE[3]/D:ScintPosW[3]");
   tree->Branch("ScintPosAdjusted",&scint_pos_adj,"ScintPosAdjE[3]/D:ScintPosAdjW[3]");
+  tree->Branch("cathRespPos",&cathResp_pos,"cathRespPosE[3]/D:cathRespPosW[3]");
   tree->Branch("PMT",&pmt,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:etaEvis0/D:etaEvis1:etaEvis2:etaEvis3:etaEvis4:etaEvis5:etaEvis6:etaEvis7:nPE0/D:nPE1:nPE2:nPE3:nPE4:nPE5:nPE6:nPE7");
   
 }
@@ -299,6 +323,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center*xE.center+yE.center*yE.center)<2500. && (xW.center*xW.center+yW.center*yW.center)<2500.");
     sprintf(tempW,"Type<4 && Type>=0 && PID==1 && Side==1 && (xW.center*xW.center+yW.center*yW.center)<2500. && (xE.center*xE.center+yE.center*yE.center)<2500.");
     outputBase = string(getenv("REVCALSIM")) + "beta/";
+    //outputBase = "./";
   }
   BetaEvents = data->GetEntries(tempE) + data->GetEntries(tempW);
   cout << "Electron Events in Data file: " << BetaEvents << endl;
@@ -422,11 +447,6 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   //chain->SetBranchAddress("primaryKE",&Eprim);
 
 
-  
-
-  //Trigger booleans
-  bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-  Double_t MWPCThreshold=0.2; // keV dep in the wirechamber.. 
 
   //Set random number generator
   TRandom3 *seed = new TRandom3(0); // seed generator
@@ -446,6 +466,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   TRandom3 *randPMTW4 = new TRandom3((int)seed->Rndm()*8);
 
   std::vector <Double_t> triggRandVec(4,0.);
+
+  // Wirechamber information
+  bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger; //Trigger booleans
+  Double_t MWPCAnodeThreshold=0.2; // keV dep in the wirechamber.. 
 
 
   //Get total number of events in TChain
@@ -522,8 +546,12 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     //Calculate event weight
     if (source=="Beta") AsymWeight = 1+(-0.12)*pol*sqrt(1-(1/((primKE/511.+1.)*(primKE/511.+1.))))*cos(primTheta);
     else AsymWeight = 1.;
+
+
+    /////////////// Do position and Wirechamber stuff ///////////////////
     
-    scint_pos_adj.ScintPosAdjE[0] = source=="Beta"?scint_pos.ScintPosE[0]*sqrt(0.6)*10.:rand2->Gaus(srcPos[0][0], fabs(srcPos[0][2]));
+    // Following negative sign is to turn x-coordinate into global coordinate on East
+    scint_pos_adj.ScintPosAdjE[0] = source=="Beta"?-scint_pos.ScintPosE[0]*sqrt(0.6)*10.:rand2->Gaus(srcPos[0][0], fabs(srcPos[0][2]));
     scint_pos_adj.ScintPosAdjE[1] = source=="Beta"?scint_pos.ScintPosE[1]*sqrt(0.6)*10.:rand2->Gaus(srcPos[0][1], fabs(srcPos[0][2]));
     scint_pos_adj.ScintPosAdjW[0] = source=="Beta"?scint_pos.ScintPosW[0]*sqrt(0.6)*10.:rand2->Gaus(srcPos[1][0], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[0]+displacementX;
     scint_pos_adj.ScintPosAdjW[1] = source=="Beta"?scint_pos.ScintPosW[1]*sqrt(0.6)*10.:rand2->Gaus(srcPos[1][1], fabs(srcPos[1][2]));//sqrt(0.6)*10.*scint_pos.ScintPosW[1]+displacementY;
@@ -532,49 +560,99 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
     //Adding in an adjusted wirechamber position to test whether using the exact location of the 
     // scintillator hit is causing the strange effects I see with backscattering events in the beta decay data
-    Double_t mwpcAdjE[3] = {0.};
-    Double_t mwpcAdjW[3] = {0.};
-    mwpcAdjE[0] = source=="Beta"?mwpc_pos.MWPCPosE[0]*sqrt(0.6)*10.: 0.;
-    mwpcAdjE[1] = source=="Beta"?mwpc_pos.MWPCPosE[1]*sqrt(0.6)*10.: 0.;
-    mwpcAdjW[0] = source=="Beta"?mwpc_pos.MWPCPosW[0]*sqrt(0.6)*10.: 0.;
-    mwpcAdjW[1] = source=="Beta"?mwpc_pos.MWPCPosW[1]*sqrt(0.6)*10.: 0.;
-    mwpcAdjE[2] = source=="Beta"?mwpc_pos.MWPCPosE[2]*10. : 0.;
-    mwpcAdjW[2] = source=="Beta"?mwpc_pos.MWPCPosW[2]*10. : 0.;
+    // This will use the same algorithm used in data...
+    Double_t mwpcAdjE[3] = {0.,0.,0.};
+    Double_t mwpcAdjW[3] = {0.,0.,0.};
 
+    //Taking care of simulation position anomalies.  
+
+    if ( source == "Beta" ) {
+
+      // 2011-2012 Cathode Threshold
+      Double_t clip_threshEX = 8.;
+      Double_t clip_threshEY = 8.;
+      Double_t clip_threshWX = 8.;
+      Double_t clip_threshWY = 8.;
+      
+      // 2012-2013 Cathode Threshold NEED TO ADD IN ISOBUTANE THRESHOLDS
+      if ( runNumber > 20000 ) {
+	// ISOBUTANE
+	if ( runNumber> 21087 && runNumber < 21623 ) { 
+	  clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
+	}
+	else clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
+      } 
+      
+      std::vector <double> posex(3,0.);
+      std::vector <double> poswx(3,0.);
+      std::vector <double> posey(3,0.);
+      std::vector <double> poswy(3,0.);
+
+      double dCath_EX[16]{0.};
+      double dCath_EY[16]{0.};
+      double dCath_WX[16]{0.};
+      double dCath_WY[16]{0.};
+
+      // Different def of wires in data
+      for ( int i=0; i<16; ++i ) {
+	dCath_EX[i] = (double)Cath_EX[i];
+	dCath_EY[i] = (double)Cath_EY[i];
+	dCath_WX[i] = (double)Cath_WX[i];
+	dCath_WY[i] = (double)Cath_WY[i];
+      }
+      
+      MWPCCathodeHandler cathResp(dCath_EX,dCath_EY,dCath_WX,dCath_WY);
+      cathResp.setCathodeThreshold(0.000001);
+      cathResp.setClippingThreshold(clip_threshEX,clip_threshEY,clip_threshWX,clip_threshWY);  
+      cathResp.findAllPositions();
+
+      //cathResp.PrintSignals();
+      //if ( evtTally ==5 ) exit(0);
+
+      posex = cathResp.getPosEX();
+      posey = cathResp.getPosEY();
+      poswx = cathResp.getPosWX();
+      poswy = cathResp.getPosWY();
+      
+      mwpcAdjE[0] = -posex[0] * sqrt(0.6) ; // The wires are already in 
+      mwpcAdjE[1] = -posey[0] * sqrt(0.6) ; // mm in the MWPCCathodeHandler Class
+      mwpcAdjW[0] = poswx[0] * sqrt(0.6) ;
+      mwpcAdjW[1] = -poswy[0] * sqrt(0.6) ;
+      mwpcAdjE[2] = mwpc_pos.MWPCPosE[2]*10. ;
+      mwpcAdjW[2] = mwpc_pos.MWPCPosW[2]*10. ;
+
+      //std::cout << mwpcAdjE[0] << "\t" << mwpcAdjE[1] << mwpcAdjW[0] << "\t" << mwpcAdjW[1] <<"\n"; 
+      
+      nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
+     
+      nClipped_EX = cathResp.getnClippedEX();
+      nClipped_EY = cathResp.getnClippedEY();
+      nClipped_WX = cathResp.getnClippedWX();
+      nClipped_WY = cathResp.getnClippedWY();
+      
+    }
+
+    for ( int ii=0; ii<3; ++ii ) {
+      cathResp_pos.cathRespPosE[ii] = mwpcAdjE[ii];
+      cathResp_pos.cathRespPosW[ii] = mwpcAdjW[ii];
+    }
+    
+    //std::cout << mwpcAdjE[0] << "\t" << mwpcAdjW[0] << std::endl;
+    //if (evtTally==5) exit(0);
 
     std::vector <Double_t> eta; 
-    if ( source!="Beta" ) eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],
-							  scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
+    if ( source!="Beta" ) eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],
+							  scint_pos_adj.ScintPosAdjE[1],
+							  scint_pos_adj.ScintPosAdjW[0],
+							  scint_pos_adj.ScintPosAdjW[1]);
+
     else eta = posmap.getInterpolatedEta(mwpcAdjE[0],mwpcAdjE[1],
 					 mwpcAdjW[0],mwpcAdjW[1]);
-    //for (UInt_t iii=0; iii<eta.size(); iii++) std::cout << eta[iii] << std::endl;
     
       
     //MWPC triggers
-    if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
-    if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
-
-    // Checking for what would be seen as a clipped event in the Cathodes. Right now, this is a hard cut on 6 keV deposited on 
-    // a single wire, as was determined by just looking for where the Cathode ADC spectra started to clip as compared to 
-    // the simulated energy spectrum (done by eye, set at 6 keV for now)
-    nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
-
-    // 2011-2012 Cathode Threshold
-    Double_t clip_threshE = 8.;
-    Double_t clip_threshW = 8.;
-
-    // 2012-2013 Cathode Threshold
-    if ( runNumber > 20000 ) clip_threshE = 6., clip_threshW = 6.;
-    
-    for ( UInt_t j=0; j<16; j++ ) {
-      if ( Cath_EX[j] > clip_threshE ) nClipped_EX++;
-      if ( Cath_EY[j] > clip_threshE ) nClipped_EY++;
-      if ( Cath_WX[j] > clip_threshW ) nClipped_WX++;
-      if ( Cath_WY[j] > clip_threshW ) nClipped_WY++;
-    }
-
-
-
+    if (mwpcE.MWPCEnergyE>MWPCAnodeThreshold) EMWPCTrigger=true;
+    if (mwpcE.MWPCEnergyW>MWPCAnodeThreshold) WMWPCTrigger=true;
 
     Double_t pmtEnergyLowerLimit = 1.; //To put a hard cut on the weight
     
@@ -621,8 +699,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     //Calculate the weighted energy on a side
     Double_t numer=0., denom=0.;
     for (UInt_t p=0;p<4;p++) {
-      numer += pmtQuality[p] ? pmt.nPE[p] : 0.;
-      denom += pmtQuality[p] ? eta[p]*alpha[p] : 0.;
+      numer += pmtQuality[p] && pmt.etaEvis[p]>0. ? pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] && pmt.etaEvis[p]>0. ? eta[p]*alpha[p] : 0.;
     }
 
     //Now we apply the trigger probability
@@ -675,8 +753,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
      //Calculate the total weighted energy
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
-      numer += pmtQuality[p] ? pmt.nPE[p] : 0.;
-      denom += pmtQuality[p] ? eta[p]*alpha[p] : 0.;
+      numer += pmtQuality[p] && pmt.etaEvis[p]>0. ? pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] && pmt.etaEvis[p]>0. ? eta[p]*alpha[p] : 0.;
     }
     //Now we apply the trigger probability
     Double_t totalEnW = denom>0. ? numer/denom : 0.;
@@ -805,17 +883,23 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     }    
   
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
-    if ( PID==1 && Erecon>0. && ( sqrt( mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1] )<fidCut
-				  && sqrt( mwpcAdjW[0]*mwpcAdjW[0] + mwpcAdjW[1]*mwpcAdjW[1] )<fidCut ) ) evtTally++;
+    if ( source == "Beta") {
+      if ( PID==1 && Erecon>0. && ( sqrt( mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1] )<fidCut
+				    && sqrt( mwpcAdjW[0]*mwpcAdjW[0] + mwpcAdjW[1]*mwpcAdjW[1] )<fidCut ) ) evtTally++;
+    }
 
-    /*    if ( PID==1 && Erecon>0. && ( sqrt( scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0] + scint_pos.ScintPosE[1]*scint_pos.ScintPosE[1] )*sqrt(0.6)*10.<fidCut
-	  && sqrt( scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0] + scint_pos.ScintPosW[1]*scint_pos.ScintPosW[1] )*sqrt(0.6)*10.<fidCut ) ) evtTally++;*/
+    else {
+      if ( PID==1 && Erecon>0. && ( sqrt( scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0] + 
+					  scint_pos.ScintPosE[1]*scint_pos.ScintPosE[1] )*sqrt(0.6)*10.<fidCut
+				    && sqrt( scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0] + 
+					     scint_pos.ScintPosW[1]*scint_pos.ScintPosW[1] )*sqrt(0.6)*10.<fidCut ) ) evtTally++;
+    }
 
     evt++;
-
+    
     if (PID>=0) tree->Fill();
     //cout << evtTally << endl;
-    if (evt%10000==0) {std::cout << evt << std::endl;}//cout << "filled event " << evt << endl;
+    if (evtTally%10000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
   }
   cout << endl;
 

@@ -7,7 +7,7 @@ double Erecon; // smeared, weighted, and trigger func corrected energy summed ov
 
 int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY; // Clipping numbers
 
-double Cath_EX[16], Cath_EY[16], Cath_WX[16], Cath_WY[16];
+float Cath_EX[16], Cath_EY[16], Cath_WX[16], Cath_WY[16];
 
 struct Evis {
   double EvisE;
@@ -48,6 +48,11 @@ struct ScintPosAdjusted {
   double ScintPosAdjE[3];
   double ScintPosAdjW[3];
 } scint_pos_adj;
+
+struct cathRespPos {
+  double cathRespPosE[3];
+  double cathRespPosW[3];
+} cathResp_pos;
 
 struct PMT {
   double Evis[8];
