@@ -1,6 +1,41 @@
 #include "DataTree.hh"
 #include <TSystem.h>
+#include <TKey.h>
 
+
+Int_t checkIfReplayFileIsGood(std::string fname) {
+
+  if ( gSystem->AccessPathName(fname.c_str()) ) {
+    std::cout << fname << " does not exist.\n";
+    return 0;
+  }
+  
+  // Open the file and give it a chance to recover broken keys
+  TFile *f = new TFile(fname.c_str(),"UPDATE");
+  
+  if ( f->IsZombie() ) {
+    std::cout << fname << " IS A ZOMBIE!!!\n";
+    delete f;
+    return -1;
+  }
+  
+  //If it's not a zombie, check that at least 5 keys exist...
+
+  TIter next(f->GetListOfKeys());
+  TKey *key;
+  Int_t nkeys = 0;
+  while ( (key=(TKey*)next()) ) nkeys++;
+
+  if ( nkeys < 5 ) {
+    std::cout << fname << " NOT FULLY RECOVERED!!!\n";
+    delete f;
+    return -1;
+  }
+
+  delete f;
+  return 1;
+
+};
 
 DataTree::DataTree() : inputFile(NULL), outputFile(NULL), inputTree(NULL), outputTree(NULL), bInputTreeIsGood(false) {
   
@@ -93,6 +128,11 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   outputTree->Branch("ProbIII",&ProbIII,"ProbIII/D");
   outputTree->Branch("Erecon",&Erecon,"Erecon/D");
 
+  outputTree->Branch("badTimeFlag",&badTimeFlag,"badTimeFlag/I");
+  outputTree->Branch("oldTimeE",&oldTimeE, "oldTimeE/D");
+  outputTree->Branch("oldTimeW",&oldTimeW, "oldTimeW/D");
+  outputTree->Branch("oldTime",&oldTime, "oldTime/D");
+  
   std::cout << "Created output tree " << outputTreeName << " in " << outputFileName << "...\n";
 };
 
@@ -110,12 +150,13 @@ void DataTree::writeOutputFile() {
 
 void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeName) {
   
-  // Check that the file exists... note that gSystem->AccessPathName() returns true if it can't access the path name!
-  if ( gSystem->AccessPathName(inputFileName.c_str()) ) return;
-  
+  // Check that the file is good...
+  if ( checkIfReplayFileIsGood(inputFileName.c_str()) != 1 ) return;
+
   bInputTreeIsGood = true;
 
   inputFile = new TFile(inputFileName.c_str(),"READ");
+
   inputTree = (TTree*)(inputFile->Get(inputTreeName.c_str()));
   //inputTree = (TTree*)(gROOT->FindObject(inputTreeName.c_str()));
 
@@ -193,6 +234,11 @@ void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeNa
   inputTree->SetBranchAddress("Type",&Type);
   inputTree->SetBranchAddress("ProbIII",&ProbIII);
   inputTree->SetBranchAddress("Erecon",&Erecon);
+
+  inputTree->SetBranchAddress("badTimeFlag",&badTimeFlag);
+  inputTree->SetBranchAddress("oldTimeE",&oldTimeE);
+  inputTree->SetBranchAddress("oldTimeW",&oldTimeW);
+  inputTree->SetBranchAddress("oldTime",&oldTime);
 
   std::cout << "Prepared input tree " << inputTreeName << " in " << inputFileName << "...\n";
 };

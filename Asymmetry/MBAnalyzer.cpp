@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   
   //if ( corr.size()>7 && corr.compare(corr.size()-8,8,"_withPOL") == 0 ) withPOL = true; 
 
-  std::cout << "Is this thing broken???\n";
+  /*  std::cout << "Is this thing broken???\n";
   std::vector<double> vec{1.,3.,2.,7.,8.,4.,5.,6.,5.,10.};
 
     for ( auto i : vec ) {
@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
     }
 
     std::cout << std::endl;
-	
+  */	
     
   std::string analysisChoice = argc>1 ? std::string(argv[1]) : "A";
   Int_t octBegin = argc>2 ? atoi(argv[2]) : 0;
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   if ( argc==7 ) corr = std::string(argv[6]);
   bool UKdata = true;//true;
-  bool simulation = false;
+  bool simulation = true;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -157,15 +157,15 @@ int main(int argc, char* argv[])
       }*/
 
    
-    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
     //PlotAsymmetriesByGrouping("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotFinalAsymmetries("Quartet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
      
-    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotAsymmetriesByGrouping("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotFinalAsymmetries("Pair",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     

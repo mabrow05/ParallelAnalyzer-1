@@ -311,7 +311,7 @@ class BetaReplayManager:
         
             for line in infile:      
                 words=line.split()
-                if words[0] in bgRunTypes: #or words[0] in betaRunTypes: 
+                if words[0] in betaRunTypes or words[0] in bgRunTypes:
                     runs.append(int(words[1]))
         
             for run in runs:
@@ -417,25 +417,25 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
-    if 1:
-        octet_range =[0,121]#[20,28]#[45,50]#[38,40]#[0,59];
+    if 0:
+        octet_range =[60,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
-            beta.findBeamDrops(octet)
-            #beta.runReplayPass1(octet)
+            beta.runReplayPass1(octet)
+            #beta.findBeamDrops(octet)
             #beta.runGainBismuth(octet)
            # beta.findTriggerFunctions(octet)
-            #beta.runReplayPass2(octet)
-            #beta.runReplayPass3(octet)
+            beta.runReplayPass2(octet)
+            beta.runReplayPass3(octet)
             #beta.runRootfileTranslator(octet)
             #beta.removeDepolRunFiles(octet)
            
 
 
     #Running reverse calibrations
-    if 0:
-        octet_range = [105,111];
+    if 1:
+        octet_range = [91,121];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findTriggerFunctions(octet)

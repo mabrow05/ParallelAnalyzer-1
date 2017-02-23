@@ -112,6 +112,11 @@ int main(int argc, char *argv[])
     spec->ProbIII = (float)UK->ProbIII;
     spec->Erecon = (float)UK->Erecon;
 
+    spec->badTimeFlag = UK->badTimeFlag; 
+    spec->oldTimeE = (float)UK->oldTimeE;
+    spec->oldTimeW = (float)UK->oldTimeW;
+    spec->oldTime = (float)UK->oldTime;
+
     copy(UK->Cathodes_Ex,UK->Cathodes_Ex+16,spec->Cathodes_Ex);
     copy(UK->Cathodes_Ey,UK->Cathodes_Ey+16,spec->Cathodes_Ey);
     copy(UK->Cathodes_Wx,UK->Cathodes_Wx+16,spec->Cathodes_Wx);

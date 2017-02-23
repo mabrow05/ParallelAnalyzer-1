@@ -25,6 +25,8 @@ int separate23(int side, double mwpcEn) {
 
 
 EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
+  
+  bool useOldTimes = false;
 
   numEnergyBins = (int)(1200./enBinWidth);
 
@@ -52,22 +54,33 @@ EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, 
   for (unsigned int i = 0; i<runs.size(); i++) {
     std::string logFilePath = std::string(getenv("RUN_INFO_FILES"))+"runInfo_"+itos(runs[i])+".dat";
     std::ifstream logFile(logFilePath.c_str());
-    std::vector <std::string> title(4);
-    std::vector <double> value(4);
-    for (int i=0; i<4; i++) {
+    std::vector <std::string> title(6);
+    std::vector <std::string> value(6); // Fix this after all of the Run Info files have been fixed. It should be 7
+    for (int i=0; i<6; i++) {      // but the monitor integral is attached to the next time.
       logFile >> title[i] >> value[i];
     }
     logFile.close();
     
     if (unblinded) {
-      runLength[i][0] = value[2];
-      runLength[i][1] = value[2];
+      runLength[i][0] = atof(value[2].c_str());
+      runLength[i][1] = atof(value[2].c_str());
     }
     else {
-      runLength[i][0] = value[0];
-      runLength[i][1] = value[1];
+      runLength[i][0] = atof(value[0].c_str());
+      runLength[i][1] = atof(value[1].c_str());
     }
-    UCNMonIntegral[i] = value[3];
+    UCNMonIntegral[i] = 100.;//value[3];
+
+    /* if ( useOldTimes ) {
+      if (unblinded) {
+	runLength[i][0] = value[6];
+	runLength[i][1] = value[6];
+      }
+      else {
+	runLength[i][0] = value[4];
+	runLength[i][1] = value[5];
+      }
+      }*/
 
     totalRunLengthE += runLength[i][0];
     totalRunLengthW += runLength[i][1];
@@ -225,6 +238,7 @@ void EvtRateHandler::dataReader() {
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
   float EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0., MWPCEnergyE_f=0., MWPCEnergyW_f=0.; // For reading in data from MPM replays
   int xE_nClipped=0, yE_nClipped=0, xW_nClipped=0, yW_nClipped=0;
+  int badTimeFlag = 0; 
 
   int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
 
@@ -245,6 +259,7 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("Erecon",&Erecon);
       Tin->SetBranchAddress("TimeE",&TimeE);
       Tin->SetBranchAddress("TimeW",&TimeW);
+      Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
       Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
       Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
       Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
@@ -273,6 +288,7 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("Erecon",&Erecon_f);
       Tin->SetBranchAddress("TimeE",&TimeE_f);
       Tin->SetBranchAddress("TimeW",&TimeW_f);
+      Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
       Tin->GetBranch("xEmpm")->GetLeaf("center")->SetAddress(&EmwpcX_f);
       Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY_f);
       Tin->GetBranch("xWmpm")->GetLeaf("center")->SetAddress(&WmwpcX_f);
@@ -311,10 +327,10 @@ void EvtRateHandler::dataReader() {
 	TimeW = (double) TimeW_f;
       }
       
-      if (PID==1) {       // Cut on electrons 
+      if ( PID==1  ) {       // && badTimeFlag==0 Cut on electrons not cut out by beam drops or bursts
 	
 	//Cut out clipped events and bad Wirechamber signals
-	if ( Type!=0 ) {
+	/*if ( Type!=0 ) {
 	  if ( xE_nClipped>1 || yE_nClipped>1 || xW_nClipped>1 || yW_nClipped>1 ) continue;
 	  else if ( xeRC>6 || yeRC>6 || xwRC>6 || ywRC>6 ) continue; //Must look at both sides
 	}
@@ -328,7 +344,7 @@ void EvtRateHandler::dataReader() {
 	    else if ( xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on West
 	  }
 	}
-	
+	*/
 	
 	// Determine radial event position squared for cutting on fiducial volume
 	r2E = EmwpcX*EmwpcX + EmwpcY*EmwpcY;
@@ -427,6 +443,8 @@ void SimEvtRateHandler::dataReader() {
   double AsymWeight=1.;
   double scintPosE[3]={0.};
   double scintPosW[3]={0.};
+  double cathRespPosE[3]={0.}; //Position reconstructed the same way it is in data
+  double cathRespPosW[3]={0.};
   double mwpcPosE[3]={0.};
   double mwpcPosW[3]={0.}; //holds the position of the event in the MWPC for simulated data
   int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
@@ -450,6 +468,8 @@ void SimEvtRateHandler::dataReader() {
     Tin->GetBranch("time")->GetLeaf("timeW")->SetAddress(&TimeW);
     Tin->GetBranch("ScintPosAdjusted")->GetLeaf("ScintPosAdjE")->SetAddress(scintPosE);
     Tin->GetBranch("ScintPosAdjusted")->GetLeaf("ScintPosAdjW")->SetAddress(scintPosW);
+    Tin->GetBranch("cathRespPos")->GetLeaf("cathRespPosE")->SetAddress(cathRespPosE);
+    Tin->GetBranch("cathRespPos")->GetLeaf("cathRespPosW")->SetAddress(cathRespPosW);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcPosE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcPosW);
     Tin->SetBranchAddress("AsymWeight",&AsymWeight);
@@ -487,8 +507,8 @@ void SimEvtRateHandler::dataReader() {
 
 	//r2E = scintPosE[0]*scintPosE[0] + scintPosE[1]*scintPosE[1];
 	//r2W = scintPosW[0]*scintPosW[0] + scintPosW[1]*scintPosW[1];
-	r2E = ( mwpcPosE[0]*mwpcPosE[0] + mwpcPosE[1]*mwpcPosE[1] ) * 0.6 * 100.; //Transforming to decay trap coords
-	r2W = ( mwpcPosW[0]*mwpcPosW[0] + mwpcPosW[1]*mwpcPosW[1] ) * 0.6 * 100.;
+	r2E = ( cathRespPosE[0]*cathRespPosE[0] + cathRespPosE[1]*cathRespPosE[1] ) ; //Transforming to decay trap coords
+	r2W = ( cathRespPosW[0]*cathRespPosW[0] + cathRespPosW[1]*cathRespPosW[1] ) ;
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  //if ( r2E<(60.*60.) && r2W<(60.*60.) ) {

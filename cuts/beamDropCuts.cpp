@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
   Float_t aveAfter = 0.;
   Int_t binsAfter = 0;
 
-  for (Int_t b=1; b<=nBins-2; b++ ) { // The minus 2 removes the last 2 empty bins
+  for ( Int_t b=1; b<=nBins-2; b++ ) { // The minus 2 removes the last 2 empty bins
 
     Float_t rate = t->UCN_Mon_1_Rate->GetBinContent(b);
 
@@ -51,16 +51,20 @@ int main(int argc, char *argv[]) {
       binCounter++;
     }
 
-    if ( rate > rateCut ) {
+    if ( rate > rateCut || b == (nBins-3) ) {
 
       if (binCounter<3) {
 	aveAfter += rate;
         binsAfter += 1;
       }
       
-      if ( binCounter > 2 ) { // We'll record this chunk
-	Float_t lowCut = t->UCN_Mon_1_Rate->GetXaxis()->GetBinLowEdge(b-binCounter);
-	Float_t UpCut = t->UCN_Mon_1_Rate->GetXaxis()->GetBinLowEdge(b);
+      if ( binCounter > 1 ) { // We'll record this chunk
+
+	// We go 3 bins back from first bin under rateCut because the rate seems
+	// to fall slowly. It then rises quickly, so we use the upper edge of the first
+	// good rate bin to come back on
+	Float_t lowCut = ( (b-binCounter)-3 ) > 0 ? t->UCN_Mon_1_Rate->GetXaxis()->GetBinLowEdge((b-binCounter)-3) : 0.;
+	Float_t UpCut = t->UCN_Mon_1_Rate->GetXaxis()->GetBinUpEdge(b);
 	std::vector <Float_t> minMax {lowCut, UpCut};
 	ranges.push_back(minMax);
       }

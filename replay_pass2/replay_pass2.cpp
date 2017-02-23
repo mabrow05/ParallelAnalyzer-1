@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <iomanip>
 
 // ROOT libraries
 #include "TRandom3.h"
@@ -28,6 +29,39 @@
 
 
 using namespace std;
+
+bool OnlyReplayBadFiles = true;
+
+//Read in beam drops
+std::vector < std::vector < Double_t > > readBeamDrops(Int_t runNumber) {
+  
+  std::vector < std::vector < Double_t > > bd; // beam drop times (low,high)
+  
+  ifstream ifile(TString::Format("%s/beamCuts_%i.dat",getenv("CUTS"),runNumber));
+  
+  std::string holdTxt;
+  std::string rateBefore, rateAfter;
+  Int_t numCuts;
+  
+  ifile >> holdTxt >> rateBefore >> holdTxt
+	>> holdTxt >> rateAfter  >> holdTxt
+	>> holdTxt >> numCuts;
+  
+  Double_t tlow, tup;
+  for ( Int_t i=0; i<numCuts; ++i ) {
+    std::vector < Double_t > pair;
+    ifile >> tlow >> tup;
+
+    pair.push_back(tlow);
+    pair.push_back(tup);
+    
+    bd.push_back(pair);
+  }
+  
+  ifile.close();
+  
+  return bd;
+};
 
 
 vector <Int_t> getPMTQuality(Int_t runNumber) {
@@ -60,7 +94,22 @@ int main(int argc, char *argv[])
   cout.precision(12);
 
   cout << "Run " << argv[1] << " ..." << endl;
-  cout << "... Applying Bi pulser gain corrections ..." << endl;
+  cout << "... Applying Bi pulser gain corrections and cutting beam drops and bursts ..." << endl;
+
+  // Check if file is corrupt
+  char tempOut[500];
+  sprintf(tempOut, "%s/replay_pass2_%s.root",getenv("REPLAY_PASS2"), argv[1]);
+
+  if ( OnlyReplayBadFiles ) {
+     
+    if ( checkIfReplayFileIsGood(std::string(tempOut)) == 1 ) return 1;
+  
+    else {
+      std::ofstream badRuns("badRuns.txt", std::fstream::app);
+      badRuns << argv[1] << "\n";
+      badRuns.close();
+    }
+  }
 
   // Read gain corrections file
   char tempFileGain[500];
@@ -85,11 +134,16 @@ int main(int argc, char *argv[])
   cout << "...   PMT W3: " << gainCorrection[6] << endl;
   cout << "...   PMT W4: " << gainCorrection[7] << endl;
 
+  ///////////////// Read in the beam drops /////////////////////////
   
+  std::vector < std::vector < Double_t > > beamDropTimes = readBeamDrops(atoi(argv[1]));
+  UInt_t numBeamDrops = beamDropTimes.size();
+  std::vector < Double_t > deltaTime;
+  for ( auto t : beamDropTimes ) deltaTime.push_back( t[1] - t[0] );
+  
+  
+  Double_t beamBurstCut = 0.05; //s
 
-  // Open output ntuple
-  char tempOut[500];
-  sprintf(tempOut, "%s/replay_pass2_%s.root",getenv("REPLAY_PASS2"), argv[1]);
   //sprintf(tempOut, "replay_pass2_%s.root", argv[1]);
   DataTree *t = new DataTree();
   t->makeOutputTree(std::string(tempOut),"pass2");
@@ -98,27 +152,98 @@ int main(int argc, char *argv[])
   sprintf(tempIn, "%s/replay_pass1_%s.root", getenv("REPLAY_PASS1"),argv[1]);
   //sprintf(tempIn, "../replay_pass1/replay_pass1_%s.root", argv[1]);
   t->setupInputTree(std::string(tempIn),"pass1");
-
+  
   int nEvents = t->getEntries();
   cout << "... Processing nEvents = " << nEvents << endl;
+  
+  // First I need to calculate the scale factor between the blinded and real time
+  // so I can subtract off the proper time from events after beam cuts
+  
+  t->getEvent(nEvents-1);
+  Double_t scaleE = t->TimeE/t->Time;
+  Double_t scaleW = t->TimeW/t->Time;
+  
+  Double_t lastGoodTimeE, lastGoodTimeW, lastGoodTime;
+  lastGoodTimeE = lastGoodTimeW = lastGoodTime = 0.;
 
+  Double_t runLengthBlindE = 0.;
+  Double_t runLengthBlindW = 0.; 
+  Double_t runLengthTrue = 0.;
+  Double_t old_runLengthBlindE = 0.;
+  Double_t old_runLengthBlindW = 0.; 
+  Double_t old_runLengthTrue = 0.;
+  
   // Loop over events
   for (Int_t i=0; i<nEvents; i++) {
     t->getEvent(i);
+    
+    if ( i%10000==0 ) std::cout << i << std::endl;
 
     // Apply gain correction factors
     t->ScintE.q1 = t->ScintE.q1*gainCorrection[0];
     t->ScintE.q2 = t->ScintE.q2*gainCorrection[1];
     t->ScintE.q3 = t->ScintE.q3*gainCorrection[2];
     t->ScintE.q4 = t->ScintE.q4*gainCorrection[3];
-
+    
     t->ScintW.q1 = t->ScintW.q1*gainCorrection[4];
     t->ScintW.q2 = t->ScintW.q2*gainCorrection[5];
     t->ScintW.q3 = t->ScintW.q3*gainCorrection[6];
     t->ScintW.q4 = t->ScintW.q4*gainCorrection[7]; 
+    
+    if ( t->Tof < beamBurstCut ) t->badTimeFlag = 1;
+    
+    for ( UInt_t j=0; j<numBeamDrops; ++j ) {
+      // If event was in a beam drop, set the bad time flag and set the event time to 
+      // the last good event time. This will create a spike at every beam drop...
+      if ( t->Time > beamDropTimes[j][0] && t->Time < beamDropTimes[j][1] ) {
+	t->badTimeFlag = 1;
+	t->Time = lastGoodTime;
+	t->TimeE = lastGoodTimeE;
+	t->TimeW = lastGoodTimeW;
+      }
+      
+      // If it isn't in a drop, subtract all previos drops from event times...
+      else if ( t->Time > beamDropTimes[j][0] ) {	
+	t->Time = t->Time - deltaTime[j];
+	t->TimeE = t->TimeE - deltaTime[j]*scaleE;
+	t->TimeW = t->TimeW - deltaTime[j]*scaleW;
+      }      
+    }
+
+    if ( t->badTimeFlag==0 ) {
+      lastGoodTimeE = t->TimeE;
+      lastGoodTimeW = t->TimeW;
+      lastGoodTime = t->Time;
+    }
+
+    if ( i == (nEvents-1) ) {
+      runLengthBlindE = t->TimeE;
+      runLengthBlindW = t->TimeW;
+      runLengthTrue = t->Time;
+      old_runLengthBlindE = t->oldTimeE;
+      old_runLengthBlindW = t->oldTimeW;
+      old_runLengthTrue = t->oldTime;
+    }
 
     t->fillOutputTree();
   }
+
+
+  //Now I want to create and store a few pertinent values in a file for later...
+  char tempFile[200];
+  sprintf(tempFile,"%s/runInfo_%s.dat",getenv("RUN_INFO_FILES"),argv[1]);
+  ofstream runInfo(tempFile);
+  std::cout << "Writing Info to " << tempFile << std::endl;
+
+  runInfo << "RunLengthEast\t" << std::setprecision(9) << runLengthBlindE << std::endl;
+  runInfo << "RunLengthWest\t" << std::setprecision(9) << runLengthBlindW << std::endl;
+  runInfo << "RunLengthTrue\t" << std::setprecision(9) << runLengthTrue << std::endl;
+  runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t->UCN_Mon_4_Rate->Integral("width");
+  runInfo << "old_RunLengthEast\t" << std::setprecision(9) << old_runLengthBlindE << std::endl;
+  runInfo << "old_RunLengthWest\t" << std::setprecision(9) << old_runLengthBlindW << std::endl;
+  runInfo << "old_RunLengthTrue\t" << std::setprecision(9) << old_runLengthTrue << std::endl;
+
+  runInfo.close();
 
   // Write output ntuple
   t->writeOutputFile();

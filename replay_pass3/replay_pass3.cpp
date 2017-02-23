@@ -30,6 +30,9 @@
 #include "replay_pass2.h"
 #include "replay_pass3.h"
 
+bool OnlyReplayBadFiles = true;
+
+
 std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
   ifstream infile;
   Char_t temp[200];
@@ -106,6 +109,27 @@ int main(int argc, char *argv[])
 
   // Run number integer
   cout << "Run " << runNumber << " ..." << endl;
+
+  char tempOut[500];
+  sprintf(tempOut, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
+  //sprintf(tempOut, "replay_pass3_%s.root", argv[1]);
+
+  //Check if the file is good already and quit if it is so that we can 
+  // only replay the files that are bad...
+
+  if ( OnlyReplayBadFiles ) {
+     
+    if ( checkIfReplayFileIsGood(std::string(tempOut)) == 1 ) return 1;
+  
+    else {
+      std::ofstream badRuns("badRuns.txt", std::fstream::app);
+      badRuns << argv[1] << "\n";
+      badRuns.close();
+    }
+  }
+  
+
+
   cout << "... Applying Calibration ..." << endl;
 
   unsigned int calibrationPeriod = getSrcRunPeriod(runNumber);
@@ -132,9 +156,6 @@ int main(int argc, char *argv[])
   DataTree *t = new DataTree();
 
   // Open output ntuple
-  char tempOut[500];
-  sprintf(tempOut, "%s/replay_pass3_%s.root",getenv("REPLAY_PASS3"), argv[1]);
-  //sprintf(tempOut, "replay_pass3_%s.root", argv[1]);
   t->makeOutputTree(std::string(tempOut),"pass3");
 
   // Input ntuple
@@ -153,13 +174,20 @@ int main(int argc, char *argv[])
   for (int i=0; i<nEvents; i++) {
     t->getEvent(i);
 
+    if ( i%10000==0 ) std::cout << i << std::endl;
+
     eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
 
-    
-    t->ScintE.e1 = eta[0]>0. ? linearityCurve.applyLinCurve(0,t->ScintE.q1) / eta[0] : 0.;
-    t->ScintE.e2 = eta[1]>0. ? linearityCurve.applyLinCurve(1,t->ScintE.q2) / eta[1] : 0.;
-    t->ScintE.e3 = eta[2]>0. ? linearityCurve.applyLinCurve(2,t->ScintE.q3) / eta[2] : 0.;
-    t->ScintE.e4 = eta[3]>0. ? linearityCurve.applyLinCurve(3,t->ScintE.q4) / eta[3] : 0.;
+    t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
+    t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
+    t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
+    t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
+
+
+    t->ScintE.e1 = ( eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / eta[0] : 0.;
+    t->ScintE.e2 = ( eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / eta[1] : 0.;
+    t->ScintE.e3 = ( eta[2]>0. && t->ScintE.e3>0. ) ? t->ScintE.e3 / eta[2] : 0.;
+    t->ScintE.e4 = ( eta[3]>0. && t->ScintE.e4>0. ) ? t->ScintE.e4 / eta[3] : 0.;
     
     t->ScintE.nPE1 = eta[0] > 0. ? t->ScintE.e1 * eta[0] * alpha[0] : 0.;
     t->ScintE.nPE2 = eta[1] > 0. ? t->ScintE.e2 * eta[1] * alpha[1] : 0.;
@@ -172,10 +200,15 @@ int main(int argc, char *argv[])
     t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
 
     
-    t->ScintW.e1 = eta[4]>0. ? linearityCurve.applyLinCurve(4,t->ScintW.q1) / eta[4] : 0.;
-    t->ScintW.e2 = eta[5]>0. ? linearityCurve.applyLinCurve(5,t->ScintW.q2) / eta[5] : 0.;
-    t->ScintW.e3 = eta[6]>0. ? linearityCurve.applyLinCurve(6,t->ScintW.q3) / eta[6] : 0.;
-    t->ScintW.e4 = eta[7]>0. ? linearityCurve.applyLinCurve(7,t->ScintW.q4) / eta[7] : 0.;
+    t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1);
+    t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2);
+    t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
+    t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
+
+    t->ScintW.e1 = ( eta[4]>0. && t->ScintW.e1>0. ) ? t->ScintW.e1 / eta[4] : 0.;
+    t->ScintW.e2 = ( eta[5]>0. && t->ScintW.e2>0. ) ? t->ScintW.e2 / eta[5] : 0.;
+    t->ScintW.e3 = ( eta[6]>0. && t->ScintW.e3>0. ) ? t->ScintW.e3 / eta[6] : 0.;
+    t->ScintW.e4 = ( eta[7]>0. && t->ScintW.e4>0. ) ? t->ScintW.e4 / eta[7] : 0.;
     
     t->ScintW.nPE1 = eta[4] > 0. ? t->ScintW.e1 * eta[4] * alpha[4] : 0.;
     t->ScintW.nPE2 = eta[5] > 0. ? t->ScintW.e2 * eta[5] * alpha[5] : 0.;
@@ -187,22 +220,38 @@ int main(int argc, char *argv[])
     t->ScintW.de3 = t->ScintW.nPE3 > 0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
     t->ScintW.de4 = t->ScintW.nPE4 > 0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
     
+    //std::cout << "Made it here" << std::endl;
 
 
     //Calculate the weighted energy on a side
     
     //EAST
-    Double_t numer = (pmtQuality[0] ? t->ScintE.nPE1 : 0.) + (pmtQuality[1] ? t->ScintE.nPE2 : 0.) + (pmtQuality[2] ? t->ScintE.nPE3 : 0.) + (pmtQuality[3] ? t->ScintE.nPE4 : 0.);
-    Double_t denom = 0.;
-    for (int i=0; i<4; i++) denom += (pmtQuality[i] ? alpha[i] * eta[i] : 0.); 
+    Double_t numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
+		       (pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
+		       (pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
+		       (pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+
+    Double_t denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * eta[0] : 0.) +
+			(pmtQuality[1] && t->ScintE.nPE2>0. ? alpha[1] * eta[1] : 0.) +
+			(pmtQuality[2] && t->ScintE.nPE3>0. ? alpha[2] * eta[2] : 0.) + 
+			(pmtQuality[3] && t->ScintE.nPE4>0. ? alpha[3] * eta[3] : 0.) ); 
 
     t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
     t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
 
     //WEST
-    numer = (pmtQuality[4] ? t->ScintW.nPE1 : 0.) + (pmtQuality[5] ? t->ScintW.nPE2 : 0.) + (pmtQuality[6] ? t->ScintW.nPE3 : 0.) + (pmtQuality[7] ? t->ScintW.nPE4 : 0.);
-    denom = 0.;
-    for (int i=4; i<8; i++) denom += (pmtQuality[i] ? alpha[i] * eta[i] : 0.); 
+    numer = denom = 0.;
+
+    numer = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? t->ScintW.nPE1 : 0.) +
+	      (pmtQuality[5] && t->ScintW.nPE1>0. ? t->ScintW.nPE2 : 0.) + 
+	      (pmtQuality[6] && t->ScintW.nPE1>0. ? t->ScintW.nPE3 : 0.) + 
+	      (pmtQuality[7] && t->ScintW.nPE1>0. ? t->ScintW.nPE4 : 0.) );
+
+    denom  = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? alpha[4] * eta[4] : 0.) +
+	       (pmtQuality[5] && t->ScintW.nPE2>0. ? alpha[5] * eta[5] : 0.) +
+	       (pmtQuality[6] && t->ScintW.nPE3>0. ? alpha[6] * eta[6] : 0.) + 
+	       (pmtQuality[7] && t->ScintW.nPE4>0. ? alpha[7] * eta[7] : 0.) ); 
+    
 
     t->ScintW.energy = t->EvisW = (denom!=0. ? numer/denom : 0.);
     t->ScintW.denergy = (denom!=0. ? sqrt(t->ScintW.energy/denom) : 0.);

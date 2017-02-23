@@ -88,6 +88,11 @@ void DataTreeFLOAT::makeOutputTree(std::string outputFileName, std::string outpu
   outputTree->Branch("ProbIII",&ProbIII,"ProbIII/F");
   outputTree->Branch("Erecon",&Erecon,"Erecon/F");
 
+  outputTree->Branch("badTimeFlag",&badTimeFlag,"badTimeFlag/I");
+  outputTree->Branch("oldTimeE",&oldTimeE, "oldTimeE/F");
+  outputTree->Branch("oldTimeW",&oldTimeW, "oldTimeW/F");
+  outputTree->Branch("oldTime",&oldTime, "oldTime/F");
+
   std::cout << "Created output tree " << outputTreeName << " in " << outputFileName << "...\n";
 };
 
@@ -180,6 +185,11 @@ void DataTreeFLOAT::setupInputTree(std::string inputFileName, std::string inputT
   inputTree->SetBranchAddress("Type",&Type);
   inputTree->SetBranchAddress("ProbIII",&ProbIII);
   inputTree->SetBranchAddress("Erecon",&Erecon);
+
+  inputTree->SetBranchAddress("badTimeFlag",&badTimeFlag);
+  inputTree->SetBranchAddress("oldTimeE",&oldTimeE);
+  inputTree->SetBranchAddress("oldTimeW",&oldTimeW);
+  inputTree->SetBranchAddress("oldTime",&oldTime);
 
   std::cout << "Prepared input tree " << inputTreeName << " in " << inputFileName << "...\n";
 };

@@ -31,6 +31,8 @@
 
 using namespace std;
 
+bool OnlyReplayBadFiles = true;
+
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
   Char_t temp[500];
@@ -54,6 +56,27 @@ int main(int argc, char *argv[])
   TH1::AddDirectory(kFALSE);
 
   cout << "Run " << argv[1] << " ..." << endl;
+
+  char tempOut[500];
+  sprintf(tempOut, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
+  
+
+
+  //Check if the file is good already and quit if it is so that we can 
+  // only replay the files that are bad...
+
+  if ( OnlyReplayBadFiles ) {
+     
+    if ( checkIfReplayFileIsGood(std::string(tempOut)) == 1 ) return 1;
+  
+    else {
+      std::ofstream badRuns("badRuns.txt", std::fstream::app);
+      badRuns << argv[1] << "\n";
+      badRuns.close();
+    }
+  }
+
+
 
   // Read cuts file
   char tempFileCuts[500];
@@ -134,9 +157,8 @@ int main(int argc, char *argv[])
   //cout << iRun << " " << pedPdc34 << endl;
   
   // Open output ntuple
-  char tempOut[500];
-  sprintf(tempOut, "%s/replay_pass1_%s.root",getenv("REPLAY_PASS1"), argv[1]);
-  
+
+
   DataTree *t = new DataTree();
   t->makeOutputTree(std::string(tempOut),"pass1");  
   
@@ -564,10 +586,10 @@ int main(int argc, char *argv[])
     //changing the length 32 double array to length 16  float array.  using variables defined in WCR. 
     for(int j = 0; j<16; j++)
       {
-	WCR->cathex[j]=(float)cathodeEast[16+j];
-	WCR->cathey[j]=(float)cathodeEast[j];
-	WCR->cathwx[j]=(float)cathodeWest[16+j];
-	WCR->cathwy[j]=(float)cathodeWest[j];
+	WCR->cathex[j]=Pdc2[16+j];
+	WCR->cathey[j]=Pdc2[j];
+	WCR->cathwx[j]=Padc[16+j];
+	WCR->cathwy[j]=Padc[j];
       } 
     
     xeRC=WCR->ResponseType(WCR->cathex);   //response class x co-ordinate, East. 
@@ -729,6 +751,10 @@ int main(int argc, char *argv[])
     t->TimeE = Clk0*scalerCountsToTime;
     t->TimeW = Clk1*scalerCountsToTime;
     t->Time = S83028*scalerCountsToTime;
+    t->badTimeFlag = 0;
+    t->oldTimeE = Clk0*scalerCountsToTime;
+    t->oldTimeW = Clk1*scalerCountsToTime;
+    t->oldTime = S83028*scalerCountsToTime;
     t->TDCE = (double) Tdc016;
     t->TDCW = (double) Tdc017;
     t->TDCE1 = (double) Tdc00;
@@ -847,21 +873,19 @@ int main(int argc, char *argv[])
   
   fileIn->Close();
 
-  //Now I want to create and store a few pertinent values in a file for later...
-  char tempFile[200];
-  sprintf(tempFile,"%s/runInfo_%s.dat",getenv("RUN_INFO_FILES"),argv[1]);
-  ofstream runInfo(tempFile);
-  std::cout << "Writing Info to " << tempFile << std::endl;
-
-  runInfo << "RunLengthEast\t" << std::setprecision(9) << runLengthBlind[0] << std::endl;
-  runInfo << "RunLengthWest\t" << std::setprecision(9) << runLengthBlind[1] << std::endl;
-  runInfo << "RunLengthTrue\t" << std::setprecision(9) << runLengthTrue << std::endl;
-  runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t->UCN_Mon_4_Rate->Integral("width");
-
-  runInfo.close();
+  
   // Write output ntuple
   t->writeOutputFile();
   delete t;
+
+
+  if ( checkIfReplayFileIsGood(std::string(tempOut)) != 1 ) {
+
+    std::ofstream badRuns("badRuns.txt", std::fstream::app);
+    badRuns << argv[1] << "\n";
+    badRuns.close();
+
+  }
   
 
   return 0;
