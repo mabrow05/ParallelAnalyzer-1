@@ -12,14 +12,14 @@ VPATH = ./:../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
-CXXFLAGS      = -O2 -Wall -fPIC
+CXXFLAGS      = -O2 -Wall -fPIC -std=c++11
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o positionMapHandler.o MBUtils.o calibrationTools.o
+objects = DataTree.o positionMapHandler.o MBUtils.o calibrationTools.o  MWPCPositionResponse.o
 
 replay_pass3.exe: replay_pass3.o $(objects)
 	$(CXX) $(CXXFLAGS) -o replay_pass3.exe replay_pass3.o $(objects) $(LIBS)
@@ -32,6 +32,9 @@ positionMapHandler.o: positionMapHandler.hh MBUtils.o
 MBUtils.o: MBUtils.hh
 
 calibrationTools.o: calibrationTools.hh
+
+MWPCPositionResponse.o: MWPCPositionResponse.hh
+
 
 #../include/positionMapHandler.o: ../include/positionMapHandler.hh ../include/MBUtils.o
 #	$(CXX) $(CXXFLAGS) -c ../include/positionMapHandler.o ../include/positionMapHandler.cc ../include/MBUtils.o $(LIBS)

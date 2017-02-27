@@ -7,7 +7,7 @@ void EQ2EtrueFitter(TString geom) {
   TString fileName  = TString::Format("HistMeans_%s.dat",geom.Data());
   ifstream infile(fileName.Data());
 
-  int type0lowOffset = 5;
+  int type0lowOffset = 10;
   int type1lowOffset = 13;
   int type23lowOffset = 13;
   
@@ -30,10 +30,25 @@ void EQ2EtrueFitter(TString geom) {
   vector <double> EQtype2W;
   vector <double> EQtype3W;
   vector <double> EQtype23W;
+  // Errors
+  vector <double> err_EQtype0E;
+  vector <double> err_EQtype1E;
+  vector <double> err_EQtype2E;
+  vector <double> err_EQtype3E;
+  vector <double> err_EQtype23E;
+  vector <double> err_EQtype0W;
+  vector <double> err_EQtype1W;
+  vector <double> err_EQtype2W;
+  vector <double> err_EQtype3W;
+  vector <double> err_EQtype23W;
+
   double nEvents;
   int nHist,Emin,Emax;
   double type0E,type1E,type2E,type3E,type23E;
   double type0W,type1W,type2W,type3W,type23W;
+  
+  double err_type0E,err_type1E,err_type2E,err_type3E,err_type23E;
+  double err_type0W,err_type1W,err_type2W,err_type3W,err_type23W;
   
   for (int i=0; i<23; i++) {
     infile >> nameRow[i];
@@ -41,9 +56,9 @@ void EQ2EtrueFitter(TString geom) {
   }
   //cout << endl;
   
-  while (infile >> nHist >> Emin >> Emax >> type0E >> nEvents >> type0W >> nEvents >>
-	 type1E >> nEvents >> type1W >> nEvents >> type2E >> nEvents >> type2W >> nEvents >>
-	 type3E >> nEvents >> type3W >> nEvents >> type23E >> nEvents >> type23W >> nEvents) {
+  while (infile >> nHist >> Emin >> Emax >> type0E >> err_type0E >> type0W >> err_type0W >>
+	 type1E >> err_type1E >> type1W >> err_type1W >> type2E >> err_type2E >> type2W >> err_type2W >>
+	 type3E >> err_type3E >> type3W >> err_type3W >> type23E >> err_type23E >> type23W >> err_type23W) {
     //if (Emin<=50.) continue;
     cout << Emin << " " << type0E << endl;
     EtrueMin.push_back(Emin);
@@ -60,6 +75,17 @@ void EQ2EtrueFitter(TString geom) {
     EQtype3W.push_back(type3W);
     EQtype23W.push_back(type23W);
 
+    err_EQtype0E.push_back(err_type0E);
+    err_EQtype1E.push_back(err_type1E);
+    err_EQtype2E.push_back(err_type2E);
+    err_EQtype3E.push_back(err_type3E);
+    err_EQtype23E.push_back(err_type23E);
+    err_EQtype0W.push_back(err_type0W);
+    err_EQtype1W.push_back(err_type1W);
+    err_EQtype2W.push_back(err_type2W);
+    err_EQtype3W.push_back(err_type3W);
+    err_EQtype23W.push_back(err_type23W);
+
     if (infile.eof()) break;
   }
   infile.close();
@@ -69,35 +95,40 @@ void EQ2EtrueFitter(TString geom) {
   int numDataPoints = EtrueMin.size();
   //cout << numDataPoints << " " << EQtype3E.size() << " " <<EtrueMid.size() <<  endl;
 
-  //TF1 *func0 = new TF1("func0","[0]+[1]*x+[2]/x+[3]/(x*x)",20.,1000.);
-  TF1 *func0 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",0.,1000.);
-  func0->SetParameters(100.,1.,1.,0.,1.,0.);
+  TF1 *func0 = new TF1("func0","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
+  //TF1 *func0 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",10.,1000.);
+  func0->SetParameters(100.,1.,0.,0.);
   //func0->FixParameter(0,0.);
   func0->SetLineColor(kBlue);
 
-  //TF1 *func1 = new TF1("func1","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
-  TF1 *func1 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",0.,1000.);
-  func1->SetParameters(100.,1.,1.,0.,1.,0.);
+  TF1 *func1 = new TF1("func1","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
+  //TF1 *func1 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",10.,1000.);
+  func1->SetParameters(100.,1.,0.,0.);
+  //func1->SetParameters(100.,1.,1.,0.,1.,0.);
   //func1->FixParameter(0,0.);
   func1->SetLineColor(kRed);
 
-  //TF1 *func23 = new TF1("func23","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
-  TF1 *func23 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",0.,1000.);
-  func23->SetParameters(100.,1.,1.,0.,1.,0.);
+  TF1 *func23 = new TF1("func23","[0]+[1]*x+[2]/x+[3]/(x*x)",40.,1000.);
+  //TF1 *func23 = new TF1("func0","[0]+[1]*x+[2]/(x+[3])+[4]/((x+[5])*(x+[5]))",10.,1000.);
+  func23->SetParameters(100.,1.,0.,0.);
+  //func23->SetParameters(100.,1.,1.,10.,1.,10.);
+  //func23->SetParLimits(0,10., 200.);
+  //func23->SetParLimits(3,0., 10000.);
+  //func23->SetParLimits(5,0., 10000.);
   //func23->FixParameter(0,0.);
   func23->SetLineColor(kGreen);
 
 
-  TGraph *t0E = new TGraph(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0E[type0lowOffset-1],&EtrueMid[type0lowOffset-1]); 
+  TGraphErrors *t0E = new TGraphErrors(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0E[type0lowOffset-1],&EtrueMid[type0lowOffset-1],&err_EQtype0E[type0lowOffset-1],0); 
   t0E->SetMarkerColor(kBlue);
   t0E->SetMarkerStyle(21);
   //t0E->SetMarkerSize(.8);
-  TGraph *t1E = new TGraph(numDataPoints-(type1lowOffset+type1highOffset),&EQtype1E[type1lowOffset-1],&EtrueMid[type1lowOffset-1]);
+  TGraphErrors *t1E = new TGraphErrors(numDataPoints-(type1lowOffset+type1highOffset),&EQtype1E[type1lowOffset-1],&EtrueMid[type1lowOffset-1],&err_EQtype1E[type1lowOffset-1],0);
   t1E->SetMarkerColor(kRed);
   t1E->SetMarkerStyle(20);
-  TGraph *t2E = new TGraph(numDataPoints-11,&EQtype2E[8],&EtrueMid[8]);
-  TGraph *t3E = new TGraph(numDataPoints-11,&EQtype3E[8],&EtrueMid[8]);
-  TGraph *t23E = new TGraph(numDataPoints-(type23lowOffset+type23highOffset),&EQtype23E[type23lowOffset-1],&EtrueMid[type23lowOffset-1]);
+  TGraphErrors *t2E = new TGraphErrors(numDataPoints-11,&EQtype2E[8],&EtrueMid[8],&err_EQtype2E[8],0);
+  TGraphErrors *t3E = new TGraphErrors(numDataPoints-11,&EQtype3E[8],&EtrueMid[8],&err_EQtype3E[8],0);
+  TGraphErrors *t23E = new TGraphErrors(numDataPoints-(type23lowOffset+type23highOffset),&EQtype23E[type23lowOffset-1],&EtrueMid[type23lowOffset-1],&err_EQtype23E[type23lowOffset-1],0);
   t23E->SetMarkerColor(kGreen);
   t23E->SetMarkerStyle(22);
 
@@ -114,15 +145,15 @@ void EQ2EtrueFitter(TString geom) {
   params << "Type23E: " << func23->GetParameter(0) << " " << func23->GetParameter(1) << " " << func23->GetParameter(2) << " " << func23->GetParameter(3) 
 	 << " " << func23->GetParameter(4) << " " << func23->GetParameter(5) << endl;
 
-  TGraph *t0W = new TGraph(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0W[type0lowOffset-1],&EtrueMid[type0lowOffset-1]); 
+  TGraphErrors *t0W = new TGraphErrors(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0W[type0lowOffset-1],&EtrueMid[type0lowOffset-1],&err_EQtype0W[type0lowOffset-1],0); 
   t0W->SetMarkerColor(kBlue);
   t0W->SetMarkerStyle(21);
-  TGraph *t1W = new TGraph(numDataPoints-(type1lowOffset+type1highOffset),&EQtype1W[type1lowOffset-1],&EtrueMid[type1lowOffset-1]);
+  TGraphErrors *t1W = new TGraphErrors(numDataPoints-(type1lowOffset+type1highOffset),&EQtype1W[type1lowOffset-1],&EtrueMid[type1lowOffset-1],&err_EQtype1W[type1lowOffset-1],0);
   t1W->SetMarkerColor(kRed);
   t1W->SetMarkerStyle(20);
-  TGraph *t2W = new TGraph(numDataPoints-11,&EQtype2W[8],&EtrueMid[8]);
-  TGraph *t3W = new TGraph(numDataPoints-11,&EQtype3W[8],&EtrueMid[8]);
-  TGraph *t23W = new TGraph(numDataPoints-(type23lowOffset+type23highOffset),&EQtype23W[type23lowOffset-1],&EtrueMid[type23lowOffset-1]);
+  TGraphErrors *t2W = new TGraphErrors(numDataPoints-11,&EQtype2W[8],&EtrueMid[8],&err_EQtype2W[8],0);
+  TGraphErrors *t3W = new TGraphErrors(numDataPoints-11,&EQtype3W[8],&EtrueMid[8],&err_EQtype3W[8],0);
+  TGraphErrors *t23W = new TGraphErrors(numDataPoints-(type23lowOffset+type23highOffset),&EQtype23W[type23lowOffset-1],&EtrueMid[type23lowOffset-1],&err_EQtype23W[type23lowOffset-1],0);
   t23W->SetMarkerColor(kGreen);
   t23W->SetMarkerStyle(22);
 

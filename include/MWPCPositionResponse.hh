@@ -45,6 +45,11 @@ public:
   int getMaxWireWX() { return getMaxWire(signalEX,pedSubtrWX); }
   int getMaxWireWY() { return getMaxWire(signalEX,pedSubtrWY); }
   
+  double getWirePosEX(int i) { return wireposEX[i]; }
+  double getWirePosEY(int i) { return wireposEY[i]; }
+  double getWirePosWX(int i) { return wireposWX[i]; }
+  double getWirePosWY(int i) { return wireposWY[i]; }
+  
 
 
 

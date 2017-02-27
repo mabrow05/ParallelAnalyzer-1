@@ -7,6 +7,7 @@
 #include "string"
 #include "vector"
 #include <TString.h>
+#include <TRandom3.h>
 
 using std::ifstream;
 using std::ofstream;
@@ -57,21 +58,25 @@ int main(int argc, char *argv[]) {
   ofstream outdata;
   outdata.open (TString::Format("HistMeans_%s.dat",geometry.Data()).Data());
   outdata << setw(5) << "Nhist" << setw(7) << "Emin" << setw(7) << "Emax" 
-                     << setw(11) << "EQType0E" << setw(7) << "Neve" 
-                     << setw(11) << "EQType0W" << setw(7) << "Neve"  
-                     << setw(11) << "EQType1E" << setw(7) << "Neve" 
-                     << setw(11) << "EQType1W" << setw(7) << "Neve"  
-                     << setw(11) << "EQType2E" << setw(7) << "Neve" 
-                     << setw(11) << "EQType2W" << setw(7) << "Neve" 
-                     << setw(11) << "EQType3E" << setw(7) << "Neve" 
-                     << setw(11) << "EQType3W" << setw(7) << "Neve"
-                     << setw(12) << "EQType23E" << setw(7) << "Neve" 
-                     << setw(12) << "EQType23W" << setw(7) << "Neve" << endl; 
+                     << setw(11) << "EQType0E" << setw(11) << "meanErr" 
+                     << setw(11) << "EQType0W" << setw(11) << "meanErr"  
+                     << setw(11) << "EQType1E" << setw(11) << "meanErr" 
+                     << setw(11) << "EQType1W" << setw(11) << "meanErr"  
+                     << setw(11) << "EQType2E" << setw(11) << "meanErr" 
+                     << setw(11) << "EQType2W" << setw(11) << "meanErr" 
+                     << setw(11) << "EQType3E" << setw(11) << "meanErr" 
+                     << setw(11) << "EQType3W" << setw(11) << "meanErr"
+                     << setw(12) << "EQType23E" << setw(11) << "meanErr" 
+                     << setw(12) << "EQType23W" << setw(11) << "meanErr" << endl; 
 
   char temp[100];
   int nFile = 1000;
   double MaxE = 800.0;
   double DeltaE = 10.0;
+
+  double alpha = 0.4; // nPE/keV of roughly 400 PE per 1 GeV
+  TRandom3 *rand = new TRandom3();
+
   #define pi M_PI
 
   vector<double> Emin;
@@ -140,79 +145,101 @@ int main(int argc, char *argv[]) {
        EDepQType23W[Nhist] = new TH1D(temp, "Energy Deposition Quenched, TYPE 23 West", 200, 0. , 800.);
 
        Nhist++;
-       }
+      }
  
-  double FidRad = 50.0;
-  TString path = TString::Format("/extern/mabrow05/ucna/geant4work/output/10mil_%s/Beta/",geometry.Data());
-  //char path[] = "/extern/mabrow05/ucna/geant4work/output/10mil_2011-2012/Beta/"; //"/extern/mabrow05/ucna/geant4work/output/bigSim/flatFieldnewEQ_2011-2012/F0/";//
-  for (int nF = 0; nF<nFile; nF++) 
+  double FidRad = 45.0; // Set to 45 to eliminate any contamination from edge effects
+
+  // We loop over both polarization states to mix the two...
+  std::vector <TString> pols {"polE","polW"};
+
+  for ( auto pol : pols ) {
+  
+    TString path = TString::Format("/extern/mabrow05/ucna/geant4work/output/official_%s/Beta_%s/",geometry.Data(),pol.Data());
+
+    for (int nF = 0; nF<nFile; nF++) 
       {
-       DataTree Tin;
-       sprintf(temp, "%s/analyzed_%d.root", path.Data(), nF);
-       Tin.setupInputTree (temp, "anaTree");
-       int Nevt = Tin.getEntries();
-       for (Int_t evt = 0; evt<Nevt; evt++) 
-           {
+	DataTree Tin;
+	sprintf(temp, "%s/analyzed_%d.root", path.Data(), nF);
+	Tin.setupInputTree (temp, "anaTree");
+	int Nevt = Tin.getEntries();
+	for (Int_t evt = 0; evt<Nevt; evt++) 
+	  {
             Tin.getEvent(evt);
-            if (Tin.MWPCPos.MWPCPosE[0]*Tin.MWPCPos.MWPCPosE[0]+Tin.MWPCPos.MWPCPosE[1]*Tin.MWPCPos.MWPCPosE[1] > FidRad*FidRad) continue; 
+	    
+	    double r2E = ( Tin.MWPCPos.MWPCPosE[0]*Tin.MWPCPos.MWPCPosE[0] + Tin.MWPCPos.MWPCPosE[1]*Tin.MWPCPos.MWPCPosE[1] ) * 0.6 * 100.;
+	    double r2W = ( Tin.MWPCPos.MWPCPosW[0]*Tin.MWPCPos.MWPCPosW[0] + Tin.MWPCPos.MWPCPosW[1]*Tin.MWPCPos.MWPCPosW[1] ) * 0.6 * 100.;
+	      
+	    
+	    if ( r2E > FidRad*FidRad || r2W > FidRad*FidRad ) continue; 
 
+	    //Calculate smeared energies
+	    Tin.EdepQ.EdepQE = (1/alpha) * rand->Poisson(Tin.EdepQ.EdepQE*alpha);
+	    Tin.EdepQ.EdepQW = (1/alpha) * rand->Poisson(Tin.EdepQ.EdepQW*alpha);
+				       
             for (Nhist=0; Nhist<MaxNhist; Nhist++) //Sets Nhist to the proper histogram based on the true energy of the event
-                 if (Emin[Nhist]<=Tin.primKE && Tin.primKE<Emax[Nhist]) break; 
-
+	      if (Emin[Nhist]<=Tin.primKE && Tin.primKE<Emax[Nhist]) break; 
+	    
             //TYPE 0E EVENTS
-            if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.Edep.EdepE > 0 &&
-                Tin.MWPCEnergy.MWPCEnergyW == 0 && Tin.Edep.EdepW == 0) 
-                EDepQType0E[Nhist]->Fill(Tin.EdepQ.EdepQE);
-
+            if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE > 0 &&
+                Tin.MWPCEnergy.MWPCEnergyW == 0 && Tin.EdepQ.EdepQW == 0) 
+	      EDepQType0E[Nhist]->Fill(Tin.EdepQ.EdepQE);
+	    
             //TYPE 0W EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE == 0 && Tin.Edep.EdepE == 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.Edep.EdepW > 0)
-                     EDepQType0W[Nhist]->Fill(Tin.EdepQ.EdepQW);
-
+            else if (Tin.MWPCEnergy.MWPCEnergyE == 0 && Tin.EdepQ.EdepQE == 0 &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW > 0)
+	      EDepQType0W[Nhist]->Fill(Tin.EdepQ.EdepQW);
+	    
             //TYPE 1E & 1W EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.Edep.EdepE > 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.Edep.EdepW > 0)
-                     {
-                      if (Tin.time.timeE < Tin.time.timeW) EDepQType1E[Nhist]->Fill(Tin.EdepQ.EdepQE+Tin.EdepQ.EdepQW);
-                      else EDepQType1W[Nhist]->Fill(Tin.EdepQ.EdepQW+Tin.EdepQ.EdepQE);
-                      }
-
+            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE > 0 &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW > 0)
+	      {
+		if (Tin.time.timeE < Tin.time.timeW) EDepQType1E[Nhist]->Fill(Tin.EdepQ.EdepQE+Tin.EdepQ.EdepQW);
+		else EDepQType1W[Nhist]->Fill(Tin.EdepQ.EdepQW+Tin.EdepQ.EdepQE);
+	      }
+	    
             //TYPE 3E & 2E EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.Edep.EdepE > 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.Edep.EdepW == 0)
-                     {
-                      EDepQType23E[Nhist]->Fill(Tin.EdepQ.EdepQE);
-                      if (Tin.primTheta>pi/2.) EDepQType3E[Nhist]->Fill(Tin.EdepQ.EdepQE);
-                      else EDepQType2E[Nhist]->Fill(Tin.EdepQ.EdepQE);
-                      }
-
+            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE > 0 &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW == 0)
+	      {
+		EDepQType23E[Nhist]->Fill(Tin.EdepQ.EdepQE);
+		if (Tin.primTheta>pi/2.) EDepQType3E[Nhist]->Fill(Tin.EdepQ.EdepQE);
+		else EDepQType2E[Nhist]->Fill(Tin.EdepQ.EdepQE);
+	      }
+	    
             //TYPE 2W & 3W EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.Edep.EdepE == 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.Edep.EdepW > 0)
-                     {
-                      EDepQType23W[Nhist]->Fill(Tin.EdepQ.EdepQW);
-                      if (Tin.primTheta<pi/2) EDepQType3W[Nhist]->Fill(Tin.EdepQ.EdepQW);
-                      else EDepQType2W[Nhist]->Fill(Tin.EdepQ.EdepQW);
-                      }
+            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE == 0 &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW > 0)
+	      {
+		EDepQType23W[Nhist]->Fill(Tin.EdepQ.EdepQW);
+		if (Tin.primTheta<pi/2) EDepQType3W[Nhist]->Fill(Tin.EdepQ.EdepQW);
+		else EDepQType2W[Nhist]->Fill(Tin.EdepQ.EdepQW);
+	      }
 
-            }
-       cout << "******* analyzed_" << nF << ".root done *******" << endl;
-       cout << endl;
-       }
+	  }
+	cout << "******* analyzed_" << nF << ".root done *******" << endl;
+	cout << endl;
+      }
+    cout << "//////////////////" << pol.Data() << " finished //////////////////" << endl;
+    cout << endl;
+  }
+
+
+  // NEED TO PUT IN FITS TO THESE SPECTRA
+  //for (Nhist=0; Nhist<MaxNhist; Nhist++)
 
   for (Nhist=0; Nhist<MaxNhist; Nhist++)
       {
        outdata << setw(5)  << Nhist << setw(7) << Emin[Nhist] << setw(7) << Emax[Nhist]
-               << setw(11) << EDepQType0E[Nhist]->GetMean() << setw(7) << EDepQType0E[Nhist]->GetEntries() 
-               << setw(11) << EDepQType0W[Nhist]->GetMean() << setw(7) << EDepQType0W[Nhist]->GetEntries()
-               << setw(11) << EDepQType1E[Nhist]->GetMean() << setw(7) << EDepQType1E[Nhist]->GetEntries() 
-               << setw(11) << EDepQType1W[Nhist]->GetMean() << setw(7) << EDepQType1W[Nhist]->GetEntries()
-               << setw(11) << EDepQType2E[Nhist]->GetMean() << setw(7) << EDepQType2E[Nhist]->GetEntries() 
-               << setw(11) << EDepQType2W[Nhist]->GetMean() << setw(7) << EDepQType2W[Nhist]->GetEntries()
-               << setw(11) << EDepQType3E[Nhist]->GetMean() << setw(7) << EDepQType3E[Nhist]->GetEntries() 
-               << setw(11) << EDepQType3W[Nhist]->GetMean() << setw(7) << EDepQType3W[Nhist]->GetEntries()  
-               << setw(12) << EDepQType23E[Nhist]->GetMean() << setw(7) << EDepQType23E[Nhist]->GetEntries()
-               << setw(12) << EDepQType23W[Nhist]->GetMean() << setw(7) << EDepQType23W[Nhist]->GetEntries() << endl;  
+               << setw(11) << EDepQType0E[Nhist]->GetMean() << setw(11) << EDepQType0E[Nhist]->GetMeanError() 
+               << setw(11) << EDepQType0W[Nhist]->GetMean() << setw(11) << EDepQType0W[Nhist]->GetMeanError()
+               << setw(11) << EDepQType1E[Nhist]->GetMean() << setw(11) << EDepQType1E[Nhist]->GetMeanError() 
+               << setw(11) << EDepQType1W[Nhist]->GetMean() << setw(11) << EDepQType1W[Nhist]->GetMeanError()
+               << setw(11) << EDepQType2E[Nhist]->GetMean() << setw(11) << EDepQType2E[Nhist]->GetMeanError() 
+               << setw(11) << EDepQType2W[Nhist]->GetMean() << setw(11) << EDepQType2W[Nhist]->GetMeanError()
+               << setw(11) << EDepQType3E[Nhist]->GetMean() << setw(11) << EDepQType3E[Nhist]->GetMeanError() 
+               << setw(11) << EDepQType3W[Nhist]->GetMean() << setw(11) << EDepQType3W[Nhist]->GetMeanError()  
+               << setw(12) << EDepQType23E[Nhist]->GetMean() << setw(11) << EDepQType23E[Nhist]->GetMeanError()
+               << setw(12) << EDepQType23W[Nhist]->GetMean() << setw(11) << EDepQType23W[Nhist]->GetMeanError() << endl;  
        }
   
   outputHists->Write();

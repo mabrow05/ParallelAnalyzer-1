@@ -31,7 +31,7 @@
 
 using namespace std;
 
-bool OnlyReplayBadFiles = true;
+bool OnlyReplayBadFiles = false;
 
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
       
       }*/
     
-    // Calculate pedestal-subtracted MWPC cathode PADC values
+    // Set cathode values to non-ped subtracted values
     for (int j=0; j<32; j++) {
       
       if (j<16) {
@@ -610,11 +610,6 @@ int main(int argc, char *argv[])
     yW = 0.;
     posError = 0.;
 
-    std::vector <double> posex(3,0.);
-    std::vector <double> poswx(3,0.);
-    std::vector <double> posey(3,0.);
-    std::vector <double> poswy(3,0.);
-
     double xMWPCEast = 0.;
     double yMWPCEast = 0.;
     double xMWPCWest = 0.;
@@ -630,118 +625,7 @@ int main(int argc, char *argv[])
     double heightEX = 0., heightEY = 0., heightWX = 0., heightWY = 0.;
     int nclippedEX = 0, nclippedEY = 0, nclippedWX = 0, nclippedWY = 0;
 
-    //If it's an electron, process it's cathode response
-    if (PID==1) {
-
-      MWPCCathodeHandler cathResp(t->Cathodes_Ex,t->Cathodes_Ey,t->Cathodes_Wx,t->Cathodes_Wy,&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
-      
-      cathResp.findAllPositions();
-
-      posex = cathResp.getPosEX();
-      posey = cathResp.getPosEY();
-      poswx = cathResp.getPosWX();
-      poswy = cathResp.getPosWY();
-
-      xE = posex[0] * positionProjection;
-      yE = posey[0] * positionProjection;
-      xW = poswx[0] * positionProjection;
-      yW = poswy[0] * positionProjection;
-
-      widthEX = posex[1];
-      widthEY = posey[1];
-      widthWX = poswx[1];
-      widthWY = poswy[1];
-      
-      heightEX = posex[2];
-      heightEY = posey[2];
-      heightWX = poswx[2];
-      heightWY = poswy[2];
-
-      xEmult = cathResp.getMultEX();
-      yEmult = cathResp.getMultEY();
-      xWmult = cathResp.getMultWX();
-      yWmult = cathResp.getMultWY();
-
-      nclippedEX = cathResp.getnClippedEX();
-      nclippedEY = cathResp.getnClippedEY();
-      nclippedWX = cathResp.getnClippedWX();
-      nclippedWY = cathResp.getnClippedWY();
-
-      xEmaxWire = cathResp.getMaxWireEX();
-      yEmaxWire = cathResp.getMaxWireEY();
-      xWmaxWire = cathResp.getMaxWireWX();
-      yWmaxWire = cathResp.getMaxWireWY();
-
-      xEmax = cathodeEast[16+xEmaxWire];
-      yEmax = cathodeEast[yEmaxWire];
-      xWmax = cathodeWest[16+xWmaxWire];
-      yWmax = cathodeWest[yWmaxWire];
-
-      //std::cout << xE << "\t" << yE << "\t" << xW << "\t" << yW << "\n";
-      /*for (int j=0; j<16; j++) {
-      
-	if (cathodeEast[j+16] > 100.) {
-	  xMWPCEast += cathodeEast[j+16]*posPdc2[j+16];
-	  xMWPCEastSum += cathodeEast[j+16];
-	  //t->Cathodes_Ex[j] = cathodeEast[j+16];
-	  xEmult++;
-	  if (cathodeEast[j+16]>xEmax) {
-	    xEmax = cathodeEast[j+16];
-	    xEmaxWire = j; 
-	  }
-	}
-	if (cathodeEast[j] > 100.) {
-	  yMWPCEast += cathodeEast[j]*posPdc2[j];
-	  yMWPCEastSum += cathodeEast[j];
-	  //t->Cathodes_Ey[j] = cathodeEast[j];
-	  yEmult++;
-	  if (cathodeEast[j]>yEmax) {
-	    yEmax = cathodeEast[j];
-	    yEmaxWire = j; 
-	  }
-	}
-	if (cathodeWest[j+16] > 100.) {
-	  xMWPCWest += cathodeWest[j+16]*posPadc[j+16];
-	  xMWPCWestSum += cathodeWest[j+16];
-	  //t->Cathodes_Wx[j] = cathodeWest[j+16];
-	  xWmult++;
-	  if (cathodeWest[j+16]>xWmax) {
-	    xWmax = cathodeWest[j+16];
-	    xWmaxWire = j; 
-	  }
-	}
-	if (cathodeWest[j] > 100.) {
-	  yMWPCWest += cathodeWest[j]*posPadc[j];
-	  yMWPCWestSum += cathodeWest[j];
-	  //t->Cathodes_Wy[j] = cathodeEast[j];
-	  yWmult++;
-	  if (cathodeWest[j]>yWmax) {
-	    yWmax = cathodeWest[j];
-	    yWmaxWire = j; 
-	  }
-	}
-      }
-       
-      if (xMWPCEastSum > 0.)
-	xMWPCEast = xMWPCEast / xMWPCEastSum;
-      if (yMWPCEastSum > 0.)
-	yMWPCEast = yMWPCEast / yMWPCEastSum;
-      if (xMWPCWestSum > 0.)
-	xMWPCWest = xMWPCWest / xMWPCWestSum;
-      if (yMWPCWestSum > 0.)
-	yMWPCWest = yMWPCWest / yMWPCWestSum;
-      
-      if (mwpcHitEast && xMWPCEastSum > 0.)
-	xE = xMWPCEast * positionProjection;
-      if (mwpcHitEast && yMWPCEastSum > 0.)
-	yE = yMWPCEast * positionProjection;
-      if (mwpcHitWest && xMWPCWestSum > 0.)
-	xW = xMWPCWest * positionProjection;
-      if (mwpcHitWest && yMWPCWestSum > 0.)
-	yW = yMWPCWest * positionProjection;
-      */
-    }
-
+    
     // Pass Everything to output tree
     t->TriggerNum = (int) Number;
     t->EvtN = i;
