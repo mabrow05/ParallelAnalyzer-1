@@ -373,57 +373,28 @@ std::vector <int> MWPCCathodeHandler::getNonClippedSorted( const std::vector<int
 std::vector<double> MWPCCathodeHandler::fitGaus(std::vector<double> x, std::vector<double> y) {
  
   std::vector <double> params;
-  //First making sure all points in y are above threshold. If they aren't for some odd reason,
-  // I'll set them equal to threshold..
-  std::vector <double> yerr;
-  for ( auto &i : y ) {
-    if ( i<cathodeThreshold ) i=cathodeThreshold;
-    yerr.push_back(sqrt(i));
-  }
-  //for ( auto &i : yerr) std::cout << yerr << std::endl;
-  //std::cout << x.size() << std::endl;
-  //std::cout << y[0] << "\t" << y[1] << "\t" << y[2] <<"\n";
-  TGraphErrors *g = new TGraphErrors(x.size(), &x[0], &y[0], 0, &yerr[0]);
-  TF1 *func = new TF1("func","[0]*TMath::Exp(-(x-[1])*(x-[1])/(2.*[2]*[2]))", -90.,90.);
-  //TF1 *func = new TF1("func","gaus(0)", -90.,90.);
-  func->SetParameters(y[1], x[1], 10.);
-  g->Fit(func,"RQ");
 
-  if ( fabs(func->GetParameter(1)) < 87. && func->GetParameter(0)>0. && func->GetParameter(0)<1.e10) {
-    params.push_back(func->GetParameter(1)); //mean
-    params.push_back(fabs(func->GetParameter(2))); //width
-    params.push_back(func->GetParameter(0)); //height
-    return params;
-  }
+  
+  // Figure out 
+  double p_minus = x[0]-x[1];
+  double p_plus = x[2]-x[1];
+  double s_minus = y[0];
+  double s_0 = y[1];
+  double s_plus = y[2];
+  
+  //First calculate sigma
+  double sigma2 = 0.5*p_plus*p_minus*(p_minus + p_plus) / ( p_plus*log(s_0/s_minus) + p_minus*log(s_plus/s_0) );
 
-  else  {
-    std::cout << "////////////////////////\n";
-    for (UInt_t i=0; i<x.size(); ++i ) {
-      std::cout << x[i] << "\t" << y[i] << "\t" << yerr[i] << "\t" << func->GetParameter(0) << "\t" << func->GetParameter(1) << "\n";
-    }
-    std::cout << "////////////////////////\n";
-    
-    func->SetParameter(0,1000.);
-    func->SetParameter(1, x[1]);
-    func->SetParameter(2, 20.);
-    func->SetParLimits(1,-87., 87.);
-    func->SetParLimits(0,0.,100000.);
-    g->Fit(func,"RQ");
+  // Calculate mean
+  double mu = ( sigma2*log(s_plus/s_0) + 0.5*p_plus*p_plus ) / p_plus ;
 
-    if ( fabs(func->GetParameter(2)) < 100. ) {
+  // Calculate amplitude
+  double amp = s_0 * exp( (mu*mu) / (2.*sigma2) );
 
-      params.push_back(func->GetParameter(1)); //mean
-      params.push_back(fabs(func->GetParameter(2))); //width
-      params.push_back(func->GetParameter(0)); //height
-    }
-    else { 
-      params.push_back(0.);
-      params.push_back(0.);
-      params.push_back(0.);
-    }
+  params.push_back(mu + x[1]);
+  params.push_back( sqrt( fabs(sigma2) ) );
+  params.push_back(amp);
 
-    delete func; delete g;
-    return params;
-  }
+  return params;
   
 };
