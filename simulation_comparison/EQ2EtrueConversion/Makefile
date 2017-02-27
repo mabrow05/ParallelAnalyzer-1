@@ -23,8 +23,8 @@ LIBS         += -lSpectrum -lMinuit
 .PHONY: all
 all: Etrue_Edep
 
-Etrue_Edep: Etrue_Edep.o peaks.o
-	$(CXX) $(CXXFLAGS) -o Etrue_Edep Etrue_Edep.o peaks.o $(LIBS)
+Etrue_Edep: Etrue_Edep.o ../../source_peaks/peaks.o
+	$(CXX) $(CXXFLAGS) -o Etrue_Edep Etrue_Edep.o ../../source_peaks/peaks.o $(LIBS)
 	@echo "Done"
 
 peaks.o: peaks.hh
