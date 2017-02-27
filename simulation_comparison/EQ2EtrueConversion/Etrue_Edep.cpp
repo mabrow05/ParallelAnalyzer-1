@@ -9,6 +9,8 @@
 #include <TString.h>
 #include <TRandom3.h>
 
+#include "peaks.hh"
+
 using std::ifstream;
 using std::ofstream;
 using namespace std;
@@ -173,8 +175,8 @@ int main(int argc, char *argv[]) {
 	    if ( r2E > FidRad*FidRad || r2W > FidRad*FidRad ) continue; 
 
 	    //Calculate smeared energies
-	    Tin.EdepQ.EdepQE = (1/alpha) * rand->Poisson(Tin.EdepQ.EdepQE*alpha);
-	    Tin.EdepQ.EdepQW = (1/alpha) * rand->Poisson(Tin.EdepQ.EdepQW*alpha);
+	    Tin.EdepQ.EdepQE = rand->Gaus(Tin.EdepQ.EdepQE, sqrt(Tin.EdepQ.EdepQE/alpha));
+	    Tin.EdepQ.EdepQW = rand->Gaus(Tin.EdepQ.EdepQW, sqrt(Tin.EdepQ.EdepQW/alpha));
 				       
             for (Nhist=0; Nhist<MaxNhist; Nhist++) //Sets Nhist to the proper histogram based on the true energy of the event
 	      if (Emin[Nhist]<=Tin.primKE && Tin.primKE<Emax[Nhist]) break; 
@@ -225,21 +227,98 @@ int main(int argc, char *argv[]) {
 
 
   // NEED TO PUT IN FITS TO THESE SPECTRA
-  //for (Nhist=0; Nhist<MaxNhist; Nhist++)
+  vector<double> mean_EDepQType0E(MaxNhist,0.);
+  vector<double> mean_EDepQType1E(MaxNhist,0.);
+  vector<double> mean_EDepQType2E(MaxNhist,0.);
+  vector<double> mean_EDepQType3E(MaxNhist,0.);
+  vector<double> mean_EDepQType23E(MaxNhist,0.);
+  vector<double> mean_EDepQType0W(MaxNhist,0.);
+  vector<double> mean_EDepQType1W(MaxNhist,0.);
+  vector<double> mean_EDepQType2W(MaxNhist,0.);
+  vector<double> mean_EDepQType3W(MaxNhist,0.);
+  vector<double> mean_EDepQType23W(MaxNhist,0.);
+
+  vector<double> err_EDepQType0E(MaxNhist,0.);
+  vector<double> err_EDepQType1E(MaxNhist,0.);
+  vector<double> err_EDepQType2E(MaxNhist,0.);
+  vector<double> err_EDepQType3E(MaxNhist,0.);
+  vector<double> err_EDepQType23E(MaxNhist,0.);
+  vector<double> err_EDepQType0W(MaxNhist,0.);
+  vector<double> err_EDepQType1W(MaxNhist,0.);
+  vector<double> err_EDepQType2W(MaxNhist,0.);
+  vector<double> err_EDepQType3W(MaxNhist,0.);
+  vector<double> err_EDepQType23W(MaxNhist,0.);
+  
+  SinglePeakHist *p;
+  
+  for (Nhist=0; Nhist<MaxNhist; Nhist++) {
+
+    p = new SinglePeakHist(EDepQType0E[Nhist],0., 800.);
+    mean_EDepQType0E[Nhist] = p->ReturnMean();
+    err_EDepQType0E[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType0W[Nhist],0., 800.);
+    mean_EDepQType0W[Nhist] = p->ReturnMean();
+    err_EDepQType0W[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType1E[Nhist],0., 800.);
+    mean_EDepQType1E[Nhist] = p->ReturnMean();
+    err_EDepQType1E[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType1W[Nhist],0., 800.);
+    mean_EDepQType1W[Nhist] = p->ReturnMean();
+    err_EDepQType1W[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType2E[Nhist],0., 800.);
+    mean_EDepQType2E[Nhist] = p->ReturnMean();
+    err_EDepQType2E[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType2W[Nhist],0., 800.);
+    mean_EDepQType2W[Nhist] = p->ReturnMean();
+    err_EDepQType2W[Nhist] = p->ReturnMeanError();
+    delete p;
+    
+    p = new SinglePeakHist(EDepQType3E[Nhist],0., 800.);
+    mean_EDepQType3E[Nhist] = p->ReturnMean();
+    err_EDepQType3E[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType3W[Nhist],0., 800.);
+    mean_EDepQType3W[Nhist] = p->ReturnMean();
+    err_EDepQType3W[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType23E[Nhist],0., 800.);
+    mean_EDepQType23E[Nhist] = p->ReturnMean();
+    err_EDepQType23E[Nhist] = p->ReturnMeanError();
+    delete p;
+
+    p = new SinglePeakHist(EDepQType23W[Nhist],0., 800.);
+    mean_EDepQType23W[Nhist] = p->ReturnMean();
+    err_EDepQType23W[Nhist] = p->ReturnMeanError();
+    delete p;
+
+  }
+    
 
   for (Nhist=0; Nhist<MaxNhist; Nhist++)
       {
        outdata << setw(5)  << Nhist << setw(7) << Emin[Nhist] << setw(7) << Emax[Nhist]
-               << setw(11) << EDepQType0E[Nhist]->GetMean() << setw(11) << EDepQType0E[Nhist]->GetMeanError() 
-               << setw(11) << EDepQType0W[Nhist]->GetMean() << setw(11) << EDepQType0W[Nhist]->GetMeanError()
-               << setw(11) << EDepQType1E[Nhist]->GetMean() << setw(11) << EDepQType1E[Nhist]->GetMeanError() 
-               << setw(11) << EDepQType1W[Nhist]->GetMean() << setw(11) << EDepQType1W[Nhist]->GetMeanError()
-               << setw(11) << EDepQType2E[Nhist]->GetMean() << setw(11) << EDepQType2E[Nhist]->GetMeanError() 
-               << setw(11) << EDepQType2W[Nhist]->GetMean() << setw(11) << EDepQType2W[Nhist]->GetMeanError()
-               << setw(11) << EDepQType3E[Nhist]->GetMean() << setw(11) << EDepQType3E[Nhist]->GetMeanError() 
-               << setw(11) << EDepQType3W[Nhist]->GetMean() << setw(11) << EDepQType3W[Nhist]->GetMeanError()  
-               << setw(12) << EDepQType23E[Nhist]->GetMean() << setw(11) << EDepQType23E[Nhist]->GetMeanError()
-               << setw(12) << EDepQType23W[Nhist]->GetMean() << setw(11) << EDepQType23W[Nhist]->GetMeanError() << endl;  
+               << setw(11) << mean_EDepQType0E[Nhist] << setw(11) << err_EDepQType0E[Nhist] 
+               << setw(11) << mean_EDepQType0W[Nhist] << setw(11) << err_EDepQType0W[Nhist]
+               << setw(11) << mean_EDepQType1E[Nhist] << setw(11) << err_EDepQType1E[Nhist] 
+               << setw(11) << mean_EDepQType1W[Nhist] << setw(11) << err_EDepQType1W[Nhist]
+               << setw(11) << mean_EDepQType2E[Nhist] << setw(11) << err_EDepQType2E[Nhist] 
+               << setw(11) << mean_EDepQType2W[Nhist] << setw(11) << err_EDepQType2W[Nhist]
+               << setw(11) << mean_EDepQType3E[Nhist] << setw(11) << err_EDepQType3E[Nhist] 
+               << setw(11) << mean_EDepQType3W[Nhist] << setw(11) << err_EDepQType3W[Nhist]  
+               << setw(12) << mean_EDepQType23E[Nhist] << setw(11) << err_EDepQType23E[Nhist]
+               << setw(12) << mean_EDepQType23W[Nhist] << setw(11) << err_EDepQType23W[Nhist] << endl;  
        }
   
   outputHists->Write();
