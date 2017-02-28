@@ -169,7 +169,7 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
 
    if ( numWires==0 ) return finalPos; // If there wasn't a signal...
 
-   else {
+   /* else {
      int max = getMaxWire(wires, sig);
      double ave = 0.; double denom = 0.;
      for ( unsigned int i=0; i<numWires; ++i ) {
@@ -180,7 +180,7 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
      finalPos[1] = fabs( pos[wires[0]] - pos[wires[numWires-1]] )/2.;
      finalPos[2] = sig[max];
      return finalPos;
-   }
+     }*/
      
 
   // This is a sorted list of the non clipped, threshold passed wires

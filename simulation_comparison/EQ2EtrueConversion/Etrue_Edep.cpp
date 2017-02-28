@@ -76,8 +76,14 @@ int main(int argc, char *argv[]) {
   double MaxE = 800.0;
   double DeltaE = 10.0;
 
+  
+
   double alpha = 0.4; // nPE/keV of roughly 400 PE per 1 GeV
+  Double_t g_d = 16.;
+  Double_t g_rest = 12500.;
   TRandom3 *rand = new TRandom3();
+  TRandom3 *rand1 = new TRandom3(rand->Rndm()*1000);
+  TRandom3 *rand2 = new TRandom3(rand->Rndm()*1000);
 
   #define pi M_PI
 
@@ -175,9 +181,12 @@ int main(int argc, char *argv[]) {
 	    if ( r2E > FidRad*FidRad || r2W > FidRad*FidRad ) continue; 
 
 	    //Calculate smeared energies
-	    Tin.EdepQ.EdepQE = rand->Gaus(Tin.EdepQ.EdepQE, sqrt(Tin.EdepQ.EdepQE/alpha));
-	    Tin.EdepQ.EdepQW = rand->Gaus(Tin.EdepQ.EdepQW, sqrt(Tin.EdepQ.EdepQW/alpha));
-				       
+	    //Tin.EdepQ.EdepQE = rand->Gaus(Tin.EdepQ.EdepQE, sqrt(Tin.EdepQ.EdepQE/alpha));
+	    //Tin.EdepQ.EdepQW = rand->Gaus(Tin.EdepQ.EdepQW, sqrt(Tin.EdepQ.EdepQW/alpha));
+	    Tin.EdepQ.EdepQE = (1./(alpha*g_d*g_rest)) * (rand->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha*Tin.EdepQ.EdepQE))));
+	    Tin.EdepQ.EdepQW = (1./(alpha*g_d*g_rest)) * (rand->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha*Tin.EdepQ.EdepQW))));
+
+	       
             for (Nhist=0; Nhist<MaxNhist; Nhist++) //Sets Nhist to the proper histogram based on the true energy of the event
 	      if (Emin[Nhist]<=Tin.primKE && Tin.primKE<Emax[Nhist]) break; 
 	    
@@ -253,52 +262,52 @@ int main(int argc, char *argv[]) {
   
   for (Nhist=0; Nhist<MaxNhist; Nhist++) {
 
-    p = new SinglePeakHist(EDepQType0E[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType0E[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType0E[Nhist] = p->ReturnMean();
     err_EDepQType0E[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType0W[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType0W[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType0W[Nhist] = p->ReturnMean();
     err_EDepQType0W[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType1E[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType1E[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType1E[Nhist] = p->ReturnMean();
     err_EDepQType1E[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType1W[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType1W[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType1W[Nhist] = p->ReturnMean();
     err_EDepQType1W[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType2E[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType2E[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType2E[Nhist] = p->ReturnMean();
     err_EDepQType2E[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType2W[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType2W[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType2W[Nhist] = p->ReturnMean();
     err_EDepQType2W[Nhist] = p->ReturnMeanError();
     delete p;
     
-    p = new SinglePeakHist(EDepQType3E[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType3E[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType3E[Nhist] = p->ReturnMean();
     err_EDepQType3E[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType3W[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType3W[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType3W[Nhist] = p->ReturnMean();
     err_EDepQType3W[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType23E[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType23E[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType23E[Nhist] = p->ReturnMean();
     err_EDepQType23E[Nhist] = p->ReturnMeanError();
     delete p;
 
-    p = new SinglePeakHist(EDepQType23W[Nhist],0., 800.);
+    p = new SinglePeakHist(EDepQType23W[Nhist],0., 800., true, 5, 0.75,1.5);
     mean_EDepQType23W[Nhist] = p->ReturnMean();
     err_EDepQType23W[Nhist] = p->ReturnMeanError();
     delete p;

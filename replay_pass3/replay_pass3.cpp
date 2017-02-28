@@ -50,32 +50,6 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 };
 
 
-//Get the conversion from EQ2Etrue
-std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
-  ifstream infile;
-  std::string basePath = getenv("ANALYSIS_CODE"); 
-  if (runNumber<16000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (runNumber<20000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (runNumber<21628 && runNumber>21087) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_isobutane_EQ2EtrueFitParams.dat");
-  else if (runNumber<24000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat");
-  else {
-    std::cout << "Bad runNumber passed to getEQ2EtrueParams\n";
-    exit(0);
-  }
-  infile.open(basePath.c_str());
-  std::vector < std::vector < std::vector < double > > > params;
-  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
-
-  char holdType[10];
-  int side=0, type=0;
-  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
-    std::cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << std::endl;
-    type+=1;
-    if (type==3) {type=0; side=1;}
-  }
-  return params;
-}
-
 vector < Double_t > GetAlphaValues(Int_t runPeriod)
 {
   Char_t temp[500];
@@ -178,8 +152,8 @@ int main(int argc, char *argv[])
   LinearityCurve linearityCurve(calibrationPeriod,false);
 
   //Load the simulated relationship between EQ and Etrue
-  vector < vector < vector < double > > > EQ2Etrue = getEQ2EtrueParams(runNumber);
- 
+  EreconParameterization eRecon(runNumber);
+
   //Read in PMT quality file
   std::vector <Int_t> pmtQuality = getPMTQuality(runNumber);
 
@@ -369,19 +343,22 @@ int main(int argc, char *argv[])
       // Determine the reconstructed energy
       
       int typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+      
       double totalEvis=0.;
       
       if (t->Side==0) {
 	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisE;
-	if (totalEvis>0.) {
-	  t->Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
+	if (t->EvisE>0. && totalEvis>0.) {
+	  t->Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+	  //t->Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
 	}
 	else t->Erecon=-1.;
       }
       if (t->Side==1) {
 	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisW;
-	if (totalEvis>0.) {
-	  t->Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
+	if (t->EvisW>0. && totalEvis>0.) {
+	  t->Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
+	  //t->Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
 	}
 	else t->Erecon=-1.;
       }

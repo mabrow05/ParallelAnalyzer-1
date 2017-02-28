@@ -179,4 +179,68 @@ bool TriggerFunctions::decideWestTrigger(std::vector<Double_t> ADC, std::vector<
 
   return numTriggs>=2 ? true : false;
 
-}
+};
+
+
+
+
+EreconParameterization::EreconParameterization(Int_t runNumber) {
+
+  if (runNumber<16000) geometry = TString("2011-2012");
+  else if (runNumber<20000) geometry = TString("2011-2012");
+  else if (runNumber<21628 && runNumber>21087) geometry = TString("2012-2013_isobutane");
+  else if (runNumber<24000) geometry = TString("2012-2013");
+  else {
+    std::cout << "Bad runNumber passed to getEQ2EtrueParams\n";
+    exit(0);
+  }
+  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (7,0.)));
+  readParams();
+
+};
+
+void EreconParameterization::readParams() {
+
+  ifstream infile;
+  TString basePath = TString::Format("%s/simulation_comparison/EQ2EtrueConversion/",getenv("ANALYSIS_CODE")); 
+  basePath += TString::Format("%s_EQ2EtrueFitParams.dat",geometry.Data());
+  
+  infile.open(basePath.Data());
+  
+  char holdType[10];
+  int side=0, type=0;
+  while (infile >> holdType >> params[side][type][0] 
+	 >> params[side][type][1] >> params[side][type][2] 
+	 >> params[side][type][3] >> params[side][type][4] 
+	 >> params[side][type][5] >> params[side][type][6]) { 
+
+    std::cout << holdType << " " << params[side][type][0] << " " 
+	      << params[side][type][1] << " " << params[side][type][2]
+	      << " " << params[side][type][3] << " " << params[side][type][4] 
+	      << " " << params[side][type][5] << std::endl;
+
+    type+=1;
+    if (type==3) {type=0; side=1;}
+  }
+};
+
+Double_t EreconParameterization::getErecon(Int_t side, Int_t type, Double_t Evis) {
+
+  Double_t EnCutoff = params[side][type][4]; // Below the EQ, we extrapolate to zero
+
+  // Above EnCutoff: p0 + p1*eQ + p2/eQ + p3/eQ*eQ
+  // Below : C*eQ^alpha where p4 is the cutoff, p5 is alpha, and p6 is C
+
+  if ( Evis > EnCutoff ) {
+
+    return ( params[side][type][0] + params[side][type][1]*Evis + 
+	     params[side][type][2]/Evis + params[side][type][3]/(Evis*Evis) );
+  }
+
+  else {
+    
+    return params[side][type][6] * TMath::Power(Evis,params[side][type][5]);
+
+  }
+
+};

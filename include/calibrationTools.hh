@@ -2,6 +2,7 @@
 #define CALTOOLS_HH
 
 #include <TF1.h>
+#include <TString.h>
 #include <TMath.h>
 #include <vector>
 #include <fstream>
@@ -50,4 +51,23 @@ private:
 
 
 };
+
+class EreconParameterization {
+ 
+public:
+  EreconParameterization(Int_t runNumber);  
+  ~EreconParameterization() {}; 
+  
+  std::vector < std::vector < std::vector < Double_t > > > returnLinCurveParams() { return params; };
+  Double_t getErecon(Int_t side, Int_t type, Double_t Evis); 
+  TString getCurrentGeometry() { return geometry; }; 
+  
+private:
+  TString geometry;
+  std::vector < std::vector < std::vector < Double_t > > >  params;                             
+  Int_t nParams;
+
+  void readParams();
+};        
+
 #endif

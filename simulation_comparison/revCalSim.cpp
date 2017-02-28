@@ -372,8 +372,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   std::vector < std::vector <Double_t> > pedestals = loadPMTpedestals(runNumber);
   std::vector < Double_t > PMTgain = loadGainFactors(runNumber);
 
-
-  std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
+  //Load the simulated relationship between EQ and Etrue
+  EreconParameterization eRecon(runNumber);
   Int_t pol = getPolarization(runNumber);
 
   LinearityCurve linCurve(calibrationPeriod,false);
@@ -863,7 +863,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     if (side==0) {
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
       if (evis.EvisE>0. && totalEvis>0.) {
-	Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
+	Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+	//Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
 	if (type==0) finalEn[0]->Fill(Erecon); 
 	else if (type==1) finalEn[2]->Fill(Erecon); 
 	else if(type==2 ||type==3) finalEn[4]->Fill(Erecon);
@@ -873,7 +874,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     if (side==1) {
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
       if (evis.EvisW>0. && totalEvis>0.) {
-	Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
+	Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
+	//Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
 	
 	if (type==0) finalEn[1]->Fill(Erecon); 
 	else if (type==1) finalEn[3]->Fill(Erecon); 
