@@ -71,11 +71,11 @@ private:
   std::vector <int>  doClipping(std::vector<int> wires, double *sig, double thresh); //Checks for clipped wires
   std::vector<double> fitCathResponse(std::vector <int> wires, std::vector<int> clip, double *sig, const double *pos); // // returns gaussian mean and width and height of a signal in a three element vector
   int getMaxWire(std::vector <int> wires, double *sig); // returns max wire
-  int getMaxWireNotClipped(std::vector <int> wires,std::vector<int> clipped, double *sig); // returns max wire that was not clipped
   std::vector <int> getNonClippedSorted( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
   std::vector <int> getNonClippedSequential( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
 
   std::vector<double> fitGaus(std::vector<double> x, std::vector<double> y); // returns gaussian mean and width and height of data arrays in a 3 element vector
+  std::vector<double> fitParabola(std::vector<double> x, std::vector<double> y); // returns gaussian mean and width and height of data arrays in a 3 element vector
 
   
   bool boolPedSubtr{false}; // Whether or not the pedestal subtraction has been calculated

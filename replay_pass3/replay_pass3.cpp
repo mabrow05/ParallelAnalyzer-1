@@ -208,6 +208,7 @@ int main(int argc, char *argv[])
       poswx = cathResp.getPosWX();
       poswy = cathResp.getPosWY();
 
+
       t->xE.center = posex[0] * positionProjection;
       t->yE.center = posey[0] * positionProjection;
       t->xW.center = poswx[0] * positionProjection;
@@ -247,15 +248,6 @@ int main(int argc, char *argv[])
       t->yE.rawCenter = cathResp.getWirePosEY(t->yE.maxWire);
       t->xW.rawCenter = cathResp.getWirePosWX(t->xW.maxWire);
       t->yW.rawCenter = cathResp.getWirePosWY(t->yW.maxWire);
-
-      // write out pedestal subtracted cathode values
-      
-      for ( int ii = 0; ii<16; ++ii ) {
-	t->Cathodes_Ex[ii] = t->Cathodes_Ex[ii] - pedPdc2[ii+16]; 
-	t->Cathodes_Ey[ii] = t->Cathodes_Ey[ii] - pedPdc2[ii];
-	t->Cathodes_Wx[ii] = t->Cathodes_Wx[ii] - pedPadc[ii+16];
-	t->Cathodes_Wy[ii] = t->Cathodes_Wy[ii] - pedPadc[ii];
-      }
 
       /////// Now do the energy reconstruction
       
@@ -362,6 +354,15 @@ int main(int argc, char *argv[])
 	}
 	else t->Erecon=-1.;
       }
+    }
+
+    // write out pedestal subtracted cathode values for all events
+    
+    for ( int ii = 0; ii<16; ++ii ) {
+      t->Cathodes_Ex[ii] = t->Cathodes_Ex[ii] - pedPdc2[ii+16]; 
+      t->Cathodes_Ey[ii] = t->Cathodes_Ey[ii] - pedPdc2[ii];
+      t->Cathodes_Wx[ii] = t->Cathodes_Wx[ii] - pedPadc[ii+16];
+      t->Cathodes_Wy[ii] = t->Cathodes_Wy[ii] - pedPadc[ii];
     }
     
     t->fillOutputTree();
