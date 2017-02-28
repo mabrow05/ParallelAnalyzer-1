@@ -201,7 +201,7 @@ EreconParameterization::EreconParameterization(Int_t runNumber) {
 
 void EreconParameterization::readParams() {
 
-  ifstream infile;
+  std::ifstream infile;
   TString basePath = TString::Format("%s/simulation_comparison/EQ2EtrueConversion/",getenv("ANALYSIS_CODE")); 
   basePath += TString::Format("%s_EQ2EtrueFitParams.dat",geometry.Data());
   

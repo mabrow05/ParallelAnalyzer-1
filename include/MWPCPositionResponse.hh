@@ -73,6 +73,7 @@ private:
   int getMaxWire(std::vector <int> wires, double *sig); // returns max wire
   int getMaxWireNotClipped(std::vector <int> wires,std::vector<int> clipped, double *sig); // returns max wire that was not clipped
   std::vector <int> getNonClippedSorted( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
+  std::vector <int> getNonClippedSequential( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
 
   std::vector<double> fitGaus(std::vector<double> x, std::vector<double> y); // returns gaussian mean and width and height of data arrays in a 3 element vector
 

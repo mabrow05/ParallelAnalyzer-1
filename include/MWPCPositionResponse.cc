@@ -164,12 +164,57 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
   unsigned int numWires = wires.size();
   unsigned int nClipped = clip.size();
 
+  if ( numWires==0 ) return finalPos; // If there are no wires over threshold, then we just have the origin
+
+  std::vector <int> nonClipped = getNonClippedSequential(wires,clip,sig);
+  int maxWireNC = getMaxWireNotClipped(wires, clip, sig);
+
+  if ( nonClipped.size() >= 3 ) { // If we have 3 wires that are not clipped use the max wire and two others to determine gaussian
+
+    //First determine which one is the max wire
+    unsigned int maxIndex = 0;
+    for ( auto w : nonClipped ) {
+      if ( w == maxWireNC ) break;
+      maxIndex++;
+    }
+
+    // Check if max index is on the front edge of the vector
+    if ( maxIndex == 0 ) {
+      for ( unsigned int i=0; i<3; ++i ) { posFit[i] = pos[nonClipped[i]]; valFit[i] = sig[nonClipped[i]]; }
+    }
+
+    // Check if max index is on the back edge of the vector
+    else if ( maxIndex == ( nonClipped.size()-1 ) ) {
+      for ( unsigned int i= (nonClipped.size()-3); i<nonClipped.size(); ++i ) { posFit[i] = pos[nonClipped[i]]; valFit[i] = sig[nonClipped[i]]; }
+    }
+
+    else {
+      for ( unsigned int i=(maxIndex-1); i<(maxIndex+2); ++i ) { posFit[i] = pos[nonClipped[i]]; valFit[i] = sig[nonClipped[i]]; }
+    }
+
+    return fitGaus(posFit, valFit);
+  }
+
+  // Just take the weighted average for anything less than three non-clipped above threshold wires
+  else {
+    int maxWire = getMaxWire(wires, sig);
+    double ave = 0.; double denom = 0.;
+    for ( unsigned int i=0; i<numWires; ++i ) {
+      ave += pos[wires[i]]*sig[wires[i]];
+      denom += sig[wires[i]];
+    }
+    finalPos[0] = ave/denom;
+    finalPos[1] = fabs( pos[wires[0]] - pos[wires[numWires-1]] )/2.;
+    finalPos[2] = sig[maxWire];
+    return finalPos;
+  }
+  /*
 
   //////////// For time being, I'm just using brad's method until we straighten this out
 
    if ( numWires==0 ) return finalPos; // If there wasn't a signal...
 
-   /* else {
+   else {
      int max = getMaxWire(wires, sig);
      double ave = 0.; double denom = 0.;
      for ( unsigned int i=0; i<numWires; ++i ) {
@@ -180,7 +225,7 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
      finalPos[1] = fabs( pos[wires[0]] - pos[wires[numWires-1]] )/2.;
      finalPos[2] = sig[max];
      return finalPos;
-     }*/
+     }
      
 
   // This is a sorted list of the non clipped, threshold passed wires
@@ -320,7 +365,7 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
   else {
     std::cout << "There is a hole in your logic\n";
     exit(0);
-  }
+    }*/
 };
 
  
@@ -367,6 +412,35 @@ std::vector <int> MWPCCathodeHandler::getNonClippedSorted( const std::vector<int
 
   //exit(0);
   return sorted;
+  
+};
+
+std::vector <int> MWPCCathodeHandler::getNonClippedSequential( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig) {
+  
+  std::vector <int> ncwires;
+  std::vector <double> ncsignals;
+
+  bool clip = false;
+
+  for ( unsigned int i=0; i<wires.size(); ++i ) {
+    
+    clip=false;
+    
+    for ( unsigned int j=0; j<clipWires.size(); ++j ) {
+      if (wires[i]==clipWires[j]) { clip = true; continue; }
+    }
+    
+    if ( !clip ) ncwires.push_back(wires[i]), ncsignals.push_back(sig[wires[i]]);
+    
+  }
+  
+
+  //for ( unsigned int j=0; j<clipWires.size(); ++j ) std::cout << "Clip: " << clipWires[j] << " " << std::endl;
+  //for ( unsigned int j=0; j<wires.size(); ++j ) std::cout << "Wires: " << wires[j] << " " << std::endl;
+  //for ( unsigned int j=0; j<sorted.size(); ++j ) std::cout << "No Clips Sorted: " << sorted[j] << " " << sortedSignals[j] << std::endl;
+
+  //exit(0);
+  return ncwires;
   
 };
   
