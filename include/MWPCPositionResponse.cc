@@ -21,6 +21,10 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
   pedWX = pedwx;
   pedWY = pedwy;
 
+  _bGaus = false;
+  _bGausAllEvents = false;
+  _sigma = 6.8;
+
   doPedestalSubtraction();
 
 };
@@ -101,8 +105,11 @@ std::vector<int> MWPCCathodeHandler::doClipping(std::vector<int> wires,
 
 
 
-void MWPCCathodeHandler::findAllPositions() {
+void MWPCCathodeHandler::findAllPositions(bool gaus, bool gausAllEvents) {
 
+  _bGaus = gaus;
+  _bGausAllEvents = gausAllEvents;
+  
   if ( !boolPedSubtr ) doPedestalSubtraction();
   if ( !boolThresholdCheck ) doThresholdCheck();
 
@@ -151,8 +158,9 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
 
   if ( numWires==0 ) return finalPos; // If there are no wires over threshold, then we just have the origin
 
-  if ( nClipped == 0 ) {
-    int maxWire = getMaxWire(wires, sig);
+  if ( ( nClipped == 0 && !(_bGaus && _bGausAllEvents) ) || !_bGaus ) { // This should be executed if _bGaus=false and if ( _bGaus=true
+                                                                        // && _bGausAllEvents=false && nClipped==0 ) and it should be bypassed  
+    int maxWire = getMaxWire(wires, sig);                               // if ( _bGaus=true && _bGausAllEvents=true )
     //std::cout << " Max Wire = " << maxWire << std::endl;
     double ave = 0.; double denom = 0.;
     for ( unsigned int i=0; i<numWires; ++i ) {
@@ -196,15 +204,12 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
     else {
       for ( unsigned int i=(maxIndex-1); i<(maxIndex+2); ++i ) { posFit[i-maxIndex+1] = pos[nonClipped[i]]; valFit[i-maxIndex+1] = sig[nonClipped[i]]; }
     }
-
-    for ( unsigned int i=0; i<3; ++i ) { valFit[i] = TMath::Log(valFit[i]); }
-
     
     //std::cout << posFit[0] << " " << posFit[1] << " " << posFit[2] << std::endl;
     //std::cout << valFit[0] << " " << valFit[1] << " " << valFit[2] << std::endl;
 
     //Check that the 3 wires being used are reasonably close to each other
-    if ( fabs(posFit[0]-posFit[1]) < 5.1*posInc && fabs(posFit[2]-posFit[1]) < 5.1*posInc ) return fitParabola(posFit, valFit);
+    if ( fabs(posFit[0]-posFit[1]) < 5.1*posInc && fabs(posFit[2]-posFit[1]) < 5.1*posInc ) return fitGaus(posFit, valFit);
     else { // Just take weighted average because there must be wires triggering somewhere else..
       int maxWire = getMaxWire(wires, sig);
       //std::cout << " Max Wire = " << maxWire << std::endl;
@@ -220,7 +225,15 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
     }
   }
 
-  // Just take the weighted average for anything less than three non-clipped above threshold wires
+  else if ( nonClipped.size() == 2 ) { // If we have 2 wires that are not clipped use the special method fitGaus2wires
+
+    std::vector <double> specPos { pos[ nonClipped[0] ], pos[ nonClipped[1] ] };
+    std::vector <double> specVal { sig[ nonClipped[0] ], sig[ nonClipped[1] ] };
+    return fitGaus2Points(specPos, specVal);
+  }
+
+  
+  // Just take the weighted average for anything less than two non-clipped above threshold wires
   else {
     int maxWire = getMaxWire(wires, sig);
     //std::cout << " Max Wire = " << maxWire << std::endl;
@@ -235,165 +248,7 @@ std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires,
     return finalPos;
   }
 };
-  /*
-
-  //////////// For time being, I'm just using brad's method until we straighten this out
-
-   if ( numWires==0 ) return finalPos; // If there wasn't a signal...
-
-   else {
-     int max = getMaxWire(wires, sig);
-     double ave = 0.; double denom = 0.;
-     for ( unsigned int i=0; i<numWires; ++i ) {
-       ave += pos[wires[i]]*sig[wires[i]];
-       denom += sig[wires[i]];
-     }
-     finalPos[0] = ave/denom;
-     finalPos[1] = fabs( pos[wires[0]] - pos[wires[numWires-1]] )/2.;
-     finalPos[2] = sig[max];
-     return finalPos;
-     }
-     
-
-  // This is a sorted list of the non clipped, threshold passed wires
-  std::vector<int> goodWires = getNonClippedSorted(wires,clip,sig);
   
-  if ( goodWires.size()>2 ) { // If there are more than 2 wires which were good, fit them and go on.
-    posFit[0] = pos[goodWires[1]]; valFit[0] = sig[goodWires[1]];
-    posFit[1] = pos[goodWires[0]]; valFit[1] = sig[goodWires[0]];
-    posFit[2] = pos[goodWires[2]]; valFit[2] = sig[goodWires[2]];
-    return fitGaus(posFit, valFit);
-  }
-
-  if ( nClipped > 2 ) { // If there are more than 2 clipped, just take the weighted average
-    double ave = 0.; double denom = 0.;
-    for ( unsigned int i=0; i<numWires; ++i ) {
-      ave += pos[wires[i]]*sig[wires[i]];
-      denom += sig[wires[i]];
-    }
-    finalPos[0] = ave/denom;
-    finalPos[1] = fabs( pos[clip[0]] - pos[clip[nClipped-1]] )/2.;
-    finalPos[2] = nClipped*4096./2.;
-    return finalPos;
-  }
-
-  if ( goodWires.size()==0 ) { // no good wires that didn't clip
-
-    if ( numWires==0 ) return finalPos; // If there wasn't a signal...
-
-    else { // Else you just take the average of the clipped wires and call it a day.. This won't happen often
-      double ave = 0.; double denom = 0.;
-      for ( unsigned int i=0; i<numWires; ++i ) {
-	ave += pos[wires[i]]*sig[wires[i]];
-	denom += sig[wires[i]];
-      }
-      finalPos[0] = ave/denom;
-      finalPos[1] = fabs( pos[clip[0]] - pos[clip[nClipped-1]] )/2.;
-      finalPos[2] = nClipped*4096.;
-      return finalPos;
-    }
-  }
-
-  else if ( goodWires.size()==1 ) { //One good wire
-    
-    if ( numWires==1 ) { // That one good wire is the only wire
-      finalPos[0] = pos[goodWires[0]];
-      finalPos[1] = 0.;
-      finalPos[2] = sig[goodWires[0]];
-      return finalPos;
-    }
-    
-    else if ( numWires==2 ) { // Then we have one clipped and one not clipped. We pick another wire on the other side
-      
-      int max = getMaxWire(wires, sig);
-      
-      if ( max==0 ) { // Handle edge wires
-	valFit[0] = cathodeThreshold; posFit[0] = pos[0]<0. ? (pos[0] - posInc) : (pos[0] + posInc) ;
-	valFit[1] = sig[wires[0]]; posFit[1] = pos[wires[0]];
-	valFit[2] = sig[wires[1]]; posFit[2] = pos[wires[1]];
-      }
-      else if ( max==15 ) {
-	valFit[0] = cathodeThreshold; posFit[0] = pos[15]<0. ? (pos[15] - posInc) : (pos[15] + posInc) ;
-	valFit[1] = sig[wires[0]]; posFit[1] = pos[wires[0]];
-	valFit[2] = sig[wires[1]]; posFit[2] = pos[wires[1]];
-      }
-      else { // pick one more wire 
-	
-	if ( wires[0]==max ) { posFit[0] = pos[wires[0]-1]; valFit[0] = cathodeThreshold; }
-	else { posFit[0] = pos[wires[1]+1]; valFit[0] = cathodeThreshold; }
-	
-	valFit[1] = sig[wires[0]]; posFit[1] = pos[wires[0]];
-	valFit[2] = sig[wires[1]]; posFit[2] = pos[wires[1]];
-      }
-      return fitGaus(posFit, valFit);
-    }
-    
-    else if ( numWires==3 ) { // So one good wire, 2 clipped wires, anything above this was taken by the nClipped > 2 up above
-      
-      if ( pos[clip[0]] > pos[goodWires[0]] ) {
-	valFit[0] = sig[goodWires[0]]; posFit[0] = pos[goodWires[0]];
-	valFit[1] = 4096. + sig[goodWires[0]]; posFit[1] = pos[clip[0]];
-	valFit[2] = 4096.;  posFit[2] = pos[clip[1]];
-      }
-      else {
-	valFit[0] = sig[goodWires[0]]; posFit[0] = pos[goodWires[0]];
-	valFit[1] = 4096. + sig[goodWires[0]]; posFit[1] = pos[clip[1]];
-	valFit[2] = 4096.;  posFit[2] = pos[clip[0]];
-      }
-      return fitGaus(posFit, valFit);
-    }
-  }
-
-  else if ( goodWires.size()==2 ) { // 2 good wires! Almost there
-
-    if ( numWires==2 ) { // Only 2, no clipped, Then we pick another wire on the other side
-      
-      int max = getMaxWire(wires, sig);
-      
-      if ( max==0 ) { // Handle edge wires
-	valFit[0] = cathodeThreshold; posFit[0] = pos[0]<0. ? (pos[0] - posInc) : (pos[0] + posInc) ;
-	valFit[1] = sig[goodWires[0]]; posFit[1] = pos[goodWires[0]];
-	valFit[2] = sig[goodWires[1]]; posFit[2] = pos[goodWires[1]];
-      }
-      else if ( max==15 ) {
-	valFit[0] = cathodeThreshold; posFit[0] = pos[15]<0. ? (pos[15] - posInc) : (pos[15] + posInc) ;
-	valFit[1] = sig[goodWires[0]]; posFit[1] = pos[goodWires[0]];
-	valFit[2] = sig[goodWires[1]]; posFit[2] = pos[goodWires[1]];
-      }
-      else { // pick one more wire 
-	
-	if ( goodWires[0]==max ) { posFit[0] = pos[goodWires[0]-1]; valFit[0] = cathodeThreshold; }
-	else { posFit[0] = pos[goodWires[1]+1]; valFit[0] = cathodeThreshold; }
-	
-	valFit[1] = sig[goodWires[0]]; posFit[1] = pos[goodWires[0]];
-	valFit[2] = sig[goodWires[1]]; posFit[2] = pos[goodWires[1]];
-      }
-      return fitGaus(posFit, valFit);
-    }
-    
-    else if ( numWires==3 ) { // 2 good, 1 clipped, Then we add the smaller wire to the clipped wire and fit
-      
-      valFit[0] = sig[goodWires[1]]; posFit[0] = pos[goodWires[1]]; // this is the smaller signal
-      valFit[1] = 4096. + sig[goodWires[1]]; posFit[1] = pos[clip[0]]; // this is the clipped one plus the smaller wire
-      valFit[2] = sig[goodWires[0]]; posFit[2] = pos[goodWires[0]]; // this is the larger signal
-      return fitGaus(posFit, valFit);
-    }
-    
-    else if ( numWires==4 ) { // 2 good, 2 clipped, then we take the center of the clipped wires as their position, and take 2
-                              // 1.66 * 4096 as the signal
-      
-      valFit[0] = sig[goodWires[1]]; posFit[0] = pos[goodWires[1]]; // this is the smaller signal
-      valFit[1] = 4096.*1.66 ; posFit[1] = ( pos[clip[0]] + pos[clip[1]] ) / 2.; // these are the clipped wires
-      valFit[2] = sig[goodWires[0]]; posFit[2] = pos[goodWires[0]]; // this is the larger signal
-      return fitGaus(posFit, valFit);
-    }   
-
-  }
-  else {
-    std::cout << "There is a hole in your logic\n";
-    exit(0);
-    }
-    };*/
 
  
 
@@ -478,19 +333,20 @@ std::vector<double> MWPCCathodeHandler::fitGaus(std::vector<double> x, std::vect
   
   // Figure out 
   double p_minus = x[0]-x[1];
-  double p_plus = x[2]-x[1];
-  double s_minus = y[0];
-  double s_0 = y[1];
-  double s_plus = y[2];
-  
+  double p_plus  = x[2]-x[1];
+  double s_minus = TMath::Log( y[0] );
+  double s_0     = TMath::Log( y[1] );
+  double s_plus  = TMath::Log( y[2] );
+
   //First calculate sigma
-  double sigma2 = 0.5*p_plus*p_minus*(p_minus + p_plus) / ( p_plus*TMath::Log(s_0/s_minus) + p_minus*TMath::Log(s_plus/s_0) );
+  double sigma2 = p_plus*p_minus*(p_minus - p_plus) / ( 2.*( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) );
 
   // Calculate mean
-  double mu = ( sigma2*TMath::Log(s_plus/s_0) + 0.5*p_plus*p_plus ) / p_plus ;
+  double mu = ( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) ;
 
   // Calculate amplitude
-  double amp = s_0 * exp( (mu*mu) / (2.*sigma2) );
+
+  double amp = ( p_minus - p_plus )*p_plus*p_minus*s_0 / ( p_minus*p_plus*( p_minus - p_plus ) ) + mu*mu / ( 2.*sigma2 );
 
   params.push_back(mu + x[1]);
   params.push_back( sqrt( fabs(sigma2) ) );
@@ -525,6 +381,35 @@ std::vector<double> MWPCCathodeHandler::fitParabola(std::vector<double> x, std::
   params.push_back(mu + x[1]);
   params.push_back( TMath::Sqrt( sigma2 ) );
   params.push_back(amp);
+
+  return params;
+  
+};
+
+
+std::vector<double> MWPCCathodeHandler::fitGaus2Points(std::vector<double> x, std::vector<double> y) {
+ 
+  std::vector <double> params;
+
+  
+  // Figure out 
+  double p_minus = x[0];
+  double p_plus = x[1];
+  double s_minus = y[0];
+  double s_plus = y[1];
+  
+  //We will use the average width as seen from studying the normal fit to gaussian
+  double sigma = _sigma / TMath::Sqrt( 0.6 );
+  // Calculate mean
+  double mu = (p_minus + p_plus) / 2. + sigma*sigma / (p_plus - p_minus) * TMath::Log(s_plus/s_minus) ;
+
+  // Calculate amplitude
+
+  double amp = ( p_plus*TMath::Log(s_minus) - p_minus*TMath::Log(s_plus) ) / ( p_plus - p_minus ) + ( mu*mu - p_plus*p_minus) / ( 2.*sigma*sigma );
+
+  params.push_back( mu );
+  params.push_back( sigma );
+  params.push_back( amp );
 
   return params;
   

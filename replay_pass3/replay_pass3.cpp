@@ -200,14 +200,15 @@ int main(int argc, char *argv[])
       std::vector <double> poswy(3,0.);
 
       MWPCCathodeHandler cathResp(t->Cathodes_Ex,t->Cathodes_Ey,t->Cathodes_Wx,t->Cathodes_Wy,&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
-      
-      cathResp.findAllPositions();
+
+
+      //First do the normal way... weighted average of good events, gaus fit of clipped
+      cathResp.findAllPositions(true,false);
 
       posex = cathResp.getPosEX();
       posey = cathResp.getPosEY();
       poswx = cathResp.getPosWX();
       poswy = cathResp.getPosWY();
-
 
       t->xE.center = posex[0] * positionProjection;
       t->yE.center = posey[0] * positionProjection;
@@ -249,6 +250,108 @@ int main(int argc, char *argv[])
       t->xW.rawCenter = cathResp.getWirePosWX(t->xW.maxWire);
       t->yW.rawCenter = cathResp.getWirePosWY(t->yW.maxWire);
 
+
+      
+      //Now do all gaussian fits... 
+      cathResp.findAllPositions(true,true);
+
+      posex = cathResp.getPosEX();
+      posey = cathResp.getPosEY();
+      poswx = cathResp.getPosWX();
+      poswy = cathResp.getPosWY();
+
+      t->gaus_xE.center = posex[0] * positionProjection;
+      t->gaus_yE.center = posey[0] * positionProjection;
+      t->gaus_xW.center = poswx[0] * positionProjection;
+      t->gaus_yW.center = poswy[0] * positionProjection;
+
+      t->gaus_xE.width = posex[1] * positionProjection;
+      t->gaus_yE.width = posey[1] * positionProjection;
+      t->gaus_xW.width = poswx[1] * positionProjection;
+      t->gaus_yW.width = poswy[1] * positionProjection;
+      
+      t->gaus_xE.height = posex[2];
+      t->gaus_yE.height = posey[2];
+      t->gaus_xW.height = poswx[2];
+      t->gaus_yW.height = poswy[2];
+
+      t->gaus_xE.mult = cathResp.getMultEX();
+      t->gaus_yE.mult = cathResp.getMultEY();
+      t->gaus_xW.mult = cathResp.getMultWX();
+      t->gaus_yW.mult = cathResp.getMultWY();
+
+      t->gaus_xE.nClipped = cathResp.getnClippedEX();
+      t->gaus_yE.nClipped = cathResp.getnClippedEY();
+      t->gaus_xW.nClipped = cathResp.getnClippedWX();
+      t->gaus_yW.nClipped = cathResp.getnClippedWY();
+
+      t->gaus_xE.maxWire = cathResp.getMaxWireEX();
+      t->gaus_yE.maxWire = cathResp.getMaxWireEY();
+      t->gaus_xW.maxWire = cathResp.getMaxWireWX();
+      t->gaus_yW.maxWire = cathResp.getMaxWireWY();
+
+      t->gaus_xE.maxValue = t->Cathodes_Ex[t->xE.maxWire];
+      t->gaus_yE.maxValue = t->Cathodes_Ey[t->yE.maxWire];
+      t->gaus_xW.maxValue = t->Cathodes_Wx[t->xW.maxWire];
+      t->gaus_yW.maxValue = t->Cathodes_Wy[t->yW.maxWire];
+
+      t->gaus_xE.rawCenter = cathResp.getWirePosEX(t->xE.maxWire);
+      t->gaus_yE.rawCenter = cathResp.getWirePosEY(t->yE.maxWire);
+      t->gaus_xW.rawCenter = cathResp.getWirePosWX(t->xW.maxWire);
+      t->gaus_yW.rawCenter = cathResp.getWirePosWY(t->yW.maxWire);
+
+
+      
+      // Now for all weighted averages...
+      cathResp.findAllPositions(false,false);
+
+      posex = cathResp.getPosEX();
+      posey = cathResp.getPosEY();
+      poswx = cathResp.getPosWX();
+      poswy = cathResp.getPosWY();
+
+      t->old_xE.center = posex[0] * positionProjection;
+      t->old_yE.center = posey[0] * positionProjection;
+      t->old_xW.center = poswx[0] * positionProjection;
+      t->old_yW.center = poswy[0] * positionProjection;
+
+      t->old_xE.width = posex[1] * positionProjection;
+      t->old_yE.width = posey[1] * positionProjection;
+      t->old_xW.width = poswx[1] * positionProjection;
+      t->old_yW.width = poswy[1] * positionProjection;
+      
+      t->old_xE.height = posex[2];
+      t->old_yE.height = posey[2];
+      t->old_xW.height = poswx[2];
+      t->old_yW.height = poswy[2];
+
+      t->old_xE.mult = cathResp.getMultEX();
+      t->old_yE.mult = cathResp.getMultEY();
+      t->old_xW.mult = cathResp.getMultWX();
+      t->old_yW.mult = cathResp.getMultWY();
+
+      t->old_xE.nClipped = cathResp.getnClippedEX();
+      t->old_yE.nClipped = cathResp.getnClippedEY();
+      t->old_xW.nClipped = cathResp.getnClippedWX();
+      t->old_yW.nClipped = cathResp.getnClippedWY();
+
+      t->old_xE.maxWire = cathResp.getMaxWireEX();
+      t->old_yE.maxWire = cathResp.getMaxWireEY();
+      t->old_xW.maxWire = cathResp.getMaxWireWX();
+      t->old_yW.maxWire = cathResp.getMaxWireWY();
+
+      t->old_xE.maxValue = t->Cathodes_Ex[t->xE.maxWire];
+      t->old_yE.maxValue = t->Cathodes_Ey[t->yE.maxWire];
+      t->old_xW.maxValue = t->Cathodes_Wx[t->xW.maxWire];
+      t->old_yW.maxValue = t->Cathodes_Wy[t->yW.maxWire];
+
+      t->old_xE.rawCenter = cathResp.getWirePosEX(t->xE.maxWire);
+      t->old_yE.rawCenter = cathResp.getWirePosEY(t->yE.maxWire);
+      t->old_xW.rawCenter = cathResp.getWirePosWX(t->xW.maxWire);
+      t->old_yW.rawCenter = cathResp.getWirePosWY(t->yW.maxWire);
+
+      
+      /////////////////////////////////////////////////////////////
       /////// Now do the energy reconstruction
       
       eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);

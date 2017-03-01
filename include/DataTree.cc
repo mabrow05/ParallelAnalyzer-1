@@ -132,6 +132,16 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   outputTree->Branch("oldTimeE",&oldTimeE, "oldTimeE/D");
   outputTree->Branch("oldTimeW",&oldTimeW, "oldTimeW/D");
   outputTree->Branch("oldTime",&oldTime, "oldTime/D");
+
+  outputTree->Branch("old_xE",&old_xE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  outputTree->Branch("old_yE",&old_yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  outputTree->Branch("old_xW",&old_xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  outputTree->Branch("old_yW",&old_yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+
+  outputTree->Branch("gaus_xE",&gaus_xE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  outputTree->Branch("gaus_yE",&gaus_yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  outputTree->Branch("gaus_xW",&gaus_xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  outputTree->Branch("gaus_yW",&gaus_yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
   
   std::cout << "Created output tree " << outputTreeName << " in " << outputFileName << "...\n";
 };
@@ -239,6 +249,16 @@ void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeNa
   inputTree->SetBranchAddress("oldTimeE",&oldTimeE);
   inputTree->SetBranchAddress("oldTimeW",&oldTimeW);
   inputTree->SetBranchAddress("oldTime",&oldTime);
+
+  inputTree->SetBranchAddress("old_xE",&old_xE);
+  inputTree->SetBranchAddress("old_yE",&old_yE);
+  inputTree->SetBranchAddress("old_xW",&old_xW);
+  inputTree->SetBranchAddress("old_yW",&old_yW);
+
+  inputTree->SetBranchAddress("gaus_xE",&gaus_xE);
+  inputTree->SetBranchAddress("gaus_yE",&gaus_yE);
+  inputTree->SetBranchAddress("gaus_xW",&gaus_xW);
+  inputTree->SetBranchAddress("gaus_yW",&gaus_yW);
 
   std::cout << "Prepared input tree " << inputTreeName << " in " << inputFileName << "...\n";
 };

@@ -21,9 +21,14 @@ public:
   void setCathodeThreshold(double t) { cathodeThreshold = t; };
   void setClippingThreshold(double ex,double ey,double wx,double wy) 
   { clipThresholdEX = ex, clipThresholdEY = ey, clipThresholdWX = wx, clipThresholdWY = wy; };
+  void setSigma(double s) { _sigma = s; };
 
+  
   void PrintSignals();
-  void findAllPositions(); // You only need to call this to return all position.  
+  void findAllPositions(bool gaus=true, bool gausAllEvents=false); // You only need to call this to return all position.
+                                         // If gaus is false, it just uses the weighted average for all events
+                                         // as was originally done. If gaus is true and gausAllEvents is true,
+                                         // it will look for three wires for all events, not just clipped events
   
   std::vector<double> getPosEX() { return posEX; }
   std::vector<double> getPosEY() { return posEY; }
@@ -55,7 +60,7 @@ public:
 
 
 private:
-
+  
   double cathodeThreshold;
   double clipThresholdEX, clipThresholdEY, clipThresholdWX, clipThresholdWY; // value where clipping occurs
   double *cathEX, *cathEY, *cathWX, *cathWY;
@@ -66,6 +71,9 @@ private:
   std::vector <int> clippedEX, clippedEY, clippedWX, clippedWY; // Vector of clipped wires
   std::vector <int> signalEX, signalEY, signalWX, signalWY; // Holds wires with signal above threshold
 
+  bool _bGaus, _bGausAllEvents;
+  double _sigma; // This is the characteristic sigma of an event
+  
   void doPedestalSubtraction(); // Subtracts pedestals and fills pedSubtr** 
   void doThresholdCheck(); // Sets all of the wires that were above threshold in signal**
   std::vector <int>  doClipping(std::vector<int> wires, double *sig, double thresh); //Checks for clipped wires
@@ -76,6 +84,7 @@ private:
 
   std::vector<double> fitGaus(std::vector<double> x, std::vector<double> y); // returns gaussian mean and width and height of data arrays in a 3 element vector
   std::vector<double> fitParabola(std::vector<double> x, std::vector<double> y); // returns gaussian mean and width and height of data arrays in a 3 element vector
+  std::vector<double> fitGaus2Points(std::vector<double> x, std::vector<double> y); // If there are only two points, this is used
 
   
   bool boolPedSubtr{false}; // Whether or not the pedestal subtraction has been calculated

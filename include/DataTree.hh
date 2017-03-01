@@ -64,7 +64,9 @@ public:
   Double_t TDCE, TDCW; // Trigger TDC by side
   Double_t TDCE1, TDCE2, TDCE3, TDCE4; //East ind PMT trigger TDC
   Double_t TDCW1, TDCW2, TDCW3, TDCW4; //West ind PMT trigger TDC
-  MWPC xE, xW, yE, yW; //MWPC structures
+  MWPC xE, xW, yE, yW; //Main MWPC structures
+  MWPC old_xE, old_xW, old_yE, old_yW; //Old style MWPC structures (all weighted averages)
+  MWPC gaus_xE, gaus_xW, gaus_yE, gaus_yW; // all gaus reconstructions
   Double_t Cathodes_Ex[16], Cathodes_Ey[16]; //array of cathode values
   Double_t Cathodes_Wx[16], Cathodes_Wy[16]; //array of cathode values
   Scint ScintE, ScintW; //Scintillator variable information
