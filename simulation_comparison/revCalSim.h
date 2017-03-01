@@ -1,3 +1,9 @@
+#include "../include/DataTree.hh"
+
+
+MWPC xE, xW, yE, yW;
+MWPC old_xE, old_xW, old_yE, old_yW;
+MWPC gaus_xE, gaus_xW, gaus_yE, gaus_yW;
 
 int PID, type, side; // basic analysis tags
 

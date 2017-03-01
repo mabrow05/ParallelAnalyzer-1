@@ -267,6 +267,21 @@ void SetUpTree(TTree *tree) {
   tree->Branch("ScintPosAdjusted",&scint_pos_adj,"ScintPosAdjE[3]/D:ScintPosAdjW[3]");
   tree->Branch("cathRespPos",&cathResp_pos,"cathRespPosE[3]/D:cathRespPosW[3]");
   tree->Branch("PMT",&pmt,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:etaEvis0/D:etaEvis1:etaEvis2:etaEvis3:etaEvis4:etaEvis5:etaEvis6:etaEvis7:nPE0/D:nPE1:nPE2:nPE3:nPE4:nPE5:nPE6:nPE7");
+
+  tree->Branch("xE",&xE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("yE",&yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("xW",&xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("yW",&yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  
+  tree->Branch("old_xE",&old_xE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("old_yE",&old_yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("old_xW",&old_xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("old_yW",&old_yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+
+  tree->Branch("gaus_xE",&gaus_xE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("gaus_yE",&gaus_yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("gaus_xW",&gaus_xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("gaus_yW",&gaus_yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
   
 }
   
@@ -603,11 +618,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       
       MWPCCathodeHandler cathResp(dCath_EX,dCath_EY,dCath_WX,dCath_WY);
       cathResp.setCathodeThreshold(0.000001);
-      cathResp.setClippingThreshold(clip_threshEX,clip_threshEY,clip_threshWX,clip_threshWY);  
-      cathResp.findAllPositions();
+      cathResp.setClippingThreshold(clip_threshEX,clip_threshEY,clip_threshWX,clip_threshWY);
 
-      //cathResp.PrintSignals();
-      //if ( evtTally ==5 ) exit(0);
+      
+      cathResp.findAllPositions(true,false);
 
       posex = cathResp.getPosEX();
       posey = cathResp.getPosEY();
@@ -629,13 +643,158 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       nClipped_EY = cathResp.getnClippedEY();
       nClipped_WX = cathResp.getnClippedWX();
       nClipped_WY = cathResp.getnClippedWY();
+
+      xE.center = -posex[0] * sqrt(0.6);
+      yE.center = -posey[0] * sqrt(0.6);
+      xW.center = poswx[0] * sqrt(0.6);
+      yW.center = -poswy[0] * sqrt(0.6);
+
+      xE.width = posex[1] * sqrt(0.6);
+      yE.width = posey[1] * sqrt(0.6);
+      xW.width = poswx[1] * sqrt(0.6);
+      yW.width = poswy[1] * sqrt(0.6);
       
+      xE.height = posex[2];
+      yE.height = posey[2];
+      xW.height = poswx[2];
+      yW.height = poswy[2];
+
+      xE.mult = cathResp.getMultEX();
+      yE.mult = cathResp.getMultEY();
+      xW.mult = cathResp.getMultWX();
+      yW.mult = cathResp.getMultWY();
+
+      xE.nClipped = cathResp.getnClippedEX();
+      yE.nClipped = cathResp.getnClippedEY();
+      xW.nClipped = cathResp.getnClippedWX();
+      yW.nClipped = cathResp.getnClippedWY();
+
+      xE.maxWire = cathResp.getMaxWireEX();
+      yE.maxWire = cathResp.getMaxWireEY();
+      xW.maxWire = cathResp.getMaxWireWX();
+      yW.maxWire = cathResp.getMaxWireWY();
+
+      xE.maxValue = dCath_EX[xE.maxWire];
+      yE.maxValue = dCath_EY[yE.maxWire];
+      xW.maxValue = dCath_WX[xW.maxWire];
+      yW.maxValue = dCath_WY[yW.maxWire];
+
+      xE.rawCenter = cathResp.getWirePosEX(xE.maxWire);
+      yE.rawCenter = cathResp.getWirePosEY(yE.maxWire);
+      xW.rawCenter = cathResp.getWirePosWX(xW.maxWire);
+      yW.rawCenter = cathResp.getWirePosWY(yW.maxWire);
+
+
+      
+      //Now do all gaussian fits... 
+      cathResp.findAllPositions(true,true);
+
+      posex = cathResp.getPosEX();
+      posey = cathResp.getPosEY();
+      poswx = cathResp.getPosWX();
+      poswy = cathResp.getPosWY();
+
+      gaus_xE.center = -posex[0] * sqrt(0.6);
+      gaus_yE.center = -posey[0] * sqrt(0.6);
+      gaus_xW.center = poswx[0] * sqrt(0.6);
+      gaus_yW.center = -poswy[0] * sqrt(0.6);
+
+      gaus_xE.width = posex[1] * sqrt(0.6);
+      gaus_yE.width = posey[1] * sqrt(0.6);
+      gaus_xW.width = poswx[1] * sqrt(0.6);
+      gaus_yW.width = poswy[1] * sqrt(0.6);
+      
+      gaus_xE.height = posex[2];
+      gaus_yE.height = posey[2];
+      gaus_xW.height = poswx[2];
+      gaus_yW.height = poswy[2];
+
+      gaus_xE.mult = cathResp.getMultEX();
+      gaus_yE.mult = cathResp.getMultEY();
+      gaus_xW.mult = cathResp.getMultWX();
+      gaus_yW.mult = cathResp.getMultWY();
+
+      gaus_xE.nClipped = cathResp.getnClippedEX();
+      gaus_yE.nClipped = cathResp.getnClippedEY();
+      gaus_xW.nClipped = cathResp.getnClippedWX();
+      gaus_yW.nClipped = cathResp.getnClippedWY();
+
+      gaus_xE.maxWire = cathResp.getMaxWireEX();
+      gaus_yE.maxWire = cathResp.getMaxWireEY();
+      gaus_xW.maxWire = cathResp.getMaxWireWX();
+      gaus_yW.maxWire = cathResp.getMaxWireWY();
+
+      gaus_xE.maxValue = dCath_EX[xE.maxWire];
+      gaus_yE.maxValue = dCath_EY[yE.maxWire];
+      gaus_xW.maxValue = dCath_WX[xW.maxWire];
+      gaus_yW.maxValue = dCath_WY[yW.maxWire];
+
+      gaus_xE.rawCenter = cathResp.getWirePosEX(xE.maxWire);
+      gaus_yE.rawCenter = cathResp.getWirePosEY(yE.maxWire);
+      gaus_xW.rawCenter = cathResp.getWirePosWX(xW.maxWire);
+      gaus_yW.rawCenter = cathResp.getWirePosWY(yW.maxWire);
+
+
+      
+      // Now for all weighted averages...
+      cathResp.findAllPositions(false,false);
+
+      posex = cathResp.getPosEX();
+      posey = cathResp.getPosEY();
+      poswx = cathResp.getPosWX();
+      poswy = cathResp.getPosWY();
+
+      old_xE.center = -posex[0] * sqrt(0.6);
+      old_yE.center = -posey[0] * sqrt(0.6);
+      old_xW.center = poswx[0] * sqrt(0.6);
+      old_yW.center = -poswy[0] * sqrt(0.6);
+
+      old_xE.width = posex[1] * sqrt(0.6);
+      old_yE.width = posey[1] * sqrt(0.6);
+      old_xW.width = poswx[1] * sqrt(0.6);
+      old_yW.width = poswy[1] * sqrt(0.6);
+      
+      old_xE.height = posex[2];
+      old_yE.height = posey[2];
+      old_xW.height = poswx[2];
+      old_yW.height = poswy[2];
+
+      old_xE.mult = cathResp.getMultEX();
+      old_yE.mult = cathResp.getMultEY();
+      old_xW.mult = cathResp.getMultWX();
+      old_yW.mult = cathResp.getMultWY();
+
+      old_xE.nClipped = cathResp.getnClippedEX();
+      old_yE.nClipped = cathResp.getnClippedEY();
+      old_xW.nClipped = cathResp.getnClippedWX();
+      old_yW.nClipped = cathResp.getnClippedWY();
+
+      old_xE.maxWire = cathResp.getMaxWireEX();
+      old_yE.maxWire = cathResp.getMaxWireEY();
+      old_xW.maxWire = cathResp.getMaxWireWX();
+      old_yW.maxWire = cathResp.getMaxWireWY();
+
+      old_xE.maxValue = dCath_EX[xE.maxWire];
+      old_yE.maxValue = dCath_EY[yE.maxWire];
+      old_xW.maxValue = dCath_WX[xW.maxWire];
+      old_yW.maxValue = dCath_WY[yW.maxWire];
+
+      old_xE.rawCenter = cathResp.getWirePosEX(xE.maxWire);
+      old_yE.rawCenter = cathResp.getWirePosEY(yE.maxWire);
+      old_xW.rawCenter = cathResp.getWirePosWX(xW.maxWire);
+      old_yW.rawCenter = cathResp.getWirePosWY(yW.maxWire);
+
+      
+      /////////////////////////////////////////////////////////////
+
     }
 
     for ( int ii=0; ii<3; ++ii ) {
       cathResp_pos.cathRespPosE[ii] = mwpcAdjE[ii];
       cathResp_pos.cathRespPosW[ii] = mwpcAdjW[ii];
     }
+
+    
     
     //std::cout << mwpcAdjE[0] << "\t" << mwpcAdjW[0] << std::endl;
     //if (evtTally==5) exit(0);
