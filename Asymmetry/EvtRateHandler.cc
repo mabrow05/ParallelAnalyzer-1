@@ -330,21 +330,21 @@ void EvtRateHandler::dataReader() {
       if ( PID==1  ) {       // && badTimeFlag==0 Cut on electrons not cut out by beam drops or bursts
 	
 	//Cut out clipped events and bad Wirechamber signals
-	/*if ( Type!=0 ) {
-	  if ( xE_nClipped>1 || yE_nClipped>1 || xW_nClipped>1 || yW_nClipped>1 ) continue;
-	  else if ( xeRC>6 || yeRC>6 || xwRC>6 || ywRC>6 ) continue; //Must look at both sides
+	if ( Type!=0 ) {
+	  //if ( xE_nClipped>1 || yE_nClipped>1 || xW_nClipped>1 || yW_nClipped>1 ) continue;
+	  if ( xeRC>6 || yeRC>6 || xwRC>6 || ywRC>6 ) continue; //Must look at both sides
 	}
 	else {
 	  if ( Side==0 ) {
-	    if ( xE_nClipped>1 || yE_nClipped>1 ) continue;
-	    else if ( xeRC>6 || yeRC>6 ) continue; //only look at MWPC signal on East
+	    //if ( xE_nClipped>1 || yE_nClipped>1 ) continue;
+	    if ( xeRC>6 || yeRC>6 ) continue; //only look at MWPC signal on East
 	  }
 	  else if ( Side==1 ) {
-	    if ( xW_nClipped>1 || yW_nClipped>1 ) continue;
-	    else if ( xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on West
+	    //if ( xW_nClipped>1 || yW_nClipped>1 ) continue;
+	    if ( xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on West
 	  }
 	}
-	*/
+	
 	
 	// Determine radial event position squared for cutting on fiducial volume
 	r2E = EmwpcX*EmwpcX + EmwpcY*EmwpcY;
