@@ -664,7 +664,7 @@ int main(int argc, char *argv[])
     
     t->EMWPC_E = t->EMWPC_W = 0.;
     
-    t->AnodeE = AnodeE;
+    t->AnodeE = AnodeE; // Pedestal subtracted
     t->AnodeW = AnodeW;
     
     t->PassedCathE = t->PassedCathW = PID==1?true:false; //temporary holder for this
