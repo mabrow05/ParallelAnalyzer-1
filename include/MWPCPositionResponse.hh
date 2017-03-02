@@ -46,9 +46,9 @@ public:
   int getMultWY() { return signalWY.size(); }
   
   int getMaxWireEX() { return getMaxWire(signalEX,pedSubtrEX); }
-  int getMaxWireEY() { return getMaxWire(signalEX,pedSubtrEY); }
-  int getMaxWireWX() { return getMaxWire(signalEX,pedSubtrWX); }
-  int getMaxWireWY() { return getMaxWire(signalEX,pedSubtrWY); }
+  int getMaxWireEY() { return getMaxWire(signalEY,pedSubtrEY); }
+  int getMaxWireWX() { return getMaxWire(signalWX,pedSubtrWX); }
+  int getMaxWireWY() { return getMaxWire(signalWX,pedSubtrWY); }
   
   double getWirePosEX(int i) { return wireposEX[i]; }
   double getWirePosEY(int i) { return wireposEY[i]; }
