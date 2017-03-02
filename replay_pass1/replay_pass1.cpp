@@ -163,78 +163,6 @@ int main(int argc, char *argv[])
   t->makeOutputTree(std::string(tempOut),"pass1");  
   
   
-  /*// East MWPC y                                                                  
-  posPdc2[0]  =  76.20;
-  posPdc2[1]  =  66.04;
-  posPdc2[2]  =  55.88;
-  posPdc2[3]  =  45.72;
-  posPdc2[4]  =  35.56;
-  posPdc2[5]  =  25.40;
-  posPdc2[6]  =  15.24;
-  posPdc2[7]  =   5.08;
-  posPdc2[8]  =  -5.08;
-  posPdc2[9]  = -15.24;
-  posPdc2[10] = -25.40;
-  posPdc2[11] = -35.56;
-  posPdc2[12] = -45.72;
-  posPdc2[13] = -55.88;
-  posPdc2[14] = -66.04;
-  posPdc2[15] = -76.20;
-
-  // East MWPC x                                                                  
-  posPdc2[16] =  76.20;
-  posPdc2[17] =  66.04;
-  posPdc2[18] =  55.88;
-  posPdc2[19] =  45.72;
-  posPdc2[20] =  35.56;
-  posPdc2[21] =  25.40;
-  posPdc2[22] =  15.24;
-  posPdc2[23] =   5.08;
-  posPdc2[24] =  -5.08;
-  posPdc2[25] = -15.24;
-  posPdc2[26] = -25.40;
-  posPdc2[27] = -35.56;
-  posPdc2[28] = -45.72;
-  posPdc2[29] = -55.88;
-  posPdc2[30] = -66.04;
-  posPdc2[31] = -76.20;
-
-  // West MWPC y                                                                  
-  posPadc[0]  =  76.20;
-  posPadc[1]  =  66.04;
-  posPadc[2]  =  55.88;
-  posPadc[3]  =  45.72;
-  posPadc[4]  =  35.56;
-  posPadc[5]  =  25.40;
-  posPadc[6]  =  15.24;
-  posPadc[7]  =   5.08;
-  posPadc[8]  =  -5.08;
-  posPadc[9]  = -15.24;
-  posPadc[10] = -25.40;
-  posPadc[11] = -35.56;
-  posPadc[12] = -45.72;
-  posPadc[13] = -55.88;
-  posPadc[14] = -66.04;
-  posPadc[15] = -76.20;
-
-  // West MWPC x                                                                  
-  posPadc[16] = -76.20;
-  posPadc[17] = -66.04;
-  posPadc[18] = -55.88;
-  posPadc[19] = -45.72;
-  posPadc[20] = -35.56;
-  posPadc[21] = -25.40;
-  posPadc[22] = -15.24;
-  posPadc[23] =  -5.08;
-  posPadc[24] =   5.08;
-  posPadc[25] =  15.24;
-  posPadc[26] =  25.40;
-  posPadc[27] =  35.56;
-  posPadc[28] =  45.72;
-  posPadc[29] =  55.88;
-  posPadc[30] =  66.04;
-  posPadc[31] =  76.20;
-  */
   // Open input ntuple
   char tempIn[500];
   sprintf(tempIn, "%s/full%s.root",getenv("UCNA_RAW_DATA"), argv[1]);
@@ -406,13 +334,6 @@ int main(int argc, char *argv[])
       pmt[j] = ((double) Qadc[j]) - pedQadc[j];
     }
     
-    /*for (int j=0; j<32; j++) {
-      
-      cathodeEast[j] = ((double) Pdc2[j]) ;
-      cathodeWest[j] = ((double) Padc[j]) ;
-      
-      }*/
-    
     // Set cathode values to non-ped subtracted values
     for (int j=0; j<32; j++) {
       
@@ -426,11 +347,26 @@ int main(int argc, char *argv[])
       }
     }
 
-    
-   
+    //////////////////////////////////////////////////////////
+    // For making a max Cathode signal cut
 
+    double CathMaxCut = 300.; // This is pedestal subtracted
+    
+    MWPCCathodeHandler cathResp(t->Cathodes_Ex,t->Cathodes_Ey,t->Cathodes_Wx,t->Cathodes_Wy,&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
+    
+    //Get the max signal in each plane (ped subtracted)
+    double cathMaxEX = cathResp.getMaxSignalEX();
+    double cathMaxEY = cathResp.getMaxSignalEY();
+    double cathMaxWX = cathResp.getMaxSignalWX();
+    double cathMaxWY = cathResp.getMaxSignalWY();
+
+    double maxCathSumE = cathMaxEX + cathMaxEY;
+    double maxCathSumW = cathMaxWX + cathMaxWY;
+
+    ///////////////////////////////////////////////////////////
+    
+    
     // Calculate pedestal-subtracted MWPC Anode PADC values
-    //Took this out for now. We are comparing against a cut instead...
     AnodeE = ((double) Pdc30) - pedPdc30;
     AnodeW = ((double) Pdc34) - pedPdc34;
 
@@ -502,8 +438,15 @@ int main(int argc, char *argv[])
     bool triggerWest = false;
 
     t->PassedAnoE = t->PassedAnoW = false;
-    if ( ((double) Pdc30)  > cutEastAnode) {mwpcHitEast = true; t->PassedAnoE=true;}
-    if ( ((double) Pdc34)  > cutWestAnode) {mwpcHitWest = true; t->PassedAnoW=true;}
+    t->PassedCathE = t->PassedCathW = false;
+    
+    if ( ((double) Pdc30)  > cutEastAnode) { t->PassedAnoE=true; }
+    if ( ((double) Pdc34)  > cutWestAnode) { t->PassedAnoW=true; }
+
+
+    // Using the cathode sum of max wires to determine MWPC trigger
+    if ( maxCathSumE > CathMaxCut ) { mwpcHitEast = true; t->PassedCathE=true; }
+    if ( maxCathSumW > CathMaxCut ) { mwpcHitWest = true; t->PassedCathW=true; }
 
     double timeEastTwoFold = ((double) Tdc016)*tdcChannelToTime;
     double timeWestTwoFold = ((double) Tdc017)*tdcChannelToTime;

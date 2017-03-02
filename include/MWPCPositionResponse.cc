@@ -132,6 +132,16 @@ void MWPCCathodeHandler::findAllPositions(bool gaus, bool gausAllEvents) {
 
 };
 
+double MWPCCathodeHandler::getMaxSignal(double *sig) {
+  double max = -100.;
+  for ( unsigned int i=0; i<16; ++i ) {
+    if ( sig[i]>max ) {
+      max = sig[i];
+    }
+  }
+  return max;
+};
+
 int MWPCCathodeHandler::getMaxWire(std::vector <int> wires, double *sig) {
   int maxWire = 0;
   double max = 0.;

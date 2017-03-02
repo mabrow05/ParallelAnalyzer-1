@@ -49,6 +49,11 @@ public:
   int getMaxWireEY() { return getMaxWire(signalEY,pedSubtrEY); }
   int getMaxWireWX() { return getMaxWire(signalWX,pedSubtrWX); }
   int getMaxWireWY() { return getMaxWire(signalWX,pedSubtrWY); }
+
+  double getMaxSignalEX() { return getMaxSignal(pedSubtrEX) ; } // These are pedestal subtracted
+  double getMaxSignalEY() { return getMaxSignal(pedSubtrEY) ; }
+  double getMaxSignalWX() { return getMaxSignal(pedSubtrWX) ; }
+  double getMaxSignalWY() { return getMaxSignal(pedSubtrWY) ; }
   
   double getWirePosEX(int i) { return wireposEX[i]; }
   double getWirePosEY(int i) { return wireposEY[i]; }
@@ -79,6 +84,7 @@ private:
   std::vector <int>  doClipping(std::vector<int> wires, double *sig, double thresh); //Checks for clipped wires
   std::vector<double> fitCathResponse(std::vector <int> wires, std::vector<int> clip, double *sig, const double *pos); // // returns gaussian mean and width and height of a signal in a three element vector
   int getMaxWire(std::vector <int> wires, double *sig); // returns max wire
+  double getMaxSignal(double *sig); // returns max signal
   std::vector <int> getNonClippedSorted( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
   std::vector <int> getNonClippedSequential( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
 
