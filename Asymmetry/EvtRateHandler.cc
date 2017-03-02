@@ -260,10 +260,10 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("TimeE",&TimeE);
       Tin->SetBranchAddress("TimeW",&TimeW);
       Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
-      Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-      Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-      Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-      Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+      Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+      Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+      Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+      Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
       Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
       Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
       Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
@@ -327,7 +327,7 @@ void EvtRateHandler::dataReader() {
 	TimeW = (double) TimeW_f;
       }
       
-      if ( PID==1  ) {       // && badTimeFlag==0 Cut on electrons not cut out by beam drops or bursts
+      if ( PID==1 && badTimeFlag==0 ) {       //  Cut on electrons not cut out by beam drops or bursts
 	
 	//Cut out clipped events and bad Wirechamber signals
 	if ( Type!=0 ) {
@@ -477,6 +477,16 @@ void SimEvtRateHandler::dataReader() {
     Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
     Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
     Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
+    //Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    //Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    //Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    //Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    //Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
+    //Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
+    //Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
+    //Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
+
+
     // ADD IN WIRECHAMBER ENERGY DEPOSITION
     
 
@@ -505,10 +515,10 @@ void SimEvtRateHandler::dataReader() {
 	  else if ( Side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
 	  }*/
 
-	//r2E = scintPosE[0]*scintPosE[0] + scintPosE[1]*scintPosE[1];
-	//r2W = scintPosW[0]*scintPosW[0] + scintPosW[1]*scintPosW[1];
-	r2E = ( cathRespPosE[0]*cathRespPosE[0] + cathRespPosE[1]*cathRespPosE[1] ) ; //Transforming to decay trap coords
-	r2W = ( cathRespPosW[0]*cathRespPosW[0] + cathRespPosW[1]*cathRespPosW[1] ) ;
+	r2E = ( mwpcPosE[0]*mwpcPosE[0] + mwpcPosE[1]*mwpcPosE[1] ) * 0.6 * 10.;
+	r2W = ( mwpcPosW[0]*mwpcPosW[0] + mwpcPosW[1]*mwpcPosW[1] ) * 0.6 * 10.;
+	//r2E = ( cathRespPosE[0]*cathRespPosE[0] + cathRespPosE[1]*cathRespPosE[1] ) ; //Transforming to decay trap coords
+	//r2W = ( cathRespPosW[0]*cathRespPosW[0] + cathRespPosW[1]*cathRespPosW[1] ) ;
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  //if ( r2E<(60.*60.) && r2W<(60.*60.) ) {
