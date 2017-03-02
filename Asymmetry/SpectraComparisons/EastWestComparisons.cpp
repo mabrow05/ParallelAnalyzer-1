@@ -1,4 +1,4 @@
-#include "../MBUtils.hh"
+#include "MBUtils.hh"
 #include <cstdlib>
 #include <cstdio>
 #include <iostream>
