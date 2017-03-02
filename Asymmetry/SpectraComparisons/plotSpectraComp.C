@@ -3,8 +3,8 @@
 {
   gStyle->SetOptStat(0);
 
-  int octetStart=0;
-  int octetEnd=59;
+  int octetStart=60;
+  int octetEnd=121;
 
   TString normType = "ALL";
 
@@ -441,7 +441,7 @@
   sim23_sfOFF_E->Draw("SAMEE0");
 
 
-  TString pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfOFF_E.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
+  pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfOFF_E.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
   //TString pdfFileStart = pdfFile + TString("(");
   //TString pdfFileEnd = pdfFile + TString
   c1_sfOFF_E->Print(TString::Format("%s(",pdfFile.Data()));
@@ -580,7 +580,7 @@
   sim23_sfON_E->Draw("SAMEE0");
 
 
-  TString pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfON_E.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
+  pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfON_E.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
   //TString pdfFileStart = pdfFile + TString("(");
   //TString pdfFileEnd = pdfFile + TString
   c1_sfON_E->Print(TString::Format("%s(",pdfFile.Data()));
@@ -719,7 +719,7 @@
   sim23_sfOFF_W->Draw("SAMEE0");
 
 
-  TString pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfOFF_W.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
+  pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfOFF_W.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
   //TString pdfFileStart = pdfFile + TString("(");
   //TString pdfFileEnd = pdfFile + TString
   c1_sfOFF_W->Print(TString::Format("%s(",pdfFile.Data()));
@@ -858,7 +858,7 @@
   sim23_sfON_W->Draw("SAMEE0");
 
 
-  TString pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfON_W.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
+  pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfON_W.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
   //TString pdfFileStart = pdfFile + TString("(");
   //TString pdfFileEnd = pdfFile + TString
   c1_sfON_W->Print(TString::Format("%s(",pdfFile.Data()));
