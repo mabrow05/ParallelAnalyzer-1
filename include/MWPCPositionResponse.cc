@@ -4,6 +4,33 @@
 #include <cmath>
 #include <TMath.h>
 
+MWPCCathodeHandler::MWPCCathodeHandler() {
+
+
+  cathodeThreshold = 100.; //Default for data
+  clipThresholdEX = clipThresholdEY = clipThresholdWX = clipThresholdWY = 4090.; //Default for data
+
+  double Hold[]{0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
+
+  
+  cathEX = &Hold[0];
+  cathEY = &Hold[0];
+  cathWX = &Hold[0];
+  cathWY = &Hold[0];
+
+  pedEX = &Hold[0];
+  pedEY = &Hold[0];
+  pedWX = &Hold[0];
+  pedWY = &Hold[0];
+
+  _bGaus = false;
+  _bGausAllEvents = false;
+  _sigma = 6.2;
+
+  doPedestalSubtraction();
+
+};
+
 
 MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *wy,
 				       double *pedex,double *pedey,double *pedwx,double *pedwy) {
@@ -23,7 +50,7 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
 
   _bGaus = false;
   _bGausAllEvents = false;
-  _sigma = 6.8;
+  _sigma = 6.2;
 
   doPedestalSubtraction();
 
@@ -45,10 +72,10 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
   pedEY = &pedHold[0];
   pedWX = &pedHold[0];
   pedWY = &pedHold[0];
-  /*pedEX = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
-  pedEX = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
-  pedEX = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
-  pedEX = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};*/
+
+  _bGaus = false;
+  _bGausAllEvents = false;
+  _sigma = 6.2;
   
   doPedestalSubtraction(); 
 

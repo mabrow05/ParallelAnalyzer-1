@@ -3,15 +3,15 @@ weighted spectra which would be seen as a reconstructed energy on one side
 of the detector. Also applies the trigger functions */
 
 #include "DeltaExpProcessor.h"
-#include "posMapReader.h"
 #include "positionMapHandler.hh"
 #include "sourcePeaks.h"
 #include "runInfo.h"
 #include "calibrationTools.hh"
 #include "TriggerMap.hh"
-#include "../Asymmetry/SQLinterface.hh"
 #include "BetaSpectrum.hh"
 #include "MBUtils.hh"
+#include "MWPCPositionResponse.hh"
+
 
 #include <vector>
 #include <cstdlib>
@@ -243,25 +243,24 @@ std::string getRunTypeFromOctetFile(int run) {
 
 
 int getPolarization(int run) {
- 
-  std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
-  std::string dbname = std::string(getenv("UCNADB"));
-  std::string dbUser = std::string(getenv("UCNADBUSER"));
-  std::string dbPass = std::string(getenv("UCNADBPASS"));
+
+  std::ifstream infile(TString::Format("%s/masterBetaRunList.txt",getenv("OCTET_LIST")).Data());
+
+  int rn = 0;
+  std::string type = "";
+  bool runFound = false;
+
+  while ( infile >> rn >> type ) {
+    if ( rn == run ) { runFound = true; infile.close(); continue; }
+  }
+
+  if ( !runFound ) throw "You didn't pick a run in an octet...";
+  //Flipper OFF is p = -1
+  if ( type=="A1" || type=="A2" || type=="A10" || type=="A12" || type=="B4" || type=="B5" || type=="B7" || type=="B9" ) return -1;
+  else if ( type=="B1" || type=="B2" || type=="B10" || type=="B12" || type=="A4" || type=="A5" || type=="A7" || type=="A9" ) return 1;
   
-  char cmd[200];
-  sprintf(cmd,"SELECT flipper FROM run WHERE run_number=%i;",run);
-
-  SQLdatabase *db = new SQLdatabase(dbname, dbAddress, dbUser, dbPass);
-  db->fetchQuery(cmd);
-  std::string flipperStatus = db->returnQueryEntry();
-  delete db;
-
-  std::cout << flipperStatus << std::endl;
-  if (flipperStatus=="On") return 1;
-  else if (flipperStatus=="Off") return -1;
   else {
-    std::cout <<  "Polarization isn't applicaple or you chose a Depol Run";
+    std::cout << "You chose a Depol Run.. no polarization\n";
     return 0;
   }
 };
@@ -341,32 +340,6 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
   return alphas;
 }
 
-  
-//Get the conversion from EQ2Etrue
-std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
-  ifstream infile;
-  std::string basePath = getenv("ANALYSIS_CODE"); 
-  if (runNumber<16000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (runNumber<20000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (runNumber<21628 && runNumber>21087) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_isobutane_EQ2EtrueFitParams.dat");
-  else if (runNumber<24000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat");
-  else {
-    std::cout << "Bad runNumber passed to getEQ2EtrueParams\n";
-    exit(0);
-  }
-  infile.open(basePath.c_str());
-  std::vector < std::vector < std::vector < double > > > params;
-  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
-
-  char holdType[10];
-  int side=0, type=0;
-  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
-    std::cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << std::endl;
-    type+=1;
-    if (type==3) {type=0; side=1;}
-  }
-  return params;
-}
 
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
@@ -501,8 +474,9 @@ void calcDeltaExp (int octet)
     std::vector < std::vector <Double_t> > pedestals = loadPMTpedestals(runNumber);
     std::vector < Double_t > PMTgain = loadGainFactors(runNumber);
 
+    //Load the simulated relationship between EQ and Etrue
+    EreconParameterization eRecon(runNumber);
 
-    std::vector < std::vector < std::vector <double> > > EQ2Etrue = getEQ2EtrueParams(runNumber);
     Int_t pol = getPolarization(runNumber);
 
     LinearityCurve linCurve(calibrationPeriod,false);
@@ -572,7 +546,7 @@ void calcDeltaExp (int octet)
     TRandom3 *rand1 = new TRandom3((int)seed->Rndm()*1000);
     TRandom3 *rand2 = new TRandom3((int)seed->Rndm()*1000);
     TRandom3 *rand3 = new TRandom3((int)seed->Rndm()*1000);
-
+    
     //Initialize random numbers for 8 pmt trigger probabilities
     TRandom3 *randPMTE1 = new TRandom3((int)seed->Rndm()*1);
     TRandom3 *randPMTE2 = new TRandom3((int)seed->Rndm()*2);
@@ -605,12 +579,9 @@ void calcDeltaExp (int octet)
     
     UInt_t evtTally = 0; //To keep track of the number of events 
 
+    // To start where the last sim of it's run type left off
     if ( runType=="A2" || runType=="A10" || runType=="B5" || runType=="B7" ) evt = evtOFF;
     else evt = evtON;
-
-    
-    
-
 
     vector < vector <Int_t> > gridPoint;
 
@@ -658,15 +629,79 @@ void calcDeltaExp (int octet)
       Double_t fidCut = 50.;
       
     
-      scint_pos_adj.ScintPosAdjE[0] = scint_pos.ScintPosE[0]*sqrt(0.6)*10.;
+      scint_pos_adj.ScintPosAdjE[0] = -scint_pos.ScintPosE[0]*sqrt(0.6)*10.;
       scint_pos_adj.ScintPosAdjE[1] = scint_pos.ScintPosE[1]*sqrt(0.6)*10.;
       scint_pos_adj.ScintPosAdjW[0] = scint_pos.ScintPosW[0]*sqrt(0.6)*10.;
       scint_pos_adj.ScintPosAdjW[1] = scint_pos.ScintPosW[1]*sqrt(0.6)*10.;
       scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2]*10.;
       scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2]*10.;
 
+      // 2011-2012 Cathode Threshold
+      Double_t clip_threshEX = 8.;
+      Double_t clip_threshEY = 8.;
+      Double_t clip_threshWX = 8.;
+      Double_t clip_threshWY = 8.;
+      
+      // 2012-2013 Cathode Threshold NEED TO ADD IN ISOBUTANE THRESHOLDS
+      if ( runNumber > 20000 ) {
+	// ISOBUTANE
+	if ( runNumber> 21087 && runNumber < 21623 ) { 
+	  clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
+	}
+	else clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
+      } 
+      
+      std::vector <double> posex(3,0.);
+      std::vector <double> poswx(3,0.);
+      std::vector <double> posey(3,0.);
+      std::vector <double> poswy(3,0.);
 
-      std::vector <Double_t> eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],scint_pos_adj.ScintPosAdjE[1],scint_pos_adj.ScintPosAdjW[0],scint_pos_adj.ScintPosAdjW[1]);
+      double dCath_EX[16]{0.};
+      double dCath_EY[16]{0.};
+      double dCath_WX[16]{0.};
+      double dCath_WY[16]{0.};
+
+      // Different def of wires in data
+      for ( int i=0; i<16; ++i ) {
+	dCath_EX[i] = (double)Cath_EX[i];
+	dCath_EY[i] = (double)Cath_EY[i];
+	dCath_WX[i] = (double)Cath_WX[i];
+	dCath_WY[i] = (double)Cath_WY[i];
+      }
+
+      Double_t mwpcAdjE[3] = {0.,0.,0.};
+      Double_t mwpcAdjW[3] = {0.,0.,0.};
+      
+      MWPCCathodeHandler cathResp(dCath_EX,dCath_EY,dCath_WX,dCath_WY);
+      cathResp.setCathodeThreshold(0.000001);
+      cathResp.setClippingThreshold(clip_threshEX,clip_threshEY,clip_threshWX,clip_threshWY);
+
+      
+      cathResp.findAllPositions(true,false);
+
+      posex = cathResp.getPosEX();
+      posey = cathResp.getPosEY();
+      poswx = cathResp.getPosWX();
+      poswy = cathResp.getPosWY();
+      
+      mwpcAdjE[0] = -posex[0] * sqrt(0.6) ; // The wires are already in 
+      mwpcAdjE[1] = -posey[0] * sqrt(0.6) ; // mm in the MWPCCathodeHandler Class
+      mwpcAdjW[0] = poswx[0] * sqrt(0.6) ;  // and the coordinates of the wires are inverted
+      mwpcAdjW[1] = -poswy[0] * sqrt(0.6) ; // for the y and east x directions from the experimental
+      mwpcAdjE[2] = mwpc_pos.MWPCPosE[2]*10. ; // positions used in MWPCCathodeHandler class
+      mwpcAdjW[2] = mwpc_pos.MWPCPosW[2]*10. ;
+
+      //std::cout << mwpcAdjE[0] << "\t" << mwpcAdjE[1] << mwpcAdjW[0] << "\t" << mwpcAdjW[1] <<"\n"; 
+      
+      nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
+     
+      nClipped_EX = cathResp.getnClippedEX();
+      nClipped_EY = cathResp.getnClippedEY();
+      nClipped_WX = cathResp.getnClippedWX();
+      nClipped_WY = cathResp.getnClippedWY();
+
+
+      std::vector <Double_t> eta = posmap.getInterpolatedEta( mwpcAdjE[0], mwpcAdjE[1], mwpcAdjW[0], mwpcAdjW[1] );
 
       //for (UInt_t iii=0; iii<eta.size(); iii++) std::cout << eta[iii] << std::endl;
     
@@ -674,27 +709,6 @@ void calcDeltaExp (int octet)
       //MWPC triggers
       if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
       if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
-
-
-      // Checking for what would be seen as a clipped event in the Cathodes. Right now, this is a hard cut on 6 keV deposited on 
-      // a single wire, as was determined by just looking for where the Cathode ADC spectra started to clip as compared to 
-      // the simulated energy spectrum (done by eye, set at 6 keV for now)
-      nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
-
-      // 2011-2012 Cathode Clipping Threshold
-      Double_t clip_threshE = 8.;
-      Double_t clip_threshW = 8.;
-      
-      // 2012-2013 Cathode Threshold
-      if ( runNumber > 20000 ) clip_threshE = 5., clip_threshW = 4.;
-    
-      for ( UInt_t j=0; j<16; j++ ) {
-	if ( Cath_EX[j] > clip_threshE ) nClipped_EX++;
-	if ( Cath_EY[j] > clip_threshE ) nClipped_EY++;
-	if ( Cath_WX[j] > clip_threshW ) nClipped_WX++;
-	if ( Cath_WY[j] > clip_threshW ) nClipped_WY++;
-      }
-
 
 
       //If there is clipping, or no wirechamber trigger, skip the event
@@ -913,14 +927,14 @@ void calcDeltaExp (int octet)
       if (side==0) {
 	Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
 	if (evis.EvisE>0. && totalEvis>0.) {
-	  Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
+	  Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
 	}
 	else Erecon=-1.;
       }
       if (side==1) {
 	Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
 	if (evis.EvisW>0. && totalEvis>0.) {
-	  Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
+	  Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
 	}
 	else Erecon=-1.;
       }    
@@ -930,12 +944,13 @@ void calcDeltaExp (int octet)
 	    
 
       //***********************************************************************************************************************
-	// Filling rate histograms with "good" events to calculate the corrections
+      // Filling rate histograms with "good" events to calculate the corrections
 
       if ( PID==1 && side<2 && type<4 && Erecon>0. ) {
 
 	evtTally++;
 
+	/*
 	//Cut out clipped events
 	if ( type==1 || type==2 ) {
 	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) {
@@ -955,7 +970,7 @@ void calcDeltaExp (int octet)
 	    if (evt%100000==0) std::cout << evt << std::endl;
 	    continue;
 	  }
-	}	
+	  }*/	
 	
 	
 	//std::cout << "Made it to clipping cut... " << r2E << "\t" << r2W\n";
@@ -976,9 +991,9 @@ void calcDeltaExp (int octet)
 	}	
 	
 	
-
-	double r2E = ( mwpc_pos.MWPCPosE[0]*mwpc_pos.MWPCPosE[0] + mwpc_pos.MWPCPosE[1]*mwpc_pos.MWPCPosE[1] ) * 0.6 * 100.; //Transforming to decay trap coords
-	double r2W = ( mwpc_pos.MWPCPosW[0]*mwpc_pos.MWPCPosW[0] + mwpc_pos.MWPCPosW[1]*mwpc_pos.MWPCPosW[1] ) * 0.6 * 100.;
+	// These are the reconstructed position using the cathode segments
+	double r2E = mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1];
+	double r2W = mwpcAdjW[0]*mwpcAdjW[0] + mwpcAdjW[1]*mwpcAdjW[1];
 
 	if ( r2E<(fidCut*fidCut) && r2W<(fidCut*fidCut ) ) {
 	
@@ -1142,18 +1157,17 @@ void calcDeltaExp (int octet)
 	  }
 	    
 	  
-	  A2_err[anaCh-1][side][bin-1] = sqrt(A2_err[anaCh-1][side][bin-1]);
-	  A5_err[anaCh-1][side][bin-1] = sqrt(A5_err[anaCh-1][side][bin-1]);
-	  A7_err[anaCh-1][side][bin-1] = sqrt(A7_err[anaCh-1][side][bin-1]);
-	  A10_err[anaCh-1][side][bin-1] = sqrt(A10_err[anaCh-1][side][bin-1]);
-	  B2_err[anaCh-1][side][bin-1] = sqrt(B2_err[anaCh-1][side][bin-1]);
-	  B5_err[anaCh-1][side][bin-1] = sqrt(B5_err[anaCh-1][side][bin-1]);
-	  B7_err[anaCh-1][side][bin-1] = sqrt(B7_err[anaCh-1][side][bin-1]);
-	  B10_err[anaCh-1][side][bin-1]=sqrt(B10_err[anaCh-1][side][bin-1]);
+	  if ( runType == "A2"  ) A2_err[anaCh-1][side][bin-1] = sqrt(A2_err[anaCh-1][side][bin-1]);
+	  if ( runType == "A5"  ) A5_err[anaCh-1][side][bin-1] = sqrt(A5_err[anaCh-1][side][bin-1]);
+	  if ( runType == "A7"  ) A7_err[anaCh-1][side][bin-1] = sqrt(A7_err[anaCh-1][side][bin-1]);
+	  if ( runType == "A10" ) A10_err[anaCh-1][side][bin-1] = sqrt(A10_err[anaCh-1][side][bin-1]);
+	  if ( runType == "B2"  ) B2_err[anaCh-1][side][bin-1] = sqrt(B2_err[anaCh-1][side][bin-1]);
+	  if ( runType == "B5"  ) B5_err[anaCh-1][side][bin-1] = sqrt(B5_err[anaCh-1][side][bin-1]);
+	  if ( runType == "B7"  ) B7_err[anaCh-1][side][bin-1] = sqrt(B7_err[anaCh-1][side][bin-1]);
+	  if ( runType == "B10" ) B10_err[anaCh-1][side][bin-1]=sqrt(B10_err[anaCh-1][side][bin-1]);
 	  //std::cout << anaChoice_A2[side][bin] << " " << anaChoice_A2_err[side][bin] << std::endl;
 	}
       }
-
     }
    
     for (int side = 0; side<2; side++) {
