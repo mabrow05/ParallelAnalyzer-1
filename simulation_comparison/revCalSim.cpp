@@ -435,21 +435,22 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 
   //Set random number generator
-  TRandom3 *seed = new TRandom3(0); // seed generator
-  TRandom3 *rand0 = new TRandom3((int)seed->Rndm()*1000);
-  TRandom3 *rand1 = new TRandom3((int)seed->Rndm()*1000);
-  TRandom3 *rand2 = new TRandom3((int)seed->Rndm()*1000);
-  TRandom3 *rand3 = new TRandom3((int)seed->Rndm()*1000);
+
+  TRandom3 *seed = new TRandom3( runNumber ); // seed generator
+  TRandom3 *rand0 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *rand1 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *rand2 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *rand3 = new TRandom3( (int) (seed->Rndm()*10000.) );
 
   //Initialize random numbers for 8 pmt trigger probabilities
-  TRandom3 *randPMTE1 = new TRandom3((int)seed->Rndm()*1);
-  TRandom3 *randPMTE2 = new TRandom3((int)seed->Rndm()*2);
-  TRandom3 *randPMTE3 = new TRandom3((int)seed->Rndm()*3);
-  TRandom3 *randPMTE4 = new TRandom3((int)seed->Rndm()*4);
-  TRandom3 *randPMTW1 = new TRandom3((int)seed->Rndm()*5);
-  TRandom3 *randPMTW2 = new TRandom3((int)seed->Rndm()*6);
-  TRandom3 *randPMTW3 = new TRandom3((int)seed->Rndm()*7);
-  TRandom3 *randPMTW4 = new TRandom3((int)seed->Rndm()*8);
+  TRandom3 *randPMTE1 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTE2 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTE3 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTE4 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW1 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW2 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW3 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW4 = new TRandom3( (int) (seed->Rndm()*10000.) );
 
   std::vector <Double_t> triggRandVec(4,0.);
 
