@@ -183,6 +183,8 @@ int main(int argc, char *argv[])
 
   vector < vector <Int_t> > gridPoint;
   vector < Double_t > eta;
+  vector < Double_t > old_eta;
+  vector < Double_t > gaus_eta;
 
   // Loop over events
   for (int i=0; i<nEvents; i++) {
@@ -200,11 +202,11 @@ int main(int argc, char *argv[])
       std::vector <double> poswy(3,0.);
 
       MWPCCathodeHandler cathResp(t->Cathodes_Ex,t->Cathodes_Ey,t->Cathodes_Wx,t->Cathodes_Wy,&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
-
-
+      
+      
       //First do the normal way... weighted average of good events, gaus fit of clipped
       cathResp.findAllPositions(true,false);
-
+      
       posex = cathResp.getPosEX();
       posey = cathResp.getPosEY();
       poswx = cathResp.getPosWX();
@@ -355,12 +357,222 @@ int main(int argc, char *argv[])
       /////// Now do the energy reconstruction
       
       eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
+      old_eta = posmap.getInterpolatedEta(t->old_xE.center, t->old_yE.center, t->old_xW.center, t->old_yW.center);
+      gaus_eta = posmap.getInterpolatedEta(t->gaus_xE.center, t->gaus_yE.center, t->gaus_xW.center, t->gaus_yW.center);
       
+      //First calculate old position reconstruction old_Erecon
       t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
       t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
       t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
       t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
       
+      t->ScintE.e1 = ( old_eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / old_eta[0] : 0.;
+      t->ScintE.e2 = ( old_eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / old_eta[1] : 0.;
+      t->ScintE.e3 = ( old_eta[2]>0. && t->ScintE.e3>0. ) ? t->ScintE.e3 / old_eta[2] : 0.;
+      t->ScintE.e4 = ( old_eta[3]>0. && t->ScintE.e4>0. ) ? t->ScintE.e4 / old_eta[3] : 0.;
+      
+      t->ScintE.nPE1 = old_eta[0] > 0. ? t->ScintE.e1 * old_eta[0] * alpha[0] : 0.;
+      t->ScintE.nPE2 = old_eta[1] > 0. ? t->ScintE.e2 * old_eta[1] * alpha[1] : 0.;
+      t->ScintE.nPE3 = old_eta[2] > 0. ? t->ScintE.e3 * old_eta[2] * alpha[2] : 0.;
+      t->ScintE.nPE4 = old_eta[3] > 0. ? t->ScintE.e4 * old_eta[3] * alpha[3] : 0.;
+      
+      t->ScintE.de1 = t->ScintE.nPE1 > 0. ? t->ScintE.e1/sqrt(t->ScintE.nPE1) : 0.;
+      t->ScintE.de2 = t->ScintE.nPE2 > 0. ? t->ScintE.e2/sqrt(t->ScintE.nPE2) : 0.;
+      t->ScintE.de3 = t->ScintE.nPE3 > 0. ? t->ScintE.e3/sqrt(t->ScintE.nPE3) : 0.;
+      t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
+      
+      
+      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1);
+      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2);
+      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
+      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
+      
+      t->ScintW.e1 = ( old_eta[4]>0. && t->ScintW.e1>0. ) ? t->ScintW.e1 / old_eta[4] : 0.;
+      t->ScintW.e2 = ( old_eta[5]>0. && t->ScintW.e2>0. ) ? t->ScintW.e2 / old_eta[5] : 0.;
+      t->ScintW.e3 = ( old_eta[6]>0. && t->ScintW.e3>0. ) ? t->ScintW.e3 / old_eta[6] : 0.;
+      t->ScintW.e4 = ( old_eta[7]>0. && t->ScintW.e4>0. ) ? t->ScintW.e4 / old_eta[7] : 0.;
+      
+      t->ScintW.nPE1 = old_eta[4] > 0. ? t->ScintW.e1 * old_eta[4] * alpha[4] : 0.;
+      t->ScintW.nPE2 = old_eta[5] > 0. ? t->ScintW.e2 * old_eta[5] * alpha[5] : 0.;
+      t->ScintW.nPE3 = old_eta[6] > 0. ? t->ScintW.e3 * old_eta[6] * alpha[6] : 0.;
+      t->ScintW.nPE4 = old_eta[7] > 0. ? t->ScintW.e4 * old_eta[7] * alpha[7] : 0.;
+      
+      t->ScintW.de1 = t->ScintW.nPE1 > 0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
+      t->ScintW.de2 = t->ScintW.nPE2 > 0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
+      t->ScintW.de3 = t->ScintW.nPE3 > 0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
+      t->ScintW.de4 = t->ScintW.nPE4 > 0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
+      
+      //std::cout << "Made it here" << std::endl;
+      
+      
+      //Calculate the weighted energy on a side
+      
+      //EAST
+      Double_t numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
+			 (pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
+			 (pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
+			 (pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+      
+      Double_t denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * old_eta[0] : 0.) +
+			  (pmtQuality[1] && t->ScintE.nPE2>0. ? alpha[1] * old_eta[1] : 0.) +
+			  (pmtQuality[2] && t->ScintE.nPE3>0. ? alpha[2] * old_eta[2] : 0.) + 
+			  (pmtQuality[3] && t->ScintE.nPE4>0. ? alpha[3] * old_eta[3] : 0.) ); 
+      
+      t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
+      t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
+      
+      //WEST
+      numer = denom = 0.;
+      
+      numer = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? t->ScintW.nPE1 : 0.) +
+		(pmtQuality[5] && t->ScintW.nPE1>0. ? t->ScintW.nPE2 : 0.) + 
+		(pmtQuality[6] && t->ScintW.nPE1>0. ? t->ScintW.nPE3 : 0.) + 
+		(pmtQuality[7] && t->ScintW.nPE1>0. ? t->ScintW.nPE4 : 0.) );
+      
+      denom  = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? alpha[4] * old_eta[4] : 0.) +
+		 (pmtQuality[5] && t->ScintW.nPE2>0. ? alpha[5] * old_eta[5] : 0.) +
+		 (pmtQuality[6] && t->ScintW.nPE3>0. ? alpha[6] * old_eta[6] : 0.) + 
+		 (pmtQuality[7] && t->ScintW.nPE4>0. ? alpha[7] * old_eta[7] : 0.) ); 
+      
+      
+      t->ScintW.energy = t->EvisW = (denom!=0. ? numer/denom : 0.);
+      t->ScintW.denergy = (denom!=0. ? sqrt(t->ScintW.energy/denom) : 0.);
+      
+      
+      // Determine the reconstructed energy
+      
+      int typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+      
+      double totalEvis=0.;
+      
+      if (t->Side==0) {
+	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisE;
+	if (t->EvisE>0. && totalEvis>0.) {
+	  t->old_Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+	}
+	else t->old_Erecon=-1.;
+      }
+      if (t->Side==1) {
+	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisW;
+	if (t->EvisW>0. && totalEvis>0.) {
+	  t->old_Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
+	}
+	else t->old_Erecon=-1.;
+      }
+    
+
+      ////////////////////////////////////////////////////////////////////
+      
+      //First calculate old position reconstruction gaus_Erecon
+      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
+      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
+      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
+      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
+      
+      t->ScintE.e1 = ( gaus_eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / gaus_eta[0] : 0.;
+      t->ScintE.e2 = ( gaus_eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / gaus_eta[1] : 0.;
+      t->ScintE.e3 = ( gaus_eta[2]>0. && t->ScintE.e3>0. ) ? t->ScintE.e3 / gaus_eta[2] : 0.;
+      t->ScintE.e4 = ( gaus_eta[3]>0. && t->ScintE.e4>0. ) ? t->ScintE.e4 / gaus_eta[3] : 0.;
+      
+      t->ScintE.nPE1 = gaus_eta[0] > 0. ? t->ScintE.e1 * gaus_eta[0] * alpha[0] : 0.;
+      t->ScintE.nPE2 = gaus_eta[1] > 0. ? t->ScintE.e2 * gaus_eta[1] * alpha[1] : 0.;
+      t->ScintE.nPE3 = gaus_eta[2] > 0. ? t->ScintE.e3 * gaus_eta[2] * alpha[2] : 0.;
+      t->ScintE.nPE4 = gaus_eta[3] > 0. ? t->ScintE.e4 * gaus_eta[3] * alpha[3] : 0.;
+      
+      t->ScintE.de1 = t->ScintE.nPE1 > 0. ? t->ScintE.e1/sqrt(t->ScintE.nPE1) : 0.;
+      t->ScintE.de2 = t->ScintE.nPE2 > 0. ? t->ScintE.e2/sqrt(t->ScintE.nPE2) : 0.;
+      t->ScintE.de3 = t->ScintE.nPE3 > 0. ? t->ScintE.e3/sqrt(t->ScintE.nPE3) : 0.;
+      t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
+      
+      
+      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1);
+      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2);
+      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
+      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
+      
+      t->ScintW.e1 = ( gaus_eta[4]>0. && t->ScintW.e1>0. ) ? t->ScintW.e1 / gaus_eta[4] : 0.;
+      t->ScintW.e2 = ( gaus_eta[5]>0. && t->ScintW.e2>0. ) ? t->ScintW.e2 / gaus_eta[5] : 0.;
+      t->ScintW.e3 = ( gaus_eta[6]>0. && t->ScintW.e3>0. ) ? t->ScintW.e3 / gaus_eta[6] : 0.;
+      t->ScintW.e4 = ( gaus_eta[7]>0. && t->ScintW.e4>0. ) ? t->ScintW.e4 / gaus_eta[7] : 0.;
+      
+      t->ScintW.nPE1 = gaus_eta[4] > 0. ? t->ScintW.e1 * gaus_eta[4] * alpha[4] : 0.;
+      t->ScintW.nPE2 = gaus_eta[5] > 0. ? t->ScintW.e2 * gaus_eta[5] * alpha[5] : 0.;
+      t->ScintW.nPE3 = gaus_eta[6] > 0. ? t->ScintW.e3 * gaus_eta[6] * alpha[6] : 0.;
+      t->ScintW.nPE4 = gaus_eta[7] > 0. ? t->ScintW.e4 * gaus_eta[7] * alpha[7] : 0.;
+      
+      t->ScintW.de1 = t->ScintW.nPE1 > 0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
+      t->ScintW.de2 = t->ScintW.nPE2 > 0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
+      t->ScintW.de3 = t->ScintW.nPE3 > 0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
+      t->ScintW.de4 = t->ScintW.nPE4 > 0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
+      
+      //std::cout << "Made it here" << std::endl;
+      
+      
+      //Calculate the weighted energy on a side
+      
+      //EAST
+      numer = 0.;
+      numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
+		(pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
+		(pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
+		(pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+      
+      denom = 0.;
+      denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * gaus_eta[0] : 0.) +
+		 (pmtQuality[1] && t->ScintE.nPE2>0. ? alpha[1] * gaus_eta[1] : 0.) +
+		 (pmtQuality[2] && t->ScintE.nPE3>0. ? alpha[2] * gaus_eta[2] : 0.) + 
+		 (pmtQuality[3] && t->ScintE.nPE4>0. ? alpha[3] * gaus_eta[3] : 0.) ); 
+      
+      t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
+      t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
+      
+      //WEST
+      numer = denom = 0.;
+      
+      numer = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? t->ScintW.nPE1 : 0.) +
+		(pmtQuality[5] && t->ScintW.nPE1>0. ? t->ScintW.nPE2 : 0.) + 
+		(pmtQuality[6] && t->ScintW.nPE1>0. ? t->ScintW.nPE3 : 0.) + 
+		(pmtQuality[7] && t->ScintW.nPE1>0. ? t->ScintW.nPE4 : 0.) );
+      
+      denom  = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? alpha[4] * gaus_eta[4] : 0.) +
+		 (pmtQuality[5] && t->ScintW.nPE2>0. ? alpha[5] * gaus_eta[5] : 0.) +
+		 (pmtQuality[6] && t->ScintW.nPE3>0. ? alpha[6] * gaus_eta[6] : 0.) + 
+		 (pmtQuality[7] && t->ScintW.nPE4>0. ? alpha[7] * gaus_eta[7] : 0.) ); 
+      
+      
+      t->ScintW.energy = t->EvisW = (denom!=0. ? numer/denom : 0.);
+      t->ScintW.denergy = (denom!=0. ? sqrt(t->ScintW.energy/denom) : 0.);
+      
+      
+      // Determine the reconstructed energy
+    
+      typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+    
+      totalEvis=0.;
+    
+      if (t->Side==0) {
+	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisE;
+	if (t->EvisE>0. && totalEvis>0.) {
+	  t->gaus_Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+	}
+	else t->gaus_Erecon=-1.;
+      }
+      if (t->Side==1) {
+	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisW;
+	if (t->EvisW>0. && totalEvis>0.) {
+	  t->gaus_Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
+	}
+	else t->gaus_Erecon=-1.;
+      }
+      
+      
+      
+      /////////////////////////////////////////////////////////////
+      // Now for the real Erecon and all of the variables that will be saved to file
+      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
+      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
+      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
+      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
       
       t->ScintE.e1 = ( eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / eta[0] : 0.;
       t->ScintE.e2 = ( eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / eta[1] : 0.;
@@ -404,15 +616,17 @@ int main(int argc, char *argv[])
       //Calculate the weighted energy on a side
       
       //EAST
-      Double_t numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
-			 (pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
-			 (pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
-			 (pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+      numer = 0.;
+      numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
+		(pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
+		(pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
+		(pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
       
-      Double_t denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * eta[0] : 0.) +
-			  (pmtQuality[1] && t->ScintE.nPE2>0. ? alpha[1] * eta[1] : 0.) +
-			  (pmtQuality[2] && t->ScintE.nPE3>0. ? alpha[2] * eta[2] : 0.) + 
-			  (pmtQuality[3] && t->ScintE.nPE4>0. ? alpha[3] * eta[3] : 0.) ); 
+      denom = 0.;
+      denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * eta[0] : 0.) +
+		 (pmtQuality[1] && t->ScintE.nPE2>0. ? alpha[1] * eta[1] : 0.) +
+		 (pmtQuality[2] && t->ScintE.nPE3>0. ? alpha[2] * eta[2] : 0.) + 
+		 (pmtQuality[3] && t->ScintE.nPE4>0. ? alpha[3] * eta[3] : 0.) ); 
       
       t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
       t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
@@ -437,15 +651,14 @@ int main(int argc, char *argv[])
       
       // Determine the reconstructed energy
       
-      int typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+      typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
       
-      double totalEvis=0.;
+      totalEvis=0.;
       
       if (t->Side==0) {
 	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisE;
 	if (t->EvisE>0. && totalEvis>0.) {
 	  t->Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
-	  //t->Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
 	}
 	else t->Erecon=-1.;
       }
@@ -453,7 +666,6 @@ int main(int argc, char *argv[])
 	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisW;
 	if (t->EvisW>0. && totalEvis>0.) {
 	  t->Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
-	  //t->Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
 	}
 	else t->Erecon=-1.;
       }

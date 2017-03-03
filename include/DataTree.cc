@@ -127,6 +127,8 @@ void DataTree::makeOutputTree(std::string outputFileName, std::string outputTree
   outputTree->Branch("Type",&Type,"Type/I");
   outputTree->Branch("ProbIII",&ProbIII,"ProbIII/D");
   outputTree->Branch("Erecon",&Erecon,"Erecon/D");
+  outputTree->Branch("old_Erecon",&old_Erecon,"old_Erecon/D");
+  outputTree->Branch("gaus_Erecon",&gaus_Erecon,"gaus_Erecon/D");
 
   outputTree->Branch("badTimeFlag",&badTimeFlag,"badTimeFlag/I");
   outputTree->Branch("oldTimeE",&oldTimeE, "oldTimeE/D");
@@ -244,6 +246,8 @@ void DataTree::setupInputTree(std::string inputFileName, std::string inputTreeNa
   inputTree->SetBranchAddress("Type",&Type);
   inputTree->SetBranchAddress("ProbIII",&ProbIII);
   inputTree->SetBranchAddress("Erecon",&Erecon);
+  inputTree->SetBranchAddress("old_Erecon",&old_Erecon);
+  inputTree->SetBranchAddress("gaus_Erecon",&gaus_Erecon);
 
   inputTree->SetBranchAddress("badTimeFlag",&badTimeFlag);
   inputTree->SetBranchAddress("oldTimeE",&oldTimeE);

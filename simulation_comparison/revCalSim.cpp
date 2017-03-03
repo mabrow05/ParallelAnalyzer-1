@@ -170,31 +170,6 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
 }
 
   
-//Get the conversion from EQ2Etrue
-std::vector < std::vector < std::vector <double> > > getEQ2EtrueParams(int runNumber) {
-  ifstream infile;
-  std::string basePath = getenv("ANALYSIS_CODE"); 
-  if (runNumber<16000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (runNumber<20000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2011-2012_EQ2EtrueFitParams.dat");
-  else if (runNumber<21628 && runNumber>21087) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_isobutane_EQ2EtrueFitParams.dat");
-  else if (runNumber<24000) basePath+=std::string("/simulation_comparison/EQ2EtrueConversion/2012-2013_EQ2EtrueFitParams.dat");
-  else {
-    std::cout << "Bad runNumber passed to getEQ2EtrueParams\n";
-    exit(0);
-  }
-  infile.open(basePath.c_str());
-  std::vector < std::vector < std::vector < double > > > params;
-  params.resize(2,std::vector < std::vector < double > > (3, std::vector < double > (6,0.)));
-
-  char holdType[10];
-  int side=0, type=0;
-  while (infile >> holdType >> params[side][type][0] >> params[side][type][1] >> params[side][type][2] >> params[side][type][3] >> params[side][type][4] >> params[side][type][5]) { 
-    std::cout << holdType << " " << params[side][type][0] << " " << params[side][type][1] << " " << params[side][type][2] << " " << params[side][type][3] << " " << params[side][type][4] << " " << params[side][type][5] << std::endl;
-    type+=1;
-    if (type==3) {type=0; side=1;}
-  }
-  return params;
-}
 
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
@@ -445,11 +420,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   chain->SetBranchAddress("Cath_EY",Cath_EY);
   chain->SetBranchAddress("Cath_WX",Cath_WX);
   chain->SetBranchAddress("Cath_WY",Cath_WY);
-  //chain->GetBranch("EdepQ")->GetLeaf("EdepQE")->SetAddress(&EdepQE);
-  //chain->GetBranch("EdepQ")->GetLeaf("EdepQW")->SetAddress(&EdepQW);
-  //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
-  //chain->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
-
+  
   //These are for feeding in Xuan's simulations... this needs to be updated so that I can pass a flag and change these on the fly
   //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
   //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
@@ -683,9 +654,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       yE.rawCenter = cathResp.getWirePosEY(yE.maxWire);
       xW.rawCenter = cathResp.getWirePosWX(xW.maxWire);
       yW.rawCenter = cathResp.getWirePosWY(yW.maxWire);
-
-
-      
+    
       //Now do all gaussian fits... 
       cathResp.findAllPositions(true,true);
 
@@ -735,7 +704,6 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       gaus_yW.rawCenter = cathResp.getWirePosWY(yW.maxWire);
 
 
-      
       // Now for all weighted averages...
       cathResp.findAllPositions(false,false);
 
@@ -789,6 +757,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
     }
 
+
     for ( int ii=0; ii<3; ++ii ) {
       cathResp_pos.cathRespPosE[ii] = mwpcAdjE[ii];
       cathResp_pos.cathRespPosW[ii] = mwpcAdjW[ii];
@@ -800,14 +769,17 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     //if (evtTally==5) exit(0);
 
     std::vector <Double_t> eta; 
+
     if ( source!="Beta" ) eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],
 							  scint_pos_adj.ScintPosAdjE[1],
 							  scint_pos_adj.ScintPosAdjW[0],
 							  scint_pos_adj.ScintPosAdjW[1]);
 
-    else eta = posmap.getInterpolatedEta(mwpcAdjE[0],mwpcAdjE[1],
-					 mwpcAdjW[0],mwpcAdjW[1]);
-    
+    else eta = posmap.getInterpolatedEta(-mwpc_pos.MWPCPosE[0]*sqrt(0.6)*10., mwpc_pos.MWPCPosE[1]*sqrt(0.6)*10.,
+					 mwpc_pos.MWPCPosW[0]*sqrt(0.6)*10.,  mwpc_pos.MWPCPosW[1]*sqrt(0.6)*10.);
+ //eta = posmap.getInterpolatedEta(t->xE.center,t->yE.center,
+      //t->xW.center,t->yW.center);
+         
       
     //MWPC triggers
     if (mwpcE.MWPCEnergyE>MWPCAnodeThreshold) EMWPCTrigger=true;

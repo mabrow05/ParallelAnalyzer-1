@@ -685,6 +685,8 @@ int main(int argc, char *argv[])
     t->Side = side;
     t->ProbIII = 0.;
     t->Erecon = 0.;
+    t->old_Erecon = 0.;
+    t->gaus_Erecon = 0.;
 
 
       /*timeE_BB = Clk2*scalerCountsToTime;
