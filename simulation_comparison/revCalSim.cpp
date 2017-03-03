@@ -70,29 +70,6 @@ int getPolarization(int run) {
   }
 };
 
-/*int getPolarization(int run) {
- 
-  std::string dbAddress = std::string(getenv("UCNADBADDRESS"));
-  std::string dbname = std::string(getenv("UCNADB"));
-  std::string dbUser = std::string(getenv("UCNADBUSER"));
-  std::string dbPass = std::string(getenv("UCNADBPASS"));
-  
-  char cmd[200];
-  sprintf(cmd,"SELECT flipper FROM run WHERE run_number=%i;",run);
-
-  SQLdatabase *db = new SQLdatabase(dbname, dbAddress, dbUser, dbPass);
-  db->fetchQuery(cmd);
-  std::string flipperStatus = db->returnQueryEntry();
-  delete db;
-
-  std::cout << flipperStatus << std::endl;
-  if (flipperStatus=="On") return 1;
-  else if (flipperStatus=="Off") return -1;
-  else {
-    std::cout <<  "Polarization isn't applicaple or you chose a Depol Run";
-    return 0;
-  }
-  };*/
 
 
 vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
@@ -995,7 +972,6 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisE;
       if (evis.EvisE>0. && totalEvis>0.) {
 	Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
-	//Erecon = EQ2Etrue[0][typeIndex][0]+EQ2Etrue[0][typeIndex][1]*totalEvis+EQ2Etrue[0][typeIndex][2]/(totalEvis+EQ2Etrue[0][typeIndex][3])+EQ2Etrue[0][typeIndex][4]/((totalEvis+EQ2Etrue[0][typeIndex][5])*(totalEvis+EQ2Etrue[0][typeIndex][5]));
 	if (type==0) finalEn[0]->Fill(Erecon); 
 	else if (type==1) finalEn[2]->Fill(Erecon); 
 	else if(type==2 ||type==3) finalEn[4]->Fill(Erecon);
@@ -1005,9 +981,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     if (side==1) {
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
       if (evis.EvisW>0. && totalEvis>0.) {
-	Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
-	//Erecon = EQ2Etrue[1][typeIndex][0]+EQ2Etrue[1][typeIndex][1]*totalEvis+EQ2Etrue[1][typeIndex][2]/(totalEvis+EQ2Etrue[1][typeIndex][3])+EQ2Etrue[1][typeIndex][4]/((totalEvis+EQ2Etrue[1][typeIndex][5])*(totalEvis+EQ2Etrue[1][typeIndex][5]));
-	
+	Erecon = eRecon.getErecon(1,typeIndex,totalEvis);	
 	if (type==0) finalEn[1]->Fill(Erecon); 
 	else if (type==1) finalEn[3]->Fill(Erecon); 
 	else if(type==2 ||type==3) finalEn[5]->Fill(Erecon);

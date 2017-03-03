@@ -8,7 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
-VPATH = ./:../include/
+VPATH = ./:../../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
@@ -16,11 +16,13 @@ CXXFLAGS      = -O2 -Wall -fPIC -std=c++11 -g
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
-CXXFLAGS     += $(ROOTCFLAGS) -I../include
+CXXFLAGS     += $(ROOTCFLAGS) -I../../include
 LIBS         += -lSpectrum -lMinuit
 
-DeltaExpProcessor.exe: DeltaExpProcessor.o positionMapHandler.o SQLinterface.o calibrationTools.o MBUtils.o TriggerMap.o BetaSpectrum.o
-	$(CXX) $(CXXFLAGS) -o DeltaExpProcessor.exe DeltaExpProcessor.o MBUtils.o calibrationTools.o positionMapHandler.o TriggerMap.o BetaSpectrum.o ../Asymmetry/SQLinterface.o $(LIBS)
+objects = positionMapHandler.o calibrationTools.o MBUtils.o TriggerMap.o BetaSpectrum.o MWPCPositionResponse.o
+
+DeltaExpProcessor.exe: DeltaExpProcessor.o $(objects)
+	$(CXX) $(CXXFLAGS) -o DeltaExpProcessor.exe DeltaExpProcessor.o $(objects) $(LIBS)
 	@echo "Done"
 
 XuanStyle_DeltaExpProcessor.exe: XuanStyle_DeltaExpProcessor.o positionMapHandler.o SQLinterface.o calibrationTools.o MBUtils.o TriggerMap.o BetaSpectrum.o
@@ -35,12 +37,9 @@ positionMapHandler.o: positionMapHandler.hh MBUtils.o
 
 TriggerMap.o: TriggerMap.hh MBUtils.o
 
-SQLinterface.o: ../Asymmetry/SQLinterface.hh
-
 calibrationTools.o: calibrationTools.hh
 
-#posMapReader.o: posMapReader.h
-
+MWPCPositionResponse.o: MWPCPositionResponse.hh
 
 
 # -------------------------------------------------------------------------------
