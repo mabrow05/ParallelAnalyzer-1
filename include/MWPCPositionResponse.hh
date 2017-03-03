@@ -7,10 +7,10 @@
 
 class MWPCCathodeHandler {
 
-  
-  
 public:
 
+  MWPCCathodeHandler(); // In case you just need access to wire positions
+  
   MWPCCathodeHandler(double *ex,double *ey,double *wx,double *wy,
 		     double *pedex,double *pedey,double *pedwx,double *pedwy);
 

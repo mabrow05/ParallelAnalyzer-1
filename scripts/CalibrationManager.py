@@ -105,6 +105,7 @@ class CalReplayManager:
         self.replayPass4 = os.getenv("REPLAY_PASS4")
         self.srcListPath = os.getenv("SOURCE_LIST")
         self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
+        self.gainCathodesPath = os.getenv("GAIN_CATHODES")
         self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
         self.octetListPath = os.getenv("OCTET_LIST")
         self.triggerFuncPath = os.getenv("TRIGGER_FUNC")

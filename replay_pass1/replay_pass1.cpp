@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
     double cathMaxEY = cathResp.getMaxSignalEY();
     double cathMaxWX = cathResp.getMaxSignalWX();
     double cathMaxWY = cathResp.getMaxSignalWY();
-
+    
     double maxCathSumE = cathMaxEX + cathMaxEY;
     double maxCathSumW = cathMaxWX + cathMaxWY;
 
