@@ -3,6 +3,7 @@
 #include <TGraphErrors.h>
 #include <cmath>
 #include <TMath.h>
+#include <fstream>
 
 MWPCCathodeHandler::MWPCCathodeHandler() {
 
@@ -27,6 +28,11 @@ MWPCCathodeHandler::MWPCCathodeHandler() {
   _bGausAllEvents = false;
   _sigma = 6.2;
 
+  gainEX.resize(16,1.);
+  gainEY.resize(16,1.);
+  gainWX.resize(16,1.);
+  gainWY.resize(16,1.);
+  
   doPedestalSubtraction();
 
 };
@@ -52,6 +58,11 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
   _bGausAllEvents = false;
   _sigma = 6.2;
 
+  gainEX.resize(16,1.);
+  gainEY.resize(16,1.);
+  gainWX.resize(16,1.);
+  gainWY.resize(16,1.);
+  
   doPedestalSubtraction();
 
 };
@@ -76,10 +87,53 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
   _bGaus = false;
   _bGausAllEvents = false;
   _sigma = 6.2;
+
+  gainEX.resize(16,1.);
+  gainEY.resize(16,1.);
+  gainWX.resize(16,1.);
+  gainWY.resize(16,1.);
   
   doPedestalSubtraction(); 
 
 };
+
+/*void MWPCCathodeHandler::setCathodeSignals(double *ex,double *ey,
+					   double *wx,double *wy,
+					   double *pedex,double *pedey,
+					   double *pedwx,double *pedwy) {
+
+  cathEX = ex;
+  cathEY = ey;
+  cathWX = wx;
+  cathWY = wy;
+
+  pedEX = pedex;
+  pedEY = pedey;
+  pedWX = pedwx;
+  pedWY = pedwy;
+
+  doPedestalSubtraction();
+  
+  };*/
+
+void MWPCCathodeHandler::loadGainFactors(int run) {
+
+  //std::cout << "Loading cathode gain for run " << run << std::endl;
+  
+  std::ifstream fin(TString::Format("%s/runs/gain_cathodes_%i.dat",
+				    getenv("GAIN_CATHODES"),run).Data());
+
+  std::string ex,ey,wx,wy;
+  fin >> ex >> ey >> wx >> wy; // These are headers
+  int i = 0;
+  while ( fin >> gainEX[i] >> gainEY[i] >> gainWX[i] >> gainWY[i] ) {
+    //std::cout << gainEX[i] << "\t" << gainEY[i] << "\t"
+    //	      << gainWX[i] << "\t" << gainWY[i] << std::endl;
+    i++;
+  }
+  fin.close();
+};
+
 
 void MWPCCathodeHandler::PrintSignals() {
   
@@ -95,23 +149,30 @@ void MWPCCathodeHandler::PrintSignals() {
 
 void MWPCCathodeHandler::doPedestalSubtraction() {
 
-  for ( int i=0; i<16; i++ ) {   
-    pedSubtrEX[i] = cathEX[i]<clipThresholdEX ? cathEX[i] - pedEX[i] : clipThresholdEX;
-    pedSubtrEY[i] = cathEY[i]<clipThresholdEY ? cathEY[i] - pedEY[i] : clipThresholdEY;
-    pedSubtrWX[i] = cathWX[i]<clipThresholdWX ? cathWX[i] - pedWX[i] : clipThresholdWX;
-    pedSubtrWY[i] = cathWY[i]<clipThresholdWY ? cathWY[i] - pedWY[i] : clipThresholdWY;   
+  for ( int i=0; i<16; i++ ) {
+    
+    pedSubtrEX[i] = ( cathEX[i]<clipThresholdEX ?
+		      (cathEX[i] - pedEX[i])*gainEX[i] : clipThresholdEX );
+    pedSubtrEY[i] = ( cathEY[i]<clipThresholdEY ?
+		      (cathEY[i] - pedEY[i])*gainEY[i] : clipThresholdEY );
+    pedSubtrWX[i] = ( cathWX[i]<clipThresholdWX ?
+		      (cathWX[i] - pedWX[i])*gainWX[i] : clipThresholdWX );
+    pedSubtrWY[i] = ( cathWY[i]<clipThresholdWY ?
+		      (cathWY[i] - pedWY[i])*gainWY[i] : clipThresholdWY );   
   }
   boolPedSubtr = true;
 };
 
 
 void MWPCCathodeHandler::doThresholdCheck() {
+
+  signalEX.clear(); signalEY.clear(); signalWX.clear(); signalWY.clear();
   
   for ( int i=0; i<16; i++ ) {   
-    if ( pedSubtrEX[i] > cathodeThreshold ) signalEX.push_back(i);
-    if ( pedSubtrEY[i] > cathodeThreshold ) signalEY.push_back(i);
-    if ( pedSubtrWX[i] > cathodeThreshold ) signalWX.push_back(i);
-    if ( pedSubtrWY[i] > cathodeThreshold ) signalWY.push_back(i);
+    if ( pedSubtrEX[i] > cathodeThreshold*gainEX[i] ) signalEX.push_back(i);
+    if ( pedSubtrEY[i] > cathodeThreshold*gainEY[i] ) signalEY.push_back(i);
+    if ( pedSubtrWX[i] > cathodeThreshold*gainWX[i] ) signalWX.push_back(i);
+    if ( pedSubtrWY[i] > cathodeThreshold*gainWY[i] ) signalWY.push_back(i);
   }  
   boolThresholdCheck = true;
 };
@@ -142,7 +203,6 @@ void MWPCCathodeHandler::findAllPositions(bool gaus, bool gausAllEvents) {
 
   //East X
   clippedEX = doClipping(signalEX, cathEX, clipThresholdEX);
-  //std::cout << clippedEX.size() << "\n";
   posEX = fitCathResponse(signalEX, clippedEX, pedSubtrEX, wireposEX);
   
   //East Y
