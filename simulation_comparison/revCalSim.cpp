@@ -753,8 +753,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 							  scint_pos_adj.ScintPosAdjW[0],
 							  scint_pos_adj.ScintPosAdjW[1]);
 
-    else eta = posmap.getInterpolatedEta(t->xE.center,t->yE.center,
-					 t->xW.center,t->yW.center);
+    else eta = posmap.getInterpolatedEta(xE.center,yE.center,
+					 xW.center,yW.center);
     //eta = posmap.getInterpolatedEta(-mwpc_pos.MWPCPosE[0]*sqrt(0.6)*10., mwpc_pos.MWPCPosE[1]*sqrt(0.6)*10.,
     //					 mwpc_pos.MWPCPosW[0]*sqrt(0.6)*10.,  mwpc_pos.MWPCPosW[1]*sqrt(0.6)*10.);
       
