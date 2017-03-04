@@ -19,7 +19,7 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o MBUtils.o peaks.o positionMapHandler.o calibrationTools.o
+objects = DataTree.o MBUtils.o peaks.o positionMapHandler.o calibrationTools.o MWPCPositionResponse.o
 
 .PHONY: all
 all: srcCalReplay.exe sim_source_peak_fitter.exe
@@ -67,6 +67,8 @@ source_peaks_EnergyPeak.exe: source_peaks_EnergyPeak.o $(objects)
 	@echo "Done"
 
 peaks.o: peaks.hh
+
+MWPCPositionResponse.o: MWPCPositionResponse.o
 
 DataTree.o: DataTree.hh
 

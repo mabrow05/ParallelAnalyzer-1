@@ -17,12 +17,17 @@ public:
   MWPCCathodeHandler(double *ex,double *ey,double *wx,double *wy); // If they are already pedestal
                                                                    // subtracted
   ~MWPCCathodeHandler() {};
-  
+
+  //void setCathodeSignals(double *ex,double *ey,double *wx,double *wy,
+  //			 double *pedex,double *pedey,
+  //			 double *pedwx,double *pedwy);
+    
   void setCathodeThreshold(double t) { cathodeThreshold = t; };
   void setClippingThreshold(double ex,double ey,double wx,double wy) 
   { clipThresholdEX = ex, clipThresholdEY = ey, clipThresholdWX = wx, clipThresholdWY = wy; };
   void setSigma(double s) { _sigma = s; };
-
+  void loadGainFactors(int run); // Loads the gain factors if you want gain
+                                 // gain corrected cathode signals
   
   void PrintSignals();
   void findAllPositions(bool gaus=true, bool gausAllEvents=false); // You only need to call this to return all position.
@@ -75,6 +80,7 @@ private:
   //int nClippedEX, nClippedEY, nClippedWX, nClippedWY;
   std::vector <int> clippedEX, clippedEY, clippedWX, clippedWY; // Vector of clipped wires
   std::vector <int> signalEX, signalEY, signalWX, signalWY; // Holds wires with signal above threshold
+  std::vector<double> gainEX, gainEY, gainWX, gainWY;
 
   bool _bGaus, _bGausAllEvents;
   double _sigma; // This is the characteristic sigma of an event

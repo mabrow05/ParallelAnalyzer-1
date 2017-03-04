@@ -186,6 +186,9 @@ int main(int argc, char *argv[])
   vector < Double_t > old_eta;
   vector < Double_t > gaus_eta;
 
+  //  MWPCCathodeHandler cathResp;
+  //cathResp.loadGainFactors(runNumber);
+  
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     t->getEvent(i);
@@ -202,8 +205,8 @@ int main(int argc, char *argv[])
       std::vector <double> poswy(3,0.);
 
       MWPCCathodeHandler cathResp(t->Cathodes_Ex,t->Cathodes_Ey,t->Cathodes_Wx,t->Cathodes_Wy,&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
-      
-      
+      cathResp.loadGainFactors(runNumber);
+  
       //First do the normal way... weighted average of good events, gaus fit of clipped
       cathResp.findAllPositions(true,false);
       

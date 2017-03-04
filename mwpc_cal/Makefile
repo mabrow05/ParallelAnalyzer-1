@@ -12,36 +12,28 @@ VPATH = ./:../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
-CXXFLAGS      = -O2 -Wall -fPIC
+CXXFLAGS      = -O2 -Wall -fPIC --std=c++11
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o MBUtils.o positionMapHandler.o
+objects = DataTree.o MBUtils.o positionMapHandler.o peaks.o MWPCPositionResponse.o
 
-position_map.exe: position_map.o $(objects)
-	$(CXX) $(CXXFLAGS) -o position_map.exe position_map.o $(objects) $(LIBS)
-	@echo "Done"
-
-plot_position_map.exe: plot_position_map.o $(objects)
-	$(CXX) $(CXXFLAGS) -o plot_position_map.exe plot_position_map.o $(objects) $(LIBS)
-	@echo "Done"
-
-plot_swank_map.exe: plot_swank_map.o $(objects)
-	$(CXX) $(CXXFLAGS) -o plot_swank_map.exe plot_swank_map.o $(objects) $(LIBS)
-	@echo "Done"
-
-compare_swank_maps.exe: compare_swank_maps.o $(objects)
-	$(CXX) $(CXXFLAGS) -o compare_swank_maps.exe compare_swank_maps.o $(objects) $(LIBS)
+cathode_gain.exe: cathode_gain.o $(objects)
+	$(CXX) $(CXXFLAGS) -o cathode_gain.exe cathode_gain.o $(objects) $(LIBS)
 	@echo "Done"
 
 DataTree.o: DataTree.hh
 
 MBUtils.o: MBUtils.hh
 
-positionMapHandler.o: positionMapHandler.hh MBUtils.hh
+positionMapHandler.o: positionMapHandler.hh MBUtils.o
+
+peaks.o: peaks.hh MBUtils.o
+
+MWPCPositionResponse.o: MWPCPositionResponse.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from
