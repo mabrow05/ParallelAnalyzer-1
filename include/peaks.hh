@@ -14,7 +14,7 @@ class SinglePeakHist {
 
 public:
 
-  SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=5, Double_t minScaleFac=1.25, Double_t maxScaleFac=1.75);
+  SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit=true, Int_t iterations=5, Double_t minScaleFac=1.25, Double_t maxScaleFac=1.75, bool landau=false);
   ~SinglePeakHist();
 
   void FitHist(Double_t meanGuess=0., Double_t sigGuess=1., Double_t heightGuess=1.);
@@ -44,6 +44,7 @@ private:
   TString status;
   Double_t minScaleFactor;
   Double_t maxScaleFactor;
+  Bool_t _bLandau;
 };
 
 
