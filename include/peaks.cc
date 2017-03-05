@@ -6,11 +6,13 @@
 #include "peaks.hh"
 
 
-SinglePeakHist::SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit, Int_t iterations, Double_t minScaleFac, Double_t maxScaleFac) :
+SinglePeakHist::SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, bool autoFit, Int_t iterations, Double_t minScaleFac, Double_t maxScaleFac, bool landau) :
   hist(h), func(NULL), mean(0.), meanErr(0.), sigma(0.), scale(0.), min(rangeLow), max(rangeHigh), iters(iterations), goodFit_prev(false), goodFit_new(false), status("NO FITS") {
 
   minScaleFactor = minScaleFac;
   maxScaleFactor = maxScaleFac;
+
+  _bLandau = landau;
 
   if (autoFit) {
     mean = hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin());
@@ -36,7 +38,8 @@ SinglePeakHist::~SinglePeakHist() {
 
 void SinglePeakHist::FitHist(Double_t meanGuess, Double_t sigGuess, Double_t heightGuess) {
   
-  func = new TF1("func","gaus(0)",min, max);
+  if ( _bLandau ) func = new TF1("func","[0]*TMath::Landau(x,[1],[2])",min, max);
+  else func = new TF1("func","gaus(0)",min, max);
 
   func->SetParameters(heightGuess, meanGuess, sigGuess);
   
