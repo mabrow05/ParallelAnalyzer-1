@@ -15,6 +15,14 @@
 #include "DataTree.hh"
 #include "MWPCPositionResponse.hh"
 #include "peaks.hh"
+#include "positionMapHandler.hh"
+
+double sumArray(double *sig, int length) {
+  double sum = 0;
+  for ( int i=0; i<length; ++i ) sum+=sig[i];
+  return sum;
+};
+
 
 std::vector <int>  readOctetFile(int octet) {
 
@@ -68,22 +76,32 @@ int main(int argc, char *argv[])
   TH1D *hisWX[16];
   TH1D *hisWY[16];
 
+  Int_t nBins = 100;
+  Double_t binLow = 0.;
+  Double_t binHigh = 0.6;
+
   for ( int i = 0; i<16; ++i ) {
 
-    hisEX[i] = new TH1D(TString::Format("hisEX%i",i),TString::Format("hisEX%i",i),120,0.,6.);
-    hisEY[i] = new TH1D(TString::Format("hisEY%i",i),TString::Format("hisEY%i",i),120,0.,6.);
-    hisWX[i] = new TH1D(TString::Format("hisWX%i",i),TString::Format("hisWX%i",i),120,0.,6.);
-    hisWY[i] = new TH1D(TString::Format("hisWY%i",i),TString::Format("hisWY%i",i),120,0.,6.);
+    hisEX[i] = new TH1D(TString::Format("hisEX%i",i),TString::Format("hisEX%i",i),nBins,binLow,binHigh);
+    hisEY[i] = new TH1D(TString::Format("hisEY%i",i),TString::Format("hisEY%i",i),nBins,binLow,binHigh);
+    hisWX[i] = new TH1D(TString::Format("hisWX%i",i),TString::Format("hisWX%i",i),nBins,binLow,binHigh);
+    hisWY[i] = new TH1D(TString::Format("hisWY%i",i),TString::Format("hisWY%i",i),nBins,binLow,binHigh);
 
   }
 
   MWPCCathodeHandler cathResp;
   double wireSep = TMath::Sqrt(0.6)*10.16;
 	
+
   
   //Loop over all runs in octet
   
   for ( auto rn : betaRuns ) {
+
+    // Load Anode position map
+    //MWPCPositionMap posmap(5., 50.);
+    //int XePeriod = 3;//getXeRunPeriod(rn);
+    //posmap.readMWPCPositionMap(XePeriod,250.,300.); // Using 250-300 keV because that's the most probable range
     
     // DataTree structure
     DataTree *t = new DataTree();
@@ -105,6 +123,15 @@ int main(int argc, char *argv[])
       
       if ( t->PID != 1 || t->Type != 0 ) continue; // only use type 0 electrons
 
+      // Get the position response
+      //std::vector <Double_t> eta = posmap.getInterpolatedEta(t->xE.center,t->yE.center,
+      //							     t->xW.center,t->yW.center);
+
+
+      //Do east and west cathode sums
+      double eastCathSum = sumArray(t->Cathodes_Ex,16) + sumArray(t->Cathodes_Ey,16);
+      double westCathSum = sumArray(t->Cathodes_Wx,16) + sumArray(t->Cathodes_Wy,16);
+      
       // East side first
       if ( t->Side == 0 && t->xE.nClipped==0 && t->yE.nClipped==0 && t->Erecon>100. ) { // Go above 
       
@@ -112,13 +139,13 @@ int main(int argc, char *argv[])
 	int wire = 0;
 
 	while ( TMath::Abs( t->xE.center - TMath::Sqrt(0.6)*cathResp.getWirePosEX(wire) )  > wireSep/2. ) wire++;
-	hisEX[wire]->Fill( t->Cathodes_Ex[wire]/t->AnodeE );
+	hisEX[wire]->Fill( t->Cathodes_Ex[wire] / eastCathSum );
 
 	// EY plane
 	wire = 0;
 	
 	while ( TMath::Abs( t->yE.center - TMath::Sqrt(0.6)*cathResp.getWirePosEY(wire) )  > wireSep/2. ) wire++;
-	hisEY[wire]->Fill( t->Cathodes_Ey[wire]/t->AnodeE );
+	hisEY[wire]->Fill( t->Cathodes_Ey[wire]/ eastCathSum );
       }
 
       // Now the west side
@@ -128,13 +155,13 @@ int main(int argc, char *argv[])
 	int wire = 0;
 
 	while ( TMath::Abs( t->xW.center - TMath::Sqrt(0.6)*cathResp.getWirePosWX(wire) )  > wireSep/2. ) wire++;
-	hisWX[wire]->Fill( t->Cathodes_Wx[wire]/t->AnodeW );
+	hisWX[wire]->Fill( t->Cathodes_Wx[wire]/ westCathSum );
 
 	// WY plane
 	wire = 0;
 	
 	while ( TMath::Abs( t->yW.center - TMath::Sqrt(0.6)*cathResp.getWirePosWY(wire) )  > wireSep/2. ) wire++;
-	hisWY[wire]->Fill( t->Cathodes_Wy[wire]/t->AnodeW );
+	hisWY[wire]->Fill( t->Cathodes_Wy[wire]/ westCathSum );
       }
 
     }
@@ -156,28 +183,28 @@ int main(int argc, char *argv[])
   for ( int h = 0; h<16; ++h ) {
 
     if ( hisEX[h]->GetEntries() > 200 ) {
-      p = new SinglePeakHist(hisEX[h],0., 6., true, 5, 0.75,1.25);
+      p = new SinglePeakHist(hisEX[h],binLow, binHigh, true, 5, 0.75,1.25);
       mean_EX[h] = p->ReturnMean();
       delete p;
     }
     else mean_EX[h] = hisEX[h]->GetMean();
 
     if ( hisEY[h]->GetEntries() > 200 ) {
-      p = new SinglePeakHist(hisEY[h],0., 6., true, 5, 0.75,1.25);
+      p = new SinglePeakHist(hisEY[h],binLow, binHigh, true, 5, 0.75,1.25);
       mean_EY[h] = p->ReturnMean();
       delete p;
     }
     else mean_EY[h] = hisEY[h]->GetMean();
 
     if ( hisWX[h]->GetEntries() > 200 ) {
-      p = new SinglePeakHist(hisWX[h],0., 6., true, 5, 0.75,1.25);
+      p = new SinglePeakHist(hisWX[h],binLow, binHigh, true, 5, 0.75,1.25);
       mean_WX[h] = p->ReturnMean();
       delete p;
     }
     else mean_WX[h] = hisWX[h]->GetMean();
 
     if ( hisWY[h]->GetEntries() > 200 ) {
-      p = new SinglePeakHist(hisWY[h],0., 6., true, 5, 0.75,1.25);
+      p = new SinglePeakHist(hisWY[h],binLow, binHigh, true, 5, 0.75,1.25);
       mean_WY[h] = p->ReturnMean();
       delete p;
     }
