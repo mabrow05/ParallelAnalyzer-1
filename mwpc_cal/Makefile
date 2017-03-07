@@ -37,6 +37,10 @@ MWPC_calibration.exe: MWPC_calibration.o $(objects)
 	$(CXX) $(CXXFLAGS) -o MWPC_calibration.exe MWPC_calibration.o $(objects) $(LIBS)
 	@echo "Done"
 
+BackscatterSeparator.exe: BackscatterSeparator.o $(objects)
+	$(CXX) $(CXXFLAGS) -o BackscatterSeparator.exe BackscatterSeparator.o $(objects) $(LIBS)
+	@echo "Done"
+
 DataTree.o: DataTree.hh
 
 MBUtils.o: MBUtils.hh
