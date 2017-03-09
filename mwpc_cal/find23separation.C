@@ -73,6 +73,8 @@ void plot23separation(TString geom) {
 
   delete f;
 
+  //
+  
   TCanvas *c1 = new TCanvas("c1","c1",1000,600);
   c1->Divide(2,1);
 

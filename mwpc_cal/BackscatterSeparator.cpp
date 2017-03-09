@@ -79,37 +79,64 @@ void SeparateBackscatters(int octetMin, int octetMax)
 
   }
    
-  char temp[200];
 
   //Root file to output to
   TFile *outfile = new TFile(TString::Format("Backscatters_%i-%i.root",octetMin,octetMax),"RECREATE");
 
   //Make all the pertinent histograms
 
-  TH1D *hType2E = new TH1D("hType2E",TString::Format("Type II East Octets %i-%i E_{MWPC}",octetMin,octetMax),100, 0., 20.);
-  TH1D *hType3E = new TH1D("hType3E",TString::Format("Type III East Octets %i-%i E_{MWPC}",octetMin,octetMax),100, 0., 20.);
-  TH1D *hType2W = new TH1D("hType2W",TString::Format("Type II West Octets %i-%i E_{MWPC}",octetMin,octetMax),100, 0., 20.);
-  TH1D *hType3W = new TH1D("hType3W",TString::Format("Type III West Octets %i-%i E_{MWPC}",octetMin,octetMax),100, 0., 20.);
+  Int_t numEnergyBins = 8;
+  Double_t energyStart = 0.;
+  Double_t energyBinWidth = 100.;
   
- 
-  // Separated type 2
-  TH1D* hScint2E = new TH1D("hScint2E",TString::Format("Type II East Octets %i-%i E_{recon}",octetMin,octetMax),120,0.,1200.);
-  TH1D* hScint3E = new TH1D("hScint3E",TString::Format("Type III East Octets %i-%i E_{recon}",octetMin,octetMax),120,0.,1200.);
-  TH1D* hScint2W = new TH1D("hScint2W",TString::Format("Type II West Octets %i-%i E_{recon}",octetMin,octetMax),120,0.,1200.);
-  TH1D* hScint3W = new TH1D("hScint3W",TString::Format("Type III West Octets %i-%i E_{recon}",octetMin,octetMax),120,0.,1200.);
+  TH1D *hType2E[numEnergyBins];
+  TH1D *hType3E[numEnergyBins];
+  TH1D *hType2W[numEnergyBins];
+  TH1D *hType3W[numEnergyBins];
 
+  TH1D *hScint2E[numEnergyBins];
+  TH1D *hScint3E[numEnergyBins];
+  TH1D *hScint2W[numEnergyBins];
+  TH1D *hScint3W[numEnergyBins];
+
+  for ( Int_t hist=0; hist<numEnergyBins; ++hist ) {
+
+    Double_t binLowEdge = hist*energyBinWidth + energyStart;
+    Double_t binHighEdge = binLowEdge + energyBinWidth;
+    
+    hType2E[hist] = new TH1D(TString::Format("hType2E_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type II East Octets %i-%i E_{MWPC} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+    hType3E[hist] = new TH1D(TString::Format("hType3E_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type III East Octets %i-%i E_{MWPC} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+    hType2W[hist] = new TH1D(TString::Format("hType2W_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type II West Octets %i-%i E_{MWPC} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+    hType3W[hist] = new TH1D(TString::Format("hType3W_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type III West Octets %i-%i E_{MWPC} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+
+    hScint2E[hist] = new TH1D(TString::Format("hScint2E_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type II East Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+    hScint3E[hist] = new TH1D(TString::Format("hScint3E_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type III East Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+    hScint2W[hist] = new TH1D(TString::Format("hScint2W_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type II West Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+    hScint3W[hist] = new TH1D(TString::Format("hScint3W_%0.0f-%0.0f",binLowEdge,binHighEdge),
+			     TString::Format("Type III West Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
+			     100, 0., 20.);
+  }
 
   //Process all runs
   for ( auto rn : betaRuns ) {
     
-    std::string infile;
-    TFile *input;
-    TTree *Tin;
-    
-    sprintf(temp,"revCalSim_%i_Beta.root",rn);
-    infile = getenv("REVCALSIM")+std::string("/beta/")+std::string(temp);
-    input = new TFile(infile.c_str(), "READ");
-    Tin = (TTree*)input->Get("revCalSim");
+    TString infile = TString::Format("%s/beta/revCalSim_%i_Beta.root", getenv("REVCALSIM"),rn);
+    TFile *input = new TFile(infile, "READ");
+    TTree *Tin = (TTree*)input->Get("revCalSim");
 
     double mwpcEX, mwpcEY, mwpcWX, mwpcWY, Erecon;
     double EmwpcE=0., EmwpcW=0.;
@@ -151,29 +178,31 @@ void SeparateBackscatters(int octetMin, int octetMax)
 	r2W = mwpcWX*mwpcWX + mwpcWY*mwpcWY;
 
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
-		
+
+	  Int_t hist = (Int_t) (Erecon/energyBinWidth);
+	  
 	  if (side==0) {
 	    // Type 2 goes west then triggers east for east side
-	    if ( primTheta < TMath::Pi()/2. && hitCountSD[5]==1 ) {
-	      hType2E->Fill(EmwpcE);
-	      hScint2E->Fill(Erecon);
+	    if ( primTheta < TMath::Pi()/2. ) { //  && hitCountSD[5]==1
+	      hType2E[hist]->Fill(EmwpcE);
+	      hScint2E[hist]->Fill(Erecon);
 	    }
 	    //Type 3 goes east and triggers, then goes west
-	    else if ( primTheta > TMath::Pi()/2. && hitCountSD[15]==1 ) {
-	      hType3E->Fill(EmwpcE);
-	      hScint3E->Fill(Erecon);
+	    else   {   //if ( primTheta > TMath::Pi()/2. && hitCountSD[15]==1
+	      hType3E[hist]->Fill(EmwpcE);
+	      hScint3E[hist]->Fill(Erecon);
 	    }
 	  }
 	  else if (side==1) {
 	    // Type 2 goes east then triggers west for west side
-	    if ( primTheta > TMath::Pi()/2. && hitCountSD[15]==1 ) {
-	      hType2W->Fill(EmwpcW);
-	      hScint2W->Fill(Erecon);
+	    if ( primTheta > TMath::Pi()/2. ) {   //  && hitCountSD[15]==1
+	      hType2W[hist]->Fill(EmwpcW);
+	      hScint2W[hist]->Fill(Erecon);
 	    }
 	    //Type 3 goes west and triggers, then goes east
-	    else if ( primTheta < TMath::Pi()/2. && hitCountSD[5]==1 ){
-	      hType3W->Fill(EmwpcW);
-	      hScint3W->Fill(Erecon);
+	    else {    //if ( primTheta < TMath::Pi()/2. && hitCountSD[5]==1 )
+	      hType3W[hist]->Fill(EmwpcW);
+	      hScint3W[hist]->Fill(Erecon);
 	    }
 	  }
 	}
