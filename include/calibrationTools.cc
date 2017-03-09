@@ -1,5 +1,5 @@
 #include "calibrationTools.hh"
-
+#include <TString.h>
 
 
 
@@ -51,17 +51,7 @@ void LinearityCurve::readLinearityCurveParams(Int_t srcPeriod) {
 
     if (fileLinearityCurve.fail()) break;
   }
-    
-                                                       
-  /*Int_t i=0;
-  while (fileLinearityCurve >> p[0] >> p[1] >> p[2] >> p[3] >> p[4] >> p[5]) {
-    Int_t ii=0;
-    while(ii<6) {pmtParams[i][ii] = p[ii]; ii++;}
-    i++;
-    std::cout << p[0] << " " << p[1] << " " << p[2]  << " " << p[3] << " " << p[4] << " " << p[5] << std::endl;
-    if (fileLinearityCurve.fail()) break;
-  }
-  */
+                                                          
   sourceCalPeriod = srcPeriod;
 }
 
@@ -74,6 +64,73 @@ Double_t LinearityCurve::applyInverseLinCurve(Int_t pmt, Double_t y) {
   else linCurve->SetParameters(pmtParams[pmt][0], pmtParams[pmt][1], pmtParams[pmt][2]);
   return linCurve->GetX(y, -50., 3000.);
 }
+
+////////////////////////////////////////////////////////////////////////
+
+
+WirechamberCal::WirechamberCal(Int_t run) : _run(run) {
+  
+  _nParams = 5;
+
+  _calFunc = new TF1("calFunc","([0] + [1]*x)", 0.,4096.5);
+  _extrap = new TF1("extrap","[0]*TMath::Power(x,[1])", -10.,4096.5);
+
+  _params.resize(2, std::vector <Double_t> (_nParams,0.));
+  
+  readWirechamberCalParams(_run);
+
+}
+
+WirechamberCal::~WirechamberCal() {
+  delete _calFunc;
+}
+
+
+void WirechamberCal::readWirechamberCalParams(Int_t run) {                                                                                                                     
+  char tempFileCal[500];
+
+  sprintf(tempFileCal, "%s/runs/MWPC_cal_%i.dat",getenv("MWPC_CALIBRATION"),run);
+  std::cout << "Reading in MWPC calibration from " << tempFileCal << ":\n";
+
+  std::cout << "p0\tp1\n";
+
+  std::ifstream fileCal(tempFileCal);
+ 
+  std::string label;
+
+  if ( fileCal.is_open() ) {
+    
+    fileCal >> label;
+    for ( int i=0; i<_nParams; ++i ) { fileCal >> _params[0][i]; std::cout << _params[0][i] << "\t"; }
+    std::cout << "\n";
+    fileCal >> label;
+    for ( int i=0; i<_nParams; ++i ) { fileCal >> _params[1][i]; std::cout << _params[1][i] << "\t"; }
+    std::cout << "\n";
+    fileCal.close();
+  }
+  
+  else throw TString::Format("Couldn't read wirechamber calibration for run %i",run).Data(); 
+                                                       
+  _run = run;
+}
+
+Double_t WirechamberCal::applyCal(Int_t side, Double_t adc) {
+
+  if ( adc > _params[side][2] ) { 
+    Double_t par[] {_params[side][0],_params[side][1]};
+    return _calFunc->EvalPar(&adc,par);
+  }
+  else if ( adc > 0. ) {
+    Double_t par[] {_params[side][3],_params[side][4]};
+    return _extrap->EvalPar(&adc,par);
+  }
+  else return 0.;
+    
+}
+
+
+
+
 
 
 ///////////////////////////////////////////////////////////////////////

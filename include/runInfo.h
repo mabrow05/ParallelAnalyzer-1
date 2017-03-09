@@ -101,6 +101,43 @@ unsigned int getXeRunPeriod(int runNumber) {
   return calibrationPeriod;
 }
 
+unsigned int getXeRunPeriodForMWPCmap(int runNumber) {
+  unsigned int calibrationPeriod=0;
+  if (runNumber <= 18080) {
+    calibrationPeriod=2;
+  }
+  else if (runNumber <= 18389) {
+    calibrationPeriod=3;
+  }
+  else if (runNumber <= 18711) {
+    calibrationPeriod=4;
+  }
+  else if (runNumber <= 19544) { // This is different due to sudden change in 
+                                 // West anode spectra (gain cranked way up)
+    calibrationPeriod=5;
+  }
+  //else if (runNumber <= 19872) {
+  //calibrationPeriod=6;
+  //}
+  else if (runNumber <= 20000) {
+    calibrationPeriod=7;
+  }
+  else if (runNumber <= 21605) {
+    calibrationPeriod=8;
+  }
+  else if (runNumber <= 22238) {
+    calibrationPeriod=9;
+  }
+  else if (runNumber <= 23173) {
+    calibrationPeriod=10;
+  }
+  else {
+    cout << "Bad run number\n";
+    exit(0);}
+
+  return calibrationPeriod;
+}
+
 unsigned int getGainReferenceRun(int runNumber) {
   map <unsigned int,unsigned int> refRun;
   refRun[1]=17238;

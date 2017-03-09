@@ -31,19 +31,6 @@ using namespace std;
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
 
-int separate23(int side, double mwpcEn) {
-  int type = 2;
-  if (side==0) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
-  }
-  
-  if (side==1) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
-  }
-  return type;
-};
-
-
 
 std::vector<Int_t> readOctetFile(int octet) {
 
@@ -128,6 +115,7 @@ void SeparateBackscatters(int octetMin, int octetMax)
     double EmwpcE=0., EmwpcW=0.;
     int PID, type, side; // basic analysis tags
     double primTheta;
+    int hitCountSD[24];
 
     Tin->SetBranchAddress("primTheta",&primTheta);
     Tin->SetBranchAddress("PID", &PID);
@@ -140,6 +128,7 @@ void SeparateBackscatters(int octetMin, int octetMax)
     Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&mwpcEY);
     Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&mwpcWX);
     Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&mwpcWY);
+    Tin->SetBranchAddress("hitCountSD",hitCountSD);
 
     
 
@@ -165,24 +154,24 @@ void SeparateBackscatters(int octetMin, int octetMax)
 		
 	  if (side==0) {
 	    // Type 2 goes west then triggers east for east side
-	    if ( primTheta < TMath::Pi()/2. ) {
+	    if ( primTheta < TMath::Pi()/2. && hitCountSD[5]==1 ) {
 	      hType2E->Fill(EmwpcE);
 	      hScint2E->Fill(Erecon);
 	    }
 	    //Type 3 goes east and triggers, then goes west
-	    else {
+	    else if ( primTheta > TMath::Pi()/2. && hitCountSD[15]==1 ) {
 	      hType3E->Fill(EmwpcE);
 	      hScint3E->Fill(Erecon);
 	    }
 	  }
 	  else if (side==1) {
 	    // Type 2 goes east then triggers west for west side
-	    if ( primTheta > TMath::Pi()/2. ) {
+	    if ( primTheta > TMath::Pi()/2. && hitCountSD[15]==1 ) {
 	      hType2W->Fill(EmwpcW);
 	      hScint2W->Fill(Erecon);
 	    }
 	    //Type 3 goes west and triggers, then goes east
-	    else {
+	    else if ( primTheta < TMath::Pi()/2. && hitCountSD[5]==1 ){
 	      hType3W->Fill(EmwpcW);
 	      hScint3W->Fill(Erecon);
 	    }

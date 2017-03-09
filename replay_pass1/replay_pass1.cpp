@@ -31,7 +31,7 @@
 
 using namespace std;
 
-bool OnlyReplayBadFiles = false;
+bool OnlyReplayBadFiles = true;
 
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
@@ -666,8 +666,6 @@ int main(int argc, char *argv[])
     
     t->AnodeE = AnodeE; // Pedestal subtracted
     t->AnodeW = AnodeW;
-    
-    t->PassedCathE = t->PassedCathW = PID==1?true:false; //temporary holder for this
     
     t->EvnbGood = t->BkhfGood = true;
     for (Int_t i = 0; i<5; i++) {

@@ -35,6 +35,8 @@ class BetaReplayManager:
         self.replayPass4 = os.getenv("REPLAY_PASS4")
         self.srcListPath = os.getenv("SOURCE_LIST")
         self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
+        self.gainCathodesPath = os.getenv("GAIN_CATHODES")
+        self.mwpcCalPath = os.getenv("MWPC_CALIBRATION")
         self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
         self.octetListPath = os.getenv("OCTET_LIST")
         self.triggerFuncPath = os.getenv("TRIGGER_FUNC")
@@ -63,6 +65,13 @@ class BetaReplayManager:
         os.system("mkdir -p %s"%self.AnalysisResultsPath)
         os.system("mkdir -p %s"%self.SimAnalysisResultsPath)
         os.system("mkdir -p %s"%self.MPMAnalysisResultsPath)
+        os.system("mkdir -p %s"%self.mwpcCalPath)
+        os.system("mkdir -p %s"%self.gainCathodesPath)
+        os.system("mkdir -p %s/position_maps"%self.mwpcCalPath)
+        os.system("mkdir -p %s/octets"%self.mwpcCalPath)
+        os.system("mkdir -p %s/runs"%self.mwpcCalPath)
+        os.system("mkdir -p %s/octets"%self.gainCathodesPath)
+        os.system("mkdir -p %s/runs"%self.gainCathodesPath)
 
     def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
         octet=0
@@ -184,6 +193,62 @@ class BetaReplayManager:
                 print "Running gain_bismuth for run %i"%run
                 os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
                 os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%run)
+        print "DONE"
+
+
+    def runGainCathodes(self,octet):
+
+        print "Running gain_cathodes for octet %i"%octet
+        os.system("cd ../mwpc_cal/; ./cathode_gain.exe %i"%octet)
+
+        runs = []
+         
+        filename = "All_Octets/octet_list_%i.dat"%(octet)
+        infile = open(self.octetListPath+filename,'r')
+        
+        for line in infile:      
+            words=line.split()
+            if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                runs.append(int(words[1]))
+                    
+        
+        for run in runs:
+            shutil.copy(self.gainCathodesPath+"/octets/gain_cathodes_octet_%i.dat"%octet,
+                        self.gainCathodesPath+"/runs/gain_cathodes_%i.dat"%run)
+                           
+        print "DONE"
+
+
+
+    def runWirechamberCal(self,runORoctet):
+
+        runs = []
+        bgruns = []
+        
+        if runORoctet > 16000:
+            print "Running MWPC cal for run %i"%runORoctet
+            os.system("cd ../mwpc_cal/; ./MWPC_calibration.exe %i"%runORoctet)
+        else: 
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
+        
+            for line in infile:      
+                words=line.split()
+                if words[0] in betaRunTypes: # get FG runs
+                    runs.append( int(words[1]) )
+                if words[0] in bgRunTypes: # get BG runs
+                    bgruns.append( int(words[1]) )
+
+            numBG = len(bgruns)
+
+            for run in runs:
+                print "Running MWPC cal for run %i"%run
+                os.system("cd ../mwpc_cal/; ./MWPC_calibration.exe %i"%run)
+                
+            for i in range(0,numBG,1): #as long as each FG has a BG, they will line up.
+                    shutil.copy(self.mwpcCalPath+"/runs/MWPC_cal_%i.dat"%runs[i],
+                                self.mwpcCalPath+"/runs/MWPC_cal_%i.dat"%bgruns[i])
+                           
         print "DONE"
     
 
@@ -418,15 +483,15 @@ if __name__ == "__main__":
 
 
     if 1:
-        octet_range =[102,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[50,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
-         #   beta.runReplayPass1(octet)
+            #beta.runReplayPass1(octet)
             #beta.findBeamDrops(octet)
             #beta.runGainBismuth(octet)
            # beta.findTriggerFunctions(octet)
-          #  beta.runReplayPass2(octet)
+            #beta.runReplayPass2(octet)
             beta.runReplayPass3(octet)
             #beta.runRootfileTranslator(octet)
             #beta.removeDepolRunFiles(octet)
@@ -435,9 +500,18 @@ if __name__ == "__main__":
 
     #Running reverse calibrations
     if 1:
-        octet_range = [102,121];
+        octet_range = [50,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findTriggerFunctions(octet)
             beta.runReverseCalibration(octet)
     
+
+    # Wirechamber stuff
+    if 0:
+        octet_range =[96,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        beta = BetaReplayManager()
+        for octet in range(octet_range[0],octet_range[1]+1,1):
+            
+            #beta.runGainCathodes(octet)
+            beta.runWirechamberCal(octet)

@@ -81,8 +81,11 @@ void PositionMap::setPositionMapPoint(Int_t xBin, Int_t yBin, std::vector <Doubl
 std::vector <Double_t> PositionMap::getInterpolatedEta(Double_t xE, Double_t yE, Double_t xW, Double_t yW) {
 
   std::vector <Double_t> val(8, 0.);
+
+  if ( (xE*xE+yE*yE) >= 65.*65. || (xW*xW+yW*yW) >= 65.*65. ) { return std::vector<Double_t>(8,1.); }
+ 
   
-  if (xE*xE+yE*yE >= rmax*rmax) {
+  if ( (xE*xE+yE*yE) >= rmax*rmax) {
 
     //First we go to a point at the same angle on the position map, only with radius = 50. mm
     Double_t tanTheta = TMath::Abs(xE)>1.e-5 ? TMath::Abs(yE)/TMath::Abs(xE) : 1.;
@@ -137,8 +140,10 @@ std::vector <Double_t> PositionMap::getInterpolatedEta(Double_t xE, Double_t yE,
       //std::cout << p << " " << val[p] << std::endl;
     }
   }
-    
-  if (xW*xW+yW*yW >= rmax*rmax) {
+  
+  
+
+  if ( (xW*xW+yW*yW) >= rmax*rmax) {
 
     Double_t tanTheta = TMath::Abs(xW)>1.e-5 ? TMath::Abs(yW)/TMath::Abs(xW) : 1.;
     Double_t x = TMath::Abs(xW)>1.e-5 ? (xW>0. ? rmax/TMath::Sqrt(tanTheta*tanTheta+1.) : -rmax/TMath::Sqrt(tanTheta*tanTheta+1.)) : 0.;
@@ -235,7 +240,7 @@ void MWPCPositionMap::readMWPCPositionMap(Int_t XeRunPeriod, Double_t elow, Doub
 
   XePeriod = XeRunPeriod;
   
-  std::string file = ( std::string(getenv("POSITION_MAPS")) + "/MWPC_position_map_" + itos(XePeriod) + "_" + ftos(binWidth) +  "mm_"
+  std::string file = ( std::string(getenv("MWPC_CALIBRATION")) + "/position_maps/MWPC_position_map_" + itos(XePeriod) + "_" + ftos(binWidth) +  "mm_"
 		       + ftos( elow )+"-"+ftos( ehigh )+".dat" );
   std::cout << "Reading position map from " << file << std::endl;
   std::ifstream infile(file.c_str());
@@ -268,6 +273,8 @@ void MWPCPositionMap::setMWPCPositionMapPoint(Int_t xBin, Int_t yBin, std::vecto
 std::vector <Double_t> MWPCPositionMap::getInterpolatedEta(Double_t xE, Double_t yE, Double_t xW, Double_t yW) {
 
   std::vector <Double_t> val(2, 0.);
+
+  if ( (xE*xE+yE*yE) >= 65.*65. || (xW*xW+yW*yW) >= 65.*65. ) { return std::vector<Double_t>(2,1.); }
   
   if (xE*xE+yE*yE >= rmax*rmax) {
 

@@ -147,35 +147,27 @@ int main(int argc, char *argv[])
   cout << "... Applying Calibration ..." << endl;
 
   unsigned int calibrationPeriod = getSrcRunPeriod(runNumber);
-
-  //Get the linearity curve
-  LinearityCurve linearityCurve(calibrationPeriod,false);
-
-  //Load the simulated relationship between EQ and Etrue
-  EreconParameterization eRecon(runNumber);
-
-  //Read in PMT quality file
-  std::vector <Int_t> pmtQuality = getPMTQuality(runNumber);
-
-  //Get values for nPE/keV...
-  std::vector <Double_t> alpha = GetAlphaValues(calibrationPeriod);
   
-  //Reading position map...
-  UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
-  //GetPositionMap(XePeriod);
-  PositionMap posmap(5.0,50.);
-  posmap.readPositionMap(XePeriod);
+  LinearityCurve linearityCurve(calibrationPeriod,false); //Get the linearity curve  
+  EreconParameterization eRecon(runNumber); //Load the simulated relationship between EQ and Etrue
+  WirechamberCal mwpcCal(runNumber);        //Load the Wirechamber Calibration
+  
+  std::vector <Int_t> pmtQuality = getPMTQuality(runNumber); //Read in PMT quality file
+  std::vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); //Get values for nPE/keV...
+    
+  PositionMap posmap(5.0,50.); //Reading Scintillator position maps
+  posmap.readPositionMap( getXeRunPeriod(runNumber) );
 
-  // DataTree structure
-  DataTree *t = new DataTree();
+  MWPCPositionMap anodeMap(5., 50.);    // Reading Anode position maps
+  anodeMap.readMWPCPositionMap( getXeRunPeriodForMWPCmap(runNumber) ,250.,300.); // Using 250-300 keV because that's the most probable range
 
-  // Open output ntuple
-  t->makeOutputTree(std::string(tempOut),"pass3");
+  
+  DataTree *t = new DataTree(); // DataTree structure for input pass2 and output pass3
+  t->makeOutputTree(std::string(tempOut),"pass3");  // Open output ntuple
 
   // Input ntuple
   char tempIn[500];
   sprintf(tempIn, "%s/replay_pass2_%s.root", getenv("REPLAY_PASS2"),argv[1]);
-  //sprintf(tempIn, "../replay_pass2/replay_pass2_%s.root",argv[1]);
   t->setupInputTree(std::string(tempIn),"pass2");
  
   int nEvents = t->getEntries();
@@ -186,9 +178,7 @@ int main(int argc, char *argv[])
   vector < Double_t > old_eta;
   vector < Double_t > gaus_eta;
 
-  //  MWPCCathodeHandler cathResp;
-  //cathResp.loadGainFactors(runNumber);
-  
+
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     t->getEvent(i);
@@ -205,7 +195,7 @@ int main(int argc, char *argv[])
       std::vector <double> poswy(3,0.);
 
       MWPCCathodeHandler cathResp(t->Cathodes_Ex,t->Cathodes_Ey,t->Cathodes_Wx,t->Cathodes_Wy,&pedPdc2[16],&pedPdc2[0],&pedPadc[16],&pedPadc[0]);
-      cathResp.loadGainFactors(runNumber);
+ 
   
       //First do the normal way... weighted average of good events, gaus fit of clipped
       cathResp.findAllPositions(true,false);
@@ -245,19 +235,31 @@ int main(int argc, char *argv[])
       t->xW.maxWire = cathResp.getMaxWireWX();
       t->yW.maxWire = cathResp.getMaxWireWY();
 
-      t->xE.maxValue = t->Cathodes_Ex[t->xE.maxWire];
-      t->yE.maxValue = t->Cathodes_Ey[t->yE.maxWire];
-      t->xW.maxValue = t->Cathodes_Wx[t->xW.maxWire];
-      t->yW.maxValue = t->Cathodes_Wy[t->yW.maxWire];
+      t->xE.maxValue = cathResp.getMaxSignalEX();
+      t->yE.maxValue = cathResp.getMaxSignalEY();
+      t->xW.maxValue = cathResp.getMaxSignalWX();
+      t->yW.maxValue = cathResp.getMaxSignalWY();
 
+      t->xE.cathSum = cathResp.getCathSumEX();
+      t->yE.cathSum = cathResp.getCathSumEY();
+      t->xW.cathSum = cathResp.getCathSumWX();
+      t->yW.cathSum = cathResp.getCathSumWY();
+
+      t->CathSumE = t->xE.cathSum + t->yE.cathSum;
+      t->CathSumW = t->xW.cathSum + t->yW.cathSum;
+
+      t->CathMaxE = t->xE.maxValue + t->yE.maxValue;
+      t->CathMaxW = t->xW.maxValue + t->yW.maxValue;
+	    
       t->xE.rawCenter = cathResp.getWirePosEX(t->xE.maxWire);
       t->yE.rawCenter = cathResp.getWirePosEY(t->yE.maxWire);
       t->xW.rawCenter = cathResp.getWirePosWX(t->xW.maxWire);
       t->yW.rawCenter = cathResp.getWirePosWY(t->yW.maxWire);
 
-
       
       //Now do all gaussian fits... 
+      //cathResp.loadGainFactors(runNumber);
+
       cathResp.findAllPositions(true,true);
 
       posex = cathResp.getPosEX();
@@ -294,11 +296,16 @@ int main(int argc, char *argv[])
       t->gaus_yE.maxWire = cathResp.getMaxWireEY();
       t->gaus_xW.maxWire = cathResp.getMaxWireWX();
       t->gaus_yW.maxWire = cathResp.getMaxWireWY();
+      
+      t->gaus_xE.maxValue = cathResp.getMaxSignalEX();
+      t->gaus_yE.maxValue = cathResp.getMaxSignalEY();
+      t->gaus_xW.maxValue = cathResp.getMaxSignalWX();
+      t->gaus_yW.maxValue = cathResp.getMaxSignalWY();
 
-      t->gaus_xE.maxValue = t->Cathodes_Ex[t->xE.maxWire];
-      t->gaus_yE.maxValue = t->Cathodes_Ey[t->yE.maxWire];
-      t->gaus_xW.maxValue = t->Cathodes_Wx[t->xW.maxWire];
-      t->gaus_yW.maxValue = t->Cathodes_Wy[t->yW.maxWire];
+      t->gaus_xE.cathSum = cathResp.getCathSumEX();
+      t->gaus_yE.cathSum = cathResp.getCathSumEY();
+      t->gaus_xW.cathSum = cathResp.getCathSumWX();
+      t->gaus_yW.cathSum = cathResp.getCathSumWY();
 
       t->gaus_xE.rawCenter = cathResp.getWirePosEX(t->xE.maxWire);
       t->gaus_yE.rawCenter = cathResp.getWirePosEY(t->yE.maxWire);
@@ -308,6 +315,7 @@ int main(int argc, char *argv[])
 
       
       // Now for all weighted averages...
+      cathResp.purgeGainFactors();
       cathResp.findAllPositions(false,false);
 
       posex = cathResp.getPosEX();
@@ -345,10 +353,15 @@ int main(int argc, char *argv[])
       t->old_xW.maxWire = cathResp.getMaxWireWX();
       t->old_yW.maxWire = cathResp.getMaxWireWY();
 
-      t->old_xE.maxValue = t->Cathodes_Ex[t->xE.maxWire];
-      t->old_yE.maxValue = t->Cathodes_Ey[t->yE.maxWire];
-      t->old_xW.maxValue = t->Cathodes_Wx[t->xW.maxWire];
-      t->old_yW.maxValue = t->Cathodes_Wy[t->yW.maxWire];
+      t->old_xE.maxValue = cathResp.getMaxSignalEX();
+      t->old_yE.maxValue = cathResp.getMaxSignalEY();
+      t->old_xW.maxValue = cathResp.getMaxSignalWX();
+      t->old_yW.maxValue = cathResp.getMaxSignalWY();
+
+      t->old_xE.cathSum = cathResp.getCathSumEX();
+      t->old_yE.cathSum = cathResp.getCathSumEY();
+      t->old_xW.cathSum = cathResp.getCathSumWX();
+      t->old_yW.cathSum = cathResp.getCathSumWY();
 
       t->old_xE.rawCenter = cathResp.getWirePosEX(t->xE.maxWire);
       t->old_yE.rawCenter = cathResp.getWirePosEY(t->yE.maxWire);
@@ -358,7 +371,11 @@ int main(int argc, char *argv[])
       
       /////////////////////////////////////////////////////////////
       /////// Now do the energy reconstruction
-      
+      /*std::cout << "Event " << i << std::endl;    
+      std::cout << "Optimal: " << t->xE.center << "\t" << t->yE.center << "\t" << t->xW.center << "\t" << t->yW.center << "\n"
+		<< "Old: " << t->old_xE.center << "\t" << t->old_yE.center << "\t" << t->old_xW.center << "\t" << t->old_yW.center << "\n"
+		<< "Gaus: " << t->gaus_xE.center << "\t" << t->gaus_yE.center << "\t" << t->gaus_xW.center << "\t" << t->gaus_yW.center << "\n\n" ;*/
+
       eta = posmap.getInterpolatedEta(t->xE.center, t->yE.center, t->xW.center, t->yW.center);
       old_eta = posmap.getInterpolatedEta(t->old_xE.center, t->old_yE.center, t->old_xW.center, t->old_yW.center);
       gaus_eta = posmap.getInterpolatedEta(t->gaus_xE.center, t->gaus_yE.center, t->gaus_xW.center, t->gaus_yW.center);
@@ -672,6 +689,19 @@ int main(int argc, char *argv[])
 	}
 	else t->Erecon=-1.;
       }
+
+      // Last thing to do for electrons is position correct the anode signal and
+      // apply the wirechamber energy calibration
+
+      // Get the position response
+      std::vector <Double_t> etaMWPC = anodeMap.getInterpolatedEta(t->xE.center,t->yE.center,
+								   t->xW.center,t->yW.center);
+      t->AnodeE = t->AnodeE / etaMWPC[0];
+      t->AnodeW = t->AnodeW / etaMWPC[1];
+
+      t->EMWPC_E = mwpcCal.applyCal( 0, t->AnodeE ) ;
+      t->EMWPC_W = mwpcCal.applyCal( 1, t->AnodeW ) ;
+
     }
 
     // write out pedestal subtracted cathode values for all events

@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
   std::vector <int> betaRuns = readOctetFile( octetNumber );
 
   // Output root file
-  TString path = TString::Format("%s/gain_cathodes_octet_%i.root",getenv("GAIN_CATHODES"),octetNumber);
+  TString path = TString::Format("%s/octets/gain_cathodes_octet_%i.root",getenv("GAIN_CATHODES"),octetNumber);
   TFile *fileOut = new TFile(path,"RECREATE");
 
 
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
     
   }
 
-  std::ofstream gainFile(TString::Format("%s/gain_cathodes_octet_%i.dat",getenv("GAIN_CATHODES"),octetNumber).Data());
+  std::ofstream gainFile(TString::Format("%s/octets/gain_cathodes_octet_%i.dat",getenv("GAIN_CATHODES"),octetNumber).Data());
 
   gainFile << "#EX" << std::setw(12)
 	   << "EY"  << std::setw(12)

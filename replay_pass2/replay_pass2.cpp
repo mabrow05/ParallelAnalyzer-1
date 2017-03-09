@@ -30,7 +30,7 @@
 
 using namespace std;
 
-bool OnlyReplayBadFiles = false;
+bool OnlyReplayBadFiles = true;
 
 //Read in beam drops
 std::vector < std::vector < Double_t > > readBeamDrops(Int_t runNumber) {
@@ -93,8 +93,16 @@ int main(int argc, char *argv[])
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
 
+
+  
+  // the second argument is a boolean. If it is given and it is false, then don't use the beam cuts
+  bool useBeamCuts = true;
+  if ( argc == 3 ) {
+    if ( std::string(argv[2])==std::string("false") || std::string(argv[2])==std::string("0") ) useBeamCuts = false;
+  }
+
   cout << "Run " << argv[1] << " ..." << endl;
-  cout << "... Applying Bi pulser gain corrections and cutting beam drops and bursts ..." << endl;
+  cout << "... Applying Bi pulser gain corrections and cutting beam drops and bursts if applicable ..." << endl;
 
   // Check if file is corrupt
   char tempOut[500];
@@ -190,60 +198,65 @@ int main(int argc, char *argv[])
     t->ScintW.q3 = t->ScintW.q3*gainCorrection[6];
     t->ScintW.q4 = t->ScintW.q4*gainCorrection[7]; 
     
-    if ( t->Tof < beamBurstCut ) t->badTimeFlag = 1;
-    
-    for ( UInt_t j=0; j<numBeamDrops; ++j ) {
-      // If event was in a beam drop, set the bad time flag and set the event time to 
-      // the last good event time. This will create a spike at every beam drop...
-      if ( t->Time > beamDropTimes[j][0] && t->Time < beamDropTimes[j][1] ) {
-	t->badTimeFlag = 1;
-	t->Time = lastGoodTime;
-	t->TimeE = lastGoodTimeE;
-	t->TimeW = lastGoodTimeW;
+    if ( useBeamCuts ) {
+ 
+      if ( t->Tof < beamBurstCut ) t->badTimeFlag = 1;
+      
+      for ( UInt_t j=0; j<numBeamDrops; ++j ) {
+	// If event was in a beam drop, set the bad time flag and set the event time to 
+	// the last good event time. This will create a spike at every beam drop...
+	if ( t->Time > beamDropTimes[j][0] && t->Time < beamDropTimes[j][1] ) {
+	  t->badTimeFlag = 1;
+	  t->Time = lastGoodTime;
+	  t->TimeE = lastGoodTimeE;
+	  t->TimeW = lastGoodTimeW;
+	}
+	
+	// If it isn't in a drop, subtract all previos drops from event times...
+	else if ( t->Time > beamDropTimes[j][0] ) {	
+	  t->Time = t->Time - deltaTime[j];
+	  t->TimeE = t->TimeE - deltaTime[j]*scaleE;
+	  t->TimeW = t->TimeW - deltaTime[j]*scaleW;
+	}      
       }
       
-      // If it isn't in a drop, subtract all previos drops from event times...
-      else if ( t->Time > beamDropTimes[j][0] ) {	
-	t->Time = t->Time - deltaTime[j];
-	t->TimeE = t->TimeE - deltaTime[j]*scaleE;
-	t->TimeW = t->TimeW - deltaTime[j]*scaleW;
-      }      
-    }
-
-    if ( t->badTimeFlag==0 ) {
-      lastGoodTimeE = t->TimeE;
-      lastGoodTimeW = t->TimeW;
-      lastGoodTime = t->Time;
-    }
-
-    if ( i == (nEvents-1) ) {
-      runLengthBlindE = t->TimeE;
-      runLengthBlindW = t->TimeW;
-      runLengthTrue = t->Time;
-      old_runLengthBlindE = t->oldTimeE;
-      old_runLengthBlindW = t->oldTimeW;
-      old_runLengthTrue = t->oldTime;
+      if ( t->badTimeFlag==0 ) {
+	lastGoodTimeE = t->TimeE;
+	lastGoodTimeW = t->TimeW;
+	lastGoodTime = t->Time;
+      }
+      
+      if ( i == (nEvents-1) ) {
+	runLengthBlindE = t->TimeE;
+	runLengthBlindW = t->TimeW;
+	runLengthTrue = t->Time;
+	old_runLengthBlindE = t->oldTimeE;
+	old_runLengthBlindW = t->oldTimeW;
+	old_runLengthTrue = t->oldTime;
+      }
     }
 
     t->fillOutputTree();
   }
 
 
-  //Now I want to create and store a few pertinent values in a file for later...
-  char tempFile[200];
-  sprintf(tempFile,"%s/runInfo_%s.dat",getenv("RUN_INFO_FILES"),argv[1]);
-  ofstream runInfo(tempFile);
-  std::cout << "Writing Info to " << tempFile << std::endl;
-
-  runInfo << "RunLengthEast\t" << std::setprecision(9) << runLengthBlindE << std::endl;
-  runInfo << "RunLengthWest\t" << std::setprecision(9) << runLengthBlindW << std::endl;
-  runInfo << "RunLengthTrue\t" << std::setprecision(9) << runLengthTrue << std::endl;
-  runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t->UCN_Mon_4_Rate->Integral("width");
-  runInfo << "old_RunLengthEast\t" << std::setprecision(9) << old_runLengthBlindE << std::endl;
-  runInfo << "old_RunLengthWest\t" << std::setprecision(9) << old_runLengthBlindW << std::endl;
-  runInfo << "old_RunLengthTrue\t" << std::setprecision(9) << old_runLengthTrue << std::endl;
-
-  runInfo.close();
+  if ( useBeamCuts ) {
+    //Now I want to create and store a few pertinent values in a file for later...
+    char tempFile[200];
+    sprintf(tempFile,"%s/runInfo_%s.dat",getenv("RUN_INFO_FILES"),argv[1]);
+    ofstream runInfo(tempFile);
+    std::cout << "Writing Info to " << tempFile << std::endl;
+    
+    runInfo << "RunLengthEast\t" << std::setprecision(9) << runLengthBlindE << std::endl;
+    runInfo << "RunLengthWest\t" << std::setprecision(9) << runLengthBlindW << std::endl;
+    runInfo << "RunLengthTrue\t" << std::setprecision(9) << runLengthTrue << std::endl;
+    runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t->UCN_Mon_4_Rate->Integral("width");
+    runInfo << "old_RunLengthEast\t" << std::setprecision(9) << old_runLengthBlindE << std::endl;
+    runInfo << "old_RunLengthWest\t" << std::setprecision(9) << old_runLengthBlindW << std::endl;
+    runInfo << "old_RunLengthTrue\t" << std::setprecision(9) << old_runLengthTrue << std::endl;
+    
+    runInfo.close();
+  }
 
   // Write output ntuple
   t->writeOutputFile();

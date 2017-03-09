@@ -127,6 +127,7 @@ void plot_position_map(int XePeriod, double binWidth)
 	   
 	  hisE[i]->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[0]);
 	  hisW[i]->Fill(plotMap.getBinCenter(xb),plotMap.getBinCenter(yb),eta[1]);
+	  //std::cout << eta[0] << "\t" << eta[1] << std::endl;
 	}
       }
     }
@@ -137,7 +138,7 @@ void plot_position_map(int XePeriod, double binWidth)
   TString filenameOut;
   Char_t runPeriodString[10];
   sprintf(runPeriodString,"%i",XePeriod);
-  filenameOut = TString(getenv("POSITION_MAPS")) + "MWPC_position_map_"+TString(runPeriodString)+TString::Format("_%0.1fmm.pdf",binWidth);
+  filenameOut = TString(getenv("MWPC_CALIBRATION")) + "position_maps/MWPC_position_map_"+TString(runPeriodString)+TString::Format("_%0.1fmm.pdf",binWidth);
 
   TString filenameOutFirst;
   filenameOutFirst  = filenameOut;

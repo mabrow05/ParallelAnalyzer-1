@@ -6,10 +6,10 @@ MWPC old_xE, old_xW, old_yE, old_yW;
 MWPC gaus_xE, gaus_xW, gaus_yE, gaus_yW;
 
 int PID, type, side; // basic analysis tags
-
+int hitCountSD[24]; // holds how many times a SD was hit in simulation
 double primKE, AsymWeight, primTheta; // initial energy from simulation
 
-double Erecon; // smeared, weighted, and trigger func corrected energy summed over two sides scint and MWPC energy
+double Erecon, old_Erecon, gaus_Erecon; // smeared, weighted, and trigger func corrected energy summed over two sides scint and MWPC energy
 
 int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY; // Clipping numbers
 

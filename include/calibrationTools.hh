@@ -29,6 +29,25 @@ private:
   TF1 *linCurve;                                                                    
 };        
 
+class WirechamberCal {
+ 
+public:
+
+  WirechamberCal(Int_t run);  
+  ~WirechamberCal(); 
+  void readWirechamberCalParams(Int_t run);
+  std::vector < std::vector < Double_t > > returnWirechamberCalParams() { return _params; };
+  Double_t applyCal(Int_t side, Double_t adc); 
+  Int_t getCurrentRun() { return _run; }; 
+  
+private:                                                                                                                      
+  Int_t _run;  
+  std::vector < std::vector < Double_t > > _params;                             
+  Int_t _nParams;
+  TF1 *_calFunc;
+  TF1 *_extrap; // Function to extrapolate to zero ADC
+};        
+
 
 class TriggerFunctions {
 

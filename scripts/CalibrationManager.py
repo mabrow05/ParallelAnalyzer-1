@@ -175,7 +175,7 @@ class CalReplayManager:
                 runs.append(int(line))
         
         for run in runs:
-            os.system("cd ../replay_pass2/; ./replay_pass2.exe %i"%run)
+            os.system("cd ../replay_pass2/; ./replay_pass2.exe %i false"%run)
         print "DONE"
         
     def runReplayPass3(self,srcRunPeriod=1, sourceORxenon="source"):
@@ -1024,18 +1024,18 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 0: 
-        runPeriods = [9]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+    if 1: 
+        runPeriods = [8,9,10]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
-            rep.findPedestals(runPeriod, sourceORxenon="xenon")
+            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             

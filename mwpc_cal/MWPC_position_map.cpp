@@ -51,8 +51,7 @@ int main(int argc, char *argv[])
 
   
   double xyBinWidth = 5.; //2.5;
-  PositionMap posmap(xyBinWidth,50.);
-  posmap.setRCflag(false); //telling the position map to not use the RC choices
+  MWPCPositionMap posmap(xyBinWidth,50.);
   Int_t nBinsXY = posmap.getNbinsXY();
   
 
@@ -62,14 +61,14 @@ int main(int argc, char *argv[])
   //sprintf(tempOut, "position_map_%s.root", argv[1]);
   tempOutBase = "MWPC_position_map_" + itos(iXeRunPeriod);
   
-  tempOut =  getenv("POSITION_MAPS")+tempOutBase+"_"+ftos(xyBinWidth)+"mm.root";
+  tempOut =  getenv("MWPC_CALIBRATION")+std::string("/position_maps/")+tempOutBase+"_"+ftos(xyBinWidth)+"mm.root";
   TFile *fileOut = new TFile(tempOut.c_str(),"RECREATE");
 
   // Output histograms
   double EnergyBinWidth = 50.;
   int nEnergyBins = 14;
   double enBinStart = 100.;
-  int nBinHist = 200;//1025;
+  int nBinHist = 400;//1025;
 
   TH1D *hisxy_E[nEnergyBins][nBinsXY][nBinsXY];
   TH1D *hisxy_W[nEnergyBins][nBinsXY][nBinsXY];
@@ -83,9 +82,9 @@ int main(int argc, char *argv[])
 	double ehigh = elow + EnergyBinWidth;
 	
         hisxy_E[p][i][j] = new TH1D(TString::Format("East_%.0f-%.0f_x%i_y%i",elow,ehigh,i,j),
-				    "", nBinHist,-0.5,1999.5);
+				    "", nBinHist,-0.5,3999.5);
 	hisxy_W[p][i][j] = new TH1D(TString::Format("West_%.0f-%.0f_x%i_y%i",elow,ehigh,i,j),
-				    "", nBinHist,-0.5,1999.5);
+				    "", nBinHist,-0.5,3999.5);
 
       }
     }
@@ -124,6 +123,12 @@ int main(int argc, char *argv[])
       //Cut out clipped events
       if ( t->Side==0 && ( t->xE.nClipped>0 || t->yE.nClipped>0 || t->xeRC<1 || t->xeRC>4 || t->yeRC<1 || t->yeRC>4 ) ) continue;
       else if ( t->Side==1 && ( t->xW.nClipped>0 || t->yW.nClipped>0 || t->xwRC<1 || t->xwRC>4 || t->ywRC<1 || t->ywRC>4) ) continue;
+
+      // Check that the event has a reasonable position
+      double r2E = t->xE.center*t->xE.center + t->yE.center*t->yE.center;
+      double r2W = t->xW.center*t->xW.center + t->yW.center*t->yW.center;
+
+      if ( r2E > 55.*55. || r2W > 55.*55. ) continue; 
 
 		
       // Type 0 East Trigger
@@ -168,12 +173,12 @@ int main(int argc, char *argv[])
     for (int i=0; i<posmap.getNbinsXY(); i++) {
       for (int j=0; j<posmap.getNbinsXY(); j++) {
 
-	peak = new SinglePeakHist(hisxy_E[p][i][j],0., 2000., true, 5, 2., 7., true);
+	peak = new SinglePeakHist(hisxy_E[p][i][j],0., 3999.5, true, 5, 2., 7., true);
 	mpv_E[p][i][j] = peak->ReturnMean();
 	if ( !peak->isGoodFit() ) mpv_E[p][i][j] = hisxy_E[p][i][j]->GetMean();
 	delete peak;
 
-	peak = new SinglePeakHist(hisxy_W[p][i][j],0., 2000., true, 5, 2., 7., true);
+	peak = new SinglePeakHist(hisxy_W[p][i][j],0., 3999.5, true, 5, 2., 7., true);
 	mpv_W[p][i][j] = peak->ReturnMean();
 	if ( !peak->isGoodFit() ) mpv_W[p][i][j] = hisxy_W[p][i][j]->GetMean();
 	delete peak;
@@ -224,8 +229,9 @@ int main(int argc, char *argv[])
   for ( int p=0; p<nEnergyBins; ++p ) {
     
     string tempMap;
-    tempMap = ( getenv("POSITION_MAPS") + tempOutBase + "_" +ftos( xyBinWidth )+ "mm_"
-		+ ftos( enBinStart + p*EnergyBinWidth )+"-"+ftos( enBinStart + (p+1)*EnergyBinWidth )+".dat" );
+    tempMap = ( getenv("MWPC_CALIBRATION") + std::string("/position_maps/")+ tempOutBase + "_" +
+		ftos( xyBinWidth )+ "mm_" + ftos( enBinStart + p*EnergyBinWidth ) +
+		"-"+ftos( enBinStart + (p+1)*EnergyBinWidth )+".dat" );
     ofstream outMap(tempMap.c_str());
     outMap << std::setprecision(7);
     

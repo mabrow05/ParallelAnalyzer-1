@@ -196,13 +196,16 @@ void SetUpTree(TTree *tree) {
   tree->Branch("side", &side, "side/I");
   tree->Branch("type", &type, "type/I");
   tree->Branch("Erecon", &Erecon,"Erecon/D");
-  
+  tree->Branch("old_Erecon", &old_Erecon,"old_Erecon/D");
+  tree->Branch("gaus_Erecon", &gaus_Erecon,"gaus_Erecon/D");
+
   tree->Branch("Evis",&evis,"EvisE/D:EvisW");
   tree->Branch("Edep",&edep,"EdepE/D:EdepW");
   tree->Branch("EdepQ",&edepQ,"EdepQE/D:EdepQW");
   tree->Branch("primKE",&primKE,"primKE/D");
   tree->Branch("primTheta",&primTheta,"primTheta/D");
   tree->Branch("AsymWeight",&AsymWeight,"AsymWeight/D");
+  tree->Branch("hitCountSD",&hitCountSD,"hitCountSD[24]/I");
   
   tree->Branch("time",&Time,"timeE/D:timeW");
   tree->Branch("MWPCEnergy",&mwpcE,"MWPCEnergyE/D:MWPCEnergyW");
@@ -397,6 +400,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   chain->SetBranchAddress("Cath_EY",Cath_EY);
   chain->SetBranchAddress("Cath_WX",Cath_WX);
   chain->SetBranchAddress("Cath_WY",Cath_WY);
+  chain->SetBranchAddress("hitCountSD",hitCountSD);
   
   //These are for feeding in Xuan's simulations... this needs to be updated so that I can pass a flag and change these on the fly
   //chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
@@ -413,21 +417,21 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
   //Set random number generator
 
-  TRandom3 *seed = new TRandom3( runNumber ); // seed generator
-  TRandom3 *rand0 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *rand1 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *rand2 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *rand3 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *seed = new TRandom3( 2*runNumber ); // seed generator
+  TRandom3 *rand0 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *rand1 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *rand2 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *rand3 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
 
   //Initialize random numbers for 8 pmt trigger probabilities
-  TRandom3 *randPMTE1 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *randPMTE2 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *randPMTE3 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *randPMTE4 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *randPMTW1 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *randPMTW2 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *randPMTW3 = new TRandom3( (int) (seed->Rndm()*10000.) );
-  TRandom3 *randPMTW4 = new TRandom3( (int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTE1 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTE2 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTE3 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTE4 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW1 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW2 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW3 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+  TRandom3 *randPMTW4 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
 
   std::vector <Double_t> triggRandVec(4,0.);
 
@@ -441,7 +445,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   cout << "events = " << nevents << endl;
  
   //Start from random position in evt sequence if we aren't simulating veryHighStatistics
-  UInt_t evtStart = rand0->Rndm()*nevents;
+  UInt_t evtStart = seed->Rndm()*nevents;
 
 
   // Now taking care of where to start the event chain when we are simulating veryHighStats
@@ -746,15 +750,36 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     //std::cout << mwpcAdjE[0] << "\t" << mwpcAdjW[0] << std::endl;
     //if (evtTally==5) exit(0);
 
+
+    /////////////////////////////////////////////////////////////////////
+    // Creating all extra structs to hold the alternate position reconstruction
+    // crap before writing it all out
+    /////////////////////////////////////////////////////////////////////
+
+    PMT old_pmt, gaus_pmt;
+    Evis old_evis, gaus_evis;
+    
+
     std::vector <Double_t> eta; 
+    std::vector <Double_t> old_eta; 
+    std::vector <Double_t> gaus_eta; 
 
-    if ( source!="Beta" ) eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],
-							  scint_pos_adj.ScintPosAdjE[1],
-							  scint_pos_adj.ScintPosAdjW[0],
-							  scint_pos_adj.ScintPosAdjW[1]);
+    if ( source!="Beta" ) { 
+      eta = gaus_eta = old_eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],
+							   scint_pos_adj.ScintPosAdjE[1],
+							   scint_pos_adj.ScintPosAdjW[0],
+							   scint_pos_adj.ScintPosAdjW[1]);
+    }
 
-    else eta = posmap.getInterpolatedEta(xE.center,yE.center,
-					 xW.center,yW.center);
+    else {
+      eta = posmap.getInterpolatedEta(xE.center,yE.center,
+				      xW.center,yW.center);
+      old_eta = posmap.getInterpolatedEta(old_xE.center,old_yE.center,
+					  old_xW.center,old_yW.center);
+      gaus_eta = posmap.getInterpolatedEta(gaus_xE.center,gaus_yE.center,
+					  gaus_xW.center,gaus_yW.center);
+    }
+      
     //eta = posmap.getInterpolatedEta(-mwpc_pos.MWPCPosE[0]*sqrt(0.6)*10., mwpc_pos.MWPCPosE[1]*sqrt(0.6)*10.,
     //					 mwpc_pos.MWPCPosW[0]*sqrt(0.6)*10.,  mwpc_pos.MWPCPosW[1]*sqrt(0.6)*10.);
       
@@ -792,29 +817,95 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	  pmt.Evis[p] = pmt.etaEvis[p];
 
 	}
+
+	if (old_eta[p]>0.) {
+
+	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*old_eta[p]*edepQ.EdepQE))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, old_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  old_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  old_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
+
+	}
+
+	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
+	  
+	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, old_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  old_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  old_pmt.Evis[p] = old_pmt.etaEvis[p];
+
+	}
+
+	if (gaus_eta[p]>0.) {
+
+	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*gaus_eta[p]*edepQ.EdepQE))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, gaus_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  gaus_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  gaus_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
+
+	}
+
+	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
+	  
+	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQE))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, gaus_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  gaus_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  gaus_pmt.Evis[p] = gaus_pmt.etaEvis[p];
+
+	}
 	
 	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
+	old_pmt.nPE[p] = ( old_pmt.etaEvis[p]>0. ) ? alpha[p]*old_pmt.etaEvis[p] : 0.;
+	gaus_pmt.nPE[p] = ( gaus_pmt.etaEvis[p]>0. ) ? alpha[p]*gaus_pmt.etaEvis[p] : 0.;
       }
+
     // If eQ is 0...
       else {
 	pmt.etaEvis[p] = 0.;
 	pmt.Evis[p] = 0.;
 	pmt.nPE[p] = 0.;
+	
+	old_pmt.etaEvis[p] = 0.;
+	old_pmt.Evis[p] = 0.;
+	old_pmt.nPE[p] = 0.;
+
+	gaus_pmt.etaEvis[p] = 0.;
+	gaus_pmt.Evis[p] = 0.;
+	gaus_pmt.nPE[p] = 0.;
       }
     }
   
+    Double_t numer=0., denom=0.;
+    for (UInt_t p=0;p<4;p++) {
+      numer += pmtQuality[p] && old_pmt.etaEvis[p]>0. ? old_pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] && old_pmt.etaEvis[p]>0. ? old_eta[p]*alpha[p] : 0.;
+    }
+
+    Double_t totalEnE = denom>0. ? numer/denom : 0.;
+    old_evis.EvisE = totalEnE;
+
+    numer = denom = 0.;
+    for (UInt_t p=0;p<4;p++) {
+      numer += pmtQuality[p] && gaus_pmt.etaEvis[p]>0. ? gaus_pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] && gaus_pmt.etaEvis[p]>0. ? gaus_eta[p]*alpha[p] : 0.;
+    }
+
+    totalEnE = denom>0. ? numer/denom : 0.;
+    gaus_evis.EvisE = totalEnE;
+
       
     //Calculate the weighted energy on a side
-    Double_t numer=0., denom=0.;
+    numer = denom = 0.;
     for (UInt_t p=0;p<4;p++) {
       numer += pmtQuality[p] && pmt.etaEvis[p]>0. ? pmt.nPE[p] : 0.;
       denom += pmtQuality[p] && pmt.etaEvis[p]>0. ? eta[p]*alpha[p] : 0.;
     }
 
-    //Now we apply the trigger probability
-    Double_t totalEnE = denom>0. ? numer/denom : 0.;
+    
+    totalEnE = denom>0. ? numer/denom : 0.;
     evis.EvisE = totalEnE;
 
+    //Now we apply the trigger probability
     triggRandVec[0] = randPMTE1->Rndm();
     triggRandVec[1] = randPMTE2->Rndm();
     triggRandVec[2] = randPMTE3->Rndm();
@@ -846,18 +937,82 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	  pmt.Evis[p] = pmt.etaEvis[p];
 	  
 	}
+
+	if (old_eta[p]>0.) {
+
+	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*old_eta[p]*edepQ.EdepQW))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, old_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  old_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  old_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
+
+	}
+
+	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
+	  
+	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, old_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  old_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  old_pmt.Evis[p] = old_pmt.etaEvis[p];
+
+	}
+
+	if (gaus_eta[p]>0.) {
+
+	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*gaus_eta[p]*edepQ.EdepQW))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, gaus_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  gaus_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  gaus_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
+
+	}
+
+	else { //To avoid dividing by zero.. these events won't be used in analysis since they are outside the fiducial cut
+	  
+	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*edepQ.EdepQW))));
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, gaus_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  gaus_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
+	  gaus_pmt.Evis[p] = gaus_pmt.etaEvis[p];
+
+	}
 	
 	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
+	old_pmt.nPE[p] = ( old_pmt.etaEvis[p]>0. ) ? alpha[p]*old_pmt.etaEvis[p] : 0.;
+	gaus_pmt.nPE[p] = ( gaus_pmt.etaEvis[p]>0. ) ? alpha[p]*gaus_pmt.etaEvis[p] : 0.;
       }
       // If PMT is dead and EQ=0...
       else {
 	pmt.etaEvis[p] = 0.;
 	pmt.Evis[p] = 0.;
 	pmt.nPE[p] = 0.;
+
+	old_pmt.etaEvis[p] = 0.;
+	old_pmt.Evis[p] = 0.;
+	old_pmt.nPE[p] = 0.;
+
+	gaus_pmt.etaEvis[p] = 0.;
+	gaus_pmt.Evis[p] = 0.;
+	gaus_pmt.nPE[p] = 0.;
       }
     }
       
       
+    numer = denom = 0.;
+    for (UInt_t p=4;p<8;p++) {
+      numer += pmtQuality[p] && old_pmt.etaEvis[p]>0. ? old_pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] && old_pmt.etaEvis[p]>0. ? old_eta[p]*alpha[p] : 0.;
+    }
+
+    double totalEnW = denom>0. ? numer/denom : 0.;
+    old_evis.EvisW = totalEnW;
+
+    numer = denom = 0.;
+    for (UInt_t p=4;p<8;p++) {
+      numer += pmtQuality[p] && gaus_pmt.etaEvis[p]>0. ? gaus_pmt.nPE[p] : 0.;
+      denom += pmtQuality[p] && gaus_pmt.etaEvis[p]>0. ? gaus_eta[p]*alpha[p] : 0.;
+    }
+
+    totalEnW = denom>0. ? numer/denom : 0.;
+    gaus_evis.EvisW = totalEnW;
+
      //Calculate the total weighted energy
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
@@ -865,7 +1020,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       denom += pmtQuality[p] && pmt.etaEvis[p]>0. ? eta[p]*alpha[p] : 0.;
     }
     //Now we apply the trigger probability
-    Double_t totalEnW = denom>0. ? numer/denom : 0.;
+    totalEnW = denom>0. ? numer/denom : 0.;
     evis.EvisW = totalEnW;
 
     triggRandVec[0] = randPMTW1->Rndm();
@@ -977,6 +1132,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	else if(type==2 ||type==3) finalEn[4]->Fill(Erecon);
       }
       else Erecon=-1.;
+      
     }
     if (side==1) {
       Double_t totalEvis = type==1 ? (evis.EvisE+evis.EvisW):evis.EvisW;
@@ -988,7 +1144,47 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       }
       else Erecon=-1.;
     }    
+    
+    // old pos recon
+    old_Erecon = -1.;
+    typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+    if (side==0) {
+      Double_t totalEvis = type==1 ? (old_evis.EvisE + old_evis.EvisW):old_evis.EvisE;
+      if (old_evis.EvisE>0. && totalEvis>0.) {
+	old_Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+      }
+      else old_Erecon=-1.;
+      
+    }
+    if (side==1) {
+      Double_t totalEvis = type==1 ? (old_evis.EvisE + old_evis.EvisW):old_evis.EvisW;
+      if (old_evis.EvisW>0. && totalEvis>0.) {
+	old_Erecon = eRecon.getErecon(1,typeIndex,totalEvis);	
+      }
+      else old_Erecon=-1.;
+    }    
+
+    // gaus pos recon
+    gaus_Erecon = -1.;
+    typeIndex = (type==0 || type==4) ? 0:(type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+    if (side==0) {
+      Double_t totalEvis = type==1 ? (gaus_evis.EvisE + gaus_evis.EvisW):gaus_evis.EvisE;
+      if (gaus_evis.EvisE>0. && totalEvis>0.) {
+	gaus_Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+      }
+      else gaus_Erecon=-1.;
+      
+    }
+    if (side==1) {
+      Double_t totalEvis = type==1 ? (gaus_evis.EvisE + gaus_evis.EvisW):gaus_evis.EvisW;
+      if (gaus_evis.EvisW>0. && totalEvis>0.) {
+	gaus_Erecon = eRecon.getErecon(1,typeIndex,totalEvis);	
+      }
+      else gaus_Erecon=-1.;
+    }    
   
+
+
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
     if ( source == "Beta") {
       if ( PID==1 && Erecon>0. && ( sqrt( mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1] )<fidCut

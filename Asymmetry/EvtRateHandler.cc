@@ -15,11 +15,15 @@ simulation data
 
 #include <TString.h>
 
+const bool writeRatesToFile = true;
 
-int separate23(int side, double mwpcEn) {
+
+int separate23(int side, double mwpcEn, int run) {
+  
+  double enCut = ( run>=21100 && run<=21595 ) ? 5.4 : 6.6; //iso vs neo
   int type = 2;
-  if (side==0)  type = ( mwpcEn>4.14 ) ? 3 : 2;  
-  if (side==1)  type = ( mwpcEn>4.14 ) ? 3 : 2;
+  if (side==0)  type = ( mwpcEn>enCut ) ? 3 : 2;  
+  else if (side==1)  type = ( mwpcEn>enCut ) ? 3 : 2;
   return type;
 };
 
@@ -260,10 +264,10 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("TimeE",&TimeE);
       Tin->SetBranchAddress("TimeW",&TimeW);
       Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
-      Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-      Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-      Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-      Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+      Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+      Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+      Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+      Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
       Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
       Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
       Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
@@ -357,11 +361,11 @@ void EvtRateHandler::dataReader() {
 	    if (Erecon>0. && Type==2) {
 	      
 	      if (Side==0) {
-		Type = separate23(Side,MWPCEnergyE);
+		Type = separate23(Side,MWPCEnergyE,runs[0]);
 		Side = Type==2 ? 1 : 0;
 	      }
 	      else if (Side==1) {
-		Type = separate23(Side,MWPCEnergyW);
+		Type = separate23(Side,MWPCEnergyW,runs[0]);
 		Side = Type==2 ? 0 : 1;
 	      }
 	    }
@@ -447,9 +451,10 @@ void SimEvtRateHandler::dataReader() {
   double cathRespPosW[3]={0.};
   double mwpcPosE[3]={0.};
   double mwpcPosW[3]={0.}; //holds the position of the event in the MWPC for simulated data
-  int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
+  double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0.;
+  int xE_nClipped, yE_nClipped, xW_nClipped, yW_nClipped;
 
-  nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
+  xE_nClipped = yE_nClipped = xW_nClipped = yW_nClipped = 0;
   
   for ( unsigned int i=0; i<runs.size(); i++ ) {
     
@@ -472,20 +477,21 @@ void SimEvtRateHandler::dataReader() {
     Tin->GetBranch("cathRespPos")->GetLeaf("cathRespPosW")->SetAddress(cathRespPosW);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcPosE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcPosW);
-    Tin->SetBranchAddress("AsymWeight",&AsymWeight);
-    Tin->SetBranchAddress("nClipped_EX",&nClipped_EX);
-    Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
-    Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
-    Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
-    //Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    //Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    //Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    //Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-    //Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
-    //Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
-    //Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
-    //Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
-
+    //Tin->SetBranchAddress("AsymWeight",&AsymWeight);
+    //Tin->SetBranchAddress("nClipped_EX",&nClipped_EX);
+    //Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
+    //Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
+    //Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
+    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
+    Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
+    Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
+    Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
+    Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
+    Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 
     // ADD IN WIRECHAMBER ENERGY DEPOSITION
     
@@ -506,19 +512,21 @@ void SimEvtRateHandler::dataReader() {
       
       if (PID==1) {
 
-	//Cut out clipped events
-	/*if ( Type!=0 ) {
-	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+	/*//Cut out clipped events
+	if ( Type!=0 ) {
+	  if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
 	}
 	else {
-	  if ( Side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
-	  else if ( Side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	  if ( Side==0 && ( xE_nClipped>0 || yE_nClipped>0 ) ) continue;
+	  else if ( Side==1 && ( xW_nClipped>0 || yW_nClipped>0 ) ) continue;
 	  }*/
 
-	r2E = ( mwpcPosE[0]*mwpcPosE[0] + mwpcPosE[1]*mwpcPosE[1] ) * 0.6 * 10.;
-	r2W = ( mwpcPosW[0]*mwpcPosW[0] + mwpcPosW[1]*mwpcPosW[1] ) * 0.6 * 10.;
+	//r2E = ( mwpcPosE[0]*mwpcPosE[0] + mwpcPosE[1]*mwpcPosE[1] ) * 0.6 * 10.;
+	//r2W = ( mwpcPosW[0]*mwpcPosW[0] + mwpcPosW[1]*mwpcPosW[1] ) * 0.6 * 10.;
 	//r2E = ( cathRespPosE[0]*cathRespPosE[0] + cathRespPosE[1]*cathRespPosE[1] ) ; //Transforming to decay trap coords
 	//r2W = ( cathRespPosW[0]*cathRespPosW[0] + cathRespPosW[1]*cathRespPosW[1] ) ;
+	r2E = ( EmwpcX*EmwpcX + EmwpcY*EmwpcY ) ; //Transforming to decay trap coords
+	r2W = ( WmwpcX*WmwpcX + WmwpcY*WmwpcY );
 	
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	  //if ( r2E<(60.*60.) && r2W<(60.*60.) ) {
@@ -528,11 +536,11 @@ void SimEvtRateHandler::dataReader() {
 	    if (Type==2) {
 	      
 	      if (Side==0) {
-		Type = separate23(Side,MWPCEnergyE);
+		Type = separate23(Side,MWPCEnergyE,runs[0]);
 		Side = Type==2 ? 1 : 0;
 	      }
 	      else if (Side==1) {
-		Type = separate23(Side,MWPCEnergyW);
+		Type = separate23(Side,MWPCEnergyW,runs[0]);
 		Side = Type==2 ? 0 : 1;
 	      }
 	    }
@@ -676,26 +684,27 @@ void BGSubtractedRate::LoadRatesByBin() {
 
   }
 
-  std::ofstream ofileE, ofileW;
-  if ( !Simulation ) {
-
-    ofileE.open(TString::Format("BinByBinComparison/UK_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-    ofileW.open(TString::Format("BinByBinComparison/UK_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-  }
-  else {
-    ofileE.open(TString::Format("BinByBinComparison/SIM_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-    ofileW.open(TString::Format("BinByBinComparison/SIM_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-  }
+  if ( Simulation || writeRatesToFile ) {
+    std::ofstream ofileE, ofileW;
+    if ( !Simulation ) {
+      
+      ofileE.open(TString::Format("BinByBinComparison/UK_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+      ofileW.open(TString::Format("BinByBinComparison/UK_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+    }
+    else {
+      ofileE.open(TString::Format("BinByBinComparison/SIM_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+      ofileW.open(TString::Format("BinByBinComparison/SIM_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+    }
     
-  ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-  ofileW << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-
-  for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
-    ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;
-    ofileW << i*10.+5. << "\t" << BetaRateW[i] << "\t" << BGRateW[i] << std::endl;
+    ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+    ofileW << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+    
+    for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
+      ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;
+      ofileW << i*10.+5. << "\t" << BetaRateW[i] << "\t" << BGRateW[i] << std::endl;
+    }
+    ofileE.close(), ofileW.close();
   }
-  ofileE.close(), ofileW.close();
-
 };
 
 std::vector<double> BGSubtractedRate::returnRunLengths(bool beta) {

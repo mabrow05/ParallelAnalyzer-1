@@ -134,6 +134,14 @@ void MWPCCathodeHandler::loadGainFactors(int run) {
   fin.close();
 };
 
+void MWPCCathodeHandler::purgeGainFactors() {
+
+  gainEX.assign(16,1.);
+  gainEY.assign(16,1.);
+  gainWX.assign(16,1.);
+  gainWY.assign(16,1.);
+
+};
 
 void MWPCCathodeHandler::PrintSignals() {
   
@@ -240,6 +248,13 @@ int MWPCCathodeHandler::getMaxWire(std::vector <int> wires, double *sig) {
   }
   return maxWire;
 };
+
+double MWPCCathodeHandler::getCathSum(double *sig, int length) {
+  double sum = 0;
+  for ( int i=0; i<length; ++i ) sum+=sig[i];
+  return sum;
+};
+
   
 
 std::vector<double> MWPCCathodeHandler::fitCathResponse(std::vector <int> wires, std::vector<int> clip, double *sig, const double *pos) {
@@ -436,16 +451,19 @@ std::vector<double> MWPCCathodeHandler::fitGaus(std::vector<double> x, std::vect
   double s_plus  = TMath::Log( y[2] );
 
   //First calculate sigma
-  double sigma2 = p_plus*p_minus*(p_minus - p_plus) / ( 2.*( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) );
+  double sigma2 = ( ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) != 0. ? 
+		    p_plus*p_minus*(p_minus - p_plus) / ( 2.*( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 6. );
 
   // Calculate mean
-  double mu = ( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) ;
+  double mu = ( ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) != 0. ? 
+		( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 65. );
 
   // Calculate amplitude
 
-  double amp = ( p_minus - p_plus )*p_plus*p_minus*s_0 / ( p_minus*p_plus*( p_minus - p_plus ) ) + mu*mu / ( 2.*sigma2 );
+  double amp = ( ( p_minus*p_plus*( p_minus - p_plus ) ) != 0. ? 
+		 ( p_minus - p_plus )*p_plus*p_minus*s_0 / ( p_minus*p_plus*( p_minus - p_plus ) ) + mu*mu / ( 2.*sigma2 ) : 1000. );
 
-  params.push_back(mu + x[1]);
+  params.push_back( TMath::Abs(mu+x[1])<65 ? mu+x[1] : 65.*(mu+x[1])/TMath::Abs(mu+x[1]) );
   params.push_back( sqrt( fabs(sigma2) ) );
   params.push_back(amp);
 
@@ -466,16 +484,19 @@ std::vector<double> MWPCCathodeHandler::fitParabola(std::vector<double> x, std::
   double s_plus = y[2];
   
   //First calculate sigma
-  double sigma2 = p_plus*p_minus*(p_minus - p_plus) / ( 2.*( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) );
+  double sigma2 = ( ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) != 0. ? 
+		    p_plus*p_minus*(p_minus - p_plus) / ( 2.*( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 1. );
 
   // Calculate mean
-  double mu = ( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) ;
+  double mu = ( ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) != 0. ? 
+		( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 65. ) ;
 
   // Calculate amplitude
 
-  double amp = ( p_minus - p_plus )*p_plus*p_minus*s_0 / ( p_minus*p_plus*( p_minus - p_plus ) ) + mu*mu / ( 2.*sigma2 );
+  double amp = ( ( p_minus*p_plus*( p_minus - p_plus ) ) != 0. ?
+		 ( p_minus - p_plus )*p_plus*p_minus*s_0 / ( p_minus*p_plus*( p_minus - p_plus ) ) + mu*mu / ( 2.*sigma2 ) : 1000. );
 
-  params.push_back(mu + x[1]);
+  params.push_back( TMath::Abs(mu+x[1])<65 ? mu+x[1] : 65.*(mu+x[1])/TMath::Abs(mu+x[1]) );
   params.push_back( TMath::Sqrt( sigma2 ) );
   params.push_back(amp);
 
@@ -498,13 +519,13 @@ std::vector<double> MWPCCathodeHandler::fitGaus2Points(std::vector<double> x, st
   //We will use the average width as seen from studying the normal fit to gaussian
   double sigma = _sigma / TMath::Sqrt( 0.6 );
   // Calculate mean
-  double mu = (p_minus + p_plus) / 2. + sigma*sigma / (p_plus - p_minus) * TMath::Log(s_plus/s_minus) ;
+  double mu = (p_plus - p_minus) != 0. ? (p_minus + p_plus) / 2. + sigma*sigma / (p_plus - p_minus) * TMath::Log(s_plus/s_minus) : 65. ;
 
   // Calculate amplitude
 
-  double amp = ( p_plus*TMath::Log(s_minus) - p_minus*TMath::Log(s_plus) ) / ( p_plus - p_minus ) + ( mu*mu - p_plus*p_minus) / ( 2.*sigma*sigma );
+  double amp = (p_plus - p_minus) != 0. ? ( p_plus*TMath::Log(s_minus) - p_minus*TMath::Log(s_plus) ) / ( p_plus - p_minus ) + ( mu*mu - p_plus*p_minus) / ( 2.*sigma*sigma ) : 1000.;
 
-  params.push_back( mu );
+  params.push_back( TMath::Abs(mu)<65 ? mu : 65.*mu/TMath::Abs(mu) );
   params.push_back( sigma );
   params.push_back( amp );
 

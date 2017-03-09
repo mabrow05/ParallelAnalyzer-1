@@ -28,7 +28,8 @@ public:
   void setSigma(double s) { _sigma = s; };
   void loadGainFactors(int run); // Loads the gain factors if you want gain
                                  // gain corrected cathode signals
-  
+  void purgeGainFactors(); //Erases previously set gain factors
+
   void PrintSignals();
   void findAllPositions(bool gaus=true, bool gausAllEvents=false); // You only need to call this to return all position.
                                          // If gaus is false, it just uses the weighted average for all events
@@ -59,6 +60,11 @@ public:
   double getMaxSignalEY() { return getMaxSignal(pedSubtrEY) ; }
   double getMaxSignalWX() { return getMaxSignal(pedSubtrWX) ; }
   double getMaxSignalWY() { return getMaxSignal(pedSubtrWY) ; }
+
+  double getCathSumEX() { return getCathSum(pedSubtrEX,16) ; } // These are pedestal subtracted
+  double getCathSumEY() { return getCathSum(pedSubtrEY,16) ; }
+  double getCathSumWX() { return getCathSum(pedSubtrWX,16) ; }
+  double getCathSumWY() { return getCathSum(pedSubtrWY,16) ; }
   
   double getWirePosEX(int i) { return wireposEX[i]; }
   double getWirePosEY(int i) { return wireposEY[i]; }
@@ -93,6 +99,7 @@ private:
   double getMaxSignal(double *sig); // returns max signal
   std::vector <int> getNonClippedSorted( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
   std::vector <int> getNonClippedSequential( const std::vector<int>& wires, const std::vector<int>& clipWires, double *sig);
+  double getCathSum(double *sig, int length);
 
   std::vector<double> fitGaus(std::vector<double> x, std::vector<double> y); // returns gaussian mean and width and height of data arrays in a 3 element vector
   std::vector<double> fitParabola(std::vector<double> x, std::vector<double> y); // returns gaussian mean and width and height of data arrays in a 3 element vector
