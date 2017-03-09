@@ -2,9 +2,11 @@
 
 void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=680) {
 
+  bool readInAsymms = false;
+  
   const Int_t numAnaCh = 4;
   TString anCh[numAnaCh] = {"A","D","F","G"};//{"A","B","C","D","E","F","G","H","J","K"};
-
+  
   std::vector <TString> anaChoices;
   std::vector <Double_t> indices;
   std::vector <Double_t> AsymmData;
@@ -15,44 +17,58 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   //Fill anaChoices
   for (Int_t i=0; i< sizeof(anCh)/sizeof(TString); i++) 
     { anaChoices.push_back(anCh[i]); indices.push_back(i+1); }
-
-
+  
+  
   //Read in Asymmetries
   ifstream infile;
-  std::string strHold; 
-
-  for (Int_t i=0; i<anaChoices.size(); i++) {
-    infile.open(TString::Format("%s/Asymmetries/%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),corrections.Data(),
-				(withPOL?"_withPOL":""),anaChoices[i].Data(),
-				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
-
-    Double_t AsymHold = 0.;
-    Double_t AsymErrHold = 0.;
-    if (infile.is_open()) {
-      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
-    }
-    AsymmData.push_back(AsymHold);
-    AsymmDataErr.push_back(AsymErrHold);
+  std::string strHold;
+  
+  if ( readInAsymms ) {
     
-    infile.close();
-
-    infile.open(TString::Format("%s/Asymmetries/%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("SIM_ANALYSIS_RESULTS"),corrections.Data(),
-				anaChoices[i].Data(),ebinLow,ebinHigh,
-				year==TString("2011-2012")?"0-59":"60-121").Data() );
-
-    AsymHold = 0.;
-    AsymErrHold = 0.;
-    if (infile.is_open()) {
-      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+    for (Int_t i=0; i<anaChoices.size(); i++) {
+      infile.open(TString::Format("%s/Asymmetries/%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				  getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				  (withPOL?"_withPOL":""),anaChoices[i].Data(),
+				  ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+      
+      Double_t AsymHold = 0.;
+      Double_t AsymErrHold = 0.;
+      if (infile.is_open()) {
+	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      }
+      AsymmData.push_back(AsymHold);
+      AsymmDataErr.push_back(AsymErrHold);
+      
+      infile.close();
+      
+      infile.open(TString::Format("%s/Asymmetries/%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				  getenv("SIM_ANALYSIS_RESULTS"),corrections.Data(),
+				  anaChoices[i].Data(),ebinLow,ebinHigh,
+				  year==TString("2011-2012")?"0-59":"60-121").Data() );
+      
+      AsymHold = 0.;
+      AsymErrHold = 0.;
+      if (infile.is_open()) {
+	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      }
+      AsymmSim.push_back(AsymHold);
+      AsymmSimErr.push_back(AsymErrHold);
+      
+      infile.close();
     }
-    AsymmSim.push_back(AsymHold);
-    AsymmSimErr.push_back(AsymErrHold);
+  }    
+  else {
     
-    infile.close();
+    AsymmData.push_back(-0.12404); AsymmDataErr.push_back(0.00079);
+    AsymmData.push_back(-0.12755); AsymmDataErr.push_back(0.00079);
+    AsymmData.push_back(-0.0925); AsymmDataErr.push_back(0.0056);
+    AsymmData.push_back(-0.0083); AsymmDataErr.push_back(0.0079);
+    
+    AsymmSim.push_back(-0.12291); AsymmSimErr.push_back(0.00069);
+    AsymmSim.push_back(-0.12551); AsymmSimErr.push_back(0.00069);
+    AsymmSim.push_back(-0.0998); AsymmSimErr.push_back(0.0046);
+    AsymmSim.push_back(-0.0251); AsymmSimErr.push_back(0.0074);
   }
-
   
 
   
@@ -120,59 +136,5 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
    //leg->AddEntry("gr","Graph with error bars","lep");
   leg->Draw();
   
-  /*TGraphErrors *data0 = new TGraphErrors(numAnaCh,&indices[0],&AsymmData[0],xerr,&AsymmDataErr[0]);
-  data0->SetMarkerColor(kBlue);
-  data0->SetLineColor(kBlue);
-  data0->SetMarkerStyle(kFullTriangleUp);
-  data0->GetXaxis()->SetNdivisions(-400);
-  data0->GetXaxis()->ChangeLabel(0,-1,-1,-1,-1,-1,"A");
-  data0->GetXaxis()->ChangeLabel(1,-1,-1,-1,-1,-1,"D");
-  data0->GetXaxis()->ChangeLabel(2,-1,-1,-1,-1,-1,"F");
-  data0->GetXaxis()->ChangeLabel(3,-1,-1,-1,-1,-1,"G");
-  data0->Draw("AP");
-
-  TGraphErrors *sim0 = new TGraphErrors(numAnaCh,&indices[0],&AsymmSim[0],xerr,&AsymmSimErr[0]);
-  sim0->SetMarkerColor(kRed);
-  sim0->SetLineColor(kRed);
-  sim0->SetMarkerStyle(kFullSquare);
-  sim0->GetXaxis()->SetNdivisions(400);
-  sim0->Draw("PSAME");
-
-
-  TMultiGraph *mg0 = new TMultiGraph();
-  mg0->Add(data0,"P");
-  mg0->Add(sim0,"P");
-  TAxis *a = mg0->GetXaxis();
-  //a->SetNdivisions(-400);
-  //mg0->GetXaxis()->ChangeLabel(0,-1,-1,-1,-1,-1,"A");
-  //mg0->GetXaxis()->ChangeLabel(1,-1,-1,-1,-1,-1,"D");
-  //mg0->GetXaxis()->ChangeLabel(2,-1,-1,-1,-1,-1,"F");
-  //mg0->GetXaxis()->ChangeLabel(3,-1,-1,-1,-1,-1,"G");
-  //mg0->SetMaximum(-0.116);
-  //mg0->SetMinimum(-0.13);
-  mg0->Draw("A");*/
-
-
-  //Backscatters only
-  /*TCanvas *c2 = new TCanvas("c2");
-
-  TGraphErrors *dataBS = new TGraphErrors(2,&anaChoices[5],&AsymmData[5],xerr,&AsymmDataErr[5]);
-  dataBS->SetMarkerColor(kBlue);
-  dataBS->SetLineColor(kBlue);
-  dataBS->SetMarkerStyle(kFullTriangleUp);
-
-
-  TGraphErrors *simBS = new TGraphErrors(2,&anaChoices[5],&AsymmSim[5],xerr,&AsymmSimErr[5]);
-  simBS->SetMarkerColor(kRed);
-  simBS->SetLineColor(kRed);
-  simBS->SetMarkerStyle(kFullSquare);
-
-
-  TMultiGraph *mgBS = new TMultiGraph();
-  mgBS->Add(dataBS,"P");
-  mgBS->Add(simBS,"P");
-  mgBS->SetMaximum(0.01);
-  mgBS->SetMinimum(-0.15);
-
-  mgBS->Draw("A");*/
+  
 }
