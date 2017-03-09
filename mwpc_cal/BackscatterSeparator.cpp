@@ -119,16 +119,16 @@ void SeparateBackscatters(int octetMin, int octetMax)
 
     hScint2E[hist] = new TH1D(TString::Format("hScint2E_%0.0f-%0.0f",binLowEdge,binHighEdge),
 			     TString::Format("Type II East Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
-			     100, 0., 20.);
+			     100, 0., 800.);
     hScint3E[hist] = new TH1D(TString::Format("hScint3E_%0.0f-%0.0f",binLowEdge,binHighEdge),
 			     TString::Format("Type III East Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
-			     100, 0., 20.);
+			     100, 0., 800.);
     hScint2W[hist] = new TH1D(TString::Format("hScint2W_%0.0f-%0.0f",binLowEdge,binHighEdge),
 			     TString::Format("Type II West Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
-			     100, 0., 20.);
+			     100, 0., 800.);
     hScint3W[hist] = new TH1D(TString::Format("hScint3W_%0.0f-%0.0f",binLowEdge,binHighEdge),
 			     TString::Format("Type III West Octets %i-%i E_{Recon} (%0.0f-%0.0f keV)",octetMin,octetMax,binLowEdge,binHighEdge),
-			     100, 0., 20.);
+			     100, 0., 800.);
   }
 
   //Process all runs
@@ -177,7 +177,8 @@ void SeparateBackscatters(int octetMin, int octetMax)
 	r2E = mwpcEX*mwpcEX + mwpcEY*mwpcEY;
 	r2W = mwpcWX*mwpcWX + mwpcWY*mwpcWY;
 
-	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
+	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) && 
+	     Erecon < (numEnergyBins*energyBinWidth + energyStart) )	  {
 
 	  Int_t hist = (Int_t) (Erecon/energyBinWidth);
 	  
