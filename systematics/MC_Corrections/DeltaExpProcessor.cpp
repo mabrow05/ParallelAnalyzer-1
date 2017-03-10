@@ -148,18 +148,6 @@ std::vector < std::vector <Double_t> > pairB2_A_SR_err(10,std::vector<Double_t>(
   }
   };*/
 
-int separate23(int side, double mwpcEn) {
-  int type = 2;
-  if (side==0) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
-  }
-  
-  if (side==1) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
-  }
-  return type;
-};
-
 void writeCorrectionFactorsToFile(Int_t octet) {
   TString fn_base = TString::Format("DeltaExp_OctetByOctetCorrections/ThOverProc_Octet-%i_Analysis-",octet); 
   std::ofstream oct; 
@@ -585,6 +573,9 @@ void calcDeltaExp (int octet)
 
     vector < vector <Int_t> > gridPoint;
 
+    BackscatterSeparator sep;
+    sep.LoadCutCurve(runNumber);
+
     //make evt type histograms
     
     TH1D* hist[3][2]; //We only go to type 2, then we separate them later and fill other histograms
@@ -980,11 +971,11 @@ void calcDeltaExp (int octet)
 	if ( type==2 ) {
 	  
 	  if (side==0) {
-	    type = separate23(side,mwpcE.MWPCEnergyE);
+	    type = sep.separate23(mwpcE.MWPCEnergyE);
 	    side = type==2 ? 1 : 0;
 	  }
 	  else if (side==1) {
-	    type = separate23(side,mwpcE.MWPCEnergyW);
+	    type = sep.separate23(mwpcE.MWPCEnergyW);
 	    side = type==2 ? 0 : 1;
 	  }
 	  
