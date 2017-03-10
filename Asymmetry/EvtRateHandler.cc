@@ -10,6 +10,7 @@ simulation data
 
 #include "EvtRateHandler.hh"
 #include "MBUtils.hh"
+#include "calibrationTools.hh"
 #include <cstdio>
 #include <fstream>
 
@@ -18,14 +19,14 @@ simulation data
 const bool writeRatesToFile = true;
 
 
-int separate23(int side, double mwpcEn, int run) {
+/*int separate23(int side, double mwpcEn, int run) {
   
   double enCut = ( run>=21100 && run<=21595 ) ? 5.4 : 6.6; //iso vs neo
   int type = 2;
   if (side==0)  type = ( mwpcEn>enCut ) ? 3 : 2;  
   else if (side==1)  type = ( mwpcEn>enCut ) ? 3 : 2;
   return type;
-};
+  };*/
 
 
 EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
@@ -248,6 +249,9 @@ void EvtRateHandler::dataReader() {
 
   int PID, Side, Type;
 
+  BackscatterSeparator sep;
+  sep.LoadCutCurve(runs[0]);
+
   for ( unsigned int i=0; i<runs.size(); i++ ) {
   
     //Set branch addresses
@@ -361,11 +365,11 @@ void EvtRateHandler::dataReader() {
 	    if (Erecon>0. && Type==2) {
 	      
 	      if (Side==0) {
-		Type = separate23(Side,MWPCEnergyE,runs[0]);
+		Type = sep.separate23(MWPCEnergyE);
 		Side = Type==2 ? 1 : 0;
 	      }
 	      else if (Side==1) {
-		Type = separate23(Side,MWPCEnergyW,runs[0]);
+		Type = sep.separate23(MWPCEnergyW);
 		Side = Type==2 ? 0 : 1;
 	      }
 	    }
@@ -503,6 +507,9 @@ void SimEvtRateHandler::dataReader() {
     
     double r2E = 0.; //position of event squared
     double r2W = 0.;
+
+    BackscatterSeparator sep;
+    sep.LoadCutCurve(runs[0]);
     
     for (unsigned int i=0; i<nevents; ++i) {
       
@@ -536,11 +543,11 @@ void SimEvtRateHandler::dataReader() {
 	    if (Type==2) {
 	      
 	      if (Side==0) {
-		Type = separate23(Side,MWPCEnergyE,runs[0]);
+		Type = sep.separate23(MWPCEnergyE);
 		Side = Type==2 ? 1 : 0;
 	      }
 	      else if (Side==1) {
-		Type = separate23(Side,MWPCEnergyW,runs[0]);
+		Type = sep.separate23(MWPCEnergyW);
 		Side = Type==2 ? 0 : 1;
 	      }
 	    }

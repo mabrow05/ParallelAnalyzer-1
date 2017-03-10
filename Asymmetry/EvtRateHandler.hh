@@ -14,8 +14,6 @@
 #include <cmath>
 #include <string>
 
-//Function to separate type 2/3 based on energy cut on Wirechamber energy
-//int separate23(int side, double mwpcEn); 
 
 
 class EvtRateHandler { // base clase for reading in runs and calculating rates and errors

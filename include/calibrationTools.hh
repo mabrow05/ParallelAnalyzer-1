@@ -87,6 +87,25 @@ private:
   Int_t nParams;
 
   void readParams();
-};        
+};
+
+
+class BackscatterSeparator {
+
+public:
+  BackscatterSeparator();
+  ~BackscatterSeparator() {};
+  void LoadCutCurve(int run);
+
+  Int_t separate23(Double_t en); 
+
+private:
+  Int_t _run;            // Current run
+  TString _geometry;   // Geometry being used
+  TF1 *_func;          // Function which parametrizes the cut
+  std::vector <Double_t> params; // Parameters for the func
+  
+};
+  
 
 #endif

@@ -2,6 +2,15 @@
 #include <TString.h>
 
 
+TString getGeometry(int run) {
+
+  if ( run < 20000 ) return TString("2011-2012");
+  else if ( run > 21087 && run < 21679) return TString("2012-2013_isobutane");
+  else return TString("2012-2013");
+
+};
+
+
 
 LinearityCurve::LinearityCurve(Int_t period, bool useTanhSmear) : sourceCalPeriod(period), useTanh(useTanhSmear) {
   
@@ -83,6 +92,7 @@ WirechamberCal::WirechamberCal(Int_t run) : _run(run) {
 
 WirechamberCal::~WirechamberCal() {
   delete _calFunc;
+  delete _extrap;
 }
 
 
@@ -127,6 +137,41 @@ Double_t WirechamberCal::applyCal(Int_t side, Double_t adc) {
   else return 0.;
     
 }
+
+
+///////////////////////////////////////////////////////
+
+BackscatterSeparator::BackscatterSeparator() : _run(0),_geometry("") {
+
+  params.resize(3,0.);
+  _func = new TF1("_func","[0]+[1]*TMath::Exp(-x/[2])",0., 1200.);
+}
+
+void BackscatterSeparator::LoadCutCurve(int run) {
+
+  _run = run;
+  TString _geometry = getGeometry(_run);
+
+  TString filename = TString::Format("%s/backscSepParameters_%s.dat",
+				     getenv("MWPC_CALIBRATION"),_geometry.Data());
+  std::ifstream infile(filename.Data());
+
+  std::string hold;
+  infile >> hold >> hold >> hold;
+  infile >> params[0] >> params[1] >> params[2];
+  
+  infile.close();
+}
+
+Int_t BackscatterSeparator::separate23(Double_t en) {
+
+  Double_t cut = _func->EvalPar(&en,&params[0]);
+
+  Int_t type = ( en > cut ) ? 3 : 2;  
+  
+  return type;
+};
+
 
 
 
