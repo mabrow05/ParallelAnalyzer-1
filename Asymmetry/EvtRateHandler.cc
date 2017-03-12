@@ -19,16 +19,6 @@ simulation data
 const bool writeRatesToFile = true;
 
 
-/*int separate23(int side, double mwpcEn, int run) {
-  
-  double enCut = ( run>=21100 && run<=21595 ) ? 5.4 : 6.6; //iso vs neo
-  int type = 2;
-  if (side==0)  type = ( mwpcEn>enCut ) ? 3 : 2;  
-  else if (side==1)  type = ( mwpcEn>enCut ) ? 3 : 2;
-  return type;
-  };*/
-
-
 EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
   
   bool useOldTimes = false;
@@ -225,6 +215,11 @@ void EvtRateHandler::dataReader() {
        analysisChoice==std::string("K") )
     sep23 = true;
 
+  //Initializing the separator
+  BackscatterSeparator sep;
+  sep.LoadCutCurve(runs[0]);
+
+
   //Event types
   bool Type0=false, Type1=false, Type2=false, Type3=false;
   if ( analysisChoice=="A" || analysisChoice=="B" || analysisChoice=="C" || analysisChoice=="D" || analysisChoice=="E" ) Type0 = true;
@@ -249,9 +244,7 @@ void EvtRateHandler::dataReader() {
 
   int PID, Side, Type;
 
-  BackscatterSeparator sep;
-  sep.LoadCutCurve(runs[0]);
-
+  
   for ( unsigned int i=0; i<runs.size(); i++ ) {
   
     //Set branch addresses
@@ -281,7 +274,9 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("yeRC", &yeRC);
       Tin->SetBranchAddress("xwRC", &xwRC);
       Tin->SetBranchAddress("ywRC", &ywRC);
-      
+
+      Tin->SetBranchAddress("EMWPC_E",&MWPCEnergyE);
+      Tin->SetBranchAddress("EMWPC_W",&MWPCEnergyW);
       //NEED TO ADD IN WIRECHAMBER ENERGY FOR 2/3 SEPARATION
     }
     else {
@@ -310,6 +305,9 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("yeRC", &yeRC);
       Tin->SetBranchAddress("xwRC", &xwRC);
       Tin->SetBranchAddress("ywRC", &ywRC);
+
+      Tin->SetBranchAddress("EMWPC_E",&MWPCEnergyE_f);
+      Tin->SetBranchAddress("EMWPC_W",&MWPCEnergyW_f);
     }
     unsigned int nevents = Tin->GetEntriesFast();
     std::cout << "Number of Events: " << nevents << std::endl;
@@ -367,6 +365,7 @@ void EvtRateHandler::dataReader() {
 	      if (Side==0) {
 		Type = sep.separate23(MWPCEnergyE);
 		Side = Type==2 ? 1 : 0;
+		//std::cout << "Side 0: " << MWPCEnergyE << "\t" << Type << "\t" << Side << std::endl;
 	      }
 	      else if (Side==1) {
 		Type = sep.separate23(MWPCEnergyW);
@@ -382,9 +381,9 @@ void EvtRateHandler::dataReader() {
 	  if ( Type0 && Type==0 ) hisCounts[Side]->Fill(Erecon);
 	  //Type1
 	  else if ( Type1 && Type==1 ) hisCounts[Side]->Fill(Erecon);
-	  //Type0
+	  //Type2
 	  else if ( Type2 && Type==2 ) hisCounts[Side]->Fill(Erecon);
-	  //Type0
+	  //Type3
 	  else if ( Type3 && Type==3 ) hisCounts[Side]->Fill(Erecon); 
 	  
 	}
@@ -486,14 +485,14 @@ void SimEvtRateHandler::dataReader() {
     //Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
     //Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
     //Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
-    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-    Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
-    Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
-    Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
-    Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
+    Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    Tin->GetBranch("old_xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
+    Tin->GetBranch("old_yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
+    Tin->GetBranch("old_xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
+    Tin->GetBranch("old_yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 

@@ -30,7 +30,7 @@
 
 using namespace std;
 
-bool OnlyReplayBadFiles = true;
+bool OnlyReplayBadFiles = false;
 
 //Read in beam drops
 std::vector < std::vector < Double_t > > readBeamDrops(Int_t runNumber) {
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
     runInfo << "RunLengthEast\t" << std::setprecision(9) << runLengthBlindE << std::endl;
     runInfo << "RunLengthWest\t" << std::setprecision(9) << runLengthBlindW << std::endl;
     runInfo << "RunLengthTrue\t" << std::setprecision(9) << runLengthTrue << std::endl;
-    runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t->UCN_Mon_4_Rate->Integral("width");
+    runInfo << "UCNMon4Integral\t" << std::setprecision(9) << t->UCN_Mon_4_Rate->Integral("width") << std::endl;
     runInfo << "old_RunLengthEast\t" << std::setprecision(9) << old_runLengthBlindE << std::endl;
     runInfo << "old_RunLengthWest\t" << std::setprecision(9) << old_runLengthBlindW << std::endl;
     runInfo << "old_RunLengthTrue\t" << std::setprecision(9) << old_runLengthTrue << std::endl;

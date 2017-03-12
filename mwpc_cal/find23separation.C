@@ -41,7 +41,7 @@ void find23separation(TString geom) {
   int octMax = 0;
   double sepVal = 6.6;
 
-  Int_t numEnergyBins = 8;
+  static const  Int_t numEnergyBins = 8;
   Double_t energyStart = 0.;
   Double_t energyBinWidth = 100.;
   
@@ -286,9 +286,9 @@ void find23separation(TString geom) {
   
   c2->Print(TString::Format("EreconVsCut_%s.pdf",geom.Data()));
 
-  //std::ofstream ofile(TString::Format("%s/backscSepParameters_%s.dat",
-  //				      getenv("MWPC_CALIBRATION"),geom.Data()).Data());
-  std::ofstream ofile(TString::Format("backscSepParameters_%s.dat",geom.Data()).Data());
+  std::ofstream ofile(TString::Format("%s/backscSepParameters_%s.dat",
+  				      getenv("MWPC_CALIBRATION"),geom.Data()).Data());
+  //std::ofstream ofile(TString::Format("backscSepParameters_%s.dat",geom.Data()).Data());
   ofile << std::setprecision(7);
   ofile << "#p0\t\tp1\t\tp2\n"
 	<< func3->GetParameter(0) << "\t" << func3->GetParameter(1) << "\t" << func3->GetParameter(2);
