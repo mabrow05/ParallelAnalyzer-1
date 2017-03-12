@@ -57,15 +57,15 @@ int main(int argc, char *argv[])
   //Count vectors for holding all of the total (BG subtracted) counts for each spin state
 
   //type0=0, type1=1, type23=2, ALL=3
-  std::vector <std::vector <double> > W_TotalCountsON(4, std::vector <double>(numBins,0.)); 
-  std::vector <std::vector <double> > W_TotalErrorON(4, std::vector <double>(numBins,0.));
-  std::vector <std::vector <double> > W_TotalCountsOFF(4, std::vector <double>(numBins,0.)); 
-  std::vector <std::vector <double> > W_TotalErrorOFF(4, std::vector <double>(numBins,0.));
+  std::vector <std::vector <double> > W_TotalCountsON(5, std::vector <double>(numBins,0.)); 
+  std::vector <std::vector <double> > W_TotalErrorON(5, std::vector <double>(numBins,0.));
+  std::vector <std::vector <double> > W_TotalCountsOFF(5, std::vector <double>(numBins,0.)); 
+  std::vector <std::vector <double> > W_TotalErrorOFF(5, std::vector <double>(numBins,0.));
 
-  std::vector <std::vector <double> > E_TotalCountsON(4, std::vector <double>(numBins,0.)); 
-  std::vector <std::vector <double> > E_TotalErrorON(4, std::vector <double>(numBins,0.));
-  std::vector <std::vector <double> > E_TotalCountsOFF(4, std::vector <double>(numBins,0.)); 
-  std::vector <std::vector <double> > E_TotalErrorOFF(4, std::vector <double>(numBins,0.));
+  std::vector <std::vector <double> > E_TotalCountsON(5, std::vector <double>(numBins,0.)); 
+  std::vector <std::vector <double> > E_TotalErrorON(5, std::vector <double>(numBins,0.));
+  std::vector <std::vector <double> > E_TotalCountsOFF(5, std::vector <double>(numBins,0.)); 
+  std::vector <std::vector <double> > E_TotalErrorOFF(5, std::vector <double>(numBins,0.));
   
 
   for (int octetNum=octetNumStart; octetNum<octetNumEnd+1; octetNum++) {
@@ -94,14 +94,14 @@ int main(int argc, char *argv[])
 	//////////////// EAST RATES //////////////////
 	
 	// All event types
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChA.dat", prefix.c_str(),runNumber));
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChC.dat", prefix.c_str(),runNumber));
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
 	
 	bin = 0; 
 	
 	while ( rateFile >> en >> fg >> bg )  { 
-	  E_TotalCountsOFF[3][bin] += (fg - bg)*time;
+	  E_TotalCountsOFF[4][bin] += (fg - bg)*time;
 	  ++bin;
 	}
 
@@ -139,8 +139,8 @@ int main(int argc, char *argv[])
 	
 	rateFile.close();
 	
-	// Type 2/3 only
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChG.dat", prefix.c_str(), runNumber));
+	// Type 2 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChJ.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
@@ -153,13 +153,28 @@ int main(int argc, char *argv[])
 	}
 	
 	rateFile.close();
-      
 
+	// Type 3 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChK.dat", prefix.c_str(), runNumber));
+	
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
+	
+        bin = 0;
+	
+	while ( rateFile >> en >> fg >> bg )  { 
+	  E_TotalCountsOFF[3][bin] += (fg - bg)*time;
+	  ++bin;
+	}
+	
+	rateFile.close();
+      
+      
       
 	///////////////// WEST RATES ///////////////////
 	
 	// All event types
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChA.dat", prefix.c_str(), runNumber));
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChC.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
@@ -167,7 +182,7 @@ int main(int argc, char *argv[])
 	bin = 0; 
 	
 	while ( rateFile >> en >> fg >> bg )  { 
-	  W_TotalCountsOFF[3][bin] += (fg - bg)*time;
+	  W_TotalCountsOFF[4][bin] += (fg - bg)*time;
 	  ++bin;
 	}
 	
@@ -205,8 +220,8 @@ int main(int argc, char *argv[])
 	
 	rateFile.close();
 	
-	// Type 2/3 only
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChG.dat", prefix.c_str(), runNumber));
+	// Type 2 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChJ.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
@@ -215,6 +230,22 @@ int main(int argc, char *argv[])
 	
 	while ( rateFile >> en >> fg >> bg )  { 
 	  W_TotalCountsOFF[2][bin] += (fg - bg)*time;
+	  ++bin;
+	}
+	
+	rateFile.close();
+      
+
+      // Type 3 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChK.dat", prefix.c_str(), runNumber));
+	
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
+	
+        bin = 0;
+	
+	while ( rateFile >> en >> fg >> bg )  { 
+	  W_TotalCountsOFF[3][bin] += (fg - bg)*time;
 	  ++bin;
 	}
 	
@@ -228,7 +259,7 @@ int main(int argc, char *argv[])
 	//////////////// EAST RATES //////////////////
 	
 	// All event types
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChA.dat", prefix.c_str(), runNumber));
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChC.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
@@ -236,7 +267,7 @@ int main(int argc, char *argv[])
 	bin = 0; 
 
 	while ( rateFile >> en >> fg >> bg )  { 
-	  E_TotalCountsON[3][bin] += (fg - bg)*time;
+	  E_TotalCountsON[4][bin] += (fg - bg)*time;
 	  ++bin;
 	}
 
@@ -274,8 +305,8 @@ int main(int argc, char *argv[])
 
 	rateFile.close();
 
-	// Type 2/3 only
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChG.dat", prefix.c_str(), runNumber));
+	// Type 2 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChJ.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
@@ -288,13 +319,28 @@ int main(int argc, char *argv[])
 	}
 
 	rateFile.close();
+
+	// Type 3 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChK.dat", prefix.c_str(), runNumber));
+	
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
+
+        bin = 0;
+
+	while ( rateFile >> en >> fg >> bg )  { 
+	  E_TotalCountsON[3][bin] += (fg - bg)*time;
+	  ++bin;
+	}
+
+	rateFile.close();
    
 
       
 	///////////////// WEST RATES ///////////////////
 	
 	// All event types
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChA.dat", prefix.c_str(), runNumber));
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChC.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
@@ -302,7 +348,7 @@ int main(int argc, char *argv[])
 	bin = 0; 
 	
 	while ( rateFile >> en >> fg >> bg )  { 
-	  W_TotalCountsON[3][bin] += (fg - bg)*time;
+	  W_TotalCountsON[4][bin] += (fg - bg)*time;
 	  ++bin;
 	}
 	
@@ -340,8 +386,8 @@ int main(int argc, char *argv[])
 	
 	rateFile.close();
 	
-	// Type 2/3 only
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChG.dat", prefix.c_str(), runNumber));
+	// Type 2 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChJ.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
@@ -354,13 +400,28 @@ int main(int argc, char *argv[])
 	}
 	
 	rateFile.close();
+
+	// Type 3 only
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChK.dat", prefix.c_str(), runNumber));
+	
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
+	
+	bin = 0;
+	
+	while ( rateFile >> en >> fg >> bg )  { 
+	  W_TotalCountsON[3][bin] += (fg - bg)*time;
+	  ++bin;
+	}
+	
+	rateFile.close();
       }
 
     }
   }
 
   // Calculate the simple errors
-  for ( unsigned int i = 0; i<4; ++i ) {
+  for ( unsigned int i = 0; i<5; ++i ) {
     for ( unsigned int b = 0; b<120; ++b ) {
       
       W_TotalErrorON[i][b] = sqrt( fabs(W_TotalCountsON[i][b]) );
@@ -372,10 +433,10 @@ int main(int argc, char *argv[])
   }
   
   // Calculate the super-sum in every bin
-  std::vector <std::vector <double> > data_SuperSum(4, std::vector <double>(numBins,0.)); 
-  std::vector <std::vector <double> > data_SuperSumError(4, std::vector <double>(numBins,0.)); 
+  std::vector <std::vector <double> > data_SuperSum(5, std::vector <double>(numBins,0.)); 
+  std::vector <std::vector <double> > data_SuperSumError(5, std::vector <double>(numBins,0.)); 
   
-  for ( unsigned int i=0; i<4; ++i ) {
+  for ( unsigned int i=0; i<5; ++i ) {
     for ( unsigned int b = 0; b<120; ++b ) {
       
       double sfON[2]={0.};
@@ -423,21 +484,25 @@ int main(int argc, char *argv[])
   Erecon0.GetXaxis()->SetTitle("Energy (keV)");
   TH1D Erecon1("Erecon1","Type 1 Super-Sum",numBins,0.,1200.);
   Erecon1.GetXaxis()->SetTitle("Energy (keV)");
-  TH1D Erecon23("Erecon23","Type 23 Super-Sum",numBins,0.,1200.);
-  Erecon23.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon2("Erecon2","Type 2 Super-Sum",numBins,0.,1200.);
+  Erecon2.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon3("Erecon3","Type 3 Super-Sum",numBins,0.,1200.);
+  Erecon3.GetXaxis()->SetTitle("Energy (keV)");
   TH1D EreconALL("EreconALL","Type ALL Super-Sum",numBins,0.,1200.);
   EreconALL.GetXaxis()->SetTitle("Energy (keV)");
   
   for (int bin=0; bin<numBins; bin++) {
     Erecon0.SetBinContent(bin+1,100.*data_SuperSum[0][bin]);
     Erecon1.SetBinContent(bin+1,100.*data_SuperSum[1][bin]);
-    Erecon23.SetBinContent(bin+1,100.*data_SuperSum[2][bin]);
-    EreconALL.SetBinContent(bin+1,100.*data_SuperSum[3][bin]);
+    Erecon2.SetBinContent(bin+1,100.*data_SuperSum[2][bin]);
+    Erecon3.SetBinContent(bin+1,100.*data_SuperSum[3][bin]);
+    EreconALL.SetBinContent(bin+1,100.*data_SuperSum[4][bin]);
     
     Erecon0.SetBinError(bin+1,100.*data_SuperSumError[0][bin]);
     Erecon1.SetBinError(bin+1,100.*data_SuperSumError[1][bin]);
-    Erecon23.SetBinError(bin+1,100.*data_SuperSumError[2][bin]);
-    EreconALL.SetBinError(bin+1,100.*data_SuperSumError[3][bin]);
+    Erecon2.SetBinError(bin+1,100.*data_SuperSumError[2][bin]);
+    Erecon3.SetBinError(bin+1,100.*data_SuperSumError[3][bin]);
+    EreconALL.SetBinError(bin+1,100.*data_SuperSumError[4][bin]);
     
   }
 
@@ -445,21 +510,25 @@ int main(int argc, char *argv[])
   Erecon0_sfOFF_E.GetXaxis()->SetTitle("Energy (keV)");
   TH1D Erecon1_sfOFF_E("Erecon1_sfOFF_E","East Type 1 Spin Flipper OFF",numBins,0.,1200.);
   Erecon1_sfOFF_E.GetXaxis()->SetTitle("Energy (keV)");
-  TH1D Erecon23_sfOFF_E("Erecon23_sfOFF_E","East Type 23 Spin Flipper OFF",numBins,0.,1200.);
-  Erecon23_sfOFF_E.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon2_sfOFF_E("Erecon2_sfOFF_E","East Type 2 Spin Flipper OFF",numBins,0.,1200.);
+  Erecon2_sfOFF_E.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon3_sfOFF_E("Erecon3_sfOFF_E","East Type 3 Spin Flipper OFF",numBins,0.,1200.);
+  Erecon3_sfOFF_E.GetXaxis()->SetTitle("Energy (keV)");
   TH1D EreconALL_sfOFF_E("EreconALL_sfOFF_E","East Type ALL Spin Flipper OFF",numBins,0.,1200.);
   EreconALL_sfOFF_E.GetXaxis()->SetTitle("Energy (keV)");
   
   for (int bin=0; bin<numBins; bin++) {
     Erecon0_sfOFF_E.SetBinContent(bin+1,100.*E_TotalCountsOFF[0][bin]/totalTimeOFF_E);
     Erecon1_sfOFF_E.SetBinContent(bin+1,100.*E_TotalCountsOFF[1][bin]/totalTimeOFF_E);
-    Erecon23_sfOFF_E.SetBinContent(bin+1,100.*E_TotalCountsOFF[2][bin]/totalTimeOFF_E);
-    EreconALL_sfOFF_E.SetBinContent(bin+1,100.*E_TotalCountsOFF[3][bin]/totalTimeOFF_E);
+    Erecon2_sfOFF_E.SetBinContent(bin+1,100.*E_TotalCountsOFF[2][bin]/totalTimeOFF_E);
+    Erecon3_sfOFF_E.SetBinContent(bin+1,100.*E_TotalCountsOFF[3][bin]/totalTimeOFF_E);
+    EreconALL_sfOFF_E.SetBinContent(bin+1,100.*E_TotalCountsOFF[4][bin]/totalTimeOFF_E);
     
     Erecon0_sfOFF_E.SetBinError(bin+1,100.*E_TotalErrorOFF[0][bin]/totalTimeOFF_E);
     Erecon1_sfOFF_E.SetBinError(bin+1,100.*E_TotalErrorOFF[1][bin]/totalTimeOFF_E);
-    Erecon23_sfOFF_E.SetBinError(bin+1,100.*E_TotalErrorOFF[2][bin]/totalTimeOFF_E);
-    EreconALL_sfOFF_E.SetBinError(bin+1,100.*E_TotalErrorOFF[3][bin]/totalTimeOFF_E);
+    Erecon2_sfOFF_E.SetBinError(bin+1,100.*E_TotalErrorOFF[2][bin]/totalTimeOFF_E);
+    Erecon3_sfOFF_E.SetBinError(bin+1,100.*E_TotalErrorOFF[3][bin]/totalTimeOFF_E);
+    EreconALL_sfOFF_E.SetBinError(bin+1,100.*E_TotalErrorOFF[4][bin]/totalTimeOFF_E);
     
   }
 
@@ -467,21 +536,25 @@ int main(int argc, char *argv[])
   Erecon0_sfOFF_W.GetXaxis()->SetTitle("Energy (keV)");
   TH1D Erecon1_sfOFF_W("Erecon1_sfOFF_W","West Type 1 Spin Flipper OFF",numBins,0.,1200.);
   Erecon1_sfOFF_W.GetXaxis()->SetTitle("Energy (keV)");
-  TH1D Erecon23_sfOFF_W("Erecon23_sfOFF_W","West Type 23 Spin Flipper OFF",numBins,0.,1200.);
-  Erecon23_sfOFF_W.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon2_sfOFF_W("Erecon2_sfOFF_W","West Type 2 Spin Flipper OFF",numBins,0.,1200.);
+  Erecon2_sfOFF_W.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon3_sfOFF_W("Erecon3_sfOFF_W","West Type 3 Spin Flipper OFF",numBins,0.,1200.);
+  Erecon3_sfOFF_W.GetXaxis()->SetTitle("Energy (keV)");
   TH1D EreconALL_sfOFF_W("EreconALL_sfOFF_W","West Type ALL Spin Flipper OFF",numBins,0.,1200.);
   EreconALL_sfOFF_W.GetXaxis()->SetTitle("Energy (keV)");
   
   for (int bin=0; bin<numBins; bin++) {
     Erecon0_sfOFF_W.SetBinContent(bin+1,100.*W_TotalCountsOFF[0][bin]/totalTimeOFF_W);
     Erecon1_sfOFF_W.SetBinContent(bin+1,100.*W_TotalCountsOFF[1][bin]/totalTimeOFF_W);
-    Erecon23_sfOFF_W.SetBinContent(bin+1,100.*W_TotalCountsOFF[2][bin]/totalTimeOFF_W);
-    EreconALL_sfOFF_W.SetBinContent(bin+1,100.*W_TotalCountsOFF[3][bin]/totalTimeOFF_W);
+    Erecon2_sfOFF_W.SetBinContent(bin+1,100.*W_TotalCountsOFF[2][bin]/totalTimeOFF_W);
+    Erecon3_sfOFF_W.SetBinContent(bin+1,100.*W_TotalCountsOFF[3][bin]/totalTimeOFF_W);
+    EreconALL_sfOFF_W.SetBinContent(bin+1,100.*W_TotalCountsOFF[4][bin]/totalTimeOFF_W);
     
     Erecon0_sfOFF_W.SetBinError(bin+1,100.*W_TotalErrorOFF[0][bin]/totalTimeOFF_W);
     Erecon1_sfOFF_W.SetBinError(bin+1,100.*W_TotalErrorOFF[1][bin]/totalTimeOFF_W);
-    Erecon23_sfOFF_W.SetBinError(bin+1,100.*W_TotalErrorOFF[2][bin]/totalTimeOFF_W);
-    EreconALL_sfOFF_W.SetBinError(bin+1,100.*W_TotalErrorOFF[3][bin]/totalTimeOFF_W);
+    Erecon2_sfOFF_W.SetBinError(bin+1,100.*W_TotalErrorOFF[2][bin]/totalTimeOFF_W);
+    Erecon3_sfOFF_W.SetBinError(bin+1,100.*W_TotalErrorOFF[3][bin]/totalTimeOFF_W);
+    EreconALL_sfOFF_W.SetBinError(bin+1,100.*W_TotalErrorOFF[4][bin]/totalTimeOFF_W);
     
   }
 
@@ -489,21 +562,25 @@ int main(int argc, char *argv[])
   Erecon0_sfON_E.GetXaxis()->SetTitle("Energy (keV)");
   TH1D Erecon1_sfON_E("Erecon1_sfON_E","East Type 1 Spin Flipper ON",numBins,0.,1200.);
   Erecon1_sfON_E.GetXaxis()->SetTitle("Energy (keV)");
-  TH1D Erecon23_sfON_E("Erecon23_sfON_E","East Type 23 Spin Flipper ON",numBins,0.,1200.);
-  Erecon23_sfON_E.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon2_sfON_E("Erecon2_sfON_E","East Type 2 Spin Flipper ON",numBins,0.,1200.);
+  Erecon2_sfON_E.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon3_sfON_E("Erecon3_sfON_E","East Type 3 Spin Flipper ON",numBins,0.,1200.);
+  Erecon3_sfON_E.GetXaxis()->SetTitle("Energy (keV)");
   TH1D EreconALL_sfON_E("EreconALL_sfON_E","East Type ALL Spin Flipper ON",numBins,0.,1200.);
   EreconALL_sfON_E.GetXaxis()->SetTitle("Energy (keV)");
   
   for (int bin=0; bin<numBins; bin++) {
     Erecon0_sfON_E.SetBinContent(bin+1,100.*E_TotalCountsON[0][bin]/totalTimeON_E);
     Erecon1_sfON_E.SetBinContent(bin+1,100.*E_TotalCountsON[1][bin]/totalTimeON_E);
-    Erecon23_sfON_E.SetBinContent(bin+1,100.*E_TotalCountsON[2][bin]/totalTimeON_E);
-    EreconALL_sfON_E.SetBinContent(bin+1,100.*E_TotalCountsON[3][bin]/totalTimeON_E);
+    Erecon2_sfON_E.SetBinContent(bin+1,100.*E_TotalCountsON[2][bin]/totalTimeON_E);
+    Erecon3_sfON_E.SetBinContent(bin+1,100.*E_TotalCountsON[3][bin]/totalTimeON_E);
+    EreconALL_sfON_E.SetBinContent(bin+1,100.*E_TotalCountsON[4][bin]/totalTimeON_E);
     
     Erecon0_sfON_E.SetBinError(bin+1,100.*E_TotalErrorON[0][bin]/totalTimeON_E);
     Erecon1_sfON_E.SetBinError(bin+1,100.*E_TotalErrorON[1][bin]/totalTimeON_E);
-    Erecon23_sfON_E.SetBinError(bin+1,100.*E_TotalErrorON[2][bin]/totalTimeON_E);
-    EreconALL_sfON_E.SetBinError(bin+1,100.*E_TotalErrorON[3][bin]/totalTimeON_E);
+    Erecon2_sfON_E.SetBinError(bin+1,100.*E_TotalErrorON[2][bin]/totalTimeON_E);
+    Erecon3_sfON_E.SetBinError(bin+1,100.*E_TotalErrorON[3][bin]/totalTimeON_E);
+    EreconALL_sfON_E.SetBinError(bin+1,100.*E_TotalErrorON[4][bin]/totalTimeON_E);
     
   }
 
@@ -511,21 +588,25 @@ int main(int argc, char *argv[])
   Erecon0_sfON_W.GetXaxis()->SetTitle("Energy (keV)");
   TH1D Erecon1_sfON_W("Erecon1_sfON_W","West Type 1 Spin Flipper ON",numBins,0.,1200.);
   Erecon1_sfON_W.GetXaxis()->SetTitle("Energy (keV)");
-  TH1D Erecon23_sfON_W("Erecon23_sfON_W","West Type 23 Spin Flipper ON",numBins,0.,1200.);
-  Erecon23_sfON_W.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon2_sfON_W("Erecon2_sfON_W","West Type 2 Spin Flipper ON",numBins,0.,1200.);
+  Erecon2_sfON_W.GetXaxis()->SetTitle("Energy (keV)");
+  TH1D Erecon3_sfON_W("Erecon3_sfON_W","West Type 3 Spin Flipper ON",numBins,0.,1200.);
+  Erecon3_sfON_W.GetXaxis()->SetTitle("Energy (keV)");
   TH1D EreconALL_sfON_W("EreconALL_sfON_W","West Type ALL Spin Flipper ON",numBins,0.,1200.);
   EreconALL_sfON_W.GetXaxis()->SetTitle("Energy (keV)");
   
   for (int bin=0; bin<numBins; bin++) {
     Erecon0_sfON_W.SetBinContent(bin+1,100.*W_TotalCountsON[0][bin]/totalTimeON_W);
     Erecon1_sfON_W.SetBinContent(bin+1,100.*W_TotalCountsON[1][bin]/totalTimeON_W);
-    Erecon23_sfON_W.SetBinContent(bin+1,100.*W_TotalCountsON[2][bin]/totalTimeON_W);
-    EreconALL_sfON_W.SetBinContent(bin+1,100.*W_TotalCountsON[3][bin]/totalTimeON_W);
+    Erecon2_sfON_W.SetBinContent(bin+1,100.*W_TotalCountsON[2][bin]/totalTimeON_W);
+    Erecon3_sfON_W.SetBinContent(bin+1,100.*W_TotalCountsON[3][bin]/totalTimeON_W);
+    EreconALL_sfON_W.SetBinContent(bin+1,100.*W_TotalCountsON[4][bin]/totalTimeON_W);
     
     Erecon0_sfON_W.SetBinError(bin+1,100.*W_TotalErrorON[0][bin]/totalTimeON_W);
     Erecon1_sfON_W.SetBinError(bin+1,100.*W_TotalErrorON[1][bin]/totalTimeON_W);
-    Erecon23_sfON_W.SetBinError(bin+1,100.*W_TotalErrorON[2][bin]/totalTimeON_W);
-    EreconALL_sfON_W.SetBinError(bin+1,100.*W_TotalErrorON[3][bin]/totalTimeON_W);
+    Erecon2_sfON_W.SetBinError(bin+1,100.*W_TotalErrorON[2][bin]/totalTimeON_W);
+    Erecon3_sfON_W.SetBinError(bin+1,100.*W_TotalErrorON[3][bin]/totalTimeON_W);
+    EreconALL_sfON_W.SetBinError(bin+1,100.*W_TotalErrorON[4][bin]/totalTimeON_W);
     
   }
     

@@ -14,8 +14,10 @@
   Double_t xAxisMax = 1200.;
 
   //Storing event fractions for data, E/W and sfON/OFF
-  Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t23E_sfON, t23E_sfOFF, t0W_sfON, t0W_sfOFF, t1W_sfON, t1W_sfOFF, t23W_sfON, t23W_sfOFF;
-  t0E_sfON = t0E_sfOFF = t1E_sfON = t1E_sfOFF = t23E_sfON = t23E_sfOFF = t0W_sfON = t0W_sfOFF = t1W_sfON = t1W_sfOFF = t23W_sfON = t23W_sfOFF = 0.;
+  Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t2E_sfON, t2E_sfOFF, t3E_sfON, t3E_sfOFF;
+  Double_t t0W_sfON, t0W_sfOFF, t1W_sfON, t1W_sfOFF, t2W_sfON, t2W_sfOFF, t3W_sfON, t3W_sfOFF;
+  t0E_sfON = t0E_sfOFF = t1E_sfON = t1E_sfOFF = t23E_sfON = t2E_sfOFF = t3E_sfOFF = 0;
+  t0W_sfON = t0W_sfOFF = t1W_sfON = t1W_sfOFF = t23W_sfON = t2W_sfOFF = t3E_sfOFF = 0.;
   
   TFile *data_file = new TFile(TString::Format("Octets_%i-%i_DATA.root",octetStart,octetEnd),"READ");
   TFile *sim_file = new TFile(TString::Format("Octets_%i-%i_SIM.root",octetStart,octetEnd),"READ");
@@ -26,72 +28,86 @@
   TH1D *dataALL = (TH1D*)data_file->Get("EreconALL");
   TH1D *data0 = (TH1D*)data_file->Get("Erecon0");
   TH1D *data1 = (TH1D*)data_file->Get("Erecon1");
-  TH1D *data23 = (TH1D*)data_file->Get("Erecon23");
+  TH1D *data2 = (TH1D*)data_file->Get("Erecon2");
+  TH1D *data3 = (TH1D*)data_file->Get("Erecon3");
   
   TH1D *simALL = (TH1D*)sim_file->Get("EreconALL");
   TH1D *sim0 = (TH1D*)sim_file->Get("Erecon0");
   TH1D *sim1 = (TH1D*)sim_file->Get("Erecon1");
-  TH1D *sim23 = (TH1D*)sim_file->Get("Erecon23");
-
+  TH1D *sim2 = (TH1D*)sim_file->Get("Erecon2");
+  TH1D *sim3 = (TH1D*)sim_file->Get("Erecon3");
+  
   TH1D *dataALL_sfOFF_E = (TH1D*)data_file->Get("EreconALL_sfOFF_E");
   TH1D *data0_sfOFF_E = (TH1D*)data_file->Get("Erecon0_sfOFF_E");
   TH1D *data1_sfOFF_E = (TH1D*)data_file->Get("Erecon1_sfOFF_E");
-  TH1D *data23_sfOFF_E = (TH1D*)data_file->Get("Erecon23_sfOFF_E");
+  TH1D *data2_sfOFF_E = (TH1D*)data_file->Get("Erecon2_sfOFF_E");
+  TH1D *data3_sfOFF_E = (TH1D*)data_file->Get("Erecon3_sfOFF_E");
   
   TH1D *simALL_sfOFF_E = (TH1D*)sim_file->Get("EreconALL_sfOFF_E");
   TH1D *sim0_sfOFF_E = (TH1D*)sim_file->Get("Erecon0_sfOFF_E");
   TH1D *sim1_sfOFF_E = (TH1D*)sim_file->Get("Erecon1_sfOFF_E");
-  TH1D *sim23_sfOFF_E = (TH1D*)sim_file->Get("Erecon23_sfOFF_E");
+  TH1D *sim2_sfOFF_E = (TH1D*)sim_file->Get("Erecon2_sfOFF_E");
+  TH1D *sim3_sfOFF_E = (TH1D*)sim_file->Get("Erecon3_sfOFF_E");
 
   TH1D *dataALL_sfOFF_W = (TH1D*)data_file->Get("EreconALL_sfOFF_W");
   TH1D *data0_sfOFF_W = (TH1D*)data_file->Get("Erecon0_sfOFF_W");
   TH1D *data1_sfOFF_W = (TH1D*)data_file->Get("Erecon1_sfOFF_W");
-  TH1D *data23_sfOFF_W = (TH1D*)data_file->Get("Erecon23_sfOFF_W");
+  TH1D *data2_sfOFF_W = (TH1D*)data_file->Get("Erecon2_sfOFF_W");
+  TH1D *data3_sfOFF_W = (TH1D*)data_file->Get("Erecon3_sfOFF_W");
   
   TH1D *simALL_sfOFF_W = (TH1D*)sim_file->Get("EreconALL_sfOFF_W");
   TH1D *sim0_sfOFF_W = (TH1D*)sim_file->Get("Erecon0_sfOFF_W");
   TH1D *sim1_sfOFF_W = (TH1D*)sim_file->Get("Erecon1_sfOFF_W");
-  TH1D *sim23_sfOFF_W = (TH1D*)sim_file->Get("Erecon23_sfOFF_W");
+  TH1D *sim2_sfOFF_W = (TH1D*)sim_file->Get("Erecon2_sfOFF_W");
+  TH1D *sim3_sfOFF_W = (TH1D*)sim_file->Get("Erecon3_sfOFF_W");
   
   TH1D *dataALL_sfON_E = (TH1D*)data_file->Get("EreconALL_sfON_E");
   TH1D *data0_sfON_E = (TH1D*)data_file->Get("Erecon0_sfON_E");
   TH1D *data1_sfON_E = (TH1D*)data_file->Get("Erecon1_sfON_E");
-  TH1D *data23_sfON_E = (TH1D*)data_file->Get("Erecon23_sfON_E");
+  TH1D *data2_sfON_E = (TH1D*)data_file->Get("Erecon2_sfON_E");
+  TH1D *data3_sfON_E = (TH1D*)data_file->Get("Erecon3_sfON_E");
   
   TH1D *simALL_sfON_E = (TH1D*)sim_file->Get("EreconALL_sfON_E");
   TH1D *sim0_sfON_E = (TH1D*)sim_file->Get("Erecon0_sfON_E");
   TH1D *sim1_sfON_E = (TH1D*)sim_file->Get("Erecon1_sfON_E");
-  TH1D *sim23_sfON_E = (TH1D*)sim_file->Get("Erecon23_sfON_E");
+  TH1D *sim2_sfON_E = (TH1D*)sim_file->Get("Erecon2_sfON_E");
+  TH1D *sim3_sfON_E = (TH1D*)sim_file->Get("Erecon3_sfON_E");
 
   TH1D *dataALL_sfON_W = (TH1D*)data_file->Get("EreconALL_sfON_W");
   TH1D *data0_sfON_W = (TH1D*)data_file->Get("Erecon0_sfON_W");
   TH1D *data1_sfON_W = (TH1D*)data_file->Get("Erecon1_sfON_W");
-  TH1D *data23_sfON_W = (TH1D*)data_file->Get("Erecon23_sfON_W");
+  TH1D *data2_sfON_W = (TH1D*)data_file->Get("Erecon2_sfON_W");
+  TH1D *data3_sfON_W = (TH1D*)data_file->Get("Erecon3_sfON_W");
   
   TH1D *simALL_sfON_W = (TH1D*)sim_file->Get("EreconALL_sfON_W");
   TH1D *sim0_sfON_W = (TH1D*)sim_file->Get("Erecon0_sfON_W");
   TH1D *sim1_sfON_W = (TH1D*)sim_file->Get("Erecon1_sfON_W");
-  TH1D *sim23_sfON_W = (TH1D*)sim_file->Get("Erecon23_sfON_W");
+  TH1D *sim2_sfON_W = (TH1D*)sim_file->Get("Erecon2_sfON_W");
+  TH1D *sim3_sfON_W = (TH1D*)sim_file->Get("Erecon3_sfON_W");
   
 
   t0E_sfOFF = data0_sfOFF_E->Integral(18,79);
   t0E_sfON = data0_sfON_E->Integral(18,79);
   t1E_sfOFF = data1_sfOFF_E->Integral(18,79);
   t1E_sfON = data1_sfON_E->Integral(18,79);
-  t23E_sfOFF = data23_sfOFF_E->Integral(18,79);
-  t23E_sfON = data23_sfON_E->Integral(18,79);
+  t2E_sfOFF = data2_sfOFF_E->Integral(18,79);
+  t2E_sfON = data2_sfON_E->Integral(18,79);
+  t3E_sfOFF = data3_sfOFF_E->Integral(18,79);
+  t3E_sfON = data3_sfON_E->Integral(18,79);
   t0W_sfOFF = data0_sfOFF_W->Integral(18,79);
   t0W_sfON = data0_sfON_W->Integral(18,79);
   t1W_sfOFF = data1_sfOFF_W->Integral(18,79);
   t1W_sfON = data1_sfON_W->Integral(18,79);
-  t23W_sfOFF = data23_sfOFF_W->Integral(18,79);
-  t23W_sfON = data23_sfON_W->Integral(18,79);
+  t2W_sfOFF = data2_sfOFF_W->Integral(18,79);
+  t2W_sfON = data2_sfON_W->Integral(18,79);
+  t3W_sfOFF = data3_sfOFF_W->Integral(18,79);
+  t3W_sfON = data3_sfON_W->Integral(18,79);
   
 
-  double totalE_sfOFF = t0E_sfOFF + t1E_sfOFF + t23E_sfOFF;
-  double totalE_sfON = t0E_sfON + t1E_sfON + t23E_sfON;
-  double totalW_sfOFF = t0W_sfOFF + t1W_sfOFF + t23W_sfOFF;
-  double totalW_sfON = t0W_sfON + t1W_sfON + t23W_sfON;
+  double totalE_sfOFF = t0E_sfOFF + t1E_sfOFF + t2E_sfOFF + t3E_sfOFF;
+  double totalE_sfON = t0E_sfON + t1E_sfON + t2E_sfON + t3E_sfON;
+  double totalW_sfOFF = t0W_sfOFF + t1W_sfOFF + t2W_sfOFF + t3W_sfOFF;
+  double totalW_sfON = t0W_sfON + t1W_sfON + t2W_sfON + t3W_sfON;
 
   
   std::cout << "********************************************\n"
@@ -101,8 +117,10 @@
 	    << "Type 0W:\t" << t0W_sfON/totalW_sfON << "\t\t" << t0W_sfOFF/totalW_sfOFF << "\n\n"
 	    << "Type 1E:\t" << t1E_sfON/totalE_sfON << "\t\t" << t1E_sfOFF/totalE_sfOFF << "\n"
 	    << "Type 1W:\t" << t1W_sfON/totalW_sfON << "\t\t" << t1W_sfOFF/totalW_sfOFF << "\n\n"
-	    << "Type 23E:\t" << t23E_sfON/totalE_sfON << "\t\t" << t23E_sfOFF/totalE_sfOFF << "\n"
-	    << "Type 23W:\t" << t23W_sfON/totalW_sfON << "\t\t" << t23W_sfOFF/totalW_sfOFF << "\n\n"
+	    << "Type 2E:\t" << t2E_sfON/totalE_sfON << "\t\t" << t2E_sfOFF/totalE_sfOFF << "\n"
+	    << "Type 2W:\t" << t2W_sfON/totalW_sfON << "\t\t" << t2W_sfOFF/totalW_sfOFF << "\n\n"
+	    << "Type 3E:\t" << t3E_sfON/totalE_sfON << "\t\t" << t3E_sfOFF/totalE_sfOFF << "\n"
+	    << "Type 3W:\t" << t3W_sfON/totalW_sfON << "\t\t" << t3W_sfOFF/totalW_sfOFF << "\n\n"
 	    << "********************************************\n";
     
  
@@ -140,34 +158,47 @@
   }
   
 
-  if (normType==TString("23")) {
-    normFactor = data23->Integral(data23->GetXaxis()->FindFixBin(normLow),data23->GetXaxis()->FindFixBin(normHigh))/sim23->Integral(sim23->GetXaxis()->FindFixBin(normLow),sim23->GetXaxis()->FindFixBin(normHigh));
-    normFactor_sfOFF_E = data23_sfOFF_E->Integral(data23_sfOFF_E->GetXaxis()->FindFixBin(normLow),data23_sfOFF_E->GetXaxis()->FindFixBin(normHigh))/sim23_sfOFF_E->Integral(sim23_sfOFF_E->GetXaxis()->FindFixBin(normLow),sim23_sfOFF_E->GetXaxis()->FindFixBin(normHigh));
-    normFactor_sfON_E = data23_sfON_E->Integral(data23_sfON_E->GetXaxis()->FindFixBin(normLow),data23_sfON_E->GetXaxis()->FindFixBin(normHigh))/sim23_sfON_E->Integral(sim23_sfON_E->GetXaxis()->FindFixBin(normLow),sim23_sfON_E->GetXaxis()->FindFixBin(normHigh));
-    normFactor_sfOFF_W = data23_sfOFF_W->Integral(data23_sfOFF_W->GetXaxis()->FindFixBin(normLow),data23_sfOFF_W->GetXaxis()->FindFixBin(normHigh))/sim23_sfOFF_W->Integral(sim23_sfOFF_W->GetXaxis()->FindFixBin(normLow),sim23_sfOFF_W->GetXaxis()->FindFixBin(normHigh));
-    normFactor_sfON_W = data23_sfON_W->Integral(data23_sfON_W->GetXaxis()->FindFixBin(normLow),data23_sfON_W->GetXaxis()->FindFixBin(normHigh))/sim23_sfON_W->Integral(sim23_sfON_W->GetXaxis()->FindFixBin(normLow),sim23_sfON_W->GetXaxis()->FindFixBin(normHigh));
+  if (normType==TString("2")) {
+    normFactor = data2->Integral(data2->GetXaxis()->FindFixBin(normLow),data2->GetXaxis()->FindFixBin(normHigh))/sim2->Integral(sim2->GetXaxis()->FindFixBin(normLow),sim2->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfOFF_E = data2_sfOFF_E->Integral(data2_sfOFF_E->GetXaxis()->FindFixBin(normLow),data2_sfOFF_E->GetXaxis()->FindFixBin(normHigh))/sim2_sfOFF_E->Integral(sim2_sfOFF_E->GetXaxis()->FindFixBin(normLow),sim2_sfOFF_E->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfON_E = data2_sfON_E->Integral(data2_sfON_E->GetXaxis()->FindFixBin(normLow),data2_sfON_E->GetXaxis()->FindFixBin(normHigh))/sim2_sfON_E->Integral(sim2_sfON_E->GetXaxis()->FindFixBin(normLow),sim2_sfON_E->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfOFF_W = data2_sfOFF_W->Integral(data2_sfOFF_W->GetXaxis()->FindFixBin(normLow),data2_sfOFF_W->GetXaxis()->FindFixBin(normHigh))/sim2_sfOFF_W->Integral(sim2_sfOFF_W->GetXaxis()->FindFixBin(normLow),sim2_sfOFF_W->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfON_W = data2_sfON_W->Integral(data2_sfON_W->GetXaxis()->FindFixBin(normLow),data2_sfON_W->GetXaxis()->FindFixBin(normHigh))/sim2_sfON_W->Integral(sim2_sfON_W->GetXaxis()->FindFixBin(normLow),sim2_sfON_W->GetXaxis()->FindFixBin(normHigh));
+  }
+
+  if (normType==TString("3")) {
+    normFactor = data3->Integral(data3->GetXaxis()->FindFixBin(normLow),data3->GetXaxis()->FindFixBin(normHigh))/sim3->Integral(sim3->GetXaxis()->FindFixBin(normLow),sim3->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfOFF_E = data3_sfOFF_E->Integral(data3_sfOFF_E->GetXaxis()->FindFixBin(normLow),data3_sfOFF_E->GetXaxis()->FindFixBin(normHigh))/sim3_sfOFF_E->Integral(sim3_sfOFF_E->GetXaxis()->FindFixBin(normLow),sim3_sfOFF_E->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfON_E = data3_sfON_E->Integral(data3_sfON_E->GetXaxis()->FindFixBin(normLow),data3_sfON_E->GetXaxis()->FindFixBin(normHigh))/sim3_sfON_E->Integral(sim3_sfON_E->GetXaxis()->FindFixBin(normLow),sim3_sfON_E->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfOFF_W = data3_sfOFF_W->Integral(data3_sfOFF_W->GetXaxis()->FindFixBin(normLow),data3_sfOFF_W->GetXaxis()->FindFixBin(normHigh))/sim3_sfOFF_W->Integral(sim3_sfOFF_W->GetXaxis()->FindFixBin(normLow),sim3_sfOFF_W->GetXaxis()->FindFixBin(normHigh));
+    normFactor_sfON_W = data3_sfON_W->Integral(data3_sfON_W->GetXaxis()->FindFixBin(normLow),data3_sfON_W->GetXaxis()->FindFixBin(normHigh))/sim3_sfON_W->Integral(sim3_sfON_W->GetXaxis()->FindFixBin(normLow),sim3_sfON_W->GetXaxis()->FindFixBin(normHigh));
   }
   
   simALL->Scale(normFactor);
   sim0->Scale(normFactor);
   sim1->Scale(normFactor);
-  sim23->Scale(normFactor);
+  sim2->Scale(normFactor);
+  sim3->Scale(normFactor);
   simALL_sfOFF_E->Scale(normFactor_sfOFF_E);
   sim0_sfOFF_E->Scale(normFactor_sfOFF_E);
   sim1_sfOFF_E->Scale(normFactor_sfOFF_E);
-  sim23_sfOFF_E->Scale(normFactor_sfOFF_E);
+  sim2_sfOFF_E->Scale(normFactor_sfOFF_E);
+  sim3_sfOFF_E->Scale(normFactor_sfOFF_E);
   simALL_sfON_E->Scale(normFactor_sfON_E);
   sim0_sfON_E->Scale(normFactor_sfON_E);
   sim1_sfON_E->Scale(normFactor_sfON_E);
-  sim23_sfON_E->Scale(normFactor_sfON_E);
+  sim2_sfON_E->Scale(normFactor_sfON_E);
+  sim3_sfON_E->Scale(normFactor_sfON_E);
   simALL_sfOFF_W->Scale(normFactor_sfOFF_W);
   sim0_sfOFF_W->Scale(normFactor_sfOFF_W);
   sim1_sfOFF_W->Scale(normFactor_sfOFF_W);
-  sim23_sfOFF_W->Scale(normFactor_sfOFF_W);
+  sim2_sfOFF_W->Scale(normFactor_sfOFF_W);
+  sim3_sfOFF_W->Scale(normFactor_sfOFF_W);
   simALL_sfON_W->Scale(normFactor_sfON_W);
   sim0_sfON_W->Scale(normFactor_sfON_W);
   sim1_sfON_W->Scale(normFactor_sfON_W);
-  sim23_sfON_W->Scale(normFactor_sfON_W);
+  sim2_sfON_W->Scale(normFactor_sfON_W);
+  sim3_sfON_W->Scale(normFactor_sfON_W);
   
 
   ////////////////////// SUPER_SUMS ////////////////////////////////////////////
@@ -232,8 +263,8 @@
   simALL->Draw("SAMEE0");
 
 
-  TCanvas *c2 = new TCanvas("c2", "c2", 1600., 600.);
-  c2->Divide(3,1);
+  TCanvas *c2 = new TCanvas("c2", "c2", 1800., 600.);
+  c2->Divide(4,1);
   c2->cd(1);
   
   
@@ -282,24 +313,46 @@
   c2->cd(3);
 
   
-  data23->SetMarkerColor(kBlue);
-  data23->SetMarkerStyle(22);
-  data23->SetMarkerSize(0.75);
-  data23->SetLineColor(kBlue);
-  //data23->SetFillStyle(3002);
-  //data23->SetFillColor(kBlue);
-  data23->SetLineWidth(3);
-  data23->SetMinimum(0.);
-  sim23->SetMarkerColor(kRed);
-  sim23->SetLineColor(kRed);
-  sim23->SetMarkerSize(0.75);
-  sim23->SetMarkerStyle(20);
-  data23->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23->SetMaximum(data23->GetMaximum()*1.2);
-  data23->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  sim23->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23->Draw("HISTE0");
-  sim23->Draw("SAMEE0");
+  data2->SetMarkerColor(kBlue);
+  data2->SetMarkerStyle(22);
+  data2->SetMarkerSize(0.75);
+  data2->SetLineColor(kBlue);
+  //data2->SetFillStyle(3002);
+  //data2->SetFillColor(kBlue);
+  data2->SetLineWidth(3);
+  data2->SetMinimum(0.);
+  sim2->SetMarkerColor(kRed);
+  sim2->SetLineColor(kRed);
+  sim2->SetMarkerSize(0.75);
+  sim2->SetMarkerStyle(20);
+  data2->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2->SetMaximum(data2->GetMaximum()*1.2);
+  data2->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim2->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2->Draw("HISTE0");
+  sim2->Draw("SAMEE0");
+
+   c2->cd(4);
+
+  
+  data3->SetMarkerColor(kBlue);
+  data3->SetMarkerStyle(22);
+  data3->SetMarkerSize(0.75);
+  data3->SetLineColor(kBlue);
+  //data3->SetFillStyle(3002);
+  //data3->SetFillColor(kBlue);
+  data3->SetLineWidth(3);
+  data3->SetMinimum(0.);
+  sim3->SetMarkerColor(kRed);
+  sim3->SetLineColor(kRed);
+  sim3->SetMarkerSize(0.75);
+  sim3->SetMarkerStyle(20);
+  data3->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3->SetMaximum(data3->GetMaximum()*1.2);
+  data3->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim3->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3->Draw("HISTE0");
+  sim3->Draw("SAMEE0");
 
 
   TString pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
@@ -421,24 +474,46 @@
   c2_sfOFF_E->cd(3);
 
   
-  data23_sfOFF_E->SetMarkerColor(kBlue);
-  data23_sfOFF_E->SetMarkerStyle(22);
-  data23_sfOFF_E->SetMarkerSize(0.75);
-  data23_sfOFF_E->SetLineColor(kBlue);
-  //data23_sfOFF_E->SetFillStyle(3002);
-  //data23_sfOFF_E->SetFillColor(kBlue);
-  data23_sfOFF_E->SetLineWidth(3);
-  data23_sfOFF_E->SetMinimum(0.);
-  sim23_sfOFF_E->SetMarkerColor(kRed);
-  sim23_sfOFF_E->SetLineColor(kRed);
-  sim23_sfOFF_E->SetMarkerSize(0.75);
-  sim23_sfOFF_E->SetMarkerStyle(20);
-  data23_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfOFF_E->SetMaximum(data23_sfOFF_E->GetMaximum()*1.2);
-  data23_sfOFF_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  sim23_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfOFF_E->Draw("HISTE0");
-  sim23_sfOFF_E->Draw("SAMEE0");
+  data2_sfOFF_E->SetMarkerColor(kBlue);
+  data2_sfOFF_E->SetMarkerStyle(22);
+  data2_sfOFF_E->SetMarkerSize(0.75);
+  data2_sfOFF_E->SetLineColor(kBlue);
+  //data2_sfOFF_E->SetFillStyle(3002);
+  //data2_sfOFF_E->SetFillColor(kBlue);
+  data2_sfOFF_E->SetLineWidth(3);
+  data2_sfOFF_E->SetMinimum(0.);
+  sim2_sfOFF_E->SetMarkerColor(kRed);
+  sim2_sfOFF_E->SetLineColor(kRed);
+  sim2_sfOFF_E->SetMarkerSize(0.75);
+  sim2_sfOFF_E->SetMarkerStyle(20);
+  data2_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfOFF_E->SetMaximum(data2_sfOFF_E->GetMaximum()*1.2);
+  data2_sfOFF_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim2_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfOFF_E->Draw("HISTE0");
+  sim2_sfOFF_E->Draw("SAMEE0");
+
+  c2_sfOFF_E->cd(4);
+
+  
+  data3_sfOFF_E->SetMarkerColor(kBlue);
+  data3_sfOFF_E->SetMarkerStyle(22);
+  data3_sfOFF_E->SetMarkerSize(0.75);
+  data3_sfOFF_E->SetLineColor(kBlue);
+  //data3_sfOFF_E->SetFillStyle(3002);
+  //data3_sfOFF_E->SetFillColor(kBlue);
+  data3_sfOFF_E->SetLineWidth(3);
+  data3_sfOFF_E->SetMinimum(0.);
+  sim3_sfOFF_E->SetMarkerColor(kRed);
+  sim3_sfOFF_E->SetLineColor(kRed);
+  sim3_sfOFF_E->SetMarkerSize(0.75);
+  sim3_sfOFF_E->SetMarkerStyle(20);
+  data3_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfOFF_E->SetMaximum(data3_sfOFF_E->GetMaximum()*1.2);
+  data3_sfOFF_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim3_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfOFF_E->Draw("HISTE0");
+  sim3_sfOFF_E->Draw("SAMEE0");
 
 
   pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfOFF_E.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
@@ -560,24 +635,47 @@
   c2_sfON_E->cd(3);
 
   
-  data23_sfON_E->SetMarkerColor(kBlue);
-  data23_sfON_E->SetMarkerStyle(22);
-  data23_sfON_E->SetMarkerSize(0.75);
-  data23_sfON_E->SetLineColor(kBlue);
-  //data23_sfON_E->SetFillStyle(3002);
-  //data23_sfON_E->SetFillColor(kBlue);
-  data23_sfON_E->SetLineWidth(3);
-  data23_sfON_E->SetMinimum(0.);
-  sim23_sfON_E->SetMarkerColor(kRed);
-  sim23_sfON_E->SetLineColor(kRed);
-  sim23_sfON_E->SetMarkerSize(0.75);
-  sim23_sfON_E->SetMarkerStyle(20);
-  data23_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfON_E->SetMaximum(data23_sfON_E->GetMaximum()*1.2);
-  data23_sfON_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  sim23_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfON_E->Draw("HISTE0");
-  sim23_sfON_E->Draw("SAMEE0");
+  data2_sfON_E->SetMarkerColor(kBlue);
+  data2_sfON_E->SetMarkerStyle(22);
+  data2_sfON_E->SetMarkerSize(0.75);
+  data2_sfON_E->SetLineColor(kBlue);
+  //data2_sfON_E->SetFillStyle(3002);
+  //data2_sfON_E->SetFillColor(kBlue);
+  data2_sfON_E->SetLineWidth(3);
+  data2_sfON_E->SetMinimum(0.);
+  sim2_sfON_E->SetMarkerColor(kRed);
+  sim2_sfON_E->SetLineColor(kRed);
+  sim2_sfON_E->SetMarkerSize(0.75);
+  sim2_sfON_E->SetMarkerStyle(20);
+  data2_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfON_E->SetMaximum(data2_sfON_E->GetMaximum()*1.2);
+  data2_sfON_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim2_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfON_E->Draw("HISTE0");
+  sim2_sfON_E->Draw("SAMEE0");
+
+
+  c2_sfON_E->cd(4);
+
+  
+  data3_sfON_E->SetMarkerColor(kBlue);
+  data3_sfON_E->SetMarkerStyle(22);
+  data3_sfON_E->SetMarkerSize(0.75);
+  data3_sfON_E->SetLineColor(kBlue);
+  //data3_sfON_E->SetFillStyle(3002);
+  //data3_sfON_E->SetFillColor(kBlue);
+  data3_sfON_E->SetLineWidth(3);
+  data3_sfON_E->SetMinimum(0.);
+  sim3_sfON_E->SetMarkerColor(kRed);
+  sim3_sfON_E->SetLineColor(kRed);
+  sim3_sfON_E->SetMarkerSize(0.75);
+  sim3_sfON_E->SetMarkerStyle(20);
+  data3_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfON_E->SetMaximum(data3_sfON_E->GetMaximum()*1.2);
+  data3_sfON_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim3_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfON_E->Draw("HISTE0");
+  sim3_sfON_E->Draw("SAMEE0");
 
 
   pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfON_E.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
@@ -699,24 +797,47 @@
   c2_sfOFF_W->cd(3);
 
   
-  data23_sfOFF_W->SetMarkerColor(kBlue);
-  data23_sfOFF_W->SetMarkerStyle(22);
-  data23_sfOFF_W->SetMarkerSize(0.75);
-  data23_sfOFF_W->SetLineColor(kBlue);
-  //data23_sfOFF_W->SetFillStyle(3002);
-  //data23_sfOFF_W->SetFillColor(kBlue);
-  data23_sfOFF_W->SetLineWidth(3);
-  data23_sfOFF_W->SetMinimum(0.);
-  sim23_sfOFF_W->SetMarkerColor(kRed);
-  sim23_sfOFF_W->SetLineColor(kRed);
-  sim23_sfOFF_W->SetMarkerSize(0.75);
-  sim23_sfOFF_W->SetMarkerStyle(20);
-  data23_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfOFF_W->SetMaximum(data23_sfOFF_W->GetMaximum()*1.2);
-  data23_sfOFF_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  sim23_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfOFF_W->Draw("HISTE0");
-  sim23_sfOFF_W->Draw("SAMEE0");
+  data2_sfOFF_W->SetMarkerColor(kBlue);
+  data2_sfOFF_W->SetMarkerStyle(22);
+  data2_sfOFF_W->SetMarkerSize(0.75);
+  data2_sfOFF_W->SetLineColor(kBlue);
+  //data2_sfOFF_W->SetFillStyle(3002);
+  //data2_sfOFF_W->SetFillColor(kBlue);
+  data2_sfOFF_W->SetLineWidth(3);
+  data2_sfOFF_W->SetMinimum(0.);
+  sim2_sfOFF_W->SetMarkerColor(kRed);
+  sim2_sfOFF_W->SetLineColor(kRed);
+  sim2_sfOFF_W->SetMarkerSize(0.75);
+  sim2_sfOFF_W->SetMarkerStyle(20);
+  data2_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfOFF_W->SetMaximum(data2_sfOFF_W->GetMaximum()*1.2);
+  data2_sfOFF_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim2_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfOFF_W->Draw("HISTE0");
+  sim2_sfOFF_W->Draw("SAMEE0");
+
+
+  c2_sfOFF_W->cd(4);
+
+  
+  data3_sfOFF_W->SetMarkerColor(kBlue);
+  data3_sfOFF_W->SetMarkerStyle(22);
+  data3_sfOFF_W->SetMarkerSize(0.75);
+  data3_sfOFF_W->SetLineColor(kBlue);
+  //data3_sfOFF_W->SetFillStyle(3002);
+  //data3_sfOFF_W->SetFillColor(kBlue);
+  data3_sfOFF_W->SetLineWidth(3);
+  data3_sfOFF_W->SetMinimum(0.);
+  sim3_sfOFF_W->SetMarkerColor(kRed);
+  sim3_sfOFF_W->SetLineColor(kRed);
+  sim3_sfOFF_W->SetMarkerSize(0.75);
+  sim3_sfOFF_W->SetMarkerStyle(20);
+  data3_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfOFF_W->SetMaximum(data3_sfOFF_W->GetMaximum()*1.2);
+  data3_sfOFF_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim3_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfOFF_W->Draw("HISTE0");
+  sim3_sfOFF_W->Draw("SAMEE0");
 
 
   pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfOFF_W.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
@@ -838,24 +959,47 @@
   c2_sfON_W->cd(3);
 
   
-  data23_sfON_W->SetMarkerColor(kBlue);
-  data23_sfON_W->SetMarkerStyle(22);
-  data23_sfON_W->SetMarkerSize(0.75);
-  data23_sfON_W->SetLineColor(kBlue);
-  //data23_sfON_W->SetFillStyle(3002);
-  //data23_sfON_W->SetFillColor(kBlue);
-  data23_sfON_W->SetLineWidth(3);
-  data23_sfON_W->SetMinimum(0.);
-  sim23_sfON_W->SetMarkerColor(kRed);
-  sim23_sfON_W->SetLineColor(kRed);
-  sim23_sfON_W->SetMarkerSize(0.75);
-  sim23_sfON_W->SetMarkerStyle(20);
-  data23_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfON_W->SetMaximum(data23_sfON_W->GetMaximum()*1.2);
-  data23_sfON_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  sim23_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data23_sfON_W->Draw("HISTE0");
-  sim23_sfON_W->Draw("SAMEE0");
+  data2_sfON_W->SetMarkerColor(kBlue);
+  data2_sfON_W->SetMarkerStyle(22);
+  data2_sfON_W->SetMarkerSize(0.75);
+  data2_sfON_W->SetLineColor(kBlue);
+  //data2_sfON_W->SetFillStyle(3002);
+  //data2_sfON_W->SetFillColor(kBlue);
+  data2_sfON_W->SetLineWidth(3);
+  data2_sfON_W->SetMinimum(0.);
+  sim2_sfON_W->SetMarkerColor(kRed);
+  sim2_sfON_W->SetLineColor(kRed);
+  sim2_sfON_W->SetMarkerSize(0.75);
+  sim2_sfON_W->SetMarkerStyle(20);
+  data2_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfON_W->SetMaximum(data2_sfON_W->GetMaximum()*1.2);
+  data2_sfON_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim2_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data2_sfON_W->Draw("HISTE0");
+  sim2_sfON_W->Draw("SAMEE0");
+
+
+  c2_sfON_W->cd(4);
+
+
+  data3_sfON_W->SetMarkerColor(kBlue);
+  data3_sfON_W->SetMarkerStyle(22);
+  data3_sfON_W->SetMarkerSize(0.75);
+  data3_sfON_W->SetLineColor(kBlue);
+  //data3_sfON_W->SetFillStyle(3002);
+  //data3_sfON_W->SetFillColor(kBlue);
+  data3_sfON_W->SetLineWidth(3);
+  data3_sfON_W->SetMinimum(0.);
+  sim3_sfON_W->SetMarkerColor(kRed);
+  sim3_sfON_W->SetLineColor(kRed);
+  sim3_sfON_W->SetMarkerSize(0.75);
+  sim3_sfON_W->SetMarkerStyle(20);
+  data3_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfON_W->SetMaximum(data3_sfON_W->GetMaximum()*1.2);
+  data3_sfON_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim3_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
+  data3_sfON_W->Draw("HISTE0");
+  sim3_sfON_W->Draw("SAMEE0");
 
 
   pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f_sfON_W.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
