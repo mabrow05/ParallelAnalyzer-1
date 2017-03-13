@@ -485,14 +485,14 @@ void SimEvtRateHandler::dataReader() {
     //Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
     //Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
     //Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
-    Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-    Tin->GetBranch("old_xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
-    Tin->GetBranch("old_yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
-    Tin->GetBranch("old_xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
-    Tin->GetBranch("old_yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
+    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
+    Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
+    Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
+    Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 

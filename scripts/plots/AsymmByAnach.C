@@ -2,21 +2,33 @@
 
 void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=680) {
 
-  bool readInAsymms = false;
+  bool readInAsymms = true;
   
-  const Int_t numAnaCh = 4;
-  TString anCh[numAnaCh] = {"A","D","F","G"};//{"A","B","C","D","E","F","G","H","J","K"};
+  const Int_t numAnaChT0 = 3;
+  const Int_t numAnaChBacksc = 5;
+  TString anChT0[numAnaChT0] = {"A","C","D"};//,"B"
+  TString anChBacksc[numAnaChBacksc] = {"F","G","H","J","K"};
   
-  std::vector <TString> anaChoices;
-  std::vector <Double_t> indices;
-  std::vector <Double_t> AsymmData;
-  std::vector <Double_t> AsymmDataErr; //Statistical Errors
-  std::vector <Double_t> AsymmSim;
-  std::vector <Double_t> AsymmSimErr; //Statistical Errors
+  std::vector <TString> anaChoicesT0;
+  std::vector <Double_t> indicesT0;
+  std::vector <Double_t> AsymmDataT0;
+  std::vector <Double_t> AsymmDataErrT0; //Statistical Errors
+  std::vector <Double_t> AsymmSimT0;
+  std::vector <Double_t> AsymmSimErrT0; //Statistical Errors
+
+  std::vector <TString> anaChoicesBacksc;
+  std::vector <Double_t> indicesBacksc;
+  std::vector <Double_t> AsymmDataBacksc;
+  std::vector <Double_t> AsymmDataErrBacksc; //Statistical Errors
+  std::vector <Double_t> AsymmSimBacksc;
+  std::vector <Double_t> AsymmSimErrBacksc; //Statistical Errors
 
   //Fill anaChoices
-  for (Int_t i=0; i< sizeof(anCh)/sizeof(TString); i++) 
-    { anaChoices.push_back(anCh[i]); indices.push_back(i+1); }
+  for (Int_t i=0; i< sizeof(anChT0)/sizeof(TString); i++) 
+    { anaChoicesT0.push_back(anChT0[i]); indicesT0.push_back(i+1); }
+
+  for (Int_t i=0; i< sizeof(anChBacksc)/sizeof(TString); i++) 
+    { anaChoicesBacksc.push_back(anChBacksc[i]); indicesBacksc.push_back(i+1); }
   
   
   //Read in Asymmetries
@@ -25,10 +37,10 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   
   if ( readInAsymms ) {
     
-    for (Int_t i=0; i<anaChoices.size(); i++) {
+    for (Int_t i=0; i<anaChoicesT0.size(); i++) {
       infile.open(TString::Format("%s/Asymmetries/%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
 				  getenv("ANALYSIS_RESULTS"),corrections.Data(),
-				  (withPOL?"_withPOL":""),anaChoices[i].Data(),
+				  (withPOL?"_withPOL":""),anaChoicesT0[i].Data(),
 				  ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
       
       Double_t AsymHold = 0.;
@@ -36,14 +48,14 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
       if (infile.is_open()) {
 	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
       }
-      AsymmData.push_back(AsymHold);
-      AsymmDataErr.push_back(AsymErrHold);
+      AsymmDataT0.push_back(AsymHold);
+      AsymmDataErrT0.push_back(AsymErrHold);
       
       infile.close();
       
       infile.open(TString::Format("%s/Asymmetries/%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
 				  getenv("SIM_ANALYSIS_RESULTS"),corrections.Data(),
-				  anaChoices[i].Data(),ebinLow,ebinHigh,
+				  anaChoicesT0[i].Data(),ebinLow,ebinHigh,
 				  year==TString("2011-2012")?"0-59":"60-121").Data() );
       
       AsymHold = 0.;
@@ -51,23 +63,55 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
       if (infile.is_open()) {
 	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
       }
-      AsymmSim.push_back(AsymHold);
-      AsymmSimErr.push_back(AsymErrHold);
+      AsymmSimT0.push_back(AsymHold);
+      AsymmSimErrT0.push_back(AsymErrHold);
+      
+      infile.close();
+    }
+
+    for (Int_t i=0; i<anaChoicesBacksc.size(); i++) {
+      infile.open(TString::Format("%s/Asymmetries/%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				  getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				  (withPOL?"_withPOL":""),anaChoicesBacksc[i].Data(),
+				  ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+      
+      Double_t AsymHold = 0.;
+      Double_t AsymErrHold = 0.;
+      if (infile.is_open()) {
+	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      }
+      AsymmDataBacksc.push_back(AsymHold);
+      AsymmDataErrBacksc.push_back(AsymErrHold);
+      
+      infile.close();
+      
+      infile.open(TString::Format("%s/Asymmetries/%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				  getenv("SIM_ANALYSIS_RESULTS"),corrections.Data(),
+				  anaChoicesBacksc[i].Data(),ebinLow,ebinHigh,
+				  year==TString("2011-2012")?"0-59":"60-121").Data() );
+      
+      AsymHold = 0.;
+      AsymErrHold = 0.;
+      if (infile.is_open()) {
+	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      }
+      AsymmSimBacksc.push_back(AsymHold);
+      AsymmSimErrBacksc.push_back(AsymErrHold);
       
       infile.close();
     }
   }    
   else {
     
-    AsymmData.push_back(-0.12404); AsymmDataErr.push_back(0.00079);
-    AsymmData.push_back(-0.12755); AsymmDataErr.push_back(0.00079);
-    AsymmData.push_back(-0.0925); AsymmDataErr.push_back(0.0056);
-    AsymmData.push_back(-0.0083); AsymmDataErr.push_back(0.0079);
+    AsymmDataT0.push_back(-0.12404); AsymmDataErrT0.push_back(0.00079);
+    AsymmDataT0.push_back(-0.12755); AsymmDataErrT0.push_back(0.00079);
+    AsymmDataT0.push_back(-0.0925); AsymmDataErrT0.push_back(0.0056);
+    AsymmDataT0.push_back(-0.0083); AsymmDataErrT0.push_back(0.0079);
     
-    AsymmSim.push_back(-0.12291); AsymmSimErr.push_back(0.00069);
-    AsymmSim.push_back(-0.12551); AsymmSimErr.push_back(0.00069);
-    AsymmSim.push_back(-0.0998); AsymmSimErr.push_back(0.0046);
-    AsymmSim.push_back(-0.0251); AsymmSimErr.push_back(0.0074);
+    AsymmSimT0.push_back(-0.12291); AsymmSimErrT0.push_back(0.00069);
+    AsymmSimT0.push_back(-0.12551); AsymmSimErrT0.push_back(0.00069);
+    AsymmSimT0.push_back(-0.0998); AsymmSimErrT0.push_back(0.0046);
+    AsymmSimT0.push_back(-0.0251); AsymmSimErrT0.push_back(0.0074);
   }
   
 
@@ -75,34 +119,39 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 
   Double_t xerr[10] = {0.};
 
-  cout << anaChoices.size() << " " << anaChoices[0] << " " << AsymmData[0] << " " << xerr[0] << " " << AsymmDataErr[0] << endl;
+  //cout << anaChoices.size() << " " << anaChoices[0] << " " << AsymmData[0] << " " << xerr[0] << " " << AsymmDataErr[0] << endl;
     
+
+  gStyle->SetLegendBorderSize(0);
+  gStyle->SetFillStyle(0);
+
+
   TCanvas *c1 = new TCanvas("c1","demo bin labels",10,10,600,600);
 
   c1->SetLeftMargin(0.15);
   c1->SetBottomMargin(0.15);
 
   
-  TH1F * data = new TH1F("data","Data vs MC Blinded Asymmetries",4,0.5,4.5);
+  TH1F * data = new TH1F("data","Analysis Choices with Type 0",AsymmDataT0.size(),0.5,AsymmDataT0.size()+0.5);
   data->SetMarkerColor(kBlue);
   data->SetLineColor(kBlue);
   data->SetLineWidth(3);
   data->SetMarkerStyle(kFullCircle);
   //data->GetXaxis()->SetNdivisions();
-  data->SetCanExtend(TH1::kAllAxes);
+  //data->SetCanExtend(TH1::kAllAxes);
   data->SetStats(0);
 
-  for (Int_t i=1;i<5;++i) {
-    data->SetBinContent(i,AsymmData[i-1]);
-    data->SetBinError(i,AsymmDataErr[i-1]);
+  for (Int_t i=0;i<AsymmDataT0.size();++i) {
+    data->SetBinContent(i+1,AsymmDataT0[i]);
+    data->SetBinError(i+1,AsymmDataErrT0[i]);
   }
   //data->LabelsDeflate("X");
   //data->LabelsDeflate("Y");
   //data->LabelsOption("v");
   data->GetXaxis()->SetBinLabel(1,"A");
-  data->GetXaxis()->SetBinLabel(2,"D");
-  data->GetXaxis()->SetBinLabel(3,"F");
-  data->GetXaxis()->SetBinLabel(4,"G");
+  //data->GetXaxis()->SetBinLabel(2,"B");
+  data->GetXaxis()->SetBinLabel(2,"C");
+  data->GetXaxis()->SetBinLabel(3,"D");
   data->GetXaxis()->SetLabelSize(0.07);
   data->GetXaxis()->SetTitle("Analysis Choice");
   data->GetYaxis()->SetTitle("Asymmetry");
@@ -110,31 +159,100 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   data->GetXaxis()->SetTitleSize(0.05);
   data->GetXaxis()->CenterTitle();
   data->GetYaxis()->CenterTitle();
+  data->SetMinimum(-0.13);
+  data->SetMaximum(-0.118);
+
   data->Draw("EX0");
 
-  TH1F * sim = new TH1F("","Sim vs MC Blinded Asymmetries",4,0.5,4.5);
+  TH1F * sim = new TH1F("","Sim vs MC Blinded Asymmetries",AsymmSimT0.size(),0.5,AsymmSimT0.size()+0.5);
   sim->SetMarkerColor(kRed);
   sim->SetLineColor(kRed);
   sim->SetLineWidth(3);
   sim->SetMarkerStyle(kFullSquare);
   //sim->GetXaxis()->SetNdivisions();
-  sim->SetCanExtend(TH1::kAllAxes);
+  //sim->SetCanExtend(TH1::kAllAxes);
   sim->SetStats(0);
 
-  for (Int_t i=1;i<5;++i) {
-    sim->SetBinContent(i,AsymmSim[i-1]);
-    sim->SetBinError(i,AsymmSimErr[i-1]);
+  for (Int_t i=0;i<AsymmSimT0.size();++i) {
+    sim->SetBinContent(i+1,AsymmSimT0[i]);
+    sim->SetBinError(i+1,AsymmSimErrT0[i]);
   }
   
   sim->Draw("SAME EX0");
-  gStyle->SetLegendBorderSize(0);
   
-  TLegend *leg = new TLegend(0.25,0.65,0.6,0.8);
+  
+  TLegend *leg = new TLegend(0.55,0.75,0.9,0.9);
   //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
   leg->AddEntry(data,"Data");
   leg->AddEntry(sim,"Monte Carlo");
    //leg->AddEntry("gr","Graph with error bars","lep");
   leg->Draw();
+
+
+  ///////////////// backscatter anachoices /////////////////////////
+
+  TCanvas *c2 = new TCanvas("c2","demo bin labels",10,10,600,600);
+
+  c2->SetLeftMargin(0.15);
+  c2->SetBottomMargin(0.15);
+
+  
+  TH1F * dataBacksc = new TH1F("dataBacksc","Backscattering Analysis Choices",AsymmDataBacksc.size(),0.5,AsymmDataBacksc.size()+0.5);
+  dataBacksc->SetMarkerColor(kBlue);
+  dataBacksc->SetLineColor(kBlue);
+  dataBacksc->SetLineWidth(3);
+  dataBacksc->SetMarkerStyle(kFullCircle);
+  //dataBacksc->GetXaxis()->SetNdivisions();
+  //dataBacksc->SetCanExtend(TH1::kAllAxes);
+  dataBacksc->SetStats(0);
+
+  for (Int_t i=0;i<AsymmDataBacksc.size();++i) {
+    dataBacksc->SetBinContent(i+1,AsymmDataBacksc[i]);
+    dataBacksc->SetBinError(i+1,AsymmDataErrBacksc[i]);
+  }
+  //dataBacksc->LabelsDeflate("X");
+  //dataBacksc->LabelsDeflate("Y");
+  //dataBacksc->LabelsOption("v");
+  dataBacksc->GetXaxis()->SetBinLabel(1,"F");
+  dataBacksc->GetXaxis()->SetBinLabel(2,"G");
+  dataBacksc->GetXaxis()->SetBinLabel(3,"H");
+  dataBacksc->GetXaxis()->SetBinLabel(4,"J");
+  dataBacksc->GetXaxis()->SetBinLabel(5,"K");
+  dataBacksc->GetXaxis()->SetLabelSize(0.07);
+  dataBacksc->GetXaxis()->SetTitle("Analysis Choice");
+  dataBacksc->GetYaxis()->SetTitle("Asymmetry");
+  dataBacksc->GetYaxis()->SetTitleOffset(2.);
+  dataBacksc->GetXaxis()->SetTitleSize(0.05);
+  dataBacksc->GetXaxis()->CenterTitle();
+  dataBacksc->GetYaxis()->CenterTitle();
+  dataBacksc->SetMinimum(-0.13);
+  dataBacksc->SetMaximum(0.02);
+
+  dataBacksc->Draw("EX0");
+
+  TH1F * simBacksc = new TH1F("","Sim vs MC Blinded Asymmetries",AsymmSimBacksc.size(),0.5,AsymmSimBacksc.size()+0.5);
+  simBacksc->SetMarkerColor(kRed);
+  simBacksc->SetLineColor(kRed);
+  simBacksc->SetLineWidth(3);
+  simBacksc->SetMarkerStyle(kFullSquare);
+  //simBacksc->GetXaxis()->SetNdivisions();
+  //simBacksc->SetCanExtend(TH1::kAllAxes);
+  simBacksc->SetStats(0);
+
+  for (Int_t i=0;i<AsymmSimBacksc.size();++i) {
+    simBacksc->SetBinContent(i+1,AsymmSimBacksc[i]);
+    simBacksc->SetBinError(i+1,AsymmSimErrBacksc[i]);
+  }
+  
+  simBacksc->Draw("SAME EX0");
+ 
+  TLegend *leg = new TLegend(0.65,0.65,0.95,0.8);
+  //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+  leg->AddEntry(dataBacksc,"Data");
+  leg->AddEntry(simBacksc,"Monte Carlo");
+   //leg->AddEntry("gr","Graph with error bars","lep");
+  //leg->Draw();
+
   
   
 }
