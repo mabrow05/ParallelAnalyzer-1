@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   if ( argc==7 ) corr = std::string(argv[6]);
   bool UKdata = true;//true;
-  bool simulation = false;
+  bool simulation = true;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 
    
     ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     

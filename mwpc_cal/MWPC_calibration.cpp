@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
   double EnergyBinWidth = 50.;
   int nEnergyBins = 12;
   double enBinStart = 100.;
-  int nBinHist = 200;
+  int nBinHist = 400;
 
   // Output histograms
   TH1D *hisE_data[nEnergyBins];
@@ -104,10 +104,10 @@ int main(int argc, char *argv[])
     double elow = enBinStart + i*EnergyBinWidth;
     double ehigh = elow + EnergyBinWidth;
     
-    hisE_data[i] = new TH1D(TString::Format("hisE_data%i",i),TString::Format("East Anode Data %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,2000.);
-    hisE_sim[i] = new TH1D(TString::Format("hisE_sim%i",i),TString::Format("East Anode Sim %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,20.);
-    hisW_data[i] = new TH1D(TString::Format("hisW_data%i",i),TString::Format("West Anode Data %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,2000.);
-    hisW_sim[i] = new TH1D(TString::Format("hisW_sim%i",i),TString::Format("West Anode Sim %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,20.);
+    hisE_data[i] = new TH1D(TString::Format("hisE_data%i",i),TString::Format("East Anode Data %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,4000.);
+    hisE_sim[i] = new TH1D(TString::Format("hisE_sim%i",i),TString::Format("East Anode Sim %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,40.);
+    hisW_data[i] = new TH1D(TString::Format("hisW_data%i",i),TString::Format("West Anode Data %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,4000.);
+    hisW_sim[i] = new TH1D(TString::Format("hisW_sim%i",i),TString::Format("West Anode Sim %0.0f-%0.0f keV",elow,ehigh), nBinHist, 0.,40.);
 
   }	
   
@@ -267,25 +267,25 @@ int main(int argc, char *argv[])
   
   for ( int i=0; i<nEnergyBins; ++i ) {
 
-    peak = new SinglePeakHist(hisE_data[i],0., 2000., true, 5, 2., 9., true);
+    peak = new SinglePeakHist(hisE_data[i],0., 4000., true, 5, 2., 9., true);
     EdataMPV[i] = peak->ReturnMean();
     EdataMPVerr[i] = peak->ReturnMeanError();
     if ( !peak->isGoodFit() ) { EdataMPV[i] = hisE_data[i]->GetMean(); EdataMPVerr[i] = hisE_data[i]->GetMeanError(); }
     delete peak;
   
-    peak = new SinglePeakHist(hisW_data[i],0., 2000., true, 5, 2., 9., true);
+    peak = new SinglePeakHist(hisW_data[i],0., 4000., true, 5, 2., 9., true);
     WdataMPV[i] = peak->ReturnMean();
     WdataMPVerr[i] = peak->ReturnMeanError();
     if ( !peak->isGoodFit() ) { WdataMPV[i] = hisW_data[i]->GetMean(); WdataMPVerr[i] = hisW_data[i]->GetMeanError(); }
     delete peak;
 
-    peak = new SinglePeakHist(hisE_sim[i],0., 20., true, 5, 2., 9., true);
+    peak = new SinglePeakHist(hisE_sim[i],0., 40., true, 5, 2., 9., true);
     EsimMPV[i] = peak->ReturnMean();
     EsimMPVerr[i] = peak->ReturnMeanError();
     if ( !peak->isGoodFit() ) { EsimMPV[i] = hisE_sim[i]->GetMean(); EsimMPVerr[i] = hisE_sim[i]->GetMeanError(); }
     delete peak;
   
-    peak = new SinglePeakHist(hisW_sim[i],0., 20., true, 5, 2., 9., true);
+    peak = new SinglePeakHist(hisW_sim[i],0., 40., true, 5, 2., 9., true);
     WsimMPV[i] = peak->ReturnMean();
     WsimMPVerr[i] = peak->ReturnMeanError();
     if ( !peak->isGoodFit() ) { WsimMPV[i] = hisW_sim[i]->GetMean(); WsimMPVerr[i] = hisW_sim[i]->GetMeanError(); }

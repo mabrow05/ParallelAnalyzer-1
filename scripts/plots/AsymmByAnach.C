@@ -4,9 +4,9 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 
   bool readInAsymms = true;
   
-  const Int_t numAnaChT0 = 3;
+  const Int_t numAnaChT0 = 4;
   const Int_t numAnaChBacksc = 5;
-  TString anChT0[numAnaChT0] = {"A","C","D"};//,"B"
+  TString anChT0[numAnaChT0] = {"A","B","C","D"};//
   TString anChBacksc[numAnaChBacksc] = {"F","G","H","J","K"};
   
   std::vector <TString> anaChoicesT0;
@@ -124,7 +124,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 
   gStyle->SetLegendBorderSize(0);
   gStyle->SetFillStyle(0);
-
+  gStyle->SetPadLeftMargin(0.1);
+  gStyle->SetTitleXOffset(1.2);
 
   TCanvas *c1 = new TCanvas("c1","demo bin labels",10,10,600,600);
 
@@ -149,9 +150,9 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   //data->LabelsDeflate("Y");
   //data->LabelsOption("v");
   data->GetXaxis()->SetBinLabel(1,"A");
-  //data->GetXaxis()->SetBinLabel(2,"B");
-  data->GetXaxis()->SetBinLabel(2,"C");
-  data->GetXaxis()->SetBinLabel(3,"D");
+  data->GetXaxis()->SetBinLabel(2,"B");
+  data->GetXaxis()->SetBinLabel(3,"C");
+  data->GetXaxis()->SetBinLabel(4,"D");
   data->GetXaxis()->SetLabelSize(0.07);
   data->GetXaxis()->SetTitle("Analysis Choice");
   data->GetYaxis()->SetTitle("Asymmetry");

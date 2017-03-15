@@ -537,7 +537,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     if ( source == "Beta" ) {
 
       // 2011-2012 Cathode Threshold
-      Double_t clip_threshEX = 8.;
+      Double_t clip_threshEX = 3.0;
       Double_t clip_threshEY = 8.;
       Double_t clip_threshWX = 8.;
       Double_t clip_threshWY = 8.;
@@ -570,7 +570,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       }
       
       MWPCCathodeHandler cathResp(dCath_EX,dCath_EY,dCath_WX,dCath_WY);
-      cathResp.setCathodeThreshold(0.000001);
+      cathResp.setCathodeThreshold(0.12);
       cathResp.setClippingThreshold(clip_threshEX,clip_threshEY,clip_threshWX,clip_threshWY);
 
       
