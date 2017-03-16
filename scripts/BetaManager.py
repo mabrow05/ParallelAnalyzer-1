@@ -482,7 +482,7 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
-    if 1:
+    if 0:
         octet_range =[50,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
@@ -499,7 +499,7 @@ if __name__ == "__main__":
 
 
     #Running reverse calibrations
-    if 1:
+    if 0:
         octet_range = [50,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
@@ -508,8 +508,8 @@ if __name__ == "__main__":
     
 
     # Wirechamber stuff
-    if 0:
-        octet_range =[96,121]#[20,28]#[45,50]#[38,40]#[0,59];
+    if 1:
+        octet_range =[67,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             

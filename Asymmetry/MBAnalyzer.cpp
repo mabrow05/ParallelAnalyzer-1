@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
   if ( argc==7 ) corr = std::string(argv[6]);
   bool UKdata = true;//true;
-  bool simulation = true;
+  bool simulation = false;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -240,7 +240,7 @@ void ProcessPairs(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t 
   for (Int_t octet=octBegin; octet<=octEnd; octet++) {
     if ( std::find(badOct.begin(), badOct.end(),octet) != badOct.end() ) continue;  //Checking if octet should be ignored for data quality reasons
     try {
-      PairAsymmetry pair(octet, anaChoice, enBinWidth, 50., UKdata, simulation, UNBLIND);
+      PairAsymmetry pair(octet, anaChoice, enBinWidth, 25., UKdata, simulation, UNBLIND);
       //pair.calcAsymmetryBinByBin();
       //pair.calcSuperSum();
       //pair.writeAsymToFile();

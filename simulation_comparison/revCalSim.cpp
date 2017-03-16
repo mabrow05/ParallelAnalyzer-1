@@ -344,9 +344,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
   //Load the simulated relationship between EQ and Etrue
   EreconParameterization eRecon(runNumber);
-  Int_t pol = getPolarization(runNumber);
+  Int_t pol = source=="Beta" ? getPolarization(runNumber) : 1;
 
   LinearityCurve linCurve(calibrationPeriod,false);
+  std::cout << "Loaded Linearity Curves\n";
 
   //Decide which simulation to use...
   std::string simLocation;

@@ -315,6 +315,8 @@ int main(int argc, char *argv[])
   // Loop over events
   for (int i=0; i<nEvents; i++) {
     t->getEvent(i);
+
+    if ( !(i%10000) ) std::cout << i/10000 << std::endl;
     
     std::vector <double> posex(3,0.);
     std::vector <double> poswx(3,0.);
@@ -604,7 +606,7 @@ int main(int argc, char *argv[])
     
     ////////////////////////////////////////////////////////////////////
     
-    //First calculate old position reconstruction gaus_Erecon
+    //calculate position reconstruction gaus_Erecon
     t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
     t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
     t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
