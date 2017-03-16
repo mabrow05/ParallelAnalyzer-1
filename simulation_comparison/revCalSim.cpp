@@ -537,7 +537,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
     if ( source == "Beta" ) {
 
-      // 2011-2012 Cathode Threshold
+      /* // 2011-2012 Cathode Threshold
       Double_t clip_threshEX = 3.0;
       Double_t clip_threshEY = 8.;
       Double_t clip_threshWX = 8.;
@@ -550,7 +550,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	  clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
 	}
 	else clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
-      } 
+	} */
       
       std::vector <double> posex(3,0.);
       std::vector <double> poswx(3,0.);
@@ -564,16 +564,14 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
       // Different def of wires in data
       for ( int i=0; i<16; ++i ) {
-	dCath_EX[i] = (double)Cath_EX[i];
-	dCath_EY[i] = (double)Cath_EY[i];
+	dCath_EX[15-i] = (double)Cath_EX[i];
+	dCath_EY[15-i] = (double)Cath_EY[i];
 	dCath_WX[i] = (double)Cath_WX[i];
-	dCath_WY[i] = (double)Cath_WY[i];
+	dCath_WY[15-i] = (double)Cath_WY[i];
       }
       
       MWPCCathodeHandler cathResp(dCath_EX,dCath_EY,dCath_WX,dCath_WY);
-      cathResp.setCathodeThreshold(0.12);
-      cathResp.setClippingThreshold(clip_threshEX,clip_threshEY,clip_threshWX,clip_threshWY);
-
+      cathResp.loadCathodeModelParams(runNumber);
       
       cathResp.findAllPositions(true,false);
 
@@ -582,10 +580,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       poswx = cathResp.getPosWX();
       poswy = cathResp.getPosWY();
       
-      mwpcAdjE[0] = -posex[0] * sqrt(0.6) ; // The wires are already in 
-      mwpcAdjE[1] = -posey[0] * sqrt(0.6) ; // mm in the MWPCCathodeHandler Class
+      mwpcAdjE[0] = posex[0] * sqrt(0.6) ; // The wires are already in 
+      mwpcAdjE[1] = posey[0] * sqrt(0.6) ; // mm in the MWPCCathodeHandler Class
       mwpcAdjW[0] = poswx[0] * sqrt(0.6) ;
-      mwpcAdjW[1] = -poswy[0] * sqrt(0.6) ;
+      mwpcAdjW[1] = poswy[0] * sqrt(0.6) ;
       mwpcAdjE[2] = mwpc_pos.MWPCPosE[2]*10. ;
       mwpcAdjW[2] = mwpc_pos.MWPCPosW[2]*10. ;
 
@@ -598,10 +596,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       nClipped_WX = cathResp.getnClippedWX();
       nClipped_WY = cathResp.getnClippedWY();
 
-      xE.center = -posex[0] * sqrt(0.6);
-      yE.center = -posey[0] * sqrt(0.6);
+      xE.center = posex[0] * sqrt(0.6);
+      yE.center = posey[0] * sqrt(0.6);
       xW.center = poswx[0] * sqrt(0.6);
-      yW.center = -poswy[0] * sqrt(0.6);
+      yW.center = poswy[0] * sqrt(0.6);
 
       xE.width = posex[1] * sqrt(0.6);
       yE.width = posey[1] * sqrt(0.6);
@@ -646,10 +644,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       poswx = cathResp.getPosWX();
       poswy = cathResp.getPosWY();
 
-      gaus_xE.center = -posex[0] * sqrt(0.6);
-      gaus_yE.center = -posey[0] * sqrt(0.6);
+      gaus_xE.center = posex[0] * sqrt(0.6);
+      gaus_yE.center = posey[0] * sqrt(0.6);
       gaus_xW.center = poswx[0] * sqrt(0.6);
-      gaus_yW.center = -poswy[0] * sqrt(0.6);
+      gaus_yW.center = poswy[0] * sqrt(0.6);
 
       gaus_xE.width = posex[1] * sqrt(0.6);
       gaus_yE.width = posey[1] * sqrt(0.6);
@@ -695,10 +693,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       poswx = cathResp.getPosWX();
       poswy = cathResp.getPosWY();
 
-      old_xE.center = -posex[0] * sqrt(0.6);
-      old_yE.center = -posey[0] * sqrt(0.6);
+      old_xE.center = posex[0] * sqrt(0.6);
+      old_yE.center = posey[0] * sqrt(0.6);
       old_xW.center = poswx[0] * sqrt(0.6);
-      old_yW.center = -poswy[0] * sqrt(0.6);
+      old_yW.center = poswy[0] * sqrt(0.6);
 
       old_xE.width = posex[1] * sqrt(0.6);
       old_yE.width = posey[1] * sqrt(0.6);

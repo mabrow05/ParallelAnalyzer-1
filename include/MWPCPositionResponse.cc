@@ -7,23 +7,14 @@
 
 MWPCCathodeHandler::MWPCCathodeHandler() {
 
-
-  cathodeThreshold = 100.; //Default for data
-  clipThresholdEX = clipThresholdEY = clipThresholdWX = clipThresholdWY = 4090.; //Default for data
-
-  double Hold[]{0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
-
+  for ( int i = 0; i<16; ++i ) {
+    cathEX[i] = cathEY[i] = cathWX[i] = cathWY[i] = 0.;
+    pedEX[i] = pedEY[i] = pedWX[i] = pedWY[i] = 0.;
+     
+    cathodeThresholdEX[i] = cathodeThresholdEY[i] = cathodeThresholdWX[i] = cathodeThresholdWY[i] = 100.;
+    clipThresholdEX[i] = clipThresholdEY[i] = clipThresholdWX[i] = clipThresholdWY[i] = 100.;
+  }
   
-  cathEX = &Hold[0];
-  cathEY = &Hold[0];
-  cathWX = &Hold[0];
-  cathWY = &Hold[0];
-
-  pedEX = &Hold[0];
-  pedEY = &Hold[0];
-  pedWX = &Hold[0];
-  pedWY = &Hold[0];
-
   _bGaus = false;
   _bGausAllEvents = false;
   _sigma = 6.2;
@@ -41,19 +32,25 @@ MWPCCathodeHandler::MWPCCathodeHandler() {
 MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *wy,
 				       double *pedex,double *pedey,double *pedwx,double *pedwy) {
 
-  cathodeThreshold = 100.; //Default for data
-  clipThresholdEX = clipThresholdEY = clipThresholdWX = clipThresholdWY = 4090.; //Default for data
+  //cathodeThreshold = 100.; //Default for data
+  //clipThresholdEX = clipThresholdEY = clipThresholdWX = clipThresholdWY = 4090.; //Default for data
 
-  cathEX = ex;
-  cathEY = ey;
-  cathWX = wx;
-  cathWY = wy;
+  
+  for ( int i = 0; i<16; ++i ) {
+    cathEX[i] = ex[i];
+    cathEY[i] = ey[i];
+    cathWX[i] = wx[i];
+    cathWY[i] = wy[i];
+  
+    pedEX[i] = pedex[i];
+    pedEY[i] = pedey[i];
+    pedWX[i] = pedwx[i];
+    pedWY[i] = pedwy[i];
 
-  pedEX = pedex;
-  pedEY = pedey;
-  pedWX = pedwx;
-  pedWY = pedwy;
-
+    cathodeThresholdEX[i] = cathodeThresholdEY[i] = cathodeThresholdWX[i] = cathodeThresholdWY[i] = 100.;
+    clipThresholdEX[i] = clipThresholdEY[i] = clipThresholdWX[i] = clipThresholdWY[i] = 4090.;
+  }
+  
   _bGaus = false;
   _bGausAllEvents = false;
   _sigma = 6.2;
@@ -68,22 +65,19 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
 };
 
 MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *wy) {
+
+  for ( int i = 0; i<16; ++i ) {
+    cathEX[i] = ex[i];
+    cathEY[i] = ey[i];
+    cathWX[i] = wx[i];
+    cathWY[i] = wy[i];
+
+    pedEX[i] = pedEY[i] = pedWX[i] = pedWY[i] = 0.;
+    
+    cathodeThresholdEX[i] = cathodeThresholdEY[i] = cathodeThresholdWX[i] = cathodeThresholdWY[i] = 100.;
+    clipThresholdEX[i] = clipThresholdEY[i] = clipThresholdWX[i] = clipThresholdWY[i] = 4090.;
+  }
   
-  cathodeThreshold = 100.; //Default for data
-  clipThresholdEX = clipThresholdEY = clipThresholdWX = clipThresholdWY = 4090.; //Default for data
-
-  cathEX = ex;
-  cathEY = ey;
-  cathWX = wx;
-  cathWY = wy;
-
-  double pedHold[]{0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
-
-  pedEX = &pedHold[0];
-  pedEY = &pedHold[0];
-  pedWX = &pedHold[0];
-  pedWY = &pedHold[0];
-
   _bGaus = false;
   _bGausAllEvents = false;
   _sigma = 6.2;
@@ -96,6 +90,29 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
   doPedestalSubtraction(); 
 
 };
+
+
+void MWPCCathodeHandler::setCathodeThreshold(double *ex,double *ey,double *wx,double *wy) {
+
+  for ( int i = 0; i<16; ++i ) {
+    cathodeThresholdEX[i] = ex[i];
+    cathodeThresholdEY[i] = ey[i];
+    cathodeThresholdWX[i] = wx[i];
+    cathodeThresholdWY[i] = wy[i];
+  }
+
+};
+
+void MWPCCathodeHandler::setClippingThreshold(double *ex,double *ey,double *wx,double *wy) {
+
+  for ( int i = 0; i<16; ++i ) {
+    clipThresholdEX[i] = ex[i];
+    clipThresholdEY[i] = ey[i];
+    clipThresholdWX[i] = wx[i];
+    clipThresholdWY[i] = wy[i];
+  }
+
+}
 
 /*void MWPCCathodeHandler::setCathodeSignals(double *ex,double *ey,
 					   double *wx,double *wy,
@@ -134,6 +151,25 @@ void MWPCCathodeHandler::loadGainFactors(int run) {
   fin.close();
 };
 
+void MWPCCathodeHandler::loadCathodeModelParams(int run) {
+
+  //std::cout << "Loading cathode gain for run " << run << std::endl;
+  
+  std::ifstream fin(TString::Format("%s/cathode_model/cathode_model_%i.dat",
+				    getenv("MWPC_CALIBRATION"),run).Data());
+
+  std::string header;
+  fin >> header >> header >> header >> header >> header >> header >> header >> header; // These are headers
+  int i = 0;
+  while ( fin >> cathodeThresholdEX[i] >> clipThresholdEX[i] >> cathodeThresholdEY[i] >> clipThresholdEY[i]
+	  >> cathodeThresholdWX[i] >> clipThresholdWX[i] >> cathodeThresholdWY[i] >> clipThresholdWY[i] ) {
+    //std::cout << cathodeThresholdEX[i] << "\t" << cathodeThresholdEY[i] << "\t"
+    //	      << cathodeThresholdWX[i] << "\t" << cathodeThresholdWY[i] << std::endl;
+    i++;
+  }
+  fin.close();
+};
+
 void MWPCCathodeHandler::purgeGainFactors() {
 
   gainEX.assign(16,1.);
@@ -159,14 +195,14 @@ void MWPCCathodeHandler::doPedestalSubtraction() {
 
   for ( int i=0; i<16; i++ ) {
     
-    pedSubtrEX[i] = ( cathEX[i]<clipThresholdEX ?
-		      (cathEX[i] - pedEX[i])*gainEX[i] : clipThresholdEX );
-    pedSubtrEY[i] = ( cathEY[i]<clipThresholdEY ?
-		      (cathEY[i] - pedEY[i])*gainEY[i] : clipThresholdEY );
-    pedSubtrWX[i] = ( cathWX[i]<clipThresholdWX ?
-		      (cathWX[i] - pedWX[i])*gainWX[i] : clipThresholdWX );
-    pedSubtrWY[i] = ( cathWY[i]<clipThresholdWY ?
-		      (cathWY[i] - pedWY[i])*gainWY[i] : clipThresholdWY );   
+    pedSubtrEX[i] = ( cathEX[i]<clipThresholdEX[i] ?
+		      (cathEX[i] - pedEX[i])*gainEX[i] : clipThresholdEX[i] );
+    pedSubtrEY[i] = ( cathEY[i]<clipThresholdEY[i] ?
+		      (cathEY[i] - pedEY[i])*gainEY[i] : clipThresholdEY[i] );
+    pedSubtrWX[i] = ( cathWX[i]<clipThresholdWX[i] ?
+		      (cathWX[i] - pedWX[i])*gainWX[i] : clipThresholdWX[i] );
+    pedSubtrWY[i] = ( cathWY[i]<clipThresholdWY[i] ?
+		      (cathWY[i] - pedWY[i])*gainWY[i] : clipThresholdWY[i] );   
   }
   boolPedSubtr = true;
 };
@@ -177,21 +213,21 @@ void MWPCCathodeHandler::doThresholdCheck() {
   signalEX.clear(); signalEY.clear(); signalWX.clear(); signalWY.clear();
   
   for ( int i=0; i<16; i++ ) {   
-    if ( pedSubtrEX[i] > cathodeThreshold*gainEX[i] ) signalEX.push_back(i);
-    if ( pedSubtrEY[i] > cathodeThreshold*gainEY[i] ) signalEY.push_back(i);
-    if ( pedSubtrWX[i] > cathodeThreshold*gainWX[i] ) signalWX.push_back(i);
-    if ( pedSubtrWY[i] > cathodeThreshold*gainWY[i] ) signalWY.push_back(i);
+    if ( pedSubtrEX[i] > cathodeThresholdEX[i]*gainEX[i] ) signalEX.push_back(i);
+    if ( pedSubtrEY[i] > cathodeThresholdEY[i]*gainEY[i] ) signalEY.push_back(i);
+    if ( pedSubtrWX[i] > cathodeThresholdWX[i]*gainWX[i] ) signalWX.push_back(i);
+    if ( pedSubtrWY[i] > cathodeThresholdWY[i]*gainWY[i] ) signalWY.push_back(i);
   }  
   boolThresholdCheck = true;
 };
 
 
 std::vector<int> MWPCCathodeHandler::doClipping(std::vector<int> wires, 
-						double* signal, double clipThresh) {
+						double* signal, double *clipThresh) {
 
   std::vector <int> clipped;
   for ( unsigned int i=0; i<wires.size(); ++i ) {
-    if ( signal[wires[i]] > clipThresh ) clipped.push_back(wires[i]); 
+    if ( signal[wires[i]] > clipThresh[wires[i]] ) clipped.push_back(wires[i]); 
  }
   
   return clipped;

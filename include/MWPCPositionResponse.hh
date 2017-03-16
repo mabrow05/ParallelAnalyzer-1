@@ -22,13 +22,15 @@ public:
   //			 double *pedex,double *pedey,
   //			 double *pedwx,double *pedwy);
     
-  void setCathodeThreshold(double t) { cathodeThreshold = t; };
-  void setClippingThreshold(double ex,double ey,double wx,double wy) 
-  { clipThresholdEX = ex, clipThresholdEY = ey, clipThresholdWX = wx, clipThresholdWY = wy; };
+  void setCathodeThreshold(double *ex,double *ey,double *wx,double *wy);
+  void setClippingThreshold(double *ex,double *ey,double *wx,double *wy); 
   void setSigma(double s) { _sigma = s; };
   void loadGainFactors(int run); // Loads the gain factors if you want gain
                                  // gain corrected cathode signals
   void purgeGainFactors(); //Erases previously set gain factors
+
+  void loadCathodeModelParams(int run); // When doing simulation, you can load the model params for clipping and triggering
+
 
   void PrintSignals();
   void findAllPositions(bool gaus=true, bool gausAllEvents=false); // You only need to call this to return all position.
@@ -77,10 +79,10 @@ public:
 
 private:
   
-  double cathodeThreshold;
-  double clipThresholdEX, clipThresholdEY, clipThresholdWX, clipThresholdWY; // value where clipping occurs
-  double *cathEX, *cathEY, *cathWX, *cathWY;
-  double *pedEX, *pedEY, *pedWX, *pedWY;
+  double cathodeThresholdEX[16], cathodeThresholdEY[16], cathodeThresholdWX[16], cathodeThresholdWY[16]; // Value where trigger occurs
+  double clipThresholdEX[16], clipThresholdEY[16], clipThresholdWX[16], clipThresholdWY[16]; // value where clipping occurs
+  double cathEX[16], cathEY[16], cathWX[16], cathWY[16];
+  double pedEX[16], pedEY[16], pedWX[16], pedWY[16];
   double pedSubtrEX[16],pedSubtrEY[16],pedSubtrWX[16],pedSubtrWY[16];
   std::vector<double> posEX, posEY, posWX, posWY; // Final position of the event (mean,width,height)
   //int nClippedEX, nClippedEY, nClippedWX, nClippedWY;
@@ -93,7 +95,7 @@ private:
   
   void doPedestalSubtraction(); // Subtracts pedestals and fills pedSubtr** 
   void doThresholdCheck(); // Sets all of the wires that were above threshold in signal**
-  std::vector <int>  doClipping(std::vector<int> wires, double *sig, double thresh); //Checks for clipped wires
+  std::vector <int>  doClipping(std::vector<int> wires, double *sig, double *thresh); //Checks for clipped wires
   std::vector<double> fitCathResponse(std::vector <int> wires, std::vector<int> clip, double *sig, const double *pos); // // returns gaussian mean and width and height of a signal in a three element vector
   int getMaxWire(std::vector <int> wires, double *sig); // returns max wire
   double getMaxSignal(double *sig); // returns max signal
