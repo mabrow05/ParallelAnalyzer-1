@@ -220,6 +220,28 @@ class BetaReplayManager:
         print "DONE"
 
 
+    def runCathodeModel(self,octet):
+
+        print "Running cathode_model for octet %i"%octet
+
+        runs = []
+         
+        filename = "All_Octets/octet_list_%i.dat"%(octet)
+        infile = open(self.octetListPath+filename,'r')
+        
+        for line in infile:      
+            words=line.split()
+            if words[0] in betaRunTypes: # Avoids depol runs and bg runs since only used for sims
+                runs.append(int(words[1]))
+                    
+        
+        for run in runs:
+            os.system("cd ../mwpc_cal/; ./cathode_model.exe %i"%run)
+    
+        print "DONE"
+
+
+
 
     def runWirechamberCal(self,runORoctet):
 
@@ -510,9 +532,10 @@ if __name__ == "__main__":
 
     # Wirechamber stuff
     if 1:
-        octet_range =[67,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[50,59]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             
             #beta.runGainCathodes(octet)
-            beta.runWirechamberCal(octet)
+            beta.runCathodeModel(octet)
+            #beta.runWirechamberCal(octet)

@@ -115,174 +115,180 @@ int main(int argc, char *argv[])
 
   // Load the files
     
-  TString infile = TString::Format("%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runNumber);
+  TString infile = TString::Format("%s/replay_pass3_%i.root",getenv("REPLAY_PASS3"),runNumber);
   TFile *data = new TFile(infile, "READ");
-  TTree *tData = (TTree*)data->Get("revCalSim");
+  TTree *tData = (TTree*)data->Get("pass3");
   
   infile = TString::Format("%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runNumber);
   TFile *sim = new TFile(infile, "READ");
   TTree *tSim = (TTree*)sim->Get("revCalSim");
 
   Double_t triggerInc = 0.01;
-  Double_t clippInc = 0.01;
+  Double_t clippInc = 0.1;
   
-  for ( int c=0; c<16; ++c ) { // loop over all cathodes on East
-      Double_t dataTriggerCut = 100.;
-      Double_t dataClippingCut = 4090.;
+  for ( int c=0; c<16; ++c ) { // loop over all cathodes
 
-      //First we do the threshold determination
+    std::cout << "//////////// Cathode "<< c << " /////////////\n";
 
-      //East X
-      Double_t dataTotalN = tData->GetEntries("PID==1 && Side==0");
-      Double_t dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_Ex[%i]>%f && PID==1 && Side==0",c,dataTriggerCut));
-      Double_t triggerFrac = dataTriggeredN / dataTotalN;
+    Double_t dataTriggerCut = 100.;
+    Double_t dataClippingCut = 4090.;
+    
+    //First we do the threshold determination
+    
+    //East X
+    Double_t dataTotalN = tData->GetEntries("PID==1 && Side==0");
+    Double_t dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_Ex[%i]>%f && PID==1 && Side==0",c,dataTriggerCut).Data());
+    Double_t triggerFrac = dataTriggeredN / dataTotalN;
+    
+    Double_t simTotalN = tSim->GetEntries("PID==1 && side==0");
+    Double_t simTriggeredN = simTotalN;
+    Double_t simTriggerFrac = 1.;
+    
+    Double_t simTrigger = 0.;
+    
+    std::cout << "EX Threshold \n";
+    while ( simTriggerFrac > triggerFrac ) {
+      simTrigger += triggerInc;
+      simTriggeredN = tSim->GetEntries(TString::Format("Cath_EX[%i]>%f && PID==1 && side==0",c,simTrigger).Data());
+      simTriggerFrac = simTriggeredN / simTotalN ;
+      cathEX_trig[c] = simTrigger;
+    }
+    
+    //East Y
+    dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_Ey[%i]>%f && PID==1 && Side==0",c,dataTriggerCut).Data());
+    triggerFrac = dataTriggeredN / dataTotalN;
+    
+    simTriggeredN = simTotalN;
+    simTriggerFrac = 1.;
+    
+    simTrigger = 0.;
 
-      Double_t simTotalN = tSim->GetEntries("PID==1 && side==0");
-      Double_t simTriggeredN = 0.;
-      Double_t simTriggerFrac = 0.;
-      
-      Double_t simTrigger = 0.;
-	    
-      while ( simTriggerFrac < triggerFrac ) {
-	simTrigger += triggerInc;
-	simTriggeredN = tSim->GetEntries(TString::Format("Cath_EX[%i]>%f && PID==1 && side==0",c,simTrigger));
-	simTriggerFrac = simTriggeredN / simTotalN ;
-	cathEX_trig[c] = simTrigger;
-      }
-
-      //East Y
-      dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_Ey[%i]>%f && PID==1 && Side==0",c,dataTriggerCut));
-      triggerFrac = dataTriggeredN / dataTotalN;
-
-      simTriggeredN = 0.;
-      simTriggerFrac = 0.;
-      
-      simTrigger = 0.;
-	    
-      while ( simTriggerFrac < triggerFrac ) {
-	simTrigger += triggerInc;
-	simTriggeredN = tSim->GetEntries(TString::Format("Cath_EY[%i]>%f && PID==1 && side==0",c,simTrigger));
-	simTriggerFrac = simTriggeredN / simTotalN ;
-	cathEY_trig[c] = simTrigger;
-      }
-
-      //West X
-      dataTotalN = tData->GetEntries("PID==1 && Side==1");
-      dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_Wx[%i]>%f && PID==1 && Side==1",c,dataTriggerCut));
-      triggerFrac = dataTriggeredN / dataTotalN;
-
-      simTotalN = tSim->GetEntries("PID==1 && side==1");
-      simTriggeredN = 0.;
-      simTriggerFrac = 0.;
-      
-      simTrigger = 0.;
-	    
-      while ( simTriggerFrac < triggerFrac ) {
-	simTrigger += triggerInc;
-	simTriggeredN = tSim->GetEntries(TString::Format("Cath_WX[%i]>%f && PID==1 && side==1",c,simTrigger));
-	simTriggerFrac = simTriggeredN / simTotalN ;
-	cathWX_trig[c] = simTrigger;
-      }
-
-      //West Y
-      dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_WY[%i]>%f && PID==1 && Side==1",c,dataTriggerCut));
-      triggerFrac = dataTriggeredN / dataTotalN;
-
-      simTriggeredN = 0.;
-      simTriggerFrac = 0.;
-      
-      simTrigger = 0.;
-	    
-      while ( simTriggerFrac < triggerFrac ) {
-	simTrigger += triggerInc;
-	simTriggeredN = tSim->GetEntries(TString::Format("Cath_WY[%i]>%f && PID==1 && side==1",c,simTrigger));
-	simTriggerFrac = simTriggeredN / simTotalN ;
-	cathWY_trig[c] = simTrigger;
-      }
-
-
-      //Now we do the clipping determination
-
-      //East X
-      dataClippingCut = 4095. - pedPdc2[16+c]; // pedestal subtracted clipping
-      
-      dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==0 && Cathodes_Ex[%i]>%f",c,dataTriggerCut));
-      Double_t dataClippedN = tData->GetEntries(TString::Format("Cathodes_Ex[%i]>%f && PID==1 && Side==0",c,dataClippingCut));
-      Double_t ClippedFrac = dataClippedN / dataTotalN;
-
-      simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==0 && Cath_EX[%i]>%f",c,cathEX_trig[c]));
-      Double_t simClippedN = 0.;
-      Double_t simClippedFrac = 0.;
-      
-      Double_t simClip = 12.;
-	    
-      while ( simClippedFrac < ClippedFrac ) {
-	simClip -= clippInc;
-	simClippedN = tSim->GetEntries(TString::Format("Cath_EX[%i]>%f && PID==1 && side==0",c,simClip));
-	simClippedFrac = simClippedN / simTotalN ;
-	cathEX_clip[c] = simClip;
-      }
-
-      // East Y
-      dataClippingCut = 4095. - pedPdc2[c]; // pedestal subtracted clipping
-      
-      dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==0 && Cathodes_Ey[%i]>%f",c,dataTriggerCut));
-      dataClippedN = tData->GetEntries(TString::Format("Cathodes_Ey[%i]>%f && PID==1 && Side==0",c,dataClippingCut));
-      ClippedFrac = dataClippedN / dataTotalN;
-
-      simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==0 && Cath_EY[%i]>%f",c,cathEX_trig[c]));
-      simClippedN = 0.;
-      simClippedFrac = 0.;
-      
-      simClip = 12.;
-	    
-      while ( simClippedFrac < ClippedFrac ) {
-	simClip -= clippInc;
-	simClippedN = tSim->GetEntries(TString::Format("Cath_EY[%i]>%f && PID==1 && side==0",c,simClip));
-	simClippedFrac = simClippedN / simTotalN ;
-	cathEY_clip[c] = simClip;
-      }
-
-      // West X
-      dataClippingCut = 4095. - pedPadc[16+c]; // pedestal subtracted clipping
-      
-      dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==1 && Cathodes_Wx[%i]>%f",c,dataTriggerCut));
-      dataClippedN = tData->GetEntries(TString::Format("Cathodes_Wx[%i]>%f && PID==1 && Side==1",c,dataClippingCut));
-      ClippedFrac = dataClippedN / dataTotalN;
-
-      simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==1 && Cath_WX[%i]>%f",c,cathEX_trig[c]));
-      simClippedN = 0.;
-      simClippedFrac = 0.;
-      
-      simClip = 12.;
-	    
-      while ( simClippedFrac < ClippedFrac ) {
-	simClip -= clippInc;
-	simClippedN = tSim->GetEntries(TString::Format("Cath_WX[%i]>%f && PID==1 && side==1",c,simClip));
-	simClippedFrac = simClippedN / simTotalN ;
-	cathWX_clip[c] = simClip;
-      }
-
-      // West Y
-      dataClippingCut = 4095. - pedPadc[c]; // pedestal subtracted clipping
-      
-      dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==1 && Cathodes_Wy[%i]>%f",c,dataTriggerCut));
-      dataClippedN = tData->GetEntries(TString::Format("Cathodes_Wy[%i]>%f && PID==1 && Side==1",c,dataClippingCut));
-      ClippedFrac = dataClippedN / dataTotalN;
-
-      simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==1 && Cath_WY[%i]>%f",c,cathEX_trig[c]));
-      simClippedN = 0.;
-      simClippedFrac = 0.;
-      
-      simClip = 12.;
-	    
-      while ( simClippedFrac < ClippedFrac ) {
-	simClip -= clippInc;
-	simClippedN = tSim->GetEntries(TString::Format("Cath_WX[%i]>%f && PID==1 && side==1",c,simClip));
-	simClippedFrac = simClippedN / simTotalN ;
-	cathWY_clip[c] = simClip;
-      }
-
+    std::cout << "EY Threshold \n";
+    while ( simTriggerFrac > triggerFrac ) {
+      simTrigger += triggerInc;
+      simTriggeredN = tSim->GetEntries(TString::Format("Cath_EY[%i]>%f && PID==1 && side==0",c,simTrigger).Data());
+      simTriggerFrac = simTriggeredN / simTotalN ;
+      cathEY_trig[c] = simTrigger;
+    }
+    
+    //West X
+    dataTotalN = tData->GetEntries("PID==1 && Side==1");
+    dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_Wx[%i]>%f && PID==1 && Side==1",c,dataTriggerCut).Data());
+    triggerFrac = dataTriggeredN / dataTotalN;
+    
+    simTotalN = tSim->GetEntries("PID==1 && side==1");
+    simTriggeredN = simTotalN;
+    simTriggerFrac = 1.;
+    
+    simTrigger = 0.;
+    std::cout << "WX Threshold \n";
+    while ( simTriggerFrac > triggerFrac ) {
+      simTrigger += triggerInc;
+      simTriggeredN = tSim->GetEntries(TString::Format("Cath_WX[%i]>%f && PID==1 && side==1",c,simTrigger).Data());
+      simTriggerFrac = simTriggeredN / simTotalN ;
+      cathWX_trig[c] = simTrigger;
+    }
+    
+    //West Y
+    dataTriggeredN = tData->GetEntries(TString::Format("Cathodes_Wy[%i]>%f && PID==1 && Side==1",c,dataTriggerCut).Data());
+    triggerFrac = dataTriggeredN / dataTotalN;
+    
+    simTriggeredN = simTotalN;
+    simTriggerFrac = 1.;
+    
+    simTrigger = 0.;
+    std::cout << "WY Threshold\n";
+    while ( simTriggerFrac > triggerFrac ) {
+      simTrigger += triggerInc;
+      simTriggeredN = tSim->GetEntries(TString::Format("Cath_WY[%i]>%f && PID==1 && side==1",c,simTrigger).Data());
+      simTriggerFrac = simTriggeredN / simTotalN ;
+      cathWY_trig[c] = simTrigger;
+    }
+    
+    
+    //Now we do the clipping determination
+    
+    //East X
+    dataClippingCut = 4090. - pedPdc2[16+c]; // pedestal subtracted clipping
+    
+    dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==0 && Cathodes_Ex[%i]>%f",c,dataTriggerCut).Data());
+    Double_t dataClippedN = tData->GetEntries(TString::Format("Cathodes_Ex[%i]>%f && PID==1 && Side==0",c,dataClippingCut).Data());
+    Double_t ClippedFrac = dataClippedN / dataTotalN;
+    
+    simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==0 && Cath_EX[%i]>%f",c,cathEX_trig[c]).Data());
+    Double_t simClippedN = 0.;
+    Double_t simClippedFrac = 0.;
+    
+    Double_t simClip = 9.;
+    std::cout << "EX Clipping\n";// clipped Frac above " << dataClippingCut << ": "
+    //	      << dataClippedN << "/" << dataTotalN << " = " << ClippedFrac << "\n";   
+    while ( simClippedFrac < ClippedFrac ) {
+      simClip -= clippInc;
+      simClippedN = tSim->GetEntries(TString::Format("Cath_EX[%i]>%f && PID==1 && side==0",c,simClip).Data());
+      simClippedFrac = simClippedN / simTotalN ;
+    }
+    cathEX_clip[c] = simClip;
+    
+    // East Y
+    dataClippingCut = 4090. - pedPdc2[c]; // pedestal subtracted clipping
+    
+    dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==0 && Cathodes_Ey[%i]>%f",c,dataTriggerCut).Data());
+    dataClippedN = tData->GetEntries(TString::Format("Cathodes_Ey[%i]>%f && PID==1 && Side==0",c,dataClippingCut).Data());
+    ClippedFrac = dataClippedN / dataTotalN;
+    
+    simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==0 && Cath_EY[%i]>%f",c,cathEX_trig[c]).Data());
+    simClippedN = 0.;
+    simClippedFrac = 0.;
+    
+    simClip = 9.;
+    std::cout << "EY Clipping\n";    
+    while ( simClippedFrac < ClippedFrac ) {
+      simClip -= clippInc;
+      simClippedN = tSim->GetEntries(TString::Format("Cath_EY[%i]>%f && PID==1 && side==0",c,simClip).Data());
+      simClippedFrac = simClippedN / simTotalN ;
+    }
+    cathEY_clip[c] = simClip;
+    
+    // West X
+    dataClippingCut = 4090. - pedPadc[16+c]; // pedestal subtracted clipping
+    
+    dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==1 && Cathodes_Wx[%i]>%f",c,dataTriggerCut).Data());
+    dataClippedN = tData->GetEntries(TString::Format("Cathodes_Wx[%i]>%f && PID==1 && Side==1",c,dataClippingCut).Data());
+    ClippedFrac = dataClippedN / dataTotalN;
+    
+    simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==1 && Cath_WX[%i]>%f",c,cathEX_trig[c]).Data());
+    simClippedN = 0.;
+    simClippedFrac = 0.;
+    
+    simClip = 9.;
+    std::cout << "WX Clipping\n";
+    while ( simClippedFrac < ClippedFrac ) {
+      simClip -= clippInc;
+      simClippedN = tSim->GetEntries(TString::Format("Cath_WX[%i]>%f && PID==1 && side==1",c,simClip).Data());
+      simClippedFrac = simClippedN / simTotalN ;
+    }
+    cathWX_clip[c] = simClip;
+    
+    // West Y
+    dataClippingCut = 4090. - pedPadc[c]; // pedestal subtracted clipping
+    
+    dataTotalN = tData->GetEntries(TString::Format("PID==1 && Side==1 && Cathodes_Wy[%i]>%f",c,dataTriggerCut).Data());
+    dataClippedN = tData->GetEntries(TString::Format("Cathodes_Wy[%i]>%f && PID==1 && Side==1",c,dataClippingCut).Data());
+    ClippedFrac = dataClippedN / dataTotalN;
+    
+    simTotalN = tSim->GetEntries(TString::Format("PID==1 && side==1 && Cath_WY[%i]>%f",c,cathEX_trig[c]).Data());
+    simClippedN = 0.;
+    simClippedFrac = 0.;
+    
+    simClip = 9.;
+    std::cout << "WY Clipping\n";
+    while ( simClippedFrac < ClippedFrac ) {
+      simClip -= clippInc;
+      simClippedN = tSim->GetEntries(TString::Format("Cath_WY[%i]>%f && PID==1 && side==1",c,simClip).Data());
+      simClippedFrac = simClippedN / simTotalN ;
+    }
+    cathWY_clip[c] = simClip;
+    
   }
 
   
@@ -291,17 +297,17 @@ int main(int argc, char *argv[])
 
   std::ofstream ofile(TString::Format("%s/cathode_model/cathode_model_%i.dat",getenv("MWPC_CALIBRATION"),runNumber).Data());
 
-  ofile << "#cathEX_trigg\tcath_EXclip\tcathEY_trigg\tcathEY_clip\tcathWX_trigg\tcathWX_clip\tcathWY_trigg\tcathWY_clip\n";
+  ofile << "#cathEX_trigg\tcathEX_clip\tcathEY_trigg\tcathEY_clip\tcathWX_trigg\tcathWX_clip\tcathWY_trigg\tcathWY_clip\n";
 
   for ( int c=0; c<16; ++c ) {
 
-    ofile << cathEX_trig[c] << "\t"
-	  << cathEX_clip[c] << "\t"
-	  << cathEY_trig[c] << "\t"
-	  << cathEY_clip[c] << "\t"
-	  << cathWX_trig[c] << "\t"
-	  << cathWX_clip[c] << "\t"
-	  << cathWY_trig[c] << "\t"
+    ofile << cathEX_trig[c] << "\t\t"
+	  << cathEX_clip[c] << "\t\t"
+	  << cathEY_trig[c] << "\t\t"
+	  << cathEY_clip[c] << "\t\t"
+	  << cathWX_trig[c] << "\t\t"
+	  << cathWX_clip[c] << "\t\t"
+	  << cathWY_trig[c] << "\t\t"
 	  << cathWY_clip[c];
     if ( c<15 ) ofile << "\n";
   }
