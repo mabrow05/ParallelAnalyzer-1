@@ -17,7 +17,7 @@ MWPCCathodeHandler::MWPCCathodeHandler() {
   
   _bGaus = false;
   _bGausAllEvents = false;
-  _sigma = 6.2;
+  _sigma = 8.;
 
   gainEX.resize(16,1.);
   gainEY.resize(16,1.);
@@ -53,7 +53,7 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
   
   _bGaus = false;
   _bGausAllEvents = false;
-  _sigma = 6.2;
+  _sigma = 8.;
 
   gainEX.resize(16,1.);
   gainEY.resize(16,1.);
@@ -80,7 +80,7 @@ MWPCCathodeHandler::MWPCCathodeHandler(double *ex,double *ey,double *wx,double *
   
   _bGaus = false;
   _bGausAllEvents = false;
-  _sigma = 6.2;
+  _sigma = 8.;
 
   gainEX.resize(16,1.);
   gainEY.resize(16,1.);
@@ -492,7 +492,7 @@ std::vector<double> MWPCCathodeHandler::fitGaus(std::vector<double> x, std::vect
 
   // Calculate mean
   double mu = ( ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) != 0. ? 
-		( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 65. );
+		( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 85. );
 
   // Calculate amplitude
 
@@ -525,7 +525,7 @@ std::vector<double> MWPCCathodeHandler::fitParabola(std::vector<double> x, std::
 
   // Calculate mean
   double mu = ( ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) != 0. ? 
-		( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 65. ) ;
+		( p_plus*p_plus*(s_0 - s_minus) - p_minus*p_minus*(s_0 - s_plus) ) / ( 2.* ( p_plus*(s_0 - s_minus) - p_minus*(s_0 - s_plus) ) ) : 85. ) ;
 
   // Calculate amplitude
 
@@ -555,7 +555,7 @@ std::vector<double> MWPCCathodeHandler::fitGaus2Points(std::vector<double> x, st
   //We will use the average width as seen from studying the normal fit to gaussian
   double sigma = _sigma / TMath::Sqrt( 0.6 );
   // Calculate mean
-  double mu = (p_plus - p_minus) != 0. ? (p_minus + p_plus) / 2. + sigma*sigma / (p_plus - p_minus) * TMath::Log(s_plus/s_minus) : 65. ;
+  double mu = (p_plus - p_minus) != 0. ? (p_minus + p_plus) / 2. + sigma*sigma / (p_plus - p_minus) * TMath::Log(s_plus/s_minus) : 85. ;
 
   // Calculate amplitude
 
