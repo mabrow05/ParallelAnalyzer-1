@@ -70,6 +70,7 @@ class BetaReplayManager:
         os.system("mkdir -p %s/position_maps"%self.mwpcCalPath)
         os.system("mkdir -p %s/octets"%self.mwpcCalPath)
         os.system("mkdir -p %s/runs"%self.mwpcCalPath)
+        os.system("mkdir -p %s/cathode_model"%self.mwpcCalPath)        
         os.system("mkdir -p %s/octets"%self.gainCathodesPath)
         os.system("mkdir -p %s/runs"%self.gainCathodesPath)
 

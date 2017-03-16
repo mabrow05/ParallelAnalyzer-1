@@ -25,6 +25,10 @@ cathode_gain.exe: cathode_gain.o $(objects)
 	$(CXX) $(CXXFLAGS) -o cathode_gain.exe cathode_gain.o $(objects) $(LIBS)
 	@echo "Done"
 
+cathode_model.exe: cathode_model.o $(objects)
+	$(CXX) $(CXXFLAGS) -o cathode_model.exe cathode_model.o $(objects) $(LIBS)
+	@echo "Done"
+
 MWPC_position_map.exe: MWPC_position_map.o $(objects)
 	$(CXX) $(CXXFLAGS) -o MWPC_position_map.exe MWPC_position_map.o $(objects) $(LIBS)
 	@echo "Done"
