@@ -293,7 +293,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     else if (sourceName[i]=="Bi1") src_hold=3;*/
 
     //Sources to ignore in fit
-    if (sourceName[i]=="Cd" || sourceName[i]=="Bi2" || sourceName[i]=="In") continue;
+    if (sourceName[i]=="Cd" || sourceName[i]=="In") continue; //|| sourceName[i]=="Bi2" 
 
     
     if ( isSourceInFidCut(run[i],sourceName[i].substr(0,2), fiducialCut, 0) ) {

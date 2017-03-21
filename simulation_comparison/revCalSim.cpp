@@ -280,9 +280,9 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   //First get the number of total electron events around the source position from the data file and also the length of the run
   
   //sprintf(temp,"%s/replay_pass4_%i.root",getenv("REPLAY_PASS4"),runNumber);
-  sprintf(temp,"%s/replay_pass2_%i.root",getenv("REPLAY_PASS2"),runNumber);
+  sprintf(temp,"%s/replay_pass3_%i.root",getenv("REPLAY_PASS3"),runNumber);
   TFile *dataFile = new TFile(temp,"READ");
-  TTree *data = (TTree*)(dataFile->Get("pass2"));
+  TTree *data = (TTree*)(dataFile->Get("pass3"));
   
   if (source!="Beta") {
     sprintf(tempE,"Type<4 && Type>=0 && PID==1 && Side==0 && (xE.center>(%f-2.*%f) && xE.center<(%f+2.*%f) && yE.center>(%f-2.*%f) && yE.center<(%f+2.*%f))",srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][0],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]),srcPos[0][1],fabs(srcPos[0][2]));

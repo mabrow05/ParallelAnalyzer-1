@@ -148,17 +148,17 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    /*TString aCh[4] = {"A","D","F","G"};//{"C","J","K","H"};//"A","D"
+    /*TString aCh[3] = {"C","D","F"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
-      ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+      ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
       PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
       }*/
 
    
     ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
     
@@ -240,7 +240,7 @@ void ProcessPairs(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t 
   for (Int_t octet=octBegin; octet<=octEnd; octet++) {
     if ( std::find(badOct.begin(), badOct.end(),octet) != badOct.end() ) continue;  //Checking if octet should be ignored for data quality reasons
     try {
-      PairAsymmetry pair(octet, anaChoice, enBinWidth, 25., UKdata, simulation, UNBLIND);
+      PairAsymmetry pair(octet, anaChoice, enBinWidth, 50., UKdata, simulation, UNBLIND);
       //pair.calcAsymmetryBinByBin();
       //pair.calcSuperSum();
       //pair.writeAsymToFile();

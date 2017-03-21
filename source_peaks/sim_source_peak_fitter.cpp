@@ -20,6 +20,7 @@
 #include "sourcePeaks.h"
 #include "positionMapHandler.hh"
 #include "peaks.hh"
+#include "DataTree.hh" // To find the MWPC struct
 //#include "calibrationTools.hh"
 
 using namespace std;
@@ -252,6 +253,7 @@ int main(int argc, char *argv[])
     Double_t Evis[2];
     ScintPosAdjusted pos;
     Int_t nClipped_EX=0, nClipped_EY=0, nClipped_WX=0, nClipped_WY=0;
+    MWPC xE, yE, xW, yW;
     // Variables
     Tin->SetBranchAddress("PMT",&pmt);
     Tin->SetBranchAddress("Erecon", &Erecon); 
@@ -260,10 +262,14 @@ int main(int argc, char *argv[])
     Tin->SetBranchAddress("PID",  &PID);
     Tin->SetBranchAddress("type", &type);
     Tin->SetBranchAddress("side", &side);
-    Tin->SetBranchAddress("nClipped_EX", &nClipped_EX);
-    Tin->SetBranchAddress("nClipped_EY", &nClipped_EY);
-    Tin->SetBranchAddress("nClipped_WX", &nClipped_WX);
-    Tin->SetBranchAddress("nClipped_WY", &nClipped_WY);
+    // Tin->SetBranchAddress("nClipped_EX", &nClipped_EX);
+    //Tin->SetBranchAddress("nClipped_EY", &nClipped_EY);
+    //Tin->SetBranchAddress("nClipped_WX", &nClipped_WX);
+    //Tin->SetBranchAddress("nClipped_WY", &nClipped_WY);
+    Tin->SetBranchAddress("xE", &xE);
+    Tin->SetBranchAddress("yE", &yE);
+    Tin->SetBranchAddress("xW", &xW);
+    Tin->SetBranchAddress("yW", &yW);
 
     int nEvents = Tin->GetEntries();
     cout << "Processing " << argv[1] << " ... " << endl;
@@ -283,7 +289,9 @@ int main(int argc, char *argv[])
       if ( r2E>(fiducialCut*fiducialCut) || r2W>(fiducialCut*fiducialCut) ) continue; // get rid of events which are outside fiducial cut
       
       // Cut the clipped events
-      if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue; 
+      //if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue; 
+      // We can't really cut the clipped events, since we aren't applying the cathode model
+      // to the simulated sources... 
 
       eta = posmap.getInterpolatedEta(pos.ScintPosAdjE[0], pos.ScintPosAdjE[1], pos.ScintPosAdjW[0], pos.ScintPosAdjW[1]);
       

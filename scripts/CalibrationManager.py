@@ -963,17 +963,17 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [9,10,11,12]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [24,23]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
-            #rep.findPedestals(runPeriod)
-            #rep.runReplayPass1(runPeriod)
+            rep.findPedestals(runPeriod)
+            rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
-            rep.findTriggerFunctions(runPeriod)
+            #rep.findTriggerFunctions(runPeriod)
             rep.runReplayPass2(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
@@ -982,7 +982,7 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [16,18]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1016,7 +1016,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 0:#i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             

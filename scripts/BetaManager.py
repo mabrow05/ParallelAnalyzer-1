@@ -506,7 +506,7 @@ if __name__ == "__main__":
 
 
     if 0:
-        octet_range =[50,59]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[67,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
@@ -521,21 +521,22 @@ if __name__ == "__main__":
            
 
 
-    #Running reverse calibrations
-    if 0:
-        octet_range = [50,59];
-        beta = BetaReplayManager()
-        for octet in range(octet_range[0],octet_range[1]+1,1):
-            #beta.findTriggerFunctions(octet)
-            beta.runReverseCalibration(octet)
-    
-
     # Wirechamber stuff
     if 1:
-        octet_range =[50,59]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[109,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             
             #beta.runGainCathodes(octet)
             beta.runCathodeModel(octet)
             #beta.runWirechamberCal(octet)
+
+
+    #Running reverse calibrations
+    if 1:
+        octet_range = [109,121];
+        beta = BetaReplayManager()
+        for octet in range(octet_range[0],octet_range[1]+1,1):
+            #beta.findTriggerFunctions(octet)
+            beta.runReverseCalibration(octet)
+    
