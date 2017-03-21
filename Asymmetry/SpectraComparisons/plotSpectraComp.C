@@ -8,7 +8,7 @@
 
   TString normType = "ALL";
 
-  Double_t normLow = 200.;
+  Double_t normLow = 0.;
   Double_t normHigh = 780.;
   
   Double_t xAxisMax = 1200.;
@@ -425,7 +425,7 @@
 
 
   TCanvas *c2_sfOFF_E = new TCanvas("c2_sfOFF_E", "c2_sfOFF_E", 1600., 600.);
-  c2_sfOFF_E->Divide(3,1);
+  c2_sfOFF_E->Divide(4,1);
   c2_sfOFF_E->cd(1);
   
   
@@ -586,7 +586,7 @@
 
 
   TCanvas *c2_sfON_E = new TCanvas("c2_sfON_E", "c2_sfON_E", 1600., 600.);
-  c2_sfON_E->Divide(3,1);
+  c2_sfON_E->Divide(4,1);
   c2_sfON_E->cd(1);
   
   
@@ -748,7 +748,7 @@
 
 
   TCanvas *c2_sfOFF_W = new TCanvas("c2_sfOFF_W", "c2_sfOFF_W", 1600., 600.);
-  c2_sfOFF_W->Divide(3,1);
+  c2_sfOFF_W->Divide(4,1);
   c2_sfOFF_W->cd(1);
   
   
@@ -910,7 +910,7 @@
 
 
   TCanvas *c2_sfON_W = new TCanvas("c2_sfON_W", "c2_sfON_W", 1600., 600.);
-  c2_sfON_W->Divide(3,1);
+  c2_sfON_W->Divide(4,1);
   c2_sfON_W->cd(1);
   
   

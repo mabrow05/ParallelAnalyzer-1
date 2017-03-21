@@ -8,7 +8,7 @@ ROOTLIBS      = $(shell root-config --libs)
 ROOTGLIBS     = $(shell root-config --glibs)
 ROOTCFLAGS    = $(shell root-config --cflags)
 
-VPATH = ./:../include/:../Asymmetry/
+VPATH = ./:../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
