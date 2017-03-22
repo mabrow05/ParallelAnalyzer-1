@@ -351,7 +351,7 @@ class CalReplayManager:
                 elif source == "Cs":
                     source = source+"137"
 
-                if source in ["Ce139","Sn113","In114","Bi207"]:
+                if source in ["Ce139","Sn113","Bi207"]: #,"In114"
                     os.system("cd ../simulation_comparison/;./revCalSim.exe %i %s"%(run, source))
                     #print "./../simulation_comparison/revCalSim.exe %i %s"%(run, source)
 
@@ -416,7 +416,7 @@ class CalibrationManager:
             exit
 
 
-    def runSourceCalReplayPeakFitter(self,srcRunPeriod=1):
+    def runSourceCalReplayPeakFitter(self,srcRunPeriod=1, doOnlyCeSnBi=True):
         print "Running SrcCalReplay for run period %i"%(srcRunPeriod)
         filename=None
         
@@ -428,7 +428,33 @@ class CalibrationManager:
                 runs.append(int(line))
             
         for run in runs:
-            os.system("cd ../source_peaks/; ./srcCalReplay.exe %i"%run)
+            filename = self.srcListPath+"source_list_%i.dat"%run
+            if not MButils.fileExistsAndNotEmpty(filename):
+                continue
+            srcFile = open(filename)
+            sources = []
+            for line in srcFile:
+                sources.append(line)
+
+            isCeSnBi = False
+            for source in sources:
+                if source[0:2]=="Ce":
+                    isCeSnBi = True
+                    break
+                if source[0:2]=="Sn":
+                    isCeSnBi = True
+                    break
+                if source[0:2]=="Bi":
+                    isCeSnBi = True
+                    break
+                
+            if doOnlyCeSnBi:
+                if isCeSnBi:
+                    os.system("cd ../source_peaks/; ./srcCalReplay.exe %i"%run)
+
+            else: 
+                os.system("cd ../source_peaks/; ./srcCalReplay.exe %i"%run)
+
         print "DONE"
                 
         
@@ -1001,16 +1027,16 @@ if __name__ == "__main__":
 
                 # Data Stuff
 
-                cal.runSourceCalReplayPeakFitter(runPeriod);
+                cal.runSourceCalReplayPeakFitter(runPeriod,doOnlyCeSnBi=True);
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
 
                 #Simulation Stuff
 
-                #rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
-                #cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
+                rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
+                cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
                 
                 cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
 
