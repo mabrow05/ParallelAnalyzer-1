@@ -363,6 +363,68 @@ int main(int argc, char *argv[])
     double maxCathSumE = cathMaxEX + cathMaxEY;
     double maxCathSumW = cathMaxWX + cathMaxWY;
 
+    //Also saving one set of positions for making position maps
+    cathResp.findAllPositions(true,false);
+
+    
+    std::vector<double> posex = cathResp.getPosEX();
+    std::vector<double> posey = cathResp.getPosEY();
+    std::vector<double> poswx = cathResp.getPosWX();
+    std::vector<double> poswy = cathResp.getPosWY();
+    
+    t->xE.center = posex[0] * positionProjection;
+    t->yE.center = posey[0] * positionProjection;
+    t->xW.center = poswx[0] * positionProjection;
+    t->yW.center = poswy[0] * positionProjection;
+    
+    t->xE.width = posex[1] * positionProjection;
+    t->yE.width = posey[1] * positionProjection;
+    t->xW.width = poswx[1] * positionProjection;
+    t->yW.width = poswy[1] * positionProjection;
+    
+    t->xE.height = posex[2];
+    t->yE.height = posey[2];
+    t->xW.height = poswx[2];
+    t->yW.height = poswy[2];
+    
+    t->xE.mult = cathResp.getMultEX();
+    t->yE.mult = cathResp.getMultEY();
+    t->xW.mult = cathResp.getMultWX();
+    t->yW.mult = cathResp.getMultWY();
+    
+    t->xE.nClipped = cathResp.getnClippedEX();
+    t->yE.nClipped = cathResp.getnClippedEY();
+    t->xW.nClipped = cathResp.getnClippedWX();
+    t->yW.nClipped = cathResp.getnClippedWY();
+    
+    t->xE.maxWire = cathResp.getMaxWireEX();
+    t->yE.maxWire = cathResp.getMaxWireEY();
+    t->xW.maxWire = cathResp.getMaxWireWX();
+    t->yW.maxWire = cathResp.getMaxWireWY();
+    
+    t->xE.maxValue = cathResp.getMaxSignalEX();
+    t->yE.maxValue = cathResp.getMaxSignalEY();
+    t->xW.maxValue = cathResp.getMaxSignalWX();
+    t->yW.maxValue = cathResp.getMaxSignalWY();
+    
+    t->xE.cathSum = cathResp.getCathSumEX();
+    t->yE.cathSum = cathResp.getCathSumEY();
+    t->xW.cathSum = cathResp.getCathSumWX();
+    t->yW.cathSum = cathResp.getCathSumWY();
+    
+    t->CathSumE = t->xE.cathSum + t->yE.cathSum;
+    t->CathSumW = t->xW.cathSum + t->yW.cathSum;
+    
+    t->CathMaxE = t->xE.maxValue + t->yE.maxValue;
+    t->CathMaxW = t->xW.maxValue + t->yW.maxValue;
+    
+    t->xE.rawCenter = cathResp.getWirePosEX(t->xE.maxWire);
+    t->yE.rawCenter = cathResp.getWirePosEY(t->yE.maxWire);
+    t->xW.rawCenter = cathResp.getWirePosWX(t->xW.maxWire);
+    t->yW.rawCenter = cathResp.getWirePosWY(t->yW.maxWire);
+
+      
+
     ///////////////////////////////////////////////////////////
     
     
