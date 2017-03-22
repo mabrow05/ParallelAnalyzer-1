@@ -609,27 +609,7 @@ int main(int argc, char *argv[])
     ////////////////////////////////////////////////////////////////////////////////////
     
     // Calculate MWPC positions for electron events
-    xE = 0.;
-    yE = 0.;
-    xW = 0.;
-    yW = 0.;
-    posError = 0.;
-
-    double xMWPCEast = 0.;
-    double yMWPCEast = 0.;
-    double xMWPCWest = 0.;
-    double yMWPCWest = 0.;
-    double xMWPCEastSum = 0.;
-    double yMWPCEastSum = 0.;
-    double xMWPCWestSum = 0.;
-    double yMWPCWestSum = 0.;
-    double xEmax = 0., yEmax = 0., xWmax = 0., yWmax = 0.; //max adc on wire
-    int xEmaxWire=0, yEmaxWire =0, xWmaxWire=0, yWmaxWire=0;  // max wire number
-    int xEmult = 0, yEmult = 0, xWmult = 0, yWmult = 0; //Num of wires over threshold
-    double widthEX = 0., widthEY = 0., widthWX = 0., widthWY = 0.;
-    double heightEX = 0., heightEY = 0., heightWX = 0., heightWY = 0.;
-    int nclippedEX = 0, nclippedEY = 0, nclippedWX = 0, nclippedWY = 0;
-
+    
     
     // Pass Everything to output tree
     t->TriggerNum = (int) Number;
@@ -656,49 +636,18 @@ int main(int argc, char *argv[])
     t->TDCW4 = (double) Tdc011;
     
     //Wirechambers
-    t->xE.center = xE;
-    t->xE.width = widthEX;
-    t->xE.cathSum = xMWPCEastSum;
-    t->xE.maxValue = xEmax;
-    t->xE.maxWire = xEmaxWire;
-    t->xE.mult = xEmult;
-    t->xE.nClipped = nclippedEX; //This is now implemented above
+    
     t->xE.err = 0.;
     t->xE.rawCenter = 0.;
-    t->xE.height = heightEX;
-    
-    t->yE.center = yE;
-    t->yE.width = widthEY;
-    t->yE.cathSum = yMWPCEastSum;
-    t->yE.maxValue = yEmax;
-    t->yE.maxWire = yEmaxWire;
-    t->yE.mult = yEmult;
-    t->yE.nClipped = nclippedEY;
+      
     t->yE.err = 0.;
     t->yE.rawCenter = 0.;
-    t->yE.height = heightEY;
-    
-    t->xW.center = xW;
-    t->xW.width = widthWX;
-    t->xW.cathSum = xMWPCWestSum;
-    t->xW.maxValue = xWmax;
-    t->xW.maxWire = xWmaxWire;
-    t->xW.mult = xWmult;
-    t->xW.nClipped = nclippedWX;
+   
     t->xW.err = 0.;
     t->xW.rawCenter = 0.;
-    t->xW.height = heightWX;
-    
-    t->yW.center = yW;
-    t->yW.width = widthWY;
-    t->yW.cathSum = yMWPCWestSum;
-    t->yW.maxValue = yWmax;
-    t->yW.maxWire = yWmaxWire;
-    t->yW.mult = yWmult;
-    t->yW.nClipped = nclippedWY;
+   
     t->yW.err = 0.;
     t->yW.rawCenter = 0.;
-    t->yW.height = heightWY;
     
     t->ScintE.q1 = pmt[0];
     t->ScintE.q2 = pmt[1];
