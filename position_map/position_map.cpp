@@ -23,7 +23,7 @@
 #include "basic_reconstruction.h"
 #include "DataTree.hh"
 #include "MBUtils.hh"
-#include "../source_peaks/peaks.hh"
+#include "peaks.hh"
 
 #include "positionMapHandler.hh"
 

@@ -12,7 +12,7 @@ VPATH = ./:../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
-CXXFLAGS      = -O2 -Wall -fPIC
+CXXFLAGS      = -O2 -Wall -fPIC -std=c++11
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
@@ -39,7 +39,7 @@ compare_swank_maps.exe: compare_swank_maps.o $(objects)
 
 DataTree.o: DataTree.hh
 
-../source_peaks/peaks.o: ../source_peaks/peaks.hh
+peaks.o: peaks.hh
 
 MBUtils.o: MBUtils.hh
 
