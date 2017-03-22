@@ -981,8 +981,8 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 0: 
-        runPeriods = [16,18,19]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1007,10 +1007,10 @@ if __name__ == "__main__":
 
                 #Simulation Stuff
 
-                rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
-                cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
-                cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
+                #rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
+                #cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
+                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
+                #cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
                 
                 cal.calculateResiduals(runPeriod) # compare data peaks to simulated peaks
 
@@ -1024,16 +1024,16 @@ if __name__ == "__main__":
 
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
-    if 1: 
-        runPeriods = [8,9,10]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+    if 0: 
+        runPeriods = [9]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
-            rep.findPedestals(runPeriod, sourceORxenon="xenon")
+            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")

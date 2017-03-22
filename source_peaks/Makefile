@@ -68,7 +68,7 @@ source_peaks_EnergyPeak.exe: source_peaks_EnergyPeak.o $(objects)
 
 peaks.o: peaks.hh
 
-MWPCPositionResponse.o: MWPCPositionResponse.o
+MWPCPositionResponse.o: MWPCPositionResponse.hh
 
 DataTree.o: DataTree.hh
 
