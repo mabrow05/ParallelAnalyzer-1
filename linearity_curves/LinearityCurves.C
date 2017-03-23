@@ -412,7 +412,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   // Fit function
   TF1 *fitADC = new TF1("fitADC", "([0] + [1]*x + [2]*x*x)", 0., 2500.0);
   fitADC->SetParameter(0, 0.0);
-  fitADC->SetParLimits(0, -15., 15.);
+  fitADC->SetParLimits(0, -20., 20.);
   //fitADC->FixParameter(0, 0.0);
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
