@@ -352,11 +352,11 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   //Decide which simulation to use...
   std::string simLocation;
   TChain *chain = new TChain("anaTree");
-  
-  if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
+  simLocation = string(getenv("SIM_2011_2012"));
+  /*  if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
   else if (runNumber>21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
   else simLocation = string(getenv("SIM_2012_2013"));
-
+  */
   //*************************************************************************
   // TAKE THIS OUT ASAP! IT'S FOR XUAN USING 2011/2012 CALIBRATIONS ON 
   // LARGE 2012/2013 SIMS TO SHOW THIN WINDOW EFFECTS

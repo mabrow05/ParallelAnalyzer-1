@@ -238,6 +238,7 @@ void EvtRateHandler::dataReader() {
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
   float EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0., MWPCEnergyE_f=0., MWPCEnergyW_f=0.; // For reading in data from MPM replays
   int xE_nClipped=0, yE_nClipped=0, xW_nClipped=0, yW_nClipped=0;
+  int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
   int badTimeFlag = 0; 
 
   int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
@@ -269,6 +270,10 @@ void EvtRateHandler::dataReader() {
       Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
       Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
       Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
+      Tin->GetBranch("xE")->GetLeaf("mult")->SetAddress(&xE_mult);
+      Tin->GetBranch("yE")->GetLeaf("mult")->SetAddress(&yE_mult);
+      Tin->GetBranch("xW")->GetLeaf("mult")->SetAddress(&xW_mult);
+      Tin->GetBranch("yW")->GetLeaf("mult")->SetAddress(&yW_mult);
 
       Tin->SetBranchAddress("xeRC", &xeRC);
       Tin->SetBranchAddress("yeRC", &yeRC);
@@ -300,6 +305,10 @@ void EvtRateHandler::dataReader() {
       Tin->GetBranch("yEmpm")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
       Tin->GetBranch("xWmpm")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
       Tin->GetBranch("yWmpm")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
+      Tin->GetBranch("xEmpm")->GetLeaf("mult")->SetAddress(&xE_mult);
+      Tin->GetBranch("yEmpm")->GetLeaf("mult")->SetAddress(&yE_mult);
+      Tin->GetBranch("xWmpm")->GetLeaf("mult")->SetAddress(&xW_mult);
+      Tin->GetBranch("yWmpm")->GetLeaf("mult")->SetAddress(&yW_mult);
 
       Tin->SetBranchAddress("xeRC", &xeRC);
       Tin->SetBranchAddress("yeRC", &yeRC);
@@ -339,15 +348,18 @@ void EvtRateHandler::dataReader() {
 	if ( Type!=0 ) {
 	  //if ( xE_nClipped>1 || yE_nClipped>1 || xW_nClipped>1 || yW_nClipped>1 ) continue;
 	  if ( xeRC>6 || yeRC>6 || xwRC>6 || ywRC>6 ) continue; //Must look at both sides
+	  else if ( xE_mult<1 || yE_mult<1 || xW_mult<1 || yW_mult<1 ) continue;
 	}
 	else {
 	  if ( Side==0 ) {
 	    //if ( xE_nClipped>1 || yE_nClipped>1 ) continue;
 	    if ( xeRC>6 || yeRC>6 ) continue; //only look at MWPC signal on East
+	    if ( xE_mult<1 || yE_mult<1 ) continue;
 	  }
 	  else if ( Side==1 ) {
 	    //if ( xW_nClipped>1 || yW_nClipped>1 ) continue;
 	    if ( xwRC>6 || ywRC>6 ) continue; //only look at MWPC signal on West
+	    if ( xW_mult<1 || yW_mult<1 ) continue;
 	  }
 	}
 	
@@ -456,6 +468,8 @@ void SimEvtRateHandler::dataReader() {
   double mwpcPosW[3]={0.}; //holds the position of the event in the MWPC for simulated data
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0.;
   int xE_nClipped, yE_nClipped, xW_nClipped, yW_nClipped;
+  int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
+
 
   xE_nClipped = yE_nClipped = xW_nClipped = yW_nClipped = 0;
   
@@ -493,6 +507,10 @@ void SimEvtRateHandler::dataReader() {
     Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
     Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
     Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&yW_nClipped);
+    Tin->GetBranch("xE")->GetLeaf("mult")->SetAddress(&xE_mult);
+    Tin->GetBranch("yE")->GetLeaf("mult")->SetAddress(&yE_mult);
+    Tin->GetBranch("xW")->GetLeaf("mult")->SetAddress(&xW_mult);
+    Tin->GetBranch("yW")->GetLeaf("mult")->SetAddress(&yW_mult);
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 
@@ -518,14 +536,21 @@ void SimEvtRateHandler::dataReader() {
       
       if (PID==1) {
 
-	/*//Cut out clipped events
+	//Cut out clipped events
 	if ( Type!=0 ) {
-	  if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
+	  //if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
+	  if (xE_mult<1 || yE_mult<1 || xW_mult<1 || yW_mult<1) continue;
 	}
 	else {
-	  if ( Side==0 && ( xE_nClipped>0 || yE_nClipped>0 ) ) continue;
-	  else if ( Side==1 && ( xW_nClipped>0 || yW_nClipped>0 ) ) continue;
-	  }*/
+	  if ( Side==0 ) {
+	    //if ( xE_nClipped>0 || yE_nClipped>0 )  continue;
+	    if ( xE_mult<1 || yE_mult<1 )  continue;
+	  }
+	  else if ( Side==1 ) {
+	    //if ( xW_nClipped>0 || yW_nClipped>0 )  continue;
+	    if ( xW_mult<1 || yW_mult<1 )  continue;
+	  }
+	}
 
 	//r2E = ( mwpcPosE[0]*mwpcPosE[0] + mwpcPosE[1]*mwpcPosE[1] ) * 0.6 * 10.;
 	//r2W = ( mwpcPosW[0]*mwpcPosW[0] + mwpcPosW[1]*mwpcPosW[1] ) * 0.6 * 10.;
