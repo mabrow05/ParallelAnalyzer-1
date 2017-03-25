@@ -142,7 +142,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 	 >> ADC_hold[4] >> ADC_hold[5] >> ADC_hold[6] >> ADC_hold[7]) {
 
     adcE1[i] = TMath::IsNaN(atof(ADC_hold[0].Data())) ? 10000. : atof(ADC_hold[0].Data());
-    adcE2[i] = TMath::IsNaN(atof(ADC_hold[1].Data())) ? 10000. : atof(ADC_hold[1].Data());
+    adcE2[i] = TMath::IsNaN(atof(ADC_hold[1].Data())) || atof(ADC_hold[1].Data())<0.01 ? 10000. : atof(ADC_hold[1].Data());
     adcE3[i] = TMath::IsNaN(atof(ADC_hold[2].Data())) ? 10000. : atof(ADC_hold[2].Data());
     adcE4[i] = TMath::IsNaN(atof(ADC_hold[3].Data())) ? 10000. : atof(ADC_hold[3].Data());
     adcW1[i] = TMath::IsNaN(atof(ADC_hold[4].Data())) ? 10000. : atof(ADC_hold[4].Data());
