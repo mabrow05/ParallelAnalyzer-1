@@ -149,8 +149,11 @@ void EvtRateHandler::loadReferenceSpectra() {
     
     ++inc;
 
+    if (inc > 9 && inc < 15) std::cout << binMid << "\t" << eastRef << "\t" << westRef << std::endl; 
+    
   }
 
+  infile.close()
   std::cout << "Finished Loading Reference Rate data...\n\n";
   
 };
