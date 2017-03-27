@@ -153,7 +153,7 @@ void EvtRateHandler::loadReferenceSpectra() {
     
   }
 
-  infile.close()
+  infile.close();
   std::cout << "Finished Loading Reference Rate data...\n\n";
   
 };
@@ -502,10 +502,14 @@ void SimEvtRateHandler::dataReader() {
     //Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
     //Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
     //Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
-    Tin->GetBranch("gaus_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("gaus_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("gaus_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    Tin->GetBranch("gaus_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    //Tin->GetBranch("gaus_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    //Tin->GetBranch("gaus_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    //Tin->GetBranch("gaus_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    //Tin->GetBranch("gaus_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
     //Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
     //Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
     //Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
