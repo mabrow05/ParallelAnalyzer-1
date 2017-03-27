@@ -141,29 +141,32 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 	 >> ADC_hold[0] >> ADC_hold[1] >> ADC_hold[2] >> ADC_hold[3]
 	 >> ADC_hold[4] >> ADC_hold[5] >> ADC_hold[6] >> ADC_hold[7]) {
 
-    adcE1[i] = TMath::IsNaN(atof(ADC_hold[0].Data())) ? 10000. : atof(ADC_hold[0].Data());
-    adcE2[i] = TMath::IsNaN(atof(ADC_hold[1].Data())) || atof(ADC_hold[1].Data())<0.01 ? 10000. : atof(ADC_hold[1].Data());
-    adcE3[i] = TMath::IsNaN(atof(ADC_hold[2].Data())) ? 10000. : atof(ADC_hold[2].Data());
-    adcE4[i] = TMath::IsNaN(atof(ADC_hold[3].Data())) ? 10000. : atof(ADC_hold[3].Data());
-    adcW1[i] = TMath::IsNaN(atof(ADC_hold[4].Data())) ? 10000. : atof(ADC_hold[4].Data());
-    adcW2[i] = TMath::IsNaN(atof(ADC_hold[5].Data())) ? 10000. : atof(ADC_hold[5].Data());
-    adcW3[i] = TMath::IsNaN(atof(ADC_hold[6].Data())) ? 10000. : atof(ADC_hold[6].Data());
-    adcW4[i] = TMath::IsNaN(atof(ADC_hold[7].Data())) ? 10000. : atof(ADC_hold[7].Data());
+    adcE1[i] = TMath::IsNaN(atof(ADC_hold[0].Data())) || atof(ADC_hold[0].Data())<0.01 ? -10000. : atof(ADC_hold[0].Data()); // if these are bad, we make them -10000
+    adcE2[i] = TMath::IsNaN(atof(ADC_hold[1].Data())) || atof(ADC_hold[1].Data())<0.01 ? -10000. : atof(ADC_hold[1].Data()); // so that they don't affect the fits right away and have
+    adcE3[i] = TMath::IsNaN(atof(ADC_hold[2].Data())) || atof(ADC_hold[2].Data())<0.01 ? -10000. : atof(ADC_hold[2].Data()); // a chance to recover on the next go around
+    adcE4[i] = TMath::IsNaN(atof(ADC_hold[3].Data())) || atof(ADC_hold[3].Data())<0.01 ? -10000. : atof(ADC_hold[3].Data());
+    adcW1[i] = TMath::IsNaN(atof(ADC_hold[4].Data())) || atof(ADC_hold[4].Data())<0.01 ? -10000. : atof(ADC_hold[4].Data());
+    adcW2[i] = TMath::IsNaN(atof(ADC_hold[5].Data())) || atof(ADC_hold[5].Data())<0.01 ? -10000. : atof(ADC_hold[5].Data());
+    adcW3[i] = TMath::IsNaN(atof(ADC_hold[6].Data())) || atof(ADC_hold[6].Data())<0.01 ? -10000. : atof(ADC_hold[6].Data());
+    adcW4[i] = TMath::IsNaN(atof(ADC_hold[7].Data())) || atof(ADC_hold[7].Data())<0.01 ? -10000. : atof(ADC_hold[7].Data());
 
     while (!(run_hold==run[i] && sourceName_hold==sourceName[i])) {
       simFileIn >> run_hold >> sourceName_hold >> Eq_hold[0] >> Eq_hold[1] >> Eq_hold[2]
 		>> Eq_hold[3] >> Eq_hold[4] >> Eq_hold[5] >> Eq_hold[6] >> Eq_hold[7];
     }
     //cout << run_hold << " " << sourceName_hold << " ";
-    if (run_hold==run[i] && sourceName_hold==sourceName[i]) { 
-      EqE1[i] = TMath::IsNaN(atof(Eq_hold[0].Data())) ? 10000. : atof(Eq_hold[0].Data()); //The 10000. here takes the peak outside the fit range if for 
-      EqE2[i] = TMath::IsNaN(atof(Eq_hold[1].Data())) ? 10000. : atof(Eq_hold[1].Data()); // some reason it wasn't a real number...
-      EqE3[i] = TMath::IsNaN(atof(Eq_hold[2].Data())) ? 10000. : atof(Eq_hold[2].Data());
-      EqE4[i] = TMath::IsNaN(atof(Eq_hold[3].Data())) ? 10000. : atof(Eq_hold[3].Data());
-      EqW1[i] = TMath::IsNaN(atof(Eq_hold[4].Data())) ? 10000. : atof(Eq_hold[4].Data());
-      EqW2[i] = TMath::IsNaN(atof(Eq_hold[5].Data())) ? 10000. : atof(Eq_hold[5].Data());
-      EqW3[i] = TMath::IsNaN(atof(Eq_hold[6].Data())) ? 10000. : atof(Eq_hold[6].Data());
-      EqW4[i] = TMath::IsNaN(atof(Eq_hold[7].Data())) ? 10000. : atof(Eq_hold[7].Data());
+    if (run_hold==run[i] && sourceName_hold==sourceName[i]) {
+      
+      EqE1[i] = TMath::IsNaN(atof(Eq_hold[0].Data())) || atof(Eq_hold[0].Data())<0.01 ? 0. : atof(Eq_hold[0].Data()); // If these are bad, we make them zero so we can see the issue
+      EqE2[i] = TMath::IsNaN(atof(Eq_hold[1].Data())) || atof(Eq_hold[1].Data())<0.01 ? 0. : atof(Eq_hold[1].Data());
+      EqE3[i] = TMath::IsNaN(atof(Eq_hold[2].Data())) || atof(Eq_hold[2].Data())<0.01 ? 0. : atof(Eq_hold[2].Data());
+      EqE4[i] = TMath::IsNaN(atof(Eq_hold[3].Data())) || atof(Eq_hold[3].Data())<0.01 ? 0. : atof(Eq_hold[3].Data());
+      EqW1[i] = TMath::IsNaN(atof(Eq_hold[4].Data())) || atof(Eq_hold[4].Data())<0.01 ? 0. : atof(Eq_hold[4].Data());
+      EqW2[i] = TMath::IsNaN(atof(Eq_hold[5].Data())) || atof(Eq_hold[5].Data())<0.01 ? 0. : atof(Eq_hold[5].Data());
+      EqW3[i] = TMath::IsNaN(atof(Eq_hold[6].Data())) || atof(Eq_hold[6].Data())<0.01 ? 0. : atof(Eq_hold[6].Data());
+      EqW4[i] = TMath::IsNaN(atof(Eq_hold[7].Data())) || atof(Eq_hold[7].Data())<0.01 ? 0. : atof(Eq_hold[7].Data());
+
+
       //simFileIn >> EqE1[i] >> EqE2[i] >> EqE3[i] >> EqE4[i]
       //	>> EqW1[i] >> EqW2[i] >> EqW3[i] >> EqW4[i];
       //cout << EqE1[i] << " " << EqE2[i] << " " << EqE3[i] << " " << EqE4[i] << " "
@@ -244,7 +247,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   sprintf(temp,"%s/residuals/PMT_runQuality_SrcPeriod_%i.dat",getenv("ANALYSIS_CODE"),calibrationPeriod);
   ifstream pmt;
   pmt.open(temp);
-  Int_t run_hold, EPMT1,EPMT2,EPMT3,EPMT4,WPMT1,WPMT2,WPMT3,WPMT4;
+  Int_t EPMT1,EPMT2,EPMT3,EPMT4,WPMT1,WPMT2,WPMT3,WPMT4;
   Int_t numRuns=0;
   while (pmt >> run_hold >> pmthold[0] >> pmthold[1] >> pmthold[2]
 	 >> pmthold[3] >> pmthold[4] >> pmthold[5]
@@ -395,14 +398,14 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   //Finding the lowest ADC/EQ peak in each PMT for fitting purposes
   std::vector <Double_t> lowestEQ(8,10000.);
   std::vector <Double_t> lowestADC(8,10000.);
-  for (Int_t i=0; i<ADCE1.size(); i++) { if (ADCE1[i] < lowestADC[0]) { lowestADC[0] = ADCE1[i]; lowestEQ[0] = EQE1[i]; } }
-  for (Int_t i=0; i<ADCE2.size(); i++) { if (ADCE2[i] < lowestADC[1]) { lowestADC[1] = ADCE2[i]; lowestEQ[1] = EQE2[i]; } }
-  for (Int_t i=0; i<ADCE3.size(); i++) { if (ADCE3[i] < lowestADC[2]) { lowestADC[2] = ADCE3[i]; lowestEQ[2] = EQE3[i]; } }
-  for (Int_t i=0; i<ADCE4.size(); i++) { if (ADCE4[i] < lowestADC[3]) { lowestADC[3] = ADCE4[i]; lowestEQ[3] = EQE4[i]; } }
-  for (Int_t i=0; i<ADCW1.size(); i++) { if (ADCW1[i] < lowestADC[4]) { lowestADC[4] = ADCW1[i]; lowestEQ[4] = EQW1[i]; } }
-  for (Int_t i=0; i<ADCW2.size(); i++) { if (ADCW2[i] < lowestADC[5]) { lowestADC[5] = ADCW2[i]; lowestEQ[5] = EQW2[i]; } }
-  for (Int_t i=0; i<ADCW3.size(); i++) { if (ADCW3[i] < lowestADC[6]) { lowestADC[6] = ADCW3[i]; lowestEQ[6] = EQW3[i]; } }
-  for (Int_t i=0; i<ADCW4.size(); i++) { if (ADCW4[i] < lowestADC[7]) { lowestADC[7] = ADCW4[i]; lowestEQ[7] = EQW4[i]; } }
+  for (Int_t i=0; i<ADCE1.size(); i++) { if (ADCE1[i] < lowestADC[0] && ADCE1[i]>0. ) { lowestADC[0] = ADCE1[i]; lowestEQ[0] = EQE1[i]; } }
+  for (Int_t i=0; i<ADCE2.size(); i++) { if (ADCE2[i] < lowestADC[1] && ADCE2[i]>0. ) { lowestADC[1] = ADCE2[i]; lowestEQ[1] = EQE2[i]; } }
+  for (Int_t i=0; i<ADCE3.size(); i++) { if (ADCE3[i] < lowestADC[2] && ADCE3[i]>0. ) { lowestADC[2] = ADCE3[i]; lowestEQ[2] = EQE3[i]; } }
+  for (Int_t i=0; i<ADCE4.size(); i++) { if (ADCE4[i] < lowestADC[3] && ADCE4[i]>0. ) { lowestADC[3] = ADCE4[i]; lowestEQ[3] = EQE4[i]; } }
+  for (Int_t i=0; i<ADCW1.size(); i++) { if (ADCW1[i] < lowestADC[4] && ADCW1[i]>0. ) { lowestADC[4] = ADCW1[i]; lowestEQ[4] = EQW1[i]; } }
+  for (Int_t i=0; i<ADCW2.size(); i++) { if (ADCW2[i] < lowestADC[5] && ADCW2[i]>0. ) { lowestADC[5] = ADCW2[i]; lowestEQ[5] = EQW2[i]; } }
+  for (Int_t i=0; i<ADCW3.size(); i++) { if (ADCW3[i] < lowestADC[6] && ADCW3[i]>0. ) { lowestADC[6] = ADCW3[i]; lowestEQ[6] = EQW3[i]; } }
+  for (Int_t i=0; i<ADCW4.size(); i++) { if (ADCW4[i] < lowestADC[7] && ADCW4[i]>0. ) { lowestADC[7] = ADCW4[i]; lowestEQ[7] = EQW4[i]; } }
   
 
   //File to hold the linearity curves for each calibration run period
@@ -444,6 +447,9 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   //fitADC->SetLineStyle(10);
 
   Double_t offset=0., slope=0., quad=0., cubic=0., spreadOfTanH=0., meanOfTanH=0., lowEnSlope=0.; //Fit Parameters
+  Double_t shiftOfTanH=0.;
+
+  Double_t x1_text, y1_text;
 
   //Creating canvases and TPads for all of the calibrations curves
   TCanvas *c1 = new TCanvas("c1", "c1", 1400, 1000);
@@ -490,7 +496,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
   
 
-  if (runE1.size()>0 && (std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && (std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end() || std::find(nameE1.begin(),nameE1.end(),"Bi2")!=nameE1.end()))) {
+  if (runE1.size()>0 && std::find(nameE1.begin(),nameE1.end(),"Ce")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Sn")!=nameE1.end() && std::find(nameE1.begin(),nameE1.end(),"Bi1")!=nameE1.end()  )  {
  
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
@@ -532,8 +538,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     else linCurves << offset << " " << slope << " " << quad << endl;
   
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -615,8 +621,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -641,7 +647,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   ofstream oFileE2(temp);
   vector <Double_t> fitEQ_E2(runE2.size(),0);
 
-  if (runE2.size()>0 && (std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && (std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end() || std::find(nameE2.begin(),nameE2.end(),"Bi2")!=nameE2.end()))) {
+
+  if (runE2.size()>0 && std::find(nameE2.begin(),nameE2.end(),"Ce")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Sn")!=nameE2.end() && std::find(nameE2.begin(),nameE2.end(),"Bi1")!=nameE2.end()  )  {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ=0.;
@@ -684,9 +691,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     if (useTanh) linCurves << offset << " " << slope << " " << quad  << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     else linCurves << offset << " " << slope << " " << quad << endl;
 
-
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -757,7 +763,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grE2r->SetMaximum( 10.0);
     grE2r->Draw("AP");
 
-    Int_t n = 2;
+    const Int_t n = 2;
     Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
@@ -767,8 +773,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -793,7 +799,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   ofstream oFileE3(temp);
   vector <Double_t> fitEQ_E3(runE3.size(),0);
 
-  if (runE3.size()>0 && (std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && (std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end() || std::find(nameE3.begin(),nameE3.end(),"Bi2")!=nameE3.end()))) {
+  if (runE3.size()>0 && std::find(nameE3.begin(),nameE3.end(),"Ce")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Sn")!=nameE3.end() && std::find(nameE3.begin(),nameE3.end(),"Bi1")!=nameE3.end()  )  {
 
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
@@ -844,8 +850,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     linCurves << offset << " " << slope << " " << quad << << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     */
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -926,8 +932,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -952,8 +958,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   ofstream oFileE4(temp);
   vector <Double_t> fitEQ_E4(runE4.size(),0);
 
-  if (runE4.size()>0 && (std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && (std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end() || std::find(nameE4.begin(),nameE4.end(),"Bi2")!=nameE4.end()))) {
-
+  if (runE4.size()>0 && std::find(nameE4.begin(),nameE4.end(),"Ce")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Sn")!=nameE4.end() && std::find(nameE4.begin(),nameE4.end(),"Bi1")!=nameE4.end()  )  {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runE4.size(); ii++) {
@@ -1002,8 +1007,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     */
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1084,8 +1089,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1113,8 +1118,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   ofstream oFileW1(temp);
   vector <Double_t> fitEQ_W1(runW1.size(),0);
 
-  if (runW1.size()>0 && (std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && (std::find(nameW1.begin(),nameW1.end(),"Bi2")!=nameW1.end() || std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end()))) {
-
+  if (runW1.size()>0 && std::find(nameW1.begin(),nameW1.end(),"Ce")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Sn")!=nameW1.end() && std::find(nameW1.begin(),nameW1.end(),"Bi1")!=nameW1.end()  )  {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW1.size(); ii++) {
@@ -1163,8 +1167,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     linCurves << offset << " " << slope << " " << quad <<  " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     */ 
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1230,7 +1234,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grW1r->SetMaximum( 10.0);
     grW1r->Draw("AP");
 
-    Int_t n = 2;
+    static const Int_t n = 2;
     Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
@@ -1240,8 +1244,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1266,7 +1270,9 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   ofstream oFileW2(temp);
   vector <Double_t> fitEQ_W2(runW2.size(),0);
 
-  if (runW2.size()>0 && (std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && (std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end() || std::find(nameW2.begin(),nameW2.end(),"Bi2")!=nameW2.end()))) {
+
+  if (runW2.size()>0 && std::find(nameW2.begin(),nameW2.end(),"Ce")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Sn")!=nameW2.end() && std::find(nameW2.begin(),nameW2.end(),"Bi1")!=nameW2.end()  )  {
+  
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW2.size(); ii++) {
@@ -1316,8 +1322,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     */ 
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1383,7 +1389,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grW2r->SetMaximum( 10.0);
     grW2r->Draw("AP");
 
-    Int_t n = 2;
+    static const Int_t n = 2;
     Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
@@ -1393,8 +1399,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1419,7 +1425,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   ofstream oFileW3(temp);
   vector <Double_t> fitEQ_W3(runW3.size(),0);
 
-  if (runW3.size()>0 && (std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && (std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end()) || std::find(nameW3.begin(),nameW3.end(),"Bi2")!=nameW3.end())) {
+  if (runW3.size()>0 && std::find(nameW3.begin(),nameW3.end(),"Ce")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Sn")!=nameW3.end() && std::find(nameW3.begin(),nameW3.end(),"Bi1")!=nameW3.end()  )  {
+
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW3.size(); ii++) {
@@ -1469,8 +1476,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     linCurves << offset << " " << slope << " " << quad << " " << lowEnSlope << " " << shiftOfTanH << " " << spreadOfTanH << endl;
     */
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1536,7 +1543,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grW3r->SetMaximum( 10.0);
     grW3r->Draw("AP");
 
-    Int_t n = 2;
+    static const Int_t n = 2;
     Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
@@ -1546,8 +1553,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1572,7 +1579,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   ofstream oFileW4(temp);
   vector <Double_t> fitEQ_W4(runW4.size(),0);
 
-  if (runW4.size()>0 && (std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && (std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end()) || std::find(nameW4.begin(),nameW4.end(),"Bi2")!=nameW4.end())) {
+  if (runW4.size()>0 && std::find(nameW4.begin(),nameW4.end(),"Ce")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Sn")!=nameW4.end() && std::find(nameW4.begin(),nameW4.end(),"Bi1")!=nameW4.end()  )  {
     //Calculating the average of the lower Ce ADC values and assigning a value to lowFitThreshold
     Double_t maxADC = 0., maxEQ = 0.;
     for (UInt_t ii=0; ii<runW4.size(); ii++) {
@@ -1625,8 +1632,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
 
     linCurves.close();
   
-    Double_t x1_text = 1200;
-    Double_t y1_text = 100;
+    x1_text = 1200;
+    y1_text = 100;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);
@@ -1692,7 +1699,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grW4r->SetMaximum( 10.0);
     grW4r->Draw("AP");
 
-    Int_t n = 2;
+    static const Int_t n = 2;
     Double_t x[n] = {0, maxADC+40.};
     Double_t y[n] = {0.0, 0.0};
 
@@ -1702,8 +1709,8 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     gr1->SetLineColor(1);
     gr1->SetLineStyle(2);
 
-    Double_t x1_text = 1200;
-    Double_t y1_text = -40;
+    x1_text = 1200;
+    y1_text = -40;
 
     /*TPaveText *pt1 = new TPaveText(x1_text,y1_text,x1_text,y1_text,"");
     pt1->SetTextSize(0.042);

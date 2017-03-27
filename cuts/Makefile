@@ -19,16 +19,23 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../include
 LIBS         += -lSpectrum -lMinuit
 
-objects = DataTree.o
+objects1 = DataTree.o
+objects2 = MWPCPositionResponse.o 
 
 .PHONY: all
 all: beamDropCuts.exe 
 
-beamDropCuts.exe: beamDropCuts.o $(objects)
-	$(CXX) $(CXXFLAGS) -o beamDropCuts.exe beamDropCuts.o $(objects) $(LIBS)
+beamDropCuts.exe: beamDropCuts.o $(objects1)
+	$(CXX) $(CXXFLAGS) -o beamDropCuts.exe beamDropCuts.o $(objects1) $(LIBS)
+	@echo "Done"
+
+cathodeTriggerCuts.exe: cathodeTriggerCuts.o $(objects2)
+	$(CXX) $(CXXFLAGS) -o cathodeTriggerCuts.exe cathodeTriggerCuts.o $(objects2) $(LIBS)
 	@echo "Done"
 
 DataTree.o: DataTree.hh
+
+MWPCPositionResponse.o: MWPCPositionResponse.hh
 
 # -------------------------------------------------------------------------------
 #  Generic compilation and linking step to make an executable from
