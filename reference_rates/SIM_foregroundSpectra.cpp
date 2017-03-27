@@ -415,30 +415,30 @@ void doForegroundSpectra (int octetMin, int octetMax)
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (type==0) histOFF[0][side]->Fill(Erecon);
+	  if (type==0) histON[0][side]->Fill(Erecon);
 	
 	  //Type 1
-	  if (type==1) histOFF[1][side]->Fill(Erecon);
+	  if (type==1) histON[1][side]->Fill(Erecon);
 	
 	  //Type 23
 	  if (type==2 || type==3) {
 	    if (side==0) { 
-	      //histOFF[2][0]->Fill(Erecon);
-	      if (type==3) histOFF[2][0]->Fill(Erecon);
-	      else histOFF[2][1]->Fill(Erecon);
+	      //histON[2][0]->Fill(Erecon);
+	      if (type==3) histON[2][0]->Fill(Erecon);
+	      else histON[2][1]->Fill(Erecon);
 	    }
 	    else if (side==1) {
-	      //histOFF[2][1]->Fill(Erecon);
-	      if (type==3) histOFF[2][1]->Fill(Erecon);
-	      else histOFF[2][0]->Fill(Erecon);
+	      //histON[2][1]->Fill(Erecon);
+	      if (type==3) histON[2][1]->Fill(Erecon);
+	      else histON[2][0]->Fill(Erecon);
 	    }
 	  }
 	
 	  //Type 2
-	  if (type==2) histOFF2[side]->Fill(Erecon);
+	  if (type==2) histON2[side]->Fill(Erecon);
 	
 	  //Type 3
-	  if (type==3) histOFF3[side]->Fill(Erecon);
+	  if (type==3) histON3[side]->Fill(Erecon);
 
 	}
       }
