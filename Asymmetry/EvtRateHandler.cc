@@ -16,7 +16,7 @@ simulation data
 
 #include <TString.h>
 
-const bool writeRatesToFile = true;
+const bool writeRatesToFile = false;
 
 
 EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
@@ -262,10 +262,10 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("TimeE",&TimeE);
       Tin->SetBranchAddress("TimeW",&TimeW);
       Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
-      Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-      Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-      Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-      Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+      Tin->GetBranch("gaus_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+      Tin->GetBranch("gaus_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+      Tin->GetBranch("gaus_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+      Tin->GetBranch("gaus_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
       Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
       Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
       Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
@@ -499,10 +499,14 @@ void SimEvtRateHandler::dataReader() {
     //Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
     //Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
     //Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);
-    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    Tin->GetBranch("gaus_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("gaus_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("gaus_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("gaus_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    //Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    //Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    //Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    //Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
     Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
     Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
     Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);

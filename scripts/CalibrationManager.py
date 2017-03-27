@@ -1008,7 +1008,7 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [24]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1027,9 +1027,9 @@ if __name__ == "__main__":
 
                 # Data Stuff
 
-                #cal.runSourceCalReplayPeakFitter(runPeriod,doOnlyCeSnBi=True);
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
-                #cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
+                cal.runSourceCalReplayPeakFitter(runPeriod,doOnlyCeSnBi=True);
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=False) # gather source peak information in ADC
+                cal.makeSourceCalibrationFile(runPeriod, Simulation=False, InEnergy=True) # gather source peak information in Energy
 
                 #Simulation Stuff
 
