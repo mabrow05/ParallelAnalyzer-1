@@ -1682,6 +1682,15 @@ int main(int argc, char *argv[])
   fileOut->Write();
   fileOut->Close();
 
+  if ( checkIfReplayFileIsGood(std::string(tempOut)) != 1 ) {
+
+    std::ofstream badRuns("badRuns.txt", std::fstream::app);
+    badRuns << argv[1] << "\n";
+    badRuns.close();
+
+  }
+
+
   return 0;
 }
 

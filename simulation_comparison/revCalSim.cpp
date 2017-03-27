@@ -352,11 +352,11 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   //Decide which simulation to use...
   std::string simLocation;
   TChain *chain = new TChain("anaTree");
-  simLocation = string(getenv("SIM_2011_2012"));
-  /*  if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
-  else if (runNumber>21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
+  //  simLocation = string(getenv("SIM_2011_2012"));
+  if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
+  else if (runNumber>=21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
   else simLocation = string(getenv("SIM_2012_2013"));
-  */
+  
   //*************************************************************************
   // TAKE THIS OUT ASAP! IT'S FOR XUAN USING 2011/2012 CALIBRATIONS ON 
   // LARGE 2012/2013 SIMS TO SHOW THIN WINDOW EFFECTS
@@ -504,8 +504,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     Double_t fidCut = 50.;
     
     if (source!="Beta")  {
-      if ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>45.
-	   || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>45. ) { evt++; continue; }
+      if ( sqrt(scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0]+scint_pos.ScintPosE[1]+scint_pos.ScintPosE[1])*sqrt(0.6)*10.>40.
+	   || sqrt(scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0]+scint_pos.ScintPosW[1]+scint_pos.ScintPosW[1])*sqrt(0.6)*10.>40. ) { evt++; continue; }
     }
       //For source events, 
     // We don't want edge contamination since they are only used in calibrations
@@ -1191,10 +1191,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     }
 
     else {
-      if ( PID==1 && Erecon>0. && ( sqrt( scint_pos.ScintPosE[0]*scint_pos.ScintPosE[0] + 
-					  scint_pos.ScintPosE[1]*scint_pos.ScintPosE[1] )*sqrt(0.6)*10.<fidCut
-				    && sqrt( scint_pos.ScintPosW[0]*scint_pos.ScintPosW[0] + 
-					     scint_pos.ScintPosW[1]*scint_pos.ScintPosW[1] )*sqrt(0.6)*10.<fidCut ) ) evtTally++;
+      if ( PID==1 && Erecon>0. ) evtTally++;
     }
 
     evt++;

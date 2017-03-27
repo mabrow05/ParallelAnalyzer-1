@@ -5,7 +5,7 @@
 TString getGeometry(int run) {
 
   if ( run < 20000 ) return TString("2011-2012");
-  else if ( run > 21087 && run < 21679) return TString("2012-2013_isobutane");
+  else if ( run >= 21087 && run < 21679) return TString("2012-2013_isobutane");
   else return TString("2012-2013");
 
 };
@@ -119,7 +119,8 @@ void WirechamberCal::readWirechamberCalParams(Int_t run) {
     fileCal.close();
   }
   
-  else throw TString::Format("Couldn't read wirechamber calibration for run %i",run).Data(); 
+  else  std::cout << TString::Format("Couldn't read wirechamber calibration for run %i",run).Data() << std::endl;
+    
                                                        
   _run = run;
 }
@@ -290,7 +291,7 @@ EreconParameterization::EreconParameterization(Int_t runNumber) {
 
   if (runNumber<16000) geometry = TString("2011-2012");
   else if (runNumber<20000) geometry = TString("2011-2012");
-  else if (runNumber<21628 && runNumber>21087) geometry = TString("2012-2013_isobutane");
+  else if (runNumber<=21628 && runNumber>21087) geometry = TString("2012-2013_isobutane");
   else if (runNumber<24000) geometry = TString("2012-2013");
   else {
     std::cout << "Bad runNumber passed to getEQ2EtrueParams\n";

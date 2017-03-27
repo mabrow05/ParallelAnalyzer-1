@@ -151,6 +151,8 @@ int main(int argc, char *argv[])
   LinearityCurve linearityCurve(calibrationPeriod,false); //Get the linearity curve  
   EreconParameterization eRecon(runNumber); //Load the simulated relationship between EQ and Etrue
   WirechamberCal mwpcCal(runNumber);        //Load the Wirechamber Calibration
+
+  std::cout << "made it here\n";
   
   std::vector <Int_t> pmtQuality = getPMTQuality(runNumber); //Read in PMT quality file
   std::vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); //Get values for nPE/keV...
