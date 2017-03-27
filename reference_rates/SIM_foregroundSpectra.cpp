@@ -5,6 +5,7 @@
 
 
 #include "MBUtils.hh"
+#include "calibrationTools.hh"
 
 #include <vector>
 #include <cstdlib>
@@ -200,10 +201,15 @@ void doForegroundSpectra (int octetMin, int octetMax)
   TH1D* histON3[2];
   histON3[0] = new TH1D("Type3E_sfON","Type3E",120,0.,1200.);
   histON3[1] = new TH1D("Type3W_sfON","Type3W",120,0.,1200.);
+
+  
+  BackscatterSeparator sep; // This is the object which takes care of 2/3 separation
   
 
   //Process SF off runs first
   for ( auto rn : fgRuns_SFoff ) {
+
+    sep.LoadCutCurve(rn); // Load the backscatter separator curve
     
     std::string infile;
     TFile *input;
@@ -214,28 +220,34 @@ void doForegroundSpectra (int octetMin, int octetMax)
     input = new TFile(infile.c_str(), "READ");
     Tin = (TTree*)input->Get("revCalSim");
 
+    double MWPCEnergyE=0., MWPCEnergyW=0.;
     double mwpcE[3] = {0.};
     double mwpcW[3] = {0.};
     double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
     int PID, type, side; // basic analysis tags
     int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
+    int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
+
     
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("type", &type);
     Tin->SetBranchAddress("side", &side); 
     Tin->SetBranchAddress("Erecon",&Erecon);
-    Tin->SetBranchAddress("nClipped_EX",&nClipped_EX);
-    Tin->SetBranchAddress("nClipped_EY",&nClipped_EY); 
-    Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
-    Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);  
-    Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcE);
-    Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcW);
     
-    EmwpcX = mwpcE[0]*sqrt(0.6)*10.;
-    EmwpcY = mwpcE[1]*sqrt(0.6)*10.;
-    WmwpcX = mwpcW[0]*sqrt(0.6)*10.;
-    WmwpcY = mwpcW[1]*sqrt(0.6)*10.;
-
+    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&nClipped_EX);
+    Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&nClipped_EY);
+    Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&nClipped_WX);
+    Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&nClipped_WY);
+    Tin->GetBranch("xE")->GetLeaf("mult")->SetAddress(&xE_mult);
+    Tin->GetBranch("yE")->GetLeaf("mult")->SetAddress(&yE_mult);
+    Tin->GetBranch("xW")->GetLeaf("mult")->SetAddress(&xW_mult);
+    Tin->GetBranch("yW")->GetLeaf("mult")->SetAddress(&yW_mult);
+    Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
+    Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
     
 
     unsigned int nevents = Tin->GetEntriesFast();
@@ -250,38 +262,27 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	//Cut out clipped events
 	if ( type!=0 ) {
-	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+	  if ( xE_mult<1 || yE_mult<1 || xW_mult<1 || yW_mult<1 ) continue;
 	}
 	else {
-	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
-	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	  if ( side==0 && ( xE_mult<1 || yE_mult<1 ) ) continue;
+	  else if ( side==1 && ( xW_mult<1 || yW_mult<1 ) ) continue;
 	}
-
-
-	/*//Clipped events
-	if ( type==1 ) {
-	  if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
-	}
-	else { 
-	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
-	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
-	  }*/
 
 	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
-	/*if (Erecon>0. && type==2) {
+	if (Erecon>0. && type==2) {
 	  
 	  if (side==0) {
-	  type = separate23(side,mwpcE.MWPCEnergyE);
-	  side = type==2 ? 1 : 0;
+	    type = sep.separate23(MWPCEnergyE);
+	    side = type==2 ? 1 : 0;
 	  }
 	  else if (side==1) {
-	  type = separate23(side,mwpcE.MWPCEnergyW);
-	  side = type==2 ? 0 : 1;
+	    type = sep.separate23(MWPCEnergyW);
+	    side = type==2 ? 0 : 1;
 	  }
 	  
-	  }*/
+	}
 	
 	
 	//***********************************************************************************************************************
@@ -301,22 +302,22 @@ void doForegroundSpectra (int octetMin, int octetMax)
 	  //Type 23
 	  if (type==2 || type==3) {
 	    if (side==0) { 
-	      histOFF[2][0]->Fill(Erecon);
-	      //if (type==3) histOFF[2][0]->Fill(Erecon);
-	      //else histOFF[2][1]->Fill(Erecon);
+	      //histOFF[2][0]->Fill(Erecon);
+	      if (type==3) histOFF[2][0]->Fill(Erecon);
+	      else histOFF[2][1]->Fill(Erecon);
 	    }
 	    else if (side==1) {
-	      histOFF[2][1]->Fill(Erecon);
-	      //if (type==3) histOFF[2][1]->Fill(Erecon);
-	      //else histOFF[2][0]->Fill(Erecon);
+	      //histOFF[2][1]->Fill(Erecon);
+	      if (type==3) histOFF[2][1]->Fill(Erecon);
+	      else histOFF[2][0]->Fill(Erecon);
 	    }
 	  }
 	
 	  //Type 2
-	  //if (type==2) histOFF2[side]->Fill(Erecon);
+	  if (type==2) histOFF2[side]->Fill(Erecon);
 	
 	  //Type 3
-	  //if (type==3) histOFF3[side]->Fill(Erecon);
+	  if (type==3) histOFF3[side]->Fill(Erecon);
 
 	}
       }
@@ -330,35 +331,43 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
   //Process SF ON runs now
   for ( auto rn : fgRuns_SFon ) {
-    
+
+    sep.LoadCutCurve(rn); // Load the backscatter separator curve
+
     sprintf(temp,"revCalSim_%i_Beta.root",rn);
     std::string infile = getenv("REVCALSIM")+std::string("/beta/")+std::string(temp);
     TFile *input = new TFile(infile.c_str(), "READ");
     TTree *Tin = (TTree*)input->Get("revCalSim");
 
 
+    double MWPCEnergyE=0., MWPCEnergyW=0.;
     double mwpcE[3] = {0.};
     double mwpcW[3] = {0.};
     double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Time=0., Erecon=0.; //Branch Variables being read in
     int PID, type, side; // basic analysis tags
     int nClipped_EX, nClipped_EY, nClipped_WX, nClipped_WY;
+    int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
+
     
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("type", &type);
     Tin->SetBranchAddress("side", &side); 
     Tin->SetBranchAddress("Erecon",&Erecon);
-    Tin->SetBranchAddress("nClipped_EX",&nClipped_EX);
-    Tin->SetBranchAddress("nClipped_EY",&nClipped_EY); 
-    Tin->SetBranchAddress("nClipped_WX",&nClipped_WX);
-    Tin->SetBranchAddress("nClipped_WY",&nClipped_WY);  
-   
-    Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcE);
-    Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcW);
     
-    EmwpcX = mwpcE[0]*sqrt(0.6)*10.;
-    EmwpcY = mwpcE[1]*sqrt(0.6)*10.;
-    WmwpcX = mwpcW[0]*sqrt(0.6)*10.;
-    WmwpcY = mwpcW[1]*sqrt(0.6)*10.;  
+    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+    Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&nClipped_EX);
+    Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&nClipped_EY);
+    Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&nClipped_WX);
+    Tin->GetBranch("yW")->GetLeaf("nClipped")->SetAddress(&nClipped_WY);
+    Tin->GetBranch("xE")->GetLeaf("mult")->SetAddress(&xE_mult);
+    Tin->GetBranch("yE")->GetLeaf("mult")->SetAddress(&yE_mult);
+    Tin->GetBranch("xW")->GetLeaf("mult")->SetAddress(&xW_mult);
+    Tin->GetBranch("yW")->GetLeaf("mult")->SetAddress(&yW_mult);
+    Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
+    Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 
 
     unsigned int nevents = Tin->GetEntriesFast();
@@ -374,77 +383,63 @@ void doForegroundSpectra (int octetMin, int octetMax)
 
       if ( PID==1 && side<2 && type<4 && Erecon>0.) {
 
-	//Cut out clipped events
 	if ( type!=0 ) {
-	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) continue;
+	  if ( xE_mult<1 || yE_mult<1 || xW_mult<1 || yW_mult<1 ) continue;
 	}
 	else {
-	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
-	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
+	  if ( side==0 && ( xE_mult<1 || yE_mult<1 ) ) continue;
+	  else if ( side==1 && ( xW_mult<1 || yW_mult<1 ) ) continue;
 	}
 
-	
-	/*//Clipped events
-	if ( type==1 ) {
-	  if ( nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0 ) continue;    
-	}
-	else { 
-	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) continue;
-	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) continue;
-	  }*/
-
-	//Type 2/3 separation
-	/*if (Erecon>0. && type==2) {
+	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
+	if (Erecon>0. && type==2) {
 	  
 	  if (side==0) {
-	  type = separate23(side,mwpcE.MWPCEnergyE);
-	  side = type==2 ? 1 : 0;
+	    type = sep.separate23(MWPCEnergyE);
+	    side = type==2 ? 1 : 0;
 	  }
 	  else if (side==1) {
-	  type = separate23(side,mwpcE.MWPCEnergyW);
-	  side = type==2 ? 0 : 1;
+	    type = sep.separate23(MWPCEnergyW);
+	    side = type==2 ? 0 : 1;
 	  }
 	  
-	  }*/
-
-      
-      //***********************************************************************************************************************
-      // Filling rate histograms with "good" events to calculate the corrections
-
-    
-	r2E = EmwpcX*EmwpcX+EmwpcY*EmwpcY;
-	r2W = WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+	}
 	
 	
+	//***********************************************************************************************************************
+	// Filling rate histograms with "good" events to calculate the corrections
+	
+	r2E=EmwpcX*EmwpcX+EmwpcY*EmwpcY;
+	r2W=WmwpcX*WmwpcX+WmwpcY*WmwpcY;
+
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (type==0) histON[0][side]->Fill(Erecon);
+	  if (type==0) histOFF[0][side]->Fill(Erecon);
 	
 	  //Type 1
-	  if (type==1) histON[1][side]->Fill(Erecon);
+	  if (type==1) histOFF[1][side]->Fill(Erecon);
 	
 	  //Type 23
 	  if (type==2 || type==3) {
-	    histON[2][side]->Fill(Erecon);
-	    //if (side==0) { 
-	    //histON[2][0]->Fill(Erecon);
-	      //if (type==3) histON[2][0]->Fill(Erecon);
-	      //else histON[2][1]->Fill(Erecon);
-	    //}
-	  //else if (side==1) {
-	  //  histON[2][1]->Fill(Erecon);
-	      //if (type==3) histON[2][1]->Fill(Erecon);
-	      //else histON[2][0]->Fill(Erecon);
-	    //}
+	    if (side==0) { 
+	      //histOFF[2][0]->Fill(Erecon);
+	      if (type==3) histOFF[2][0]->Fill(Erecon);
+	      else histOFF[2][1]->Fill(Erecon);
+	    }
+	    else if (side==1) {
+	      //histOFF[2][1]->Fill(Erecon);
+	      if (type==3) histOFF[2][1]->Fill(Erecon);
+	      else histOFF[2][0]->Fill(Erecon);
+	    }
 	  }
 	
 	  //Type 2
-	  //if (type==2) histON2[side]->Fill(Erecon);
+	  if (type==2) histOFF2[side]->Fill(Erecon);
 	
 	  //Type 3
-	  //if (type==3) histON3[side]->Fill(Erecon);
-    
+	  if (type==3) histOFF3[side]->Fill(Erecon);
+
 	}
       }
       

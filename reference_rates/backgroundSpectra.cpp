@@ -6,6 +6,7 @@
 
 #include "MBUtils.hh"
 #include "DataTree.hh"
+#include "calibrationTools.hh"
 
 #include <vector>
 #include <cstdlib>
@@ -53,17 +54,6 @@ std::vector < std::vector < std::vector <Double_t> > > sfOFF_err(10,std::vector 
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
 
-int separate23(int side, double mwpcEn) {
-  int type = 2;
-  if (side==0) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
-  }
-  
-  if (side==1) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
-  }
-  return type;
-};
 
 void writeRatesToFile(int octMin, int octMax) {
 
@@ -203,11 +193,17 @@ void doBackgroundSpectra (int octetMin, int octetMax)
   TH1D* histON3[2];
   histON3[0] = new TH1D("Type3E_sfON","Type3E",120,0.,1200.);
   histON3[1] = new TH1D("Type3W_sfON","Type3W",120,0.,1200.);
+
+
+  BackscatterSeparator sep; // This is the object which takes care of 2/3 separation
+  
   
   //Process SF off runs first
   for ( auto rn : bgRuns_SFoff ) {
 
     std::cout << "Processing run " << rn << "... ";
+
+    sep.LoadCutCurve(rn); // Load the backscatter separator curve
 
     // DataTree structure
     DataTree t;
@@ -238,42 +234,35 @@ void doBackgroundSpectra (int octetMin, int octetMax)
       
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0. ) {
 
-	//Clipped events                                                                                                                       
         if ( t.Type!=0 ) {
-          if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
-          else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 || t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //Mu
+          if ( t.xeRC>6 || t.yeRC>6 || t.xwRC>6 || t.ywRC>6 ) continue;
+	  else if ( t.xE.mult<1 || t.yE.mult<1 || t.xW.mult<1 || t.yW.mult<1 ) continue;
 	}
         else {
           if ( t.Side==0 ) {
-            if ( t.xE.nClipped>0 || t.yE.nClipped>0 ) continue;
-            else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East       
+            if ( t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East
+	    else if ( t.xE.mult<1 || t.yE.mult<1 ) continue;
           }
           else if ( t.Side==1 ) {
-            if ( t.xW.nClipped>0 || t.yW.nClipped>0  ) continue;
-            else if ( t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West       
+            if ( t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West
+	    else if ( t.xW.mult<1 || t.yW.mult<1 ) continue;      
           }
 	}
 	
 	
-
-
-	/*if ( useRCclasses ) {
-	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
-	  }*/
-
 	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
-	/*if (t.Erecon>0. && t.Type==2) {
+	if (t.Erecon>0. && t.Type==2) {
 	  
-	  if (side==0) {
-	  t.Type = separate23(t.Side,t.EMWPC_E);
-	  t.Side = t.Type==2 ? 1 : 0;
+	  if (t.Side==0) {
+	    t.Type = sep.separate23(t.EMWPC_E);
+	    t.Side = t.Type==2 ? 1 : 0;
 	  }
 	  else if (t.Side==1) {
-	  t.Type = separate23(t.Side,t.EMWPC_W);
-	  t.Side = t.Type==2 ? 0 : 1;
+	    t.Type = sep.separate23(t.EMWPC_W);
+	    t.Side = t.Type==2 ? 0 : 1;
 	  }
 	  
-	  }*/
+	}
 	
 	
 	//***********************************************************************************************************************
@@ -291,25 +280,25 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 	  //Type 1
 	  if (t.Type==1) histOFF[1][t.Side]->Fill(t.Erecon);
 	
-	  //Type 23
+	  //Type 23... This puts them back where they would go if they weren't separated
 	  if (t.Type==2 || t.Type==3) {
 	    if (t.Side==0) { 
-	      histOFF[2][0]->Fill(t.Erecon);
-	      //if (type==3) histOFF[2][0]->Fill(t.Erecon);
-	      //else histOFF[2][1]->Fill(t.Erecon);
+	      //histOFF[2][0]->Fill(t.Erecon);
+	      if (t.Type==3) histOFF[2][0]->Fill(t.Erecon);
+	      else histOFF[2][1]->Fill(t.Erecon);
 	    }
 	    else if (t.Side==1) {
-	      histOFF[2][1]->Fill(t.Erecon);
-	      //if (type==3) histOFF[2][1]->Fill(t.Erecon);
-	      //else histOFF[2][0]->Fill(t.Erecon);
+	      //histOFF[2][1]->Fill(t.Erecon);
+	      if (t.Type==3) histOFF[2][1]->Fill(t.Erecon);
+	      else histOFF[2][0]->Fill(t.Erecon);
 	    }
 	  }
 	
 	  //Type 2
-	  //if (t.Type==2) histOFF2[t.Side]->Fill(t.Erecon);
+	  if (t.Type==2) histOFF2[t.Side]->Fill(t.Erecon);
 	
 	  //Type 3
-	  //if (t.Type==3) histOFF3[t.Side]->Fill(t.Erecon);
+	  if (t.Type==3) histOFF3[t.Side]->Fill(t.Erecon);
 
 	}
       }
@@ -323,6 +312,8 @@ void doBackgroundSpectra (int octetMin, int octetMax)
   for ( auto rn : bgRuns_SFon ) {
 
     std::cout << "Processing run " << rn << "... ";
+
+    sep.LoadCutCurve(rn); // Load the backscatter separator curve
     
     // DataTree structure
     DataTree t;
@@ -350,47 +341,42 @@ void doBackgroundSpectra (int octetMin, int octetMax)
       t.getEvent(n);
 
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0. ) {
-	
-	if ( t.Type!=0 ) {
-          if ( t.xE.nClipped>0 || t.yE.nClipped>0 || t.xW.nClipped>0 || t.yW.nClipped>0 ) continue;
-          else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 || t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //Mu
+
+        if ( t.Type!=0 ) {
+          if ( t.xeRC>6 || t.yeRC>6 || t.xwRC>6 || t.ywRC>6 ) continue;
+	  else if ( t.xE.mult<1 || t.yE.mult<1 || t.xW.mult<1 || t.yW.mult<1 ) continue;
 	}
         else {
           if ( t.Side==0 ) {
-            if ( t.xE.nClipped>0 || t.yE.nClipped>0 ) continue;
-            else if ( t.xeRC<1 || t.yeRC<1 || t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East       
+            if ( t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East
+	    else if ( t.xE.mult<1 || t.yE.mult<1 ) continue;
           }
           else if ( t.Side==1 ) {
-            if ( t.xW.nClipped>0 || t.yW.nClipped>0  ) continue;
-            else if ( t.xwRC<1 || t.ywRC<1 || t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West       
+            if ( t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West
+	    else if ( t.xW.mult<1 || t.yW.mult<1 ) continue;      
           }
 	}
-
-
-
-	/*if ( useRCclasses ) {
-	  if ( t.xeRC==0 || t.yeRC==0 || t.xwRC==0 || t.ywRC==0 ) continue;
-	  }*/
-
+	
+	
 	//Type 2/3 separation... ADD IN AFTER DOING MWPC CAL
-	/*if (t.Erecon>0. && t.Type==2) {
+	if (t.Erecon>0. && t.Type==2) {
 	  
-	  if (side==0) {
-	  t.Type = separate23(t.Side,t.EMWPC_E);
-	  t.Side = t.Type==2 ? 1 : 0;
+	  if (t.Side==0) {
+	    t.Type = sep.separate23(t.EMWPC_E);
+	    t.Side = t.Type==2 ? 1 : 0;
 	  }
 	  else if (t.Side==1) {
-	  t.Type = separate23(t.Side,t.EMWPC_W);
-	  t.Side = t.Type==2 ? 0 : 1;
+	    t.Type = sep.separate23(t.EMWPC_W);
+	    t.Side = t.Type==2 ? 0 : 1;
 	  }
 	  
-	  }*/
+	}
 	
 	
 	//***********************************************************************************************************************
 	// Filling rate histograms with "good" events to calculate the corrections
 	
- 
+	
 	r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
 	r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
 
@@ -402,26 +388,26 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 	  //Type 1
 	  if (t.Type==1) histON[1][t.Side]->Fill(t.Erecon);
 	
-	  //Type 23
+	  //Type 23... This puts them back where they would go if they weren't separated
 	  if (t.Type==2 || t.Type==3) {
 	    if (t.Side==0) { 
-	      histON[2][0]->Fill(t.Erecon);
-	      //if (type==3) histON[2][0]->Fill(t.Erecon);
-	      //else histON[2][1]->Fill(t.Erecon);
+	      //histON[2][0]->Fill(t.Erecon);
+	      if (t.Type==3) histON[2][0]->Fill(t.Erecon);
+	      else histON[2][1]->Fill(t.Erecon);
 	    }
 	    else if (t.Side==1) {
-	      histON[2][1]->Fill(t.Erecon);
-	      //if (type==3) histON[2][1]->Fill(t.Erecon);
-	      //else histON[2][0]->Fill(t.Erecon);
+	      //histON[2][1]->Fill(t.Erecon);
+	      if (t.Type==3) histON[2][1]->Fill(t.Erecon);
+	      else histON[2][0]->Fill(t.Erecon);
 	    }
 	  }
 	
 	  //Type 2
-	  //if (t.Type==2) histON2[t.Side]->Fill(t.Erecon);
+	  if (t.Type==2) histON2[t.Side]->Fill(t.Erecon);
 	
 	  //Type 3
-	  //if (t.Type==3) histON3[t.Side]->Fill(t.Erecon);
-
+	  if (t.Type==3) histON3[t.Side]->Fill(t.Erecon);
+  
 	}
       }
       
@@ -441,7 +427,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     bool sep3 = false;
     
     if (anaCh==1) { type_low=0; type_high=2; }                             //All types, 2/3 not separated
-    else if (anaCh==3 || anaCh==5) { type_low=0; type_high=1; sep23=true;} // All event types, 2/3 separated
+    else if (anaCh==3 || anaCh==5) { type_low=0; type_high=1; sep23 = sep2 = sep3 = true;} // All event types, 2/3 separated
     else if (anaCh==2) { type_low=0; type_high=1;}                         // Type 0 and 1
     else if (anaCh==4) { type_low=0; type_high=0;}                         // Type 0
     else if (anaCh==6) { type_low=1; type_high=1;}                         // Type 1

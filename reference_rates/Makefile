@@ -21,23 +21,27 @@ LIBS         += -lSpectrum -lMinuit
 
 .PHONY: all
 
+objects = MBUtils.o DataTree.o calibrationTools.o
+
 all: backgroundSpectra.exe foregroundSpectra.exe SIM_foregroundSpectra.exe
 
-backgroundSpectra.exe: backgroundSpectra.o MBUtils.o DataTree.o 
-	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o MBUtils.o DataTree.o $(LIBS)
+backgroundSpectra.exe: backgroundSpectra.o $(objects)
+	$(CXX) $(CXXFLAGS) -o backgroundSpectra.exe backgroundSpectra.o $(objects) $(LIBS)
 	@echo "Done"
 
-foregroundSpectra.exe: foregroundSpectra.o MBUtils.o DataTree.o
-	$(CXX) $(CXXFLAGS) -o foregroundSpectra.exe foregroundSpectra.o MBUtils.o DataTree.o $(LIBS)
+foregroundSpectra.exe: foregroundSpectra.o $(objects)
+	$(CXX) $(CXXFLAGS) -o foregroundSpectra.exe foregroundSpectra.o $(objects) $(LIBS)
 	@echo "Done"
 
-SIM_foregroundSpectra.exe: SIM_foregroundSpectra.o MBUtils.o  
-	$(CXX) $(CXXFLAGS) -o SIM_foregroundSpectra.exe SIM_foregroundSpectra.o MBUtils.o $(LIBS)
+SIM_foregroundSpectra.exe: SIM_foregroundSpectra.o MBUtils.o calibrationTools.o 
+	$(CXX) $(CXXFLAGS) -o SIM_foregroundSpectra.exe SIM_foregroundSpectra.o MBUtils.o calibrationTools.o $(LIBS)
 	@echo "Done"
 
 MBUtils.o: MBUtils.hh
 
 DataTree.o: DataTree.hh
+
+calibrationTools.o: calibrationTools.hh
 
 
 
