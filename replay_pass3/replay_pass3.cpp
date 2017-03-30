@@ -63,12 +63,12 @@ vector < Double_t > GetAlphaValues(Int_t runPeriod)
   return alphas;
 };
 
-vector <Int_t> getPMTQuality(Int_t runNumber) {
+vector <Int_t> getEreconPMTQuality(Int_t runNumber) {
   //Read in PMT quality file
   cout << "Reading in PMT Quality file ...\n";
   vector <Int_t>  pmtQuality (8,0);
   Char_t temp[200];
-  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
   ifstream pmt;
   std::cout << temp << std::endl;
   pmt.open(temp);
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
   std::cout << "made it here\n";
   
-  std::vector <Int_t> pmtQuality = getPMTQuality(runNumber); //Read in PMT quality file
+  std::vector <Int_t> pmtQuality = getEreconPMTQuality(runNumber); //Read in PMT quality file
   std::vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); //Get values for nPE/keV...
     
   PositionMap posmap(5.0,50.); //Reading Scintillator position maps

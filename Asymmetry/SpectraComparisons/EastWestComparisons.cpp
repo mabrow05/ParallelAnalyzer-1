@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
   Double_t totalTimeON_E, totalTimeON_W, totalTimeOFF_E, totalTimeOFF_W;
   totalTimeON_E = totalTimeON_W = totalTimeOFF_E = totalTimeOFF_W = 0.;
-  
+ 
   //Count vectors for holding all of the total (BG subtracted) counts for each spin state
 
   //type0=0, type1=1, type23=2, ALL=3

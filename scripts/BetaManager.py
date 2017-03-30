@@ -506,19 +506,19 @@ if __name__ == "__main__":
 
 
     if 1: 
-        octet_range =[109,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[111,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
             #beta.runReplayPass1(octet)
             #beta.findBeamDrops(octet)
-            #beta.runGainBismuth(octet)
-            #beta.findTriggerFunctions(octet)
-            #beta.runReplayPass2(octet)
-            beta.runReplayPass3(octet)
+            beta.runGainBismuth(octet)
+            beta.runReplayPass2(octet)
+            beta.findTriggerFunctions(octet)
+            #beta.runReplayPass3(octet)
             #beta.runRootfileTranslator(octet)
             #beta.removeDepolRunFiles(octet)
-            beta.runReverseCalibration(octet)
+            #beta.runReverseCalibration(octet)
 
 
     # Wirechamber stuff

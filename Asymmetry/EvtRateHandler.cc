@@ -16,7 +16,7 @@ simulation data
 
 #include <TString.h>
 
-const bool writeRatesToFile = false;
+const bool writeRatesToFile = true;
 
 
 EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
@@ -265,18 +265,18 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("TimeE",&TimeE);
       Tin->SetBranchAddress("TimeW",&TimeW);
       Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
-      //Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-      //Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-      //Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-      //Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+      Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+      Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+      Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+      Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
       //Tin->GetBranch("gaus_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
       //Tin->GetBranch("gaus_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
       //Tin->GetBranch("gaus_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
       //Tin->GetBranch("gaus_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-      Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-      Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-      Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-      Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
+      //Tin->GetBranch("old_xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+      //Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+      //Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+      //Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
       Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
       Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
       Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
@@ -505,6 +505,10 @@ void SimEvtRateHandler::dataReader() {
     Tin->GetBranch("cathRespPos")->GetLeaf("cathRespPosW")->SetAddress(cathRespPosW);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosE")->SetAddress(mwpcPosE);
     Tin->GetBranch("MWPCPos")->GetLeaf("MWPCPosW")->SetAddress(mwpcPosW);
+    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
+    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
+    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
+    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
     //Tin->SetBranchAddress("AsymWeight",&AsymWeight);
     //Tin->SetBranchAddress("nClipped_EX",&nClipped_EX);
     //Tin->SetBranchAddress("nClipped_EY",&nClipped_EY);
@@ -518,10 +522,6 @@ void SimEvtRateHandler::dataReader() {
     //Tin->GetBranch("old_yE")->GetLeaf("center")->SetAddress(&EmwpcY);
     //Tin->GetBranch("old_xW")->GetLeaf("center")->SetAddress(&WmwpcX);
     //Tin->GetBranch("old_yW")->GetLeaf("center")->SetAddress(&WmwpcY);
-    Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
-    Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
-    Tin->GetBranch("xW")->GetLeaf("center")->SetAddress(&WmwpcX);
-    Tin->GetBranch("yW")->GetLeaf("center")->SetAddress(&WmwpcY);
     Tin->GetBranch("xE")->GetLeaf("nClipped")->SetAddress(&xE_nClipped);
     Tin->GetBranch("yE")->GetLeaf("nClipped")->SetAddress(&yE_nClipped);
     Tin->GetBranch("xW")->GetLeaf("nClipped")->SetAddress(&xW_nClipped);
