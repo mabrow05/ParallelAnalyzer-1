@@ -109,12 +109,12 @@ vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
   return srcPos;
 }
 
-vector <Int_t> getPMTQuality(Int_t runNumber) {
+vector <Int_t> getEreconPMTQuality(Int_t runNumber) {
   //Read in PMT quality file
   cout << "Reading in PMT Quality file ...\n";
   vector <Int_t>  pmtQuality (8,0);
   Char_t temp[200];
-  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
   ifstream pmt;
   std::cout << temp << std::endl;
   pmt.open(temp);
@@ -327,7 +327,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   Double_t g_rest = 12500.;
 
   /////// Loading other run dependent quantities
-  vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
+  vector <Int_t> pmtQuality = getEreconPMTQuality(runNumber); // Get the quality of the PMTs for that run
   UInt_t calibrationPeriod = getSrcRunPeriod(runNumber); // retrieve the calibration period for this run
   UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
   //GetPositionMap(XePeriod);

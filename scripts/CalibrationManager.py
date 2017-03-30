@@ -18,7 +18,6 @@ import MButils
 omittedRuns = [17588,17950,17953,18749,21298,21605]
 #17588, 17950, 17953 are seemingly empty
 #18749 - just an outlier on its west side... messes up fits in WPMT3 & 4
-#19232 has abnormally high Bi peak energies on West side... no explanation
 #21298 has very few events in Bi Pulser
 #21605 has very few counts
 
@@ -33,63 +32,115 @@ for Range in omittedRanges:
     for run in range(Range[0],Range[1]+1,1):
         omittedRuns.append(run)
 
+####################################################################################################################
 ##### Set up which runs to omit which PMTs.
 #### This will be done by having a file with all source runs, where the PMT value
 #### is set to 0 or 1 to represent false (don't use) and true (do use)
 
-EPMT1 = [] #These hold individual runs where PMT was flaky or Bi pulser was not working. 
-EPMT2 = []
-EPMT3 = []
-EPMT4 = []
-WPMT1 = []
-WPMT2 = []
-WPMT3 = []
-WPMT4 = []
+badEPMT1 = [] #These hold individual runs where PMT was dead or Bi pulser was not working. 
+badEPMT2 = []
+badEPMT3 = []
+badEPMT4 = []
+badWPMT1 = []
+badWPMT2 = []
+badWPMT3 = []
+badWPMT4 = []
 
-EPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
-EPMT2_runRanges = []
-EPMT3_runRanges = []
-EPMT4_runRanges = [(20000,23173)] #(17233,18055) not sure why these used to be removed... 2012-2013 have weird Bi gain and odd lin curves
-WPMT1_runRanges = [(17359,18055)]
-WPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
-WPMT3_runRanges = []
-WPMT4_runRanges = [(18712,19999),(20000,24000)]
-#(18712,19999) WPMT4 becomes unreliable and there is no way to avoid affecting all of these runs due to bad Xe maps & Calibrations for this PMT
+badEPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
+badEPMT2_runRanges = []
+badEPMT3_runRanges = []
+badEPMT4_runRanges = [] 
+badWPMT1_runRanges = [(17359,18055)] #PMTW1 Bi pulser fell off for (17359,18055)
+badWPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
+badWPMT3_runRanges = []
+badWPMT4_runRanges = [(20000,24000)] # no Bi pulser for 2012-2013
 
-for Range in EPMT1_runRanges:
+for Range in badEPMT1_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        EPMT1.append(run)
-for Range in EPMT2_runRanges:
+        badEPMT1.append(run)
+for Range in badEPMT2_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        EPMT2.append(run)
-for Range in EPMT3_runRanges:
+        badEPMT2.append(run)
+for Range in badEPMT3_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        EPMT3.append(run)
-for Range in EPMT4_runRanges:
+        badEPMT3.append(run)
+for Range in badEPMT4_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        EPMT4.append(run)
-for Range in WPMT1_runRanges:
+        badEPMT4.append(run)
+for Range in badWPMT1_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        WPMT1.append(run)
-for Range in WPMT2_runRanges:
+        badWPMT1.append(run)
+for Range in badWPMT2_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        WPMT2.append(run)
-for Range in WPMT3_runRanges:
+        badWPMT2.append(run)
+for Range in badWPMT3_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        WPMT3.append(run)
-for Range in WPMT4_runRanges:
+        badWPMT3.append(run)
+for Range in badWPMT4_runRanges:
     for run in range(Range[0],Range[1]+1,1):
-        WPMT4.append(run)
+        badWPMT4.append(run)
 
 for run in omittedRuns:
-    EPMT1.append(run)
-    EPMT2.append(run)
-    EPMT3.append(run)
-    EPMT4.append(run)
-    WPMT1.append(run)
-    WPMT2.append(run)
-    WPMT3.append(run)
-    WPMT4.append(run)
+    badEPMT1.append(run)
+    badEPMT2.append(run)
+    badEPMT3.append(run)
+    badEPMT4.append(run)
+    badWPMT1.append(run)
+    badWPMT2.append(run)
+    badWPMT3.append(run)
+    badWPMT4.append(run)
+
+
+# Now we make lists of bad Erecon PMTs, meaning they may have a working pulser, but they can't be used 
+# for constructing a final energy
+
+ereconEPMT1 = []
+ereconEPMT2 = []
+ereconEPMT3 = []
+ereconEPMT4 = []
+ereconWPMT1 = []
+ereconWPMT2 = []
+ereconWPMT3 = []
+ereconWPMT4 = []
+
+ereconEPMT1_runRanges = [] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
+ereconEPMT2_runRanges = []
+ereconEPMT3_runRanges = []
+ereconEPMT4_runRanges = [(20000,23173)] #2012-2013 have weird Bi gain and odd lin curves
+ereconWPMT1_runRanges = []
+ereconWPMT2_runRanges = [] 
+ereconWPMT3_runRanges = []
+ereconWPMT4_runRanges = [(18712,19999)]
+#(18712,19999) WPMT4 becomes unreliable and there is no way to avoid affecting all of these runs due to erecon Xe maps & Calibrations for this PMT
+
+for Range in ereconEPMT1_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconEPMT1.append(run)
+for Range in ereconEPMT2_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconEPMT2.append(run)
+for Range in ereconEPMT3_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconEPMT3.append(run)
+for Range in ereconEPMT4_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconEPMT4.append(run)
+for Range in ereconWPMT1_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconWPMT1.append(run)
+for Range in ereconWPMT2_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconWPMT2.append(run)
+for Range in ereconWPMT3_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconWPMT3.append(run)
+for Range in ereconWPMT4_runRanges:
+    for run in range(Range[0],Range[1]+1,1):
+        ereconWPMT4.append(run)
+
+
+######################################################################################################################
+
 
 class CalReplayManager:
     
@@ -591,7 +642,6 @@ class CalibrationManager:
 
     def makePMTrunFile(self,CalibrationPeriod=1, master=False):
         if not master:
-            outputFile = "%s/residuals/PMT_runQuality_SrcPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
             runList = []
 
             with open("%s/run_lists/Source_Calibration_Run_Period_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)) as runlist:
@@ -604,59 +654,126 @@ class CalibrationManager:
                         if int(lines[0])>0:
                             runList.append(int(run))
 
-            outfile = open(outputFile,'w')
+            outfile = open("%s/residuals/PMT_runQuality_SrcPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod),'w')
+            ereconfile = open("%s/residuals/PMT_EreconQuality_SrcPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod),'w')
 
             for run in runList:
                 pmtList = [1,1,1,1,1,1,1,1]
-                if run in EPMT1:
+                ereconList = [1,1,1,1,1,1,1,1]
+
+                if run in badEPMT1:
                     pmtList[0]=0
-                if run in EPMT2:
+                    ereconList[0]=0
+                if run in badEPMT2:
                     pmtList[1]=0
-                if run in EPMT3:
+                    ereconList[1]=0
+                if run in badEPMT3:
                     pmtList[2]=0
-                if run in EPMT4:
+                    ereconList[2]=0
+                if run in badEPMT4:
                     pmtList[3]=0
-                if run in WPMT1:
+                    ereconList[3]=0
+                if run in badWPMT1:
                     pmtList[4]=0
-                if run in WPMT2:
+                    ereconList[4]=0
+                if run in badWPMT2:
                     pmtList[5]=0
-                if run in WPMT3:
+                    ereconList[5]=0
+                if run in badWPMT3:
                     pmtList[6]=0
-                if run in WPMT4:
+                    ereconList[6]=0
+                if run in badWPMT4:
                     pmtList[7]=0
+                    ereconList[7]=0
+
+                if run in ereconEPMT1:
+                    ereconList[0]=0
+                if run in ereconEPMT2:
+                    ereconList[1]=0
+                if run in ereconEPMT3:
+                    ereconList[2]=0
+                if run in ereconEPMT4:
+                    ereconList[3]=0
+                if run in ereconWPMT1:
+                    ereconList[4]=0
+                if run in ereconWPMT2:
+                    ereconList[5]=0
+                if run in ereconWPMT3:
+                    ereconList[6]=0
+                if run in ereconWPMT4:
+                    ereconList[7]=0
 
                 outfile.write("%i %i %i %i %i %i %i %i %i\n"%(run,pmtList[0],pmtList[1],pmtList[2],pmtList[3],
                                                           pmtList[4],pmtList[5],pmtList[6],pmtList[7]))
+                ereconfile.write("%i %i %i %i %i %i %i %i %i\n"%(run,ereconList[0],ereconList[1],ereconList[2],ereconList[3],
+                                                          ereconList[4],ereconList[5],ereconList[6],ereconList[7]))
+
 
             outfile.close()
+            ereconfile.close()
+
             print "Done writing PMT file for Source Period %i"%CalibrationPeriod
+
+
 
         #Update the master list of PMT quality
         if master:
             masterFile = open("%s/residuals/PMT_runQuality_master.dat"%(os.getenv("ANALYSIS_CODE")),'w')
+            ereconFile = open("%s/residuals/PMT_EreconQuality_master.dat"%(os.getenv("ANALYSIS_CODE")),'w')
             
             for run in range(16983,23174,1):
                 pmtList = [1,1,1,1,1,1,1,1]
-                if run in EPMT1:
+                ereconList = [1,1,1,1,1,1,1,1]
+
+                if run in badEPMT1:
                     pmtList[0]=0
-                if run in EPMT2:
+                    ereconList[0]=0
+                if run in badEPMT2:
                     pmtList[1]=0
-                if run in EPMT3:
+                    ereconList[1]=0
+                if run in badEPMT3:
                     pmtList[2]=0
-                if run in EPMT4:
+                    ereconList[2]=0
+                if run in badEPMT4:
                     pmtList[3]=0
-                if run in WPMT1:
+                    ereconList[3]=0
+                if run in badWPMT1:
                     pmtList[4]=0
-                if run in WPMT2:
+                    ereconList[4]=0
+                if run in badWPMT2:
                     pmtList[5]=0
-                if run in WPMT3:
+                    ereconList[5]=0
+                if run in badWPMT3:
                     pmtList[6]=0
-                if run in WPMT4:
+                    ereconList[6]=0
+                if run in badWPMT4:
                     pmtList[7]=0
+                    ereconList[7]=0
+
+                if run in ereconEPMT1:
+                    ereconList[0]=0
+                if run in ereconEPMT2:
+                    ereconList[1]=0
+                if run in ereconEPMT3:
+                    ereconList[2]=0
+                if run in ereconEPMT4:
+                    ereconList[3]=0
+                if run in ereconWPMT1:
+                    ereconList[4]=0
+                if run in ereconWPMT2:
+                    ereconList[5]=0
+                if run in ereconWPMT3:
+                    ereconList[6]=0
+                if run in ereconWPMT4:
+                    ereconList[7]=0
 
                 masterFile.write("%i %i %i %i %i %i %i %i %i\n"%(run,pmtList[0],pmtList[1],pmtList[2],pmtList[3],
                                                           pmtList[4],pmtList[5],pmtList[6],pmtList[7]))
+                ereconFile.write("%i %i %i %i %i %i %i %i %i\n"%(run,ereconList[0],ereconList[1],ereconList[2],ereconList[3],
+                                                          ereconList[4],ereconList[5],ereconList[6],ereconList[7]))
+
             masterFile.close()
+            ereconFile.close()
             print "Updated master list of PMT run quality"
 
 
@@ -989,18 +1106,18 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [21,22]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
-            rep.findPedestals(runPeriod)
-            rep.runReplayPass1(runPeriod)
+            #rep.findPedestals(runPeriod)
+            #rep.runReplayPass1(runPeriod)
             rep.runGainBismuth(runPeriod)
-            rep.findTriggerFunctions(runPeriod)
             rep.runReplayPass2(runPeriod)
+            rep.findTriggerFunctions(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
         
@@ -1051,18 +1168,23 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [9]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [8,9,10]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
             
     
+    #Do reference runs first if needed.. So if you are redoing something upstream
+    # of the gain calculation (like pedestals) you need to redo all of the reference runs
+    if 0:
+
+        refruns2012 = {}

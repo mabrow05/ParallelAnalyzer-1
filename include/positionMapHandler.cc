@@ -9,7 +9,9 @@
 
 
 
-PositionMap::PositionMap(Double_t bin_width, Double_t r_max) : binWidth(bin_width), rmax(r_max), bUseRC(useRC) {
+PositionMap::PositionMap(Double_t bin_width, Double_t r_max) : binWidth(bin_width), rmax(r_max) {
+  
+  bUseRC = false;
   
   Int_t nBinsHold = (int)(110./binWidth);
   nBinsXY = ((int)nBinsHold%2)==0 ? (int)nBinsHold+1 : (int)nBinsHold;

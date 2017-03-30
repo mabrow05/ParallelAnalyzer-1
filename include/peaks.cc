@@ -15,20 +15,22 @@ SinglePeakHist::SinglePeakHist(TH1D* h, Double_t rangeLow, Double_t rangeHigh, b
   _bLandau = landau;
 
   if (autoFit) {
+    hist->GetXaxis()->SetRangeUser(min,max);
     mean = hist->GetXaxis()->GetBinCenter(hist->GetMaximumBin());
     scale = hist->GetBinContent(hist->GetMaximumBin());
+    hist->GetXaxis()->SetRange(0,hist->GetNbinsX());
     sigma = 50.;
     Int_t it = 0;
     while (it<iters) {
       FitHist(mean, sigma, scale);
-      if (goodFit_new && goodFit_prev) break;
+      if (goodFit_new && goodFit_prev && it>1) break;
       goodFit_prev = goodFit_new;
       it++;
     }
 
     if (!goodFit_new && meanErr==0.) meanErr = 100.;
     
-    std::cout << "Finished Fitting after " << it << " iterations with Status = " << status << "\n"; 
+    std::cout << "Finished Fitting after " << it+1 << " iterations with Status = " << status << "\n"; 
   }
 }
 

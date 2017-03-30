@@ -276,10 +276,10 @@ int main(int argc, char *argv[])
       if (TdcE1<0.0001 && TdcE2<0.0001 && TdcE3<0.0001 && TdcE4<0.0001) {
 
 	// East PMTs
-	//his11->Fill(Qadc[0]);
-	//his12->Fill(Qadc[1]);
-	//his13->Fill(Qadc[2]);
-	//his14->Fill(Qadc[3]);
+	his11->Fill(Qadc[0]);
+	his12->Fill(Qadc[1]);
+	his13->Fill(Qadc[2]);
+	his14->Fill(Qadc[3]);
 
 	//East Wirechambers
 	his101->Fill(Pdc2[0]);
@@ -325,10 +325,10 @@ int main(int argc, char *argv[])
       if (TdcW1<0.0001 && TdcW2<0.0001 && TdcW3<0.0001 && TdcW4<0.0001) {
 
 	//West PMTs
-	//his15->Fill(Qadc[4]);
-	//his16->Fill(Qadc[5]);
-	//his17->Fill(Qadc[6]);
-	//his18->Fill(Qadc[7]);
+	his15->Fill(Qadc[4]);
+	his16->Fill(Qadc[5]);
+	his17->Fill(Qadc[6]);
+	his18->Fill(Qadc[7]);
 
 	//West Wirechamber
 	his201->Fill(Padc[0]);
@@ -369,7 +369,7 @@ int main(int argc, char *argv[])
       
     }
 
-    // Now handle PMT pedestals using electron events
+    /* // Now handle PMT pedestals using electron events
     else if ( triggerEast || triggerWest || triggerBoth ) {
 
       if ( TdcE1<0.000001 ) his11->Fill(Qadc[0]);
@@ -381,8 +381,8 @@ int main(int argc, char *argv[])
       if ( TdcW2<0.000001 ) his16->Fill(Qadc[5]);
       if ( TdcW3<0.000001 ) his17->Fill(Qadc[6]);
       if ( TdcW4<0.000001 ) his18->Fill(Qadc[7]);	
-
-    }
+    
+      }*/
 
   }
 

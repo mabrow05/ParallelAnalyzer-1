@@ -1,7 +1,6 @@
 #include <vector>
 #include <TF1.h>
 
-static const bool useRC = false;
 
 class PositionMap {
 
@@ -34,7 +33,8 @@ private:
 
   Double_t binWidth; //x and y width of position bins
   Double_t rmax; //Maximum r where an interpolation can faithfully be constructed
-  bool bUseRC; // Flag which defaults to const value at top of file, but can be set to whatever
+  bool bUseRC; // Flag which defaults to false, but can be set to whatever
+               // This is outdated and shouldn't be turned on...
   
   Int_t nBinsXY, nBinsTotal;
   Int_t XePeriod;
