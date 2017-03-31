@@ -69,7 +69,10 @@ vector <Int_t> getPMTQuality(Int_t runNumber) {
   cout << "Reading in PMT Quality file ...\n";
   vector <Int_t>  pmtQuality (8,0);
   Char_t temp[200];
-  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  
+  // NOTE: for now i'm using EreconQuality until I can see if the bad EPMT4 crap 
+  // can be salvaged...
+  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
   ifstream pmt;
   std::cout << temp << std::endl;
   pmt.open(temp);
