@@ -1109,13 +1109,13 @@ if __name__ == "__main__":
     if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [20,21,22]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
             #rep.findPedestals(runPeriod)
             #rep.runReplayPass1(runPeriod)
-            rep.runGainBismuth(runPeriod)
+            #rep.runGainBismuth(runPeriod)
             rep.runReplayPass2(runPeriod)
             rep.findTriggerFunctions(runPeriod)
             #cal.fitSourcePositions(runPeriod)
@@ -1124,8 +1124,8 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 0: 
-        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods = [20,21,22]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1176,7 +1176,7 @@ if __name__ == "__main__":
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
