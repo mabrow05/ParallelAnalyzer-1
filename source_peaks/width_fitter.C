@@ -1,4 +1,6 @@
 
+#include <TMinuit.h>
+
 std::vector <Int_t> getPMTQuality(Int_t runNumber) {
   //Read in PMT quality file
   cout << "Reading in PMT Quality file ...\n";
@@ -157,7 +159,7 @@ void width_fitter(Int_t calPeriod)
 	  Double_t simRatio_hold = simWidths_hold[p]/sqrt(simPeaks_hold[p]);
 	  
 
-	  if ( (TMath::Abs(simWidths_hold[p]-dataWidths_hold[p])/dataWidths_hold[p] < .25) ) { //Checking for outliers
+	  if ( (TMath::Abs(simWidths_hold[p]-dataWidths_hold[p])/dataWidths_hold[p] < 1.5) ) { //Checking for outliers
 
 	    dataWidths[p][num[p]] = dataWidths_hold[p];
 	    simWidths[p][num[p]] = simWidths_hold[p];
@@ -213,7 +215,7 @@ void width_fitter(Int_t calPeriod)
 
   TF1 *f1 = new TF1("f1","[0]*x",0., 300.);
   f1->SetParameter(0,1.);
-  f1->SetParLimits(0,0.3,1.8);
+  f1->SetParLimits(0,0.5,1.5);
   gStyle->SetOptFit();
   
   TString status = " ";
