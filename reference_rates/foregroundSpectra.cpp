@@ -228,7 +228,7 @@ void doForegroundSpectra (int octetMin, int octetMax)
     for (unsigned int n=0 ; n<nevents ; n++ ) {
       
       
-      t.getEvent(n);
+      t.getEvent(n); 
 
       if ( t.PID==1 && t.Side<2 && t.Type<4 && t.Erecon>0. ) {
 
