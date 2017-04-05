@@ -1,4 +1,3 @@
-//Plots the gain as a function of run number (time)
 
 //Should make an array of all the calibration periods and the
 // runs they apply to, and then put vertical lines at each of these

@@ -25,6 +25,10 @@ endpointGain.exe: endpointGain.o $(objects)
 	$(CXX) $(CXXFLAGS) -o endpointGain.exe endpointGain.o $(objects) $(LIBS)
 	@echo "Done"
 
+endpointTracker.exe: endpointTracker.o $(objects)
+	$(CXX) $(CXXFLAGS) -o endpointTracker.exe endpointTracker.o $(objects) $(LIBS)
+	@echo "Done"
+
 DataTree.o: DataTree.hh
 
 MBUtils.o: MBUtils.hh

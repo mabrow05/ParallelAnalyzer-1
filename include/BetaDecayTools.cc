@@ -24,30 +24,37 @@ void KurieFitter::FitSpectrum(const TH1D* spec, Double_t min, Double_t max, Doub
   Int_t nBins = spec->GetNbinsX();
 
   // For plotting, these are the value and the error
-  std::vector < std::vector< Double_t> > W_vals( nBins, std::vector<Double_t>(2,0.) );
-  std::vector < std::vector< Double_t> > K_vals( nBins, std::vector<Double_t>(2,0.) );
+  std::vector < std::vector< Double_t> > W_vals( 2, std::vector<Double_t>(nBins,0.) );
+  std::vector < std::vector< Double_t> > K_vals( 2, std::vector<Double_t>(nBins,0.) );
   
 
   for ( Int_t bin=1; bin<=nBins; ++bin ) {
     
-    Double_t W = calcTotalEn_Wilk( alpha * _kuriePlot->GetXaxis()->GetBinCenter(bin) );
+    Double_t W = calcTotalEn_Wilk( alpha * spec->GetXaxis()->GetBinCenter(bin) );
     Double_t p = calcMomentum_Wilk( W );
-    K_vals[bin-1][0] = TMath::Sqrt( spec->GetBinContent(bin) / ( p*W ) );
-    K_vals[bin-1][1] = TMath::Abs( 0.5*spec->GetBinError(bin) /
-				   TMath::Sqrt(TMath::Abs(spec->GetBinContent(bin))*p*W) );
-    W_vals[bin-1][0] = W;
-    W_vals[bin-1][1] = 0.;
+    
+    K_vals[0][bin-1] = TMath::Sqrt( spec->GetBinContent(bin) / ( p*W ) );
+    K_vals[1][bin-1] = ( K_vals[0][bin-1]>0. ? 
+			 TMath::Abs( 0.5*spec->GetBinError(bin) / TMath::Sqrt(TMath::Abs(spec->GetBinContent(bin))*p*W) )
+			 : 0. );
+    W_vals[0][bin-1] = W;
+    W_vals[1][bin-1] = 0.;
+
+    /*std::cout << "**** Bin " << bin << " ****\n"
+	      << "TotalEn W = " << W << "\nMomentum p = " << p << "\n"
+	      << "Kurie Val = " << K_vals[0][bin-1] << " +/- " << K_vals[1][bin-1] << "\n" ;*/
     
   }
 
   _kuriePlot = new TGraphErrors(nBins,&W_vals[0][0],&K_vals[0][0],&W_vals[1][0],&K_vals[1][0]);
   
-  TF1 *lin = new TF1("lin","[0]-x",calcTotalEn_Wilk(min),calcTotalEn_Wilk(max));
-  lin->SetParameter(0,_actualW0);
+  TF1 *lin = new TF1("lin","[0]*([1]-x)",calcTotalEn_Wilk(min),calcTotalEn_Wilk(max));
+  lin->SetParameter(1,_actualW0);
+  lin->SetParameter(0,50.);
   
   _kuriePlot->Fit(lin,"R");
-  _W0 = lin->GetParameter(0);
-  _W0err = lin->GetParError(0);
+  _W0 = lin->GetParameter(1);
+  _W0err = lin->GetParError(1);
   
 
 };

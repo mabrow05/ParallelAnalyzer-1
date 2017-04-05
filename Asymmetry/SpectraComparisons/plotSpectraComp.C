@@ -1,14 +1,11 @@
 
 
-{
+void plotSpectraComp(int octetStart, int octetEnd) {
   gStyle->SetOptStat(0);
-
-  int octetStart = 60;
-  int octetEnd = 121;
 
   TString normType = "ALL";
 
-  Double_t normLow = 0.;
+  Double_t normLow = 200.;
   Double_t normHigh = 780.;
   
   Double_t xAxisMax = 1200.;

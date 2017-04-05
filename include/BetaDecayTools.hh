@@ -40,8 +40,9 @@ public:
   TGraphErrors returnKuriePlot() { return *_kuriePlot; };
   Double_t returnAlpha() { return _alpha; };
   Double_t returnW0() { return _W0; };
-  Double_t returnK0() { return m_e*(_W0-1); };
   Double_t returnW0err() { return _W0err; };
+  Double_t returnK0() { return m_e*(_W0-1); };
+  Double_t returnK0err() { return m_e*_W0err; };
 
   void setActualW0(Double_t w) { _actualW0 = w; }; // This is the W0 to compare against
 

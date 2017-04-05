@@ -45,6 +45,8 @@ class BetaReplayManager:
         self.AnalysisResultsPath = os.getenv("ANALYSIS_RESULTS")
         self.SimAnalysisResultsPath = os.getenv("SIM_ANALYSIS_RESULTS")
         self.MPMAnalysisResultsPath = os.getenv("MPM_ANALYSIS_RESULTS")
+        self.endpointAnaDir = os.getenv("ENDPOINT_ANALYSIS")
+                
 
     def makeAllDirectories(self):
         os.system("mkdir -p %s"%os.getenv("PEDESTALS"))
@@ -73,6 +75,8 @@ class BetaReplayManager:
         os.system("mkdir -p %s/cathode_model"%self.mwpcCalPath)        
         os.system("mkdir -p %s/octets"%self.gainCathodesPath)
         os.system("mkdir -p %s/runs"%self.gainCathodesPath)
+        os.system("mkdir -p %s/FinalEndpoints"%self.endpointAnaDir)
+        os.system("mkdir -p %s/EndpointGain"%self.endpointAnaDir)
 
     def createOctetLists(self): #This creates lists of runs and type of run for each octet. There are 122 octets in the combined datasets
         octet=0
@@ -506,13 +510,13 @@ if __name__ == "__main__":
 
 
     if 1: 
-        octet_range =[109,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[67,93]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
             #beta.runReplayPass1(octet)
             #beta.findBeamDrops(octet)
-            #beta.runGainBismuth(octet)
+            beta.runGainBismuth(octet)
             beta.runReplayPass2(octet)
             beta.findTriggerFunctions(octet)
             #beta.runReplayPass3(octet)

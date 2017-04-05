@@ -41,7 +41,7 @@ Double_t POL_ave = (POL_plus+POL_minus) / 2.;
 bool withPOL = false; //Set this to true to correct DATA for the polarimetry measurement
 
 
-std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
+std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66}; 
                                   // Octet 7 had W anode dead for part of run
                                   // Either need to discard, or apply the 
                                   // Charge cloud method to determine a 
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    /*TString aCh[2] = {"C","D"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    /*TString aCh[2] = {"F","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       //ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
