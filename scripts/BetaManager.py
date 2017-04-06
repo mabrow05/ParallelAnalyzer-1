@@ -200,6 +200,13 @@ class BetaReplayManager:
                 os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%run)
         print "DONE"
 
+    def runEndpointGain(self,octet):
+    
+        print "Running endpoint gain for octet %i"%octet
+        os.system("cd ../endpointAnalysis/; ./endpointGain.exe %i"%octet)
+            
+        print "DONE"
+
 
     def runGainCathodes(self,octet):
 
@@ -516,10 +523,11 @@ if __name__ == "__main__":
             #beta.findPedestals(octet)
             #beta.runReplayPass1(octet)
             #beta.findBeamDrops(octet)
-            beta.runGainBismuth(octet)
-            beta.runReplayPass2(octet)
-            beta.findTriggerFunctions(octet)
+           # beta.runGainBismuth(octet)
+            #beta.runReplayPass2(octet)
+            #beta.findTriggerFunctions(octet)
             #beta.runReplayPass3(octet)
+            beta.runEndpointGain(octet)
             #beta.runRootfileTranslator(octet)
             #beta.removeDepolRunFiles(octet)
             #beta.runReverseCalibration(octet)
