@@ -39,6 +39,44 @@ std::vector <int>  readOctetFile(int octet) {
 
 };
 
+std::vector < std::vector <Double_t> > readPMTbackgroundRates(Int_t octet) {
+
+  std::vector < std::vector <Double_t> > PMT;
+
+  TString dir = TString::Format("%s/reference_rates/backgroundRatesByAnaChoice/",getenv("ANALYSIS_CODE"));
+
+  TString filename = ( dir + TString("pmtRefSpectra_Octets_") +
+		       ( octet<=59 ? TString("0-59") : TString("60-121") ) + TString(".txt") );
+
+  std::ifstream infile(filename.Data());
+
+  Double_t totalRefTime[8];
+
+  std::string label;
+  infile >> label >> totalRefTime[0] >> totalRefTime[1] >> totalRefTime[2] >> totalRefTime[3]
+	 >> totalRefTime[4] >> totalRefTime[5] >> totalRefTime[6] >> totalRefTime[7];
+
+  double binMid=0.;
+  std::vector <Double_t> pmt(8, 0.);
+
+  while ( infile >> binMid >> pmt[0] >> pmt[1] >> pmt[2] >> pmt[3] 
+	  >> pmt[4] >> pmt[5] >> pmt[6] >> pmt[7] ) {
+
+    for ( int i=0; i<8; ++i ) {
+      pmt[i] = pmt[i]/totalRefTime[i];
+      std::cout << pmt[i] << "  ";
+    }
+    std::cout << std::endl;
+
+    PMT.push_back(pmt);
+  }
+  
+  return PMT;
+
+}
+
+
+
 int main(int argc, char *argv[]) {
 
   
@@ -58,6 +96,8 @@ int main(int argc, char *argv[]) {
   
   std::vector <int> runs = readOctetFile(octet);
 
+  std::vector < std::vector <Double_t> > pmtBackgroundRates = readPMTbackgroundRates(octet);
+
   
 
   ////////////////// Begin with data files /////////////////////
@@ -75,6 +115,8 @@ int main(int argc, char *argv[]) {
   TH1D *simspec[8]; // All 8 PMTs signals
 
   int nRun = 0;
+  
+  std::vector <Double_t> totalTime(runs.size(),0.); // Holds the runLengths
   
   for ( auto rn : runs ) {
 
@@ -94,10 +136,8 @@ int main(int argc, char *argv[]) {
 
     unsigned int nevents = t.getEntries();
 
-    //t.getEvent(nevents-1);
-    //totalTimeOFF += t.Time;
-    //totalBLINDTimeOFF[0] += t.TimeE;
-    //totalBLINDTimeOFF[1] += t.TimeW;
+    t.getEvent(nevents-1);
+    totalTime[nRun] = t.Time;
 
     double r2E = 0.; //position of event squared
     double r2W = 0.;
@@ -111,7 +151,16 @@ int main(int argc, char *argv[]) {
 
       if ( t.PID==1 && t.Side<2 && t.Type==0 && t.Erecon>0. ) {
 
-	if ( r2E > 50. || r2W > 50. ) continue;
+	if ( t.Side==0 ) {
+	  if ( t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East
+	  else if ( t.xE.mult<1 || t.yE.mult<1 ) continue;
+	}
+	else if ( t.Side==1 ) {
+	  if ( t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West
+	  else if ( t.xW.mult<1 || t.yW.mult<1 ) continue;      
+	}
+
+	if ( r2E > 50.*50. || r2W > 50.*50 ) continue;
 
 	if ( t.Side==0 ) {
 	  spec[0]->Fill(t.ScintE.e1);
@@ -132,8 +181,8 @@ int main(int argc, char *argv[]) {
 
     for ( int p=0; p<8; ++p ) {
       for ( int bin=1; bin<=nBins; ++bin ) {
-	pmtSpec[nRun][p][bin-1] = (double)spec[p]->GetBinContent(bin);
-	pmtSpecErr[nRun][p][bin-1] = spec[p]->GetBinError(bin);
+	pmtSpec[nRun][p][bin-1] = (double)spec[p]->GetBinContent(bin)/totalTime[nRun];
+	pmtSpecErr[nRun][p][bin-1] = spec[p]->GetBinError(bin)/totalTime[nRun];
       }
     }
 
@@ -224,7 +273,10 @@ int main(int argc, char *argv[]) {
 
       if ( PID==1 && Side<2 && Type==0 && Erecon>0. ) {
 
-	if ( r2E > 50. || r2W > 50. ) continue;
+	if ( Side==0 && ( xE.mult<1 || yE.mult<1 ) ) continue;
+	else if ( Side==1 && ( xW.mult<1 || yW.mult<1 ) ) continue;
+
+	if ( r2E > 50.*50. || r2W > 50.*50. ) continue;
 
 	
 	if ( Side==0 ) {
@@ -246,8 +298,8 @@ int main(int argc, char *argv[]) {
 
     for ( int p=0; p<8; ++p ) {
       for ( int bin=1; bin<=nBins; ++bin ) {
-	simSpec[nRun][p][bin-1] = (double)simspec[p]->GetBinContent(bin);
-	simSpecErr[nRun][p][bin-1] = simspec[p]->GetBinError(bin);
+	simSpec[nRun][p][bin-1] = (double)simspec[p]->GetBinContent(bin)/totalTime[nRun];
+	simSpecErr[nRun][p][bin-1] = simspec[p]->GetBinError(bin)/totalTime[nRun];
       }
     }
 
@@ -262,7 +314,8 @@ int main(int argc, char *argv[]) {
 
   //Now we take the weighted average over the runs in the octet
   
-  TFile *fout = new TFile(TString::Format("PMT_octet_%i.root",octet),"RECREATE");
+  TFile *fout = new TFile(TString::Format("%s/EndpointGain/endpointGain_octet-%i.root",
+					  getenv("ENDPOINT_ANALYSIS"),octet),"RECREATE");
   
   std::cout << "Made output rootfile...\n\n";
 
@@ -277,18 +330,23 @@ int main(int argc, char *argv[]) {
  
   for ( int p=0; p<8; ++p ) {
     for ( int bin=1; bin<=nBins; ++bin ) {
-
+      
       double numer = 0.;
       double denom = 0.;
       
       for ( UInt_t i=0; i<runs.size(); ++i ) {
-	double weight = pmtSpec[i][p][bin-1]>0. ? 1./(pmtSpecErr[i][p][bin-1]*pmtSpecErr[i][p][bin-1]) : 1.;
+	
+	//First background subtract each rate (keeping the error on the rate as just the counting
+	// error
+	pmtSpec[i][p][bin-1] -= pmtBackgroundRates[bin-1][p];	
+
+	double weight = pmtSpecErr[i][p][bin-1]>0. ? 1./(pmtSpecErr[i][p][bin-1]*pmtSpecErr[i][p][bin-1]) : 0.;
 	numer += pmtSpec[i][p][bin-1]*weight;
 	denom += weight;
       }
 
-      spec[p]->SetBinContent(bin,numer/denom);
-      spec[p]->SetBinError(bin,TMath::Sqrt(1./denom));
+      spec[p]->SetBinContent(bin, denom>0. ? numer/denom : 0.);
+      spec[p]->SetBinError(bin, denom>0. ? TMath::Sqrt(1./denom) : 1. );
     }
   }
 
@@ -316,11 +374,13 @@ int main(int argc, char *argv[]) {
       simspec[p]->SetBinError(bin,TMath::Sqrt(1./denom));
     }
   }
+
+  
   
   
   /////////////////////////// Kurie Fitting ////////////////////
 
-  KurieFitter kf, simkf;
+  /*KurieFitter kf, simkf;
 
   TGraphErrors kurie[8];
   TGraphErrors simkurie[8];
@@ -341,7 +401,46 @@ int main(int argc, char *argv[]) {
     simkurie[i].SetName(TString::Format("sim%i",i));
 
     simkurie[i].Write();
+    }*/
+
+  ///// Getting the gains... 
+
+  std::vector <Double_t> alpha_data(8,0.);
+  std::vector <Double_t> alpha_sim(8,0.);
+  std::vector <Double_t> gain(8,0.);
+
+  TGraphErrors kurie[8];
+  TGraphErrors simkurie[8];
+
+  KurieFitter kf, simkf;
+
+  for ( int i=0; i<8; ++i ) {
+    
+    kf.IterativeKurie(spec[i],250.,550.,1.1,1.e-4);
+    simkf.IterativeKurie(simspec[i],250.,550.,1.1,1.e-4);
+
+    kurie[i] = kf.returnKuriePlot();
+    kurie[i].SetName(TString::Format("data%i",i));
+    kurie[i].Write();
+    
+    simkurie[i] = simkf.returnKuriePlot();
+    simkurie[i].SetName(TString::Format("sim%i",i));
+    simkurie[i].Write();
+
+    alpha_data[i] = kf.returnAlpha();
+    alpha_sim[i] = simkf.returnAlpha();
+
+    gain[i] = alpha_sim[i]>0. ? alpha_data[i]/alpha_sim[i] : 1.;
+
   }
+
+  /// Write out pmt endpoint gain corrections
+  std::ofstream gainFile(TString::Format("%s/EndpointGain/endpointGain_octet-%i.dat",
+					 getenv("ENDPOINT_ANALYSIS"),octet));
+
+  for ( auto g : gain ) gainFile << g << std::endl;
+
+  gainFile.close();
   
 
   fout->Write();

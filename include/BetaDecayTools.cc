@@ -33,7 +33,9 @@ void KurieFitter::FitSpectrum(const TH1D* spec, Double_t min, Double_t max, Doub
     Double_t W = calcTotalEn_Wilk( alpha * spec->GetXaxis()->GetBinCenter(bin) );
     Double_t p = calcMomentum_Wilk( W );
     
-    K_vals[0][bin-1] = TMath::Sqrt( spec->GetBinContent(bin) / ( p*W ) );
+    K_vals[0][bin-1] = ( spec->GetBinContent(bin)>0. ? 
+			 TMath::Sqrt( spec->GetBinContent(bin) / ( p*W ) ) :
+			 0. );
     K_vals[1][bin-1] = ( K_vals[0][bin-1]>0. ? 
 			 TMath::Abs( 0.5*spec->GetBinError(bin) / TMath::Sqrt(TMath::Abs(spec->GetBinContent(bin))*p*W) )
 			 : 0. );
@@ -62,20 +64,19 @@ void KurieFitter::FitSpectrum(const TH1D* spec, Double_t min, Double_t max, Doub
 void KurieFitter::IterativeKurie(const TH1D* spec, Double_t min, Double_t max,
 				 Double_t alphaStart, Double_t delta) {
 
-  Double_t alpha_new, alpha;
-  alpha = alpha_new = alphaStart;
+  Double_t alpha_new;
+  alpha_new = alphaStart;
   Double_t diff = 100.;
   Int_t iters = 0;
 
-  while ( diff > delta ) {
+  while ( diff > delta && iters<10 ) {
 
-    std::cout << "Alpha: " << alpha_new << "Diff: " << diff << std::endl;
+    std::cout << "\n\nNew Alpha: " << alpha_new << "Diff: " << diff << std::endl;
     
-    alpha = alpha_new;
-    FitSpectrum(spec,min,max,alpha);
+    FitSpectrum(spec,min,max,alpha_new);
     
-    alpha_new = ( _actualW0 - 1 ) / ( _W0 - 1 ) * alpha;
-    diff = TMath::Abs( 1. - alpha_new/alpha );    
+    alpha_new = ( _actualW0 - 1 ) / ( _W0 - 1 ) * _alpha;
+    diff = TMath::Abs( 1. - alpha_new/_alpha );    
     iters++;
   }
 
