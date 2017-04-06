@@ -10,6 +10,9 @@
 #include <fstream>
 
 
+std::vector <Int_t> badOct {7,9,59,60,61,62,63,64,65,66};
+
+
 std::vector <int>  readOctetFile(int octet) {
 
   std::vector <int> runs;
@@ -89,6 +92,19 @@ int main(int argc, char *argv[]) {
 
   int octet = atoi(argv[1]);
 
+  if ( std::find(badOct.begin(), badOct.end(),octet) != badOct.end() ) {
+
+    std::cout << "Bad Octet... \n";
+
+    std::ofstream gainFile(TString::Format("%s/EndpointGain/endpointGain_octet-%i.dat", getenv("ENDPOINT_ANALYSIS"),octet));
+
+    for ( int i=0; i<8; ++i )  gainFile << 1. << std::endl;
+
+    gainFile.close();
+
+    return 0;
+  }
+  
 
   int nBins = 100;
   double minRange = 0.;
