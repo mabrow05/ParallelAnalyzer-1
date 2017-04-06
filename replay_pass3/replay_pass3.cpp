@@ -33,6 +33,21 @@
 
 bool OnlyReplayBadFiles = false;
 
+std::vector <Double_t> loadEndpointGain(Int_t runNumber) {
+
+  std::vector <Double_t> gain(8,1.);
+  std::ifstream infile(TString::Format("%s/EndpointGain/run-%i_epGain.dat",getenv("ENDPOINT_ANALYSIS"),runNumber));
+
+  if ( infile.is_open() ) {
+    for ( auto &g : gain ) infile >> g;
+  }
+
+  for ( auto g : gain ) std::cout << g << std::endl;
+  
+  return gain;
+
+}; // TODO: copy all endpoint gain factors to individual runs in BetaManager.py
+
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
   Char_t temp[500];
@@ -92,10 +107,24 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+
+  if ( argc<2 || argc>3 ) {
+    std::cout << "USAGE: ./replay_pass3.exe [run] [applyEndpointGain = false]\n\n";
+    exit(0);
+  }
+  
   cout.setf(ios::fixed, ios::floatfield);
   cout.precision(12);
   
   int runNumber = atoi(argv[1]);
+  bool applyEndpointGain = false;
+  if ( TString(argv[2])==TString("true") || atoi(argv[2])==1 ) applyEndpointGain = true; 
+
+  std::vector <Double_t> epGain(8,1.);
+  if ( applyEndpointGain ) epGain = loadEndpointGain(runNumber);
+
+  exit(0);
+  
   int nPMT = 8;
   int nParams = 3; //takes a quadratic 
 
@@ -383,10 +412,10 @@ int main(int argc, char *argv[])
       gaus_eta = posmap.getInterpolatedEta(t->gaus_xE.center, t->gaus_yE.center, t->gaus_xW.center, t->gaus_yW.center);
       
       //First calculate old position reconstruction old_Erecon
-      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
-      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
-      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
-      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
+      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1) * epGain[0];
+      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2) * epGain[1];
+      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3) * epGain[2];
+      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4) * epGain[3];
       
       t->ScintE.e1 = ( old_eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / old_eta[0] : 0.;
       t->ScintE.e2 = ( old_eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / old_eta[1] : 0.;
@@ -404,10 +433,10 @@ int main(int argc, char *argv[])
       t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
       
       
-      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1);
-      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2);
-      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
-      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
+      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1) * epGain[4];
+      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2) * epGain[5];
+      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3) * epGain[6];
+      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4) * epGain[7];
       
       t->ScintW.e1 = ( old_eta[4]>0. && t->ScintW.e1>0. ) ? t->ScintW.e1 / old_eta[4] : 0.;
       t->ScintW.e2 = ( old_eta[5]>0. && t->ScintW.e2>0. ) ? t->ScintW.e2 / old_eta[5] : 0.;
@@ -486,10 +515,10 @@ int main(int argc, char *argv[])
       ////////////////////////////////////////////////////////////////////
       
       //First calculate old position reconstruction gaus_Erecon
-      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
-      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
-      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
-      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
+      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1) * epGain[0];
+      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2) * epGain[1];
+      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3) * epGain[2];
+      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4) * epGain[3];
       
       t->ScintE.e1 = ( gaus_eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / gaus_eta[0] : 0.;
       t->ScintE.e2 = ( gaus_eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / gaus_eta[1] : 0.;
@@ -507,10 +536,10 @@ int main(int argc, char *argv[])
       t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
       
       
-      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1);
-      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2);
-      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
-      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
+      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1) * epGain[4];
+      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2) * epGain[5];
+      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3) * epGain[6];
+      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4) * epGain[7];
       
       t->ScintW.e1 = ( gaus_eta[4]>0. && t->ScintW.e1>0. ) ? t->ScintW.e1 / gaus_eta[4] : 0.;
       t->ScintW.e2 = ( gaus_eta[5]>0. && t->ScintW.e2>0. ) ? t->ScintW.e2 / gaus_eta[5] : 0.;
@@ -591,10 +620,10 @@ int main(int argc, char *argv[])
       
       /////////////////////////////////////////////////////////////
       // Now for the real Erecon and all of the variables that will be saved to file
-      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
-      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
-      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
-      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
+      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1) * epGain[0];
+      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2) * epGain[1];
+      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3) * epGain[2];
+      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4) * epGain[3];
       
       t->ScintE.e1 = ( eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / eta[0] : 0.;
       t->ScintE.e2 = ( eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / eta[1] : 0.;
@@ -612,10 +641,10 @@ int main(int argc, char *argv[])
       t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
       
       
-      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1);
-      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2);
-      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
-      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
+      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1) * epGain[4];
+      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2) * epGain[5];
+      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3) * epGain[6];
+      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4) * epGain[7];
       
       t->ScintW.e1 = ( eta[4]>0. && t->ScintW.e1>0. ) ? t->ScintW.e1 / eta[4] : 0.;
       t->ScintW.e2 = ( eta[5]>0. && t->ScintW.e2>0. ) ? t->ScintW.e2 / eta[5] : 0.;
