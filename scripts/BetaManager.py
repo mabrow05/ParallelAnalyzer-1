@@ -203,8 +203,23 @@ class BetaReplayManager:
     def runEndpointGain(self,octet):
     
         print "Running endpoint gain for octet %i"%octet
-        os.system("cd ../endpointAnalysis/; ./endpointGain.exe %i"%octet)
-            
+        #os.system("cd ../endpointAnalysis/; ./endpointGain.exe %i"%octet)
+
+        runs = []
+         
+        filename = "All_Octets/octet_list_%i.dat"%(octet)
+        infile = open(self.octetListPath+filename,'r')
+        
+        for line in infile:      
+            words=line.split()
+            if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                runs.append(int(words[1]))
+                    
+        
+        for run in runs:
+            shutil.copy(self.endpointAnaDir+"/EndpointGain/endpointGain_octet_%i.dat"%octet,
+                        self.endpointAnaDir+"/EndpointGain/run-%i_epGain.dat"%run)
+        
         print "DONE"
 
 
