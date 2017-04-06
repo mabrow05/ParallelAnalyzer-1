@@ -248,6 +248,8 @@ void EvtRateHandler::dataReader() {
 
   int PID, Side, Type;
 
+  Bool_t EvnbGood, BkhfGood;
+
   
   for ( unsigned int i=0; i<runs.size(); i++ ) {
   
@@ -291,6 +293,9 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("xwRC", &xwRC);
       Tin->SetBranchAddress("ywRC", &ywRC);
 
+      Tin->SetBranchAddress("EvnbGood", &EvnbGood);
+      Tin->SetBranchAddress("BkhfGood", &BkhfGood);
+
       Tin->SetBranchAddress("EMWPC_E",&MWPCEnergyE);
       Tin->SetBranchAddress("EMWPC_W",&MWPCEnergyW);
       //NEED TO ADD IN WIRECHAMBER ENERGY FOR 2/3 SEPARATION
@@ -326,6 +331,9 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("xwRC", &xwRC);
       Tin->SetBranchAddress("ywRC", &ywRC);
 
+      Tin->SetBranchAddress("EvnbGood", &EvnbGood);
+      Tin->SetBranchAddress("BkhfGood", &BkhfGood);
+
       Tin->SetBranchAddress("EMWPC_E",&MWPCEnergyE_f);
       Tin->SetBranchAddress("EMWPC_W",&MWPCEnergyW_f);
     }
@@ -341,6 +349,8 @@ void EvtRateHandler::dataReader() {
     for (unsigned int i=0; i<nevents; i++) {
       
       Tin->GetEvent(i);
+
+      if ( !(EvnbGood && BkhfGood) ) continue; //Checking quality of header/footer (I think)
       
       //Cast float variables to double if they are from MPM replay
       if (!UKdata) {
