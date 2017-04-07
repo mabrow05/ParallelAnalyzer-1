@@ -203,7 +203,7 @@ class BetaReplayManager:
     def runEndpointGain(self,octet):
     
         print "Running endpoint gain for octet %i"%octet
-        #os.system("cd ../endpointAnalysis/; ./endpointGain.exe %i"%octet)
+        os.system("cd ../endpointAnalysis/; ./endpointGain.exe %i"%octet)
 
         runs = []
          
@@ -217,7 +217,7 @@ class BetaReplayManager:
                     
         
         for run in runs:
-            shutil.copy(self.endpointAnaDir+"/EndpointGain/endpointGain_octet_%i.dat"%octet,
+            shutil.copy(self.endpointAnaDir+"/EndpointGain/endpointGain_octet-%i.dat"%octet,
                         self.endpointAnaDir+"/EndpointGain/run-%i_epGain.dat"%run)
         
         print "DONE"
@@ -345,11 +345,11 @@ class BetaReplayManager:
         print "DONE"
 
         
-    def runReplayPass3(self,runORoctet):
+    def runReplayPass3(self,runORoctet, applyEndpointGain=False):
         runs = []
         if runORoctet > 16000:
             print "Running replay_pass3 for run %i"%runORoctet
-            os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%runORoctet)
+            os.system("cd ../replay_pass3/; ./replay_pass3.exe %i %i"%(runORoctet,applyEndpointGain))
         else: 
             filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
             infile = open(self.octetListPath+filename,'r')
@@ -363,7 +363,8 @@ class BetaReplayManager:
         
             for run in runs:
                 print "Running replay_pass3 for run %i"%run
-                os.system("cd ../replay_pass3/; ./replay_pass3.exe %i"%run)
+                os.system("cd ../replay_pass3/; ./replay_pass3.exe %i %i"%(run,applyEndpointGain))
+                #print("cd ../replay_pass3/; ./replay_pass3.exe %i %i"%(run,applyEndpointGain))
         print "DONE"
 
     
@@ -531,8 +532,10 @@ if __name__ == "__main__":
             beta.makeBasicHistograms(octet)
 
 
+
+    ####### Complete list of processing beta runs assuming calibration and position maps are in place
     if 1: 
-        octet_range =[112,121]#[20,28]#[45,50]#[38,40]#[0,59];
+        octet_range =[109,121]#[20,28]#[45,50]#[38,40]#[0,59];
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
@@ -541,11 +544,13 @@ if __name__ == "__main__":
            # beta.runGainBismuth(octet)
             #beta.runReplayPass2(octet)
             #beta.findTriggerFunctions(octet)
-            beta.runReplayPass3(octet)
-            beta.runReverseCalibration(octet)
+            beta.runReplayPass3(octet,applyEndpointGain=False)
             beta.runEndpointGain(octet)
+            beta.runReplayPass3(octet,applyEndpointGain=True)
             beta.runWirechamberCal(octet)
+            beta.runReplayPass3(octet,applyEndpointGain=True)
             #beta.runRootfileTranslator(octet)
+            #beta.runReverseCalibration(octet)
             #beta.removeDepolRunFiles(octet)
             
 

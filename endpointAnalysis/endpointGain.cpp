@@ -354,7 +354,9 @@ int main(int argc, char *argv[]) {
 	
 	//First background subtract each rate (keeping the error on the rate as just the counting
 	// error
+	if (i==0) std::cout << bin << ": " <<  pmtSpec[i][p][bin-1] << " - " << pmtBackgroundRates[bin-1][p] << " = ";
 	pmtSpec[i][p][bin-1] -= pmtBackgroundRates[bin-1][p];	
+	if (i==0) std::cout << pmtSpec[i][p][bin-1] << std::endl;
 
 	double weight = pmtSpecErr[i][p][bin-1]>0. ? 1./(pmtSpecErr[i][p][bin-1]*pmtSpecErr[i][p][bin-1]) : 0.;
 	numer += pmtSpec[i][p][bin-1]*weight;
@@ -432,8 +434,8 @@ int main(int argc, char *argv[]) {
 
   for ( int i=0; i<8; ++i ) {
     
-    kf.IterativeKurie(spec[i],250.,550.,1.1,1.e-4);
-    simkf.IterativeKurie(simspec[i],250.,550.,1.1,1.e-4);
+    kf.IterativeKurie(spec[i],300.,500.,1.1,1.e-6);
+    simkf.IterativeKurie(simspec[i],300.,500.,1.1,1.e-6);
 
     kurie[i] = kf.returnKuriePlot();
     kurie[i].SetName(TString::Format("data%i",i));

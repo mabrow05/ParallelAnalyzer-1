@@ -144,6 +144,8 @@ void plotEndpoints(TString geometry) {
   c->cd(1);
   gPad->SetGridy(1);
   DATA_eastGraph->Draw("AP");
+  DATA_eastGraph->SetMinimum(750.);
+  DATA_eastGraph->SetMaximum(815.);
   DATA_eastGraph->GetXaxis()->SetRangeUser(octets[0]-10.,octets[octets.size()-1]+10.); 
   DATA_eastGraph->GetXaxis()->SetTitle("Octet number"); 
   DATA_eastGraph->GetYaxis()->SetTitle("Kinetic Energy Endpoint (keV)"); 
@@ -152,6 +154,8 @@ void plotEndpoints(TString geometry) {
   c->cd(2);
   gPad->SetGridy(1);
   DATA_westGraph->Draw("AP");
+  DATA_westGraph->SetMinimum(750.);
+  DATA_westGraph->SetMaximum(815.);
   DATA_westGraph->GetXaxis()->SetRangeUser(octets[0]-10.,octets[octets.size()-1]+10.);  
   DATA_westGraph->GetXaxis()->SetTitle("Octet number"); 
   DATA_westGraph->GetYaxis()->SetTitle("Kinetic Energy Endpoint (keV)"); 
@@ -159,6 +163,8 @@ void plotEndpoints(TString geometry) {
 
   c->Update();
   c->Modified();
+
+  c->Print(TString::Format("%s_endpoints.pdf",geometry.Data()));
 
 }
 

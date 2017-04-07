@@ -608,7 +608,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     
     pmt[p]->SetYTitle("mHz/keV");
     pmt[p]->SetXTitle("E_{vis} (keV)");
-    pmt[p]->Scale( 1.e2/(totalTimeOFF+totalTimeON) );
+    pmt[p]->Scale( 1.e2/(pmtTotalTime[p]) );
 
   }
   

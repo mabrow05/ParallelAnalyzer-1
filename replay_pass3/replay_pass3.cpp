@@ -120,10 +120,6 @@ int main(int argc, char *argv[])
   bool applyEndpointGain = false;
   if ( TString(argv[2])==TString("true") || atoi(argv[2])==1 ) applyEndpointGain = true; 
 
-  std::vector <Double_t> epGain(8,1.);
-  if ( applyEndpointGain ) epGain = loadEndpointGain(runNumber);
-
-  exit(0);
   
   int nPMT = 8;
   int nParams = 3; //takes a quadratic 
@@ -181,7 +177,8 @@ int main(int argc, char *argv[])
   EreconParameterization eRecon(runNumber); //Load the simulated relationship between EQ and Etrue
   WirechamberCal mwpcCal(runNumber);        //Load the Wirechamber Calibration
 
-  std::cout << "made it here\n";
+  std::vector <Double_t> epGain(8,1.); // Loading the endpoint gain factors if they are to be used
+  if ( applyEndpointGain ) epGain = loadEndpointGain(runNumber);
   
   std::vector <Int_t> pmtQuality = getEreconPMTQuality(runNumber); //Read in PMT quality file
   std::vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); //Get values for nPE/keV...
