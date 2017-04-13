@@ -30,7 +30,7 @@
 
 using namespace std;
 
-bool OnlyReplayBadFiles = false;
+bool OnlyReplayBadFiles = true;
 
 //Read in beam drops
 std::vector < std::vector < Double_t > > readBeamDrops(Int_t runNumber) {

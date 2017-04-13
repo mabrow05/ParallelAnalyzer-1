@@ -29,6 +29,10 @@ plot_position_map.exe: plot_position_map.o $(objects)
 	$(CXX) $(CXXFLAGS) -o plot_position_map.exe plot_position_map.o $(objects) $(LIBS)
 	@echo "Done"
 
+compare_position_maps.exe: compare_position_maps.o $(objects)
+	$(CXX) $(CXXFLAGS) -o compare_position_maps.exe compare_position_maps.o $(objects) $(LIBS)
+	@echo "Done"
+
 plot_swank_map.exe: plot_swank_map.o $(objects)
 	$(CXX) $(CXXFLAGS) -o plot_swank_map.exe plot_swank_map.o $(objects) $(LIBS)
 	@echo "Done"

@@ -9,7 +9,7 @@ public:
   PositionMap(Double_t bin_width, Double_t r_max); //Constructor
   ~PositionMap();
 
-  void readPositionMap(Int_t XeRunPeriod); //Read in a trigger map
+  void readPositionMap(Int_t XeRunPeriod, TString type="ave"); //Read in a trigger map
   //void writePositionMap(Int_t XeRunPeriod); //Write trigger map
   void setPositionMapPoint(Int_t xBin, Int_t yBin, std::vector <Double_t> vals); //Set a trigger map val
 

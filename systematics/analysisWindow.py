@@ -42,7 +42,7 @@ def sumErrors(err):
     return sqrt(sum([er**2 for er in err]))
 
 
-class analysisWindow:
+class uncertaintyHandler:
     
     def __init__(self,year):
         self.stats = []
@@ -175,8 +175,8 @@ class analysisWindow:
 
         infile.close()
 
-        for x in A_corr:
-            print(x)
+        #for x in A_corr:
+        #    print(x)
 
         # Calculate the percent error on the correction
         corr = []
@@ -198,7 +198,34 @@ class analysisWindow:
         """Calculate the theory uncertainties given the error in lambda provided"""
         percErr = []
         
-    
+    def calcEnergyUncert(self,emin,emax):
+
+        if len(self.energy_err)==0: 
+            self.readEnergyUncertainties() 
+            
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        return weightRealStats(self.energy_err,self.stat_percent_err,emin,emax)
+
+    def calcStatUncert(self,emin,emax):
+
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        return totalStatErr(self.realA,self.realAerr,emin,emax) 
+        
+
+    def calcSystematicUncert(self,emin,emax):
+
+        if len(self.syst_err)==0: 
+            self.makeSystematicCorrections() 
+            
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+
 
     def minimizer(self):
         """Minimizes the error and outputs all errors in order or largest to smallest"""
@@ -220,9 +247,9 @@ class analysisWindow:
 
                 Errors = []
 
-                Errors.append( weightRealStats(self.energy_err,self.stat_percent_err,getBinEnergyMid(lowBin),getBinEnergyMid(highBin)) )
-                Errors.append( totalStatErr(self.realA,self.realAerr,getBinEnergyMid(lowBin),getBinEnergyMid(highBin)) )
-                Errors.append( weightRealStats(self.syst_err,self.stat_percent_err,getBinEnergyMid(lowBin),getBinEnergyMid(highBin)) )
+                Errors.append( calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
+                Errors.append( calcStatUncert(       getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
+                Errors.append( calcSystematicUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
 
                 errSum = sumErrors(Errors)
                 
@@ -247,5 +274,8 @@ class analysisWindow:
 
 if __name__ == "__main__":
     
-    minim = analysisWindow(2012)
-    minim.minimizer()
+    uncert = uncertaintyHandler(2012)
+    print(uncert.calcEnergyUncert(220,670))
+    print(uncert.calcStatUncert(220,670))
+    print(uncert.calcSystematicUncert(220,670))
+    #uncert.minimizer()

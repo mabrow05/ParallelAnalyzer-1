@@ -60,7 +60,7 @@ std::vector < std::vector < std::vector <Double_t> > > sfOFF_err(10,std::vector 
 std::vector < std::vector < Double_t > > pmtBackground(120, std::vector<Double_t>(8,0.) ); 
 
 
-std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66}; 
+std::vector <Int_t> badOct = {7,60,61,62,63,64,65,66}; 
 
 
 std::vector <Int_t> getPMTQuality(Int_t runNumber) {

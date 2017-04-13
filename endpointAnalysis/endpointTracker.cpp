@@ -9,7 +9,7 @@
 #include <fstream>
 #include <algorithm>
 
-std::vector <Int_t> badOct {7,9,59,60,61,62,63,64,65,66};
+std::vector <Int_t> badOct {7,60,61,62,63,64,65,66};
 
 std::vector <int>  readOctetFile(int octet); 
 

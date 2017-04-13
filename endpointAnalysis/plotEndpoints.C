@@ -166,6 +166,36 @@ void plotEndpoints(TString geometry) {
 
   c->Print(TString::Format("%s_endpoints.pdf",geometry.Data()));
 
+  TCanvas *c2 = new TCanvas("c2","c2",1200,600);
+  c2->Divide(2,1);
+  
+  
+  TH1D *epDataE = new TH1D("epDataE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
+  TH1D *epDataW = new TH1D("epDataW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
+  TH1D *epSimE = new TH1D("epSimE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
+  TH1D *epSimW = new TH1D("epSimW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
+
+  epSimE->SetLineColor(kRed);
+  epSimW->SetLineColor(kRed);
+
+  for ( UInt_t i=0; i<octets.size(); ++i ) {
+    
+    epDataE->Fill(DATA_east_ep[i]);
+    epDataW->Fill(DATA_west_ep[i]);
+    epSimE->Fill(SIM_east_ep[i]);
+    epSimW->Fill(SIM_west_ep[i]);
+
+  }
+
+  c2->cd(1);
+  epSimE->Draw();
+  epDataE->Draw("SAME");
+  
+
+  c2->cd(2); 
+  epSimW->Draw();
+  epDataW->Draw("SAME");
+
 }
 
   

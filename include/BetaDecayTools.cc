@@ -33,7 +33,7 @@ void KurieFitter::FitSpectrum(const TH1D* spec, Double_t min, Double_t max, Doub
     Double_t W = calcTotalEn_Wilk( alpha * spec->GetXaxis()->GetBinCenter(bin) );
     Double_t p = calcMomentum_Wilk( W );
     
-    K_vals[0][bin-1] = ( spec->GetBinContent(bin)>0. ? 
+    K_vals[0][bin-1] = ( spec->GetBinContent(bin)>0. && p*W>0 ? 
 			 TMath::Sqrt( spec->GetBinContent(bin) / ( p*W ) ) :
 			 0. );
     K_vals[1][bin-1] = ( K_vals[0][bin-1]>0. ? 

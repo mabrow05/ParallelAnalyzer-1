@@ -10,7 +10,7 @@
 #include <fstream>
 
 
-std::vector <Int_t> badOct {7,9,59,60,61,62,63,64,65,66};
+std::vector <Int_t> badOct {7,60,61,62,63,64,65,66};
 
 
 std::vector <int>  readOctetFile(int octet) {
@@ -28,6 +28,35 @@ std::vector <int>  readOctetFile(int octet) {
 
     if (runTypeHold=="A2" || runTypeHold=="A5" || runTypeHold=="A7" || runTypeHold=="A10" || 
 	runTypeHold=="B2" || runTypeHold=="B5" || runTypeHold=="B7" || runTypeHold=="B10" )  {
+     
+      runs.push_back(runNumberHold);
+
+    }
+    numRuns++;
+  }
+
+  infile.close();
+ 
+  std::cout << "Read in octet file for octet " << octet << "\n";
+  return runs;
+
+};
+
+std::vector <int>  readOctetFileForBGruns(int octet) {
+
+  std::vector <int> runs;
+  
+  char fileName[200];
+  sprintf(fileName,"%s/All_Octets/octet_list_%i.dat",getenv("OCTET_LIST"),octet);
+  std::ifstream infile(fileName);
+  std::string runTypeHold;
+  int runNumberHold;
+  int numRuns = 0;
+  // Populate the map with the runType and runNumber from this octet
+  while (infile >> runTypeHold >> runNumberHold) {
+
+    if (runTypeHold=="A1" || runTypeHold=="A4" || runTypeHold=="A9" || runTypeHold=="A12" || 
+	runTypeHold=="B1" || runTypeHold=="B4" || runTypeHold=="B9" || runTypeHold=="B12" )  {
      
       runs.push_back(runNumberHold);
 
@@ -111,6 +140,7 @@ int main(int argc, char *argv[]) {
   double maxRange = 1000.;
   
   std::vector <int> runs = readOctetFile(octet);
+  std::vector <int> bgruns = readOctetFileForBGruns(octet);
 
   std::vector < std::vector <Double_t> > pmtBackgroundRates = readPMTbackgroundRates(octet);
 
@@ -125,15 +155,24 @@ int main(int argc, char *argv[]) {
   pmtSpec.resize(runs.size(),std::vector<std::vector<Double_t>>(8,std::vector<Double_t>(nBins,0.)));
   pmtSpecErr.resize(runs.size(),std::vector<std::vector<Double_t>>(8,std::vector<Double_t>(nBins,0.)));
 
+  std::vector < std::vector < std::vector <Double_t> > > bgpmtSpec;
+  std::vector < std::vector < std::vector <Double_t> > > bgpmtSpecErr;
+    
+  bgpmtSpec.resize(runs.size(),std::vector<std::vector<Double_t>>(8,std::vector<Double_t>(nBins,0.)));
+  bgpmtSpecErr.resize(runs.size(),std::vector<std::vector<Double_t>>(8,std::vector<Double_t>(nBins,0.)));
+
   // Now loop over each run to determine the individual spectra, then fill their appropriate bins in the vector
 
   TH1D *spec[8]; // All 8 PMTs signals
+  TH1D *bgspec[8]; // All 8 PMTs bg signals
   TH1D *simspec[8]; // All 8 PMTs signals
 
   int nRun = 0;
   
-  std::vector <Double_t> totalTime(runs.size(),0.); // Holds the runLengths
+  std::vector <Double_t> totalTime(runs.size(),0.); // Holds the runLengths 
+  std::vector <Double_t> bgtotalTime(runs.size(),0.); // Holds the runLengths 
   
+  //runs.resize(0);
   for ( auto rn : runs ) {
 
     for ( int i=0; i<8; ++i ) {
@@ -176,20 +215,20 @@ int main(int argc, char *argv[]) {
 	  else if ( t.xW.mult<1 || t.yW.mult<1 ) continue;      
 	}
 
-	if ( r2E > 50.*50. || r2W > 50.*50 ) continue;
+	if ( r2E > 50.*50. || r2W > 50.*50. ) continue;
 
 	if ( t.Side==0 ) {
-	  spec[0]->Fill(t.ScintE.e1);
-	  spec[1]->Fill(t.ScintE.e2);
-	  spec[2]->Fill(t.ScintE.e3);
-	  spec[3]->Fill(t.ScintE.e4);
+	  spec[0]->Fill(t.ScintE_bare.e1);
+	  spec[1]->Fill(t.ScintE_bare.e2);
+	  spec[2]->Fill(t.ScintE_bare.e3);
+	  spec[3]->Fill(t.ScintE_bare.e4);
 	}
 
 	if ( t.Side==1 ) {
-	  spec[4]->Fill(t.ScintW.e1);
-	  spec[5]->Fill(t.ScintW.e2);
-	  spec[6]->Fill(t.ScintW.e3);
-	  spec[7]->Fill(t.ScintW.e4);
+	  spec[4]->Fill(t.ScintW_bare.e1);
+	  spec[5]->Fill(t.ScintW_bare.e2);
+	  spec[6]->Fill(t.ScintW_bare.e3);
+	  spec[7]->Fill(t.ScintW_bare.e4);
 	}
 
       }
@@ -205,6 +244,86 @@ int main(int argc, char *argv[]) {
     for ( int i=0; i<8; ++i ) { 
       // std::cout << "deleting spec[" << i << "]\n";
       delete spec[i];
+    }
+    nRun++;
+    
+  }
+
+  nRun = 0;
+
+  for ( auto rn : bgruns ) {
+
+    for ( int i=0; i<8; ++i ) {
+      bgspec[i] = new TH1D(TString::Format("bgPMT%i",i),TString::Format("bg PMT %i",i),
+		      nBins, minRange, maxRange);
+    }
+    
+    // DataTree structure
+    DataTree t;
+
+    // Input ntuple
+    char tempIn[500];
+    sprintf(tempIn, "%s/replay_pass3_%i.root", getenv("REPLAY_PASS3"),rn);
+    
+    t.setupInputTree(std::string(tempIn),"pass3");
+
+    unsigned int nevents = t.getEntries();
+
+    t.getEvent(nevents-1);
+    bgtotalTime[nRun] = t.Time;
+
+    double r2E = 0.; //position of event squared
+    double r2W = 0.;
+    
+    for (unsigned int n=0 ; n<nevents ; n++ ) {
+
+      t.getEvent(n);
+
+      r2E = t.xE.center*t.xE.center + t.yE.center*t.yE.center;
+      r2W = t.xW.center*t.xW.center + t.yW.center*t.yW.center;
+
+      if ( t.PID==1 && t.Side<2 && t.Type==0 && t.Erecon>0. ) {
+
+	if ( t.Side==0 ) {
+	  if ( t.xeRC>6 || t.yeRC>6 ) continue; //only look at MWPC signal on East
+	  else if ( t.xE.mult<1 || t.yE.mult<1 ) continue;
+	}
+	else if ( t.Side==1 ) {
+	  if ( t.xwRC>6 || t.ywRC>6 ) continue; //only look at MWPC signal on West
+	  else if ( t.xW.mult<1 || t.yW.mult<1 ) continue;      
+	}
+
+	if ( r2E > 50.*50. || r2W > 50.*50. ) continue;
+
+	if ( t.Side==0 ) {
+	  bgspec[0]->Fill(t.ScintE_bare.e1);
+	  bgspec[1]->Fill(t.ScintE_bare.e2);
+	  bgspec[2]->Fill(t.ScintE_bare.e3);
+	  bgspec[3]->Fill(t.ScintE_bare.e4);
+	}
+
+	if ( t.Side==1 ) {
+	  bgspec[4]->Fill(t.ScintW_bare.e1);
+	  bgspec[5]->Fill(t.ScintW_bare.e2);
+	  bgspec[6]->Fill(t.ScintW_bare.e3);
+	  bgspec[7]->Fill(t.ScintW_bare.e4);
+	}
+
+      }
+    }
+    std::cout << "Made it through filling hists\n";
+    for ( int p=0; p<8; ++p ) {
+      for ( int bin=1; bin<=nBins; ++bin ) {
+	bgpmtSpec[nRun][p][bin-1] = (double)bgspec[p]->GetBinContent(bin)/bgtotalTime[nRun];
+	bgpmtSpecErr[nRun][p][bin-1] = ( bgspec[p]->GetBinContent(bin)>20 ?
+					 bgspec[p]->GetBinError(bin)/bgtotalTime[nRun] :
+					 TMath::Sqrt(pmtBackgroundRates[bin-1][p]/bgtotalTime[nRun]) );
+      }
+    }
+
+    for ( int i=0; i<8; ++i ) { 
+      // std::cout << "deleting spec[" << i << "]\n";
+      delete bgspec[i];
     }
     nRun++;
     
@@ -354,8 +473,11 @@ int main(int argc, char *argv[]) {
 	
 	//First background subtract each rate (keeping the error on the rate as just the counting
 	// error
-	if (i==0) std::cout << bin << ": " <<  pmtSpec[i][p][bin-1] << " - " << pmtBackgroundRates[bin-1][p] << " = ";
-	pmtSpec[i][p][bin-1] -= pmtBackgroundRates[bin-1][p];	
+	if (i==0) std::cout << bin << ": " <<  pmtSpec[i][p][bin-1] << " - " << bgpmtSpec[i][p][bin-1] << " = ";
+	pmtSpec[i][p][bin-1] -= bgpmtSpec[i][p][bin-1];//pmtBackgroundRates[bin-1][p];	
+	pmtSpecErr[i][p][bin-1] = TMath::Sqrt( 
+					      TMath::Power(bgpmtSpecErr[i][p][bin-1],2) + 
+					      TMath::Power(pmtSpecErr[i][p][bin-1],2) );
 	if (i==0) std::cout << pmtSpec[i][p][bin-1] << std::endl;
 
 	double weight = pmtSpecErr[i][p][bin-1]>0. ? 1./(pmtSpecErr[i][p][bin-1]*pmtSpecErr[i][p][bin-1]) : 0.;
@@ -364,7 +486,7 @@ int main(int argc, char *argv[]) {
       }
 
       spec[p]->SetBinContent(bin, denom>0. ? numer/denom : 0.);
-      spec[p]->SetBinError(bin, denom>0. ? TMath::Sqrt(1./denom) : 1. );
+      spec[p]->SetBinError(bin, denom>0. ? TMath::Sqrt(1./denom) : 0. );
     }
   }
 
@@ -383,13 +505,13 @@ int main(int argc, char *argv[]) {
       double denom = 0.;
       
       for ( UInt_t i=0; i<runs.size(); ++i ) {
-	double weight = simSpec[i][p][bin-1]>0. ? 1./(simSpecErr[i][p][bin-1]*simSpecErr[i][p][bin-1]) : 1.;
+	double weight = simSpec[i][p][bin-1]>0. ? 1./(simSpecErr[i][p][bin-1]*simSpecErr[i][p][bin-1]) : 0.;
 	numer += simSpec[i][p][bin-1]*weight;
 	denom += weight;
       }
 
-      simspec[p]->SetBinContent(bin,numer/denom);
-      simspec[p]->SetBinError(bin,TMath::Sqrt(1./denom));
+      simspec[p]->SetBinContent(bin, denom>0. ? numer/denom : 0.);
+      simspec[p]->SetBinError(bin, denom>0. ? TMath::Sqrt(1./denom) : 0. );
     }
   }
 
@@ -398,30 +520,38 @@ int main(int argc, char *argv[]) {
   
   /////////////////////////// Kurie Fitting ////////////////////
 
-  /*KurieFitter kf, simkf;
+  // First I'm going to Kurie fit the simulated endpoint, and then
+  // I will iterate until the data until the endpoint matches this endpoint
+
+  std::vector <Double_t> gain(8,0.);
 
   TGraphErrors kurie[8];
   TGraphErrors simkurie[8];
 
-  for ( int i=0; i<8; ++i ) {
+  KurieFitter kf, simkf;
 
-    kf.FitSpectrum(spec[i],120., 580., 1.); //150., 635.
-    std::cout << "Data Endpoint: " << kf.returnK0() << "\n";
-  
+  for ( int i=0; i<8; ++i ) {
+    
+    simkf.FitSpectrum(simspec[i],300.,500.,1.); //Fit the simulated spectrum to get relative endpoint
+
+    kf.setActualW0( simkf.returnW0() ); // Setting the comparison endpoint to the extracted ep from sim
+    kf.IterativeKurie(spec[i],300.,500.,1.,1.e-7);
+   
+
     kurie[i] = kf.returnKuriePlot();
     kurie[i].SetName(TString::Format("data%i",i));
     kurie[i].Write();
-
-    simkf.FitSpectrum(simspec[i],120., 580., 1.); //150., 635.
-    std::cout << "Sim Endpoint: " << simkf.returnK0() << "\n";
-  
+    
     simkurie[i] = simkf.returnKuriePlot();
     simkurie[i].SetName(TString::Format("sim%i",i));
-
     simkurie[i].Write();
-    }*/
 
-  ///// Getting the gains... 
+    gain[i] = kf.returnAlpha();
+
+  }
+
+  
+  /*///// Getting the gains... 
 
   std::vector <Double_t> alpha_data(8,0.);
   std::vector <Double_t> alpha_sim(8,0.);
@@ -450,7 +580,7 @@ int main(int argc, char *argv[]) {
 
     gain[i] = alpha_sim[i]>0. ? alpha_data[i]/alpha_sim[i] : 1.;
 
-  }
+    }*/
 
   /// Write out pmt endpoint gain corrections
   std::ofstream gainFile(TString::Format("%s/EndpointGain/endpointGain_octet-%i.dat",

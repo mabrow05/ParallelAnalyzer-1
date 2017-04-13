@@ -41,12 +41,12 @@ Double_t POL_ave = (POL_plus+POL_minus) / 2.;
 bool withPOL = false; //Set this to true to correct DATA for the polarimetry measurement
 
 
-std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66}; 
+std::vector <Int_t> badOct = {7,60,61,62,63,64,65,66}; // 9,59 used to be part of this, but not totally sure why... they are just not complete octets
                                   // Octet 7 had W anode dead for part of run
                                   // Either need to discard, or apply the 
                                   // Charge cloud method to determine a 
                                   // coincidence
-
+                                  // 60,61,62,63,64,65,66 have bad TDC spectra
                                   // 70 and 92 just have low statistics so they had bad corrections. Put them back in when using high statistics corrections
 
 // The Process functions will calculate all the raw asymmetries on a bin-by-bin basis and write them to file
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    /*TString aCh[2] = {"F","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    /*TString aCh[2] = {"J","K"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       //ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);

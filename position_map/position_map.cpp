@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 		  }
 		else
 		  {
-		    Double_t *xpeaks = spec->GetPositionX();
+		    Float_t *xpeaks = spec->GetPositionX(); // Note that newer versions of ROOT return a pointer to double...
 		    TAxis *xaxis = (TAxis*)(hisxy[p][i][j]->GetXaxis());
 		    Int_t peakBin=0;
 		    Double_t BinSum=0.;
@@ -420,8 +420,8 @@ int main(int argc, char *argv[])
 
   ////////// Now determine the endpoint of the Xe distribution in every position bin
 
-  double lowerBoundMult = 0.75;
-  double upperBoundMult = 1.5;
+  double lowerBoundMult = 1.;
+  double upperBoundMult = 2.;
 
   TFile *epfile = new TFile(TString::Format("%s/%s_%smm_endpoints.root",getenv("POSITION_MAPS"),tempOutBase.c_str(),ftos(xyBinWidth).c_str()),"RECREATE");
 
@@ -437,7 +437,7 @@ int main(int argc, char *argv[])
 	endpoint[p][i][j] = kf.returnK0();
 
 	epgraph = kf.returnKuriePlot();
-	epgraph.SetName(TString::Format("pmt%i_xbin%i_ybin%i",p,i,j));
+	epgraph.SetName(TString::Format("pmt%i_x%0.1f_y%0.1f",p,posmap.getBinCenter(i), posmap.getBinCenter(j)));
 	epgraph.Write();
 
       }
@@ -477,7 +477,7 @@ int main(int argc, char *argv[])
   }
 
   // Write position maps to file
-  TString mapFile = TString::Format("%s/%s_%f0.1mm.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
+  TString mapFile = TString::Format("%s/%s_%0.1fmm.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
   ofstream outMap(mapFile.Data());
 
   for (int i=0; i<nBinsXY; i++) {
@@ -497,7 +497,7 @@ int main(int argc, char *argv[])
   outMap.close();
 
   // Write norms to file
-  TString normFile = TString::Format("%s/norm_%s_%f0.1mm.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
+  TString normFile = TString::Format("%s/norm_%s_%0.1fmm.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
   ofstream outNorm(normFile.Data());
 
   for (int p=0; p<nPMT; p++) {
@@ -533,7 +533,7 @@ int main(int argc, char *argv[])
   }
 
   // Write position maps to file
-  mapFile = TString::Format("%s/%s_%f0.1mm_peakFits.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
+  mapFile = TString::Format("%s/%s_%0.1fmm_peakFits.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
   outMap.open(mapFile.Data());
   
 
@@ -582,7 +582,7 @@ int main(int argc, char *argv[])
   }
 
   // Write position maps to file
-  mapFile = TString::Format("%s/%s_%f0.1mm_endpoints.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
+  mapFile = TString::Format("%s/%s_%0.1fmm_endpoints.dat", getenv("POSITION_MAPS"),tempOutBase.c_str(),xyBinWidth);
   outMap.open(mapFile.Data());
 
   for (int i=0; i<nBinsXY; i++) {

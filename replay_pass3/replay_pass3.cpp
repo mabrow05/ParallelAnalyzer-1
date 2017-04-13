@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
   
   int runNumber = atoi(argv[1]);
   bool applyEndpointGain = false;
-  if ( TString(argv[2])==TString("true") || atoi(argv[2])==1 ) applyEndpointGain = true; 
+  if ( argc==3 && ( TString(argv[2])==TString("true") || atoi(argv[2])==1 ) ) applyEndpointGain = true; 
 
   
   int nPMT = 8;
@@ -617,6 +617,7 @@ int main(int argc, char *argv[])
       
       /////////////////////////////////////////////////////////////
       // Now for the real Erecon and all of the variables that will be saved to file
+      
       t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1) * epGain[0];
       t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2) * epGain[1];
       t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3) * epGain[2];
@@ -658,6 +659,59 @@ int main(int argc, char *argv[])
       t->ScintW.de3 = t->ScintW.nPE3 > 0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
       t->ScintW.de4 = t->ScintW.nPE4 > 0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
       
+
+      // Fill bare scintillator branch with no endpoint gain
+      t->ScintE_bare.q1 = t->ScintE.q1;
+      t->ScintE_bare.q2 = t->ScintE.q2;
+      t->ScintE_bare.q3 = t->ScintE.q3;
+      t->ScintE_bare.q4 = t->ScintE.q4;
+
+      t->ScintW_bare.q1 = t->ScintW.q1;
+      t->ScintW_bare.q2 = t->ScintW.q2;
+      t->ScintW_bare.q3 = t->ScintW.q3;
+      t->ScintW_bare.q4 = t->ScintW.q4;
+
+      t->ScintE_bare.e1 = linearityCurve.applyLinCurve(0,t->ScintE_bare.q1);
+      t->ScintE_bare.e2 = linearityCurve.applyLinCurve(1,t->ScintE_bare.q2);
+      t->ScintE_bare.e3 = linearityCurve.applyLinCurve(2,t->ScintE_bare.q3);
+      t->ScintE_bare.e4 = linearityCurve.applyLinCurve(3,t->ScintE_bare.q4);
+      
+      t->ScintE_bare.e1 = ( eta[0]>0. && t->ScintE_bare.e1>0. ) ? t->ScintE_bare.e1 / eta[0] : 0.;
+      t->ScintE_bare.e2 = ( eta[1]>0. && t->ScintE_bare.e2>0. ) ? t->ScintE_bare.e2 / eta[1] : 0.;
+      t->ScintE_bare.e3 = ( eta[2]>0. && t->ScintE_bare.e3>0. ) ? t->ScintE_bare.e3 / eta[2] : 0.;
+      t->ScintE_bare.e4 = ( eta[3]>0. && t->ScintE_bare.e4>0. ) ? t->ScintE_bare.e4 / eta[3] : 0.;
+      
+      t->ScintE_bare.nPE1 = eta[0] > 0. ? t->ScintE_bare.e1 * eta[0] * alpha[0] : 0.;
+      t->ScintE_bare.nPE2 = eta[1] > 0. ? t->ScintE_bare.e2 * eta[1] * alpha[1] : 0.;
+      t->ScintE_bare.nPE3 = eta[2] > 0. ? t->ScintE_bare.e3 * eta[2] * alpha[2] : 0.;
+      t->ScintE_bare.nPE4 = eta[3] > 0. ? t->ScintE_bare.e4 * eta[3] * alpha[3] : 0.;
+      
+      t->ScintE_bare.de1 = t->ScintE_bare.nPE1 > 0. ? t->ScintE_bare.e1/sqrt(t->ScintE_bare.nPE1) : 0.;
+      t->ScintE_bare.de2 = t->ScintE_bare.nPE2 > 0. ? t->ScintE_bare.e2/sqrt(t->ScintE_bare.nPE2) : 0.;
+      t->ScintE_bare.de3 = t->ScintE_bare.nPE3 > 0. ? t->ScintE_bare.e3/sqrt(t->ScintE_bare.nPE3) : 0.;
+      t->ScintE_bare.de4 = t->ScintE_bare.nPE4 > 0. ? t->ScintE_bare.e4/sqrt(t->ScintE_bare.nPE4) : 0.;
+      
+      
+      t->ScintW_bare.e1 = linearityCurve.applyLinCurve(4,t->ScintW_bare.q1);
+      t->ScintW_bare.e2 = linearityCurve.applyLinCurve(5,t->ScintW_bare.q2);
+      t->ScintW_bare.e3 = linearityCurve.applyLinCurve(6,t->ScintW_bare.q3);
+      t->ScintW_bare.e4 = linearityCurve.applyLinCurve(7,t->ScintW_bare.q4);
+      
+      t->ScintW_bare.e1 = ( eta[4]>0. && t->ScintW_bare.e1>0. ) ? t->ScintW_bare.e1 / eta[4] : 0.;
+      t->ScintW_bare.e2 = ( eta[5]>0. && t->ScintW_bare.e2>0. ) ? t->ScintW_bare.e2 / eta[5] : 0.;
+      t->ScintW_bare.e3 = ( eta[6]>0. && t->ScintW_bare.e3>0. ) ? t->ScintW_bare.e3 / eta[6] : 0.;
+      t->ScintW_bare.e4 = ( eta[7]>0. && t->ScintW_bare.e4>0. ) ? t->ScintW_bare.e4 / eta[7] : 0.;
+      
+      t->ScintW_bare.nPE1 = eta[4] > 0. ? t->ScintW_bare.e1 * eta[4] * alpha[4] : 0.;
+      t->ScintW_bare.nPE2 = eta[5] > 0. ? t->ScintW_bare.e2 * eta[5] * alpha[5] : 0.;
+      t->ScintW_bare.nPE3 = eta[6] > 0. ? t->ScintW_bare.e3 * eta[6] * alpha[6] : 0.;
+      t->ScintW_bare.nPE4 = eta[7] > 0. ? t->ScintW_bare.e4 * eta[7] * alpha[7] : 0.;
+      
+      t->ScintW_bare.de1 = t->ScintW_bare.nPE1 > 0. ? t->ScintW_bare.e1/sqrt(t->ScintW_bare.nPE1) : 0.;
+      t->ScintW_bare.de2 = t->ScintW_bare.nPE2 > 0. ? t->ScintW_bare.e2/sqrt(t->ScintW_bare.nPE2) : 0.;
+      t->ScintW_bare.de3 = t->ScintW_bare.nPE3 > 0. ? t->ScintW_bare.e3/sqrt(t->ScintW_bare.nPE3) : 0.;
+      t->ScintW_bare.de4 = t->ScintW_bare.nPE4 > 0. ? t->ScintW_bare.e4/sqrt(t->ScintW_bare.nPE4) : 0.;
+
       //std::cout << "Made it here" << std::endl;
       
       
