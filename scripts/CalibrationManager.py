@@ -106,7 +106,7 @@ ereconWPMT4 = []
 ereconEPMT1_runRanges = [] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
 ereconEPMT2_runRanges = []
 ereconEPMT3_runRanges = []
-ereconEPMT4_runRanges = [(16000,23173)] #2012-2013 have weird Bi gain and odd lin curves
+ereconEPMT4_runRanges = [(20000,23173)] #2012-2013 have weird Bi gain and odd lin curves
 ereconWPMT1_runRanges = []
 ereconWPMT2_runRanges = [] 
 ereconWPMT3_runRanges = []
@@ -1124,12 +1124,12 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 0: 
+    if 1: 
         runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 3 # number of times to run through the calibration
+        iterations = 1 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -1159,7 +1159,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1168,7 +1168,7 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [8,9,10]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [4,5,7]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
@@ -1176,7 +1176,7 @@ if __name__ == "__main__":
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")

@@ -332,7 +332,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
   //GetPositionMap(XePeriod);
   PositionMap posmap(5.0,50.); //Load position map with 5 mm bins
-  posmap.readPositionMap(XePeriod);
+  posmap.readPositionMap(XePeriod,"endpoint");
   vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
 
 

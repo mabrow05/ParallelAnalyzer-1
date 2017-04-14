@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
   UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
   //GetPositionMap(XePeriod);
   PositionMap posmap(5.0,50.);
-  posmap.readPositionMap(XePeriod);
+  posmap.readPositionMap(XePeriod,"endpoint");
 
   MWPCPositionMap anodeMap(5., 50.);    // Reading Anode position maps
   anodeMap.readMWPCPositionMap( getXeRunPeriodForMWPCmap(runNumber) ,250.,300.); // Using 250-300 keV because that's the most probable range
