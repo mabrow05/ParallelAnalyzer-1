@@ -3,8 +3,8 @@
 
 void plot_resid_vs_pos(string SRC) {
   
-  UInt_t calPeriodLow = 1;
-  UInt_t calPeriodHigh = 12;
+  UInt_t calPeriodLow = 16;
+  UInt_t calPeriodHigh = 24;
   Char_t tempfile[500];
   
   //Setting vectors for side to hold the source name, runNumber, residual, x, and y positions

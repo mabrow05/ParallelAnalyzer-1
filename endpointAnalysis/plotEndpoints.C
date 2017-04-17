@@ -43,6 +43,7 @@ void plotEndpoints(TString geometry) {
   gStyle->SetTitleXSize(0.05);
   gStyle->SetTitleXOffset(1.2);
   gStyle->SetLabelSize(0.05,"xyz");
+  gStyle->SetOptStat(0);
   //gStyle->SetOptFit(1111);
   //gStyle->SetStatY(0.85);
   //gStyle->SetStatX(0.975);
@@ -164,16 +165,16 @@ void plotEndpoints(TString geometry) {
   c->Update();
   c->Modified();
 
-  c->Print(TString::Format("%s_endpoints.pdf",geometry.Data()));
+  c->Print(TString::Format("%s_endpoints.pdf(",geometry.Data()));
 
   TCanvas *c2 = new TCanvas("c2","c2",1200,600);
   c2->Divide(2,1);
   
   
-  TH1D *epDataE = new TH1D("epDataE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
-  TH1D *epDataW = new TH1D("epDataW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
-  TH1D *epSimE = new TH1D("epSimE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
-  TH1D *epSimW = new TH1D("epSimW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 60, 760., 810.);
+  TH1D *epDataE = new TH1D("epDataE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
+  TH1D *epDataW = new TH1D("epDataW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
+  TH1D *epSimE = new TH1D("epSimE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
+  TH1D *epSimW = new TH1D("epSimW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
 
   epSimE->SetLineColor(kRed);
   epSimW->SetLineColor(kRed);
@@ -195,6 +196,8 @@ void plotEndpoints(TString geometry) {
   c2->cd(2); 
   epSimW->Draw();
   epDataW->Draw("SAME");
+
+  c2->Print(TString::Format("%s_endpoints.pdf)",geometry.Data()));
 
 }
 

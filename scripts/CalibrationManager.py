@@ -840,6 +840,7 @@ class CalibrationManager:
 
             EvisFile = None
             EvisWidthFile = None
+            EvisWidthErrorFile = None
             EreconFile = None
             src_file_base = None
 
@@ -847,11 +848,13 @@ class CalibrationManager:
                 src_file_base = self.revCalSimPath + "/source_peaks/"
                 EvisFile = "%s/residuals/SIM_source_runs_Evis_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 EvisWidthFile = "%s/residuals/SIM_source_runs_EvisWidth_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                EvisWidthErrorFile = "%s/residuals/SIM_source_runs_EvisWidthError_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 EreconFile = "%s/residuals/SIM_source_runs_Erecon_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
             else:
                 src_file_base = self.srcPeakPath
                 EvisFile = "%s/residuals/source_runs_Evis_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 EvisWidthFile = "%s/residuals/source_runs_EvisWidth_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
+                EvisWidthErrorFile = "%s/residuals/source_runs_EvisWidthError_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
                 EreconFile = "%s/residuals/source_runs_Erecon_RunPeriod_%i.dat"%(os.getenv("ANALYSIS_CODE"),CalibrationPeriod)
         
 
@@ -871,6 +874,7 @@ class CalibrationManager:
 
             EvisOutfile = open(EvisFile,'w')
             EvisWidthOutfile = open(EvisWidthFile,'w')
+            EvisWidthErrorOutfile = open(EvisWidthErrorFile,'w')
             EreconOutfile = open(EreconFile,'w')
 
             for run in runList:
@@ -888,6 +892,13 @@ class CalibrationManager:
                         EvisWidthOutfile.write(line)
                     infile.close()
 
+                src_file = src_file_base + "/source_widths_errors_%i_Evis.dat"%run
+                if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
+                    infile = open(src_file,'r')
+                    for line in infile:
+                        EvisWidthErrorOutfile.write(line)
+                    infile.close()
+
                 src_file = src_file_base + "/source_peaks_%i_EreconTot.dat"%run
                 if MButils.fileExistsAndNotEmpty(src_file) and run not in omittedRuns:
                     infile = open(src_file,'r')
@@ -897,6 +908,7 @@ class CalibrationManager:
 
             EvisOutfile.close()
             EvisWidthOutfile.close()
+            EvisWidthErrorOutfile.close()
             EreconOutfile.close()
 
         print "Made combined source peak file for Calibration Period %i"%CalibrationPeriod
@@ -1106,10 +1118,10 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [16,18]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [9,10,11,12]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
@@ -1124,12 +1136,12 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 1: 
-        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 0: 
+        runPeriods = [20,21,22]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 1 # number of times to run through the calibration
+        iterations = 3 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -1159,7 +1171,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 1:#i<(iterations-1):
+                if i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1168,15 +1180,15 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [4,5,7]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [5,7]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")

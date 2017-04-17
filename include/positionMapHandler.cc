@@ -60,7 +60,7 @@ void PositionMap::readPositionMap(Int_t XeRunPeriod, TString fitType ) {
   TString file;
   if ( bUseRC ) file = TString::Format("%s/position_map_%i_RC_123_%0.1fmm%s.dat",getenv("POSITION_MAPS"),
 				       XePeriod,binWidth,fileSuffix.Data());
-  else file = TString::Format("%s/TEST_position_map_%i_%0.1fmm%s.dat",getenv("POSITION_MAPS"),
+  else file = TString::Format("%s/position_map_%i_%0.1fmm%s.dat",getenv("POSITION_MAPS"),
 				       XePeriod,binWidth,fileSuffix.Data());
 
   std::cout << "Reading position map from " << file.Data() << std::endl;
