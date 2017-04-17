@@ -113,8 +113,8 @@ void width_fitter(Int_t calPeriod)
   ifstream simWidthErrorsFile(tempfile); 
   
   
-  std::string srcNameData, srcNameSim;
-  Int_t Run, simRun;
+  std::string srcNameData, srcNameSim, srcNameDataErr, srcNameSimErr;
+  Int_t Run, simRun, RunErr, simRunErr;
 
   Int_t i=0;
   std::vector < Double_t > dataWidths_hold(8,0.);
@@ -128,14 +128,19 @@ void width_fitter(Int_t calPeriod)
 	 >> dataWidths_hold[0] >> dataWidths_hold[1] >> dataWidths_hold[2] >> dataWidths_hold[3] >>
 	 dataWidths_hold[4] >> dataWidths_hold[5] >> dataWidths_hold[6] >> dataWidths_hold[7]) {
 
-    dataWidthErrorsFile >> Run >> srcNameData
-			>> dataWidthErrors_hold[0] >> dataWidthErrors_hold[1] 
-			>> dataWidthErrors_hold[2] >> dataWidthErrors_hold[3] 
-			>> dataWidthErrors_hold[4] >> dataWidthErrors_hold[5] 
-			>> dataWidthErrors_hold[6] >> dataWidthErrors_hold[7];   
+
+
+    if ( srcNameData!=std::string("In") && srcNameData!=std::string("Cd") && srcNameData!=std::string("Cs") )  { 
+      dataWidthErrorsFile >> RunErr >> srcNameDataErr
+			  >> dataWidthErrors_hold[0] >> dataWidthErrors_hold[1] 
+			  >> dataWidthErrors_hold[2] >> dataWidthErrors_hold[3] 
+			  >> dataWidthErrors_hold[4] >> dataWidthErrors_hold[5] 
+			  >> dataWidthErrors_hold[6] >> dataWidthErrors_hold[7];   
+    }
     
    
-    simWidthErrorsFile >> simRun >> srcNameSim;
+    if ( srcNameData!=std::string("In") && srcNameData!=std::string("Cd") && srcNameData!=std::string("Cs") ) simWidthErrorsFile >> simRunErr >> srcNameSimErr;
+    
     simWidthsFile >> simRun >> srcNameSim;
     
     if (simRun==Run && srcNameSim==srcNameData) {
@@ -143,13 +148,16 @@ void width_fitter(Int_t calPeriod)
 		    >> simWidths_hold[3] >> simWidths_hold[4] >> simWidths_hold[5] 
 		    >> simWidths_hold[6] >> simWidths_hold[7];
       
-      simWidthErrorsFile >> simWidthErrors_hold[0] >> simWidthErrors_hold[1] 
-			 >> simWidthErrors_hold[2] >> simWidthErrors_hold[3] 
-			 >> simWidthErrors_hold[4] >> simWidthErrors_hold[5] 
-			 >> simWidthErrors_hold[6] >> simWidthErrors_hold[7];
       
+      if ( srcNameData!=std::string("In") && srcNameData!=std::string("Cd") && srcNameData!=std::string("Cs") ) {
+	simWidthErrorsFile >> simWidthErrors_hold[0] >> simWidthErrors_hold[1] 
+			   >> simWidthErrors_hold[2] >> simWidthErrors_hold[3] 
+			   >> simWidthErrors_hold[4] >> simWidthErrors_hold[5] 
+			   >> simWidthErrors_hold[6] >> simWidthErrors_hold[7];
+      }
 
-      std::vector <Int_t> pmtQuality = getPMTQuality(Run); //Not using this right now
+      //      std::vector <Int_t> pmtQuality = getPMTQuality(Run); //Not using this right now
+    	          cout << "made it here\n";   
 
       Double_t fiducialCut = 35.;
       bool passFidCutEast = isSourceInFidCut(Run, srcNameData.substr(0,2), fiducialCut, 0);
@@ -166,7 +174,9 @@ void width_fitter(Int_t calPeriod)
 
 	    dataWidths[p][num[p]] = dataWidths_hold[p];
 	    simWidths[p][num[p]] = simWidths_hold[p];
-	    
+	    dataWidthErrors[p][num[p]] = dataWidthErrors_hold[p];
+	    simWidthErrors[p][num[p]] = simWidthErrors_hold[p];
+
 
 	    if (srcNameData!="Cd" && srcNameData!="Cs" && 
 		srcNameData!="In" && srcNameData!="Ce"
@@ -177,7 +187,6 @@ void width_fitter(Int_t calPeriod)
       }
 
       cout << simRun << " " << srcNameSim << endl;
-
       
     }
     else {
@@ -186,6 +195,16 @@ void width_fitter(Int_t calPeriod)
     }
     if (dataWidthsFile.fail()) break;
     
+    for ( int i=0; i<8; ++i ) {
+      
+      dataWidths_hold[i] = 0.;
+      simWidths_hold[i] = 0.;
+      dataWidthErrors_hold[i] = 0.;
+      simWidthErrors_hold[i] = 0.;
+      
+    }
+    
+
   }
 
   dataWidthsFile.close();
