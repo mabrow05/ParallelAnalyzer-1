@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
   string tempOutBase;
   string tempOut;
   //sprintf(tempOut, "position_map_%s.root", argv[1]);
-  tempOutBase = "TEST_position_map_" + itos(iXeRunPeriod);
+  tempOutBase = "position_map_" + itos(iXeRunPeriod);
   /*if (!allResponseClasses) {
     tempOutBase+="_RC_";
     for (int i=0; i< numResponseClasses; i++) {

@@ -20,15 +20,18 @@ void plot_position_map(int iRunPeriod, double binWidth, TString fitType);
 
 
 int main(int argc, char* argv[]) {
-  int runPeriod = atoi(argv[1]);
-  double binWidth = atof(argv[2]);
-  TString fitType = TString(argv[3]);
 
-  if ( argc!=4 ) {
+    if ( argc!=4 ) {
     std::cout << "USAGE: ./plot_position_map.exe [XePeriod] [binWidth] [fitType]\n"
 	      << "fitType = {ave, peak, endpoint}\n";
     exit(0);
   }
+
+
+  int runPeriod = atoi(argv[1]);
+  double binWidth = atof(argv[2]);
+  TString fitType = TString(argv[3]);
+
 
   plot_position_map(runPeriod, binWidth, fitType);
   

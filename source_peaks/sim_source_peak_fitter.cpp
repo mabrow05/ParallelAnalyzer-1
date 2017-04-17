@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
 
   // Load calibration info
   PositionMap posmap(5.0,50.);
-  posmap.readPositionMap(getXeRunPeriod(runNumber));
+  posmap.readPositionMap(getXeRunPeriod(runNumber),"endpoint");
   
   vector < Double_t > eta;
   std::vector < std::vector <Int_t> > numDataPoints(3, std::vector <Int_t>(2,0)); //Holds the number of data points for each side for each source

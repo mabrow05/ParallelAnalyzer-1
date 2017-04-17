@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
   std::vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); //Get values for nPE/keV...
     
   PositionMap posmap(5.0,50.); //Reading Scintillator position maps
-  posmap.readPositionMap( getXeRunPeriod(runNumber) );
+  posmap.readPositionMap( getXeRunPeriod(runNumber), "endpoint" );
 
   MWPCPositionMap anodeMap(5., 50.);    // Reading Anode position maps
   anodeMap.readMWPCPositionMap( getXeRunPeriodForMWPCmap(runNumber) ,250.,300.); // Using 250-300 keV because that's the most probable range
