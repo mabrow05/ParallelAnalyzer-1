@@ -18,6 +18,8 @@ simulation data
 
 const bool writeRatesToFile = true;
 
+const std::vector<UInt_t> neutronPoisonedBGruns {17274,18209,21433,21890,22311};
+
 
 EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
   
@@ -65,6 +67,16 @@ EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, 
       runLength[i][1] = atof(value[1].c_str());
     }
     UCNMonIntegral[i] = 100.;//value[3];
+
+    if ( std::find(neutronPoisonedBGruns.begin(),neutronPoisonedBGruns.end(),runs[i])
+	   !=neutronPoisonedBGruns.end() ) 
+	{
+	  //Skipping first 100 seconds of bg runs which are 
+	  // contaminated with neutrons
+	  runLength[i][0] -= 100.;
+	  runLength[i][1] -= 100.;
+	   
+	}
 
     /* if ( useOldTimes ) {
       if (unblinded) {
@@ -238,8 +250,8 @@ void EvtRateHandler::dataReader() {
   TFile *input = new TFile();
   TTree *Tin;
 
-  double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
-  float EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Erecon_f=0., MWPCEnergyE_f=0., MWPCEnergyW_f=0.; // For reading in data from MPM replays
+  double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0., TimeE=0., TimeW=0.,Time=0., Erecon=0., MWPCEnergyE=0., MWPCEnergyW=0.; //Branch Variables being read in
+  float EmwpcX_f=0., EmwpcY_f=0., WmwpcX_f=0., WmwpcY_f=0., TimeE_f=0., TimeW_f=0., Time_f=0., Erecon_f=0., MWPCEnergyE_f=0., MWPCEnergyW_f=0.; // For reading in data from MPM replays
   int xE_nClipped=0, yE_nClipped=0, xW_nClipped=0, yW_nClipped=0;
   int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
   int badTimeFlag = 0; 
@@ -250,8 +262,15 @@ void EvtRateHandler::dataReader() {
 
   Bool_t EvnbGood, BkhfGood;
 
-  
-  for ( unsigned int i=0; i<runs.size(); i++ ) {
+  Bool_t skipFirst100s = false;
+
+  for ( UInt_t i=0; i<runs.size(); i++ ) {
+
+    if ( std::find(neutronPoisonedBGruns.begin(),neutronPoisonedBGruns.end(),runs[i])
+	   !=neutronPoisonedBGruns.end() ) 
+      {
+	skipFirst100s = true;
+      }
   
     //Set branch addresses
     if (UKdata) {
@@ -266,6 +285,7 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("Erecon",&Erecon);
       Tin->SetBranchAddress("TimeE",&TimeE);
       Tin->SetBranchAddress("TimeW",&TimeW);
+      Tin->SetBranchAddress("Time",&Time);
       Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
       Tin->GetBranch("xE")->GetLeaf("center")->SetAddress(&EmwpcX);
       Tin->GetBranch("yE")->GetLeaf("center")->SetAddress(&EmwpcY);
@@ -312,6 +332,7 @@ void EvtRateHandler::dataReader() {
       Tin->SetBranchAddress("Erecon",&Erecon_f);
       Tin->SetBranchAddress("TimeE",&TimeE_f);
       Tin->SetBranchAddress("TimeW",&TimeW_f);
+      Tin->SetBranchAddress("Time",&Time_f);
       Tin->SetBranchAddress("badTimeFlag",&badTimeFlag);
       Tin->GetBranch("xEmpm")->GetLeaf("center")->SetAddress(&EmwpcX_f);
       Tin->GetBranch("yEmpm")->GetLeaf("center")->SetAddress(&EmwpcY_f);
@@ -361,7 +382,16 @@ void EvtRateHandler::dataReader() {
 	Erecon = (double) Erecon_f;
 	TimeE = (double) TimeE_f;
 	TimeW = (double) TimeW_f;
+	Time = (double) Time_f;
       }
+	
+      // Skipping event in first 100s if bg run is contaminated by neutrons
+      if ( skipFirst100s ) {
+	if ( Time<100. ) { 
+	  continue;
+	}
+      }
+
       
       if ( PID==1 && badTimeFlag==0 ) {       //  Cut on electrons not cut out by beam drops or bursts
 	
@@ -748,12 +778,16 @@ void BGSubtractedRate::LoadRatesByBin() {
     std::ofstream ofileE, ofileW;
     if ( !Simulation ) {
       
-      ofileE.open(TString::Format("BinByBinComparison/UK_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-      ofileW.open(TString::Format("BinByBinComparison/UK_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+      ofileE.open(TString::Format("BinByBinComparison/%sUK_Erun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
+				  FGruns[0],analysisChoice.c_str()).Data());
+      ofileW.open(TString::Format("BinByBinComparison/%sUK_Wrun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
+				  FGruns[0],analysisChoice.c_str()).Data());
     }
     else {
-      ofileE.open(TString::Format("BinByBinComparison/SIM_Erun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
-      ofileW.open(TString::Format("BinByBinComparison/SIM_Wrun%i_anaCh%s.dat",FGruns[0],analysisChoice.c_str()).Data());
+      ofileE.open(TString::Format("BinByBinComparison/%sSIM_Erun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
+				  FGruns[0],analysisChoice.c_str()).Data());
+      ofileW.open(TString::Format("BinByBinComparison/%sSIM_Wrun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
+				  FGruns[0],analysisChoice.c_str()).Data());
     }
     
     ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;

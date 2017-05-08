@@ -415,10 +415,10 @@ int main(int argc, char *argv[]) {
 
 	
 	if ( Side==0 ) {
-	  simspec[0]->Fill(e1);
-	  simspec[1]->Fill(e2);
-	  simspec[2]->Fill(e3);
-	  simspec[3]->Fill(e4);
+	  simspec[0]->Fill(e0);
+	  simspec[1]->Fill(e1);
+	  simspec[2]->Fill(e2);
+	  simspec[3]->Fill(e3);
 	}
 
 	if ( Side==1 ) {

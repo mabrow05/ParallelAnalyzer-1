@@ -79,8 +79,43 @@ std::vector < std::vector < Double_t > > getXePeriodEnvelope(Int_t XePeriod) {
   if (infile.is_open()) {
     for ( UInt_t i = 1; i<16; ++i ) {
       infile >> txt >> txt >> txt;
-      if ( (i+2)%3 == 0 && (i+2)!=6 ) ret[1].push_back(atoi(txt.c_str()));
-      if ( i%3 == 0 && i!=6 ) ret[0].push_back(atoi(txt.c_str()));
+      if ( (i+2)%3 == 0 && (i+2)!=6 ) ret[1].push_back(atof(txt.c_str()));
+      if ( i%3 == 0 && i!=6 ) ret[0].push_back(atof(txt.c_str()));
+    }
+  }
+  else {
+    std::cout << "Couldn't open error envelope file!!\n";
+    exit(0);
+  }
+  infile.close();
+  return ret;
+}
+
+//This returns mean, sigma, and rms, where the order is Ce,In,Sn,Bi2,Bi1
+std::vector < std::vector < Double_t > > getGeomEnvelope(TString geom) {
+
+  
+  std::vector < std::vector <Double_t> > ret(3,std::vector<Double_t>(0));
+  Int_t lowCal, highCal;
+  
+  if ( geom==TString("2011-2012") ) lowCal=1, highCal=12;
+  else if ( geom==TString("2012-2013") ) lowCal=16, highCal=24;
+  
+  else std::cout << "Bad geometry passed to getGeomEnvelope\n", exit(0);
+
+  TString path = TString::Format("%s/error_envelope/error_envelope_calPeriods_%i-%i.dat", getenv("ANALYSIS_CODE"),lowCal,highCal);
+  std::cout << path << std::endl;
+
+  std::ifstream infile(path.Data());  
+  std::string txt = "";
+
+  if (infile.is_open()) {
+    for ( UInt_t i = 1; i<16; ++i ) {
+      infile >> txt >> txt >> txt;
+      if ( i%3 == 0 && i!=6 ) ret[2].push_back(atof(txt.c_str())); // RMS
+      if ( (i+1)%3 == 0 && i!=5 ) ret[1].push_back(atof(txt.c_str())); // Err
+      if ( (i+2)%3 == 0 && i!=4 ) ret[0].push_back(atof(txt.c_str())); // mean
+     
     }
   }
   else {
@@ -334,64 +369,22 @@ void asymm_vs_cal(TString year) {
 
   TCanvas *c2 = new TCanvas("c2","c2",1600,1200);
   
-  double En[5];
+  double En[4];
   En[0] = peakCe;//98.2;
-  En[1] = peakIn;
-  En[2] = peakSn;//331.2;
-  En[3] = peakBiLow; //443.0;
-  En[4] = peakBiHigh;//928.0;
+  //  En[1] = peakIn;
+  En[1] = peakSn;//331.2;
+  En[2] = peakBiLow; //443.0;
+  En[3] = peakBiHigh;//928.0;
  
-  double dEn[5] = {0.};
+  double dEn[4] = {0.};
   
-  double res[5];
-  double sig[5];
-  double rms[5];
-  double rmsY[5] = {0.};
+  double rmsY[4] = {0.};
 
-  if ( year == TString("2011-2012") ) {
-    res[0] = 0.25;
-    res[1] = -.4;
-    res[2] =  -3.0;
-    res[3] = 0.75;
-    res[4] = -1.69;
-    
-    sig[0] = 1.95;
-    sig[1] = 1.9;
-    sig[2] = 3.9;
-    sig[3] = 5.7;
-    sig[4] = 8.;
-
-    rms[0] = 1.737;
-    rms[1] = 2.436;
-    rms[2] = 3.89;
-    rms[3] = 5.57;
-    rms[4] = 9.22;
-  }
-  else {
-
-    res[0] = -0.34;
-    res[1] = 2.8;
-    res[2] = 0.64;
-    res[3] = -1.79;
-    res[4] = -3.9;
-    
-    sig[0] = 1.72;
-    sig[1] = 2.1;
-    sig[2] = 2.93;
-    sig[3] = 3.8;
-    sig[4] = 5.52;
-
-    rms[0] = 2.21;
-    rms[1] = 3.17;
-    rms[2] = 3.29;
-    rms[3] = 4.76;
-    rms[4] = 8.08;
-  }
-    
+  std::vector < std::vector<Double_t> > env = getGeomEnvelope(year);
 
   TMultiGraph *mg = new TMultiGraph();
 
-  TGraphErrors *RMS = new TGraphErrors(5,En,rmsY,dEn,rms);
+  TGraphErrors *RMS = new TGraphErrors(4,En,rmsY,dEn,&env[2][0]);
   RMS->SetTitle(TString::Format("RMS"));
   RMS->SetMarkerColor(8);
   RMS->SetLineColor(8);
@@ -400,7 +393,7 @@ void asymm_vs_cal(TString year) {
   RMS->SetMarkerSize(0);
   RMS->SetFillStyle(0);
 
-  TGraphErrors *gr = new TGraphErrors(5,En,res,dEn,sig);
+  TGraphErrors *gr = new TGraphErrors(4,En,&env[0][0],dEn,&env[1][0]);
   gr->SetTitle(TString::Format("Mean & Sigma"));
   gr->SetMarkerColor(kBlue);
   gr->SetLineColor(kBlue);
@@ -449,8 +442,8 @@ void asymm_vs_cal(TString year) {
   const Int_t nn = 5;
   Double_t perc1=0.017;
   Double_t perc2=0.010;
-  Double_t perc3=0.007;
-  Double_t perc4=0.007;
+  Double_t perc3=0.0065;
+  Double_t perc4=0.0065;
   Double_t x2[nn] = {0., peakCe, peakSn, peakBiHigh, 1200.};
   Double_t percent[nn] = {1., perc1, perc2, perc3, peakBiHigh/1200.*perc4};
   Double_t y_upper[nn], y_lower[nn];

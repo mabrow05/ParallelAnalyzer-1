@@ -291,7 +291,7 @@ vector <vector <double> > returnSourcePosition (Int_t runNumber, string src) {
   return srcPos;
 }
 
-vector <Int_t> getPMTQuality(Int_t runNumber) {
+vector <Int_t> getEreconPMTQuality(Int_t runNumber) {
   //Read in PMT quality file
   cout << "Reading in PMT Quality file ...\n";
   vector <Int_t>  pmtQuality (8,0);
@@ -396,6 +396,12 @@ void SetUpTree(TTree *tree) {
   tree->Branch("ScintPosAdjusted",&scint_pos_adj,"ScintPosAdjE[3]/D:ScintPosAdjW[3]");
   tree->Branch("PMT",&pmt,"Evis0/D:Evis1:Evis2:Evis3:Evis4:Evis5:Evis6:Evis7:etaEvis0/D:etaEvis1:etaEvis2:etaEvis3:etaEvis4:etaEvis5:etaEvis6:etaEvis7:nPE0/D:nPE1:nPE2:nPE3:nPE4:nPE5:nPE6:nPE7");
   
+  tree->Branch("xE",&xE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("yE",&yE,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("xW",&xW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  tree->Branch("yW",&yW,"center/D:width:cathSum:maxValue:maxWire/I:mult:nClipped:err:rawCenter/D:height");
+  
+
 }
   
 
@@ -447,12 +453,12 @@ void calcDeltaExp (int octet)
     Double_t g_rest = 12500.;
 
     /////// Loading other run dependent quantities
-    vector <Int_t> pmtQuality = getPMTQuality(runNumber); // Get the quality of the PMTs for that run
+    vector <Int_t> pmtQuality = getEreconPMTQuality(runNumber); // Get the quality of the PMTs for that run
     UInt_t calibrationPeriod = getSrcRunPeriod(runNumber); // retrieve the calibration period for this run
     UInt_t XePeriod = getXeRunPeriod(runNumber); // Get the proper Xe run period for the Trigger functions
     //GetPositionMap(XePeriod);
     PositionMap posmap(5.0, 50.); //Load position map with 5 mm bins
-    posmap.readPositionMap(XePeriod);
+    posmap.readPositionMap(XePeriod,"endpoint");
     vector <Double_t> alpha = GetAlphaValues(calibrationPeriod); // fill vector with the alpha (nPE/keV) values for this run period
 
 
@@ -474,7 +480,7 @@ void calcDeltaExp (int octet)
     TChain *chain = new TChain("anaTree");
   
     if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
-    else if (runNumber>21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
+    else if (runNumber>=21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
     else simLocation = string(getenv("SIM_2012_2013"));
 
 
@@ -523,30 +529,29 @@ void calcDeltaExp (int octet)
     //chain->SetBranchAddress("primaryKE",&Eprim);
     
     
-    
-    //Trigger booleans
-    bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger;
-    Double_t MWPCThreshold=0.2; // keV dep in the wirechamber.. 
-
+   
     //Set random number generator
-    TRandom3 *seed = new TRandom3(runNumber); // seed generator, always same for given run for reproducibility
-    TRandom3 *rand0 = new TRandom3((int)seed->Rndm()*1000);
-    TRandom3 *rand1 = new TRandom3((int)seed->Rndm()*1000);
-    TRandom3 *rand2 = new TRandom3((int)seed->Rndm()*1000);
-    TRandom3 *rand3 = new TRandom3((int)seed->Rndm()*1000);
+    TRandom3 *seed = new TRandom3(4*runNumber); // seed generator, always same for given run for reproducibility
+    TRandom3 *rand0 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *rand1 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *rand2 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *rand3 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
     
     //Initialize random numbers for 8 pmt trigger probabilities
-    TRandom3 *randPMTE1 = new TRandom3((int)seed->Rndm()*1);
-    TRandom3 *randPMTE2 = new TRandom3((int)seed->Rndm()*2);
-    TRandom3 *randPMTE3 = new TRandom3((int)seed->Rndm()*3);
-    TRandom3 *randPMTE4 = new TRandom3((int)seed->Rndm()*4);
-    TRandom3 *randPMTW1 = new TRandom3((int)seed->Rndm()*5);
-    TRandom3 *randPMTW2 = new TRandom3((int)seed->Rndm()*6);
-    TRandom3 *randPMTW3 = new TRandom3((int)seed->Rndm()*7);
-    TRandom3 *randPMTW4 = new TRandom3((int)seed->Rndm()*8);
+    TRandom3 *randPMTE1 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *randPMTE2 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *randPMTE3 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *randPMTE4 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *randPMTW1 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *randPMTW2 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *randPMTW3 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
+    TRandom3 *randPMTW4 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
 
     std::vector <Double_t> triggRandVec(4,0.);
 
+    // Wirechamber information
+    bool EastScintTrigger, WestScintTrigger, EMWPCTrigger, WMWPCTrigger; //Trigger booleans
+    Double_t MWPCAnodeThreshold=0.2; // keV dep in the wirechamber.. 
 
     //Get total number of events in TChain
     UInt_t nevents = chain->GetEntries();
@@ -627,21 +632,6 @@ void calcDeltaExp (int octet)
       scint_pos_adj.ScintPosAdjE[2] = scint_pos.ScintPosE[2]*10.;
       scint_pos_adj.ScintPosAdjW[2] = scint_pos.ScintPosW[2]*10.;
 
-      // 2011-2012 Cathode Threshold
-      Double_t clip_threshEX = 8.;
-      Double_t clip_threshEY = 8.;
-      Double_t clip_threshWX = 8.;
-      Double_t clip_threshWY = 8.;
-      
-      // 2012-2013 Cathode Threshold NEED TO ADD IN ISOBUTANE THRESHOLDS
-      if ( runNumber > 20000 ) {
-	// ISOBUTANE
-	if ( runNumber> 21087 && runNumber < 21623 ) { 
-	  clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
-	}
-	else clip_threshEX = 8., clip_threshEY = 8., clip_threshWX = 8., clip_threshWY = 8.;
-      } 
-      
       std::vector <double> posex(3,0.);
       std::vector <double> poswx(3,0.);
       std::vector <double> posey(3,0.);
@@ -654,19 +644,14 @@ void calcDeltaExp (int octet)
 
       // Different def of wires in data
       for ( int i=0; i<16; ++i ) {
-	dCath_EX[i] = (double)Cath_EX[i];
-	dCath_EY[i] = (double)Cath_EY[i];
+	dCath_EX[15-i] = (double)Cath_EX[i];
+	dCath_EY[15-i] = (double)Cath_EY[i];
 	dCath_WX[i] = (double)Cath_WX[i];
-	dCath_WY[i] = (double)Cath_WY[i];
+	dCath_WY[15-i] = (double)Cath_WY[i];
       }
-
-      Double_t mwpcAdjE[3] = {0.,0.,0.};
-      Double_t mwpcAdjW[3] = {0.,0.,0.};
       
       MWPCCathodeHandler cathResp(dCath_EX,dCath_EY,dCath_WX,dCath_WY);
-      cathResp.setCathodeThreshold(0.000001);
-      cathResp.setClippingThreshold(clip_threshEX,clip_threshEY,clip_threshWX,clip_threshWY);
-
+      cathResp.loadCathodeModelParams(runNumber);
       
       cathResp.findAllPositions(true,false);
 
@@ -675,12 +660,6 @@ void calcDeltaExp (int octet)
       poswx = cathResp.getPosWX();
       poswy = cathResp.getPosWY();
       
-      mwpcAdjE[0] = -posex[0] * sqrt(0.6) ; // The wires are already in 
-      mwpcAdjE[1] = -posey[0] * sqrt(0.6) ; // mm in the MWPCCathodeHandler Class
-      mwpcAdjW[0] = poswx[0] * sqrt(0.6) ;  // and the coordinates of the wires are inverted
-      mwpcAdjW[1] = -poswy[0] * sqrt(0.6) ; // for the y and east x directions from the experimental
-      mwpcAdjE[2] = mwpc_pos.MWPCPosE[2]*10. ; // positions used in MWPCCathodeHandler class
-      mwpcAdjW[2] = mwpc_pos.MWPCPosW[2]*10. ;
 
       //std::cout << mwpcAdjE[0] << "\t" << mwpcAdjE[1] << mwpcAdjW[0] << "\t" << mwpcAdjW[1] <<"\n"; 
       
@@ -691,18 +670,59 @@ void calcDeltaExp (int octet)
       nClipped_WX = cathResp.getnClippedWX();
       nClipped_WY = cathResp.getnClippedWY();
 
+      xE.center = posex[0] * sqrt(0.6);
+      yE.center = posey[0] * sqrt(0.6);
+      xW.center = poswx[0] * sqrt(0.6);
+      yW.center = poswy[0] * sqrt(0.6);
 
-      std::vector <Double_t> eta = posmap.getInterpolatedEta( mwpcAdjE[0], mwpcAdjE[1], mwpcAdjW[0], mwpcAdjW[1] );
+      xE.width = posex[1] * sqrt(0.6);
+      yE.width = posey[1] * sqrt(0.6);
+      xW.width = poswx[1] * sqrt(0.6);
+      yW.width = poswy[1] * sqrt(0.6);
+      
+      xE.height = posex[2];
+      yE.height = posey[2];
+      xW.height = poswx[2];
+      yW.height = poswy[2];
+
+      xE.mult = cathResp.getMultEX();
+      yE.mult = cathResp.getMultEY();
+      xW.mult = cathResp.getMultWX();
+      yW.mult = cathResp.getMultWY();
+
+      xE.nClipped = cathResp.getnClippedEX();
+      yE.nClipped = cathResp.getnClippedEY();
+      xW.nClipped = cathResp.getnClippedWX();
+      yW.nClipped = cathResp.getnClippedWY();
+
+      xE.maxWire = cathResp.getMaxWireEX();
+      yE.maxWire = cathResp.getMaxWireEY();
+      xW.maxWire = cathResp.getMaxWireWX();
+      yW.maxWire = cathResp.getMaxWireWY();
+
+      xE.maxValue = dCath_EX[xE.maxWire];
+      yE.maxValue = dCath_EY[yE.maxWire];
+      xW.maxValue = dCath_WX[xW.maxWire];
+      yW.maxValue = dCath_WY[yW.maxWire];
+
+      xE.rawCenter = cathResp.getWirePosEX(xE.maxWire);
+      yE.rawCenter = cathResp.getWirePosEY(yE.maxWire);
+      xW.rawCenter = cathResp.getWirePosWX(xW.maxWire);
+      yW.rawCenter = cathResp.getWirePosWY(yW.maxWire);
+
+
+      std::vector <Double_t> eta = posmap.getInterpolatedEta( xE.center,yE.center,
+				      xW.center,yW.center );
 
       //for (UInt_t iii=0; iii<eta.size(); iii++) std::cout << eta[iii] << std::endl;
     
       
       //MWPC triggers
-      if (mwpcE.MWPCEnergyE>MWPCThreshold) EMWPCTrigger=true;
-      if (mwpcE.MWPCEnergyW>MWPCThreshold) WMWPCTrigger=true;
+      if (mwpcE.MWPCEnergyE>MWPCAnodeThreshold) EMWPCTrigger=true;
+      if (mwpcE.MWPCEnergyW>MWPCAnodeThreshold) WMWPCTrigger=true;
 
 
-      //If there is clipping, or no wirechamber trigger, skip the event
+      //If there is no wirechamber trigger, skip the event
       if ( !(EMWPCTrigger || WMWPCTrigger) ) {
 	evt++;
 	if (evt%100000==0) {std::cout << evt << std::endl;}
@@ -754,8 +774,8 @@ void calcDeltaExp (int octet)
       //Calculate the weighted energy on a side
       Double_t numer=0., denom=0.;
       for (UInt_t p=0;p<4;p++) {
-	numer += pmtQuality[p] ? pmt.nPE[p] : 0.;
-	denom += pmtQuality[p] ? eta[p]*alpha[p] : 0.;
+	numer += (pmtQuality[p] && pmt.etaEvis[p]>0.) ? pmt.nPE[p] : 0.;
+	denom += (pmtQuality[p] && pmt.etaEvis[p]>0.) ? eta[p]*alpha[p] : 0.;
       }
 
       //Now we apply the trigger probability
@@ -808,8 +828,8 @@ void calcDeltaExp (int octet)
       //Calculate the total weighted energy
       numer=denom=0.;
       for (UInt_t p=4;p<8;p++) {
-	numer += pmtQuality[p] ? pmt.nPE[p] : 0.;
-	denom += pmtQuality[p] ? eta[p]*alpha[p] : 0.;
+	numer += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? pmt.nPE[p] : 0.;
+	denom += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? eta[p]*alpha[p] : 0.;
       }
       //Now we apply the trigger probability
       Double_t totalEnW = denom>0. ? numer/denom : 0.;
@@ -939,33 +959,36 @@ void calcDeltaExp (int octet)
 
       if ( PID==1 && side<2 && type<4 && Erecon>0. ) {
 
-	evtTally++;
 
-	/*
-	//Cut out clipped events
-	if ( type==1 || type==2 ) {
-	  if (nClipped_EX>0 || nClipped_EY>0 || nClipped_WX>0 || nClipped_WY>0) {
+	if ( type!=0 ) {
+	  //if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
+	  if (xE.mult<1 || yE.mult<1 || xW.mult<1 || yW.mult<1) { 
 	    evt++;
 	    if (evt%100000==0) std::cout << evt << std::endl;
 	    continue;
 	  }
 	}
 	else {
-	  if ( side==0 && ( nClipped_EX>0 || nClipped_EY>0 ) ) {
-	    evt++;
+	  if ( side==0 ) {
+	    //if ( xE_nClipped>0 || yE_nClipped>0 )  continue;
+	    if ( xE.mult<1 || yE.mult<1 )  {
+	      evt++;
+	      if (evt%100000==0) std::cout << evt << std::endl;
+	      continue;
+	    }
+	  }
+	  else if ( side==1 ) {
+	    //if ( xW_nClipped>0 || yW_nClipped>0 )  continue;
+	    if ( xW.mult<1 || yW.mult<1 )  { 
+	      evt++;
 	    if (evt%100000==0) std::cout << evt << std::endl;
 	    continue;
+	    }
 	  }
-	  else if ( side==1 && ( nClipped_WX>0 || nClipped_WY>0 ) ) {
-	    evt++;
-	    if (evt%100000==0) std::cout << evt << std::endl;
-	    continue;
-	  }
-	  }*/	
-	
-	
-	//std::cout << "Made it to clipping cut... " << r2E << "\t" << r2W\n";
-	
+	}
+
+	evtTally++;
+		
 	
 	//Type 2/3 separation
 	if ( type==2 ) {
@@ -983,8 +1006,8 @@ void calcDeltaExp (int octet)
 	
 	
 	// These are the reconstructed position using the cathode segments
-	double r2E = mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1];
-	double r2W = mwpcAdjW[0]*mwpcAdjW[0] + mwpcAdjW[1]*mwpcAdjW[1];
+	double r2E = xE.center*xE.center + yE.center*yE.center;
+	double r2W = xW.center*xW.center + yW.center*yW.center;
 
 	if ( r2E<(fidCut*fidCut) && r2W<(fidCut*fidCut ) ) {
 	
@@ -1047,15 +1070,15 @@ void calcDeltaExp (int octet)
       bool sep2 = false;
       bool sep3 = false;
 
-      if (anaCh==1) { type_low=0; type_high=2; }                             //All types, 2/3 not separated
-      else if (anaCh==3 || anaCh==5) { type_low=0; type_high=1; sep23=true;} // All event types, 2/3 separated
-      else if (anaCh==2) { type_low=0; type_high=1;}                         // Type 0 and 1
-      else if (anaCh==4) { type_low=0; type_high=0;}                         // Type 0
-      else if (anaCh==6) { type_low=1; type_high=1;}                         // Type 1
-      else if (anaCh==7) { type_low=type_high=2; }                           // Type 2/3 not separated
-      else if (anaCh==8) { sep23 = sep2 = sep3 = true; }                 // Type 2/3, separated
-      else if (anaCh==9) { sep23 = sep2 = true;}                   // Type 2
-      else if (anaCh==10) { sep23 = sep3 = true;}                  // Type 3
+      if (anaCh==1) { type_low=0; type_high=2; }                             // "A" All types, 2/3 not separated
+      else if (anaCh==3 || anaCh==5) { type_low=0; type_high=1; sep23 = sep2 = sep3 = true;} // "C & E" All event types, 2/3 separated
+      else if (anaCh==2) { type_low=0; type_high=1;}                         // "B" Type 0 and 1
+      else if (anaCh==4) { type_low=0; type_high=0;}                         // "D" Type 0
+      else if (anaCh==6) { type_low=1; type_high=1;}                         // "F" Type 1
+      else if (anaCh==7) { type_low=type_high=2; }                           // "G" Type 2/3 not separated
+      else if (anaCh==8) { sep23 = sep2 = sep3 = true; }                 // "H" Type 2/3, separated
+      else if (anaCh==9) { sep23 = sep2 = true;}                   // "J" Type 2
+      else if (anaCh==10) { sep23 = sep3 = true;}                  // "K" Type 3
       
       for (unsigned int side=0; side<2; side++) {
 	for (unsigned int bin=1; bin<=120; bin++) {

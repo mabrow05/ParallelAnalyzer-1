@@ -486,7 +486,7 @@ int main(int argc, char *argv[])
   ofstream outResultsMeanError(tempResults);
   sprintf(tempResults, "%s/source_peaks/source_widths_%s_Evis.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsSigma(tempResults);
-  sprintf(tempResults, "%s/source_widths_errors_%s_Evis.dat",getenv("REVCALSIM"), argv[1]);
+  sprintf(tempResults, "%s/source_peaks/source_widths_errors_%s_Evis.dat",getenv("REVCALSIM"), argv[1]);
   ofstream outResultsSigmaError(tempResults);
 
   for (int n=0; n<nSources; n++) {
@@ -583,6 +583,7 @@ int main(int argc, char *argv[])
   outResultsMean.close();
   outResultsMeanError.close();
   outResultsSigma.close();
+  outResultsSigmaError.close();
 
 
   //Now for the total Evis peaks and widths

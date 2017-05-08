@@ -160,8 +160,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   data->GetXaxis()->SetTitleSize(0.05);
   data->GetXaxis()->CenterTitle();
   data->GetYaxis()->CenterTitle();
-  data->SetMinimum(-0.13);
-  data->SetMaximum(-0.118);
+  data->SetMinimum(-0.126);
+  data->SetMaximum(-0.1175);
 
   data->Draw("EX0");
 
@@ -226,7 +226,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   dataBacksc->GetXaxis()->SetTitleSize(0.05);
   dataBacksc->GetXaxis()->CenterTitle();
   dataBacksc->GetYaxis()->CenterTitle();
-  dataBacksc->SetMinimum(-0.13);
+  dataBacksc->SetMinimum(-0.2);
   dataBacksc->SetMaximum(0.02);
 
   dataBacksc->Draw("EX0");
@@ -254,6 +254,6 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
    //leg->AddEntry("gr","Graph with error bars","lep");
   //leg->Draw();
 
-  
-  
+  c1->Print(TString::Format("AsymmByAnaCh_%s_%s_%s_%i-%i.pdf(",year.Data(),corrections.Data(),withPOL?"withPOL":"noPOL",ebinLow,ebinHigh));
+  c2->Print(TString::Format("AsymmByAnaCh_%s_%s_%s_%i-%i.pdf)",year.Data(),corrections.Data(),withPOL?"withPOL":"noPOL",ebinLow,ebinHigh));  
 }

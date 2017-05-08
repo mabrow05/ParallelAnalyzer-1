@@ -827,8 +827,11 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
     grE3->SetMaximum(maxEQ+40.);
     grE3->Draw("AP");
 
+    //fitADC->SetParLimits(0, 0., 20.);
 
     grE3->Fit("fitADC", "","", 0., maxADC+40.);
+
+    //fitADC->SetParLimits(0, -20., 20.);
 
     offset = fitADC->GetParameter(0);
     slope = fitADC->GetParameter(1);

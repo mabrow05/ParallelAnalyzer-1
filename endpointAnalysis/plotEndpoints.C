@@ -61,7 +61,7 @@ void plotEndpoints(TString geometry) {
   //gStyle->SetGridStyle(4);
   //gStyle->SetGridColor(kBlue);
 
-  Int_t badocts[] = {7,9,59,60,61,62,63,64,65,66};
+  Int_t badocts[] = {7,60,61,62,63,64,65,66};
   
 
   Int_t octMin, octMax;
