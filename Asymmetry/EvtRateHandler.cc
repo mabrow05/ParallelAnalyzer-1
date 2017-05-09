@@ -764,7 +764,7 @@ void SimEvtRateHandler::dataReader() {
 	  }
 
 	  //Determine Radial bin 
-	  int rad = (int) ( Side==0 ? (r2E/10.) : (r2W/10.) );
+	  int rad = (int) ( Side==0 ? (sqrt(r2E)/10.) : (sqrt(r2W)/10.) );
 
 
 	  // Fill histograms according to event types in this analysis choice
