@@ -84,7 +84,7 @@ protected:
   
   TH1D *hisCounts[2];       // histogram for counts in an energy bin
   TH1D *hisCountsQuad[4][2];       // histogram for counts in an energy bin for each quadrant
-  TH1D *hisCountsRad[5][2];       // histogram for counts in an energy bin for each annuli
+  TH1D *hisCountsRad[6][2];       // histogram for counts in an energy bin for each annuli
   
   std::vector <double> rateWvec;       //Stores the rate for each bin
   std::vector <double> rateEvec;

@@ -246,7 +246,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
   bool allEvtsTrigg = false; //This just removes the use of the trigger function for an initial calibration. 
                             // Once a calibration is established (or if running on Betas), you can keep this false
 
-  bool simProperStatistics = true; // If True, this uses the actual data run to determine the number of Type 0s to simulate
+  bool simProperStatistics = false; // If True, this uses the actual data run to determine the number of Type 0s to simulate
 
   bool veryHighStatistics = false; // Run 24 million events per run
   if ( octet>=0 ) veryHighStatistics = true; //This will ensure the proper 24 million events are chosen and that they don't overlap
@@ -1186,8 +1186,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
     // Increment the event tally if the event was PID = 1 (electron) and the event was inside the fiducial radius used to determine num of events in data file
     if ( source == "Beta") {
-      if ( PID==1 && Erecon>0. && ( sqrt( mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1] )<fidCut
-				    && sqrt( mwpcAdjW[0]*mwpcAdjW[0] + mwpcAdjW[1]*mwpcAdjW[1] )<fidCut ) ) evtTally++;
+      if ( PID==1 && Erecon>0. &&  sqrt( xE.center*xE.center + yE.center*yE.center )<fidCut && sqrt( xW.center*xW.center + yW.center*yW.center )<fidCut ) evtTally++; //&& ( sqrt( mwpcAdjE[0]*mwpcAdjE[0] + mwpcAdjE[1]*mwpcAdjE[1] )<fidCut
+      // && sqrt( mwpcAdjW[0]*mwpcAdjW[0] + mwpcAdjW[1]*mwpcAdjW[1] )<fidCut )
     }
 
     else {

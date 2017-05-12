@@ -81,22 +81,22 @@ AsymmetryBase::AsymmetryBase(int oct, std::string anaCh, double enBinWidth, doub
   A10errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   B10errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   
-  A2Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B2Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A5Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B5Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A7Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B7Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A10Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B10Rad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A2errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B2errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A5errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B5errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A7errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B7errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A10errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B10errRad.resize(5,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A2Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B2Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A5Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B5Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A7Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B7Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A10Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B10Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A2errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B2errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A5errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B5errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A7errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B7errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A10errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B10errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   
   A2len.resize(2,std::vector <double> (2,0.));
   A5len.resize(2,std::vector <double> (2,0.));
@@ -335,7 +335,7 @@ void AsymmetryBase::loadRates() {
 	  A2errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  A2Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  A2errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  A2Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -358,7 +358,7 @@ void AsymmetryBase::loadRates() {
 	  A5errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  A5Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  A5errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  A5Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -381,7 +381,7 @@ void AsymmetryBase::loadRates() {
 	  A7errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  A7Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  A7errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  A7Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -404,7 +404,7 @@ void AsymmetryBase::loadRates() {
 	  A10errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  A10Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  A10errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  A10Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -427,7 +427,7 @@ void AsymmetryBase::loadRates() {
 	  B2errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  B2Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  B2errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  B2Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -450,7 +450,7 @@ void AsymmetryBase::loadRates() {
 	  B5errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  B5Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  B5errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  B5Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -473,7 +473,7 @@ void AsymmetryBase::loadRates() {
 	  B7errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  B7Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  B7errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  B7Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -496,7 +496,7 @@ void AsymmetryBase::loadRates() {
 	  B10errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
 	}
 
-	for (int i=0; i<5; ++i) {
+	for (int i=0; i<6; ++i) {
 	  B10Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
 	  B10errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
 	  B10Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
@@ -611,8 +611,8 @@ OctetAsymmetry::OctetAsymmetry(int oct, std::string anaCh, double enBinWidth, do
     asymmetryQuad.resize(4,std::vector<double> (numEnBins,0.) );
     asymmetryErrorQuad.resize(4,std::vector<double> (numEnBins,0.) );
     
-    asymmetryRad.resize(5,std::vector<double> (numEnBins,0.) );
-    asymmetryErrorRad.resize(5,std::vector<double> (numEnBins,0.) );
+    asymmetryRad.resize(6,std::vector<double> (numEnBins,0.) );
+    asymmetryErrorRad.resize(6,std::vector<double> (numEnBins,0.) );
 
     superSum.resize(numEnBins,0.);
     superSumError.resize(numEnBins,0.);
@@ -641,7 +641,7 @@ void OctetAsymmetry::calcAsymmetryBinByBin() {
 			   B2errQuad[i],B5errQuad[i],B7errQuad[i],B10errQuad[i],
 			   asymmetryQuad[i],asymmetryErrorQuad[i]);
   }
-  for (int i=0; i<5; ++i) {
+  for (int i=0; i<6; ++i) {
     calcBinByBinSuperRatio(A2Rad[i],A5Rad[i],A7Rad[i],A10Rad[i],
 			   B2Rad[i],B5Rad[i],B7Rad[i],B10Rad[i],
 			   A2errRad[i],A5errRad[i],A7errRad[i],A10errRad[i],
@@ -1091,7 +1091,7 @@ void OctetAsymmetry::writeAsymToFile() {
     outfile.close();
   }
 
-  for (int j=0; j<5; ++j) {
+  for (int j=0; j<6; ++j) {
     
     if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_RadialRing"+itos(j)+".dat";
     else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_RadialRing"+itos(j)+".dat";

@@ -110,11 +110,11 @@ int main(int argc, char* argv[])
   Double_t enBinWidth = 10.;
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
   Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
-  if ( argc==7 ) corr = std::string(argv[6]);
+  if ( argc>6 ) corr = std::string(argv[6]);
   int key = 0;
   if ( argc==8 ) key = atoi(argv[7]);
   bool UKdata = true;//true;
-  bool simulation = false;
+  bool simulation = true;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = false;
+  bool UNBLIND = true;
 
 
   if (UNBLIND) {
@@ -409,7 +409,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   g->GetXaxis()->CenterTitle();
   g->GetYaxis()->CenterTitle();
   
-  TF1 *fit = new TF1("fit","[0]",rawAsymByGroup[0][0], rawAsymByGroup[0][rawAsymByGroup[0].size()-1]);
+  TF1 *fit = new TF1("fit","[0]",rawAsymByGroup[0][0]-1., rawAsymByGroup[0][rawAsymByGroup[0].size()-1]+1.);
   fit->SetLineColor(kRed);
   fit->SetLineWidth(3);
   fit->SetParameter(0,0.05);

@@ -4,9 +4,9 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
 
   
   const Int_t numQuads = 4;
-  const Int_t numRings = 5;
+  const Int_t numRings = 6;
   TString Quads[numQuads] = {"I","II","III","IV"};//
-  TString Rings[numRings] = {"0-10","10-20","20-30","30-40","40-50"};
+  TString Rings[numRings] = {"0-10","10-20","20-30","30-40","40-50","50-60"};
  
   std::vector <Double_t> AsymmDataQuad;
   std::vector <Double_t> AsymmDataErrQuad; //Statistical Errors
@@ -33,8 +33,8 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
     Double_t AsymHold = 0.;
     Double_t AsymErrHold = 0.;
     if (infile.is_open()) {
-      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
-      cout << strHold << AsymHold << AsymErrHold << endl;
+      for (Int_t j=0; j<1; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      //cout << strHold << AsymHold << AsymErrHold << endl;
     }
     AsymmDataQuad.push_back(AsymHold);
     AsymmDataErrQuad.push_back(AsymErrHold);
@@ -49,7 +49,7 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
     AsymHold = 0.;
     AsymErrHold = 0.;
     if (infile.is_open()) {
-      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      for (Int_t j=0; j<1; j++) infile >> strHold >> AsymHold >> AsymErrHold;
     }
     AsymmSimQuad.push_back(AsymHold);
     AsymmSimErrQuad.push_back(AsymErrHold);
@@ -66,7 +66,7 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
     Double_t AsymHold = 0.;
     Double_t AsymErrHold = 0.;
     if (infile.is_open()) {
-      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      for (Int_t j=0; j<1; j++) infile >> strHold >> AsymHold >> AsymErrHold;
     }
     AsymmDataRings.push_back(AsymHold);
     AsymmDataErrRings.push_back(AsymErrHold);
@@ -81,7 +81,7 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
     AsymHold = 0.;
     AsymErrHold = 0.;
     if (infile.is_open()) {
-      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      for (Int_t j=0; j<1; j++) infile >> strHold >> AsymHold >> AsymErrHold;
     }
     AsymmSimRings.push_back(AsymHold);
     AsymmSimErrRings.push_back(AsymErrHold);
@@ -109,7 +109,7 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   c1->SetBottomMargin(0.15);
 
   
-  TH1F * data = new TH1F("data","Asymmetry vs. Quadrant",AsymmDataQuad.size(),0.5,AsymmDataQuad.size()+0.5);
+  TH1F * data = new TH1F("data",TString::Format("A_{raw} vs. Quadrant for Analysis Choice %s",anaCh.Data()),AsymmDataQuad.size(),0.5,AsymmDataQuad.size()+0.5);
   data->SetMarkerColor(kBlue);
   data->SetLineColor(kBlue);
   data->SetLineWidth(3);
@@ -134,8 +134,18 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   data->GetXaxis()->SetTitleSize(0.05);
   data->GetXaxis()->CenterTitle();
   data->GetYaxis()->CenterTitle();
-  data->SetMinimum(-0.135);
-  data->SetMaximum(-0.115);
+  data->SetMinimum(0.045);
+  data->SetMaximum(0.056);
+
+  
+
+  TF1 *f1 = new TF1("f1","[0]",0.,6.);
+  f1->SetParameter(0,0.05);
+  f1->SetLineStyle(6);
+  f1->SetLineWidth(2);
+  f1->SetLineColor(1);
+  data->Fit(f1,"R");
+  //std::cout << "Chi2/ndf = " << f1->GetChisquare()/f1->GetNDF() << std::endl;
 
   data->Draw("EX0");
 
@@ -156,11 +166,10 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   sim->Draw("SAME EX0");
   
   
-  TLegend *leg = new TLegend(0.55,0.75,0.9,0.9);
-  //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+  TLegend *leg = new TLegend(0.25,0.72,0.9,0.87);
   leg->AddEntry(data,"Data");
   leg->AddEntry(sim,"Monte Carlo");
-   //leg->AddEntry("gr","Graph with error bars","lep");
+  leg->AddEntry(f1,TString::Format("Data fit = %0.5f+/-%0.5f",f1->GetParameter(0), f1->GetParError(0)),"l");
   leg->Draw();
 
 
@@ -172,7 +181,7 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   c2->SetBottomMargin(0.15);
 
   
-  TH1F * dataRing = new TH1F("dataRing","Asymmetry vs. Radial Position",AsymmDataRings.size(),0.5,AsymmDataRings.size()+0.5);
+  TH1F * dataRing = new TH1F("dataRing",TString::Format("A_{raw} vs. Radius for Analysis Choice %s",anaCh.Data()),AsymmDataRings.size(),0.5,AsymmDataRings.size()+0.5);
   dataRing->SetMarkerColor(kBlue);
   dataRing->SetLineColor(kBlue);
   dataRing->SetLineWidth(3);
@@ -190,16 +199,18 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   //dataRing->LabelsOption("v");
   for (int i=1; i<=numRings; ++i) dataRing->GetXaxis()->SetBinLabel(i,Rings[i-1]);
   
-  dataRing->GetXaxis()->SetLabelSize(0.07);
+  dataRing->GetXaxis()->SetLabelSize(0.06);
   dataRing->GetXaxis()->SetTitle("Radial Cut (mm)");
   dataRing->GetYaxis()->SetTitle("Asymmetry");
   dataRing->GetYaxis()->SetTitleOffset(2.);
   dataRing->GetXaxis()->SetTitleSize(0.05);
   dataRing->GetXaxis()->CenterTitle();
   dataRing->GetYaxis()->CenterTitle();
-  dataRing->SetMinimum(-0.135);
-  dataRing->SetMaximum(-0.115);
+  dataRing->SetMinimum(0.045);
+  dataRing->SetMaximum(0.056);
 
+  dataRing->Fit(f1,"","",0.,5.);
+  //std::cout << "Chi2/ndf = " << f1->GetChisquare()/f1->GetNDF() << std::endl;
   dataRing->Draw("EX0");
 
   TH1F * simRing = new TH1F("simRing","Asymmetry vs. Radial Position",AsymmSimRings.size(),0.5,AsymmSimRings.size()+0.5);
@@ -219,12 +230,11 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   simRing->Draw("SAME EX0");
   
   
-  TLegend *leg = new TLegend(0.55,0.75,0.9,0.9);
-  //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
-  leg->AddEntry(dataRing,"Data");
-  leg->AddEntry(simRing,"Monte Carlo");
-   //leg->AddEntry("gr","Graph with error bars","lep");
-  leg->Draw();
+  TLegend *leg1 = new TLegend(0.25,0.72,0.9,0.87);
+  leg1->AddEntry(data,"Data");
+  leg1->AddEntry(sim,"Monte Carlo");
+  leg1->AddEntry(f1,TString::Format("Data fit = %0.5f+/-%0.5f",f1->GetParameter(0), f1->GetParError(0)),"l");
+  leg1->Draw();
   
 
   c1->Print(TString::Format("AsymmVsPosition_%s_anaCh%s_%s_%s_%i-%i.pdf(",year.Data(),anaCh.Data(),corrections.Data(),withPOL?"withPOL":"noPOL",ebinLow,ebinHigh));

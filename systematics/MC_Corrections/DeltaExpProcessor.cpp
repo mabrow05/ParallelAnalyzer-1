@@ -439,7 +439,7 @@ void calcDeltaExp (int octet)
 
   for (auto& runNumber : betaRuns) {
   
-    UInt_t BetaEvents = 18000000; //Number of Beta events for each beta run
+    UInt_t BetaEvents = 24000000; //Number of Beta events for each beta run... This is pure events, not triggered events
     
 
     std::cout << "Processing " << BetaEvents << " events for run " << runNumber << "...\n";
@@ -582,6 +582,8 @@ void calcDeltaExp (int octet)
     sep.LoadCutCurve(runNumber);
 
     //make evt type histograms
+
+    TFile *specFile = new TFile(TString::Format("spectra/spectra_%i.root",runNumber),"RECREATE");
     
     TH1D* hist[3][2]; //We only go to type 2, then we separate them later and fill other histograms
 
@@ -619,6 +621,13 @@ void calcDeltaExp (int octet)
       EastScintTrigger = WestScintTrigger = EMWPCTrigger = WMWPCTrigger = false; //Resetting triggers each event
 
       chain->GetEvent(evt);
+
+      if (evtTally%100000==0) {std::cout << " Event Number " << evtTally << " in run " << runNumber << "  (" << evt << ")" << std::endl;}//cout << "filled event " << evt << endl;
+
+
+      // Go ahead and increment the event counters
+      evt++;
+      evtTally++;
 
       //Checking that the event occurs within the fiducial volume in the simulation to minimize
       // contamination from edge effects and interactions with detector walls
@@ -723,11 +732,7 @@ void calcDeltaExp (int octet)
 
 
       //If there is no wirechamber trigger, skip the event
-      if ( !(EMWPCTrigger || WMWPCTrigger) ) {
-	evt++;
-	if (evt%100000==0) {std::cout << evt << std::endl;}
-	continue;
-      }
+      if ( !(EMWPCTrigger || WMWPCTrigger) ) continue;
       
       Double_t pmtEnergyLowerLimit = 1.; //To put a hard cut on the weight
     
@@ -961,48 +966,17 @@ void calcDeltaExp (int octet)
 
 
 	if ( type!=0 ) {
-	  //if (xE_nClipped>0 || yE_nClipped>0 || xW_nClipped>0 || yW_nClipped>0) continue;
-	  if (xE.mult<1 || yE.mult<1 || xW.mult<1 || yW.mult<1) { 
-	    evt++;
-	    if (evt%100000==0) std::cout << evt << std::endl;
-	    continue;
-	  }
+	  if (xE.mult<1 || yE.mult<1 || xW.mult<1 || yW.mult<1)  continue;
 	}
 	else {
 	  if ( side==0 ) {
-	    //if ( xE_nClipped>0 || yE_nClipped>0 )  continue;
-	    if ( xE.mult<1 || yE.mult<1 )  {
-	      evt++;
-	      if (evt%100000==0) std::cout << evt << std::endl;
-	      continue;
-	    }
+	    if ( xE.mult<1 || yE.mult<1 )  continue;
 	  }
 	  else if ( side==1 ) {
-	    //if ( xW_nClipped>0 || yW_nClipped>0 )  continue;
-	    if ( xW.mult<1 || yW.mult<1 )  { 
-	      evt++;
-	    if (evt%100000==0) std::cout << evt << std::endl;
-	    continue;
-	    }
+	    if ( xW.mult<1 || yW.mult<1 )  continue;
 	  }
-	}
-
-	evtTally++;
-		
+	}		
 	
-	//Type 2/3 separation
-	if ( type==2 ) {
-	  
-	  if (side==0) {
-	    type = sep.separate23(mwpcE.MWPCEnergyE);
-	    side = type==2 ? 1 : 0;
-	  }
-	  else if (side==1) {
-	    type = sep.separate23(mwpcE.MWPCEnergyW);
-	    side = type==2 ? 0 : 1;
-	  }
-	  
-	}	
 	
 	
 	// These are the reconstructed position using the cathode segments
@@ -1019,32 +993,29 @@ void calcDeltaExp (int octet)
 	  if (type==1) hist[1][side]->Fill(Erecon);
 	
 	  //Type 23
-	  if (type==2 || type==3) {
-	    if (side==0) { 
-	      if (type==3) hist[2][0]->Fill(Erecon);
-	      else hist[2][1]->Fill(Erecon);
+	  if (type==2) { 
+	    
+	    hist[2][side]->Fill(Erecon);
+	      
+	    //Type 2/3 separation
+	    if (side==0) {
+	      type = sep.separate23(mwpcE.MWPCEnergyE);
+	      side = type==2 ? 1 : 0;
 	    }
 	    else if (side==1) {
-	      if (type==3) hist[2][1]->Fill(Erecon);
-	      else hist[2][0]->Fill(Erecon);
+	      type = sep.separate23(mwpcE.MWPCEnergyW);
+	      side = type==2 ? 0 : 1;
 	    }
+	    
+	    //Separated Type 2
+	    if (type==2) hist2[side]->Fill(Erecon); 
+	    //Separated Type 3
+	    if (type==3) hist3[side]->Fill(Erecon);
 	  }
-	
-	  //Type 2
-	  if (type==2) hist2[side]->Fill(Erecon);
-	
-	  //Type 3
-	  if (type==3) hist3[side]->Fill(Erecon);
-    
+
 	}
       }
 
-      
-      //***************************************************************************************************************************
-
-      evt++;
-      //cout << evtTally << endl;
-      if (evt%100000==0) {std::cout << evt << std::endl;}//cout << "filled event " << evt << endl;
     }
 
     
@@ -1060,8 +1031,11 @@ void calcDeltaExp (int octet)
 
     //    outfile->Write();
     //outfile->Close();
+    
 
     //Fill all the vectors according to their event types and analysis choices
+
+    
 
     for (int anaCh = 1; anaCh<11 ; anaCh++) {
 
@@ -1184,12 +1158,17 @@ void calcDeltaExp (int octet)
       }
     }
    
-    for (int side = 0; side<2; side++) {
+
+    specFile->Write();
+    delete specFile;
+
+    /*  for (int side = 0; side<2; side++) {
 	  for (int type=0; type<3; type++) {
-	    delete hist[type][side];
+	    if (hist[type][side]) delete hist[type][side];
 	  }
-	  delete hist2[side]; delete hist3[side];
-    }
+	  if (hist2[side]) delete hist2[side]; 
+5A	  if (hist3[side]) delete hist3[side];
+}*/
    
   }
     
