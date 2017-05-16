@@ -647,6 +647,7 @@ void SimEvtRateHandler::dataReader() {
   
   for ( unsigned int i=0; i<runs.size(); i++ ) {
     
+    //sprintf(temp,"%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runs[i]);
     sprintf(temp,"%s/beta_highStatistics/revCalSim_%i_Beta.root",getenv("REVCALSIM"),runs[i]);
     infile = std::string(temp);
     input = TFile::Open(infile.c_str(), "READ");
@@ -1035,29 +1036,76 @@ void BGSubtractedRate::LoadRatesByBin() {
   }
 
   if ( Simulation || writeRatesToFile ) {
-    std::ofstream ofileE, ofileW;
+    std::ofstream ofileE, ofileW, ofileEquad, ofileWquad, ofileErad, ofileWrad;
     if ( !Simulation ) {
       
       ofileE.open(TString::Format("BinByBinComparison/%sUK_Erun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
 				  FGruns[0],analysisChoice.c_str()).Data());
       ofileW.open(TString::Format("BinByBinComparison/%sUK_Wrun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
 				  FGruns[0],analysisChoice.c_str()).Data());
+
+      ofileEquad.open(TString::Format("BinByBinComparison/%sUK_Erun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
+				      FGruns[0],analysisChoice.c_str()).Data());
+      ofileWquad.open(TString::Format("BinByBinComparison/%sUK_Wrun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
+				      FGruns[0],analysisChoice.c_str()).Data());
+      
+      ofileErad.open(TString::Format("BinByBinComparison/%sUK_Erun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
+				     FGruns[0],analysisChoice.c_str()).Data());
+      ofileWrad.open(TString::Format("BinByBinComparison/%sUK_Wrun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
+				     FGruns[0],analysisChoice.c_str()).Data());
     }
     else {
       ofileE.open(TString::Format("BinByBinComparison/%sSIM_Erun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
 				  FGruns[0],analysisChoice.c_str()).Data());
       ofileW.open(TString::Format("BinByBinComparison/%sSIM_Wrun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
 				  FGruns[0],analysisChoice.c_str()).Data());
+      
+      ofileEquad.open(TString::Format("BinByBinComparison/%sSIM_Erun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
+				      FGruns[0],analysisChoice.c_str()).Data());
+      ofileWquad.open(TString::Format("BinByBinComparison/%sSIM_Wrun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
+				      FGruns[0],analysisChoice.c_str()).Data());
+      
+      ofileErad.open(TString::Format("BinByBinComparison/%sSIM_Erun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
+				     FGruns[0],analysisChoice.c_str()).Data());
+      ofileWrad.open(TString::Format("BinByBinComparison/%sSIM_Wrun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
+				     FGruns[0],analysisChoice.c_str()).Data());
     }
     
     ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
     ofileW << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-    
+    ofileEquad << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+    ofileWquad << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+    ofileErad << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+    ofileWrad << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+
     for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
       ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;
       ofileW << i*10.+5. << "\t" << BetaRateW[i] << "\t" << BGRateW[i] << std::endl;
+
+      ofileEquad << i*10.+5. ;
+      ofileWquad << i*10.+5. ;
+
+      for ( unsigned int j = 0; j<4; ++j ) {
+	ofileEquad << "\t" << BetaRateEQuad[j][i] << "\t" << BGRateEQuad[j][i] ;
+	ofileWquad << "\t" << BetaRateWQuad[j][i] << "\t" << BGRateWQuad[j][i] ;
+      }
+
+      ofileEquad << "\n";
+      ofileWquad << "\n";
+
+      ofileErad << i*10.+5. ;
+      ofileWrad << i*10.+5. ;
+
+      for ( unsigned int j = 0; j<6; ++j ) {
+	ofileErad << "\t" << BetaRateERad[j][i] << "\t" << BGRateERad[j][i] ;
+	ofileWrad << "\t" << BetaRateWRad[j][i] << "\t" << BGRateWRad[j][i] ;
+      }
+
+      ofileErad << "\n";
+      ofileWrad << "\n";
+
     }
-    ofileE.close(), ofileW.close();
+    ofileE.close(), ofileW.close(), ofileEquad.close(), ofileWquad.close(), ofileErad.close(), ofileWrad.close();
   }
 };
 

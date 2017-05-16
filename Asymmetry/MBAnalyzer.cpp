@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
   int key = 0;
   if ( argc==8 ) key = atoi(argv[7]);
   bool UKdata = true;//true;
-  bool simulation = true;
+  bool simulation = false;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = true;
+  bool UNBLIND = false;
 
 
   if (UNBLIND) {
@@ -163,11 +163,19 @@ int main(int argc, char* argv[])
       PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
       }*/
 
+    // Loop over keys
+    /*int keys[] {0,10,11,12,13,20,21,22,23,24,25};
+
+    for ( auto& k : keys ) {
+      PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);
+      PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);
+      }*/
+
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
-    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     //*************** DONT FORGET TO CHANGE FIDUCIAL CUT TO 50!
 
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);

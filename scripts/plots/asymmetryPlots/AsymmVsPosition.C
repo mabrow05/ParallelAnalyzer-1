@@ -1,6 +1,6 @@
 
 
-void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=680) {
+void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=670) {
 
   
   const Int_t numQuads = 4;
@@ -135,7 +135,7 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   data->GetXaxis()->CenterTitle();
   data->GetYaxis()->CenterTitle();
   data->SetMinimum(0.045);
-  data->SetMaximum(0.056);
+  data->SetMaximum(0.060);
 
   
 
@@ -207,7 +207,7 @@ void AsymmVsPosition(TString year, TString anaCh, TString corrections, bool with
   dataRing->GetXaxis()->CenterTitle();
   dataRing->GetYaxis()->CenterTitle();
   dataRing->SetMinimum(0.045);
-  dataRing->SetMaximum(0.056);
+  dataRing->SetMaximum(0.060);
 
   dataRing->Fit(f1,"","",0.,5.);
   //std::cout << "Chi2/ndf = " << f1->GetChisquare()/f1->GetNDF() << std::endl;
