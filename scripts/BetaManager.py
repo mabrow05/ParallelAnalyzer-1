@@ -535,7 +535,7 @@ if __name__ == "__main__":
 
     ####### Complete list of processing beta runs assuming calibration and position maps are in place
     if 1: 
-        octet_range =[30,59]
+        octet_range =[112,121]
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)

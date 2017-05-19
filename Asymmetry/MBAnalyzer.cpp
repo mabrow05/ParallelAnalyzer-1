@@ -103,6 +103,11 @@ int main(int argc, char* argv[])
 
     std::cout << std::endl;
   */	
+
+  if (argc==1) {
+    std::cout << "USAGE: ./MBAnalyzer.exe [anaChoice] [octmin] [octmax] [analysis window min] [analysis window max] [corrections] [key]\n";
+    exit(0);
+  }
     
   std::string analysisChoice = argc>1 ? std::string(argv[1]) : "A";
   Int_t octBegin = argc>2 ? atoi(argv[2]) : 0;
@@ -114,7 +119,7 @@ int main(int argc, char* argv[])
   int key = 0;
   if ( argc==8 ) key = atoi(argv[7]);
   bool UKdata = true;//true;
-  bool simulation = false;
+  bool simulation = true;
   bool applyAsymm = false;
 
   if (simulation) withPOL=false;
@@ -130,7 +135,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = false;
+  bool UNBLIND = true;
 
 
   if (UNBLIND) {
@@ -173,9 +178,9 @@ int main(int argc, char* argv[])
 
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
-    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
-    ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    //ProcessPairs(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     //*************** DONT FORGET TO CHANGE FIDUCIAL CUT TO 50!
 
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, applyAsymm, UNBLIND);
@@ -1266,7 +1271,8 @@ std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, std::st
 
   }
   
-  TString filename = TString::Format("%s/Octet_%i/OctetAsymmetry/Systematics/ThOverProc_Octet-%i_Analysis-%i.txt",getenv("ANALYSIS_RESULTS"),octet,octet,iAnaChoice);
+  //TString filename = TString::Format("%s/Octet_%i/OctetAsymmetry/Systematics/ThOverProc_Octet-%i_Analysis-%i.txt",getenv("ANALYSIS_RESULTS"),octet,octet,iAnaChoice);
+  TString filename = TString::Format("%s/systematics/MC_Corrections/DeltaExp_OctetByOctetCorrections/ThOverProc_Octet-%i_Analysis-%i.txt",getenv("ANALYSIS_CODE"),octet,iAnaChoice);
   //std::cout << filename.Data() << std::endl;
   std::vector < std::vector <Double_t> > syst(enBinMidpoint.size(), std::vector<Double_t>(2,1.));
 
