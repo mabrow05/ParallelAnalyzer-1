@@ -20,12 +20,22 @@
 #include <TPaveText.h>
 #include <TF1.h>
 
+#include "BetaSpectrum.hh"
+
+TString anaChoices[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 //Returns the values of the systematic corrections and statistical error on this for now
 std::vector < std::vector <Double_t> >  LoadOctetSystematics(Int_t octet, std::string anaChoice, std::vector <Double_t> enBinMidpoint);
 
 //Returns a vector containing all the theory corrections to A0 for a particular bin
 std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint);
+
+// Function to return beta when given the kinetic energy of an electron            
+Double_t returnBeta(Double_t En) {
+  Double_t me = 510.998928; //rest mass energy of electron in keV     
+  return sqrt(En*En+2.*En*me)/(En+me);
+};
+
 
 void calcBinByBinSuperRatio(std::vector< std::vector<double> > &A2, 
 			    std::vector< std::vector<double> > &A5,
@@ -383,8 +393,9 @@ int main(int argc, char *argv[])
       // Now check to see if we need to do shuffling of Type 1
 
       if ( percentT2!=0. ) {
-
-	rateFile.open(TString::Format("%s/Asymmetry/BinByBinComparison/SIM_Erun%i_anaChJ.dat", getenv("ANALYSIS_CODE"),runNumber[i]));
+	// Note that for T2, we shuffle the west events to the east, as this would mimic a wirechamber not triggering on
+	// the side that had a scintillator not trigger. Otherwise, the event would not be classified as an electron like event
+	rateFile.open(TString::Format("%s/Asymmetry/BinByBinComparison/SIM_Wrun%i_anaChJ.dat", getenv("ANALYSIS_CODE"),runNumber[i]));
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
 	
@@ -415,7 +426,7 @@ int main(int argc, char *argv[])
 	}
 	rateFile.close();
 
-	rateFile.open(TString::Format("%s/Asymmetry/BinByBinComparison/SIM_Wrun%i_anaChJ.dat", getenv("ANALYSIS_CODE"),runNumber[i]));
+	rateFile.open(TString::Format("%s/Asymmetry/BinByBinComparison/SIM_Erun%i_anaChJ.dat", getenv("ANALYSIS_CODE"),runNumber[i]));
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
 	
@@ -547,13 +558,25 @@ int main(int argc, char *argv[])
     
    
     // TODO: Add in the application of the corrections
+    std::vector < std::vector <Double_t> > deltaSys = LoadOctetSystematics(octetNum,"D",enBins);
+    std::vector <Double_t> theoryCorr(numBins,1.);// = LoadTheoryCorrections(enBins);
 
+
+    for ( int j=0; j<numBins; ++j ) {
+      asymmetry[j] = asymmetry[j]*deltaSys[j][0]/theoryCorr[j];
+      asymmetryError[j] = asymmetryError[j]*deltaSys[j][0]/theoryCorr[j];        
+    // Since Asym is multiplied by delta, AsymError would be as well...
+      asymmetry_shift[j] = asymmetry_shift[j]*deltaSys[j][0]/theoryCorr[j];
+      asymmetryError_shift[j] = asymmetryError_shift[j]*deltaSys[j][0]/theoryCorr[j];        
+
+    }
 
     // Add the bin by bin asymmetries to the total asymmetry in each bin, weighted by its own asymmetry
     for ( int j=0; j<numBins; ++j ) {
       Asymm[0][j]+= ( asymmetryError[j]!=0. ? ( asymmetry[j] / (asymmetryError[j]*asymmetryError[j]) ) : 0. );
       Asymm[1][j]+= ( asymmetryError[j]!=0. ? 1./(asymmetryError[j]*asymmetryError[j]) : 0. );
-      AsymmWithShuffle[0][j]+= ( asymmetryError_shift[j]!=0. ? ( asymmetry_shift[j] / (asymmetryError_shift[j]*asymmetryError_shift[j]) ) : 0. );
+      AsymmWithShuffle[0][j]+= ( asymmetryError_shift[j]!=0. ? 
+				 ( asymmetry_shift[j] / (asymmetryError_shift[j]*asymmetryError_shift[j]) ) : 0. );
       AsymmWithShuffle[1][j]+= ( asymmetryError_shift[j]!=0. ? 1./(asymmetryError_shift[j]*asymmetryError_shift[j]): 0. );
     }
     
@@ -569,10 +592,19 @@ int main(int argc, char *argv[])
       
   }
 
+  //Divide by Beta/2.
+  for ( int j=0; j<numBins; ++j ) {
+    Double_t betaOver2 = returnBeta(enBins[j])/2.;
+    Asymm[0][j] /= betaOver2;
+    Asymm[1][j] /= betaOver2;
+    AsymmWithShuffle[0][j] /= betaOver2;
+    AsymmWithShuffle[1][j] /= betaOver2;
+      
+  }
 
   //Now we need to fit for the asymmetries
   TF1 *fit = new TF1("fit","[0]",emin,emax);
-  fit->SetParameter(0,-0.05);
+  fit->SetParameter(0,-0.12);
   
   TGraphErrors *a = new TGraphErrors(numBins,&enBins[0],&Asymm[0][0],0,&Asymm[1][0]);
   a->Fit(fit,"R");
@@ -592,6 +624,12 @@ int main(int argc, char *argv[])
 	    << "asym = " << asym << " +/- " << asymErr << std::endl
 	    << "asymWithShuffle = " << asymWithShuffle << " +/- " << asymErrWithShuffle << std::endl
 	    << "Percent Difference deltaA/A = " << (asym-asymWithShuffle)/asym << std::endl;
+
+  std::ofstream resultFile("resultHolderEventShuffle.txt");
+  resultFile << "asym=\t" << asym << "\n" << "asymWithShuffle=\t" << asymWithShuffle << "\n"
+	   << "percentDifference=\t" << (asym-asymWithShuffle)/asym;
+  resultFile.close();
+
   return 0;
   
 }
@@ -611,8 +649,6 @@ std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, std::st
   TString filename = TString::Format("%s/systematics/MC_Corrections/DeltaExp_OctetByOctetCorrections/ThOverProc_Octet-%i_Analysis-%i.txt",getenv("ANALYSIS_CODE"),octet,iAnaChoice);
   //std::cout << filename.Data() << std::endl;
   std::vector < std::vector <Double_t> > syst(enBinMidpoint.size(), std::vector<Double_t>(2,1.));
-
-  if ( corr!=std::string("DeltaExpOnly") && corr!=std::string("AllCorr") ) return syst;
   
   std::ifstream infile(filename.Data());
 
@@ -651,8 +687,6 @@ std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, std::st
 std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint) {
 
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-
-  if ( corr!=std::string("DeltaTheoryOnly") && corr!=std::string("AllCorr") ) return syst;
 
   for (UInt_t i=0; i<syst.size(); i++) {
    

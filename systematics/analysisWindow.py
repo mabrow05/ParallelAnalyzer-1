@@ -16,6 +16,12 @@ def getEnergyBin(energy):
 def getBinEnergyMid(b):
     return b*10. + 5.
 
+def getBinEnergyLowEdge(b):
+    return b*10.
+
+def getBinEnergyUpperEdge(b):
+    return (b+1.)*10.
+
 def weightRealStats(data,stats,e0,e1):
         """Weight the given data array by the real experimental statistics"""
 
@@ -157,91 +163,100 @@ class uncertaintyHandler:
 
     def calcMCSystematicError(self,elow,ehigh):
 
-        if len(self.systA)==0:
-            self.readMCSystematicCorrections()
-
-         # Now Simulation
-        infile = open( os.environ["SIM_ANALYSIS_RESULTS"]+"/Asymmetries/"+
-                       "DeltaExpOnly_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
-                       %(self.anaChoice,self.octLow,self.octHigh),'r' )
-        sim_A_en = []
-        sim_A = []
-        sim_Aerr = []
-        sim_percErr = []
-
-        if infile:
-            for line in infile:
-                l = line.split()
-                if float(l[0])<1000.:
-                    sim_A_en.append(float(l[0]))
-                    sim_A.append(float(l[1]))
-                    sim_Aerr.append(float(l[2]))
-                    if float(l[1])!=0.: 
-                        sim_percErr.append( fabs( float(l[2])/float(l[1]) ) )
-                        
-                    else:
-                        sim_percErr.append( 1. )
-                    
-
-        else: 
-            print("Couldn't open file for statistical uncertainties")
-            exit(0)
-
-    ### here is the crucial part. We take the anaChoice D sim and data to calculate 
-        ### delta A diff to subtract off of the difference between sim and data from 
-        ### the analysis choice of interest.
-
-        # Data first
-        anaD = uncertaintyHandler(self.year,"D")
-        anaD.readMCSystematicCorrections()
-
-        # Now Simulation
-        infile = open( os.environ["SIM_ANALYSIS_RESULTS"]+"/Asymmetries/"+
-                       "DeltaExpOnly_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
-                       %(self.anaChoice,self.octLow,self.octHigh),'r' )
-        simD_A_en = []
-        simD_A = []
-        simD_Aerr = []
-        simD_percErr = []
-
-        if infile:
-            for line in infile:
-                l = line.split()
-                if float(l[0])<1000.:
-                    simD_A_en.append(float(l[0]))
-                    simD_A.append(float(l[1]))
-                    simD_Aerr.append(float(l[2]))
-                    if float(l[1])!=0.: 
-                        simD_percErr.append( fabs( float(l[2])/float(l[1]) ) )
-                        #print(fabs( float(l[2])/float(l[1]) ) , l[1] )
-                    else:
-                        simD_percErr.append( 1. )
-
-        else: 
-            print("Couldn't open file for statistical uncertainties")
-            exit(0)
+        percErrType0Sim = 0
+        type0sim = 0
+        type0data = 0
         
-       
-        ### Now calculate asymmetry over bins
-        dataA_anaD = weightRealStats(anaD.systA,anaD.stat_percent_err,elow,ehigh)
-        simA_anaD = weightRealStats(simD_A,simD_percErr,elow,ehigh)
+        simAymmUNBLINDED = 0
+        simAsymmUNBLINDEDsigma = 0
+        dataAsymm = 0
+        simAsymm = 0
 
-        dataA = weightRealStats(self.systA,self.stat_percent_err,elow,ehigh)
-        simA = weightRealStats(sim_A,sim_percErr,elow,ehigh)
+        infile = None
 
-        deltaAOffset = dataA_anaD-simA_anaD # the reference delta
-
-        deltaAOffsetPerc = deltaAOffset / dataA_anaD if dataA_anaD!=0 else 1000.
-        #return fabs(deltaAOffsetPerc)
-        
-
-       # print("( (%f-%f)/%f ) - %f = %f"%(dataA,simA,dataA,deltaAOffsetPerc,fabs( ( (dataA-simA) / dataA ) - deltaAOffsetPerc ) if fabs(dataA)>0. else 100000.))
-        #return fabs( ( (dataA-simA) / dataA ) - deltaAOffsetPerc ) if fabs(dataA)>0. else 100000.
-
-        print("( ( %f-%f ) - %f ) / %f = %f"%(dataA,simA,deltaAOffset,dataA,fabs( ( (dataA-simA)  - deltaAOffset) / dataA ) if dataA!=0. else 100000. ))
-        return fabs( ( (dataA-simA) -deltaAOffset) / dataA ) if fabs(dataA)>0. else 100000. 
-        
+        #read in Type 0 MC error
+        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 -0.2 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
+        infile = open("resultHolderEventShuffle.txt",'r')
     
+        if infile:
+            for line in infile:
+                if line[0]=="p":
+                    entry = line.split()
+                    percErrType0Sim = float(entry[1])
+                    #print("perc Err on T0 %f"%percErrType0Sim)
+
+        infile.close()
+        
+        #now read in Type 0 data and sim asymms for calculation of delta offset
+        
+        os.system("./MC_Corrections/AsymmCalculator.exe D %i %i %f %f true false > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
+        infile = open("asymm_hold.txt",'r')
+        if infile:
+            for line in infile:
+                entry = line.split()
+                type0sim = float(entry[1])
+                #print("type0sim %f"%type0sim)
+        infile.close()
+    
+        os.system("./MC_Corrections/AsymmCalculator.exe D %i %i %f %f false false > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
+        infile = open("asymm_hold.txt",'r')
+        if infile:
+            for line in infile:
+                entry = line.split()
+                type0data = float(entry[1])
+                #print("type0data %f"%type0data)
+        infile.close()
+    
+       
+        #now read in unblinded MC asymms for comparison with A0PDG
+        
+        os.system("./MC_Corrections/AsymmCalculator.exe %s %i %i %f %f true true > log.txt"%(self.anaChoice,self.octLow, self.octHigh, elow,ehigh))
+        infile = open("asymm_hold.txt",'r')
+        if infile:
+            for line in infile:
+                entry = line.split()
+                simAsymmUNBLINDED = float(entry[1])
+                simAsymmUNBLINDEDsigma = float(entry[2])
+                #print("simAsymmUNBINDED %f"%simAsymmUNBLINDED)
+        infile.close()
+
+        #now read in data and MC asymms for the proper analysis choice
+        
+        os.system("./MC_Corrections/AsymmCalculator.exe %s %i %i %f %f true false > log.txt"%(self.anaChoice,self.octLow, self.octHigh, elow,ehigh))
+        infile = open("asymm_hold.txt",'r')
+        if infile:
+            for line in infile:
+                entry = line.split()
+                simAsymm = float(entry[1])
+                #print("simAsymm %f"%simAsymm)
+        infile.close()
+
+        os.system("./MC_Corrections/AsymmCalculator.exe %s %i %i %f %f false false > log.txt"%(self.anaChoice,self.octLow, self.octHigh, elow,ehigh))
+        infile = open("asymm_hold.txt",'r')
+        if infile:
+            for line in infile:
+                entry = line.split()
+                dataAsymm = float(entry[1])
+                #print("dataAsymm %f"%dataAsymm)
+        infile.close()
+
+        
+        ########## Calculate the maximum correction
+        deltaAoffsetPerc = (type0data-type0sim)/type0sim
+        deltaAoffsetERRPerc = fabs(percErrType0Sim)
+        anaChOffsetPerc = (dataAsymm-simAsymm)/simAsymm
+        A0PDGshiftPerc = 0 # This is how far from 1 sigma is the answer from A0PDG
+        A0PDG = -0.1184
+     #   if (simAsymmUNBLINDED-simAsymmUNBLINDEDsigma)>=A0PDG:
+     #       A0PDGshiftPerc = fabs((-0.1184 - (simAsymmUNBLINDED-simAsymmUNBLINDEDsigma))/-0.1184)
+     #   elif (simAsymmUNBLINDED+simAsymmUNBLINDEDsigma)<=A0PDG:
+     #       A0PDGshiftPerc = fabs((-0.1184 - (simAsymmUNBLINDED+simAsymmUNBLINDEDsigma))/-0.1184)
+        
+        print("fabs( %f - %f ) + %f + %f"%(anaChOffsetPerc,deltaAoffsetPerc,deltaAoffsetERRPerc,A0PDGshiftPerc))
+
+        deltaA = fabs(anaChOffsetPerc - deltaAoffsetPerc) + deltaAoffsetERRPerc + A0PDGshiftPerc 
+        
+        return fabs(deltaA)
 
     def readEnergyUncertainties(self):
         """Read in the Energy uncertainties and store the percent 
@@ -370,7 +385,9 @@ class uncertaintyHandler:
         self.statUncertainties()
         self.readEnergyUncertainties()
         #self.makeSystematicCorrections()
-        self.readMCSystematicCorrections()
+        #self.readMCSystematicCorrections()
+
+        ofile = open("%i_Uncertainties.txt"%self.year, 'w')
         
 
         minErr = 100.
@@ -380,8 +397,11 @@ class uncertaintyHandler:
         enBinLow = None
         enBinHigh = None
 
-        for lowBin in range(0,79-1):
-            for highBin in range(lowBin+1,79):
+        minNumBins = 40
+        lowbound = 10
+        upperbound = 76
+        for lowBin in range(lowbound,upperbound+1-minNumBins):
+            for highBin in range(lowBin+minNumBins,upperbound+1):
 
                 Errors = []
 
@@ -403,6 +423,22 @@ class uncertaintyHandler:
 
                 errSum = sumErrors(Errors)
                 
+
+
+                print("****************************")
+                print("%i-%i keV total Error = %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
+                print("Weighted Energy Error: %f"%Errors[0])
+                print("Total Statistical Error: %f"%Errors[1])
+                print("Total Systematic Error: %f"%Errors[2])
+
+                
+                ofile.write("****************************\n")
+                ofile.write("%i-%i keV total Error = %f\n\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
+                ofile.write("Weighted Energy Error: %f\n"%Errors[0])
+                ofile.write("Total Statistical Error: %f\n"%Errors[1])
+                ofile.write("Total Systematic Error: %f\n"%Errors[2])
+
+                
                 if errSum < minErr:
                     minErr = errSum
                     enBinLow = lowBin
@@ -412,21 +448,31 @@ class uncertaintyHandler:
                     minSystematicErr = Errors[2]
 
 
-        minSystCorrTotal = weightRealStats(self.syst_corr,self.stat_percent_err,getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh))
+        ofile.close()
+
+       # minSystCorrTotal = weightRealStats(self.syst_corr,self.stat_percent_err,getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh))
         print
-        print("Systematic Correction: %f"%minSystCorrTotal)
+        #print("Systematic Correction: %f"%minSystCorrTotal)
         print
         print("Weighted Energy Error: %f"%minEnergyErr)
         print("Total Statistical Error: %f"%minStatisticalErr)
         print("Total Systematic Error: %f"%minSystematicErr)
         print("Min total Err = %f"%minErr)
-        print("Energy Range = %f-%f"%(getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh)))
+        print("Energy Range = %f-%f"%(getBinEnergyLowEdge(enBinLow),getBinEnergyUpperEdge(enBinHigh)))
 
 if __name__ == "__main__":
     
-    uncert = uncertaintyHandler(2011,"C")
+    uncert = uncertaintyHandler(2012,"C")
     uncert.minimizer()
-    print(uncert.calcEnergyUncert(220,680))
-    print(uncert.calcStatUncert(220,680))
-    print(uncert.calcSystematicUncert(220,680))
-    print(uncert.calcMCSystematicError(220,680) )
+
+    low = 295
+    high = 765
+#    print(uncert.calcEnergyUncert(low,high))
+ #   print(uncert.calcStatUncert(low,high))
+ #   print(uncert.calcSystematicUncert(low,high))
+ #   print(uncert.calcMCSystematicError(low,high) )
+ #   print(sumErrors([uncert.calcEnergyUncert(low,high),uncert.calcStatUncert(low,high),uncert.calcMCSystematicError(low,high)]))
+    #290-770 for 2011 : 0.005984
+    #330-740 for 2012 : 0.011127
+
+    # bonehead weighted average uncertainty: 0.005270

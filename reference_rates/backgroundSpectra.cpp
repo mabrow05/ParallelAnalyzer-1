@@ -33,7 +33,7 @@
 #include <TString.h>
 #include <TStyle.h>
 
-
+const bool useEvis = false;           // Uses Evis rather than Erecon
 
 const bool useRCclasses = true;      // If this is true, we only use "good" response class 
                                      // events as defined by C. Swank (triangular MWPC responses)
@@ -199,7 +199,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
   char temp[200];
 
   //Root file to output to
-  TFile *outfile = new TFile(TString::Format("BackgroundSpectra_%i-%i.root",octetMin,octetMax),"RECREATE");
+  TFile *outfile = new TFile(TString::Format("BackgroundSpectra_%i-%i%s.root",octetMin,octetMax,(useEvis?"_Evis":"")),"RECREATE");
 
   //Make all the pertinent histograms
 
@@ -335,7 +335,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 		
 	  //Type 0
 	  if (t.Type==0) {
-	    histOFF[0][t.Side]->Fill(t.Erecon);
+	    histOFF[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
 	    
 	    if ( t.Side==0 ) {
 	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE.e1);
@@ -464,7 +464,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 		
 	  //Type 0
 	  if (t.Type==0) {
-	    histON[0][t.Side]->Fill(t.Erecon);
+	    histON[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
 
 	    if ( t.Side==0 ) {
 	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE.e1);

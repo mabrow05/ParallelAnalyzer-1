@@ -19,7 +19,7 @@
 #include <TLegend.h>
 #include <TPaveText.h>
 
-std::vector <Int_t> badOct {7,60,61,62,63,64,65,66}; 
+std::vector <Int_t> badOct = {7,60,61,62,63,64,65,66,67,91,93,107,121}; 
 
 int main(int argc, char *argv[])
 {
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
  
   //Count vectors for holding all of the total (BG subtracted) counts for each spin state
 
-  //type0=0, type1=1, type23=2, ALL=3
+  //type0=0, type1=1, type2=2, type3=3 ALL=4
   std::vector <std::vector <double> > W_TotalCountsON(5, std::vector <double>(numBins,0.)); 
   std::vector <std::vector <double> > W_TotalErrorON(5, std::vector <double>(numBins,0.));
   std::vector <std::vector <double> > W_TotalCountsOFF(5, std::vector <double>(numBins,0.)); 
@@ -124,23 +124,24 @@ int main(int argc, char *argv[])
 	totalTimeOFF_E += time;
 	totalBGTimeOFF_E += bg_time;
 	rateFile.close();
-	
-	
-	// Type 0 only
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChD.dat", prefix.c_str(), runNumber));
-	
+
+
+	// Type 0
+	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChD.dat", prefix.c_str(),runNumber));
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
 	
-        bin = 0;
+	bin = 0; 
 	
 	while ( rateFile >> en >> fg >> bg )  { 
 	  E_TotalCountsOFF[0][bin] += (fg - bg)*time;
 	  E_BGTotalCountsOFF[0][bin] += (bg)*bg_time;
 	  ++bin;
 	}
-	
+
 	rateFile.close();
+	
+	
 	
 	// Type 1 only
 	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChF.dat", prefix.c_str(), runNumber));

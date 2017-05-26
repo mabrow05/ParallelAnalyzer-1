@@ -3,10 +3,10 @@
 void plotSpectraComp(int octetStart, int octetEnd) {
   gStyle->SetOptStat(0);
 
-  TString normType = "0";
+  TString normType = "ALL";
 
   Double_t normLow = 0.;
-  Double_t normHigh = 780.;
+  Double_t normHigh = 790.;
   
   Double_t xAxisMax = 1200.;
 
@@ -271,21 +271,25 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   sim1->Scale(normFactor);
   sim2->Scale(normFactor);
   sim3->Scale(normFactor);
+
   simALL_sfOFF_E->Scale(normFactor_sfOFF_E);
   sim0_sfOFF_E->Scale(normFactor_sfOFF_E);
   sim1_sfOFF_E->Scale(normFactor_sfOFF_E);
   sim2_sfOFF_E->Scale(normFactor_sfOFF_E);
   sim3_sfOFF_E->Scale(normFactor_sfOFF_E);
+
   simALL_sfON_E->Scale(normFactor_sfON_E);
   sim0_sfON_E->Scale(normFactor_sfON_E);
   sim1_sfON_E->Scale(normFactor_sfON_E);
   sim2_sfON_E->Scale(normFactor_sfON_E);
   sim3_sfON_E->Scale(normFactor_sfON_E);
+
   simALL_sfOFF_W->Scale(normFactor_sfOFF_W);
   sim0_sfOFF_W->Scale(normFactor_sfOFF_W);
   sim1_sfOFF_W->Scale(normFactor_sfOFF_W);
   sim2_sfOFF_W->Scale(normFactor_sfOFF_W);
   sim3_sfOFF_W->Scale(normFactor_sfOFF_W);
+
   simALL_sfON_W->Scale(normFactor_sfON_W);
   sim0_sfON_W->Scale(normFactor_sfON_W);
   sim1_sfON_W->Scale(normFactor_sfON_W);
@@ -2122,8 +2126,6 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   c5_sfON_W->Print(TString::Format("%s)",pdfFile.Data()));
 
   
-  
-
-  
+   
 }
   

@@ -29,8 +29,8 @@ XuanStyle_DeltaExpProcessor.exe: XuanStyle_DeltaExpProcessor.o positionMapHandle
 	$(CXX) $(CXXFLAGS) -o XuanStyle_DeltaExpProcessor.exe XuanStyle_DeltaExpProcessor.o MBUtils.o calibrationTools.o positionMapHandler.o TriggerMap.o BetaSpectrum.o ../Asymmetry/SQLinterface.o $(LIBS)
 	@echo "Done"
 
-MC_SpectralCorrection.exe: MC_SpectralCorrection.o BetaSpectrum.o MBUtils.o
-	$(CXX) $(CXXFLAGS) -o MC_SpectralCorrection.exe MC_SpectralCorrection.o BetaSpectrum.o MBUtils.o $(LIBS) 
+AsymmCalculator.exe: AsymmCalculator.o BetaSpectrum.o MBUtils.o
+	$(CXX) $(CXXFLAGS) -o AsymmCalculator.exe AsymmCalculator.o BetaSpectrum.o MBUtils.o $(LIBS) 
 	@echo "Done"
 
 EventShuffle.exe: EventShuffle.o BetaSpectrum.o MBUtils.o
