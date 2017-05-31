@@ -561,9 +561,9 @@ int main(int argc, char *argv[])
       //EAST
       numer = 0.;
       numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
-		(pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
-		(pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
-		(pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+		(pmtQuality[1] && t->ScintE.nPE2>0. ? t->ScintE.nPE2 : 0.) + 
+		(pmtQuality[2] && t->ScintE.nPE3>0. ? t->ScintE.nPE3 : 0.) + 
+		(pmtQuality[3] && t->ScintE.nPE4>0. ? t->ScintE.nPE4 : 0.) );
       
       denom = 0.;
       denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * gaus_eta[0] : 0.) +
@@ -578,9 +578,9 @@ int main(int argc, char *argv[])
       numer = denom = 0.;
       
       numer = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? t->ScintW.nPE1 : 0.) +
-		(pmtQuality[5] && t->ScintW.nPE1>0. ? t->ScintW.nPE2 : 0.) + 
-		(pmtQuality[6] && t->ScintW.nPE1>0. ? t->ScintW.nPE3 : 0.) + 
-		(pmtQuality[7] && t->ScintW.nPE1>0. ? t->ScintW.nPE4 : 0.) );
+		(pmtQuality[5] && t->ScintW.nPE2>0. ? t->ScintW.nPE2 : 0.) + 
+		(pmtQuality[6] && t->ScintW.nPE3>0. ? t->ScintW.nPE3 : 0.) + 
+		(pmtQuality[7] && t->ScintW.nPE4>0. ? t->ScintW.nPE4 : 0.) );
       
       denom  = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? alpha[4] * gaus_eta[4] : 0.) +
 		 (pmtQuality[5] && t->ScintW.nPE2>0. ? alpha[5] * gaus_eta[5] : 0.) +
@@ -720,9 +720,9 @@ int main(int argc, char *argv[])
       //EAST
       numer = 0.;
       numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
-		(pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
-		(pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
-		(pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+		(pmtQuality[1] && t->ScintE.nPE2>0. ? t->ScintE.nPE2 : 0.) + 
+		(pmtQuality[2] && t->ScintE.nPE3>0. ? t->ScintE.nPE3 : 0.) + 
+		(pmtQuality[3] && t->ScintE.nPE4>0. ? t->ScintE.nPE4 : 0.) );
       
       denom = 0.;
       denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * eta[0] : 0.) +
@@ -737,9 +737,9 @@ int main(int argc, char *argv[])
       numer = denom = 0.;
       
       numer = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? t->ScintW.nPE1 : 0.) +
-		(pmtQuality[5] && t->ScintW.nPE1>0. ? t->ScintW.nPE2 : 0.) + 
-		(pmtQuality[6] && t->ScintW.nPE1>0. ? t->ScintW.nPE3 : 0.) + 
-		(pmtQuality[7] && t->ScintW.nPE1>0. ? t->ScintW.nPE4 : 0.) );
+		(pmtQuality[5] && t->ScintW.nPE2>0. ? t->ScintW.nPE2 : 0.) + 
+		(pmtQuality[6] && t->ScintW.nPE3>0. ? t->ScintW.nPE3 : 0.) + 
+		(pmtQuality[7] && t->ScintW.nPE4>0. ? t->ScintW.nPE4 : 0.) );
       
       denom  = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? alpha[4] * eta[4] : 0.) +
 		 (pmtQuality[5] && t->ScintW.nPE2>0. ? alpha[5] * eta[5] : 0.) +
