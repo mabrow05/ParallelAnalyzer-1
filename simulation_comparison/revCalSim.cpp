@@ -152,8 +152,7 @@ std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 
   Char_t temp[500];
   std::vector < std::vector < Double_t > > peds (8,std::vector <Double_t> (2,0.));
-  if (runNumber>20000) sprintf(temp,"%s/PMT_pedestals_%i.dat",getenv("PEDESTALS"),runNumber);
-  else sprintf(temp,"%s/pedestal_widths_%i.dat",getenv("PEDESTALS"),runNumber);
+  sprintf(temp,"%s/PMT_pedestals_%i.dat",getenv("PEDESTALS"),runNumber);
   ifstream infile;
   infile.open(temp);
 
@@ -800,7 +799,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	if (eta[p]>0.) {
 
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE))));
-	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  ADCvecE[p] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
@@ -919,7 +918,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	if (eta[p]>0.) {
 
 	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW))));
-	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
+	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  ADCvecW[p-4] = ADC;
 	  //cout << ADCvecW[p-4] << endl;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);	  
@@ -1198,7 +1197,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     
     if (PID>=0) tree->Fill();
     //cout << evtTally << endl;
-    if (evtTally%10000==0) {std::cout << evtTally << std::endl;}//cout << "filled event " << evt << endl;
+    if (evtTally%10000==0) {std::cout << evtTally  << "    PID=" << PID << "    Erecon=" << Erecon << std::endl;}//cout << "filled event " << evt << endl;
   }
   cout << endl;
 

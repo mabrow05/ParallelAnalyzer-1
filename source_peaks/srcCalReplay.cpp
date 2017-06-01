@@ -552,9 +552,9 @@ int main(int argc, char *argv[])
     
     //EAST
     Double_t numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
-		       (pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
-		       (pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
-		       (pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+		       (pmtQuality[1] && t->ScintE.nPE2>0. ? t->ScintE.nPE2 : 0.) + 
+		       (pmtQuality[2] && t->ScintE.nPE3>0. ? t->ScintE.nPE3 : 0.) + 
+		       (pmtQuality[3] && t->ScintE.nPE4>0. ? t->ScintE.nPE4 : 0.) );
     
     Double_t denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * old_eta[0] : 0.) +
 			(pmtQuality[1] && t->ScintE.nPE2>0. ? alpha[1] * old_eta[1] : 0.) +
@@ -568,9 +568,9 @@ int main(int argc, char *argv[])
     numer = denom = 0.;
     
     numer = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? t->ScintW.nPE1 : 0.) +
-	      (pmtQuality[5] && t->ScintW.nPE1>0. ? t->ScintW.nPE2 : 0.) + 
-	      (pmtQuality[6] && t->ScintW.nPE1>0. ? t->ScintW.nPE3 : 0.) + 
-	      (pmtQuality[7] && t->ScintW.nPE1>0. ? t->ScintW.nPE4 : 0.) );
+	      (pmtQuality[5] && t->ScintW.nPE2>0. ? t->ScintW.nPE2 : 0.) + 
+	      (pmtQuality[6] && t->ScintW.nPE3>0. ? t->ScintW.nPE3 : 0.) + 
+	      (pmtQuality[7] && t->ScintW.nPE4>0. ? t->ScintW.nPE4 : 0.) );
     
     denom  = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? alpha[4] * old_eta[4] : 0.) +
 	       (pmtQuality[5] && t->ScintW.nPE2>0. ? alpha[5] * old_eta[5] : 0.) +
@@ -717,10 +717,10 @@ int main(int argc, char *argv[])
     t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
     t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
     
-    t->ScintE.e1 = ( eta[0]>0. && t->ScintE.e1>0. ) ? t->ScintE.e1 / eta[0] : 0.;
-    t->ScintE.e2 = ( eta[1]>0. && t->ScintE.e2>0. ) ? t->ScintE.e2 / eta[1] : 0.;
-    t->ScintE.e3 = ( eta[2]>0. && t->ScintE.e3>0. ) ? t->ScintE.e3 / eta[2] : 0.;
-    t->ScintE.e4 = ( eta[3]>0. && t->ScintE.e4>0. ) ? t->ScintE.e4 / eta[3] : 0.;
+    t->ScintE.e1 = ( eta[0]>0. ) ? t->ScintE.e1 / eta[0] : 0.;
+    t->ScintE.e2 = ( eta[1]>0. ) ? t->ScintE.e2 / eta[1] : 0.;
+    t->ScintE.e3 = ( eta[2]>0. ) ? t->ScintE.e3 / eta[2] : 0.;
+    t->ScintE.e4 = ( eta[3]>0. ) ? t->ScintE.e4 / eta[3] : 0.;
     
     t->ScintE.nPE1 = eta[0] > 0. ? t->ScintE.e1 * eta[0] * alpha[0] : 0.;
     t->ScintE.nPE2 = eta[1] > 0. ? t->ScintE.e2 * eta[1] * alpha[1] : 0.;
@@ -738,10 +738,10 @@ int main(int argc, char *argv[])
     t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
     t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
     
-    t->ScintW.e1 = ( eta[4]>0. && t->ScintW.e1>0. ) ? t->ScintW.e1 / eta[4] : 0.;
-    t->ScintW.e2 = ( eta[5]>0. && t->ScintW.e2>0. ) ? t->ScintW.e2 / eta[5] : 0.;
-    t->ScintW.e3 = ( eta[6]>0. && t->ScintW.e3>0. ) ? t->ScintW.e3 / eta[6] : 0.;
-    t->ScintW.e4 = ( eta[7]>0. && t->ScintW.e4>0. ) ? t->ScintW.e4 / eta[7] : 0.;
+    t->ScintW.e1 = ( eta[4]>0. ) ? t->ScintW.e1 / eta[4] : 0.;
+    t->ScintW.e2 = ( eta[5]>0. ) ? t->ScintW.e2 / eta[5] : 0.;
+    t->ScintW.e3 = ( eta[6]>0. ) ? t->ScintW.e3 / eta[6] : 0.;
+    t->ScintW.e4 = ( eta[7]>0. ) ? t->ScintW.e4 / eta[7] : 0.;
     
     t->ScintW.nPE1 = eta[4] > 0. ? t->ScintW.e1 * eta[4] * alpha[4] : 0.;
     t->ScintW.nPE2 = eta[5] > 0. ? t->ScintW.e2 * eta[5] * alpha[5] : 0.;
@@ -760,16 +760,16 @@ int main(int argc, char *argv[])
     
     //EAST
     numer = 0.;
-    numer = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? t->ScintE.nPE1 : 0.) +
-	      (pmtQuality[1] && t->ScintE.nPE1>0. ? t->ScintE.nPE2 : 0.) + 
-	      (pmtQuality[2] && t->ScintE.nPE1>0. ? t->ScintE.nPE3 : 0.) + 
-	      (pmtQuality[3] && t->ScintE.nPE1>0. ? t->ScintE.nPE4 : 0.) );
+    numer = ( (pmtQuality[0] ? t->ScintE.nPE1 : 0.) +
+	      (pmtQuality[1] ? t->ScintE.nPE2 : 0.) + 
+	      (pmtQuality[2] ? t->ScintE.nPE3 : 0.) + 
+	      (pmtQuality[3] ? t->ScintE.nPE4 : 0.) );
     
     denom = 0.;
-    denom  = ( (pmtQuality[0] && t->ScintE.nPE1>0. ? alpha[0] * eta[0] : 0.) +
-	       (pmtQuality[1] && t->ScintE.nPE2>0. ? alpha[1] * eta[1] : 0.) +
-	       (pmtQuality[2] && t->ScintE.nPE3>0. ? alpha[2] * eta[2] : 0.) + 
-	       (pmtQuality[3] && t->ScintE.nPE4>0. ? alpha[3] * eta[3] : 0.) ); 
+    denom  = ( (pmtQuality[0] ? alpha[0] * eta[0] : 0.) +
+	       (pmtQuality[1] ? alpha[1] * eta[1] : 0.) +
+	       (pmtQuality[2] ? alpha[2] * eta[2] : 0.) + 
+	       (pmtQuality[3] ? alpha[3] * eta[3] : 0.) ); 
     
     t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
     t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
@@ -777,15 +777,15 @@ int main(int argc, char *argv[])
     //WEST
     numer = denom = 0.;
     
-    numer = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? t->ScintW.nPE1 : 0.) +
-	      (pmtQuality[5] && t->ScintW.nPE1>0. ? t->ScintW.nPE2 : 0.) + 
-	      (pmtQuality[6] && t->ScintW.nPE1>0. ? t->ScintW.nPE3 : 0.) + 
-	      (pmtQuality[7] && t->ScintW.nPE1>0. ? t->ScintW.nPE4 : 0.) );
+    numer = ( (pmtQuality[4] ? t->ScintW.nPE1 : 0.) +
+	      (pmtQuality[5] ? t->ScintW.nPE2 : 0.) + 
+	      (pmtQuality[6] ? t->ScintW.nPE3 : 0.) + 
+	      (pmtQuality[7] ? t->ScintW.nPE4 : 0.) );
     
-    denom  = ( (pmtQuality[4] && t->ScintW.nPE1>0. ? alpha[4] * eta[4] : 0.) +
-	       (pmtQuality[5] && t->ScintW.nPE2>0. ? alpha[5] * eta[5] : 0.) +
-	       (pmtQuality[6] && t->ScintW.nPE3>0. ? alpha[6] * eta[6] : 0.) + 
-	       (pmtQuality[7] && t->ScintW.nPE4>0. ? alpha[7] * eta[7] : 0.) ); 
+    denom  = ( (pmtQuality[4] ? alpha[4] * eta[4] : 0.) +
+	       (pmtQuality[5] ? alpha[5] * eta[5] : 0.) +
+	       (pmtQuality[6] ? alpha[6] * eta[6] : 0.) + 
+	       (pmtQuality[7] ? alpha[7] * eta[7] : 0.) ); 
     
     
     t->ScintW.energy = t->EvisW = (denom!=0. ? numer/denom : 0.);
