@@ -61,7 +61,7 @@ void plotEndpoints(TString geometry) {
   //gStyle->SetGridStyle(4);
   //gStyle->SetGridColor(kBlue);
 
-  Int_t badocts[] = {7,60,61,62,63,64,65,66};
+  Int_t badocts[] = {7,60,61,62,63,64,65,66,67,91,93,101,107,121};
   
 
   Int_t octMin, octMax;
@@ -91,7 +91,7 @@ void plotEndpoints(TString geometry) {
   //// Read in all necessary endpoints
   for ( int octet=octMin ; octet<=octMax ; ++octet ) {
 
-    if ( std::find(badocts, badocts+10,octet) != (badocts+10) ) continue;  //Checking if octet should be ignored for data quality reasons
+    if ( std::find(badocts, badocts+14,octet) != (badocts+14) ) continue;  //Checking if octet should be ignored for data quality reasons
 
     octets.push_back(octet);
 
@@ -171,10 +171,10 @@ void plotEndpoints(TString geometry) {
   c2->Divide(2,1);
   
   
-  TH1D *epDataE = new TH1D("epDataE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
-  TH1D *epDataW = new TH1D("epDataW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
-  TH1D *epSimE = new TH1D("epSimE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
-  TH1D *epSimW = new TH1D("epSimW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 600., 900.);
+  TH1D *epDataE = new TH1D("epDataE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
+  TH1D *epDataW = new TH1D("epDataW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
+  TH1D *epSimE = new TH1D("epSimE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
+  TH1D *epSimW = new TH1D("epSimW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
 
   epSimE->SetLineColor(kRed);
   epSimW->SetLineColor(kRed);
@@ -187,6 +187,9 @@ void plotEndpoints(TString geometry) {
     epSimW->Fill(SIM_west_ep[i]);
 
   }
+
+  std::cout << "endpoint RMS East: " << epDataE->GetRMS() << std::endl;
+  std::cout << "endpoint RMS West: " << epDataW->GetRMS() << std::endl;
 
   c2->cd(1);
   epSimE->Draw();

@@ -559,7 +559,8 @@ int main(int argc, char *argv[])
    
     // TODO: Add in the application of the corrections
     std::vector < std::vector <Double_t> > deltaSys = LoadOctetSystematics(octetNum,"D",enBins);
-    std::vector <Double_t> theoryCorr(numBins,1.);// = LoadTheoryCorrections(enBins);
+    std::vector <Double_t> theoryCorr(numBins,1.);
+    theoryCorr = LoadTheoryCorrections(enBins);
 
 
     for ( int j=0; j<numBins; ++j ) {

@@ -98,7 +98,7 @@ void pedestal_tracker(Int_t run) {
   cE1->cd(1);
   Tin->Draw("Qadc0>>hisOppBiE1","(int(Sis00)==32) && Tdc00<0.0001 && Tdc01<0.0001 && Tdc02<0.0001 && Tdc03<0.0001");
   cE1->cd(2);
-  Tin->Draw("Qadc0>>hisOpp2foldE1","(int(Sis00)==2) && Tdc00<0.0001 ");
+  Tin->Draw("Qadc0>>hisOpp2foldE1","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc00<0.0001 ");
   cE1->cd(3);
   Tin->Draw("Qadc0>>hisMonE1","Tdc00<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cE1->cd(4);
@@ -112,7 +112,7 @@ void pedestal_tracker(Int_t run) {
   cE2->cd(1);
   Tin->Draw("Qadc1>>hisOppBiE2","(int(Sis00)==32) && Tdc00<0.0001 && Tdc01<0.0001 && Tdc02<0.0001 && Tdc03<0.0001");
   cE2->cd(2);
-  Tin->Draw("Qadc1>>hisOpp2foldE2","(int(Sis00)==2) && Tdc01<0.0001 ");
+  Tin->Draw("Qadc1>>hisOpp2foldE2","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc01<0.0001 ");
   cE2->cd(3);
   Tin->Draw("Qadc1>>hisMonE2","Tdc01<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cE2->cd(4);
@@ -125,7 +125,7 @@ void pedestal_tracker(Int_t run) {
   cE3->cd(1);
   Tin->Draw("Qadc2>>hisOppBiE3","(int(Sis00)==32) && Tdc00<0.0001 && Tdc01<0.0001 && Tdc02<0.0001 && Tdc03<0.0001");
   cE3->cd(2);
-  Tin->Draw("Qadc2>>hisOpp2foldE3","(int(Sis00)==2) && Tdc02<0.0001 ");
+  Tin->Draw("Qadc2>>hisOpp2foldE3","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc02<0.0001 ");
   cE3->cd(3);
   Tin->Draw("Qadc2>>hisMonE3","Tdc02<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cE3->cd(4);
@@ -138,7 +138,7 @@ void pedestal_tracker(Int_t run) {
   cE4->cd(1);
   Tin->Draw("Qadc3>>hisOppBiE4","(int(Sis00)==32) && Tdc00<0.0001 && Tdc01<0.0001 && Tdc02<0.0001 && Tdc03<0.0001");
   cE4->cd(2);
-  Tin->Draw("Qadc3>>hisOpp2foldE4","(int(Sis00)==2) && Tdc03<0.0001 ");
+  Tin->Draw("Qadc3>>hisOpp2foldE4","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc03<0.0001 ");
   cE4->cd(3);
   Tin->Draw("Qadc3>>hisMonE4","Tdc03<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cE4->cd(4);
@@ -155,7 +155,7 @@ void pedestal_tracker(Int_t run) {
   cW1->cd(1);
   Tin->Draw("Qadc4>>hisOppBiW1","(int(Sis00)==32) && Tdc08<0.0001 && Tdc09<0.0001 && Tdc014<0.0001 && Tdc011<0.0001");
   cW1->cd(2);
-  Tin->Draw("Qadc4>>hisOpp2foldW1","(int(Sis00)==1) && Tdc08<0.0001 ");
+  Tin->Draw("Qadc4>>hisOpp2foldW1","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc08<0.0001 ");
   cW1->cd(3);
   Tin->Draw("Qadc4>>hisMonW1","Tdc08<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cW1->cd(4);
@@ -169,7 +169,7 @@ void pedestal_tracker(Int_t run) {
   cW2->cd(1);
   Tin->Draw("Qadc5>>hisOppBiW2","(int(Sis00)==32) && Tdc08<0.0001 && Tdc09<0.0001 && Tdc014<0.0001 && Tdc011<0.0001");
   cW2->cd(2);
-  Tin->Draw("Qadc5>>hisOpp2foldW2","(int(Sis00)==1) && Tdc09<0.0001 ");
+  Tin->Draw("Qadc5>>hisOpp2foldW2","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc09<0.0001 ");
   cW2->cd(3);
   Tin->Draw("Qadc5>>hisMonW2","Tdc09<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cW2->cd(4);
@@ -182,7 +182,7 @@ void pedestal_tracker(Int_t run) {
   cW3->cd(1);
   Tin->Draw("Qadc6>>hisOppBiW3","(int(Sis00)==32) && Tdc08<0.0001 && Tdc09<0.0001 && Tdc014<0.0001 && Tdc011<0.0001");
   cW3->cd(2);
-  Tin->Draw("Qadc6>>hisOpp2foldW3","(int(Sis00)==1) && Tdc014<0.0001 ");
+  Tin->Draw("Qadc6>>hisOpp2foldW3","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc014<0.0001 ");
   cW3->cd(3);
   Tin->Draw("Qadc6>>hisMonW3","Tdc014<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cW3->cd(4);
@@ -195,7 +195,7 @@ void pedestal_tracker(Int_t run) {
   cW4->cd(1);
   Tin->Draw("Qadc7>>hisOppBiW4","(int(Sis00)==32) && Tdc08<0.0001 && Tdc09<0.0001 && Tdc014<0.0001 && Tdc011<0.0001");
   cW4->cd(2);
-  Tin->Draw("Qadc7>>hisOpp2foldW4","(int(Sis00)==1) && Tdc011<0.0001 ");
+  Tin->Draw("Qadc7>>hisOpp2foldW4","(int(Sis00)==2 || int(Sis00)==1 || int(Sis00)==3) && Tdc011<0.0001 ");
   cW4->cd(3);
   Tin->Draw("Qadc7>>hisMonW4","Tdc011<0.0001 && (int(Sis00) == 260 || int(Sis00) == 516 || int(Sis00) == 1028 || int(Sis00) == 2052 || int(Sis00) == (2052+260) || int(Sis00) == (2052+516) || int(Sis00) == (2052+1028) || int(Sis00) == (260+516) || int(Sis00) == (260+1028) || int(Sis00) == (516+1028) )");
   cW4->cd(4);

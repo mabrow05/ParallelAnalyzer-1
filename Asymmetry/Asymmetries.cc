@@ -11,6 +11,7 @@ ppair, quartet, octet
 #include <cstdlib>
 #include <cmath>
 #include <TMath.h>
+#include <iomanip>
 
 void calcBinByBinSuperRatio(std::vector< std::vector<double> > &A2, 
 			    std::vector< std::vector<double> > &A5,
@@ -1059,7 +1060,8 @@ void OctetAsymmetry::writeAsymToFile() {
   else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
   else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+".dat";
   std::ofstream outfile(outpath.c_str());
-  
+  outfile << std::setprecision(15);
+
   if (isFullOctet()) {
     for (unsigned int i=0; i<asymmetry.size(); i++) {
       outfile << binLowerEdge[i] << " " << asymmetry[i] << " " << asymmetryError[i] << std::endl;
@@ -1078,6 +1080,7 @@ void OctetAsymmetry::writeAsymToFile() {
     else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quadrant"+itos(j)+".dat";
     else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quadrant"+itos(j)+".dat";
     outfile.open(outpath.c_str());
+    outfile << std::setprecision(15);
     
     if (isFullOctet()) {
       for (unsigned int i=0; i<asymmetryQuad[j].size(); i++) {
@@ -1097,6 +1100,7 @@ void OctetAsymmetry::writeAsymToFile() {
     else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_RadialRing"+itos(j)+".dat";
     else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_RadialRing"+itos(j)+".dat";
     outfile.open(outpath.c_str());
+    outfile << std::setprecision(15);
     
     if (isFullOctet()) {
       for (unsigned int i=0; i<asymmetryRad[j].size(); i++) {

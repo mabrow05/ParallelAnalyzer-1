@@ -13,6 +13,7 @@ simulation data
 #include "calibrationTools.hh"
 #include <cstdio>
 #include <fstream>
+#include <iomanip>
 
 #include <TString.h>
 
@@ -1071,12 +1072,12 @@ void BGSubtractedRate::LoadRatesByBin() {
 				     FGruns[0],analysisChoice.c_str()).Data());
     }
     
-    ofileE << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-    ofileW << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-    ofileEquad << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-    ofileWquad << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-    ofileErad << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-    ofileWrad << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+    ofileE << std::setprecision(15) << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+    ofileW << std::setprecision(15) << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+    ofileEquad << std::setprecision(15) << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+    ofileWquad << std::setprecision(15) << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
+    ofileErad << std::setprecision(15) << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
+    ofileWrad << std::setprecision(15) << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
 
     for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
       ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;

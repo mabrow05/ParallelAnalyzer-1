@@ -3,6 +3,11 @@
 void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=680) {
 
   bool readInAsymms = true;
+  bool withSim = false;
+  bool CorrAndUnCorr = true;
+
+  double ymin0 = -0.129;
+  double ymax0 = -0.1175;
   
   const Int_t numAnaChT0 = 4;
   const Int_t numAnaChBacksc = 5;
@@ -13,6 +18,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   std::vector <Double_t> indicesT0;
   std::vector <Double_t> AsymmDataT0;
   std::vector <Double_t> AsymmDataErrT0; //Statistical Errors
+  std::vector <Double_t> AsymmCorrDataT0;
+  std::vector <Double_t> AsymmCorrDataErrT0; //Statistical Errors
   std::vector <Double_t> AsymmSimT0;
   std::vector <Double_t> AsymmSimErrT0; //Statistical Errors
 
@@ -20,6 +27,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   std::vector <Double_t> indicesBacksc;
   std::vector <Double_t> AsymmDataBacksc;
   std::vector <Double_t> AsymmDataErrBacksc; //Statistical Errors
+  std::vector <Double_t> AsymmCorrDataBacksc;
+  std::vector <Double_t> AsymmCorrDataErrBacksc; //Statistical Errors
   std::vector <Double_t> AsymmSimBacksc;
   std::vector <Double_t> AsymmSimErrBacksc; //Statistical Errors
 
@@ -50,6 +59,21 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
       }
       AsymmDataT0.push_back(AsymHold);
       AsymmDataErrT0.push_back(AsymErrHold);
+      
+      infile.close();
+
+      infile.open(TString::Format("%s/Asymmetries/%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				  getenv("ANALYSIS_RESULTS"),"AllCorr",
+				  (withPOL?"_withPOL":""),anaChoicesT0[i].Data(),
+				  ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+      
+      Double_t AsymHold = 0.;
+      Double_t AsymErrHold = 0.;
+      if (infile.is_open()) {
+	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      }
+      AsymmCorrDataT0.push_back(AsymHold);
+      AsymmCorrDataErrT0.push_back(AsymErrHold);
       
       infile.close();
       
@@ -84,6 +108,21 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
       AsymmDataErrBacksc.push_back(AsymErrHold);
       
       infile.close();
+
+      infile.open(TString::Format("%s/Asymmetries/%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				  getenv("ANALYSIS_RESULTS"),"AllCorr",
+				  (withPOL?"_withPOL":""),anaChoicesBacksc[i].Data(),
+				  ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+      
+      Double_t AsymHold = 0.;
+      Double_t AsymErrHold = 0.;
+      if (infile.is_open()) {
+	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+      }
+      AsymmCorrDataBacksc.push_back(AsymHold);
+      AsymmCorrDataErrBacksc.push_back(AsymErrHold);
+      
+      infile.close();
       
       infile.open(TString::Format("%s/Asymmetries/%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
 				  getenv("SIM_ANALYSIS_RESULTS"),corrections.Data(),
@@ -115,8 +154,6 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   }
   
 
-  
-
   Double_t xerr[10] = {0.};
 
   //cout << anaChoices.size() << " " << anaChoices[0] << " " << AsymmData[0] << " " << xerr[0] << " " << AsymmDataErr[0] << endl;
@@ -132,13 +169,14 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   c1->SetLeftMargin(0.15);
   c1->SetBottomMargin(0.15);
 
-  
+  gPad->SetGridy();
+
   TH1F * data = new TH1F("data","Analysis Choices with Type 0",AsymmDataT0.size(),0.5,AsymmDataT0.size()+0.5);
   data->SetMarkerColor(kBlue);
   data->SetLineColor(kBlue);
   data->SetLineWidth(3);
   data->SetMarkerStyle(kFullCircle);
-  //data->GetXaxis()->SetNdivisions();
+  data->GetYaxis()->SetNdivisions(512);
   //data->SetCanExtend(TH1::kAllAxes);
   data->SetStats(0);
 
@@ -160,10 +198,26 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   data->GetXaxis()->SetTitleSize(0.05);
   data->GetXaxis()->CenterTitle();
   data->GetYaxis()->CenterTitle();
-  data->SetMinimum(-0.126);
-  data->SetMaximum(-0.1175);
+  data->SetMinimum(ymin0);
+  data->SetMaximum(ymax0);
 
   data->Draw("EX0");
+
+  TH1F * corrData = new TH1F("","CorrData vs MC Blinded Asymmetries",AsymmCorrDataT0.size(),0.5,AsymmCorrDataT0.size()+0.5);
+  corrData->SetMarkerColor(kRed);
+  corrData->SetLineColor(kRed);
+  corrData->SetLineWidth(3);
+  corrData->SetMarkerStyle(kFullSquare);
+  //corrData->GetXaxis()->SetNdivisions();
+  //corrData->SetCanExtend(TH1::kAllAxes);
+  corrData->SetStats(0);
+
+  for (Int_t i=0;i<AsymmCorrDataT0.size();++i) {
+    corrData->SetBinContent(i+1,AsymmCorrDataT0[i]);
+    corrData->SetBinError(i+1,AsymmCorrDataErrT0[i]);
+  }
+
+  if (CorrAndUnCorr) corrData->Draw("SAME EX0");
 
   TH1F * sim = new TH1F("","Sim vs MC Blinded Asymmetries",AsymmSimT0.size(),0.5,AsymmSimT0.size()+0.5);
   sim->SetMarkerColor(kRed);
@@ -179,15 +233,16 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
     sim->SetBinError(i+1,AsymmSimErrT0[i]);
   }
   
-  sim->Draw("SAME EX0");
+  if (withSim) sim->Draw("SAME EX0");
   
   
   TLegend *leg = new TLegend(0.55,0.75,0.9,0.9);
   //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
   leg->AddEntry(data,"Data");
-  leg->AddEntry(sim,"Monte Carlo");
+  if (withSim) leg->AddEntry(sim,"Monte Carlo");
+  if (CorrAndUnCorr) leg->AddEntry(corrData,"Corrected Data");
    //leg->AddEntry("gr","Graph with error bars","lep");
-  leg->Draw();
+  if (withSim || CorrAndUnCorr) leg->Draw();
 
 
   ///////////////// backscatter anachoices /////////////////////////
@@ -196,14 +251,14 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 
   c2->SetLeftMargin(0.15);
   c2->SetBottomMargin(0.15);
+  gPad->SetGridy();
 
-  
   TH1F * dataBacksc = new TH1F("dataBacksc","Backscattering Analysis Choices",AsymmDataBacksc.size(),0.5,AsymmDataBacksc.size()+0.5);
   dataBacksc->SetMarkerColor(kBlue);
   dataBacksc->SetLineColor(kBlue);
   dataBacksc->SetLineWidth(3);
   dataBacksc->SetMarkerStyle(kFullCircle);
-  //dataBacksc->GetXaxis()->SetNdivisions();
+  dataBacksc->GetYaxis()->SetNdivisions(512);
   //dataBacksc->SetCanExtend(TH1::kAllAxes);
   dataBacksc->SetStats(0);
 
@@ -227,9 +282,25 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   dataBacksc->GetXaxis()->CenterTitle();
   dataBacksc->GetYaxis()->CenterTitle();
   dataBacksc->SetMinimum(-0.2);
-  dataBacksc->SetMaximum(0.02);
+  dataBacksc->SetMaximum(0.025);
 
   dataBacksc->Draw("EX0");
+
+  TH1F * corrDataBacksc = new TH1F("","CorrDataBacksc vs MC Blinded Asymmetries",AsymmCorrDataBacksc.size(),0.5,AsymmCorrDataBacksc.size()+0.5);
+  corrDataBacksc->SetMarkerColor(kRed);
+  corrDataBacksc->SetLineColor(kRed);
+  corrDataBacksc->SetLineWidth(3);
+  corrDataBacksc->SetMarkerStyle(kFullSquare);
+  //corrDataBacksc->GetXaxis()->SetNdivisions();
+  //corrDataBacksc->SetCanExtend(TH1::kAllAxes);
+  corrDataBacksc->SetStats(0);
+
+  for (Int_t i=0;i<AsymmCorrDataBacksc.size();++i) {
+    corrDataBacksc->SetBinContent(i+1,AsymmCorrDataBacksc[i]);
+    corrDataBacksc->SetBinError(i+1,AsymmCorrDataErrBacksc[i]);
+  }
+
+  if (CorrAndUnCorr) corrDataBacksc->Draw("SAME EX0");
 
   TH1F * simBacksc = new TH1F("","Sim vs MC Blinded Asymmetries",AsymmSimBacksc.size(),0.5,AsymmSimBacksc.size()+0.5);
   simBacksc->SetMarkerColor(kRed);
@@ -245,15 +316,19 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
     simBacksc->SetBinError(i+1,AsymmSimErrBacksc[i]);
   }
   
-  simBacksc->Draw("SAME EX0");
+  if (withSim) simBacksc->Draw("SAME EX0");
  
   TLegend *leg = new TLegend(0.65,0.65,0.95,0.8);
   //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
   leg->AddEntry(dataBacksc,"Data");
   leg->AddEntry(simBacksc,"Monte Carlo");
    //leg->AddEntry("gr","Graph with error bars","lep");
-  //leg->Draw();
+  //if (withSim) leg->Draw();
 
-  c1->Print(TString::Format("AsymmByAnaCh_%s_%s_%s_%i-%i.pdf(",year.Data(),corrections.Data(),withPOL?"withPOL":"noPOL",ebinLow,ebinHigh));
-  c2->Print(TString::Format("AsymmByAnaCh_%s_%s_%s_%i-%i.pdf)",year.Data(),corrections.Data(),withPOL?"withPOL":"noPOL",ebinLow,ebinHigh));  
+  c1->Print(TString::Format("AsymmByAnaCh%s%s_%s_%s_%s_%i-%i.pdf(",withSim?"":"_NoSIM",
+			    CorrAndUnCorr?"_CorrVsUnCorr":"",year.Data(),corrections.Data(),
+			    withPOL?"withPOL":"noPOL",ebinLow,ebinHigh));
+  c2->Print(TString::Format("AsymmByAnaCh%s%s_%s_%s_%s_%i-%i.pdf)",withSim?"":"_NoSIM",
+			    CorrAndUnCorr?"_CorrVsUnCorr":"",year.Data(),corrections.Data(),
+			    withPOL?"withPOL":"noPOL",ebinLow,ebinHigh));  
 }

@@ -215,7 +215,7 @@ int main(int argc, char *argv[]) {
 	  else if ( t.xW.mult<1 || t.yW.mult<1 ) continue;      
 	}
 
-	if ( r2E > 50.*50. || r2W > 50.*50. ) continue;
+	if ( r2E > 30.*30. || r2W > 30.*30. ) continue;
 
 	if ( t.Side==0 ) {
 	  spec[0]->Fill(t.ScintE_bare.e1);
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
 	  else if ( t.xW.mult<1 || t.yW.mult<1 ) continue;      
 	}
 
-	if ( r2E > 50.*50. || r2W > 50.*50. ) continue;
+	if ( r2E > 30.*30. || r2W > 30.*30. ) continue;
 
 	if ( t.Side==0 ) {
 	  bgspec[0]->Fill(t.ScintE_bare.e1);
@@ -355,7 +355,7 @@ int main(int argc, char *argv[]) {
     TFile *f = new TFile(TString::Format("%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),rn), "READ");
     TTree *Tin = (TTree*)f->Get("revCalSim");
 
-    std::cout << "Reading from " << TString::Format("%s/beta/revCalSim_%i_Beta.root",getenv("REVCALSIM"),rn).Data() << "\n";
+    std::cout << "Reading from " << TString::Format("%s/beta_highStatistics/revCalSim_%i_Beta.root",getenv("REVCALSIM"),rn).Data() << "\n";
     
     Double_t e0,e1,e2,e3,e4,e5,e6,e7;
     MWPC xE, yE, xW, yW;
@@ -411,7 +411,7 @@ int main(int argc, char *argv[]) {
 	if ( Side==0 && ( xE.mult<1 || yE.mult<1 ) ) continue;
 	else if ( Side==1 && ( xW.mult<1 || yW.mult<1 ) ) continue;
 
-	if ( r2E > 50.*50. || r2W > 50.*50. ) continue;
+	if ( r2E > 30.*30. || r2W > 30.*30. ) continue;
 
 	
 	if ( Side==0 ) {
@@ -451,6 +451,8 @@ int main(int argc, char *argv[]) {
   
   TFile *fout = new TFile(TString::Format("%s/EndpointGain/endpointGain_octet-%i.root",
 					  getenv("ENDPOINT_ANALYSIS"),octet),"RECREATE");
+  //TFile *fout = new TFile(TString::Format("endpointGain_octet-%i.root",
+  //					  octet),"RECREATE");
   
   std::cout << "Made output rootfile...\n\n";
 
@@ -584,7 +586,8 @@ int main(int argc, char *argv[]) {
 
   /// Write out pmt endpoint gain corrections
   std::ofstream gainFile(TString::Format("%s/EndpointGain/endpointGain_octet-%i.dat",
-					 getenv("ENDPOINT_ANALYSIS"),octet));
+  					 getenv("ENDPOINT_ANALYSIS"),octet));
+  // std::ofstream gainFile(TString::Format("endpointGain_octet-%i.dat",octet));
 
   for ( auto g : gain ) gainFile << g << std::endl;
 

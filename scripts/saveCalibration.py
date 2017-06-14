@@ -2,7 +2,7 @@
 
 import os
 
-calibrationName = "04192017_endPointMaps"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
+calibrationName = "06082017_SnCeBiWidthFits_Final"#"07312016_3PoissonMethod_with_Trigger_noBi2_linear_it4"
 year = "2011-2012" #"2011-2012" or "2012-2013"
 calibrationName = calibrationName+"_"+year
 location = "/extern/UCNA/goodCalibrations/" + calibrationName + "/"

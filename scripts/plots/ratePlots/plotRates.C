@@ -62,7 +62,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
 
   
   std::vector <Int_t> badOct;// {7,60,61,62,63,64,65,66};
-  Int_t octs[] = {7,60,61,62,63,64,65,66};
+  Int_t octs[] = {7,59,60,61,62,63,64,65,66,67,91,93,101,107,121};
 
   for (int j=0; j<8; ++j) badOct.push_back(octs[j]);
 

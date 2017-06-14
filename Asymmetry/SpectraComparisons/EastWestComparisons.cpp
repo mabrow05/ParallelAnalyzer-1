@@ -19,7 +19,7 @@
 #include <TLegend.h>
 #include <TPaveText.h>
 
-std::vector <Int_t> badOct = {7,60,61,62,63,64,65,66,67,91,93,107,121}; 
+std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,67,91,93,101,107,121}; 
 
 int main(int argc, char *argv[])
 {

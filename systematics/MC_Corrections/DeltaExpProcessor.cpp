@@ -210,6 +210,7 @@ void readOctetFile(int octet) {
 	runTypeHold=="B2" || runTypeHold=="B5" || runTypeHold=="B7" || runTypeHold=="B10" )  {
      
       betaRuns.push_back(runNumberHold);
+      std::cout << betaRuns[numRuns] << std::endl;
 
     }
     numRuns++;
@@ -743,7 +744,7 @@ void calcDeltaExp (int octet)
     
     
       for (UInt_t p=0; p<4; p++) {
-	if ( edepQ.EdepQE>0. ) { //Check to make sure that there is light to see in the scintillator
+	if ( edep.EdepE>0. ) { //Check to make sure that there is light to see in the scintillator
 	
 	  if (eta[p]>0.) {
 
@@ -765,7 +766,7 @@ void calcDeltaExp (int octet)
 
 	  }
 	
-	  pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
+	  pmt.nPE[p] = alpha[p]*pmt.etaEvis[p];
 	}
 	// If eQ is 0...
 	else {
@@ -779,8 +780,8 @@ void calcDeltaExp (int octet)
       //Calculate the weighted energy on a side
       Double_t numer=0., denom=0.;
       for (UInt_t p=0;p<4;p++) {
-	numer += (pmtQuality[p] && pmt.etaEvis[p]>0.) ? pmt.nPE[p] : 0.;
-	denom += (pmtQuality[p] && pmt.etaEvis[p]>0.) ? eta[p]*alpha[p] : 0.;
+	numer += (pmtQuality[p] ) ? pmt.nPE[p] : 0.;
+	denom += (pmtQuality[p] ) ? eta[p]*alpha[p] : 0.;
       }
 
       //Now we apply the trigger probability
@@ -796,7 +797,7 @@ void calcDeltaExp (int octet)
       
       //West Side
       for ( UInt_t p=4; p<8; p++ ) {
-	if ( !(p==5 && runNumber>16983 && runNumber<17249)  &&  edepQ.EdepQW>0. ) { //Check to make sure that there is light to see in the scintillator and that run isn't one where PMTW2 was dead
+	if ( !(p==5 && runNumber>16983 && runNumber<17249)  &&  edep.EdepW>0. ) { //Check to make sure that there is light to see in the scintillator and that run isn't one where PMTW2 was dead
 	
 	  if (eta[p]>0.) {
 
@@ -819,7 +820,7 @@ void calcDeltaExp (int octet)
 	  
 	  }
 	
-	  pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
+	  pmt.nPE[p] = alpha[p]*pmt.etaEvis[p];
 	}
 	// If PMT is dead and EQ=0...
 	else {
@@ -833,8 +834,8 @@ void calcDeltaExp (int octet)
       //Calculate the total weighted energy
       numer=denom=0.;
       for (UInt_t p=4;p<8;p++) {
-	numer += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? pmt.nPE[p] : 0.;
-	denom += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? eta[p]*alpha[p] : 0.;
+	numer += ( pmtQuality[p] ) ? pmt.nPE[p] : 0.;
+	denom += ( pmtQuality[p] ) ? eta[p]*alpha[p] : 0.;
       }
       //Now we apply the trigger probability
       Double_t totalEnW = denom>0. ? numer/denom : 0.;

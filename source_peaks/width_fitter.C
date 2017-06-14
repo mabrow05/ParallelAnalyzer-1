@@ -115,7 +115,6 @@ void width_fitter(Int_t calPeriod)
   Double_t p[8] ={0.}; 
   Int_t run=0;
   std::string nm = "";
-						
 
   sprintf(tempfile,"%s/residuals/source_runs_EvisWidth_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
   ifstream dataWidthsFile(tempfile); 
@@ -123,35 +122,53 @@ void width_fitter(Int_t calPeriod)
 
   while ( dataWidthsFile >> run >> nm >> p[0] >> p[1] >> p[2] >> p[3] >> p[4] >> p[5] >> p[6] >> p[7] ) {
     
-    if ( nm==std::string("Sn") ) {
+    if ( nm==std::string("In") ) continue;
+    if ( nm==std::string("Cd") ) continue;
+    if ( nm==std::string("Cs") ) continue;
+    if ( nm==std::string("Bi2") ) continue;
+
       for ( UInt_t i=0; i<8; ++i ) {  dataWidthRun[i].push_back(run); dataWidthSrc[i].push_back(nm); dataWidths[i].push_back(p[i]); }
-    }
+    
   }
 	   
 
   sprintf(tempfile,"%s/residuals/source_runs_EvisWidthError_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
   ifstream dataWidthErrorsFile(tempfile);
+  if (dataWidthErrorsFile.is_open()) cout << tempfile << endl;
   while ( dataWidthErrorsFile >> run >> nm >> p[0] >> p[1] >> p[2] >> p[3] >> p[4] >> p[5] >> p[6] >> p[7] ) {
-      if ( nm==std::string("Sn") ) {
-	for ( UInt_t i=0; i<8; ++i ) {  dataWidthErrorRun[i].push_back(run); dataWidthErrorSrc[i].push_back(nm); dataWidthErrors[i].push_back(p[i]); }
-      }
+    if ( nm==std::string("In") ) continue;
+    if ( nm==std::string("Cd") ) continue;
+    if ( nm==std::string("Cs") ) continue;
+    if ( nm==std::string("Bi2") ) continue;
+
+    for ( UInt_t i=0; i<8; ++i ) {  dataWidthErrorRun[i].push_back(run); dataWidthErrorSrc[i].push_back(nm); dataWidthErrors[i].push_back(p[i]); }
+      
   }
 
   sprintf(tempfile,"%s/residuals/SIM_source_runs_EvisWidth_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
   ifstream simWidthsFile(tempfile);
-  
+  if (simWidthsFile.is_open()) cout << tempfile << endl;
   while ( simWidthsFile >> run >> nm >> p[0] >> p[1] >> p[2] >> p[3] >> p[4] >> p[5] >> p[6] >> p[7] ) {
-     if ( nm==std::string("Sn") ) {
-       for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].push_back(nm); simWidths[i].push_back(p[i]); }
-     }
+    if ( nm==std::string("In") ) continue;
+    if ( nm==std::string("Cd") ) continue;
+    if ( nm==std::string("Cs") ) continue;
+    if ( nm==std::string("Bi2") ) continue;
+
+for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].push_back(nm); simWidths[i].push_back(p[i]); }
+     
   }
 
   sprintf(tempfile,"%s/residuals/SIM_source_runs_EvisWidthError_RunPeriod_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);  
   ifstream simWidthErrorsFile(tempfile); 
+  if (simWidthErrorsFile.is_open()) cout << tempfile << endl;
   while ( simWidthErrorsFile >> run >> nm >> p[0] >> p[1] >> p[2] >> p[3] >> p[4] >> p[5] >> p[6] >> p[7] ) {
-    if ( nm==std::string("Sn") ) {
-      for ( UInt_t i=0; i<8; ++i ) {  simWidthErrorRun[i].push_back(run); simWidthErrorSrc[i].push_back(nm); simWidthErrors[i].push_back(p[i]); }
-    }
+    if ( nm==std::string("In") ) continue;
+    if ( nm==std::string("Cd") ) continue;
+    if ( nm==std::string("Cs") ) continue;
+    if ( nm==std::string("Bi2") ) continue;
+
+    for ( UInt_t i=0; i<8; ++i ) {  simWidthErrorRun[i].push_back(run); simWidthErrorSrc[i].push_back(nm); simWidthErrors[i].push_back(p[i]); }
+    
   }
   
   dataWidthsFile.close();
@@ -361,6 +378,7 @@ void width_fitter(Int_t calPeriod)
     }
     if (status!=TString("CONVERGED ")) slope[3] = 1.;
     else slope[3] = f1->GetParameter(0);
+
   }
   
   else slope[3]=1.;

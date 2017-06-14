@@ -794,7 +794,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     
     
     for (UInt_t p=0; p<4; p++) {
-      if ( edepQ.EdepQE>0. ) { //Check to make sure that there is light to see in the scintillator
+      if ( edep.EdepE>0. ) { //Check to make sure that there is light to see in the scintillator
 	
 	if (eta[p]>0.) {
 
@@ -852,7 +852,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 	}
 	
-	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
+	pmt.nPE[p] = alpha[p]*pmt.etaEvis[p] ;
+	//pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
 	old_pmt.nPE[p] = ( old_pmt.etaEvis[p]>0. ) ? alpha[p]*old_pmt.etaEvis[p] : 0.;
 	gaus_pmt.nPE[p] = ( gaus_pmt.etaEvis[p]>0. ) ? alpha[p]*gaus_pmt.etaEvis[p] : 0.;
       }
@@ -895,8 +896,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     //Calculate the weighted energy on a side
     numer = denom = 0.;
     for (UInt_t p=0;p<4;p++) {
-      numer += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? pmt.nPE[p] : 0.;
-      denom += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? eta[p]*alpha[p] : 0.;
+      numer += ( pmtQuality[p] ) ? pmt.nPE[p] : 0.;
+      denom += ( pmtQuality[p] ) ? eta[p]*alpha[p] : 0.;
+      //numer += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? pmt.nPE[p] : 0.;
+      //denom += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? eta[p]*alpha[p] : 0.;
     }
 
     
@@ -913,7 +916,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
       
     //West Side
     for (UInt_t p=4; p<8; p++) {
-      if ( !(p==5 && runNumber>16983 && runNumber<17249)  &&  edepQ.EdepQW>0. ) { //Check to make sure that there is light to see in the scintillator and that run isn't one where PMTW2 was dead
+      if ( !(p==5 && runNumber>16983 && runNumber<17249) &&  edep.EdepW>0. ) { //Check to make sure that there is light to see in the scintillator and that run isn't one where PMTW2 was dead
 	
 	if (eta[p]>0.) {
 
@@ -972,7 +975,8 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 	}
 	
-	pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
+	pmt.nPE[p] = alpha[p]*pmt.etaEvis[p];
+	//pmt.nPE[p] = ( pmt.etaEvis[p]>0. ) ? alpha[p]*pmt.etaEvis[p] : 0.;
 	old_pmt.nPE[p] = ( old_pmt.etaEvis[p]>0. ) ? alpha[p]*old_pmt.etaEvis[p] : 0.;
 	gaus_pmt.nPE[p] = ( gaus_pmt.etaEvis[p]>0. ) ? alpha[p]*gaus_pmt.etaEvis[p] : 0.;
       }
@@ -1014,8 +1018,10 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
      //Calculate the total weighted energy
     numer=denom=0.;
     for (UInt_t p=4;p<8;p++) {
-      numer += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? pmt.nPE[p] : 0.;
-      denom += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? eta[p]*alpha[p] : 0.;
+      numer += ( pmtQuality[p] ) ? pmt.nPE[p] : 0.;
+      denom += ( pmtQuality[p] ) ? eta[p]*alpha[p] : 0.;
+      //numer += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? pmt.nPE[p] : 0.;
+      //denom += ( pmtQuality[p] && pmt.etaEvis[p]>0. ) ? eta[p]*alpha[p] : 0.;
     }
     //Now we apply the trigger probability
     totalEnW = denom>0. ? numer/denom : 0.;
