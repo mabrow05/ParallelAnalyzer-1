@@ -537,7 +537,10 @@ int main(int argc, char *argv[])
 
 	std::vector <Double_t> perc(120,0.);
 
-	for (int j=0; j<h->GetNbinsX(); ++j) perc[j] = h->GetBinContent(j+1);
+	for (int j=0; j<h->GetNbinsX(); ++j) {
+	  perc[j] = h->GetBinContent(j+1);
+	  std::cout << perc[j] << std::endl;
+	}
 
 	for (UInt_t bin=0; bin<perc.size(); ++bin) {
 
@@ -577,7 +580,7 @@ int main(int argc, char *argv[])
 
 	
 	}
-
+	delete rfile;
       }	
   
   //////////////////////////////////////////////////////////////////////////
