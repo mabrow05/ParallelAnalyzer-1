@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 
+
 #include <TMath.h>
 #include <TString.h>
 #include <TFile.h>
@@ -128,12 +129,12 @@ void calcBinByBinSuperRatio(std::vector< std::vector<double> > &A2,
 };
 
 
-std::vector <Int_t> badOct {7,60,61,62,63,64,65,66}; 
+std::vector <Int_t> badOct {7,9,59,60,61,62,63,64,65,66,67,91,93,101,107,121};  
 
 int main(int argc, char *argv[])
 {
-  if (argc!=8) {
-    std::cout << "Usage: ./EventShuffle.exe [octet start] [octet end] [Emax] [Emin] [T1 percent shuffle] [T2 percent shuffle] [T3 percent Shuffle]\n";
+  if (argc!=9) {
+    std::cout << "Usage: ./EventShuffle.exe [octet start] [octet end] [Emax] [Emin] [T1 percent shuffle] [T2 percent shuffle] [T3 percent Shuffle] [Lost event percent shuffle]\n";
     exit(0);
   }
 
@@ -146,6 +147,7 @@ int main(int argc, char *argv[])
   double percentT1 = atof(argv[5]);
   double percentT2 = atof(argv[6]);
   double percentT3 = atof(argv[7]);  
+  double percentT4 = atof(argv[8]);  
 
   double enBinWidth = 10.;
   int numBins = 1200/enBinWidth;
@@ -334,22 +336,22 @@ int main(int argc, char *argv[])
 	while ( rateFile >> en >> fg >> bg )  { 
 	  
 	  if ( runType[i] == "A2" ) { 
-	    A2_shift[0][bin]+=percentT1*fg, A2err_shift[0][bin]+=fg/time;	}
+	    A2_shift[0][bin]+=percentT1*fg, A2err_shift[0][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "A5" ) { 
-	    A5_shift[0][bin]+=percentT1*fg, A5err_shift[0][bin]+=fg/time;	}
+	    A5_shift[0][bin]+=percentT1*fg, A5err_shift[0][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "A7" ) { 
-	    A7_shift[0][bin]+=percentT1*fg, A7err_shift[0][bin]+=fg/time;	}
+	    A7_shift[0][bin]+=percentT1*fg, A7err_shift[0][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "A10" ) { 
-	    A10_shift[0][bin]+=percentT1*fg, A10err_shift[0][bin]+=fg/time;
+	    A10_shift[0][bin]+=percentT1*fg, A10err_shift[0][bin]+=percentT1*fg/time;
 	  }
 	  else if ( runType[i] == "B2" ) { 
-	    B2_shift[0][bin]+=percentT1*fg, B2err_shift[0][bin]+=fg/time;	}
+	    B2_shift[0][bin]+=percentT1*fg, B2err_shift[0][bin]+=percentT1*percentT1*fg/time;	}
 	  else if ( runType[i] == "B5" ) { 
-	    B5_shift[0][bin]+=percentT1*fg, B5err_shift[0][bin]+=fg/time;	}
+	    B5_shift[0][bin]+=percentT1*fg, B5err_shift[0][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "B7" ) { 
-	    B7_shift[0][bin]+=percentT1*fg, B7err_shift[0][bin]+=fg/time;	}
+	    B7_shift[0][bin]+=percentT1*fg, B7err_shift[0][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "B10" ) { 
-	    B10_shift[0][bin]+=percentT1*fg, B10err_shift[0][bin]+=fg/time;
+	    B10_shift[0][bin]+=percentT1*fg, B10err_shift[0][bin]+=percentT1*fg/time;
 	  }
 	  bin++;
 	}
@@ -365,22 +367,22 @@ int main(int argc, char *argv[])
 	while ( rateFile >> en >> fg >> bg )  { 
 	  
 	  if ( runType[i] == "A2" ) { 
-	    A2_shift[1][bin]+=percentT1*fg, A2err_shift[1][bin]+=fg/time;	}
+	    A2_shift[1][bin]+=percentT1*fg, A2err_shift[1][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "A5" ) { 
-	    A5_shift[1][bin]+=percentT1*fg, A5err_shift[1][bin]+=fg/time;	}
+	    A5_shift[1][bin]+=percentT1*fg, A5err_shift[1][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "A7" ) { 
-	    A7_shift[1][bin]+=percentT1*fg, A7err_shift[1][bin]+=fg/time;	}
+	    A7_shift[1][bin]+=percentT1*fg, A7err_shift[1][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "A10" ) { 
-	    A10_shift[1][bin]+=percentT1*fg, A10err_shift[1][bin]+=fg/time;
+	    A10_shift[1][bin]+=percentT1*fg, A10err_shift[1][bin]+=percentT1*fg/time;
 	  }
 	  else if ( runType[i] == "B2" ) { 
-	    B2_shift[1][bin]+=percentT1*fg, B2err_shift[1][bin]+=fg/time;	}
+	    B2_shift[1][bin]+=percentT1*fg, B2err_shift[1][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "B5" ) { 
-	    B5_shift[1][bin]+=percentT1*fg, B5err_shift[1][bin]+=fg/time;	}
+	    B5_shift[1][bin]+=percentT1*fg, B5err_shift[1][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "B7" ) { 
-	    B7_shift[1][bin]+=percentT1*fg, B7err_shift[1][bin]+=fg/time;	}
+	    B7_shift[1][bin]+=percentT1*fg, B7err_shift[1][bin]+=percentT1*fg/time;	}
 	  else if ( runType[i] == "B10" ) { 
-	    B10_shift[1][bin]+=percentT1*fg, B10err_shift[1][bin]+=fg/time;
+	    B10_shift[1][bin]+=percentT1*fg, B10err_shift[1][bin]+=percentT1*fg/time;
 	  }
 	  bin++;
 	}
@@ -405,22 +407,22 @@ int main(int argc, char *argv[])
 	  
 	  if ( runType[i] == "A2" ) { 
 	   
-	    A2_shift[0][bin]+=percentT2*fg, A2err_shift[0][bin]+=fg/time;	}
+	    A2_shift[0][bin]+=percentT2*fg, A2err_shift[0][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "A5" ) { 
-	    A5_shift[0][bin]+=percentT2*fg, A5err_shift[0][bin]+=fg/time;	}
+	    A5_shift[0][bin]+=percentT2*fg, A5err_shift[0][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "A7" ) { 
-	    A7_shift[0][bin]+=percentT2*fg, A7err_shift[0][bin]+=fg/time;	}
+	    A7_shift[0][bin]+=percentT2*fg, A7err_shift[0][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "A10" ) { 
-	    A10_shift[0][bin]+=percentT2*fg, A10err_shift[0][bin]+=fg/time;
+	    A10_shift[0][bin]+=percentT2*fg, A10err_shift[0][bin]+=percentT2*fg/time;
 	  }
 	  else if ( runType[i] == "B2" ) { 
-	    B2_shift[0][bin]+=percentT2*fg, B2err_shift[0][bin]+=fg/time;	}
+	    B2_shift[0][bin]+=percentT2*fg, B2err_shift[0][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "B5" ) { 
-	    B5_shift[0][bin]+=percentT2*fg, B5err_shift[0][bin]+=fg/time;	}
+	    B5_shift[0][bin]+=percentT2*fg, B5err_shift[0][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "B7" ) { 
-	    B7_shift[0][bin]+=percentT2*fg, B7err_shift[0][bin]+=fg/time;	}
+	    B7_shift[0][bin]+=percentT2*fg, B7err_shift[0][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "B10" ) { 
-	    B10_shift[0][bin]+=percentT2*fg, B10err_shift[0][bin]+=fg/time;
+	    B10_shift[0][bin]+=percentT2*fg, B10err_shift[0][bin]+=percentT2*fg/time;
 	  }
 	  bin++;
 	}
@@ -435,22 +437,22 @@ int main(int argc, char *argv[])
 	while ( rateFile >> en >> fg >> bg )  { 
 	  
 	  if ( runType[i] == "A2" ) { 
-	    A2_shift[1][bin]+=percentT2*fg, A2err_shift[1][bin]+=fg/time;	}
+	    A2_shift[1][bin]+=percentT2*fg, A2err_shift[1][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "A5" ) { 
-	    A5_shift[1][bin]+=percentT2*fg, A5err_shift[1][bin]+=fg/time;	}
+	    A5_shift[1][bin]+=percentT2*fg, A5err_shift[1][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "A7" ) { 
-	    A7_shift[1][bin]+=percentT2*fg, A7err_shift[1][bin]+=fg/time;	}
+	    A7_shift[1][bin]+=percentT2*fg, A7err_shift[1][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "A10" ) { 
-	    A10_shift[1][bin]+=percentT2*fg, A10err_shift[1][bin]+=fg/time;
+	    A10_shift[1][bin]+=percentT2*fg, A10err_shift[1][bin]+=percentT2*fg/time;
 	  }
 	  else if ( runType[i] == "B2" ) { 
-	    B2_shift[1][bin]+=percentT2*fg, B2err_shift[1][bin]+=fg/time;	}
+	    B2_shift[1][bin]+=percentT2*fg, B2err_shift[1][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "B5" ) { 
-	    B5_shift[1][bin]+=percentT2*fg, B5err_shift[1][bin]+=fg/time;	}
+	    B5_shift[1][bin]+=percentT2*fg, B5err_shift[1][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "B7" ) { 
-	    B7_shift[1][bin]+=percentT2*fg, B7err_shift[1][bin]+=fg/time;	}
+	    B7_shift[1][bin]+=percentT2*fg, B7err_shift[1][bin]+=percentT2*fg/time;	}
 	  else if ( runType[i] == "B10" ) { 
-	    B10_shift[1][bin]+=percentT2*fg, B10err_shift[1][bin]+=fg/time;
+	    B10_shift[1][bin]+=percentT2*fg, B10err_shift[1][bin]+=percentT2*fg/time;
 	  }
 	  bin++;
 	}
@@ -472,22 +474,22 @@ int main(int argc, char *argv[])
 	while ( rateFile >> en >> fg >> bg )  { 
 	  
 	  if ( runType[i] == "A2" ) { 
-	    A2_shift[0][bin]+=percentT3*fg, A2err_shift[0][bin]+=fg/time;	}
+	    A2_shift[0][bin]+=percentT3*fg, A2err_shift[0][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "A5" ) { 
-	    A5_shift[0][bin]+=percentT3*fg, A5err_shift[0][bin]+=fg/time;	}
+	    A5_shift[0][bin]+=percentT3*fg, A5err_shift[0][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "A7" ) { 
-	    A7_shift[0][bin]+=percentT3*fg, A7err_shift[0][bin]+=fg/time;	}
+	    A7_shift[0][bin]+=percentT3*fg, A7err_shift[0][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "A10" ) { 
-	    A10_shift[0][bin]+=percentT3*fg, A10err_shift[0][bin]+=fg/time;
+	    A10_shift[0][bin]+=percentT3*fg, A10err_shift[0][bin]+=percentT3*fg/time;
 	  }
 	  else if ( runType[i] == "B2" ) { 
-	    B2_shift[0][bin]+=percentT3*fg, B2err_shift[0][bin]+=fg/time;	}
+	    B2_shift[0][bin]+=percentT3*fg, B2err_shift[0][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "B5" ) { 
-	    B5_shift[0][bin]+=percentT3*fg, B5err_shift[0][bin]+=fg/time;	}
+	    B5_shift[0][bin]+=percentT3*fg, B5err_shift[0][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "B7" ) { 
-	    B7_shift[0][bin]+=percentT3*fg, B7err_shift[0][bin]+=fg/time;	}
+	    B7_shift[0][bin]+=percentT3*fg, B7err_shift[0][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "B10" ) { 
-	    B10_shift[0][bin]+=percentT3*fg, B10err_shift[0][bin]+=fg/time;
+	    B10_shift[0][bin]+=percentT3*fg, B10err_shift[0][bin]+=percentT3*fg/time;
 	  }
 	  bin++;
 	}
@@ -502,31 +504,86 @@ int main(int argc, char *argv[])
 	while ( rateFile >> en >> fg >> bg )  { 
 	  
 	  if ( runType[i] == "A2" ) { 
-	    A2_shift[1][bin]+=percentT3*fg, A2err_shift[1][bin]+=fg/time;	}
+	    A2_shift[1][bin]+=percentT3*fg, A2err_shift[1][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "A5" ) { 
-	    A5_shift[1][bin]+=percentT3*fg, A5err_shift[1][bin]+=fg/time;	}
+	    A5_shift[1][bin]+=percentT3*fg, A5err_shift[1][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "A7" ) { 
-	    A7_shift[1][bin]+=percentT3*fg, A7err_shift[1][bin]+=fg/time;	}
+	    A7_shift[1][bin]+=percentT3*fg, A7err_shift[1][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "A10" ) { 
-	    A10_shift[1][bin]+=percentT3*fg, A10err_shift[1][bin]+=fg/time;
+	    A10_shift[1][bin]+=percentT3*fg, A10err_shift[1][bin]+=percentT3*fg/time;
 	  }
 	  else if ( runType[i] == "B2" ) { 
-	    B2_shift[1][bin]+=percentT3*fg, B2err_shift[1][bin]+=fg/time;	}
+	    B2_shift[1][bin]+=percentT3*fg, B2err_shift[1][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "B5" ) { 
-	    B5_shift[1][bin]+=percentT3*fg, B5err_shift[1][bin]+=fg/time;	}
+	    B5_shift[1][bin]+=percentT3*fg, B5err_shift[1][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "B7" ) { 
-	    B7_shift[1][bin]+=percentT3*fg, B7err_shift[1][bin]+=fg/time;	}
+	    B7_shift[1][bin]+=percentT3*fg, B7err_shift[1][bin]+=percentT3*fg/time;	}
 	  else if ( runType[i] == "B10" ) { 
-	    B10_shift[1][bin]+=percentT3*fg, B10err_shift[1][bin]+=fg/time;
+	    B10_shift[1][bin]+=percentT3*fg, B10err_shift[1][bin]+=percentT3*fg/time;
 	  }
 	  bin++;
 	}
 	rateFile.close();
 
       }
+    
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+      // Shuffling lost events.....
+      if ( percentT4!=0. ) {
+
+	TFile *rfile = new TFile(TString::Format("lost_events_%s.root",rn<20000?"2011-2012":"2012-2013"),"READ");
+
+	TH1D *h = (TH1D*)rfile->Get("percLost");
+
+	std::vector <Double_t> perc(120,0.);
+
+	for (int j=0; j<h->GetNbinsX(); ++j) perc[j] = h->GetBinContent(j+1);
+
+	for (UInt_t bin=0; bin<perc.size(); ++bin) {
+
+	  if ( runType[i] == "A2" ) { 
+	    A2_shift[0][bin]+=percentT4*perc[bin]*A2[0][bin], A2err_shift[0][bin]+=percentT4*perc[bin]*A2[0][bin]/time;	}
+	  else if ( runType[i] == "A5" ) { 
+	    A5_shift[0][bin]+=percentT4*perc[bin]*A5[0][bin], A5err_shift[0][bin]+=percentT4*perc[bin]*A5[0][bin]/time;	}
+	  else if ( runType[i] == "A7" ) { 
+	    A7_shift[0][bin]+=percentT4*perc[bin]*A7[0][bin], A7err_shift[0][bin]+=percentT4*perc[bin]*A7[0][bin]/time;	}
+	  else if ( runType[i] == "A10" ) { 
+	    A10_shift[0][bin]+=percentT4*perc[bin]*A10[0][bin], A10err_shift[0][bin]+=percentT4*perc[bin]*A10[0][bin]/time; }
+	  else if ( runType[i] == "B2" ) { 
+	    B2_shift[0][bin]+=percentT4*perc[bin]*B2[0][bin], B2err_shift[0][bin]+=percentT4*perc[bin]*B2[0][bin]/time;	}
+	  else if ( runType[i] == "B5" ) { 
+	    B5_shift[0][bin]+=percentT4*perc[bin]*B5[0][bin], B5err_shift[0][bin]+=percentT4*perc[bin]*B5[0][bin]/time;	}
+	  else if ( runType[i] == "B7" ) { 
+	    B7_shift[0][bin]+=percentT4*perc[bin]*B7[0][bin], B7err_shift[0][bin]+=percentT4*perc[bin]*B7[0][bin]/time;	}
+	  else if ( runType[i] == "B10" ) { 
+	    B10_shift[0][bin]+=percentT4*perc[bin]*B10[0][bin], B10err_shift[0][bin]+=percentT4*perc[bin]*B10[0][bin]/time; }
+
+	  if ( runType[i] == "A2" ) { 
+	    A2_shift[1][bin]+=percentT4*perc[bin]*A2[1][bin], A2err_shift[1][bin]+=percentT4*perc[bin]*A2[1][bin]/time;	}
+	  else if ( runType[i] == "A5" ) { 
+	    A5_shift[1][bin]+=percentT4*perc[bin]*A5[1][bin], A5err_shift[1][bin]+=percentT4*perc[bin]*A5[1][bin]/time;	}
+	  else if ( runType[i] == "A7" ) { 
+	    A7_shift[1][bin]+=percentT4*perc[bin]*A7[1][bin], A7err_shift[1][bin]+=percentT4*perc[bin]*A7[1][bin]/time;	}
+	  else if ( runType[i] == "A10" ) { 
+	    A10_shift[1][bin]+=percentT4*perc[bin]*A10[1][bin], A10err_shift[1][bin]+=percentT4*perc[bin]*A10[1][bin]/time; }
+	  else if ( runType[i] == "B2" ) { 
+	    B2_shift[1][bin]+=percentT4*perc[bin]*B2[1][bin], B2err_shift[1][bin]+=percentT4*perc[bin]*B2[1][bin]/time;	}
+	  else if ( runType[i] == "B5" ) { 
+	    B5_shift[1][bin]+=percentT4*perc[bin]*B5[1][bin], B5err_shift[1][bin]+=percentT4*perc[bin]*B5[1][bin]/time;	}
+	  else if ( runType[i] == "B7" ) { 
+	    B7_shift[1][bin]+=percentT4*perc[bin]*B7[1][bin], B7err_shift[1][bin]+=percentT4*perc[bin]*B7[1][bin]/time;	}
+	  else if ( runType[i] == "B10" ) { 
+	    B10_shift[1][bin]+=percentT4*perc[bin]*B10[1][bin], B10err_shift[1][bin]+=percentT4*perc[bin]*B10[1][bin]/time; }
+
+	
+	}
+
+      }	
+  
+  //////////////////////////////////////////////////////////////////////////
+
     }
     
-
     // take the sq root of the shifted errors since they would be added in quadrature
     for (int j=0; j<2; ++j) {
       for (int k=0; k<numBins; ++k) {
