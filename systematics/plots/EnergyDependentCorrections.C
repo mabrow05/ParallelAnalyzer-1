@@ -87,69 +87,90 @@ void EnergyDependentCorrections() {
   infile.close();
 
 
-  TH1D *theory = new TH1D("theory","Theory Corrections vs. Energy",
-			  80,0.,800.);
-  theory->SetMarkerStyle(kFullCircle);
-  theory->SetMinimum(-5.);
-  theory->SetMaximum(0.);
-  theory->SetLineWidth(3);
-  theory->SetLineColor(kBlack);
-  theory->GetYaxis()->SetTitle("#DeltaA/A (%)");
-  theory->GetYaxis()->CenterTitle();
-  theory->GetXaxis()->SetTitle("Energy (keV)");
-  theory->GetXaxis()->CenterTitle();
   
   
-  TH1D *mc2011 = new TH1D("mc2011","MC Corrections vs. Energy",
-			  80,0.,800.);
-  mc2011->SetMarkerStyle(kFullCircle);
-  mc2011->SetMinimum(-10.);
-  mc2011->SetMaximum(10.);
-  mc2011->SetLineWidth(3);
-  mc2011->SetLineColor(kBlue);
-  mc2011->GetYaxis()->SetTitle("#DeltaA/A (%)");
-  mc2011->GetYaxis()->CenterTitle();
-  mc2011->GetXaxis()->SetTitle("Energy (keV)");
-  mc2011->GetXaxis()->CenterTitle();
+  
   
 
-  TH1D *mc2012 = new TH1D("mc2012","MC Corrections vs. Energy",
-			  80,0.,800.);
-  mc2012->SetMarkerStyle(kFullCircle);
-  mc2012->SetMinimum(-10.);
-  mc2012->SetMaximum(10.);
-  mc2012->SetLineWidth(3);
-  mc2012->SetLineColor(kGreen);
-  mc2012->GetYaxis()->SetTitle("#DeltaA/A (%)");
-  mc2012->GetYaxis()->CenterTitle();
-  mc2012->GetXaxis()->SetTitle("Energy (keV)");
-  mc2012->GetXaxis()->CenterTitle();
-  
-  TLegend *leg = new TLegend(0.55,0.75,0.85,0.85);
-  leg->AddEntry(mc2011,"2011-2012","l");
-  leg->AddEntry(mc2012,"2012-2013","l");
+  std::vector <Double_t> en_Th;
+  std::vector <Double_t> corr_Th;
+  std::vector <Double_t> en_MC2011;
+  std::vector <Double_t> corr_MC2011;
+  std::vector <Double_t> en_MC2012;
+  std::vector <Double_t> corr_MC2012;
   
   
   for (int i=2;i<80;++i) {
 
-    theory->SetBinContent(i+1,UnCorr2011[i]==0.?0.:
-			  (100.*(TheoryCorr2011[i]/UnCorr2011[i]-1.)));
-    mc2011->SetBinContent(i+1,TheoryCorr2011[i]==0.?0.:
-		      (100.*(AllCorr2011[i]/TheoryCorr2011[i]-1.)));
-    mc2012->SetBinContent(i+1,TheoryCorr2012[i]==0.?0.:
-		      (100.*(AllCorr2012[i]/TheoryCorr2012[i]-1.)));
+    if (UnCorr2011[i]!=0.) en_Th.push_back(energy[i]), corr_Th.push_back(100.*(TheoryCorr2011[i]/UnCorr2011[i]-1.));
+    if (TheoryCorr2011[i]!=0.) en_MC2011.push_back(energy[i]), corr_MC2011.push_back(100.*(AllCorr2011[i]/TheoryCorr2011[i]-1.));
+    if (TheoryCorr2012[i]!=0.) en_MC2012.push_back(energy[i]), corr_MC2012.push_back(100.*(AllCorr2012[i]/TheoryCorr2012[i]-1.));
   }
 
-  TCanvas *c1 = new TCanvas("c1","c1",1200,800);
-  c1->Divide(2,1);
-
-  c1->cd(1);
-
-  theory->Draw("C0");
   
-  c1->cd(2);
 
-  mc2011->Draw("C0");
-  mc2012->Draw("C0 SAME");
+  TCanvas *c2 = new TCanvas("c2","c2",1200,800);
+  c2->Divide(2,1);
+
+  c2->cd(1);
+
+  TGraph *gTheory = new TGraph(en_Th.size(),&en_Th[0],&corr_Th[0]);
+  gTheory->SetTitle("Theory Corrections vs. Energy");
+  gTheory->SetMarkerStyle(kFullCircle);
+  gTheory->SetMinimum(-5.);
+  gTheory->SetMaximum(0.);
+  gTheory->SetLineWidth(3);
+  gTheory->SetLineColor(kBlack);
+  gTheory->GetYaxis()->SetTitle("#DeltaA/A (%)");
+  gTheory->GetYaxis()->CenterTitle();
+  gTheory->GetXaxis()->SetTitle("Energy (keV)");
+  gTheory->GetXaxis()->CenterTitle();
+  gTheory->Draw("AL");
+  
+  c2->cd(2);
+
+  TMultiGraph *mg = new TMultiGraph();
+  mg->SetTitle("MC Corrections vs. Energy");
+  
+  TGraph *gMC2011 = new TGraph(en_MC2011.size(),&en_MC2011[0],&corr_MC2011[0]);
+  gMC2011->SetMarkerStyle(kFullCircle);
+  //gMC2011->SetMinimum(-10.);
+  //gMC2011->SetMaximum(6.);
+  gMC2011->SetLineWidth(3);
+  gMC2011->SetLineColor(kBlue);
+  gMC2011->GetYaxis()->SetTitle("#DeltaA/A (%)");
+  gMC2011->GetYaxis()->CenterTitle();
+  gMC2011->GetXaxis()->SetTitle("Energy (keV)");
+  gMC2011->GetXaxis()->CenterTitle();
+  //gMC2011->Draw("AC");
+
+  TGraph *gMC2012 = new TGraph(en_MC2012.size(),&en_MC2012[0],&corr_MC2012[0]);
+  gMC2012->SetMarkerStyle(kFullCircle);
+  //gMC2012->SetMinimum(-10.);
+  //gMC2012->SetMaximum(6.);
+  gMC2012->SetLineWidth(3);
+  gMC2012->SetLineColor(kGreen);
+  //gMC2012->GetYaxis()->SetTitle("#DeltaA/A (%)");
+  //gMC2012->GetYaxis()->CenterTitle();
+  //gMC2012->GetXaxis()->SetTitle("Energy (keV)");
+  //gMC2012->GetXaxis()->CenterTitle();
+  //gMC2012->Draw("AC");
+  
+  mg->Add(gMC2011);
+  mg->Add(gMC2012);
+  mg->SetMinimum(-8.);
+  mg->SetMaximum(6.);
+  
+  mg->Draw("AC");
+  mg->GetYaxis()->SetTitle("#DeltaA/A (%)");
+  mg->GetYaxis()->CenterTitle();
+  mg->GetXaxis()->SetTitle("Energy (keV)");
+  mg->GetXaxis()->CenterTitle();
+  gPad->Modified();
+
+  TLegend *leg = new TLegend(0.55,0.75,0.85,0.85);
+  leg->AddEntry(gMC2011,"2011-2012","l");
+  leg->AddEntry(gMC2012,"2012-2013","l");
+  leg->SetTextSize(0.05);
   leg->Draw("SAME");
 }
