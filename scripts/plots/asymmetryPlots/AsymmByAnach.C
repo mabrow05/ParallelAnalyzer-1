@@ -67,8 +67,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 				  (withPOL?"_withPOL":""),anaChoicesT0[i].Data(),
 				  ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
       
-      Double_t AsymHold = 0.;
-      Double_t AsymErrHold = 0.;
+      AsymHold = 0.;
+      AsymErrHold = 0.;
       if (infile.is_open()) {
 	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
       }
@@ -114,8 +114,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 				  (withPOL?"_withPOL":""),anaChoicesBacksc[i].Data(),
 				  ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
       
-      Double_t AsymHold = 0.;
-      Double_t AsymErrHold = 0.;
+      AsymHold = 0.;
+      AsymErrHold = 0.;
       if (infile.is_open()) {
 	for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
       }
@@ -163,7 +163,9 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   gStyle->SetFillStyle(0);
   gStyle->SetPadLeftMargin(0.1);
   gStyle->SetTitleXOffset(1.2);
-
+  gStyle->SetGridStyle(8);
+  gStyle->SetGridColor(kBlue);
+  
   TCanvas *c1 = new TCanvas("c1","demo bin labels",10,10,600,600);
 
   c1->SetLeftMargin(0.15);
@@ -318,10 +320,10 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   
   if (withSim) simBacksc->Draw("SAME EX0");
  
-  TLegend *leg = new TLegend(0.65,0.65,0.95,0.8);
+  // TLegend *leg = new TLegend(0.65,0.65,0.95,0.8);
   //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
-  leg->AddEntry(dataBacksc,"Data");
-  leg->AddEntry(simBacksc,"Monte Carlo");
+  //leg->AddEntry(dataBacksc,"Data");
+  //leg->AddEntry(simBacksc,"Monte Carlo");
    //leg->AddEntry("gr","Graph with error bars","lep");
   //if (withSim) leg->Draw();
 
