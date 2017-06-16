@@ -4,7 +4,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 
   bool readInAsymms = true;
   bool withSim = false;
-  bool CorrAndUnCorr = true;
+  bool CorrAndUnCorr = false;
 
   double ymin0 = -0.129;
   double ymax0 = -0.1175;
