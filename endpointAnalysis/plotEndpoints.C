@@ -188,8 +188,8 @@ void plotEndpoints(TString geometry) {
 
   }
 
-  std::cout << "endpoint RMS East: " << epDataE->GetRMS() << std::endl;
-  std::cout << "endpoint RMS West: " << epDataW->GetRMS() << std::endl;
+  std::cout << "endpoint Mean and RMS East: " << epSimE->GetMean() - epDataE->GetMean() << " +/- " << epDataE->GetRMS() << std::endl;
+  std::cout << "endpoint Mean and RMS West: " << epSimW->GetMean() - epDataW->GetMean() << " +/- " << epDataW->GetRMS() << std::endl;
 
   c2->cd(1);
   epSimE->Draw();

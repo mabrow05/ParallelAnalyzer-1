@@ -531,7 +531,8 @@ int main(int argc, char *argv[])
       // Shuffling lost events.....
       if ( percentT4!=0. ) {
 
-	TFile *rfile = new TFile(TString::Format("lost_events_%s.root",rn<20000?"2011-2012":"2012-2013"),"READ");
+	TFile *rfile = new TFile(TString::Format("%s/systematics/MC_Corrections/lost_events_%s.root",
+						 getenv("ANALYSIS_CODE"),rn<20000?"2011-2012":"2012-2013"),"READ");
 
 	TH1D *h = (TH1D*)rfile->Get("percLost");
 

@@ -177,22 +177,70 @@ class uncertaintyHandler:
     def calcMCSystematicError(self,elow,ehigh,BStypes=[]):
 
         percErrType0Sim = 0
+
+        t0errs = []
        
         infile = None
 
-        #read in Type 0 MC error
-        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 -0.25 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
+        #read in Type 0 MC error from Type 1 shuffle
+        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f -0.1 0.0 0.0 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
         infile = open("resultHolderEventShuffle.txt",'r')
     
         if infile:
             for line in infile:
                 if line[0]=="p":
                     entry = line.split()
-                    percErrType0Sim = float(entry[1])
+                    t0errs.append(float(entry[1]))
+                    #percErrType0Sim = float(entry[1])
                     #print("perc Err on T0 %f"%percErrType0Sim)
 
         infile.close()
         
+        #read in Type 0 MC error from Type 2 shuffle
+        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 -0.25 0.0 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
+        infile = open("resultHolderEventShuffle.txt",'r')
+    
+        if infile:
+            for line in infile:
+                if line[0]=="p":
+                    entry = line.split()
+                    t0errs.append(float(entry[1]))
+                    #percErrType0Sim = float(entry[1])
+                    #print("perc Err on T0 %f"%percErrType0Sim)
+
+        infile.close()
+
+        #read in Type 0 MC error from Type 3 shuffle
+        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 0.0 -0.05 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
+        infile = open("resultHolderEventShuffle.txt",'r')
+    
+        if infile:
+            for line in infile:
+                if line[0]=="p":
+                    entry = line.split()
+                    t0errs.append(float(entry[1]))
+                    #percErrType0Sim = float(entry[1])
+                    #print("perc Err on T0 %f"%percErrType0Sim)
+
+        infile.close()
+        
+        #read in Type 0 MC error from Type 4 shuffle
+        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 0.0 0.0 0.25 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
+        infile = open("resultHolderEventShuffle.txt",'r')
+    
+        if infile:
+            for line in infile:
+                if line[0]=="p":
+                    entry = line.split()
+                    t0errs.append(float(entry[1]))
+                    #percErrType0Sim = float(entry[1])
+                    #print("perc Err on T0 %f"%percErrType0Sim)
+
+        infile.close()
+        
+        
+        percErrType0Sim = sqrt( sum(err*err for err in t0errs) )
+        #print(percErrType0Sim)
        
         asymm = []
         A = []
@@ -225,29 +273,6 @@ class uncertaintyHandler:
 
         
 
-        #deltaA = fabs(dataAsymm - type0data) + fabs(type0data*percErrType0Sim)
-        #deltaAPerc = deltaA/fabs(type0data)
-        
-        
-        #print("[ fabs( %f - %f ) + fabs( %f*%f ) ] / %f"%(dataAsymm,type0data,
-         #                                                 type0data,percErrType0Sim,type0data))
-
-        #return deltaAPerc
-
-        ########## Calculate the maximum correction
-        #deltaAoffsetPerc = type0data/type0sim - 1. # How far off is the type 0 asymmetry
-        #deltaAoffsetPercErr = fabs( type0data/(type0sim**2) * percErrType0Sim*type0sim ) # percent error on deltaAoffsetPerc as calculated through normal error prop 
-        #SIManaChPercErr = type0sim/simAsymm - 1. # how far away from type0sim is the MC corrected asymm
-        #anaChOffsetPerc = dataAsymm/simAsymm - 1.
-        #anaChOffsetPercErr = fabs( dataAsymm/(simAsymm**2) * SIManaChPercErr*simAsymm )
-        
-        
-        
-        #print("fabs( %f - %f ) + %f + %f"%(anaChOffsetPerc,deltaAoffsetPerc,deltaAoffsetPercErr,anaChOffsetPercErr))
-
-        #deltaA = fabs(anaChOffsetPerc - deltaAoffsetPerc) + deltaAoffsetPercErr + anaChOffsetPercErr
-        
-        #return fabs(deltaA)
 
     def readEnergyUncertainties(self):
         """Read in the Energy uncertainties and store the percent 
@@ -493,10 +518,10 @@ class uncertaintyHandler:
 
 if __name__ == "__main__":
     
-    uncert = uncertaintyHandler(2012,"C")
+    uncert = uncertaintyHandler(2011,"C")
     #uncert.minimizer()
 
-    low = 220
+    low = 230
     high = 750
     print(uncert.calcEnergyUncert(low,high))
     print(uncert.calcStatUncert(low,high))
