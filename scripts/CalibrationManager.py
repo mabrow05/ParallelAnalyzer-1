@@ -156,6 +156,7 @@ class CalReplayManager:
         self.replayPass4 = os.getenv("REPLAY_PASS4")
         self.srcListPath = os.getenv("SOURCE_LIST")
         self.gainBismuthPath = os.getenv("GAIN_BISMUTH")
+        self.gainLEDPath = os.getenv("GAIN_LED")
         self.gainCathodesPath = os.getenv("GAIN_CATHODES")
         self.nPEweightsPath = os.getenv("NPE_WEIGHTS")
         self.octetListPath = os.getenv("OCTET_LIST")
@@ -178,6 +179,7 @@ class CalReplayManager:
         os.system("mkdir -p %s"%self.replayPass3)
         os.system("mkdir -p %s"%self.replayPass4)
         os.system("mkdir -p %s"%self.gainBismuthPath)
+        os.system("mkdir -p %s"%self.gainLEDPath)
         os.system("mkdir -p %s"%self.nPEweightsPath)
         os.system("mkdir -p %s"%self.octetListPath)
         os.system("mkdir -p %s"%self.triggerFuncPath)
@@ -289,6 +291,28 @@ class CalReplayManager:
         for run in runs:
             os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
             os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%run)
+        print "DONE"
+
+
+    def runGainLED(self,srcRunPeriod=1, sourceORxenon="source"):
+        print "Running gain_LED for %s run period %i"%(sourceORxenon,srcRunPeriod)
+        filename=None
+        if sourceORxenon=="source":
+            filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        elif sourceORxenon=="xenon":
+            filename = "Xenon_Calibration_Run_Period_%i.dat"%srcRunPeriod
+        else:
+            print "Not a valid source type!! Options: source or xenon"
+            exit();
+        infile = open(self.runListPath+filename,'r')
+        runs = []
+        for line in infile:      
+            if int(line) not in omittedRuns:
+                runs.append(int(line))
+        
+        for run in runs:
+            os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%run)
+            os.system("root -l -b -q '../gain_bismuth/plot_gain_LED.C(\"%i\")'"%run)
         print "DONE"
 
 

@@ -22,9 +22,13 @@ LIBS         += -lSpectrum -lMinuit
 objects = DataTree.o peaks.o
 
 .PHONY: all
-all: gain_bismuth.exe 
+all: gain_bismuth.exe gain_LED.exe
 gain_bismuth.exe: gain_bismuth.o $(objects)
 	$(CXX) $(CXXFLAGS) -o gain_bismuth.exe gain_bismuth.o $(objects) $(LIBS)
+	@echo "Done"
+
+gain_LED.exe: gain_LED.o $(objects)
+	$(CXX) $(CXXFLAGS) -o gain_LED.exe gain_LED.o $(objects) $(LIBS)
 	@echo "Done"
 
 DataTree.o: DataTree.hh
