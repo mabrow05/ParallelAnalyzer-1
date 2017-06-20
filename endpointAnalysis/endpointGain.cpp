@@ -534,10 +534,10 @@ int main(int argc, char *argv[]) {
 
   for ( int i=0; i<8; ++i ) {
     
-    simkf.FitSpectrum(simspec[i],300.,500.,1.); //Fit the simulated spectrum to get relative endpoint
+    simkf.FitSpectrum(simspec[i],250.,500.,1.); //Fit the simulated spectrum to get relative endpoint
 
     kf.setActualW0( simkf.returnW0() ); // Setting the comparison endpoint to the extracted ep from sim
-    kf.IterativeKurie(spec[i],300.,500.,1.,1.e-7);
+    kf.IterativeKurie(spec[i],250.,500.,1.,1.e-7);
    
 
     kurie[i] = kf.returnKuriePlot();

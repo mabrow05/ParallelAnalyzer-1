@@ -95,15 +95,19 @@ int main(int argc, char *argv[]) {
 	
 	
 	// Type 0
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChD.dat", prefix.c_str(),runNumber));
+	rateFile.open(TString::Format("../Asymmetry/BinByBinComparison/%s_Erun%i_anaChD.dat", prefix.c_str(),runNumber));
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
 	
+	totalTimeOFF_E = time;
+	totalBGTimeOFF_E = bg_time; 
+
 	bin = 0; 
 	
 	while ( rateFile >> en >> fg >> bg && bin<nBins)  { 
 	  E_TotalCountsOFF[bin] += (fg - bg)*time;
 	  E_BGTotalCountsOFF[bin] += (bg)*bg_time;
+	  //	  std::cout << E_TotalCountsOFF[bin] << std:: endl;
 	  ++bin;
 	}
 	
@@ -116,10 +120,13 @@ int main(int argc, char *argv[]) {
 	
 	
 	// Type 0 only
-	rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChD.dat", prefix.c_str(), runNumber));
+	rateFile.open(TString::Format("../Asymmetry/BinByBinComparison/%s_Wrun%i_anaChD.dat", prefix.c_str(), runNumber));
 	
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
 	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
+	
+	totalTimeOFF_W = time;
+	totalBGTimeOFF_W = bg_time; 
 	
         bin = 0;
 	
@@ -130,63 +137,69 @@ int main(int argc, char *argv[]) {
 	}
 	
 	rateFile.close();
-	
-	
-	
-	
-	
-	
-	/////////////// Spin flipper ON ///////////////////
-	if ( runType == "B2" || runType == "B10" || runType == "A5" || runType == "A7" ) {	
-	  
-	  //////////////// EAST RATES //////////////////
-	  
-	  
-	  
-	  
-	  // Type 0 only
-	  rateFile.open(TString::Format("../BinByBinComparison/%s_Erun%i_anaChD.dat", prefix.c_str(), runNumber));
-	  
-	  rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
-	  rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
-	  
-	  bin = 0;
-	  
-	  while ( rateFile >> en >> fg >> bg && bin<nBins)  { 
-	    E_TotalCountsON[bin] += (fg - bg)*time;
-	    E_BGTotalCountsON[bin] += (bg)*bg_time;
-	    ++bin;
-	  }
-	  
-	  rateFile.close();
-	  
-	  
-	  
-	  
-	  ///////////////// WEST RATES ///////////////////
-	  
-	  
-	  // Type 0 only
-	  rateFile.open(TString::Format("../BinByBinComparison/%s_Wrun%i_anaChD.dat", prefix.c_str(), runNumber));
-	  
-	  rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
-	  rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
-	  
-	  bin = 0;
-	  
-	  while ( rateFile >> en >> fg >> bg && bin<nBins)  { 
-	    W_TotalCountsON[bin] += (fg - bg)*time;
-	    W_BGTotalCountsON[bin] += (bg)*bg_time;
-	    ++bin;
-	  }
-	  
-	  rateFile.close();
-	
-	
-	}
-
       }
+	
+	
+	
+	
+	
+      /////////////// Spin flipper ON ///////////////////
+      if ( runType == "B2" || runType == "B10" || runType == "A5" || runType == "A7" ) {	
+	
+	//////////////// EAST RATES //////////////////
+	
+	
+	
+	
+	// Type 0 only
+	rateFile.open(TString::Format("../Asymmetry/BinByBinComparison/%s_Erun%i_anaChD.dat", prefix.c_str(), runNumber));
+	
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
+	
+	totalTimeON_E = time;
+	totalBGTimeON_E = bg_time; 
+	
+	bin = 0;
+	
+	while ( rateFile >> en >> fg >> bg && bin<nBins)  { 
+	  E_TotalCountsON[bin] += (fg - bg)*time;
+	  E_BGTotalCountsON[bin] += (bg)*bg_time;
+	  ++bin;
+	}
+	
+	rateFile.close();
+	
+	
+	
+	
+	///////////////// WEST RATES ///////////////////
+	
+	
+	// Type 0 only
+	rateFile.open(TString::Format("../Asymmetry/BinByBinComparison/%s_Wrun%i_anaChD.dat", prefix.c_str(), runNumber));
+	
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> time;
+	rateFile >> txt_hold >> txt_hold >> txt_hold >> bg_time;
+
+	totalTimeON_W = time;
+	totalBGTimeON_W = bg_time; 
+	
+	bin = 0;
+	
+	while ( rateFile >> en >> fg >> bg && bin<nBins)  { 
+	  W_TotalCountsON[bin] += (fg - bg)*time;
+	  W_BGTotalCountsON[bin] += (bg)*bg_time;
+	  ++bin;
+	}
+	
+	rateFile.close();
+	
+	
+      }
+
     }
+    
 
     // Calculate the simple errors
     for ( unsigned int b = 0; b<100; ++b ) {
@@ -213,7 +226,7 @@ int main(int argc, char *argv[]) {
     
     
     // First for data
-    for ( unsigned int b = 0; b<120; ++b ) {
+    for ( unsigned int b = 0; b<nBins; ++b ) {
       
       double sfON[2]={0.};
       double sfOFF[2]={0.};
@@ -257,7 +270,7 @@ int main(int argc, char *argv[]) {
     // Now for BG
     
     if ( !sim ) {
-      for ( unsigned int b = 0; b<120; ++b ) {
+      for ( unsigned int b = 0; b<nBins; ++b ) {
 	
 	double sfON[2]={0.};
 	double sfOFF[2]={0.};
@@ -328,7 +341,7 @@ int main(int argc, char *argv[]) {
     
     KurieFitter kf;
     
-    kf.FitSpectrum(spec, 300., 600., 1.);
+    kf.FitSpectrum(spec, 300., 550., 1.);
     epfile << "East_Endpoint: " << kf.returnK0() << " +/- " << kf.returnK0err() << "\n";
     
     kurie = kf.returnKuriePlot();

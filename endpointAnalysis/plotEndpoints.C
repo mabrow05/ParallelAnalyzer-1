@@ -61,7 +61,7 @@ void plotEndpoints(TString geometry) {
   //gStyle->SetGridStyle(4);
   //gStyle->SetGridColor(kBlue);
 
-  Int_t badocts[] = {7,60,61,62,63,64,65,66,67,91,93,101,107,121};
+  Int_t badocts[] = {7,9,59,60,61,62,63,64,65,66,67,91,93,101,107,121};
   
 
   Int_t octMin, octMax;
@@ -167,15 +167,16 @@ void plotEndpoints(TString geometry) {
 
   c->Print(TString::Format("%s_endpoints.pdf(",geometry.Data()));
 
-  TCanvas *c2 = new TCanvas("c2","c2",1200,600);
-  c2->Divide(2,1);
+  TCanvas *c2 = new TCanvas("c2","c2",1500,600);
+  c2->Divide(3,1);
   
   
   TH1D *epDataE = new TH1D("epDataE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
   TH1D *epDataW = new TH1D("epDataW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
   TH1D *epSimE = new TH1D("epSimE",TString::Format("%s East Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
   TH1D *epSimW = new TH1D("epSimW",TString::Format("%s West Beta Decay Endpoint Distribution",geometry.Data()), 150, 700., 820.);
-
+  TH1D *res = new TH1D("res",TString::Format("%s Beta Decay Endpoint Residuals",geometry.Data()), 41, -20., 20.);
+  
   epSimE->SetLineColor(kRed);
   epSimW->SetLineColor(kRed);
 
@@ -185,11 +186,13 @@ void plotEndpoints(TString geometry) {
     epDataW->Fill(DATA_west_ep[i]);
     epSimE->Fill(SIM_east_ep[i]);
     epSimW->Fill(SIM_west_ep[i]);
-
+    res->Fill(DATA_east_ep[i]-SIM_east_ep[i]);
+    res->Fill(DATA_west_ep[i]-SIM_west_ep[i]);
   }
 
-  std::cout << "endpoint Mean and RMS East: " << epSimE->GetMean() - epDataE->GetMean() << " +/- " << epDataE->GetRMS() << std::endl;
-  std::cout << "endpoint Mean and RMS West: " << epSimW->GetMean() - epDataW->GetMean() << " +/- " << epDataW->GetRMS() << std::endl;
+  std::cout << "endpoint Mean and RMS East: " << epDataE->GetMean() - epSimE->GetMean() << " +/- " << epDataE->GetRMS() << std::endl;
+  std::cout << "endpoint Mean and RMS West: " << epDataW->GetMean() - epSimW->GetMean() << " +/- " << epDataW->GetRMS() << std::endl;
+  std::cout << "res Mean and RMS: " << res->GetMean() << " +/- " << res->GetRMS() << std::endl;
 
   c2->cd(1);
   epSimE->Draw();
@@ -199,6 +202,9 @@ void plotEndpoints(TString geometry) {
   c2->cd(2); 
   epSimW->Draw();
   epDataW->Draw("SAME");
+
+  c2->cd(3);
+  res->Draw();
 
   c2->Print(TString::Format("%s_endpoints.pdf)",geometry.Data()));
 

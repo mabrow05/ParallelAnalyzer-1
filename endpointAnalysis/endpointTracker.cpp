@@ -147,14 +147,14 @@ int main(int argc, char *argv[]) {
 
     KurieFitter kf;
 
-    kf.FitSpectrum(specE, 300., 600., 1.);
+    kf.FitSpectrum(specE, 250., 525., 1.);
     epfile << "East_Endpoint: " << kf.returnK0() << " +/- " << kf.returnK0err() << "\n";
 
     kurieE = kf.returnKuriePlot();
     kurieE.SetName("kurieE");
     kurieE.Write();
 
-    kf.FitSpectrum(specW, 300., 600., 1.);
+    kf.FitSpectrum(specW, 250., 525., 1.);
     epfile << "West_Endpoint: " << kf.returnK0() << " +/- " << kf.returnK0err();
     epfile.close();
 

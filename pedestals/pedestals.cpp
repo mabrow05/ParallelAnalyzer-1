@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
     }
 
     // Now handle PMT pedestals using electron events
-    else if ( triggerEast || triggerWest || triggerBoth ) {
+    else if ( triggerEast || triggerWest ) { //|| triggerBoth ) {
 
       if ( TdcE1<0.000001 ) his11->Fill(Qadc[0]);
       if ( TdcE2<0.000001 ) his12->Fill(Qadc[1]);
