@@ -124,18 +124,30 @@ int main(int argc, char *argv[])
 
   // Read gain corrections file
   char tempFileGain[500];
+  
   sprintf(tempFileGain, "%s/gain_bismuth_%s.dat",getenv("GAIN_BISMUTH"), argv[1]);
   cout << "... Reading: " << tempFileGain << endl;
+  ifstream fileBiGain(tempFileGain);
+  
+  sprintf(tempFileGain, "%s/gain_LED_%s.dat",getenv("GAIN_LED"), argv[1]);
+  cout << "... Reading: " << tempFileGain << endl;
+  ifstream fileLEDGain(tempFileGain);
 
   //Read in PMT Quality
   std::vector<Int_t> pmtquality = getPMTQuality(atoi(argv[1])); 
 
-  double fitMean[8], gainCorrection[8];
-  ifstream fileGain(tempFileGain);
+  double fitMean, gainBiFactor,gainLEDFactor;
+  double gainCorrection[8];
+
   for (int i=0; i<8; i++) {
-    fileGain >> fitMean[i] >> gainCorrection[i];
-    gainCorrection[i] = pmtquality[i] ? gainCorrection[i] : 1.; //This sets the gain to 1 if the bi pulser was bad or something was wrong with the pmt
+    fileBiGain >> fitMean >> gainBiFactor;
+    fileLEDGain >> fitMean >> gainLEDFactor;
+    gainCorrection[i] = pmtquality[i] ? gainBiFactor : gainLEDFactor; //This sets the gain to use the LED if Bi Pulser is bad
   }
+
+  fileBiGain.close();
+  fileLEDGain.close();
+  
   cout << "...   PMT E1: " << gainCorrection[0] << endl;
   cout << "...   PMT E2: " << gainCorrection[1] << endl;
   cout << "...   PMT E3: " << gainCorrection[2] << endl;
@@ -144,6 +156,7 @@ int main(int argc, char *argv[])
   cout << "...   PMT W2: " << gainCorrection[5] << endl;
   cout << "...   PMT W3: " << gainCorrection[6] << endl;
   cout << "...   PMT W4: " << gainCorrection[7] << endl;
+
 
   ///////////////// Read in the beam drops /////////////////////////
   
