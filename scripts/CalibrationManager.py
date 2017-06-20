@@ -106,9 +106,9 @@ ereconWPMT4 = []
 ereconEPMT1_runRanges = [] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
 ereconEPMT2_runRanges = []
 ereconEPMT3_runRanges = []
-ereconEPMT4_runRanges = [(20000,23173)] #2012-2013 have weird Bi gain and odd lin curves
-ereconWPMT1_runRanges = []
-ereconWPMT2_runRanges = [] 
+ereconEPMT4_runRanges = []#[(20000,23173)] #2012-2013 have weird Bi gain and odd lin curves
+ereconWPMT1_runRanges = [(17359,18055)] #PMTW1 Bi pulser fell off for (17359,18055)
+ereconWPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 ereconWPMT3_runRanges = []
 ereconWPMT4_runRanges = [(18712,19999)]
 #(18712,19999) WPMT4 becomes unreliable and there is no way to avoid affecting all of these runs due to erecon Xe maps & Calibrations for this PMT
@@ -687,28 +687,20 @@ class CalibrationManager:
 
                 if run in badEPMT1:
                     pmtList[0]=0
-                    ereconList[0]=0
                 if run in badEPMT2:
                     pmtList[1]=0
-                    ereconList[1]=0
                 if run in badEPMT3:
                     pmtList[2]=0
-                    ereconList[2]=0
                 if run in badEPMT4:
                     pmtList[3]=0
-                    ereconList[3]=0
                 if run in badWPMT1:
                     pmtList[4]=0
-                    ereconList[4]=0
                 if run in badWPMT2:
                     pmtList[5]=0
-                    ereconList[5]=0
                 if run in badWPMT3:
                     pmtList[6]=0
-                    ereconList[6]=0
                 if run in badWPMT4:
                     pmtList[7]=0
-                    ereconList[7]=0
 
                 if run in ereconEPMT1:
                     ereconList[0]=0

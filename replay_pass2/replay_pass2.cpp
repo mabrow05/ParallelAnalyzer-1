@@ -70,9 +70,11 @@ vector <Int_t> getPMTQuality(Int_t runNumber) {
   vector <Int_t>  pmtQuality (8,0);
   Char_t temp[200];
   
-  // NOTE: for now i'm using EreconQuality until I can see if the bad EPMT4 crap 
-  // can be salvaged...
-  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  // NOTE: We apply the gain based on run Quality which determines only if
+  // bi gain and PMT were on. if Bi gain is bad, it attempts to
+  // to use the LED gain.
+  // Then the PMT is only used in Erecon if EreconQuality is good
+  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
   ifstream pmt;
   std::cout << temp << std::endl;
   pmt.open(temp);
@@ -104,6 +106,7 @@ int main(int argc, char *argv[])
     if ( std::string(argv[2])==std::string("false") || std::string(argv[2])==std::string("0") ) useBeamCuts = false;
   }
 
+  int run = atoi(argv[1]);
   cout << "Run " << argv[1] << " ..." << endl;
   cout << "... Applying Bi pulser gain corrections and cutting beam drops and bursts if applicable ..." << endl;
 
@@ -134,15 +137,16 @@ int main(int argc, char *argv[])
   ifstream fileLEDGain(tempFileGain);
 
   //Read in PMT Quality
-  std::vector<Int_t> pmtquality = getPMTQuality(atoi(argv[1])); 
+  std::vector<Int_t> pmtquality = getPMTQuality(run); 
 
   double fitMean, gainBiFactor,gainLEDFactor;
   double gainCorrection[8];
 
   for (int i=0; i<8; i++) {
     fileBiGain >> fitMean >> gainBiFactor;
-    fileLEDGain >> fitMean >> gainLEDFactor;
-    gainCorrection[i] = pmtquality[i] ? gainBiFactor : gainLEDFactor; //This sets the gain to use the LED if Bi Pulser is bad
+    if (run>20000) fileLEDGain >> fitMean >> gainLEDFactor;
+    gainCorrection[i] = pmtquality[i] ? gainBiFactor : (run>20000 ? gainLEDFactor : 1.); //This sets the gain to use the LED if Bi Pulser is bad
+    // and the run is in 2012/2013 when the LEDs were working better
   }
 
   fileBiGain.close();
