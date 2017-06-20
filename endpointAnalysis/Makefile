@@ -29,6 +29,10 @@ endpointTracker.exe: endpointTracker.o $(objects)
 	$(CXX) $(CXXFLAGS) -o endpointTracker.exe endpointTracker.o $(objects) $(LIBS)
 	@echo "Done"
 
+SuperSumEndpointTracker.exe: SuperSumEndpointTracker.o $(objects)
+	$(CXX) $(CXXFLAGS) -o SuperSumEndpointTracker.exe SuperSumEndpointTracker.o $(objects) $(LIBS)
+	@echo "Done"
+
 DataTree.o: DataTree.hh
 
 MBUtils.o: MBUtils.hh
