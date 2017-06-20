@@ -312,7 +312,7 @@ class CalReplayManager:
         
         for run in runs:
             os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%run)
-            os.system("root -l -b -q '../gain_bismuth/plot_gain_LED.C(\"%i\")'"%run)
+            #os.system("root -l -b -q '../gain_bismuth/plot_gain_LED.C(\"%i\")'"%run)
         print "DONE"
 
 
@@ -1149,6 +1149,7 @@ if __name__ == "__main__":
             rep.findPedestals(runPeriod)
             #rep.runReplayPass1(runPeriod)
             #rep.runGainBismuth(runPeriod)
+            #rep.runGainLED(runPeriod)
             #rep.runReplayPass2(runPeriod)
             #rep.findTriggerFunctions(runPeriod)
             #cal.fitSourcePositions(runPeriod)
@@ -1210,6 +1211,7 @@ if __name__ == "__main__":
             rep.findPedestals(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
+            #rep.runGainLED(runPeriod,sourceORxenon="xenon")
             #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
