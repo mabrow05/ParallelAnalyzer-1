@@ -743,28 +743,20 @@ class CalibrationManager:
 
                 if run in badEPMT1:
                     pmtList[0]=0
-                    ereconList[0]=0
                 if run in badEPMT2:
                     pmtList[1]=0
-                    ereconList[1]=0
                 if run in badEPMT3:
                     pmtList[2]=0
-                    ereconList[2]=0
                 if run in badEPMT4:
                     pmtList[3]=0
-                    ereconList[3]=0
                 if run in badWPMT1:
                     pmtList[4]=0
-                    ereconList[4]=0
                 if run in badWPMT2:
                     pmtList[5]=0
-                    ereconList[5]=0
                 if run in badWPMT3:
                     pmtList[6]=0
-                    ereconList[6]=0
                 if run in badWPMT4:
                     pmtList[7]=0
-                    ereconList[7]=0
 
                 if run in ereconEPMT1:
                     ereconList[0]=0
@@ -1139,16 +1131,16 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 0:
+    if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [16,17,18]#[19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
-            rep.findPedestals(runPeriod)
+            #rep.findPedestals(runPeriod)
             #rep.runReplayPass1(runPeriod)
-            #rep.runGainBismuth(runPeriod)
+            rep.runGainBismuth(runPeriod)
             #rep.runGainLED(runPeriod)
             #rep.runReplayPass2(runPeriod)
             #rep.findTriggerFunctions(runPeriod)
@@ -1208,10 +1200,10 @@ if __name__ == "__main__":
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
-            rep.findPedestals(runPeriod, sourceORxenon="xenon")
-            #rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            #rep.runGainBismuth(runPeriod, sourceORxenon="xenon")
-            #rep.runGainLED(runPeriod,sourceORxenon="xenon")
+            #rep.findPedestals(runPeriod, sourceORxenon="xenon")
+           # rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            #rep.runGainLED(runPeriod, sourceORxenon="xenon")
+            rep.runGainBismuth(runPeriod,sourceORxenon="xenon")
             #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
@@ -1222,4 +1214,11 @@ if __name__ == "__main__":
     # of the gain calculation (like pedestals) you need to redo all of the reference runs
     if 0:
 
-        refruns2012 = {}
+        refruns2011 = [17238,17370,17521,17892,18361,18621,18749,19232,19359,19511,19857,19899]
+        refruns2012 = [20519,20820,20905,21091,21315,21683,21918,22219,22298,22441,22771,22925]
+        
+        for run in refruns2011:
+            #os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
+            #os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
+            #os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
+            os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%run)
