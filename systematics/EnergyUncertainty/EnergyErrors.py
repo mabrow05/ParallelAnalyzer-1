@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import csv
 import os
 from math import *
 from PyxUtils import *
@@ -11,10 +12,23 @@ from CorrectionsPlotter import *
 # These are the error envelopes
 limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.025),(1200,1200*0.025)],
           2010:[(0,2.5),(200,200*0.0125),(500,500*0.0125),(1000,500*0.0125)],
-          2011:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.0065),(1200,993.789*0.0065)], 
+          #2011:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.0065),(1200,993.789*0.0065)], 
           #2012:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.007),(1200,993.789*0.007)],
-          2012:[(0,0.017*130.3+10.),(130.3,130.3*0.017+10.),(368.49,0.010*368.49+10.),(993.789,993.789*0.0065+10.),(1200,993.789*0.0065+10.)]} 
+          #2012:[(0,0.017*130.3+10.),(130.3,130.3*0.017+10.),(368.49,0.010*368.49+10.),(993.789,993.789*0.0065+10.),(1200,993.789*0.0065+10.)]
+}
 
+
+def makeCalEnvelope(year=2011):
+        envLower = []
+        envUpper = []
+        with open('envolopeValues-%i-deg2-cal4-curves1000.tsv'%year,'rb') as tsvin:
+                tsvin = csv.reader(tsvin, delimiter='\t')
+                for row in tsvin:
+                        envLower.append( ( float(row[0]),float(row[1]) ) )
+                        envUpper.append( ( float(row[0]),float(row[2]) ) )
+                        print("%s\t%s\t%s"%(row[0],row[1],row[2]))
+
+                        
 def calEnvelope(E,year=2011):	
 	i = 0
 	while E > limdat[year][i+1][0]:
@@ -214,8 +228,9 @@ def plotGainfluctErrors():
 
 
 if __name__=="__main__":
-	year = 2012
-        gainUncertaintyTable(year,0.0064)
+	year = 2011
+        makeCalEnvelope(2011)
+        #gainUncertaintyTable(year,0.0064)
 	#linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
 	#plotEnergyErrors(year)
