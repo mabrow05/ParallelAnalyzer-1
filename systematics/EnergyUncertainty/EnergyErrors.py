@@ -18,7 +18,7 @@ limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.0
 }
 
 
-def makeCalEnvelope(year=2011):
+def readCalEnvelope(year=2011,upper=True):
         envLower = []
         envUpper = []
         with open('envolopeValues-%i-deg2-cal4-curves1000.tsv'%year,'rb') as tsvin:
@@ -27,7 +27,12 @@ def makeCalEnvelope(year=2011):
                         envLower.append( ( float(row[0]),float(row[1]) ) )
                         envUpper.append( ( float(row[0]),float(row[2]) ) )
                         print("%s\t%s\t%s"%(row[0],row[1],row[2]))
-
+        limdat[year*10+1] = envLower
+        limdat[year*10+2] = envUpper
+        if upper:
+                limdat[year] = envUpper
+        else:
+                limdat[year] = envLower
                         
 def calEnvelope(E,year=2011):	
 	i = 0
@@ -171,7 +176,8 @@ def plotEnergyErrors(year=2011):
 			 
         gdat = [ [x,100*energyErrorA(x,year),100*energyErrorSimple(x,year),100*energyErrorRC(x,year)] for x in unifrange(50,850.,800) ]
 
-	#gdat2011 = [ [x,100*energyErrorA(x,2011),100*energyErrorSimple(x,2011),100*energyErrorRC(x,2011)] for x in unifrange(50,850.,800) ]
+	gdatLower = [ [x,100*energyErrorA(x,year*10+1),100*energyErrorSimple(x,year*10+1),100*energyErrorRC(x,year*10+1)] for x in unifrange(50,850.,800) ]
+	gdatUpper = [ [x,100*energyErrorA(x,year*10+2),100*energyErrorSimple(x,year*10+2),100*energyErrorRC(x,year*10+2)] for x in unifrange(50,850.,800) ]
 	#gdat2010 = [ [x,100*energyErrorA(x,2010),100*energyErrorSimple(x,2010),100*energyErrorRC(x,2010)] for x in unifrange(50,850.,800) ]
 	#gdat2012 = [ [x,100*energyErrorA(x,2012),100*energyErrorSimple(x,2012),100*energyErrorRC(x,2012)] for x in unifrange(50,850.,800) ]
 
@@ -181,8 +187,10 @@ def plotEnergyErrors(year=2011):
                  [ graph.style.line([style.linewidth.THick,style.linestyle.dashed]),] )
         gCx.plot(graph.data.points(gdat,x=1,y=2,title="%i Monte Carlo"%year),
                  [ graph.style.line([style.linewidth.THick]),])
-	#gCx.plot(graph.data.points(gdat2010,x=1,y=2,title="2010"),
-         #        [ graph.style.line([style.linewidth.THick]),])
+	gCx.plot(graph.data.points(gdatUpper,x=1,y=2,title="%i Upper Edge"),
+                 [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
+        gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i Lower Edge"),
+                 [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
         #gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
 	#gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
@@ -193,7 +201,8 @@ def plotEnergyErrors(year=2011):
         #print "Eavg MC MB 2012=",weightStats(gdat2012,220,670)
 	
 	print "Eavg MC %i = "%year,weightStats(gdat,220,670)
-				 			 
+	print "Eavg MC Lower %i = "%year,weightStats(gdatLower,220,670)
+        print "Eavg MC Upper %i = "%year,weightStats(gdatUpper,220,670)
 	gCx.writetofile("%s/Corrections/EnergyUncert%i.pdf"%(baseOutPath,year))
 
 
