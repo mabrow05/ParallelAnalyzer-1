@@ -200,6 +200,31 @@ class BetaReplayManager:
                 os.system("root -l -b -q '../gain_bismuth/plot_gain_bismuth.C(\"%i\")'"%run)
         print "DONE"
 
+
+    def runGainLED(self,runORoctet):
+        runs = []
+        if runORoctet > 16000:
+            print "Running gain_LED for run %i"%runORoctet
+            os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%runORoctet)
+            #os.system("root -l -b -q '../gain_bismuth/plot_gain_LED.C(\"%i\")'"%runORoctet)
+        else: 
+            filename = "All_Octets/octet_list_%i.dat"%(runORoctet)
+            infile = open(self.octetListPath+filename,'r')
+        
+            for line in infile:      
+                words=line.split()
+                if words[0] in betaRunTypes or words[0] in bgRunTypes: # Avoids depol runs
+                    runs.append(int(words[1]))
+                    
+        
+            for run in runs:
+                print "Running gain_LED for run %i"%run
+                os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%run)
+                #os.system("root -l -b -q '../gain_bismuth/plot_gain_LED.C(\"%i\")'"%run)
+        print "DONE"
+
+    
+
     def runEndpointGain(self,octet):
     
         print "Running endpoint gain for octet %i"%octet
@@ -542,6 +567,7 @@ if __name__ == "__main__":
             #beta.runReplayPass1(octet)
             #beta.findBeamDrops(octet)
             #beta.runGainBismuth(octet)
+            #beta.runGainLED(octet)
             #beta.runReplayPass2(octet)
             #beta.findTriggerFunctions(octet)
             #beta.runReverseCalibration(octet)
