@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
         
 	else minCounter++;
 	
-	if ( minCounter>10 && maxCounter>4 ) break; //Making sure we only get the high energy peak
+	if ( minCounter>10 && maxCounter>7 ) break; //Making sure we only get the high energy peak
       }
     }
   }

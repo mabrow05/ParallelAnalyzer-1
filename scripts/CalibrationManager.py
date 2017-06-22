@@ -138,6 +138,16 @@ for Range in ereconWPMT4_runRanges:
     for run in range(Range[0],Range[1]+1,1):
         ereconWPMT4.append(run)
 
+for run in omittedRuns:
+    ereconEPMT1.append(run)
+    ereconEPMT2.append(run)
+    ereconEPMT3.append(run)
+    ereconEPMT4.append(run)
+    ereconWPMT1.append(run)
+    ereconWPMT2.append(run)
+    ereconWPMT3.append(run)
+    ereconWPMT4.append(run)
+
 
 ######################################################################################################################
 
@@ -1134,14 +1144,14 @@ if __name__ == "__main__":
     if 1:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [16,17,18]#[19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [5,6,7,8,9,10,11,12]#[16,17,18]#[19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
             #rep.findPedestals(runPeriod)
-            #rep.runReplayPass1(runPeriod)
+            rep.runReplayPass1(runPeriod)
             rep.runGainBismuth(runPeriod)
-            #rep.runGainLED(runPeriod)
+            rep.runGainLED(runPeriod)
             #rep.runReplayPass2(runPeriod)
             #rep.findTriggerFunctions(runPeriod)
             #cal.fitSourcePositions(runPeriod)
@@ -1194,15 +1204,15 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [8,9,10]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [2,3,4,5,7]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
         for runPeriod in runPeriods:    
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="xenon")
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
-           # rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
-            #rep.runGainLED(runPeriod, sourceORxenon="xenon")
+            rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
+            rep.runGainLED(runPeriod, sourceORxenon="xenon")
             rep.runGainBismuth(runPeriod,sourceORxenon="xenon")
             #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")

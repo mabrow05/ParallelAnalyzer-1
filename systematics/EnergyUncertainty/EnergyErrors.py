@@ -12,7 +12,7 @@ from CorrectionsPlotter import *
 # These are the error envelopes
 limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.025),(1200,1200*0.025)],
           2010:[(0,2.5),(200,200*0.0125),(500,500*0.0125),(1000,500*0.0125)],
-          #2011:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.0065),(1200,993.789*0.0065)], 
+          2011:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.0065),(1200,993.789*0.0065)], 
           #2012:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.007),(1200,993.789*0.007)],
           #2012:[(0,0.017*130.3+10.),(130.3,130.3*0.017+10.),(368.49,0.010*368.49+10.),(993.789,993.789*0.0065+10.),(1200,993.789*0.0065+10.)]
 }
@@ -24,15 +24,15 @@ def readCalEnvelope(year=2011,upper=True):
         with open('envolopeValues-%i-deg2-cal4-curves1000.tsv'%year,'rb') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
                 for row in tsvin:
-                        envLower.append( ( float(row[0]),float(row[1]) ) )
+                        envLower.append( ( float(row[0]),fabs(float(row[1])) ) )
                         envUpper.append( ( float(row[0]),float(row[2]) ) )
                         print("%s\t%s\t%s"%(row[0],row[1],row[2]))
         limdat[year*10+1] = envLower
         limdat[year*10+2] = envUpper
-        if upper:
-                limdat[year] = envUpper
-        else:
-                limdat[year] = envLower
+        #if upper:
+        #        limdat[year] = envUpper
+        #else:
+        #        limdat[year] = envLower
                         
 def calEnvelope(E,year=2011):	
 	i = 0
@@ -68,7 +68,7 @@ def ObsAsymApprox(KE,year):
         p6=0.
         
         #MPM Values
-        if year==2010:
+        if year==2010 or year/10==2010:
                 A0 = .1172
                 p2 = .966648
                 p3 = 0.0001174
@@ -78,7 +78,7 @@ def ObsAsymApprox(KE,year):
 
         #MB Values
         
-        elif year==2011:
+        elif year==2011 or year/10==2011:
                 A0 = .1184
                 p2 = 1.00231
                 p3 = 0.0000886218
@@ -86,7 +86,7 @@ def ObsAsymApprox(KE,year):
                 p5 = 0.983511
                 p6 = -3.60345
 
-        elif year==2012:
+        elif year==2012 or year/10==2012:
                 A0 = .1184
                 p2 = .976146
                 p3 = 0.000146057
@@ -181,15 +181,15 @@ def plotEnergyErrors(year=2011):
 	#gdat2010 = [ [x,100*energyErrorA(x,2010),100*energyErrorSimple(x,2010),100*energyErrorRC(x,2010)] for x in unifrange(50,850.,800) ]
 	#gdat2012 = [ [x,100*energyErrorA(x,2012),100*energyErrorSimple(x,2012),100*energyErrorRC(x,2012)] for x in unifrange(50,850.,800) ]
 
-	gCx.plot(graph.data.points(gdat[::8],x=1,y=3,title="$A={\\beta \\over 2}A_0$"),
-                 [ graph.style.line([style.linewidth.THick,style.linestyle.dotted]),])
-	gCx.plot(graph.data.points(gdat,x=1,y=4,title="$A={\\beta \\over 2}(1+$R.C.$)A_0$"),
-                 [ graph.style.line([style.linewidth.THick,style.linestyle.dashed]),] )
+	#gCx.plot(graph.data.points(gdat[::8],x=1,y=3,title="$A={\\beta \\over 2}A_0$"),
+        #         [ graph.style.line([style.linewidth.THick,style.linestyle.dotted]),])
+	#gCx.plot(graph.data.points(gdat,x=1,y=4,title="$A={\\beta \\over 2}(1+$R.C.$)A_0$"),
+        #         [ graph.style.line([style.linewidth.THick,style.linestyle.dashed]),] )
         gCx.plot(graph.data.points(gdat,x=1,y=2,title="%i Monte Carlo"%year),
                  [ graph.style.line([style.linewidth.THick]),])
-	gCx.plot(graph.data.points(gdatUpper,x=1,y=2,title="%i Upper Edge"),
+	gCx.plot(graph.data.points(gdatUpper,x=1,y=2,title="%i Upper Edge"%year),
                  [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
-        gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i Lower Edge"),
+        gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i Lower Edge"%year),
                  [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
         #gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
@@ -238,9 +238,9 @@ def plotGainfluctErrors():
 
 if __name__=="__main__":
 	year = 2011
-        makeCalEnvelope(2011)
+        readCalEnvelope(year)
         #gainUncertaintyTable(year,0.0064)
-	#linearityUncertaintyTable(year)
+	linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
-	#plotEnergyErrors(year)
+	plotEnergyErrors(year)
 	#plotGainfluctErrors()

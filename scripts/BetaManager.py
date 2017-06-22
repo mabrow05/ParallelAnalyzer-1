@@ -559,14 +559,14 @@ if __name__ == "__main__":
 
 
     ####### Complete list of processing beta runs assuming calibration and position maps are in place
-    if 0: 
-        octet_range = [108,121]
+    if 1: 
+        octet_range = [45,59]
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
-            #beta.runReplayPass1(octet)
+            beta.runReplayPass1(octet)
             #beta.findBeamDrops(octet)
-            #beta.runGainBismuth(octet)
+            beta.runGainBismuth(octet)
             beta.runGainLED(octet)
             #beta.runReplayPass2(octet)
             #beta.findTriggerFunctions(octet)
