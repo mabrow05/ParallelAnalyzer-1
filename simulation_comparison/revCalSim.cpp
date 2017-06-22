@@ -320,8 +320,6 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 
   ///////////////////////// SETTING GAIN OF FIRST and second DYNYODE
-  Double_t g_d1 = 4.;
-  Double_t g_d2 = 4.;
   Double_t g_d = 16.;
   Double_t g_rest = 12500.;
 
@@ -761,7 +759,15 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     std::vector <Double_t> eta; 
     std::vector <Double_t> old_eta; 
     std::vector <Double_t> gaus_eta; 
+    std::vector <Double_t> trueEta; // This is the position map value of the actual event position, not the position as determined
+                                    // by cathode reconstruction
+    
 
+    trueEta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],
+					scint_pos_adj.ScintPosAdjE[1],
+					scint_pos_adj.ScintPosAdjW[0],
+					scint_pos_adj.ScintPosAdjW[1]);
+    
     if ( source!="Beta" ) { 
       eta = gaus_eta = old_eta = posmap.getInterpolatedEta(scint_pos_adj.ScintPosAdjE[0],
 							   scint_pos_adj.ScintPosAdjE[1],
@@ -798,7 +804,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	
 	if (eta[p]>0.) {
 
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQE))));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*trueEta[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  ADCvecE[p] = ADC;
 	  pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
@@ -818,7 +824,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 	if (old_eta[p]>0.) {
 
-	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*old_eta[p]*edepQ.EdepQE))));
+	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*trueEta[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, old_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  old_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  old_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
@@ -836,7 +842,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 	if (gaus_eta[p]>0.) {
 
-	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*gaus_eta[p]*edepQ.EdepQE))));
+	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*trueEta[p]*edepQ.EdepQE))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, gaus_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  gaus_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  gaus_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
@@ -920,7 +926,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 	
 	if (eta[p]>0.) {
 
-	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*eta[p]*edepQ.EdepQW))));
+	  pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*trueEta[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, pmt.etaEvis[p]) + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  ADCvecW[p-4] = ADC;
 	  //cout << ADCvecW[p-4] << endl;
@@ -941,7 +947,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 	if (old_eta[p]>0.) {
 
-	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*old_eta[p]*edepQ.EdepQW))));
+	  old_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*trueEta[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, old_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  old_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  old_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
@@ -959,7 +965,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
 	if (gaus_eta[p]>0.) {
 
-	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*gaus_eta[p]*edepQ.EdepQW))));
+	  gaus_pmt.etaEvis[p] = (1./(alpha[p]*g_d*g_rest)) * (rand3->Poisson(g_rest*rand2->Poisson(g_d*rand1->Poisson(alpha[p]*trueEta[p]*edepQ.EdepQW))));
 	  Double_t ADC = linCurve.applyInverseLinCurve(p, gaus_pmt.etaEvis[p]);// + rand0->Gaus(0.,pedestals[p][1]); //Take into account non-zero width of the pedestal
 	  gaus_pmt.etaEvis[p] = linCurve.applyLinCurve(p, ADC);
 	  gaus_pmt.Evis[p] = pmt.etaEvis[p]/eta[p];
