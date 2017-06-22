@@ -439,7 +439,24 @@ void asymm_vs_cal(TString year) {
   gr0->SetLineColor(1);
   gr0->SetLineStyle(2);
 
-  const Int_t nn = 5;
+
+  //Read in the error envelope from Kevin Hickerson
+  std::ifstream errEnv(TString::Format("envolopeValues-%i-deg2-cal4-curves1000.tsv",geom==TString("2011-2012")?2011:2012));
+  std::vector <Double_t> en;
+  std::vector <Double_t> low;
+  std::vector <Double_t> high;
+  std::vector <Double_t> y;
+  
+  Double_t e,l,h;
+
+  while ( errEnv >> e >> l >> h ) {
+    en.push_back(e);
+    low.push_back(l);
+    high.push_back(h);
+    y.push_back(0.);
+  }
+
+  /*const Int_t nn = 5;
   Double_t perc1=0.017;
   Double_t perc2=0.010;
   Double_t perc3=0.0065;
@@ -454,9 +471,14 @@ void asymm_vs_cal(TString year) {
   }
   y_upper[0]=y_upper[1];
   y_lower[0]=y_lower[1];
-    
+  */
 
-  TGraph *env_upper = new TGraph(nn,x2,y_upper);
+  TGraphAsymmErrors *env = new TGraphAsymmErrors(high.size(),&en[0],&y[0],0,0,&low[0],&high[0]);
+  env->SetFillColor(6);
+  env->SetFillStyle(3005);
+  env->Draw("a4","SAME");
+  
+  /*TGraph *env_upper = new TGraph(high.size(),&en[0],&high[0]);
   env_upper->Draw("Same");
   env_upper->SetLineWidth(3);
   env_upper->SetLineColor(2);
@@ -467,7 +489,7 @@ void asymm_vs_cal(TString year) {
   env_lower->SetLineWidth(3);
   env_lower->SetLineColor(2);
   env_lower->SetLineStyle(8); 
-
+  */
   c2->Update();
 
   c2->Print(TString::Format("%s.pdf)",filename.Data()));
