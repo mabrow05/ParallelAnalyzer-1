@@ -251,7 +251,6 @@ void revCalSimulation (Int_t runNumber, string b, string A)
   
   cout << "Running reverse calibration for run " << runNumber << endl;  
 
-  string outputBase;
   UInt_t BetaEvents = 0; //Holds the number of electron like Type 0 events to process
 
   Char_t temp[500],tempE[500],tempW[500];
@@ -276,7 +275,6 @@ void revCalSimulation (Int_t runNumber, string b, string A)
   //If we have a Beta run and we don't want exact statistics, simulate 16 times the number of events
   if ( !simProperStatistics  ) {
     BetaEvents = 16*BetaEvents;
-    outputBase = string(getenv("REVCALSIM")) + "beta_highStatistics/";
   } 
 
   std::cout << "Processing " << BetaEvents << " events...\n";
