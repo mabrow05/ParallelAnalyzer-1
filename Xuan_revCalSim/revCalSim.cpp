@@ -322,7 +322,7 @@ void revCalSimulation (Int_t runNumber, string b, string A)
   delete randFile;
   for (int i=0; i<numFiles; i++) {
     if (fileNum==numFiles) fileNum=0;
-    chain->AddFile(TString::Format("%s/analyzed_%i.root",fileLocation.Data(),fileNum));
+    chain->AddFile(TString::Format("%s/xuan_analyzed_%i.root",fileLocation.Data(),fileNum));
     fileNum++;
   }
 
@@ -342,7 +342,7 @@ void revCalSimulation (Int_t runNumber, string b, string A)
   chain->SetBranchAddress("hitCountSD",hitCountSD);*/
   
   //These are for feeding in Xuan's simulations... this needs to be updated so that I can pass a flag and change these on the fly
-  chain->SetBranchAddress("PrimaryParticleSpecies",&primaryID);
+  chain->SetBranchAddress("primaryParticleSpecies",&primaryID);
   chain->SetBranchAddress("mwpcEnergy",&mwpcE);
   chain->SetBranchAddress("scintTimeToHit",&Time);
   chain->SetBranchAddress("scintillatorEdep",&edep);
