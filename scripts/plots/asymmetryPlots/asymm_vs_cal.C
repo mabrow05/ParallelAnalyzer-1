@@ -10,6 +10,7 @@
 #include <TString.h>
 #include <TH1D.h>
 #include <TGraphErrors.h>
+#include <TGraphAsymmErrors.h>
 #include <TGraph.h>
 #include <TMultiGraph.h>
 #include <TCanvas.h>
@@ -300,7 +301,7 @@ void asymm_vs_cal(TString year) {
   std::vector <TGraph*> gEnv_mean(XePeriod.size());
   
   Double_t xmin = 0.0;
-  Double_t xmax = 1200.;
+  Double_t xmax = 1100.;
   TLine *zeroLine = new TLine(xmin,0.,xmax,0.);
 
   for ( UInt_t ii=0; ii<XePeriod.size(); ++ii ) {
@@ -403,57 +404,34 @@ void asymm_vs_cal(TString year) {
   gr->SetFillStyle(0);
   
 
-  
-  mg->Add(RMS,"PZ");
-  //mg->Draw("A");
-  mg->Add(gr,"P");
- 
-  mg->Draw("A");
-  mg->SetTitle(TString::Format("Error Envelope %s",year.Data()));
-  mg->GetXaxis()->SetTitle("E_{recon} [keV]");
-  mg->GetXaxis()->SetTitleOffset(1.2);
-  mg->GetXaxis()->CenterTitle();
-  mg->GetYaxis()->SetTitle("Calibration Residual [keV]");
-  // mg->GetYaxis()->SetTitleOffset(1.2);
-  mg->GetYaxis()->CenterTitle();
-  
-
-  mg->GetXaxis()->SetLimits(0.0,1200.0);
-  mg->SetMinimum(-30.0);
-  mg->SetMaximum( 30.0);
-
-  TLegend *leg = new TLegend(0.65,0.70,0.875,0.875);
-  leg->AddEntry(RMS,0,"l");
-  leg->AddEntry(gr,0,"lp");
-  leg->Draw();
-
-  
-
   const Int_t n = 2;
-  Double_t x[n] = {0, 1200};
+  Double_t x[n] = {xmin, xmax};
   Double_t y[n] = {0.0, 0.0};
 
   TGraph *gr0 = new TGraph(n,x,y);
-  gr0->Draw("Same");
+  
   gr0->SetLineWidth(2);
   gr0->SetLineColor(1);
   gr0->SetLineStyle(2);
 
 
   //Read in the error envelope from Kevin Hickerson
-  std::ifstream errEnv(TString::Format("envolopeValues-%i-deg2-cal4-curves1000.tsv",geom==TString("2011-2012")?2011:2012));
+  std::ifstream errEnv(TString::Format("../../../systematics/EnergyUncertainty/envolopeValues-%i-deg2-cal4-curves1000.tsv",year==TString("2011-2012")?2011:2012));
   std::vector <Double_t> en;
   std::vector <Double_t> low;
   std::vector <Double_t> high;
-  std::vector <Double_t> y;
+  std::vector <Double_t> yenv;
+  std::vector <Double_t> xerr;
   
   Double_t e,l,h;
 
   while ( errEnv >> e >> l >> h ) {
     en.push_back(e);
-    low.push_back(l);
+    std::cout << e << " " << l << " " << h << std::endl;
+    low.push_back(TMath::Abs(l));
     high.push_back(h);
-    y.push_back(0.);
+    yenv.push_back(0.);
+    xerr.push_back(5.);
   }
 
   /*const Int_t nn = 5;
@@ -473,11 +451,43 @@ void asymm_vs_cal(TString year) {
   y_lower[0]=y_lower[1];
   */
 
-  TGraphAsymmErrors *env = new TGraphAsymmErrors(high.size(),&en[0],&y[0],0,0,&low[0],&high[0]);
-  env->SetFillColor(6);
-  env->SetFillStyle(3005);
-  env->Draw("a4","SAME");
+  TGraphAsymmErrors *finenv = new TGraphAsymmErrors(high.size(),&en[0],&yenv[0],&xerr[0],&xerr[0],&low[0],&low[0]);
+  finenv->SetFillColor(kGray);
+  finenv->SetFillStyle(3001);
+  //finenv->Draw("3SAME");
   
+  mg->Add(finenv,"3");
+  //mg->Add(gr0);
+  mg->Add(RMS,"PZ");
+  //mg->Draw("A");
+  mg->Add(gr,"P");
+ 
+
+  mg->Draw("A");
+  mg->SetTitle(TString::Format("Error Envelope %s",year.Data()));
+  mg->GetXaxis()->SetTitle("E_{recon} [keV]");
+  mg->GetXaxis()->SetTitleOffset(1.2);
+  mg->GetXaxis()->CenterTitle();
+  mg->GetYaxis()->SetTitle("Calibration Residual [keV]");
+  // mg->GetYaxis()->SetTitleOffset(1.2);
+  mg->GetYaxis()->CenterTitle();
+  
+
+  mg->GetXaxis()->SetLimits(xmin,xmax);
+  mg->SetMinimum(-30.0);
+  mg->SetMaximum( 30.0);
+
+  zeroLine->SetLineWidth(2);
+  zeroLine->SetLineStyle(2);
+  zeroLine->Draw("SAME");
+
+  TLegend *leg = new TLegend(0.65,0.70,0.875,0.875);
+  leg->AddEntry(RMS,0,"l");
+  leg->AddEntry(gr,0,"lp");
+  leg->Draw();
+
+
+ 
   /*TGraph *env_upper = new TGraph(high.size(),&en[0],&high[0]);
   env_upper->Draw("Same");
   env_upper->SetLineWidth(3);

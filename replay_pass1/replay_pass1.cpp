@@ -31,7 +31,7 @@
 
 using namespace std;
 
-bool OnlyReplayBadFiles = false;
+bool OnlyReplayBadFiles = true;
 
 std::vector < std::vector <Double_t> > loadPMTpedestals(Int_t runNumber) {
 

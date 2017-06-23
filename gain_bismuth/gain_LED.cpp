@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
 
   // Output histograms
-  int nBin = 200;
+  int nBin = 500;
   TH1D *his[8];
   his[0] = new TH1D("hisE0", "", nBin,0.0,4000.0);
   his[1] = new TH1D("hisE1", "", nBin,0.0,4000.0);
@@ -268,28 +268,28 @@ int main(int argc, char *argv[])
   SinglePeakHist *fitter;
 
   // Fit for East PMT #0
-  fitter = new SinglePeakHist(his[0],xLow[0],xHigh[0]);
+  fitter = new SinglePeakHist(his[0],xLow[0],xHigh[0],true,5.,1.,1.);
   fitMean[0] = fitter->ReturnMean();
   delete fitter;
 
   cout << "fitMean[0] = " << fitMean[0] << endl;
 
   // Fit for East PMT #1
-  fitter = new SinglePeakHist(his[1],xLow[1],xHigh[1]);
+  fitter = new SinglePeakHist(his[1],xLow[1],xHigh[1],true,5.,1.,1.);
   fitMean[1] = fitter->ReturnMean();
   delete fitter;
 
   cout << "fitMean[1] = " << fitMean[1] << endl;
 
   // Fit for East PMT #2
-  fitter = new SinglePeakHist(his[2],xLow[2],xHigh[2]);
+  fitter = new SinglePeakHist(his[2],xLow[2],xHigh[2],true,5.,1.,1.);
   fitMean[2] = fitter->ReturnMean();
   delete fitter;
 
   cout << "fitMean[2] = " << fitMean[2] << endl;
 
   // Fit for East PMT #3
-  fitter = new SinglePeakHist(his[3],xLow[3],xHigh[3]);
+  fitter = new SinglePeakHist(his[3],xLow[3],xHigh[3],true,5.,1.,1.);
   fitMean[3] = fitter->ReturnMean();
   delete fitter;
 
@@ -297,28 +297,28 @@ int main(int argc, char *argv[])
 
 
   // Fit for West PMT #0
-  fitter = new SinglePeakHist(his[4],xLow[4],xHigh[4]);
+  fitter = new SinglePeakHist(his[4],xLow[4],xHigh[4],true,5.,1.,1.);
   fitMean[4] = fitter->ReturnMean();
   delete fitter;
 
   cout << "fitMean[4] = " << fitMean[4] << endl;
 
   // Fit for West PMT #1
-  fitter = new SinglePeakHist(his[5],xLow[5],xHigh[5]);
+  fitter = new SinglePeakHist(his[5],xLow[5],xHigh[5],true,5.,1.,1.);
   fitMean[5] = fitter->ReturnMean();
   delete fitter;
 
   cout << "fitMean[5] = " << fitMean[5] << endl;
 
   // Fit for West PMT #2
-  fitter = new SinglePeakHist(his[6],xLow[6],xHigh[6]);
+  fitter = new SinglePeakHist(his[6],xLow[6],xHigh[6],true,5.,1.,1.);
   fitMean[6] = fitter->ReturnMean();
   delete fitter;
 
   cout << "fitMean[6] = " << fitMean[6] << endl;
 
   // Fit for West PMT #3
-  fitter = new SinglePeakHist(his[7],xLow[7],xHigh[7]);
+  fitter = new SinglePeakHist(his[7],xLow[7],xHigh[7],true,5.,1.,1.);
   fitMean[7] = fitter->ReturnMean();
   delete fitter;
 

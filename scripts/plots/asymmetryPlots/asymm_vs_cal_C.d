@@ -37,6 +37,7 @@
 ./asymm_vs_cal_C.so: /cern/root/include/root/TFitResultPtr.h
 ./asymm_vs_cal_C.so: /cern/root/include/root/TGraphErrors.h
 ./asymm_vs_cal_C.so: /cern/root/include/root/TGraph.h
+./asymm_vs_cal_C.so: /cern/root/include/root/TGraphAsymmErrors.h
 ./asymm_vs_cal_C.so: /cern/root/include/root/TMultiGraph.h
 ./asymm_vs_cal_C.so: /cern/root/include/root/TF1.h
 ./asymm_vs_cal_C.so: /cern/root/include/root/TFormula.h

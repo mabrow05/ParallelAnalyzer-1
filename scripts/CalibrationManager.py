@@ -49,7 +49,7 @@ badWPMT4 = []
 badEPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 badEPMT2_runRanges = []
 badEPMT3_runRanges = []
-badEPMT4_runRanges = [] 
+badEPMT4_runRanges = [(20000,23173)] #2012-2013 have weird Bi gain and odd lin curves
 badWPMT1_runRanges = [(17359,18055)] #PMTW1 Bi pulser fell off for (17359,18055)
 badWPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 badWPMT3_runRanges = []
@@ -106,7 +106,7 @@ ereconWPMT4 = []
 ereconEPMT1_runRanges = [] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
 ereconEPMT2_runRanges = []
 ereconEPMT3_runRanges = []
-ereconEPMT4_runRanges = []#[(20000,23173)] #2012-2013 have weird Bi gain and odd lin curves
+ereconEPMT4_runRanges = []
 ereconWPMT1_runRanges = [(17359,18055)] #PMTW1 Bi pulser fell off for (17359,18055)
 ereconWPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 ereconWPMT3_runRanges = []
@@ -1141,27 +1141,27 @@ if __name__ == "__main__":
 
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
-    if 1:
+    if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [5,6,7,8,9,10,11,12]#[16,17,18]#[19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [19,20,21,22,23,24]#[16,17,18]#[19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
             #rep.findPedestals(runPeriod)
-            rep.runReplayPass1(runPeriod)
-            rep.runGainBismuth(runPeriod)
+            rep.runReplayPass1(runPeriod) # right now this is only running those runs that have bad files!
+            #rep.runGainBismuth(runPeriod)
             rep.runGainLED(runPeriod)
-            #rep.runReplayPass2(runPeriod)
-            #rep.findTriggerFunctions(runPeriod)
+            rep.runReplayPass2(runPeriod)
+            rep.findTriggerFunctions(runPeriod)
             #cal.fitSourcePositions(runPeriod)
             
         
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 0: 
-        runPeriods = [12]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 1: 
+        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1195,7 +1195,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1204,7 +1204,7 @@ if __name__ == "__main__":
     ### Replaying Xe Runs. Note that the position maps are calculated post replayPass2 and only need to
     ### be done once unless fundamental changes to the code are made upstream
     if 0: 
-        runPeriods = [2,3,4,5,7]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
+        runPeriods = [8,9,10]#,3,4,5,7]#[2,3,4,5,7,8,9,10]#,3,4,5,7] #[8,9,10]##### 1-7 are from 2011/2012, while 8-10 are from 2012/2013
         rep = CalReplayManager()
         cal = CalibrationManager()
         #cal.calc_nPE_per_PMT(runAllRefRun=False,writeNPEforAllRuns=True)
@@ -1213,8 +1213,8 @@ if __name__ == "__main__":
             #rep.findPedestals(runPeriod, sourceORxenon="xenon")
             rep.runReplayPass1(runPeriod, sourceORxenon="xenon")
             rep.runGainLED(runPeriod, sourceORxenon="xenon")
-            rep.runGainBismuth(runPeriod,sourceORxenon="xenon")
-            #rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
+            #rep.runGainBismuth(runPeriod,sourceORxenon="xenon")
+            rep.runReplayPass2(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass3(runPeriod, sourceORxenon="xenon")
             #rep.runReplayPass4(runPeriod, sourceORxenon="xenon")
 
@@ -1229,6 +1229,6 @@ if __name__ == "__main__":
         
         for run in refruns2011:
             #os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
-            #os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
+            os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
             #os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
             os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%run)
