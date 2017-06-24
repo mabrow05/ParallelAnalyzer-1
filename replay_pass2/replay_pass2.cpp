@@ -205,14 +205,16 @@ int main(int argc, char *argv[])
   for (Int_t i=0; i<nEvents; i++) {
     t->getEvent(i);
     
-    if ( i%10000==0 ) std::cout << i << std::endl;
+    if ( i%1000==0 ) std::cout << i <<"/"<<nEvents<< std::endl;
 
     // Apply gain correction factors
+    //    std::cout << t->ScintE.q4 << "*" << gainCorrection[3] << "=\t";
     t->ScintE.q1 = t->ScintE.q1*gainCorrection[0];
     t->ScintE.q2 = t->ScintE.q2*gainCorrection[1];
     t->ScintE.q3 = t->ScintE.q3*gainCorrection[2];
     t->ScintE.q4 = t->ScintE.q4*gainCorrection[3];
-    
+    //std::cout << t->ScintE.q4 << std::endl;
+
     t->ScintW.q1 = t->ScintW.q1*gainCorrection[4];
     t->ScintW.q2 = t->ScintW.q2*gainCorrection[5];
     t->ScintW.q3 = t->ScintW.q3*gainCorrection[6];
