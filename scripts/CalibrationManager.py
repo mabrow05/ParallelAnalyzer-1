@@ -590,7 +590,7 @@ class CalibrationManager:
         
         
 
-    def fitSourcePositions(self,srcRunPeriod=1, overwrite=False):
+    def fitSourcePositions(self,srcRunPeriod=1, doOnlyCeSnBi=True,overwrite=False):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath + filename,'r')
         runs = []
@@ -622,8 +622,36 @@ class CalibrationManager:
             
 
         for run in runs:
+
+            filename = self.srcListPath+"source_list_%i.dat"%run
+            if not MButils.fileExistsAndNotEmpty(filename):
+                continue
+            srcFile = open(filename)
+            sources = []
+            for line in srcFile:
+                sources.append(line)
+
+            isCeSnBi = False
+            for source in sources:
+                if source[0:2]=="Ce":
+                    isCeSnBi = True
+                    break
+                if source[0:2]=="Sn":
+                    isCeSnBi = True
+                    break
+                if source[0:2]=="Bi":
+                    isCeSnBi = True
+                    break
+                
+            if doOnlyCeSnBi:
+                if isCeSnBi:
+                    os.system("cd ../source_peaks; ./sim_source_peak_fitter.exe %i"%run)
+
+            else: 
+                os.system("cd ../source_peaks; ./sim_source_peak_fitter.exe %i"%run)
             
-            os.system("cd ../source_peaks; ./sim_source_peak_fitter.exe %i"%run)
+
+            
             #os.system("root -b -q '../source_peaks/plot_sim_source_peaks.C(\"%i\")'"%run)
             print "Ran sim_source_peak_fitter.exe on run %i"%run
 
@@ -1161,7 +1189,7 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [21,22]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1187,7 +1215,7 @@ if __name__ == "__main__":
                 #Simulation Stuff
 
                 rep.runReverseCalibration(runPeriod) #Apply detector response model to simulation
-                cal.fitSimSourcePeaks(runPeriod) #fit the source peaks in eta*Evis
+                cal.fitSimSourcePeaks(runPeriod,doOnlyCeSnBi=True) #fit the source peaks in eta*Evis
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=False) #gather source peak information in eta*Evis
                 cal.makeSourceCalibrationFile(runPeriod, Simulation=True, InEnergy=True)  #gather source peak information in Energy
                 
