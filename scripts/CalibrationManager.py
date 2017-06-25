@@ -606,7 +606,7 @@ class CalibrationManager:
             print "Running fit_source_positions.C on run %i"%run
         
 
-    def fitSimSourcePeaks(self,srcRunPeriod=1, overwrite=True):
+    def fitSimSourcePeaks(self,srcRunPeriod=1, doOnlyCeSnBi=True, overwrite=True):
         filename = "Source_Calibration_Run_Period_%i.dat"%srcRunPeriod
         infile = open(self.runListPath+filename,'r')
         runs = []
