@@ -421,7 +421,7 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   fitADC->SetParameter(1, 1.0);
   fitADC->SetParameter(2, 0.0);
   if ( calibrationPeriod<13) fitADC->SetParLimits(2, -0.00005, 0.00005);
-  else fitADC->SetParLimits(2, -0.00005, 0.00005);
+  else fitADC->SetParLimits(2, -0.000075, 0.000075);
   if (!quadratic) fitADC->FixParameter(2, 0.0);
   //fitADC->FixParameter(0, 0.0);
 
