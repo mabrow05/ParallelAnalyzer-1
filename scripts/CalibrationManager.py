@@ -986,7 +986,7 @@ class CalibrationManager:
 
         if os.path.isfile(filename):
             
-            os.system("root -b -q 'calc_residuals_postCal.C (%i)'"%CalibrationPeriod)
+            os.system("root -l -b -q 'calc_residuals_postCal.C (%i)'"%CalibrationPeriod)
             
             print "Calculated residuals for Calibration Period %i"%CalibrationPeriod
         else:
@@ -1158,7 +1158,7 @@ if __name__ == "__main__":
     ## Makes file holding all the residuals for each PMT for each run which is to be used
     if options.makeGlobalResiduals:
         cal = CalibrationManager()
-        runPeriods = [1,2,3,4,5,6,7,8,9,10,11,12]#[16,17,18,19,20,21,22,23,24]#,6,7,8,9,10,11,12]#[16,17,18,19,20,21,22,23,24]#,#[
+        runPeriods = [16,17,18,19,20,21,22,23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]#,6,7,8,9,10,11,12]#[16,17,18,19,20,21,22,23,24]#,#[
         
         cal.makeGlobalResiduals(runPeriods)
 
@@ -1189,7 +1189,7 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [21,22]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [24,23]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
@@ -1223,7 +1223,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 1:#i<(iterations-1):
+                if i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
