@@ -8,19 +8,19 @@ echo "Files being saved in "
 pwd
 
 ##### Edit these variables to generate the script 	#####
-polFlag=1
-polSide=W
-nbEvents=10000
+polFlag=0
+polSide=E
+nbEvents=50000
 ##### 							#####
 
 rm GNUParallel_commands.txt
 
 # in this loop, set the number of .mac files you want to generate
-for ((x = 5000; x < 10000; x = x + 1))
+for ((x = 0; x < 3; x = x + 1))
 
 do
 
-echo './nsm '$nbEvents' n1_f_p_p'$polSide'/Evts_'$x'.root '$polFlag >> GNUParallel_commands.txt
+echo './nsm '$nbEvents' '$G4EVTDIR'/n1_f_p_p'$polSide'/Evts_'$x'.root '$polFlag >> east_test.txt
 
 done
 

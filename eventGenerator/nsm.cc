@@ -39,7 +39,7 @@
 using		 namespace std;
 
 //required later for plot_program
-TApplication plot_program("FADC_readin",0,0,0,0);
+//TApplication plot_program("FADC_readin",0,0,0,0);
 
 void PlotHist(TCanvas *C, int styleIndex, int canvasIndex, TH1D *hPlot, TString title, TString command);
 
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
   else if(polFlag == 1) { pol = +1; }
   else { cout << "polarization flag is incorrect." << endl; }
 
-  TFile fTree(outputName, "RECREATE");
+  TFile *fTree = new TFile(outputName, "RECREATE");
   TTree* Evts = new TTree("Evts", "initial events kinematics");
 
   Int_t event_id = -1;	// event ID will be incremented
@@ -162,13 +162,15 @@ int main(int argc, char* argv[])
   }
 
 
-  fTree.Write();
-  fTree.Close();
+  fTree->Write();
+  delete fTree;
+
+  //if (Evts) delete Evts;
 
 
   cout << "-------------- End of Program ---------------" << endl;
   return 0;
-}
+};
 
 void PlotHist(TCanvas *C, int styleIndex, int canvasIndex, TH1D *hPlot, TString title, TString command)
 {

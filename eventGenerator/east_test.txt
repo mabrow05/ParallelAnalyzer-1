@@ -1,0 +1,3 @@
+./nsm 50000 /home/mabr239/UCNA/eventdir/n1_f_p_pE/Evts_0.root 0
+./nsm 50000 /home/mabr239/UCNA/eventdir/n1_f_p_pE/Evts_1.root 0
+./nsm 50000 /home/mabr239/UCNA/eventdir/n1_f_p_pE/Evts_2.root 0
