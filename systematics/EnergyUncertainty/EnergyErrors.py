@@ -21,7 +21,7 @@ limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.0
 def readCalEnvelope(year=2011,upper=True):
         envLower = []
         envUpper = []
-        with open('envolopeValues-%i-deg2-cal4-curves1000.tsv'%year,'rb') as tsvin:
+        with open('envolopeValues-%i-deg2-cal5-curves1000.tsv'%year,'rb') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
                 for row in tsvin:
                         envLower.append( ( float(row[0]),fabs(float(row[1])) ) )
@@ -122,18 +122,21 @@ def energyErrorRC(E,year):
 
 def linearityUncertaintyTable(year=2011):
 	"""Uncertainty due to energy calibration errors; see EnergyErrorsRevis.pdf"""
+        
+        year2 = year*10+1
+
 	edges = bin_edges()
 	dat = []
 	errmax = 0
 	for i in range(len(edges)-1)[-1::-1]:
 		c = 0.5*(edges[i]+edges[i+1])
-		Eprim = c+calEnvelope(c,year)
-		err = ObsAsymApprox(Eprim,year)/ObsAsymApprox(c,year)-1
+		Eprim = c+calEnvelope(c,year2)
+		err = ObsAsymApprox(Eprim,year2)/ObsAsymApprox(c,year2)-1
 		if err > errmax:
 			errmax = err
 		#dat.append((edges[i],edges[i+1],0.0,errmax))
 		dat.append((edges[i],edges[i+1],0.0,err))
-		print c,Eprim,ObsAsymApprox(c,year),err,errmax
+		print c,Eprim,ObsAsymApprox(c,year2),err,errmax
                 #print c,Eprim,simpleAsym(c,year),err,errmax
 	dat = dat[::-1]
 	fout = open(baseOutPath+"/Corrections/EnergyLinearityUncertainty_%i.txt"%year,"w")
@@ -185,11 +188,11 @@ def plotEnergyErrors(year=2011):
         #         [ graph.style.line([style.linewidth.THick,style.linestyle.dotted]),])
 	#gCx.plot(graph.data.points(gdat,x=1,y=4,title="$A={\\beta \\over 2}(1+$R.C.$)A_0$"),
         #         [ graph.style.line([style.linewidth.THick,style.linestyle.dashed]),] )
-        gCx.plot(graph.data.points(gdat,x=1,y=2,title="%i Monte Carlo"%year),
+        gCx.plot(graph.data.points(gdat,x=1,y=2,title="%i Old Method"%year),
                  [ graph.style.line([style.linewidth.THick]),])
-	gCx.plot(graph.data.points(gdatUpper,x=1,y=2,title="%i Upper Edge"%year),
-                 [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
-        gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i Lower Edge"%year),
+	#gCx.plot(graph.data.points(gdatUpper,x=1,y=2,title="%i Upper Edge"%year),
+        #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
+        gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i New Method"%year),
                  [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
         #gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
@@ -240,7 +243,7 @@ if __name__=="__main__":
 	year = 2011
         readCalEnvelope(year)
         #gainUncertaintyTable(year,0.0064)
-	linearityUncertaintyTable(year)
+	#linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
 	plotEnergyErrors(year)
 	#plotGainfluctErrors()

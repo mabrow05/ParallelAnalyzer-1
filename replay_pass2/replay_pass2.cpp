@@ -17,6 +17,7 @@
 #include <TH2F.h>
 #include <TF1.h>
 #include <TH1D.h>
+#include <TString.h>
 
 #include "fullTreeVariables.h"
 #include "MWPCGeometry.h"
@@ -31,6 +32,23 @@
 using namespace std;
 
 bool OnlyReplayBadFiles = false;
+
+std::vector <Double_t> getLEDGainAdjuster(Int_t rn) {
+
+  std::vector <Double_t> adj(2,1.);
+
+  if (rn>20000) {
+    std::ifstream infile(TString::Format("%s/gain_bismuth/LEDgainAdjusters.txt",getenv("ANALYSIS_CODE")).Data());  
+    std::cout << "Getting LED gain adjuster from " << TString::Format("%s/gain_bismuth/LEDgainAdjusters.txt",getenv("ANALYSIS_CODE")).Data() << std::endl;
+    Int_t run_hold;
+    while ( infile >> run_hold >> adj[0] >> adj[1] ) {
+      if ( run_hold==rn ) break;
+    }
+  }
+  std::cout << "LED gain adjustments: " << adj[0] << "   " << adj[1] << std::endl;
+  return adj;
+
+};
 
 //Read in beam drops
 std::vector < std::vector < Double_t > > readBeamDrops(Int_t runNumber) {
@@ -138,15 +156,22 @@ int main(int argc, char *argv[])
 
   //Read in PMT Quality
   std::vector<Int_t> pmtquality = getPMTQuality(run); 
+  std::vector <Double_t> adj = getLEDGainAdjuster(run);
+  
 
   double fitMean, gainBiFactor,gainLEDFactor;
   double gainCorrection[8];
 
   for (int i=0; i<8; i++) {
+    
+    double LED_Adjuster = ( i==3 ? adj[0] : ( i==7 ? adj[1] : 1. ) ); 
+    
     fileBiGain >> fitMean >> gainBiFactor;
     if (run>20000) fileLEDGain >> fitMean >> gainLEDFactor;
-    gainCorrection[i] = pmtquality[i] ? gainBiFactor : (run>20000 ? gainLEDFactor : 1.); //This sets the gain to use the LED if Bi Pulser is bad
+    gainCorrection[i] = pmtquality[i] ? gainBiFactor : (run>20000 ? gainLEDFactor*LED_Adjuster : 1.); //This sets the gain to use the LED if Bi Pulser is bad
     // and the run is in 2012/2013 when the LEDs were working better
+
+    cout << i << " " << gainLEDFactor << " " << LED_Adjuster << " " << gainCorrection[i] << endl;
   }
 
   fileBiGain.close();

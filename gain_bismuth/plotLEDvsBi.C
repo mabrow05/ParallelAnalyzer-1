@@ -3,6 +3,7 @@
 //Should make an array of all the calibration periods and the
 // runs they apply to, and then put vertical lines at each of these
 #include <vector>
+#include <utility>
 
 std::vector <Int_t> getPMTEreconQuality(Int_t runNumber) {
   //Read in PMT quality file
@@ -28,7 +29,20 @@ std::vector <Int_t> getPMTEreconQuality(Int_t runNumber) {
   return pmtQuality;
 }
 
-void plotLEDTimeDependence(TString year) {
+std::vector <Double_t> getLEDGainAdjuster(Int_t rn) {
+
+  std::ifstream infile("LEDgainAdjusters.txt");
+
+  std::vector <Double_t> adj(2,1.);
+  Int_t run_hold;
+  while ( infile >> run_hold >> adj[0] >> adj[1] ) {
+    if ( run_hold==rn ) break;
+  }
+  return adj;
+
+};
+
+void plotLEDvsBi(TString year) {
 
   gStyle->SetTitleSize(0.08,"t");
   gStyle->SetPadBottomMargin(0.15);
@@ -109,6 +123,129 @@ void plotLEDTimeDependence(TString year) {
       // (rn>20515 && rn<21087) is all the garbage which isn't really usable from the beginning of 2012-2013
 
       std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
+      //std::vector <Double_t> adj = getLEDGainAdjuster(rn);
+      std::vector <Double_t> adj(2,1.);
+
+      //std::cout << "Opened " << filename << std::endl;
+      gainFile >> e1 >> e1_norm
+	       >> e2 >> e2_norm
+	       >> e3 >> e3_norm
+	       >> e4 >> e4_norm
+	       >> w1 >> w1_norm
+	       >> w2 >> w2_norm
+	       >> w3 >> w3_norm
+	       >> w4 >> w4_norm;
+      
+      if (pmtQuality[0]) { 
+	runNumber[0][numRuns[0]]=rn; eastGain[0][numRuns[0]]=e1; eastGainFactor[0][numRuns[0]]=e1_norm*adj[0]; numRuns[0]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[0][numRuns_ref[0]]=rn; eastGain_ref[0][numRuns_ref[0]]=e1; eastGainFactor_ref[0][numRuns_ref[0]]=e1_norm; numRuns_ref[0]++; 
+	    continue;
+	  }
+	}
+      }
+      else e1=1000.; //so it doesn't trigger the check below
+      if (pmtQuality[1]) { 
+	runNumber[1][numRuns[1]]=rn; eastGain[1][numRuns[1]]=e2; eastGainFactor[1][numRuns[1]]=e2_norm*adj[0]; numRuns[1]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[1][numRuns_ref[1]]=rn; eastGain_ref[1][numRuns_ref[1]]=e2; eastGainFactor_ref[1][numRuns_ref[1]]=e2_norm; numRuns_ref[1]++; 
+	    continue;
+	  }
+	}
+      }
+      else e2=1000.; //so it doesn't trigger the check below
+      if (pmtQuality[2]) {
+	runNumber[2][numRuns[2]]=rn; eastGain[2][numRuns[2]]=e3; eastGainFactor[2][numRuns[2]]=e3_norm*adj[0]; numRuns[2]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[2][numRuns_ref[2]]=rn; eastGain_ref[2][numRuns_ref[2]]=e3; eastGainFactor_ref[2][numRuns_ref[2]]=e3_norm; numRuns_ref[2]++; 
+	    continue;
+	  }
+	}
+      }
+      else e3=1000.; //so it doesn't trigger the check below
+      if (pmtQuality[3]) { 
+	runNumber[3][numRuns[3]]=rn; eastGain[3][numRuns[3]]=e4; eastGainFactor[3][numRuns[3]]=e4_norm*adj[0]; numRuns[3]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[3][numRuns_ref[3]]=rn; eastGain_ref[3][numRuns_ref[3]]=e4; eastGainFactor_ref[3][numRuns_ref[3]]=e4_norm; numRuns_ref[3]++;
+	    continue;; 
+	  }
+	}
+      }
+      else e4=1000.; //so it doesn't trigger the check below
+      if (pmtQuality[4]) { 
+	runNumber[4][numRuns[4]]=rn; westGain[0][numRuns[4]]=w1; westGainFactor[0][numRuns[4]]=w1_norm*adj[1]; numRuns[4]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[4][numRuns_ref[4]]=rn; westGain_ref[0][numRuns_ref[4]]=w1; westGainFactor_ref[0][numRuns_ref[4]]=w1_norm; numRuns_ref[4]++; 
+	    continue;
+	  }
+	}
+      }
+      else w1=1000.; //so it doesn't trigger the check below
+      if (pmtQuality[5]) { 
+	runNumber[5][numRuns[5]]=rn; westGain[1][numRuns[5]]=w2; westGainFactor[1][numRuns[5]]=w2_norm*adj[1]; numRuns[5]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[5][numRuns_ref[5]]=rn; westGain_ref[1][numRuns_ref[5]]=w2; westGainFactor_ref[1][numRuns_ref[5]]=w2_norm; numRuns_ref[5]++; 
+	    continue;
+	  }
+	}
+      }
+      else w2=1000.; //so it doesn't trigger the check below
+      if (pmtQuality[6]) { 
+	runNumber[6][numRuns[6]]=rn; westGain[2][numRuns[6]]=w3; westGainFactor[2][numRuns[6]]=w3_norm*adj[1]; numRuns[6]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[6][numRuns_ref[6]]=rn; westGain_ref[2][numRuns_ref[6]]=w3; westGainFactor_ref[2][numRuns_ref[6]]=w3_norm; numRuns_ref[6]++;
+	    continue;
+	  }
+	}
+      }
+      else w3=1000.; //so it doesn't trigger the check below
+      if (pmtQuality[7]) { 
+	runNumber[7][numRuns[7]]=rn; westGain[3][numRuns[7]]=w4; westGainFactor[3][numRuns[7]]=w4_norm*adj[1]; numRuns[7]++; 
+	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
+	  if ( (int)rn==*it ) {
+	    runNumber_ref[7][numRuns_ref[7]]=rn; westGain_ref[3][numRuns_ref[7]]=w4; westGainFactor_ref[3][numRuns_ref[7]]=w4_norm; numRuns_ref[7]++; 
+	    continue;
+	  }
+	}
+      }
+      else w4=1000.; //so it doesn't trigger the check below
+      
+      
+      gainFile.close();
+    }
+  }
+  
+
+  std::vector < Int_t > numRunsBi(8,0);
+  std::vector < Int_t > numRuns_refBi(8,0);
+
+  std::vector < std::pair<Int_t,Double_t> > gainAdjusterE;
+  std::vector < std::pair<Int_t,Double_t> > gainAdjusterW;
+
+  for (Int_t rn=runMin; rn<runMax; rn++) {
+    
+    if (rn%500==0) std::cout << "NOW AT RUN " << rn << std::endl;
+
+    TString filename = TString::Format("%s/gain_bismuth_%i.dat",getenv("GAIN_BISMUTH"),rn);
+    gainFile.open(filename.Data());
+    
+    if (gainFile.is_open()) {
+
+      std::vector <Double_t> adjE;
+      std::vector <Double_t> adjW;
+      
+      if ( rn==17588 || (rn>19583 && rn<19616) || (rn>=16000 && rn<=17078) ) { gainFile.close(); continue; } //Groups of runs to ignore due to bad crap
+      // 17588 is empty, the ranges are unused Xe runs which weren't processed, 
+      // (rn>20515 && rn<21087) is all the garbage which isn't really usable from the beginning of 2012-2013
+
+      std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
       
       //std::cout << "Opened " << filename << std::endl;
       gainFile >> e1 >> e1_norm
@@ -121,104 +258,131 @@ void plotLEDTimeDependence(TString year) {
 	       >> w4 >> w4_norm;
       
       if (pmtQuality[0]) { 
-	runNumber[0][numRuns[0]]=rn; eastGain[0][numRuns[0]]=e1; eastGainFactor[0][numRuns[0]]=e1_norm; numRuns[0]++; 
+        eastGain[0][numRunsBi[0]]/=e1; eastGainFactor[0][numRunsBi[0]]/=e1_norm; 
+	adjE.push_back(1./eastGainFactor[0][numRunsBi[0]]);
+	numRunsBi[0]++;	
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[0][numRuns_ref[0]]=rn; eastGain_ref[0][numRuns_ref[0]]=e1; eastGainFactor_ref[0][numRuns_ref[0]]=e1_norm; numRuns_ref[0]++; 
+	    eastGain_ref[0][numRuns_refBi[0]]/=e1; eastGainFactor_ref[0][numRuns_refBi[0]]/=e1_norm; numRuns_refBi[0]++;
 	    continue;
 	  }
 	}
       }
       else e1=1000.; //so it doesn't trigger the check below
       if (pmtQuality[1]) { 
-	runNumber[1][numRuns[1]]=rn; eastGain[1][numRuns[1]]=e2; eastGainFactor[1][numRuns[1]]=e2_norm; numRuns[1]++; 
+	eastGain[1][numRunsBi[1]]/=e2; eastGainFactor[1][numRunsBi[1]]/=e2_norm; 
+	adjE.push_back(1./eastGainFactor[1][numRunsBi[1]]);
+	numRunsBi[1]++;
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[1][numRuns_ref[1]]=rn; eastGain_ref[1][numRuns_ref[1]]=e2; eastGainFactor_ref[1][numRuns_ref[1]]=e2_norm; numRuns_ref[1]++; 
+	    eastGain_ref[1][numRuns_refBi[1]]/=e2; eastGainFactor_ref[1][numRuns_refBi[1]]/=e2_norm; numRuns_refBi[1]++;
 	    continue;
 	  }
 	}
       }
       else e2=1000.; //so it doesn't trigger the check below
       if (pmtQuality[2]) {
-	runNumber[2][numRuns[2]]=rn; eastGain[2][numRuns[2]]=e3; eastGainFactor[2][numRuns[2]]=e3_norm; numRuns[2]++; 
+	eastGain[2][numRunsBi[2]]/=e3; eastGainFactor[2][numRunsBi[2]]/=e3_norm; 
+	adjE.push_back(1./eastGainFactor[2][numRunsBi[2]]);
+	numRunsBi[2]++;
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[2][numRuns_ref[2]]=rn; eastGain_ref[2][numRuns_ref[2]]=e3; eastGainFactor_ref[2][numRuns_ref[2]]=e3_norm; numRuns_ref[2]++; 
+	    eastGain_ref[2][numRuns_refBi[2]]/=e3; eastGainFactor_ref[2][numRuns_refBi[2]]/=e3_norm; numRuns_refBi[2]++;
 	    continue;
 	  }
 	}
       }
       else e3=1000.; //so it doesn't trigger the check below
       if (pmtQuality[3]) { 
-	runNumber[3][numRuns[3]]=rn; eastGain[3][numRuns[3]]=e4; eastGainFactor[3][numRuns[3]]=e4_norm; numRuns[3]++; 
+	eastGain[3][numRunsBi[3]]/=e4; eastGainFactor[3][numRunsBi[3]]/=e4_norm; 
+	numRunsBi[3]++;
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[3][numRuns_ref[3]]=rn; eastGain_ref[3][numRuns_ref[3]]=e4; eastGainFactor_ref[3][numRuns_ref[3]]=e4_norm; numRuns_ref[3]++;
-	    continue;; 
+	    eastGain_ref[3][numRuns_refBi[3]]/=e4; eastGainFactor_ref[3][numRuns_refBi[3]]/=e4_norm; numRuns_refBi[3]++;
+	    continue;
 	  }
 	}
       }
       else e4=1000.; //so it doesn't trigger the check below
       if (pmtQuality[4]) { 
-	runNumber[4][numRuns[4]]=rn; westGain[0][numRuns[4]]=w1; westGainFactor[0][numRuns[4]]=w1_norm; numRuns[4]++; 
+	westGain[0][numRunsBi[4]]/=w1; westGainFactor[0][numRunsBi[4]]/=w1_norm; 
+	adjW.push_back(1./westGainFactor[0][numRunsBi[4]]);
+	numRunsBi[4]++;
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[4][numRuns_ref[4]]=rn; westGain_ref[0][numRuns_ref[4]]=w1; westGainFactor_ref[0][numRuns_ref[4]]=w1_norm; numRuns_ref[4]++; 
+	    westGain_ref[0][numRuns_refBi[4]]/=w1; westGainFactor_ref[0][numRuns_refBi[4]]/=w1_norm; numRuns_refBi[4]++;
 	    continue;
 	  }
 	}
       }
       else w1=1000.; //so it doesn't trigger the check below
       if (pmtQuality[5]) { 
-	runNumber[5][numRuns[5]]=rn; westGain[1][numRuns[5]]=w2; westGainFactor[1][numRuns[5]]=w2_norm; numRuns[5]++; 
+	westGain[1][numRunsBi[5]]/=w2; westGainFactor[1][numRunsBi[5]]/=w2_norm; 
+	adjW.push_back(1./westGainFactor[1][numRunsBi[5]]);
+	numRunsBi[5]++;
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[5][numRuns_ref[5]]=rn; westGain_ref[1][numRuns_ref[5]]=w2; westGainFactor_ref[1][numRuns_ref[5]]=w2_norm; numRuns_ref[5]++; 
+	    westGain_ref[1][numRuns_refBi[5]]/=w2; westGainFactor_ref[1][numRuns_refBi[5]]/=w2_norm; numRuns_refBi[5]++;
 	    continue;
 	  }
 	}
       }
       else w2=1000.; //so it doesn't trigger the check below
       if (pmtQuality[6]) { 
-	runNumber[6][numRuns[6]]=rn; westGain[2][numRuns[6]]=w3; westGainFactor[2][numRuns[6]]=w3_norm; numRuns[6]++; 
+	westGain[2][numRunsBi[6]]/=w3; westGainFactor[2][numRunsBi[6]]/=w3_norm; 
+	adjW.push_back(1./westGainFactor[2][numRunsBi[6]]);
+	numRunsBi[6]++;
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[6][numRuns_ref[6]]=rn; westGain_ref[2][numRuns_ref[6]]=w3; westGainFactor_ref[2][numRuns_ref[6]]=w3_norm; numRuns_ref[6]++;
+	    westGain_ref[2][numRuns_refBi[6]]/=w3; westGainFactor_ref[2][numRuns_refBi[6]]/=w3_norm; numRuns_refBi[6]++;
 	    continue;
 	  }
 	}
       }
       else w3=1000.; //so it doesn't trigger the check below
       if (pmtQuality[7]) { 
-	runNumber[7][numRuns[7]]=rn; westGain[3][numRuns[7]]=w4; westGainFactor[3][numRuns[7]]=w4_norm; numRuns[7]++; 
+	westGain[3][numRunsBi[7]]/=w4; westGainFactor[3][numRunsBi[7]]/=w4_norm; 
+	numRunsBi[7]++;
 	for ( std::vector<Int_t>::iterator it = calPeriodRefRun.begin(); it!=calPeriodRefRun.end(); ++it ) {
 	  if ( (int)rn==*it ) {
-	    runNumber_ref[7][numRuns_ref[7]]=rn; westGain_ref[3][numRuns_ref[7]]=w4; westGainFactor_ref[3][numRuns_ref[7]]=w4_norm; numRuns_ref[7]++; 
+	    westGain_ref[3][numRuns_refBi[7]]/=w4; westGainFactor_ref[3][numRuns_refBi[7]]/=w4_norm; numRuns_refBi[7]++;
 	    continue;
 	  }
 	}
       }
       else w4=1000.; //so it doesn't trigger the check below
       
+      Double_t ave = 0.;
+      for (UInt_t i=0;i<adjE.size();++i) ave+=adjE[i];
+      ave = (adjE.size()>0?ave/(double)adjE.size():1.);
+      std::pair<Int_t,Double_t> pE(rn,ave);
+      gainAdjusterE.push_back(pE);
 
-      if (e1<1000. || e2<1000. || e3<1000. || e4<1000. || w1<1000. || w2<1000. || w3<1000. || w4<1000.) {
+      //std::cout << rn << "\t" <<  ave << "\t";
 
-	std::cout << rn << "\t"
-		  << e1 << "\t" << e2 << "\t" << e3 << "\t" << e4 << "\t"
-		  << w1 << "\t" << w2 << "\t" << w3 << "\t" << w4 << "\n";
-      }
-      
-      else if (e1>4000. || e2>4000. || e3>4000. || e4>4000. || w1>4000. || w2>4000. || w3>4000. || w4>4000.) {
+      ave = 0.;
+      for (UInt_t ii=0;ii<adjW.size();++ii) ave+=adjW[ii];
+      ave = (adjW.size()>0?ave/(double)adjW.size():1.);
+      std::pair<Int_t,Double_t> pW(rn,ave);
+      gainAdjusterW.push_back(pW);
 
-	std::cout << rn << "\t"
-		  << e1 << "\t" << e2 << "\t" << e3 << "\t" << e4 << "\t"
-		  << w1 << "\t" << w2 << "\t" << w3 << "\t" << w4 << "\n";
-      }
+      //std::cout <<  ave << "\n";
       
       gainFile.close();
     }
   }
+
+  // Write all the gain adjusters
+  std::ofstream gainAdjusterFile("LEDgainAdjusters.txt");
+  
+  gainAdjusterFile << std::setprecision(10);
+
+  for (UInt_t j=0; j<gainAdjusterE.size();++j) {
+    gainAdjusterFile << gainAdjusterE[j].first << "\t" << gainAdjusterE[j].second << "\t" << gainAdjusterW[j].second << "\n";
+  }
+
+  gainAdjusterFile.close();
+
 
 
   // making all of the TLines to reperesent the calibration periods
@@ -244,337 +408,6 @@ void plotLEDTimeDependence(TString year) {
   Double_t min = 0., max = 0.;
   
 
-  //EAST SIDE
-  TCanvas *cEast = new TCanvas("cEast","East PMTs",1000, 1200);
-  cEast->Divide(1,4);
-
-  cEast->cd(1);
-
-  TGraph *east1 = new TGraph(numRuns[0],&runNumber[0][0],&eastGain[0][0]);
-  east1->SetTitle("PMT East 1");
-  east1->GetXaxis()->SetTitle("Run Number");
-  east1->GetYaxis()->SetTitle("ADC Channels");
-  east1->GetXaxis()->SetLimits(runMin, runMax);
-  east1->SetMarkerStyle(8);
-  // east1->SetMinimum(0.);
-  //east1->SetMaximum(4096.);
-  east1->Draw("AP");
-  
-  cEast->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE1[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE1[i]->SetLineStyle(2);
-    linesE1[i]->SetLineColor(kRed);
-    linesE1[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[0][0] && (double)calPeriodRunEnd[i] < runNumber[0][numRuns[0]-1] ) {
-      linesE1[i]->Draw();
-    }
-  } 
-  
-  TGraph *east1_ref = new TGraph(numRuns_ref[0],&runNumber_ref[0][0],&eastGain_ref[0][0]);
-  east1_ref->SetTitle("PMT East 1");
-  east1_ref->GetXaxis()->SetTitle("Run Number");
-  east1_ref->GetYaxis()->SetTitle("ADC Channels");
-  east1_ref->SetMarkerStyle(8);
-  east1_ref->SetMarkerColor(kRed);
-  // east1_ref->SetMinimum(0.);
-  //east1_ref->SetMaximum(4096.);
-  east1_ref->Draw("P SAME");
-
-  
-
-  
-
-  cEast->cd(2);
-
-  TGraph *east2 = new TGraph(numRuns[1],&runNumber[1][0],&eastGain[1][0]);
-  east2->SetTitle("PMT East 2");
-  east2->GetXaxis()->SetTitle("Run Number");
-  east2->GetYaxis()->SetTitle("ADC Channels");
-  east2->GetXaxis()->SetLimits(runMin, runMax);
-  east2->SetMarkerStyle(8);
-  //east2->SetMinimum(0.);
-  //east2->SetMaximum(4096.);
-  east2->Draw("AP");
-
-  cEast->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE2[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE2[i]->SetLineStyle(2);
-    linesE2[i]->SetLineColor(kRed);
-    linesE2[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[1][0] && (double)calPeriodRunEnd[i] < runNumber[1][numRuns[1]-1] ) {
-      linesE2[i]->Draw();
-    }
-  }
-
-  TGraph *east2_ref = new TGraph(numRuns_ref[1],&runNumber_ref[1][0],&eastGain_ref[1][0]);
-  east2_ref->SetTitle("PMT East 2");
-  east2_ref->GetXaxis()->SetTitle("Run Number");
-  east2_ref->GetYaxis()->SetTitle("ADC Channels");
-  east2_ref->SetMarkerStyle(8);
-  east2_ref->SetMarkerColor(kRed);
-  // east2_ref->SetMinimum(0.);
-  //east2_ref->SetMaximum(4096.);
-  east2_ref->Draw("P SAME");
-
-
-  cEast->cd(3);
-
-  TGraph *east3 = new TGraph(numRuns[2],&runNumber[2][0],&eastGain[2][0]);
-  east3->SetTitle("PMT East 3");
-  east3->GetXaxis()->SetTitle("Run Number");
-  east3->GetYaxis()->SetTitle("ADC Channels");
-  east3->GetXaxis()->SetLimits(runMin, runMax);
-  east3->SetMarkerStyle(8);
-  //east3->SetMinimum(0.);
-  //east3->SetMaximum(4096.);
-  east3->Draw("AP");
-
-  cEast->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE3[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE3[i]->SetLineStyle(2);
-    linesE3[i]->SetLineColor(kRed);
-    linesE3[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[2][0] && (double)calPeriodRunEnd[i] < runNumber[2][numRuns[2]-1] ) {
-      linesE3[i]->Draw();
-    }
-  }
-
-  TGraph *east3_ref = new TGraph(numRuns_ref[2],&runNumber_ref[2][0],&eastGain_ref[2][0]);
-  east3_ref->SetTitle("PMT East 3");
-  east3_ref->GetXaxis()->SetTitle("Run Number");
-  east3_ref->GetYaxis()->SetTitle("ADC Channels");
-  east3_ref->SetMarkerStyle(8);
-  east3_ref->SetMarkerColor(kRed);
-  // east3_ref->SetMinimum(0.);
-  //east3_ref->SetMaximum(4096.);
-  east3_ref->Draw("P SAME");
-  
-
-  cEast->cd(4);
-
-  TGraph *east4 = new TGraph(numRuns[3],&runNumber[3][0],&eastGain[3][0]);
-  east4->SetTitle("PMT East 4");
-  east4->GetXaxis()->SetTitle("Run Number");
-  east4->GetYaxis()->SetTitle("ADC Channels");
-  east4->GetXaxis()->SetLimits(runMin, runMax);
-  east4->SetMarkerStyle(8);
-  //east4->SetMinimum(0.);
-  //east4->SetMaximum(4096.);
-  east4->Draw("AP");
-
-  cEast->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesE4[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesE4[i]->SetLineStyle(2);
-    linesE4[i]->SetLineColor(kRed);
-    linesE4[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[3][0] && (double)calPeriodRunEnd[i] < runNumber[3][numRuns[3]-1] ) {
-      linesE4[i]->Draw();
-    }
-  }
-
-  TGraph *east4_ref = new TGraph(numRuns_ref[3],&runNumber_ref[3][0],&eastGain_ref[3][0]);
-  east4_ref->SetTitle("PMT East 4");
-  east4_ref->GetXaxis()->SetTitle("Run Number");
-  east4_ref->GetYaxis()->SetTitle("ADC Channels");
-  east4_ref->SetMarkerStyle(8);
-  east4_ref->SetMarkerColor(kRed);
-  // east4_ref->SetMinimum(0.);
-  //east4_ref->SetMaximum(4096.);
-  east4_ref->Draw("P SAME");
-
-
-
-  //WEST SIDE
-  TCanvas *cWest = new TCanvas("cWest","West PMTs",1000, 1200);
-  cWest->Divide(1,4);
-
-  cWest->cd(1);
-
-  TGraph *west1 = new TGraph(numRuns[4],&runNumber[4][0],&westGain[0][0]);
-  west1->SetTitle("PMT West 1");
-  west1->GetXaxis()->SetTitle("Run Number");
-  west1->GetYaxis()->SetTitle("ADC Channels");
-  west1->GetXaxis()->SetLimits(runMin, runMax);
-  west1->SetMarkerStyle(8);
-  //west1->SetMinimum(0.);
-  //west1->SetMaximum(4096.);
-  west1->Draw("AP");
-
-  cWest->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesW1[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW1[i]->SetLineStyle(2);
-    linesW1[i]->SetLineColor(kRed);
-    linesW1[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[4][0] && (double)calPeriodRunEnd[i] < runNumber[4][numRuns[4]-1] ) {
-      linesW1[i]->Draw();
-    }
-  }
-
-  TGraph *west1_ref = new TGraph(numRuns_ref[4],&runNumber_ref[4][0],&westGain_ref[0][0]);
-  west1_ref->SetTitle("PMT West 1");
-  west1_ref->GetXaxis()->SetTitle("Run Number");
-  west1_ref->GetYaxis()->SetTitle("ADC Channels");
-  west1_ref->SetMarkerStyle(8);
-  west1_ref->SetMarkerColor(kRed);
-  // west1_ref->SetMinimum(0.);
-  //west1_ref->SetMaximum(4096.);
-  west1_ref->Draw("P SAME");
-
-
-
-  cWest->cd(2);
-
-  TGraph *west2 = new TGraph(numRuns[5],&runNumber[5][0],&westGain[1][0]);
-  west2->SetTitle("PMT West 2");
-  west2->GetXaxis()->SetTitle("Run Number");
-  west2->GetYaxis()->SetTitle("ADC Channels");
-  west2->GetXaxis()->SetLimits(runMin, runMax);
-  west2->SetMarkerStyle(8);
-  //west2->SetMinimum(0.);
-  //west2->SetMaximum(4096.);
-  west2->Draw("AP");
-
-  cWest->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesW2[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW2[i]->SetLineStyle(2);
-    linesW2[i]->SetLineColor(kRed);
-    linesW2[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[5][0] && (double)calPeriodRunEnd[i] < runNumber[5][numRuns[5]-1] ) {
-      linesW2[i]->Draw();
-    }
-  }
-
-  TGraph *west2_ref = new TGraph(numRuns_ref[5],&runNumber_ref[5][0],&westGain_ref[1][0]);
-  west2_ref->SetTitle("PMT West 2");
-  west2_ref->GetXaxis()->SetTitle("Run Number");
-  west2_ref->GetYaxis()->SetTitle("ADC Channels");
-  west2_ref->SetMarkerStyle(8);
-  west2_ref->SetMarkerColor(kRed);
-  // west2_ref->SetMinimum(0.);
-  //west2_ref->SetMaximum(4096.);
-  west2_ref->Draw("P SAME");
-
-
-
-  cWest->cd(3);
-
-  TGraph *west3 = new TGraph(numRuns[6],&runNumber[6][0],&westGain[2][0]);
-  west3->SetTitle("PMT West 3");
-  west3->GetXaxis()->SetTitle("Run Number");
-  west3->GetYaxis()->SetTitle("ADC Channels");
-  west3->GetXaxis()->SetLimits(runMin, runMax);
-  west3->SetMarkerStyle(8);
-  //west3->SetMinimum(0.);
-  //west3->SetMaximum(4096.);
-  west3->Draw("AP");
-
-  cWest->Update();
-  
-  min = gPad->GetUymin();
-  max = gPad->GetUymax();
-
-  for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-    
-    linesW3[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-    linesW3[i]->SetLineStyle(2);
-    linesW3[i]->SetLineColor(kRed);
-    linesW3[i]->SetLineWidth(2);
-    if ( (double)calPeriodRunEnd[i] > runNumber[6][0] && (double)calPeriodRunEnd[i] < runNumber[6][numRuns[6]-1] ) {
-      linesW3[i]->Draw();
-    }
-  }
-
-  TGraph *west3_ref = new TGraph(numRuns_ref[6],&runNumber_ref[6][0],&westGain_ref[2][0]);
-  west3_ref->SetTitle("PMT West 3");
-  west3_ref->GetXaxis()->SetTitle("Run Number");
-  west3_ref->GetYaxis()->SetTitle("ADC Channels");
-  west3_ref->SetMarkerStyle(8);
-  west3_ref->SetMarkerColor(kRed);
-  // west3_ref->SetMinimum(0.);
-  //west3_ref->SetMaximum(4096.);
-  west3_ref->Draw("P SAME");
-
-
-
-  if (numRuns[7]>0) {
-    cWest->cd(4);
-    
-    
-    TGraph *west4 = new TGraph(numRuns[7],&runNumber[7][0],&westGain[3][0]);
-    west4->SetTitle("PMT West 4");
-    west4->GetXaxis()->SetTitle("Run Number");
-    west4->GetYaxis()->SetTitle("ADC Channels");
-    west4->GetXaxis()->SetLimits(runMin, runMax);
-    west4->SetMarkerStyle(8);
-    //west4->SetMinimum(0.);
-    //west4->SetMaximum(4096.);
-    west4->Draw("AP");
-
-    cWest->Update();
-  
-    min = gPad->GetUymin();
-    max = gPad->GetUymax();
-    
-    for (UInt_t i=0; i<calPeriodRunEnd.size(); i++) {
-      
-      linesW4[i] = new TLine((double)calPeriodRunEnd[i],min,(double)calPeriodRunEnd[i],max);
-      linesW4[i]->SetLineStyle(2);
-      linesW4[i]->SetLineColor(kRed);
-      linesW4[i]->SetLineWidth(2);
-      if ( (double)calPeriodRunEnd[i] > runNumber[7][0] && (double)calPeriodRunEnd[i] < runNumber[7][numRuns[7]-1] ) {
-	linesW4[i]->Draw();
-      }
-    }
-
-    TGraph *west4_ref = new TGraph(numRuns_ref[7],&runNumber_ref[7][0],&westGain_ref[3][0]);
-    west4_ref->SetTitle("PMT West 4");
-    west4_ref->GetXaxis()->SetTitle("Run Number");
-    west4_ref->GetYaxis()->SetTitle("ADC Channels");
-    west4_ref->SetMarkerStyle(8);
-    west4_ref->SetMarkerColor(kRed);
-    // west4_ref->SetMinimum(0.);
-    //west4_ref->SetMaximum(4096.);
-    west4_ref->Draw("P SAME");
-
-    
-  }
-    
   
     ///////////////////////////// Plotting the gain factors //////////////////////////////////
 
@@ -588,7 +421,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac1 = new TGraph(numRuns[0],&runNumber[0][0],&eastGainFactor[0][0]);
   east_fac1->SetTitle("PMT East 1");
   east_fac1->GetXaxis()->SetTitle("Run Number");
-  east_fac1->GetYaxis()->SetTitle("Gain Factor");
+  east_fac1->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac1->GetXaxis()->SetLimits(runMin, runMax);
   east_fac1->SetMarkerStyle(8);
   // east_fac1->SetMinimum(0.);
@@ -614,7 +447,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac1_ref = new TGraph(numRuns_ref[0],&runNumber_ref[0][0],&eastGainFactor_ref[0][0]);
   east_fac1_ref->SetTitle("PMT East 1");
   east_fac1_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac1_ref->GetYaxis()->SetTitle("Gain Factor");
+  east_fac1_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac1_ref->SetMarkerStyle(8);
   east_fac1_ref->SetMarkerColor(kRed);
   // east_fac1_ref->SetMinimum(0.);
@@ -628,7 +461,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac2 = new TGraph(numRuns[1],&runNumber[1][0],&eastGainFactor[1][0]);
   east_fac2->SetTitle("PMT East 2");
   east_fac2->GetXaxis()->SetTitle("Run Number");
-  east_fac2->GetYaxis()->SetTitle("Gain Factor");
+  east_fac2->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac2->GetXaxis()->SetLimits(runMin, runMax);
   east_fac2->SetMarkerStyle(8);
   //east_fac2->SetMinimum(0.);
@@ -654,7 +487,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac2_ref = new TGraph(numRuns_ref[1],&runNumber_ref[1][0],&eastGainFactor_ref[1][0]);
   east_fac2_ref->SetTitle("PMT East 2");
   east_fac2_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac2_ref->GetYaxis()->SetTitle("Gain Factor");
+  east_fac2_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac2_ref->SetMarkerStyle(8);
   east_fac2_ref->SetMarkerColor(kRed);
   // east_fac2_ref->SetMinimum(0.);
@@ -668,7 +501,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac3 = new TGraph(numRuns[2],&runNumber[2][0],&eastGainFactor[2][0]);
   east_fac3->SetTitle("PMT East 3");
   east_fac3->GetXaxis()->SetTitle("Run Number");
-  east_fac3->GetYaxis()->SetTitle("Gain Factor");
+  east_fac3->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac3->GetXaxis()->SetLimits(runMin, runMax);
   east_fac3->SetMarkerStyle(8);
   //east_fac3->SetMinimum(0.);
@@ -694,7 +527,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac3_ref = new TGraph(numRuns_ref[2],&runNumber_ref[2][0],&eastGainFactor_ref[2][0]);
   east_fac3_ref->SetTitle("PMT East 3");
   east_fac3_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac3_ref->GetYaxis()->SetTitle("Gain Factor");
+  east_fac3_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac3_ref->SetMarkerStyle(8);
   east_fac3_ref->SetMarkerColor(kRed);
   // east_fac3_ref->SetMinimum(0.);
@@ -707,7 +540,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac4 = new TGraph(numRuns[3],&runNumber[3][0],&eastGainFactor[3][0]);
   east_fac4->SetTitle("PMT East 4");
   east_fac4->GetXaxis()->SetTitle("Run Number");
-  east_fac4->GetYaxis()->SetTitle("Gain Factor");
+  east_fac4->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac4->GetXaxis()->SetLimits(runMin, runMax);
   east_fac4->SetMarkerStyle(8);
   //east_fac4->SetMinimum(0.);
@@ -733,7 +566,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *east_fac4_ref = new TGraph(numRuns_ref[3],&runNumber_ref[3][0],&eastGainFactor_ref[3][0]);
   east_fac4_ref->SetTitle("PMT East 4");
   east_fac4_ref->GetXaxis()->SetTitle("Run Number");
-  east_fac4_ref->GetYaxis()->SetTitle("Gain Factor");
+  east_fac4_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
   east_fac4_ref->SetMarkerStyle(8);
   east_fac4_ref->SetMarkerColor(kRed);
   // east_fac4_ref->SetMinimum(0.);
@@ -750,7 +583,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *west_fac1 = new TGraph(numRuns[4],&runNumber[4][0],&westGainFactor[0][0]);
   west_fac1->SetTitle("PMT West 1");
   west_fac1->GetXaxis()->SetTitle("Run Number");
-  west_fac1->GetYaxis()->SetTitle("Gain Factor");
+  west_fac1->GetYaxis()->SetTitle("LEDGain / BiGain");
   west_fac1->GetXaxis()->SetLimits(runMin, runMax);
   west_fac1->SetMarkerStyle(8);
   //west_fac1->SetMinimum(0.);
@@ -776,7 +609,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *west_fac1_ref = new TGraph(numRuns_ref[4],&runNumber_ref[4][0],&westGainFactor_ref[0][0]);
   west_fac1_ref->SetTitle("PMT West 1");
   west_fac1_ref->GetXaxis()->SetTitle("Run Number");
-  west_fac1_ref->GetYaxis()->SetTitle("Gain Factor");
+  west_fac1_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
   west_fac1_ref->SetMarkerStyle(8);
   west_fac1_ref->SetMarkerColor(kRed);
   // west_fac1_ref->SetMinimum(0.);
@@ -790,7 +623,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *west_fac2 = new TGraph(numRuns[5],&runNumber[5][0],&westGainFactor[1][0]);
   west_fac2->SetTitle("PMT West 2");
   west_fac2->GetXaxis()->SetTitle("Run Number");
-  west_fac2->GetYaxis()->SetTitle("Gain Factor");
+  west_fac2->GetYaxis()->SetTitle("LEDGain / BiGain");
   west_fac2->GetXaxis()->SetLimits(runMin, runMax);
   west_fac2->SetMarkerStyle(8);
   //west_fac2->SetMinimum(0.);
@@ -816,7 +649,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *west_fac2_ref = new TGraph(numRuns_ref[5],&runNumber_ref[5][0],&westGainFactor_ref[1][0]);
   west_fac2_ref->SetTitle("PMT West 2");
   west_fac2_ref->GetXaxis()->SetTitle("Run Number");
-  west_fac2_ref->GetYaxis()->SetTitle("Gain Factor");
+  west_fac2_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
   west_fac2_ref->SetMarkerStyle(8);
   west_fac2_ref->SetMarkerColor(kRed);
   // west_fac2_ref->SetMinimum(0.);
@@ -829,7 +662,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *west_fac3 = new TGraph(numRuns[6],&runNumber[6][0],&westGainFactor[2][0]);
   west_fac3->SetTitle("PMT West 3");
   west_fac3->GetXaxis()->SetTitle("Run Number");
-  west_fac3->GetYaxis()->SetTitle("Gain Factor");
+  west_fac3->GetYaxis()->SetTitle("LEDGain / BiGain");
   west_fac3->GetXaxis()->SetLimits(runMin, runMax);
   west_fac3->SetMarkerStyle(8);
   //west_fac3->SetMinimum(0.);
@@ -855,7 +688,7 @@ void plotLEDTimeDependence(TString year) {
   TGraph *west_fac3_ref = new TGraph(numRuns_ref[6],&runNumber_ref[6][0],&westGainFactor_ref[2][0]);
   west_fac3_ref->SetTitle("PMT West 3");
   west_fac3_ref->GetXaxis()->SetTitle("Run Number");
-  west_fac3_ref->GetYaxis()->SetTitle("Gain Factor");
+  west_fac3_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
   west_fac3_ref->SetMarkerStyle(8);
   west_fac3_ref->SetMarkerColor(kRed);
   // west_fac3_ref->SetMinimum(0.);
@@ -870,7 +703,7 @@ void plotLEDTimeDependence(TString year) {
     TGraph *west_fac4 = new TGraph(numRuns[7],&runNumber[7][0],&westGainFactor[3][0]);
     west_fac4->SetTitle("PMT West 4");
     west_fac4->GetXaxis()->SetTitle("Run Number");
-    west_fac4->GetYaxis()->SetTitle("Gain Factor");
+    west_fac4->GetYaxis()->SetTitle("LEDGain / BiGain");
     west_fac4->GetXaxis()->SetLimits(runMin, runMax);
     west_fac4->SetMarkerStyle(8);
     //west_fac4->SetMinimum(0.);
@@ -896,7 +729,7 @@ void plotLEDTimeDependence(TString year) {
     TGraph *west_fac4_ref = new TGraph(numRuns_ref[7],&runNumber_ref[7][0],&westGainFactor_ref[3][0]);
     west_fac4_ref->SetTitle("PMT West 4");
     west_fac4_ref->GetXaxis()->SetTitle("Run Number");
-    west_fac4_ref->GetYaxis()->SetTitle("Gain Factor");
+    west_fac4_ref->GetYaxis()->SetTitle("LEDGain / BiGain");
     west_fac4_ref->SetMarkerStyle(8);
     west_fac4_ref->SetMarkerColor(kRed);
     // west_fac4_ref->SetMinimum(0.);
@@ -906,10 +739,10 @@ void plotLEDTimeDependence(TString year) {
   }
     
 
-  TString fnamebase = TString::Format("%s_LEDgain.pdf",year.Data());
-  cEast->Print(TString::Format("%s(",fnamebase.Data()));
-  cWest->Print(TString::Format("%s",fnamebase.Data()));
-  cEast_Fac->Print(TString::Format("%s",fnamebase.Data()));
+  TString fnamebase = TString::Format("%s_LEDvsBi.pdf",year.Data());
+  //cEast->Print(TString::Format("%s(",fnamebase.Data()));
+  //cWest->Print(TString::Format("%s",fnamebase.Data()));
+  cEast_Fac->Print(TString::Format("%s(",fnamebase.Data()));
   cWest_Fac->Print(TString::Format("%s)",fnamebase.Data()));
   
 
