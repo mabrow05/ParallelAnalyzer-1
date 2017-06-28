@@ -410,6 +410,7 @@ int main(int argc, char *argv[])
 	  //Double_t rangeLow = 5.;
 	  //Double_t rangeHigh = 4096.;
 	  SinglePeakHist sing(hisEvis[n][j], xLow[n][j], xHigh[n][j]);
+	  sing.SetScaleFactors(1.,1.75);
 
 	  if (sing.isGoodFit()) {
 	    fitMean[n][j] = sing.ReturnMean();
@@ -650,7 +651,8 @@ int main(int argc, char *argv[])
 	  //Double_t rangeLowEvisTot = 5.;
 	  //Double_t rangeHighEvisTot = 4096.;
 	  SinglePeakHist sing(hisEvisTot[n][j], xLowEvisTot[n][j], xHighEvisTot[n][j]);
-	  
+	  sing.SetScaleFactors(1.,1.75);
+
 	  if (sing.isGoodFit()) {
 	    fitMeanEvisTot[n][j] = sing.ReturnMean();
 	    fitSigmaEvisTot[n][j] = sing.ReturnSigma();
@@ -677,7 +679,9 @@ int main(int argc, char *argv[])
 	  //DoublePeakHist doub(hisEvisTot[n][j], xLowEvisTot[n][j], xHighEvisTot[n][j]);
 	  SinglePeakHist singBi1(hisEvisTot[n][j], 800., xHighEvisTot[n][j]);
 	  SinglePeakHist singBi2(hisEvisTot[n][j], 340., 530.);
-	  
+	  singBi1.SetScaleFactors(1.25,1.75);
+	  singBi2.SetScaleFactors(1.75,1.25);
+
 	  if (singBi1.isGoodFit()) {	    
 	    fitMeanEvisTot[n][j] = singBi1.ReturnMean();	 
 	    fitSigmaEvisTot[n][j] = singBi1.ReturnSigma();
@@ -817,7 +821,8 @@ int main(int argc, char *argv[])
 	  //Double_t rangeLowEreconTot = 5.;
 	  //Double_t rangeHighEreconTot = 4096.;
 	  SinglePeakHist sing(hisEreconTot[n][j], xLowEreconTot[n][j], xHighEreconTot[n][j]);
-	  
+	  sing.SetScaleFactors(1.,1.75);
+
 	  if (sing.isGoodFit()) {
 	    fitMeanEreconTot[n][j] = sing.ReturnMean();
 	    fitSigmaEreconTot[n][j] = sing.ReturnSigma();
@@ -843,6 +848,7 @@ int main(int argc, char *argv[])
 	  
 	  //DoublePeakHist doub(hisEreconTot[n][j], xLowEreconTot[n][j], xHighEreconTot[n][j]);
 	  SinglePeakHist singBi1(hisEreconTot[n][j], 850., xHighEreconTot[n][j], true, 5, 1.25, 1.75);
+	  
 	  SinglePeakHist singBi2(hisEreconTot[n][j], 390., 580., true, 5, 1.75, 1.25);
 	  
 	  if (singBi1.isGoodFit()) {	    

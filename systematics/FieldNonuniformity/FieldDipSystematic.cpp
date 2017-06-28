@@ -38,8 +38,8 @@ void FieldAsymmetry(TString field,TString year) {
   TH1D *hisE_polE = new TH1D("hisE_polE","hisE",100,0.,1000.);
   TH1D *hisW_polE = new TH1D("hisW_polE","hisW",100,0.,1000.);
 
-  TH1D *hisE_polW = new TH1D("hisE_polE","hisE",100,0.,1000.);
-  TH1D *hisW_polW = new TH1D("hisW_polE","hisW",100,0.,1000.);
+  TH1D *hisE_polW = new TH1D("hisE_polW","hisE",100,0.,1000.);
+  TH1D *hisW_polW = new TH1D("hisW_polW","hisW",100,0.,1000.);
 
 
   Double_t EdepQ[2], MWPCEnergy[2],primKE,primTheta;
@@ -47,7 +47,7 @@ void FieldAsymmetry(TString field,TString year) {
   //Start with East polarization
   for (int i=0; i<5; ++i) {
     std::cout << "In Folder " << i << std::endl;
-    for (int j=0; j<1000; ++j) {
+    for (int j=0; j<10; ++j) {
       f = new TFile(TString::Format("%s/%s%i/analyzed_%i.root",
 					   basepath.Data(),
 					   (field==TString("good")?"G":
@@ -79,7 +79,7 @@ void FieldAsymmetry(TString field,TString year) {
   //Now West polarization
   for (int i=5; i<10; ++i) {
     std::cout << "In Folder " << i << std::endl;
-    for (int j=0; j<1000; ++j) {
+    for (int j=0; j<10; ++j) {
       f = new TFile(TString::Format("%s/%s%i/analyzed_%i.root",
 					   basepath.Data(),
 					   (field==TString("good")?"G":
@@ -116,6 +116,11 @@ void FieldAsymmetry(TString field,TString year) {
     rW_polW[b] = hisW_polW->GetBinContent(b+1); rW_polW_err[b] = TMath::Sqrt(rW_polW[b]);
   }
 
+  delete hisE_polE;
+  delete hisW_polE;
+  delete hisE_polW;
+  delete hisW_polW;
+  
   std::vector <Double_t> asymm(100,0.);
   std::vector <Double_t> asymmErr(100,0.);
   
@@ -147,7 +152,7 @@ void FieldAsymmetry(TString field,TString year) {
 
 int main(int argc, char *argv[]) {
 
-  if (argc!=2) {
+  if (argc!=3) {
     std::cout << "usage: ./FieldDipSystematic.exe [field=good,flat] [year]\n";
     exit(0);
   }

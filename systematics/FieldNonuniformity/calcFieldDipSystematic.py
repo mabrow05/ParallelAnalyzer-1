@@ -22,8 +22,8 @@ def weightAsymm(data,emin,emax):
     
 if __name__=="__main__":
     year = "2011-2012"
-    emin = 220.
-    emax = 670.
+    emin = 230.
+    emax = 750.
     
     A_dip = readAsymm(year,"good")
     A_dip_int = weightAsymm(A_dip,emin,emax)
