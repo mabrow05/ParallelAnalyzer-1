@@ -45,10 +45,10 @@ void PlotHist(TCanvas *C, int styleIndex, int canvasIndex, TH1D *hPlot, TString 
 
 int main(int argc, char* argv[])
 {
-  if(argc != 4)
+  if(argc != 5)
   {
     cout << "Incorrect format. Execute with: \n";
-    cout << "(executable) (number of events) (output file name) (0 for East, 1 for West)" << endl;
+    cout << "(executable) (number of events) (output file name) (0 for East, 1 for West) (fileNum for seed)" << endl;
     return 0;
   }
 
@@ -56,6 +56,8 @@ int main(int argc, char* argv[])
   Int_t polFlag = atoi(argv[3]);	// polarization value
   TString outputName(argv[2]);
   cout << "Saving initial events kinematics in file " << outputName << endl;
+
+  Int_t seed = (10000*polFlag)+(atoi(argv[4])+1);
 
   Int_t pol = 10000;
   if(polFlag == 0) { pol = -1; }
@@ -73,7 +75,7 @@ int main(int argc, char* argv[])
   Double_t event_KE = -1;	// keV
   Double_t event_theta = 0;
   Double_t event_phi = 0;
-  TRandom3 factor(0);
+  TRandom3 factor(seed);
 
   Double_t event_pos[3];	// position in m
   Double_t event_dir[3];        // momentum direction, unit vector

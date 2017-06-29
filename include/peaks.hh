@@ -28,6 +28,7 @@ public:
   
   void SetRangeMin(Double_t m) { min = m; }
   void SetRangeMax(Double_t m) { max = m; }
+  void SetScaleFactors(Double_t low, Double_t high) { minScaleFactor=low, maxScaleFactor=high;}
 
 private:
 

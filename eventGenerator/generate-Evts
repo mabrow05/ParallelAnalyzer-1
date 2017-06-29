@@ -16,11 +16,11 @@ nbEvents=50000
 rm GNUParallel_commands.txt
 
 # in this loop, set the number of .mac files you want to generate
-for ((x = 0; x < 3; x = x + 1))
+for ((x = 0; x < 10000; x = x + 1))
 
 do
 
-echo './nsm '$nbEvents' '$G4EVTDIR'/n1_f_p_p'$polSide'/Evts_'$x'.root '$polFlag >> east_test.txt
+echo './nsm '$nbEvents' '$G4EVTDIR'/n1_f_p_p'$polSide'/Evts_'$x'.root '$polFlag' '$x >> east_ALL.txt
 
 done
 
