@@ -15,7 +15,7 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17588,17950,17953,18749,21298,21605]
+omittedRuns = [17588,17950,17953,21298,21605]
 #17588, 17950, 17953 are seemingly empty
 #18749 - just an outlier on its west side... messes up fits in WPMT3 & 4
 #21298 has very few events in Bi Pulser
@@ -1172,7 +1172,7 @@ if __name__ == "__main__":
     if 0:
         rep = CalReplayManager()
         cal = CalibrationManager()
-        runPeriods = [23,24]#[16,17,18]#[19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
+        runPeriods = [10,11,12]#[16,17,18]#[19,20,21,22,23,24]#,17,18,19,20,21,22,23,24]#,16,19,20,21,22,23,24]#,16,17,18,19,20,21,22,23,24]#[11,12]#,4,5,6,7,8,9,10,11,12]#[13,14,16,17,18,19,20,21,22,23,24]# 
         for runPeriod in runPeriods:
             #rep.makeBasicHistograms(runPeriod, sourceORxenon="source")
            
@@ -1189,11 +1189,11 @@ if __name__ == "__main__":
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
     if 1: 
-        runPeriods = [23,24]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+        runPeriods = [10,11,12]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 2 # number of times to run through the calibration
+        iterations = 1 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -1201,7 +1201,7 @@ if __name__ == "__main__":
             for runPeriod in runPeriods:
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 1:# i<iterations-1:
+                if 0:# i<iterations-1:
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1223,7 +1223,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 0:#i<(iterations-1):
+                if 1:#i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             
@@ -1258,5 +1258,5 @@ if __name__ == "__main__":
         for run in refruns2011:
             #os.system("cd ../pedestals/; ./pedestals.exe %i"%run)
             os.system("cd ../replay_pass1/; ./replay_pass1.exe %i"%run)
-            #os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
-            os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%run)
+            os.system("cd ../gain_bismuth/; ./gain_bismuth.exe %i"%run)
+            #os.system("cd ../gain_bismuth/; ./gain_LED.exe %i"%run)
