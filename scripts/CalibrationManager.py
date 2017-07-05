@@ -15,7 +15,7 @@ from math import *
 import MButils
 
 ##### Set up list of runs which are to be omitted from the Energy Calibration
-omittedRuns = [17588,17950,17953,21298,21605]
+omittedRuns = [17588,17950,17953,18749,21298,21605]
 #17588, 17950, 17953 are seemingly empty
 #18749 - just an outlier on its west side... messes up fits in WPMT3 & 4
 #21298 has very few events in Bi Pulser
