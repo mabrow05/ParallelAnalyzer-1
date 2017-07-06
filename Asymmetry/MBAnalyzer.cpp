@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    /*std::vector<TString> aCh {"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    /*std::vector<TString> aCh {"K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
