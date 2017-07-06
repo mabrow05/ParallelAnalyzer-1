@@ -103,13 +103,13 @@ ereconWPMT2 = []
 ereconWPMT3 = []
 ereconWPMT4 = []
 
-ereconEPMT1_runRanges = [] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
+ereconEPMT1_runRanges = [(20000,24000)] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
 ereconEPMT2_runRanges = []
 ereconEPMT3_runRanges = []
-ereconEPMT4_runRanges = []
-ereconWPMT1_runRanges = [(17359,18055)] #PMTW1 Bi pulser fell off for (17359,18055)
+ereconEPMT4_runRanges = [(20000,24000)]
+ereconWPMT1_runRanges = [(17359,18055),(20000,24000)] #PMTW1 Bi pulser fell off for (17359,18055)
 ereconWPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
-ereconWPMT3_runRanges = []
+ereconWPMT3_runRanges = [(20000,24000)]
 ereconWPMT4_runRanges = [(18712,19999)]
 #(18712,19999) WPMT4 becomes unreliable and there is no way to avoid affecting all of these runs due to erecon Xe maps & Calibrations for this PMT
 
@@ -1188,12 +1188,12 @@ if __name__ == "__main__":
     
     ### Source Run Calibration Steps...
     ### 13,14,15 all bad!
-    if 1: 
-        runPeriods = [10,11,12]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
+    if 0: 
+        runPeriods = [4]#[1,2,3,4,5,6,7,8,9,10,11,12]#[16,20,21,22,24,23]#[16,17,18,19,20,21,22,23,24]#[1,12]##[13,14,16,17,18,19,20,21,22,23,24]#
         rep = CalReplayManager()
         cal = CalibrationManager()
 
-        iterations = 1 # number of times to run through the calibration
+        iterations = 2 # number of times to run through the calibration
 
         for i in range(0,iterations,1):
         
@@ -1223,7 +1223,7 @@ if __name__ == "__main__":
 
 
                 # Calculate new linearity curves and nPE/keV values from previous iterations peaks
-                if 1:#i<(iterations-1):
+                if i<(iterations-1):
                     cal.calc_new_nPE_per_keV(runPeriod) # compare widths of simulated peaks and data peaks to make new alphas
                     cal.LinearityCurves(runPeriod) # Calculate new Linearity Curves using new peak values
             

@@ -41,6 +41,8 @@ Double_t totalTimeOFF=0.;
 Double_t totalBLINDTimeON[2]={0.,0.};
 Double_t totalBLINDTimeOFF[2]={0.,0.};
 
+std::vector <Double_t> pmtTotalTime(8,0.); // Holds total time for each PMT, since some aren't always functioning
+
 TString anaChoice[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 std::vector < std::vector < std::vector <Double_t> > >  sfON(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
@@ -52,23 +54,37 @@ std::vector < std::vector < std::vector <Double_t> > > sfOFF_err(10,std::vector 
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92}; 
 
-int separate23(int side, double mwpcEn) {
-  int type = 2;
-  if (side==0) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
+std::vector <Int_t> getPMTEreconQuality(Int_t runNumber) {
+  //Read in PMT quality file
+  std::cout << "Reading in PMT Quality file ...\n";
+  std::vector <Int_t>  pmtQuality (8,0);
+  Char_t temp[200];
+  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  std::ifstream pmt;
+  std::cout << temp << std::endl;
+  pmt.open(temp);
+  Int_t run_hold;
+  while (pmt >> run_hold >> pmtQuality[0] >> pmtQuality[1] >> pmtQuality[2]
+	 >> pmtQuality[3] >> pmtQuality[4] >> pmtQuality[5]
+	 >> pmtQuality[6] >> pmtQuality[7]) {
+    if (run_hold==runNumber) break;
+    if (pmt.fail()) break;
   }
-  
-  if (side==1) {
-    type = ( mwpcEn>4.14 ) ? 3 : 2;
+  pmt.close();
+  if (run_hold!=runNumber) {
+    std::cout << "Run not found in PMT quality file!" << std::endl;
+    exit(0);
   }
-  return type;
-};
+  return pmtQuality;
+}
+
 
 void writeRatesToFile(int octMin, int octMax) {
   
   TString fn_base = TString::Format("foregroundRatesByAnaChoice/ReferenceSpectra_Octets-%i-%i_",octMin,octMax);
   ofstream sf_ON;
   ofstream sf_OFF;
+ 
   
   for (int anaCh=0; anaCh<10; anaCh++) {
     sf_ON.open(TString::Format("%ssfON-AnaCh-%s.txt",fn_base.Data(),anaChoice[anaCh].Data()).Data());
@@ -203,7 +219,12 @@ void doForegroundSpectra (int octetMin, int octetMax)
   histON3[0] = new TH1D("Type3E_sfON","Type3E",120,0.,1200.);
   histON3[1] = new TH1D("Type3W_sfON","Type3W",120,0.,1200.);
 
-  
+  // Individual PMT histograms for Type0 
+  TH1D *pmt[8];
+  for ( UInt_t i=0; i<8; ++i ) {
+    pmt[i] = new TH1D(TString::Format("pmt%i",i), TString::Format("pmt %i",i),120, 0., 1200.);
+  }
+
   BackscatterSeparator sep; // This is the object which takes care of 2/3 separation
   
 
@@ -211,7 +232,8 @@ void doForegroundSpectra (int octetMin, int octetMax)
   for ( auto rn : fgRuns_SFoff ) {
 
     sep.LoadCutCurve(rn); // Load the backscatter separator curve
-    
+    std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
+
     std::string infile;
     TFile *input;
     TTree *Tin;
@@ -230,7 +252,17 @@ void doForegroundSpectra (int octetMin, int octetMax)
     int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
 
     double EdepQE=0., EdepQW=0.;
-    
+
+    double pmt0,pmt1,pmt2,pmt3,pmt4,pmt5,pmt6,pmt7;
+    Tin->GetBranch("PMT")->GetLeaf("Evis0")->SetAddress(&pmt0);
+    Tin->GetBranch("PMT")->GetLeaf("Evis1")->SetAddress(&pmt1);
+    Tin->GetBranch("PMT")->GetLeaf("Evis2")->SetAddress(&pmt2);
+    Tin->GetBranch("PMT")->GetLeaf("Evis3")->SetAddress(&pmt3);
+    Tin->GetBranch("PMT")->GetLeaf("Evis4")->SetAddress(&pmt4);
+    Tin->GetBranch("PMT")->GetLeaf("Evis5")->SetAddress(&pmt5);
+    Tin->GetBranch("PMT")->GetLeaf("Evis6")->SetAddress(&pmt6);
+    Tin->GetBranch("PMT")->GetLeaf("Evis7")->SetAddress(&pmt7);
+  
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("type", &type);
     Tin->SetBranchAddress("side", &side); 
@@ -299,8 +331,21 @@ void doForegroundSpectra (int octetMin, int octetMax)
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (type==0) histOFF[0][side]->Fill( !useEvis ? Erecon : (side==0 ? EdepQE : EdepQW) );
-	
+	  if (type==0) {
+	    histOFF[0][side]->Fill( !useEvis ? Erecon : (side==0 ? EdepQE : EdepQW) );
+	    if ( side==0 ) {
+	      if ( pmtQuality[0] ) pmt[0]->Fill(pmt0);
+	      if ( pmtQuality[1] ) pmt[1]->Fill(pmt1);
+	      if ( pmtQuality[2] ) pmt[2]->Fill(pmt2);
+	      if ( pmtQuality[3] ) pmt[3]->Fill(pmt3);
+	    }
+	    else if (side==1) {
+	      if ( pmtQuality[4] ) pmt[4]->Fill(pmt4);
+	      if ( pmtQuality[5] ) pmt[5]->Fill(pmt5);
+	      if ( pmtQuality[6] ) pmt[6]->Fill(pmt6);
+	      if ( pmtQuality[7] ) pmt[7]->Fill(pmt7);
+	    }
+	  }
 	  //Type 1
 	  if (type==1) histOFF[1][side]->Fill(Erecon);
 	
@@ -338,7 +383,8 @@ void doForegroundSpectra (int octetMin, int octetMax)
   for ( auto rn : fgRuns_SFon ) {
 
     sep.LoadCutCurve(rn); // Load the backscatter separator curve
-
+    std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
+     
     sprintf(temp,"revCalSim_%i_Beta.root",rn);
     std::string infile = getenv("REVCALSIM")+std::string("/beta/")+std::string(temp);
     TFile *input = new TFile(infile.c_str(), "READ");
@@ -354,6 +400,16 @@ void doForegroundSpectra (int octetMin, int octetMax)
     int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
 
     double EdepQE=0., EdepQW=0.;
+    
+    double pmt0,pmt1,pmt2,pmt3,pmt4,pmt5,pmt6,pmt7;
+    Tin->GetBranch("PMT")->GetLeaf("Evis0")->SetAddress(&pmt0);
+    Tin->GetBranch("PMT")->GetLeaf("Evis1")->SetAddress(&pmt1);
+    Tin->GetBranch("PMT")->GetLeaf("Evis2")->SetAddress(&pmt2);
+    Tin->GetBranch("PMT")->GetLeaf("Evis3")->SetAddress(&pmt3);
+    Tin->GetBranch("PMT")->GetLeaf("Evis4")->SetAddress(&pmt4);
+    Tin->GetBranch("PMT")->GetLeaf("Evis5")->SetAddress(&pmt5);
+    Tin->GetBranch("PMT")->GetLeaf("Evis6")->SetAddress(&pmt6);
+    Tin->GetBranch("PMT")->GetLeaf("Evis7")->SetAddress(&pmt7);
     
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("type", &type);
@@ -424,8 +480,21 @@ void doForegroundSpectra (int octetMin, int octetMax)
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (type==0) histON[0][side]->Fill( !useEvis ? Erecon : (side==0 ? EdepQE : EdepQW) );
-	
+	  if (type==0) {
+	    histON[0][side]->Fill( !useEvis ? Erecon : (side==0 ? EdepQE : EdepQW) );	    
+	    if ( side==0 ) {
+	      if ( pmtQuality[0] ) pmt[0]->Fill(pmt0);
+	      if ( pmtQuality[1] ) pmt[1]->Fill(pmt1);
+	      if ( pmtQuality[2] ) pmt[2]->Fill(pmt2);
+	      if ( pmtQuality[3] ) pmt[3]->Fill(pmt3);
+	    }
+	    else if (side==1) {
+	      if ( pmtQuality[4] ) pmt[4]->Fill(pmt4);
+	      if ( pmtQuality[5] ) pmt[5]->Fill(pmt5);
+	      if ( pmtQuality[6] ) pmt[6]->Fill(pmt6);
+	      if ( pmtQuality[7] ) pmt[7]->Fill(pmt7);
+	    }
+	  }
 	  //Type 1
 	  if (type==1) histON[1][side]->Fill(Erecon);
 	
