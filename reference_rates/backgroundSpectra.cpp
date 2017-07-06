@@ -33,7 +33,7 @@
 #include <TString.h>
 #include <TStyle.h>
 
-const bool useEvis = false;           // Uses Evis rather than Erecon
+const bool useEvis = true;           // Uses Evis rather than Erecon
 
 const bool useRCclasses = true;      // If this is true, we only use "good" response class 
                                      // events as defined by C. Swank (triangular MWPC responses)
@@ -639,7 +639,7 @@ int main(int argc, char *argv[]) {
   int octetMax = atoi(argv[2]);
 
   doBackgroundSpectra(octetMin, octetMax);
-  writeRatesToFile(octetMin, octetMax);
+  if (!useEvis) writeRatesToFile(octetMin, octetMax);
 
   //tests
   /*UInt_t XePeriod = getXeRunPeriod(atoi(argv[1]));

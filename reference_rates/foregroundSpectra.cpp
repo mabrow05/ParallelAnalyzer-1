@@ -43,6 +43,8 @@ Double_t totalTimeOFF=0.;
 Double_t totalBLINDTimeON[2]={0.,0.};
 Double_t totalBLINDTimeOFF[2]={0.,0.};
 
+std::vector <Double_t> pmtTotalTime(8,0.); // Holds total time for each PMT, since some aren't always functioning
+
 TString anaChoice[10] = {"A","B","C","D","E","F","G","H","J","K"};
 
 std::vector < std::vector < std::vector <Double_t> > >  sfON(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
@@ -51,9 +53,35 @@ std::vector < std::vector < std::vector <Double_t> > > sfON_err(10,std::vector <
 std::vector < std::vector < std::vector <Double_t> > >  sfOFF(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
 std::vector < std::vector < std::vector <Double_t> > > sfOFF_err(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
 
+//Vector for individual PMT background
+std::vector < std::vector < Double_t > > pmtForeground(120, std::vector<Double_t>(8,0.) );
+
 
 std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,70,92};
 
+std::vector <Int_t> getPMTEreconQuality(Int_t runNumber) {
+  //Read in PMT quality file
+  std::cout << "Reading in PMT Quality file ...\n";
+  std::vector <Int_t>  pmtQuality (8,0);
+  Char_t temp[200];
+  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  std::ifstream pmt;
+  std::cout << temp << std::endl;
+  pmt.open(temp);
+  Int_t run_hold;
+  while (pmt >> run_hold >> pmtQuality[0] >> pmtQuality[1] >> pmtQuality[2]
+	 >> pmtQuality[3] >> pmtQuality[4] >> pmtQuality[5]
+	 >> pmtQuality[6] >> pmtQuality[7]) {
+    if (run_hold==runNumber) break;
+    if (pmt.fail()) break;
+  }
+  pmt.close();
+  if (run_hold!=runNumber) {
+    std::cout << "Run not found in PMT quality file!" << std::endl;
+    exit(0);
+  }
+  return pmtQuality;
+}
 
 
 void writeRatesToFile(int octMin, int octMax) {
@@ -62,6 +90,8 @@ void writeRatesToFile(int octMin, int octMax) {
   std::ofstream sf_ON;
   std::ofstream sf_OFF;
   
+  std::ofstream pmt(TString::Format("foregroundRatesByAnaChoice/pmtRefSpectra_Octets_%i-%i.txt",octMin,octMax).Data());
+
   for (int anaCh=0; anaCh<10; anaCh++) {
     sf_ON.open(TString::Format("%ssfON-AnaCh-%s.txt",fn_base.Data(),anaChoice[anaCh].Data()).Data());
     sf_OFF.open(TString::Format("%ssfOFF-AnaCh-%s.txt",fn_base.Data(),anaChoice[anaCh].Data()).Data());
@@ -77,6 +107,9 @@ void writeRatesToFile(int octMin, int octMax) {
 	   << "totalTimeE\t" << totalBLINDTimeOFF[0] << std::endl
 	   << "totalTimeW\t" << totalBLINDTimeOFF[1] << std::endl;
 
+    pmt << "totalTimes:\t";
+    for ( int p=0; p<8; ++p ) pmt << "\t\t" << pmtTotalTime[p];
+    pmt << std::endl;
     
     for (int bin=0; bin<120; bin++) {
 
@@ -92,6 +125,7 @@ void writeRatesToFile(int octMin, int octMax) {
     
     sf_ON.close();
     sf_OFF.close();
+    pmt.close();
   }
   std::cout << "Wrote All Reference rates to file!\n";
 
@@ -195,6 +229,13 @@ void doForegroundSpectra (int octetMin, int octetMax)
   histON3[0] = new TH1D("Type3E_sfON","Type3E",120,0.,1200.);
   histON3[1] = new TH1D("Type3W_sfON","Type3W",120,0.,1200.);
 
+  // Individual PMT histograms for Type0 
+  TH1D *pmt[8];
+  for ( UInt_t i=0; i<8; ++i ) {
+    pmt[i] = new TH1D(TString::Format("pmt%i",i), TString::Format("pmt %i",i),120, 0., 1200.);
+  }
+
+  
 
   BackscatterSeparator sep; // This is the object which takes care of 2/3 separation
   
@@ -222,6 +263,12 @@ void doForegroundSpectra (int octetMin, int octetMax)
     totalTimeOFF += t.Time;
     totalBLINDTimeOFF[0] += t.TimeE;
     totalBLINDTimeOFF[1] += t.TimeW;
+
+    std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
+
+    for ( int p=0; p<8; ++p ) {
+      if ( pmtQuality[p]) pmtTotalTime[p]+=t.Time;
+    }
 
     double r2E = 0.; //position of event squared
     double r2W = 0.;
@@ -274,8 +321,22 @@ void doForegroundSpectra (int octetMin, int octetMax)
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (t.Type==0) histOFF[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
+	  if (t.Type==0) {
+	    histOFF[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
 	
+	    if ( t.Side==0 ) {
+	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE_bare.e1);
+	      if ( pmtQuality[1] ) pmt[1]->Fill(t.ScintE_bare.e2);
+	      if ( pmtQuality[2] ) pmt[2]->Fill(t.ScintE_bare.e3);
+	      if ( pmtQuality[3] ) pmt[3]->Fill(t.ScintE_bare.e4);
+	    }
+	    else if (t.Side==1) {
+	      if ( pmtQuality[4] ) pmt[4]->Fill(t.ScintW_bare.e1);
+	      if ( pmtQuality[5] ) pmt[5]->Fill(t.ScintW_bare.e2);
+	      if ( pmtQuality[6] ) pmt[6]->Fill(t.ScintW_bare.e3);
+	      if ( pmtQuality[7] ) pmt[7]->Fill(t.ScintW_bare.e4);
+	    }
+	  }
 	  //Type 1
 	  if (t.Type==1) histOFF[1][t.Side]->Fill(t.Erecon);
 	
@@ -331,6 +392,12 @@ void doForegroundSpectra (int octetMin, int octetMax)
     totalBLINDTimeON[0] += t.TimeE;
     totalBLINDTimeON[1] += t.TimeW;
 
+    std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
+
+    for ( int p=0; p<8; ++p ) {
+      if ( pmtQuality[p]) pmtTotalTime[p]+=t.Time;
+    }
+
     double r2E = 0.; //position of event squared
     double r2W = 0.;
     
@@ -382,8 +449,23 @@ void doForegroundSpectra (int octetMin, int octetMax)
 	if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut) )	  {
 		
 	  //Type 0
-	  if (t.Type==0) histON[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
+	  if (t.Type==0) { 
+	    histON[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
 	
+	    if ( t.Side==0 ) {
+	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE_bare.e1);
+	      if ( pmtQuality[1] ) pmt[1]->Fill(t.ScintE_bare.e2);
+	      if ( pmtQuality[2] ) pmt[2]->Fill(t.ScintE_bare.e3);
+	      if ( pmtQuality[3] ) pmt[3]->Fill(t.ScintE_bare.e4);
+	    }
+	    else if (t.Side==1) {
+	      if ( pmtQuality[4] ) pmt[4]->Fill(t.ScintW_bare.e1);
+	      if ( pmtQuality[5] ) pmt[5]->Fill(t.ScintW_bare.e2);
+	      if ( pmtQuality[6] ) pmt[6]->Fill(t.ScintW_bare.e3);
+	      if ( pmtQuality[7] ) pmt[7]->Fill(t.ScintW_bare.e4);
+	    }
+	  }
+
 	  //Type 1
 	  if (t.Type==1) histON[1][t.Side]->Fill(t.Erecon);
 	
@@ -500,7 +582,13 @@ void doForegroundSpectra (int octetMin, int octetMax)
     histOFF3[s]->Scale(1.e2/totalTimeOFF);
   }
   
-  
+  for ( UInt_t p=0; p<8; ++p ) {
+    
+    pmt[p]->SetYTitle("mHz/keV");
+    pmt[p]->SetXTitle("E_{vis} (keV)");
+    pmt[p]->Scale( 1.e2/(pmtTotalTime[p]) );
+
+  }
   
 
   outfile->Write();
