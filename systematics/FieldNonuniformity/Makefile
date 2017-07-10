@@ -19,9 +19,14 @@ LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../../include 
 LIBS         += -lSpectrum -lMinuit
 
-objects = MBUtils.o
+objects = MBUtils.o calibrationTools.o
+
 FieldDipSystematic.exe: FieldDipSystematic.o $(objects)
 	$(CXX) $(CXXFLAGS) -o FieldDipSystematic.exe FieldDipSystematic.o $(objects) $(LIBS)
+	@echo "Done"
+
+FieldDipSystematic_BHasymm.exe: FieldDipSystematic_BHasymm.o $(objects)
+	$(CXX) $(CXXFLAGS) -o FieldDipSystematic_BHasymm.exe FieldDipSystematic_BHasymm.o $(objects) $(LIBS)
 	@echo "Done"
 
 
