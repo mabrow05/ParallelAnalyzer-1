@@ -363,14 +363,14 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
       ADCW3.push_back(adcW3[i]);
       ADCW3_err.push_back(adcW3_err[i]);
       //}
-      //if (pmtQuality[runPos][7]) {
-      runW4.push_back(run[i]);
-      EQW4.push_back(EqW4[i]);
-      EQW4_err.push_back(EqW4_err[i]);
-      nameW4.push_back(sourceName[i]);
-      ADCW4.push_back(adcW4[i]);
-      ADCW4_err.push_back(adcW4_err[i]);
-      //}
+      if (run[i]!=19362) { //Need to check everything about this run...
+	runW4.push_back(run[i]);
+	EQW4.push_back(EqW4[i]);
+	EQW4_err.push_back(EqW4_err[i]);
+	nameW4.push_back(sourceName[i]);
+	ADCW4.push_back(adcW4[i]);
+	ADCW4_err.push_back(adcW4_err[i]);
+      }
     }
 
   }

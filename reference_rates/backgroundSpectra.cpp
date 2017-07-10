@@ -33,7 +33,7 @@
 #include <TString.h>
 #include <TStyle.h>
 
-const bool useEvis = false;           // Uses Evis rather than Erecon
+const bool useEvis = true;           // Uses Evis rather than Erecon
 
 const bool useRCclasses = true;      // If this is true, we only use "good" response class 
                                      // events as defined by C. Swank (triangular MWPC responses)
@@ -63,12 +63,12 @@ std::vector < std::vector < Double_t > > pmtBackground(120, std::vector<Double_t
 std::vector <Int_t> badOct = {7,60,61,62,63,64,65,66}; 
 
 
-std::vector <Int_t> getPMTQuality(Int_t runNumber) {
+std::vector <Int_t> getPMTEreconQuality(Int_t runNumber) {
   //Read in PMT quality file
   std::cout << "Reading in PMT Quality file ...\n";
   std::vector <Int_t>  pmtQuality (8,0);
   Char_t temp[200];
-  sprintf(temp,"%s/residuals/PMT_runQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
   std::ifstream pmt;
   std::cout << temp << std::endl;
   pmt.open(temp);
@@ -276,7 +276,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     totalBLINDTimeOFF[0] += t.TimeE;
     totalBLINDTimeOFF[1] += t.TimeW;
 
-    std::vector <Int_t> pmtQuality = getPMTQuality(rn);
+    std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
 
     for ( int p=0; p<8; ++p ) {
       if ( pmtQuality[p]) pmtTotalTime[p]+=t.Time;
@@ -338,16 +338,16 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 	    histOFF[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
 	    
 	    if ( t.Side==0 ) {
-	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE.e1);
-	      if ( pmtQuality[1] ) pmt[1]->Fill(t.ScintE.e2);
-	      if ( pmtQuality[2] ) pmt[2]->Fill(t.ScintE.e3);
-	      if ( pmtQuality[3] ) pmt[3]->Fill(t.ScintE.e4);
+	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE_bare.e1);
+	      if ( pmtQuality[1] ) pmt[1]->Fill(t.ScintE_bare.e2);
+	      if ( pmtQuality[2] ) pmt[2]->Fill(t.ScintE_bare.e3);
+	      if ( pmtQuality[3] ) pmt[3]->Fill(t.ScintE_bare.e4);
 	    }
 	    else if (t.Side==1) {
-	      if ( pmtQuality[4] ) pmt[4]->Fill(t.ScintW.e1);
-	      if ( pmtQuality[5] ) pmt[5]->Fill(t.ScintW.e2);
-	      if ( pmtQuality[6] ) pmt[6]->Fill(t.ScintW.e3);
-	      if ( pmtQuality[7] ) pmt[7]->Fill(t.ScintW.e4);
+	      if ( pmtQuality[4] ) pmt[4]->Fill(t.ScintW_bare.e1);
+	      if ( pmtQuality[5] ) pmt[5]->Fill(t.ScintW_bare.e2);
+	      if ( pmtQuality[6] ) pmt[6]->Fill(t.ScintW_bare.e3);
+	      if ( pmtQuality[7] ) pmt[7]->Fill(t.ScintW_bare.e4);
 	    }
 	  }
 	  
@@ -406,7 +406,7 @@ void doBackgroundSpectra (int octetMin, int octetMax)
     totalBLINDTimeON[0] += t.TimeE;
     totalBLINDTimeON[1] += t.TimeW;
 
-    std::vector <Int_t> pmtQuality = getPMTQuality(rn);
+    std::vector <Int_t> pmtQuality = getPMTEreconQuality(rn);
 
     for ( int p=0; p<8; ++p ) {
       if ( pmtQuality[p]) pmtTotalTime[p]+=t.Time;
@@ -467,16 +467,16 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 	    histON[0][t.Side]->Fill( !useEvis ? t.Erecon : ( t.Side==0 ? t.EvisE : t.EvisW ) );
 
 	    if ( t.Side==0 ) {
-	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE.e1);
-	      if ( pmtQuality[1] ) pmt[1]->Fill(t.ScintE.e2);
-	      if ( pmtQuality[2] ) pmt[2]->Fill(t.ScintE.e3);
-	      if ( pmtQuality[3] ) pmt[3]->Fill(t.ScintE.e4);
+	      if ( pmtQuality[0] ) pmt[0]->Fill(t.ScintE_bare.e1);
+	      if ( pmtQuality[1] ) pmt[1]->Fill(t.ScintE_bare.e2);
+	      if ( pmtQuality[2] ) pmt[2]->Fill(t.ScintE_bare.e3);
+	      if ( pmtQuality[3] ) pmt[3]->Fill(t.ScintE_bare.e4);
 	    }
 	    else if (t.Side==1) {
-	      if ( pmtQuality[4] ) pmt[4]->Fill(t.ScintW.e1);
-	      if ( pmtQuality[5] ) pmt[5]->Fill(t.ScintW.e2);
-	      if ( pmtQuality[6] ) pmt[6]->Fill(t.ScintW.e3);
-	      if ( pmtQuality[7] ) pmt[7]->Fill(t.ScintW.e4);
+	      if ( pmtQuality[4] ) pmt[4]->Fill(t.ScintW_bare.e1);
+	      if ( pmtQuality[5] ) pmt[5]->Fill(t.ScintW_bare.e2);
+	      if ( pmtQuality[6] ) pmt[6]->Fill(t.ScintW_bare.e3);
+	      if ( pmtQuality[7] ) pmt[7]->Fill(t.ScintW_bare.e4);
 	    }
 	  }
 	
@@ -639,7 +639,7 @@ int main(int argc, char *argv[]) {
   int octetMax = atoi(argv[2]);
 
   doBackgroundSpectra(octetMin, octetMax);
-  writeRatesToFile(octetMin, octetMax);
+  if (!useEvis) writeRatesToFile(octetMin, octetMax);
 
   //tests
   /*UInt_t XePeriod = getXeRunPeriod(atoi(argv[1]));

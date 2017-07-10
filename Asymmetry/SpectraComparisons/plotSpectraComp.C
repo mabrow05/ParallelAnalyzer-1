@@ -5,7 +5,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TString normType = "0";
 
-  Double_t normLow = 0.;
+  Double_t normLow = 230.;
   Double_t normHigh = 750.;
   
   Double_t xAxisMax = 1200.;
