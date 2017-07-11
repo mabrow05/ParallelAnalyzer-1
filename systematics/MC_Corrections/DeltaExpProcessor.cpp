@@ -480,9 +480,9 @@ void calcDeltaExp (int octet)
     std::string simLocation;
     TChain *chain = new TChain("anaTree");
   
-    if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
-    else if (runNumber>=21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
-    else simLocation = string(getenv("SIM_2012_2013"));
+    if (runNumber<20000) simLocation = string("/scratch/mabr239/output/2011-2012_Beta_");//string(getenv("SIM_2011_2012"));
+    else if (runNumber>=21087 && runNumber<21679) simLocation = string("/scratch/mabr239/output/2012-2013_Beta_ISOBUTANE_");//string(getenv("SIM_2012_2013_ISOBUTANE"));
+    else simLocation = string("/scratch/mabr239/output/2012-2013_Beta_");//string(getenv("SIM_2012_2013"));
 
 
     std::cout << "Using simulation from " << simLocation << "...\n";
@@ -495,9 +495,9 @@ void calcDeltaExp (int octet)
     
     for (int i=0; i<numFiles; i++) {
       
-      if (pol==-1) sprintf(temp,"%s/Beta_polE/analyzed_%i.root",simLocation.c_str(),i);
-      if (pol==1) sprintf(temp,"%s/Beta_polW/analyzed_%i.root",simLocation.c_str(),i);
-      
+      if (pol==-1) sprintf(temp,"%spolE/analyzed_%i.root",simLocation.c_str(),i);
+      if (pol==1) sprintf(temp,"%spolW/analyzed_%i.root",simLocation.c_str(),i);
+      //      std::cout << "Adding file " << temp << std::endl;
       chain->AddFile(temp);
       
     }

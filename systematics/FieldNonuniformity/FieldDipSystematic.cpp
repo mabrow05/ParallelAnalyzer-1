@@ -25,6 +25,8 @@ Double_t returnBeta(Double_t En) {
 
 void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum) {
 
+  bool rawAsymm=true; //Doesn't check for triggering if true
+
   int badFiles[21] = {926,944,1605,2327,2614,2703,3109,3449,4494,4968,
 		      5531,5869,6216,6687,6863,7766,9225,9718,9798,9821,9959};
 
@@ -77,7 +79,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   TH1D *hisW_polW = new TH1D("hisW_polW","hisW",100,0.,1000.);
 
 
-  Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3],keInSD[24];
+  Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3],keInSD[24],primPos[4];
 
   //Start with East polarization
   for (int j=startFileNum; j<endFileNum; j+=2) {
@@ -100,6 +102,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
     t->GetBranch("ScintPos")->GetLeaf("ScintPosE")->SetAddress(ScintPosE);
     t->GetBranch("ScintPos")->GetLeaf("ScintPosW")->SetAddress(ScintPosW);
     t->SetBranchAddress("keInSD",keInSD);
+    t->SetBranchAddress("primPos",primPos);
     
     for (UInt_t i=0; i<t->GetEntriesFast() ; ++i) {
       
@@ -108,7 +111,9 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       double rE = TMath::Sqrt(ScintPosE[0]*ScintPosE[0]+ScintPosE[1]*ScintPosE[1])*TMath::Sqrt(0.6)*10.;
       double rW = TMath::Sqrt(ScintPosW[0]*ScintPosW[0]+ScintPosW[1]*ScintPosW[1])*TMath::Sqrt(0.6)*10.;
 
-      if (rE>fidCut || rW>fidCut) continue;
+      double rPrim = primPos[3]*100.;
+
+      if (rE>fidCut || rW>fidCut || rPrim>fidCut) continue;
 
       double weight = 1.+0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
@@ -142,7 +147,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
       }
 
-      if (trigger) {
+      if (trigger || rawAsymm) {
 	if (side==0) hisE_polE->Fill(primKE,weight);
 	else if (side==1) hisW_polE->Fill(primKE,weight);
       } 
@@ -176,6 +181,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
     t->GetBranch("ScintPos")->GetLeaf("ScintPosE")->SetAddress(ScintPosE);
     t->GetBranch("ScintPos")->GetLeaf("ScintPosW")->SetAddress(ScintPosW);
     t->SetBranchAddress("keInSD",keInSD);
+    t->SetBranchAddress("primPos",primPos);
  
     for (UInt_t i=0; i<t->GetEntriesFast() ; ++i) {
       
@@ -184,7 +190,9 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       double rE = TMath::Sqrt(ScintPosE[0]*ScintPosE[0]+ScintPosE[1]*ScintPosE[1])*TMath::Sqrt(0.6)*10.;
       double rW = TMath::Sqrt(ScintPosW[0]*ScintPosW[0]+ScintPosW[1]*ScintPosW[1])*TMath::Sqrt(0.6)*10.;
 
-      if (rE>fidCut || rW>fidCut) continue;
+      double rPrim = primPos[3]*100.;
+
+      if (rE>fidCut || rW>fidCut || rPrim>fidCut) continue;
 
       double weight = 1-0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
@@ -218,7 +226,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
-      if (trigger) {
+      if (trigger || rawAsymm) {
 	if (side==0) hisE_polW->Fill(primKE,weight);
 	else if (side==1) hisW_polW->Fill(primKE,weight);
       } 
@@ -258,7 +266,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   std::cout << " A = " << asymm[20] << " +/- " << asymmErr[20] << std::endl;
   
-  ofstream ofile(TString::Format("%s_asymmPrimKE_%sField_files_%i-%i.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofstream ofile(TString::Format("%s_%sasymmPrimKE_%sField_files_%i-%i.txt",year.Data(),rawAsymm?"RAW":"",field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
