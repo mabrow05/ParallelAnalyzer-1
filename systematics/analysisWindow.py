@@ -60,6 +60,22 @@ def getAsymmetry(anaCh,octLow,octHigh,elow,ehigh,sim=True):
         infile.close()
     return asymm
 
+def readAngleCorr(year=2011,percErr=0.2):
+    A = [[],[]]
+    yearString=None
+    if year==2011:
+        yearString = "2011-2012"
+    else:
+        yearString = "2012-2013"
+    with open('AngleCorrections/angleCorr_%s.txt'%(yearString),'rb') as tsvin:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+        for row in tsvin:
+            A[0].append(float(row[3]))
+            A[1].append(fabs(float(row[3])*percErr))
+            #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
+
+    return A
+
 
 class uncertaintyHandler:
     
@@ -518,22 +534,45 @@ class uncertaintyHandler:
 
 if __name__ == "__main__":
     
-    uncert = uncertaintyHandler(2011,"C")
+    year=2011
+    uncert = uncertaintyHandler(year,"C")
     #uncert.minimizer()
 
+    percErrAngle = 0.25
+    percErrBS = 0.25
     low = 230
     high = 750
-    print(uncert.calcEnergyUncert(low,high))
-    print(uncert.calcStatUncert(low,high))
-    #print(uncert.calcSystematicUncert(low,high))
-    print(uncert.calcMCSystematicError(low,high,["F","J","K"]) )
-    asymm = getAsymmetry(uncert.anaChoice,uncert.octLow,uncert.octHigh,low,high,False)
-    print(sumErrors([uncert.calcEnergyUncert(low,high),fabs( asymm[1]/asymm[0] ),uncert.calcMCSystematicError(low,high,["F","J","K"])]))
-    print("A: %f +/- %f"%(asymm[0],asymm[1]))
+    print("Energy Uncert: %f"%uncert.calcEnergyUncert(low,high))
+    print("Stat Uncert: %f"%uncert.calcStatUncert(low,high))
+    
 
-    print("Gain Err: +/- %f"%uncert.gainUncert(low,high))
+    angleCorr = readAngleCorr(year,percErr=percErrAngle)
+    uncert.readMCSystematicCorrections()
+    deltaBS = [ (1.+uncert.syst_corr[i])/(1.+angleCorr[0][i])-1. for i in range(0,100) ]
+    deltaBSerr = [percErrBS*x for x in deltaBS]
+
+    deltaBSsum = weightRealStats(deltaBS,uncert.stat_percent_err,low,high)
+    deltaBSerrSum = weightRealStats(deltaBSerr,uncert.stat_percent_err,low,high)
+    deltaAngleSum = weightRealStats(angleCorr[0],uncert.stat_percent_err,low,high)
+    deltaAngleErrSum = weightRealStats(angleCorr[1],uncert.stat_percent_err,low,high)
+    
+    print("BS corr : %f +/- %f"%(deltaBSsum,deltaBSerrSum))
+    print("Angle corr : %f +/- %f"%(deltaAngleSum,deltaAngleErrSum))
+    print("MC Corr: %f +/- %f"%((1.+deltaBSsum)*(1.+deltaAngleSum)-1.,sumErrors([deltaBSerrSum,deltaAngleErrSum])))
+
+    
+    asymm = getAsymmetry(uncert.anaChoice,uncert.octLow,uncert.octHigh,low,high,False)
+    totalErr = sumErrors([uncert.calcEnergyUncert(low,high),fabs( asymm[1]/asymm[0] ),sumErrors([deltaBSerrSum,deltaAngleErrSum])])
+    print("A: %f +/- %f (%f percent Uncertainty)"%(asymm[0],totalErr*fabs(asymm[0]),totalErr))
+
+
+    #print(uncert.calcSystematicUncert(low,high))
+    #print(uncert.calcMCSystematicError(low,high,["F","J","K"]) )
+    #asymm = getAsymmetry(uncert.anaChoice,uncert.octLow,uncert.octHigh,low,high,False)
+    #print(sumErrors([uncert.calcEnergyUncert(low,high),fabs( asymm[1]/asymm[0] ),uncert.calcMCSystematicError(low,high,["F","J","K"])]))
+   # print("A: %f +/- %f"%(asymm[0],asymm[1]))
+
+    #print("Gain Err: +/- %f"%uncert.gainUncert(low,high))
     #220-750 for 2011 : 0.00612 
     
     #290-750 for 2012 : 0.01114
-
-    

@@ -68,22 +68,27 @@ def statUncertainties(year="2011-2012"):
 
         
 
-def readAngleCorr(year="2011-2012"):
-    A = []
+def readAngleCorr(year="2011-2012",percErr=0.2):
+    A = [[],[]]
     with open('angleCorr_%s.txt'%(year),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
-            A.append(float(row[3]))
+            A[0].append(float(row[3]))
+            A[1].append(fabs(float(row[3])*percErr))
             #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
 
     return A
 
+
+
     
 if __name__=="__main__":
-    year = "2011-2012"
+    year = "2012-2013"
     emin = 230.
     emax = 750.
+    perc_Err=0.20
 
-    angleCorr = readAngleCorr(year)
+    angleCorr = readAngleCorr(year,percErr=perc_Err)
     statErr = statUncertainties(year)
-    print(weightRealStats(angleCorr,statErr,emin,emax-5.))
+    print(weightRealStats(angleCorr[0],statErr,emin,emax))
+    print(weightRealStats(angleCorr[1],statErr,emin,emax))
