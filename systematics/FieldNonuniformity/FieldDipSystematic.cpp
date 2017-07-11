@@ -5,6 +5,8 @@
 #include <TFile.h>
 #include <TH1D.h>
 #include <TTree.h>
+#include <TBranch.h>
+#include <TLeaf.h>
 
 #include <iostream>
 #include <cstdlib>
@@ -25,16 +27,17 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
   int badFiles[21] = {926,944,1605,2327,2614,2703,3109,3449,4494,4968,
 		      5531,5869,6216,6687,6863,7766,9225,9718,9798,9821,9959};
-  
+
+  double fidCut = 50.;
 
   //Load the simulated relationship between EQ and Etrue
-  int fakeRunNumber = ( year==TString("2011-2012")?17126:
-			( year==TString("2012-2013")?22024:21537 ));
-  EreconParameterization eRecon(fakeRunNumber);
+  //int fakeRunNumber = ( year==TString("2011-2012")?17126:
+  //			( year==TString("2012-2013")?22024:21537 ));
+  //  EreconParameterization eRecon(fakeRunNumber);
 
   //Initializing the separator
-  BackscatterSeparator sep;
-  sep.LoadCutCurve(fakeRunNumber);
+  //BackscatterSeparator sep;
+  //sep.LoadCutCurve(fakeRunNumber);
 
   TString field_prefix = ( field==TString("flat")?TString("FLAT_FIELD"):
 			   (field==TString("dip")?TString("FIELD_DIP"):
@@ -53,6 +56,16 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   std::vector <Double_t> rW_polW (100,0.);
   std::vector <Double_t> rW_polW_err (100,0.);  
 
+  std::vector <UInt_t> eastType0(90,0);
+  std::vector <UInt_t> eastType1(90,0);
+  std::vector <UInt_t> eastType23(90,0);
+  std::vector <UInt_t> eastType3(90,0);
+
+  std::vector <UInt_t> westType0(90,0);
+  std::vector <UInt_t> westType1(90,0);
+  std::vector <UInt_t> westType23(90,0);
+  std::vector <UInt_t> westType3(90,0);
+
   TString basepath = TString::Format("/scratch/mabr239/output/%s_1e-3_%s/",field_prefix.Data(),year.Data());
 
   TFile *f;
@@ -64,7 +77,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   TH1D *hisW_polW = new TH1D("hisW_polW","hisW",100,0.,1000.);
 
 
-  Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta;
+  Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3],keInSD[24];
 
   //Start with East polarization
   for (int j=startFileNum; j<endFileNum; j+=2) {
@@ -84,53 +97,56 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
     t->SetBranchAddress("primKE",&primKE);
     t->SetBranchAddress("primTheta",&primTheta);
     t->SetBranchAddress("time",time);
+    t->GetBranch("ScintPos")->GetLeaf("ScintPosE")->SetAddress(ScintPosE);
+    t->GetBranch("ScintPos")->GetLeaf("ScintPosW")->SetAddress(ScintPosW);
+    t->SetBranchAddress("keInSD",keInSD);
     
     for (UInt_t i=0; i<t->GetEntriesFast() ; ++i) {
       
       t->GetEntry(i);
-      double erecon = 0.;
-      double weight = 1.+0.12*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
-      
+      //double erecon = 0.;
+      double rE = TMath::Sqrt(ScintPosE[0]*ScintPosE[0]+ScintPosE[1]*ScintPosE[1])*TMath::Sqrt(0.6)*10.;
+      double rW = TMath::Sqrt(ScintPosW[0]*ScintPosW[0]+ScintPosW[1]*ScintPosW[1])*TMath::Sqrt(0.6)*10.;
+
+      if (rE>fidCut || rW>fidCut) continue;
+
+      double weight = 1.+0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
+      double cosTheta = TMath::Cos(primTheta);
+      int realside = cosTheta>0.?1:0;
+      int side = (keInSD[5]>keInSD[15])?0:1;
+      bool trigger = false;
       // Type 0
       if ( EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
-	erecon = eRecon.getErecon(0,0,EdepQ[0]);
-	hisE_polE->Fill(erecon,weight);
+	trigger=true;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       else if ( EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
-	erecon = eRecon.getErecon(1,0,EdepQ[1]);
-	hisW_polE->Fill(erecon,weight);
+	trigger=true;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
       else if ( EdepQ[0]>0. && EdepQ[1]>0. && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
-	if (time[0]<time[1]) {
-	  erecon = eRecon.getErecon(0,1,EdepQ[0]+EdepQ[1]);
-	  hisE_polE->Fill(erecon,weight);
-	}
-	else {
-	  erecon = eRecon.getErecon(1,1,EdepQ[0]+EdepQ[1]);
-	  hisW_polE->Fill(erecon,weight);
-	}
+	trigger=true;
+	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
-      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
-	int side = -1;
-	if (EdepQ[0]>0. && EdepQ[1]==0.) {
-	  int type = sep.separate23(MWPCEnergy[0]);
-	  erecon = eRecon.getErecon(0,2,EdepQ[0]);
-	  side = type==2 ? 1 : 0;
-	}
-	else if (EdepQ[0]==0. && EdepQ[1]>0.){
-	  int type = sep.separate23(MWPCEnergy[1]);
-	  erecon = eRecon.getErecon(1,2,EdepQ[1]);
-	  side = type==2 ? 0 : 1;
-	}
-	if ( side==0 ) hisE_polE->Fill(erecon,weight);
-	else if ( side==1 ) hisW_polE->Fill(erecon,weight);
+      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( EdepQ[0]>0. || EdepQ[1]>0. ) ) {
+	trigger=true;
+	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+
       }
-      
-    }   
+
+      if (trigger) {
+	if (side==0) hisE_polE->Fill(primKE,weight);
+	else if (side==1) hisW_polE->Fill(primKE,weight);
+      } 
+    }  
     delete f;
     
   }
@@ -157,52 +173,57 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
     t->SetBranchAddress("primKE",&primKE);
     t->SetBranchAddress("primTheta",&primTheta);
     t->SetBranchAddress("time",time);
-    
+    t->GetBranch("ScintPos")->GetLeaf("ScintPosE")->SetAddress(ScintPosE);
+    t->GetBranch("ScintPos")->GetLeaf("ScintPosW")->SetAddress(ScintPosW);
+    t->SetBranchAddress("keInSD",keInSD);
+ 
     for (UInt_t i=0; i<t->GetEntriesFast() ; ++i) {
       
       t->GetEntry(i);
-      double erecon = 0.;
-      double weight = 1-0.12*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
+      //double erecon = 0.;
+      double rE = TMath::Sqrt(ScintPosE[0]*ScintPosE[0]+ScintPosE[1]*ScintPosE[1])*TMath::Sqrt(0.6)*10.;
+      double rW = TMath::Sqrt(ScintPosW[0]*ScintPosW[0]+ScintPosW[1]*ScintPosW[1])*TMath::Sqrt(0.6)*10.;
 
+      if (rE>fidCut || rW>fidCut) continue;
+
+      double weight = 1-0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
+      double cosTheta = TMath::Cos(primTheta);
+      int realside = cosTheta>0.?1:0;
+      int side = (keInSD[5]>keInSD[15]?0:1);
+
+      bool trigger = false;
       // Type 0
       if ( EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
-	erecon = eRecon.getErecon(0,0,EdepQ[0]);
-	hisE_polW->Fill(erecon,weight);
+	trigger=true;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       else if ( EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
-	erecon = eRecon.getErecon(1,0,EdepQ[1]);
-	hisW_polW->Fill(erecon,weight);
+	trigger=true;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
       else if ( EdepQ[0]>0. && EdepQ[1]>0. && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
-	if (time[0]<time[1]) {
-	  erecon = eRecon.getErecon(0,1,EdepQ[0]+EdepQ[1]);
-	  hisE_polW->Fill(erecon,weight);
-	}
-	else {
-	  erecon = eRecon.getErecon(1,1,EdepQ[0]+EdepQ[1]);
-	  hisW_polW->Fill(erecon,weight);
-	}
+	trigger=true;
+	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
-      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
-	int side = -1;
-	if (EdepQ[0]>0. && EdepQ[1]==0.) {
-	  int type = sep.separate23(MWPCEnergy[0]);
-	  erecon = eRecon.getErecon(0,2,EdepQ[0]);
-	  side = type==2 ? 1 : 0;
-	}
-	else if (EdepQ[0]==0. && EdepQ[1]>0.){
-	  int type = sep.separate23(MWPCEnergy[1]);
-	  erecon = eRecon.getErecon(1,2,EdepQ[1]);
-	  side = type==2 ? 0 : 1;
-	}
-	if ( side==0 ) hisE_polW->Fill(erecon,weight);
-	else if ( side==1 ) hisW_polW->Fill(erecon,weight);
+      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( EdepQ[0]>0. || EdepQ[1]>0. ) ) {
+	trigger=true;
+	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+      }
+
+      if (trigger) {
+	if (side==0) hisE_polW->Fill(primKE,weight);
+	else if (side==1) hisW_polW->Fill(primKE,weight);
       } 
-    }   
+    }
+   
     delete f;
     
   }
@@ -237,14 +258,36 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   std::cout << " A = " << asymm[20] << " +/- " << asymmErr[20] << std::endl;
   
-  ofstream ofile(TString::Format("%s_asymm_%sField_files_%i-%i.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofstream ofile(TString::Format("%s_asymmPrimKE_%sField_files_%i-%i.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
     ofile << 10.*b+5. << "\t" << asymm[b] << "\t" << asymmErr[b] << std::endl;
   }
   ofile.close();
-    
+
+  ofile.open(TString::Format("%s_thetaBins_%sField_%i-%i_East.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofile << std::setprecision(10);
+  ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
+  for (UInt_t b=0;b<eastType0.size();++b) {
+    ofile << (double)b+0.5 << "\t\t" 
+	  << eastType0[b] << "\t\t" 
+	  << eastType1[b] << "\t\t" 
+	  << eastType23[b] << "\n";
+  }
+  ofile.close();
+ 
+  ofile.open(TString::Format("%s_thetaBins_%sField_%i-%i_West.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofile << std::setprecision(10);
+  ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
+  for (UInt_t b=0;b<westType0.size();++b) {
+    ofile << (double)b+0.5 << "\t\t" 
+	  << westType0[b] << "\t\t" 
+	  << westType1[b] << "\t\t" 
+	  << westType23[b] << "\n";
+  }
+  ofile.close();
+ 
 
 
 };

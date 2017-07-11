@@ -6,7 +6,7 @@ from math import *
 
 def readAsymm(year="2011-2012",field="good",filemin=0,filemax=1000):
     A = []
-    with open('%s_asymm_%sField_files_%i-%i.txt'%(year,field,filemin,filemax),'rb') as tsvin:
+    with open('%s_asymmPrimKE_%sField_files_%i-%i.txt'%(year,field,filemin,filemax),'rb') as tsvin:
     #with open('%s_BHasymm_%sField_polW.txt'%(year,field),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
@@ -27,8 +27,8 @@ if __name__=="__main__":
     year = "2011-2012"
     emin = 230.
     emax = 750.
-    filemin = 7000
-    filemax = 8000
+    filemin = 0
+    filemax = 1000
     
     A_dip = readAsymm(year,"dip",filemin,filemax)
     A_dip_int = weightAsymm(A_dip,emin,emax)
