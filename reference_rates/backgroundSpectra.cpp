@@ -33,7 +33,7 @@
 #include <TString.h>
 #include <TStyle.h>
 
-const bool useEvis = true;           // Uses Evis rather than Erecon
+const bool useEvis = false;           // Uses Evis rather than Erecon
 
 const bool useRCclasses = true;      // If this is true, we only use "good" response class 
                                      // events as defined by C. Swank (triangular MWPC responses)
@@ -60,7 +60,7 @@ std::vector < std::vector < std::vector <Double_t> > > sfOFF_err(10,std::vector 
 std::vector < std::vector < Double_t > > pmtBackground(120, std::vector<Double_t>(8,0.) ); 
 
 
-std::vector <Int_t> badOct = {7,60,61,62,63,64,65,66}; 
+std::vector <Int_t> badOct = {7,9,59,60,61,62,63,64,65,66,67,91,93,101,107,121}; 
 
 
 std::vector <Int_t> getPMTEreconQuality(Int_t runNumber) {
