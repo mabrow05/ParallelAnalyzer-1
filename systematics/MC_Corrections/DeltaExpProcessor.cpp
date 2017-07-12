@@ -480,9 +480,9 @@ void calcDeltaExp (int octet)
     std::string simLocation;
     TChain *chain = new TChain("anaTree");
   
-    if (runNumber<20000) simLocation = string(getenv("SIM_2011_2012"));
-    else if (runNumber>=21087 && runNumber<21679) simLocation = string(getenv("SIM_2012_2013_ISOBUTANE"));
-    else simLocation = string(getenv("SIM_2012_2013"));
+    if (runNumber<20000) simLocation = string("/scratch/mabr239/output/2011-2012_Beta_");//string(getenv("SIM_2011_2012"));
+    else if (runNumber>=21087 && runNumber<21679) simLocation = string("/scratch/mabr239/output/2012-2013_Beta_ISOBUTANE_");//string(getenv("SIM_2012_2013_ISOBUTANE"));
+    else simLocation = string("/scratch/mabr239/output/2012-2013_Beta_");//string(getenv("SIM_2012_2013"));
 
 
     std::cout << "Using simulation from " << simLocation << "...\n";
@@ -495,9 +495,9 @@ void calcDeltaExp (int octet)
     
     for (int i=0; i<numFiles; i++) {
       
-      if (pol==-1) sprintf(temp,"%s/Beta_polE/analyzed_%i.root",simLocation.c_str(),i);
-      if (pol==1) sprintf(temp,"%s/Beta_polW/analyzed_%i.root",simLocation.c_str(),i);
-      
+      if (pol==-1) sprintf(temp,"%spolE/analyzed_%i.root",simLocation.c_str(),i);
+      if (pol==1) sprintf(temp,"%spolW/analyzed_%i.root",simLocation.c_str(),i);
+      //      std::cout << "Adding file " << temp << std::endl;
       chain->AddFile(temp);
       
     }
@@ -659,10 +659,13 @@ void calcDeltaExp (int octet)
 	dCath_WX[i] = (double)Cath_WX[i];
 	dCath_WY[15-i] = (double)Cath_WY[i];
       }
+      //std::cout << dCath_EX[7] << " " << dCath_EY[7] << " " << dCath_WX[7] << " " << dCath_WY[7] << std::endl;
+ 
       
       MWPCCathodeHandler cathResp(dCath_EX,dCath_EY,dCath_WX,dCath_WY);
       cathResp.loadCathodeModelParams(runNumber);
       
+      //cathResp.PrintSignals();
       cathResp.findAllPositions(true,false);
 
       posex = cathResp.getPosEX();
@@ -670,7 +673,8 @@ void calcDeltaExp (int octet)
       poswx = cathResp.getPosWX();
       poswy = cathResp.getPosWY();
       
-
+      //std::cout << posex[0] << " " << posey[0] << " " << poswx[0] << " " << poswy[0] << std::endl;
+ 
       //std::cout << mwpcAdjE[0] << "\t" << mwpcAdjE[1] << mwpcAdjW[0] << "\t" << mwpcAdjW[1] <<"\n"; 
       
       nClipped_EX = nClipped_EY = nClipped_WX = nClipped_WY = 0;
@@ -724,6 +728,7 @@ void calcDeltaExp (int octet)
       std::vector <Double_t> eta = posmap.getInterpolatedEta( xE.center,yE.center,
 				      xW.center,yW.center );
 
+      //     std::cout << xE.center << " " << yE.center << " " << xW.center << " " << yW.center << std::endl;
       //for (UInt_t iii=0; iii<eta.size(); iii++) std::cout << eta[iii] << std::endl;
     
       
@@ -986,7 +991,6 @@ void calcDeltaExp (int octet)
 
 	if ( r2E<(fidCut*fidCut) && r2W<(fidCut*fidCut ) ) {
 	
-	
 	  //Type 0
 	  if (type==0) hist[0][side]->Fill(Erecon);
 	
@@ -1034,10 +1038,8 @@ void calcDeltaExp (int octet)
     //outfile->Close();
     
 
-    //Fill all the vectors according to their event types and analysis choices
-
-    
-
+    //Fill all the vectors according to their event types and analysis choices    
+  
     for (int anaCh = 1; anaCh<11 ; anaCh++) {
 
       int type_low=-1, type_high=-1;
@@ -1093,7 +1095,7 @@ void calcDeltaExp (int octet)
 	    }
 
 	  }
-	  
+	
 	  if ( sep23 ) {
 	    if ( runType == "A2" ) {
 	      A2[anaCh-1][side][bin-1] += sep2 ? hist2[side]->GetBinContent(bin) : 0.;
@@ -1145,7 +1147,6 @@ void calcDeltaExp (int octet)
 	    }
 	  }
 	    
-	  
 	  if ( runType == "A2"  ) A2_err[anaCh-1][side][bin-1] = sqrt(A2_err[anaCh-1][side][bin-1]);
 	  if ( runType == "A5"  ) A5_err[anaCh-1][side][bin-1] = sqrt(A5_err[anaCh-1][side][bin-1]);
 	  if ( runType == "A7"  ) A7_err[anaCh-1][side][bin-1] = sqrt(A7_err[anaCh-1][side][bin-1]);
@@ -1158,20 +1159,19 @@ void calcDeltaExp (int octet)
 	}
       }
     }
-   
-
+      
     specFile->Write();
     delete specFile;
-
+  }
     /*  for (int side = 0; side<2; side++) {
 	  for (int type=0; type<3; type++) {
 	    if (hist[type][side]) delete hist[type][side];
 	  }
 	  if (hist2[side]) delete hist2[side]; 
-5A	  if (hist3[side]) delete hist3[side];
+	  if (hist3[side]) delete hist3[side];
 }*/
    
-  }
+  
     
     
   // Now we calculate all of the asymmetries bin-by-bin for all anaChoices
