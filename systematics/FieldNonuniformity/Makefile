@@ -29,6 +29,10 @@ FieldDipSystematic_BHasymm.exe: FieldDipSystematic_BHasymm.o $(objects)
 	$(CXX) $(CXXFLAGS) -o FieldDipSystematic_BHasymm.exe FieldDipSystematic_BHasymm.o $(objects) $(LIBS)
 	@echo "Done"
 
+FieldDipSystematic_Erecon.exe: FieldDipSystematic_Erecon.o $(objects)
+	$(CXX) $(CXXFLAGS) -o FieldDipSystematic_Erecon.exe FieldDipSystematic_Erecon.o $(objects) $(LIBS)
+	@echo "Done"
+
 
 MBUtils.o: MBUtils.hh
 

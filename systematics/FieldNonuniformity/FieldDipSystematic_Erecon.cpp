@@ -70,15 +70,20 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   double fidCut = 50.;
 
   //Load the simulated relationship between EQ and Etrue
-  //int fakeRunNumber = ( year==TString("2011-2012")?17126:
-  //			( year==TString("2012-2013")?22024:21537 ));
-  //  EreconParameterization eRecon(fakeRunNumber);
+  int fakeRunNumber = ( year==TString("2011-2012")?17126:
+  			( year==TString("2012-2013")?22024:21537 ));
+  EreconParameterization eRecon(fakeRunNumber);
 
   //Initializing the separator
-  //BackscatterSeparator sep;
-  //sep.LoadCutCurve(fakeRunNumber);
+  BackscatterSeparator sep;
+  sep.LoadCutCurve(fakeRunNumber);
 
   trigg scintTrigg(year);
+
+  //For smearing
+  double alpha = 0.4; // nPE/keV of roughly 400 PE per 1 GeV
+  Double_t g_d = 16.;
+  Double_t g_rest = 12500.;
 
   TString field_prefix = ( field==TString("flat")?TString("FLAT_FIELD"):
 			   (field==TString("dip")?TString("FIELD_DIP"):
@@ -159,8 +164,13 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       double weight = 1.+0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
       int realside = cosTheta>0.?1:0;
-      int side = (keInSD[5]>keInSD[15])?0:1;
+      int windowSide = (keInSD[5]>keInSD[15])?0:1;
+      int side = -1;
+      int type=-1;
       bool trigger = false;
+
+      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 
       bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
       bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
@@ -168,34 +178,46 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
 	trigger=true;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	side=0;
+	type=0;
       }
       else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	side=1;
+	type=0;
       }
 
       //Type 1
       else if ( scintEastTrigg && scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
 	trigger=true;
-	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	side=time[0]<time[1]?0:1;
+	type=1;
       }
       
       //Type 2/3
       else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( scintEastTrigg || scintWestTrigg ) ) {
 	trigger=true;
-	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-
+	side=scintEastTrigg?0:1;
+	type=2;
       }
 
-      if (trigger || rawAsymm) {
-	if (side==0) hisE_polE->Fill(primKE,weight);
-	else if (side==1) hisW_polE->Fill(primKE,weight);
-      } 
+      if (trigger) {
+	double evis = type==1?(EdepQ[0]+EdepQ[1]):EdepQ[side];
+	double erecon = eRecon.getErecon(side,type,evis);
+	if (type==2) {
+	  if (side==0) {
+	      type = sep.separate23(MWPCEnergy[0]);
+	      side = type==2 ? 1 : 0;
+	    }
+	    else if (side==1) {
+	      type = sep.separate23(MWPCEnergy[1]);
+	      side = type==2 ? 0 : 1;
+	    }
+	}
+	if (side==0) hisE_polE->Fill(erecon,weight);
+	else if (side==1) hisW_polE->Fill(erecon,weight);
+      }
+      
     }  
     delete f;
     
@@ -242,9 +264,13 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       double weight = 1-0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
       int realside = cosTheta>0.?1:0;
-      int side = (keInSD[5]>keInSD[15]?0:1);
-
+      int windowSide = (keInSD[5]>keInSD[15])?0:1;
+      int side = -1;
+      int type=-1;
       bool trigger = false;
+
+      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 
       bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
       bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
@@ -252,34 +278,45 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
 	trigger=true;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	side=0;
+	type=0;
       }
       else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	side=1;
+	type=0;
       }
 
       //Type 1
       else if ( scintEastTrigg && scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
 	trigger=true;
-	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	side=time[0]<time[1]?0:1;
+	type=1;
       }
       
       //Type 2/3
       else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( scintEastTrigg || scintWestTrigg ) ) {
 	trigger=true;
-	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-
+	side=scintEastTrigg?0:1;
+	type=2;
       }
 
-      if (trigger || rawAsymm) {
-	if (side==0) hisE_polW->Fill(primKE,weight);
-	else if (side==1) hisW_polW->Fill(primKE,weight);
-      } 
+      if (trigger) {
+	double evis = type==1?(EdepQ[0]+EdepQ[1]):EdepQ[side];
+	double erecon = eRecon.getErecon(side,type,evis);
+	if (type==2) {
+	  if (side==0) {
+	      type = sep.separate23(MWPCEnergy[0]);
+	      side = type==2 ? 1 : 0;
+	    }
+	    else if (side==1) {
+	      type = sep.separate23(MWPCEnergy[1]);
+	      side = type==2 ? 0 : 1;
+	    }
+	}
+	if (side==0) hisE_polW->Fill(erecon,weight);
+	else if (side==1) hisW_polW->Fill(erecon,weight);
+      }
     }
    
     delete f;
