@@ -28,9 +28,9 @@ if __name__=="__main__":
     emin = 230.
     emax = 750.
     filemin = 0
-    filemax = 10000
+    filemax = 1000
     
-    A_dip = readAsymm(year,"dip",filemin,filemax)
+    A_dip = readAsymm(year,"symm",filemin,filemax)
     A_dip_int = weightAsymm(A_dip,emin,emax)
 
     A = readAsymm(year,"flat",filemin,filemax)
