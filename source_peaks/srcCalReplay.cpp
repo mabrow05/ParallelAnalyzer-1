@@ -818,10 +818,8 @@ int main(int argc, char *argv[])
 
     else if (t->PID==0) {
 
-      
-
-      //eta = posmap.getInterpolatedEta(0., 0., 0., 0.);
-      eta = posmap.getInterpolatedEta(xEast[0], yEast[0], xWest[0], yWest[0]);
+      eta = posmap.getInterpolatedEta(0., 0., 0., 0.);
+      //eta = posmap.getInterpolatedEta(xEast[0], yEast[0], xWest[0], yWest[0]);
       
       t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
       t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
