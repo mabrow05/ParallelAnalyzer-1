@@ -771,21 +771,125 @@ int main(int argc, char *argv[])
 	}
 	else t->Erecon=-1.;
       }
-
-      // Last thing to do for electrons is position correct the anode signal and
-      // apply the wirechamber energy calibration
-
-      // Get the position response
-      std::vector <Double_t> etaMWPC = anodeMap.getInterpolatedEta(t->xE.center,t->yE.center,
-								   t->xW.center,t->yW.center);
-      t->AnodeE = t->AnodeE / etaMWPC[0];
-      t->AnodeW = t->AnodeW / etaMWPC[1];
-
-      t->EMWPC_E = mwpcCal.applyCal( 0, t->AnodeE ) ;
-      t->EMWPC_W = mwpcCal.applyCal( 1, t->AnodeW ) ;
+    }
+    else if (t->PID==0) {
+      
+      eta = posmap.getInterpolatedEta(0., 0., 0., 0.);
+      //eta = posmap.getInterpolatedEta(xEast[0], yEast[0], xWest[0], yWest[0]);
+      
+      t->ScintE.e1 = linearityCurve.applyLinCurve(0,t->ScintE.q1);
+      t->ScintE.e2 = linearityCurve.applyLinCurve(1,t->ScintE.q2);
+      t->ScintE.e3 = linearityCurve.applyLinCurve(2,t->ScintE.q3);
+      t->ScintE.e4 = linearityCurve.applyLinCurve(3,t->ScintE.q4);
+      
+      t->ScintE.e1 = ( eta[0]>0. ) ? t->ScintE.e1 / eta[0] : 0.;
+      t->ScintE.e2 = ( eta[1]>0. ) ? t->ScintE.e2 / eta[1] : 0.;
+      t->ScintE.e3 = ( eta[2]>0. ) ? t->ScintE.e3 / eta[2] : 0.;
+      t->ScintE.e4 = ( eta[3]>0. ) ? t->ScintE.e4 / eta[3] : 0.;
+      
+      t->ScintE.nPE1 = eta[0] > 0. ? t->ScintE.e1 * eta[0] * alpha[0] : 0.;
+      t->ScintE.nPE2 = eta[1] > 0. ? t->ScintE.e2 * eta[1] * alpha[1] : 0.;
+      t->ScintE.nPE3 = eta[2] > 0. ? t->ScintE.e3 * eta[2] * alpha[2] : 0.;
+      t->ScintE.nPE4 = eta[3] > 0. ? t->ScintE.e4 * eta[3] * alpha[3] : 0.;
+      
+      t->ScintE.de1 = t->ScintE.nPE1 > 0. ? t->ScintE.e1/sqrt(t->ScintE.nPE1) : 0.;
+      t->ScintE.de2 = t->ScintE.nPE2 > 0. ? t->ScintE.e2/sqrt(t->ScintE.nPE2) : 0.;
+      t->ScintE.de3 = t->ScintE.nPE3 > 0. ? t->ScintE.e3/sqrt(t->ScintE.nPE3) : 0.;
+      t->ScintE.de4 = t->ScintE.nPE4 > 0. ? t->ScintE.e4/sqrt(t->ScintE.nPE4) : 0.;
+      
+      
+      t->ScintW.e1 = linearityCurve.applyLinCurve(4,t->ScintW.q1);
+      t->ScintW.e2 = linearityCurve.applyLinCurve(5,t->ScintW.q2);
+      t->ScintW.e3 = linearityCurve.applyLinCurve(6,t->ScintW.q3);
+      t->ScintW.e4 = linearityCurve.applyLinCurve(7,t->ScintW.q4);
+    
+      t->ScintW.e1 = ( eta[4]>0. ) ? t->ScintW.e1 / eta[4] : 0.;
+      t->ScintW.e2 = ( eta[5]>0. ) ? t->ScintW.e2 / eta[5] : 0.;
+      t->ScintW.e3 = ( eta[6]>0. ) ? t->ScintW.e3 / eta[6] : 0.;
+      t->ScintW.e4 = ( eta[7]>0. ) ? t->ScintW.e4 / eta[7] : 0.;
+    
+      t->ScintW.nPE1 = eta[4] > 0. ? t->ScintW.e1 * eta[4] * alpha[4] : 0.;
+      t->ScintW.nPE2 = eta[5] > 0. ? t->ScintW.e2 * eta[5] * alpha[5] : 0.;
+      t->ScintW.nPE3 = eta[6] > 0. ? t->ScintW.e3 * eta[6] * alpha[6] : 0.;
+      t->ScintW.nPE4 = eta[7] > 0. ? t->ScintW.e4 * eta[7] * alpha[7] : 0.;
+    
+      t->ScintW.de1 = t->ScintW.nPE1 > 0. ? t->ScintW.e1/sqrt(t->ScintW.nPE1) : 0.;
+      t->ScintW.de2 = t->ScintW.nPE2 > 0. ? t->ScintW.e2/sqrt(t->ScintW.nPE2) : 0.;
+      t->ScintW.de3 = t->ScintW.nPE3 > 0. ? t->ScintW.e3/sqrt(t->ScintW.nPE3) : 0.;
+      t->ScintW.de4 = t->ScintW.nPE4 > 0. ? t->ScintW.e4/sqrt(t->ScintW.nPE4) : 0.;
+    
+      //std::cout << "Made it here" << std::endl;
+    
+    
+      //Calculate the weighted energy on a side
+    
+      //EAST
+      double numer = 0.;
+      numer = ( (pmtQuality[0] ? t->ScintE.nPE1 : 0.) +
+		(pmtQuality[1] ? t->ScintE.nPE2 : 0.) + 
+		(pmtQuality[2] ? t->ScintE.nPE3 : 0.) + 
+		(pmtQuality[3] ? t->ScintE.nPE4 : 0.) );
+    
+      double denom = 0.;
+      denom  = ( (pmtQuality[0] ? alpha[0] * eta[0] : 0.) +
+		 (pmtQuality[1] ? alpha[1] * eta[1] : 0.) +
+		 (pmtQuality[2] ? alpha[2] * eta[2] : 0.) + 
+		 (pmtQuality[3] ? alpha[3] * eta[3] : 0.) ); 
+    
+      t->ScintE.energy = t->EvisE = (denom!=0. ? numer/denom : 0.);
+      t->ScintE.denergy = (denom!=0. ? sqrt(t->ScintE.energy/denom) : 0.);
+    
+      //WEST
+      numer = denom = 0.;
+    
+      numer = ( (pmtQuality[4] ? t->ScintW.nPE1 : 0.) +
+		(pmtQuality[5] ? t->ScintW.nPE2 : 0.) + 
+		(pmtQuality[6] ? t->ScintW.nPE3 : 0.) + 
+		(pmtQuality[7] ? t->ScintW.nPE4 : 0.) );
+    
+      denom  = ( (pmtQuality[4] ? alpha[4] * eta[4] : 0.) +
+		 (pmtQuality[5] ? alpha[5] * eta[5] : 0.) +
+		 (pmtQuality[6] ? alpha[6] * eta[6] : 0.) + 
+		 (pmtQuality[7] ? alpha[7] * eta[7] : 0.) ); 
+    
+    
+      t->ScintW.energy = t->EvisW = (denom!=0. ? numer/denom : 0.);
+      t->ScintW.denergy = (denom!=0. ? sqrt(t->ScintW.energy/denom) : 0.);
+  
+    
+      // Determine the reconstructed energy
+    
+      Int_t typeIndex = 0; //for retrieving the parameters from EQ2Etrue
+     
+      if (t->Side==0) {
+	if (t->EvisE>0.) {
+	  t->Erecon = eRecon.getErecon(0,typeIndex,t->EvisE);
+	}
+	else t->Erecon=-1.;
+      }
+      if (t->Side==1) {
+	if (t->EvisW>0.) {
+	  t->Erecon = eRecon.getErecon(1,typeIndex,t->EvisW);
+	}
+	else t->Erecon=-1.;
+      }
 
     }
-
+      
+    // Last thing to do for electrons is position correct the anode signal and
+    // apply the wirechamber energy calibration
+    
+    // Get the position response
+    std::vector <Double_t> etaMWPC = anodeMap.getInterpolatedEta(t->xE.center,t->yE.center,
+								 t->xW.center,t->yW.center);
+    t->AnodeE = t->AnodeE / etaMWPC[0];
+    t->AnodeW = t->AnodeW / etaMWPC[1];
+    
+    t->EMWPC_E = mwpcCal.applyCal( 0, t->AnodeE ) ;
+    t->EMWPC_W = mwpcCal.applyCal( 1, t->AnodeW ) ;
+    
+  
+  
     // write out pedestal subtracted cathode values for all events
     
     for ( int ii = 0; ii<16; ++ii ) {
