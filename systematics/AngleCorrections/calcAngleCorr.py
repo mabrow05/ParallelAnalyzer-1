@@ -83,10 +83,10 @@ def readAngleCorr(year="2011-2012",percErr=0.2):
 
     
 if __name__=="__main__":
-    year = "2012-2013"
+    year = "2011-2012"
     emin = 230.
     emax = 750.
-    perc_Err=0.20
+    perc_Err=0.25
 
     angleCorr = readAngleCorr(year,percErr=perc_Err)
     statErr = statUncertainties(year)

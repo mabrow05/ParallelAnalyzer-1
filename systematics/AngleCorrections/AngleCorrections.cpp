@@ -49,7 +49,7 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 
   TFile *f;
 
-  Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3];
+  Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3],primPos[4];
 
   //Start with East polarization
   for (int j=startFileNum; j<endFileNum; ++j) {
@@ -63,6 +63,7 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
     t->SetBranchAddress("time",time);
     t->GetBranch("ScintPos")->GetLeaf("ScintPosE")->SetAddress(ScintPosE);
     t->GetBranch("ScintPos")->GetLeaf("ScintPosW")->SetAddress(ScintPosW);
+    t->SetBranchAddress("primPos",primPos);
 
     std::cout << "In East file " << j << std::endl;
     
@@ -72,8 +73,9 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       
       Double_t rE = TMath::Sqrt(ScintPosE[0]*ScintPosE[0]+ScintPosE[1]*ScintPosE[1])*TMath::Sqrt(0.6)*10.;
       Double_t rW = TMath::Sqrt(ScintPosW[0]*ScintPosW[0]+ScintPosW[1]*ScintPosW[1])*TMath::Sqrt(0.6)*10.;
+      Double_t rPrim = primPos[3]*100.;
 
-      if (rE>50. || rW>50.) continue;
+      if (rE>50. || rW>50. || rPrim>50.) continue;
 
       Int_t side = TMath::Cos(primTheta)>0.?1:0;
 
@@ -133,7 +135,8 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
     t->SetBranchAddress("time",time);
     t->GetBranch("ScintPos")->GetLeaf("ScintPosE")->SetAddress(ScintPosE);
     t->GetBranch("ScintPos")->GetLeaf("ScintPosW")->SetAddress(ScintPosW);
-
+    t->SetBranchAddress("primPos",primPos);
+	
     std::cout << "In West file " << j << std::endl;
     
     for (UInt_t i=0; i<t->GetEntriesFast() ; ++i) {
@@ -141,8 +144,9 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       t->GetEntry(i);
       Double_t rE = TMath::Sqrt(ScintPosE[0]*ScintPosE[0]+ScintPosE[1]*ScintPosE[1])*TMath::Sqrt(0.6)*10.;
       Double_t rW = TMath::Sqrt(ScintPosW[0]*ScintPosW[0]+ScintPosW[1]*ScintPosW[1])*TMath::Sqrt(0.6)*10.;
+      Double_t rPrim = primPos[3]*100.;
 
-      if (rE>50. || rW>50.) continue;
+      if (rE>50. || rW>50. || rPrim>50.) continue;
 
       Int_t side = TMath::Cos(primTheta)>0.?1:0;
 
