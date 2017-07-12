@@ -201,6 +201,11 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
 	std::cout << "didn't pass west fiducial cut or pmt is bad\n";
 	continue;  
       }
+
+      else if ( j==7 && dataWidthRun[j][i]==19362 ) { 
+	std::cout << "Just a bad run...\n";
+	continue;  
+      }
       
       if ( (TMath::Abs(simWidths[j][i]-dataWidths[j][i])/dataWidths[j][i] < 1.5) ) { //Checking for outliers
 	std::cout << dataWidthRun[j][i] << " PMT " << j << std::endl; 

@@ -570,7 +570,7 @@ if __name__ == "__main__":
             #beta.runGainLED(octet)
             #beta.runReplayPass2(octet)
             #beta.findTriggerFunctions(octet)
-            #beta.runReverseCalibration(octet)
+            beta.runReverseCalibration(octet)
             #beta.runReplayPass3(octet,applyEndpointGain=False)
             #beta.runEndpointGain(octet)
             beta.runReplayPass3(octet,applyEndpointGain=True)
