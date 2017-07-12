@@ -33,12 +33,17 @@ TString anaChoices[10] = {"A","B","C","D","E","F","G","H","J","K"};
 std::string corr ("UnCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
-Double_t POL_minus = 0.9981;
-Double_t POL_plus = 0.9937;
-Double_t delta_POL = POL_plus-POL_minus;
-Double_t POL_ave = (POL_plus+POL_minus) / 2.;
+Double_t POL_minus2011 = 0.997;
+Double_t POL_plus2011 = 0.9939;
+Double_t delta_POL2011 = (POL_plus2011-POL_minus2011)/2.;
+Double_t POL_ave2011 = (POL_plus2011+POL_minus2011) / 2.;
 
-bool withPOL = false; //Set this to true to correct DATA for the polarimetry measurement
+Double_t POL_minus2012 = 0.9979;
+Double_t POL_plus2012 = 0.9952;
+Double_t delta_POL2012 = (POL_plus2012-POL_minus2012)/2.;
+Double_t POL_ave2012 = (POL_plus2012+POL_minus2012) / 2.;
+
+bool withPOL = true; //Set this to true to correct DATA for the polarimetry measurement
 
 
 std::vector <Int_t> badOct {7,9,59,60,61,62,63,64,65,66,67,91,93,101,107,121}; // This includes all
@@ -162,13 +167,13 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    std::vector<TString> aCh {"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    /*std::vector<TString> aCh {"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
       //PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-    }
+      }*/
     
     // Loop over keys
     /*int keys[] {0,10,11,12,13,20,21,22,23,24,25};
@@ -180,8 +185,8 @@ int main(int argc, char* argv[])
 
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
-    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
     
 
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
@@ -391,6 +396,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 
     // Apply polarimetry correction if necessary
     if (withPOL) {
+      double POL_ave=POL_ave2011;
+      if (octBegin>59 && octEnd>59)  POL_ave = POL_ave2012;
       groupRawAsymByBin[1][i] = groupRawAsymByBin[1][i] / ( POL_ave ); 
       groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i] / ( POL_ave );
       groupAsymByBin[1][i] = groupAsymByBin[1][i] / ( POL_ave ); 
@@ -672,7 +679,8 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	AsymAndError[1][i] *= (deltaSys[i][0] / theoryCorr[i]);
 
 	if ( withPOL ) {
-
+	  double POL_ave=POL_ave2011;
+	  if (octet>59)  POL_ave = POL_ave2012;
 	  AsymAndError[0][i] /= ( POL_ave ); 
 	  AsymAndError[1][i] /= ( POL_ave );
 

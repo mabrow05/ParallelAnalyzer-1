@@ -29,8 +29,8 @@ int main() {
 
     fgTriggE += (Double_t)t->GetEntries("Type==0 && PID==1 && Side==0 && Erecon>320. && Erecon<400.");
     fgTriggW += (Double_t)t->GetEntries("Type==0 && PID==1 && Side==1 && Erecon>320. && Erecon<400.");
-    fgNoTriggE += (Double_t)t->GetEntries("Sis00==1 && PID==0 && Side==0 && Erecon>320. && Erecon<400.");
-    fgNoTriggW += (Double_t)t->GetEntries("Sis00==2 && PID==0 && Side==1 && Erecon>320. && Erecon<400.");
+    fgNoTriggE += (Double_t)t->GetEntries("PID==0 && Side==0 && Erecon>320. && Erecon<400.");
+    fgNoTriggW += (Double_t)t->GetEntries("PID==0 && Side==1 && Erecon>320. && Erecon<400.");
   }
   
   for (auto run:bgruns) {
@@ -43,8 +43,8 @@ int main() {
 
     bgTriggE += (Double_t)t->GetEntries("Type==0 && PID==1 && Side==0 && Erecon>320. && Erecon<400.");
     bgTriggW += (Double_t)t->GetEntries("Type==0 && PID==1 && Side==1 && Erecon>320. && Erecon<400.");
-    bgNoTriggE += (Double_t)t->GetEntries("(Sis00==1 || Sis00==33)  && PID==0 && Side==0 && Erecon>320. && Erecon<400.");
-    bgNoTriggW += (Double_t)t->GetEntries("(Sis00==2 || Sis00==34) && PID==0 && Side==1 && Erecon>320. && Erecon<400.");
+    bgNoTriggE += (Double_t)t->GetEntries("PID==0 && Side==0 && Erecon>320. && Erecon<400.");
+    bgNoTriggW += (Double_t)t->GetEntries("PID==0 && Side==1 && Erecon>320. && Erecon<400.");
   }
 
   fgTriggEerr = TMath::Sqrt(fgTriggE);
