@@ -21,6 +21,12 @@ def weightAsymm(data,emin,emax):
     denom = sum([ 1./x[2]**2 for x in data if emin<x[0]<emax ])
     return [numer/denom,sqrt(1./denom)]
 
+def writeCorrectionByBin(uncorr,corr,year):
+    with open("FieldDipCorr_%s.txt"%year,'w') as fout:
+        for i in range(0,len(uncorr)):
+            c = corr[i][1]/uncorr[i][1] if fabs(uncorr[i][1])>0. else 1.
+            fout.write("%f\t%0.10f\n"%(uncorr[i][0],c))
+            #print("%f\t%0.10f"%(uncorr[i][0],c))    
 
     
 if __name__=="__main__":
@@ -36,6 +42,8 @@ if __name__=="__main__":
     A = readAsymm(year,"flat",filemin,filemax)
     A_int = weightAsymm(A,emin,emax)
     
+    writeCorrectionByBin(A,A_dip,year)
+
     print("A_flat = %f +/- %f"%(A_int[0],A_int[1]))
     print("A_dip = %f +/- %f"%(A_dip_int[0],A_dip_int[1]))
     print("DeltaFieldDip (DeltaA/A) = %f"%(A_int[0]/A_dip_int[0] - 1))
