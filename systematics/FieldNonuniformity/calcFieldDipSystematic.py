@@ -42,7 +42,7 @@ if __name__=="__main__":
     A = readAsymm(year,"flat",filemin,filemax)
     A_int = weightAsymm(A,emin,emax)
     
-    writeCorrectionByBin(A,A_dip,year)
+    writeCorrectionByBin(A_dip,A,year)
 
     print("A_flat = %f +/- %f"%(A_int[0],A_int[1]))
     print("A_dip = %f +/- %f"%(A_dip_int[0],A_dip_int[1]))
