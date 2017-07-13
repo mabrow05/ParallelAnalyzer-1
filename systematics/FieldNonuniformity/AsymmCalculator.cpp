@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
   
  
   if (argc!=8) {
-    std::cout << "USAGE: ./MC_SpectralCorrection.exe [anaCh] [octmin] [octmax] [analysis window min] [analysis window max] [sim] [UNBLIND] \n";
+    std::cout << "USAGE: ./MC_SpectralCorrection.exe [anaCh] [octmin] [octmax] [analysis window min] [analysis window max] [corr] [sim]  \n";
     exit(0);
   }
     
@@ -84,9 +84,8 @@ int main(int argc, char* argv[])
   Double_t enBinWidth = 10.;
   Double_t Elow = atoi(argv[4]);
   Double_t Ehigh = atoi(argv[5]);//680
-  std::string sim = argv[6];
-  std::string unblind = argv[7];
-  corr = "AllCorr";
+  std::string sim = argv[7];
+  corr = std::string(argv[6]);
   int key = 0;
  
   bool UKdata = true;//true;
@@ -105,7 +104,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = unblind==std::string("true") ? true : false;
+  bool UNBLIND = false;//unblind==std::string("true") ? true : false;
 
   
   try {
