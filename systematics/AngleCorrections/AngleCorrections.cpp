@@ -7,6 +7,7 @@
 #include <TTree.h>
 #include <TBranch.h>
 #include <TLeaf.h>
+#include <TRandom3.h>
 
 #include <iostream>
 #include <cstdlib>
@@ -15,6 +16,41 @@
 #include <iomanip>
 
 #include "calibrationTools.hh"
+
+class trigg {
+
+public:
+  trigg(TString year) ;
+  ~trigg();
+  bool triggerE(Double_t *eq,Double_t rand) {return (fE->EvalPar(eq,pE)>rand)?true:false;};
+  bool triggerW(Double_t *eq,Double_t rand) {return (fW->EvalPar(eq,pW)>rand)?true:false;};
+protected:
+  Double_t pE[2];
+  Double_t pW[2];
+  TF1 *fE,*fW;
+};
+
+trigg::trigg(TString year) {
+
+  if (year==TString("2011-2012")) {
+    pE[0] = -18.3615;
+    pE[1] = 47.5979;
+    pW[0] = -15.8085;
+    pW[1] = 46.3180;
+  }
+  else {
+    pE[0] = -13.6101;
+    pE[1] = 45.7509;
+    pW[0] = -16.9604;
+    pW[1] = 46.5911;
+  }
+
+  fE = new TF1("fE","0.5+0.5*TMath::Erf((x-[0])/[1])",0.,1000.);
+  fW = new TF1("fW","0.5+0.5*TMath::Erf((x-[0])/[1])",0.,1000.);
+
+};
+
+trigg::~trigg() {delete fE; delete fW;}
 
 // Function to return beta when given the kinetic energy of an electron
 Double_t returnBeta(Double_t En) { 
@@ -34,6 +70,13 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   BackscatterSeparator sep;
   sep.LoadCutCurve(fakeRunNumber);
 
+  trigg scintTrigg(year);
+
+  //For smearing on a detector basis (roughly)                                                                        
+  double alpha = 0.4; // nPE/keV of roughly 400 PE per 1 GeV                                                                                  
+  Double_t g_d = 4.*16.;
+  Double_t g_rest = 4.*12500.;
+
   std::vector <Double_t> aveThetaPureE(100,0.);
   std::vector <Double_t> PureEntriesE(100,0.);
   std::vector <Double_t> aveThetaTriggE(100,0.);
@@ -50,6 +93,8 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   TFile *f;
 
   Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3],primPos[4];
+
+  TRandom3 rand;
 
   //Start with East polarization
   for (int j=startFileNum; j<endFileNum; ++j) {
@@ -89,22 +134,32 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       }
 
       bool trigger = false;
+
+      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
+
+
+      bool mwpcEastTrigg = (MWPCEnergy[0]>0.)?true:false;
+      bool mwpcWestTrigg = (MWPCEnergy[1]>0.)?true:false;
+      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
+      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+
       // Type 0
-      if ( EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
-	trigger=true;
+      if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {
+      	trigger=true;
       }
-      else if ( EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
+      else if ( !scintEastTrigg && scintWestTrigg && !mwpcEastTrigg && mwpcWestTrigg ) {
 	trigger=true;
       }
 
       //Type 1
-      else if ( EdepQ[0]>0. && EdepQ[1]>0. && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
-	trigger=true;
+      else if ( scintEastTrigg && scintWestTrigg && mwpcEastTrigg && mwpcWestTrigg ) {
+      	trigger=true;
       }
       
       //Type 2/3
-      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && (EdepQ[0]>0. || EdepQ[1]>0.) ) {
-	trigger=true;
+      if ( (scintEastTrigg || scintWestTrigg) && mwpcEastTrigg && mwpcWestTrigg ) {
+      	trigger=true;
       }
 
       if (trigger && side==0) {
@@ -159,23 +214,32 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 	PureEntriesW[(int)(primKE/10.)]+=1.;
       }
 
-      bool trigger = false;
+      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
+
+      bool trigger=false;
+
+      bool mwpcEastTrigg = (MWPCEnergy[0]>0.)?true:false;
+      bool mwpcWestTrigg = (MWPCEnergy[1]>0.)?true:false;
+      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
+      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+
       // Type 0
-      if ( EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
-	trigger=true;
+      if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {
+      	trigger=true;
       }
-      else if ( EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
+      else if ( !scintEastTrigg && scintWestTrigg && !mwpcEastTrigg && mwpcWestTrigg ) {
 	trigger=true;
       }
 
       //Type 1
-      else if ( EdepQ[0]>0. && EdepQ[1]>0. && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
-	trigger=true;
+      else if ( scintEastTrigg && scintWestTrigg && mwpcEastTrigg && mwpcWestTrigg ) {
+      	trigger=true;
       }
       
       //Type 2/3
-      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && (EdepQ[0]>0. || EdepQ[1]>0.) ) {
-	trigger=true;
+      if ( (scintEastTrigg || scintWestTrigg) && mwpcEastTrigg && mwpcWestTrigg ) {
+      	trigger=true;
       }
 
       if (trigger && side==0) {
