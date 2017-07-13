@@ -180,11 +180,15 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=0;
 	type=0;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
 	side=1;
 	type=0;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
@@ -192,6 +196,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=time[0]<time[1]?0:1;
 	type=1;
+	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
@@ -199,6 +205,9 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=scintEastTrigg?0:1;
 	type=2;
+	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+
       }
 
       if (trigger) {
@@ -280,11 +289,15 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=0;
 	type=0;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
 	side=1;
 	type=0;
+	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
@@ -292,6 +305,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=time[0]<time[1]?0:1;
 	type=1;
+	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
@@ -299,6 +314,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=scintEastTrigg?0:1;
 	type=2;
+	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       if (trigger) {
@@ -353,7 +370,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   std::cout << " A = " << asymm[20] << " +/- " << asymmErr[20] << std::endl;
   
-  ofstream ofile(TString::Format("%s_%sasymmPrimKE_%sField_files_%i-%i.txt",year.Data(),rawAsymm?"RAW":"",field.Data(),startFileNum,endFileNum).Data());
+  ofstream ofile(TString::Format("%s_%sasymmErecon_%sField_files_%i-%i.txt",year.Data(),rawAsymm?"RAW":"",field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
@@ -361,7 +378,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   ofile.close();
 
-  ofile.open(TString::Format("%s_thetaBins_%sField_%i-%i_East.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofile.open(TString::Format("%s_thetaBinsErecon_%sField_%i-%i_East.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
   ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
   for (UInt_t b=0;b<eastType0.size();++b) {
@@ -372,7 +389,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   ofile.close();
  
-  ofile.open(TString::Format("%s_thetaBins_%sField_%i-%i_West.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofile.open(TString::Format("%s_thetaBinsErecon_%sField_%i-%i_West.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
   ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
   for (UInt_t b=0;b<westType0.size();++b) {
