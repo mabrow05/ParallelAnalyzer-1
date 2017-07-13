@@ -432,7 +432,7 @@ void calcDeltaExp (int octet)
   std::vector < std::vector < std::vector <Double_t> > > B10_err(10,std::vector < std::vector <Double_t> > (2, std::vector<Double_t>(120,0.))); 
 
 
-  TRandom3 *event = new TRandom3(0);
+  TRandom3 *event = new TRandom3(betaRuns[0]);
   UInt_t evtON = (int)(event->Rndm()*97000000.);
   UInt_t evtOFF = (int)(event->Rndm()*97000000.);
   UInt_t evt = 0;

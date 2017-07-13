@@ -7,6 +7,7 @@
 #include <TTree.h>
 #include <TBranch.h>
 #include <TLeaf.h>
+#include <TRandom3.h>
 
 #include <iostream>
 #include <cstdlib>
@@ -15,6 +16,42 @@
 #include <iomanip>
 
 #include "calibrationTools.hh"
+
+class trigg {
+
+public: 
+  trigg(TString year) ;
+  ~trigg();
+  bool triggerE(Double_t *eq,Double_t rand) {return (fE->EvalPar(eq,pE)>rand)?true:false;};
+  bool triggerW(Double_t *eq,Double_t rand) {return (fW->EvalPar(eq,pW)>rand)?true:false;};
+protected:
+  Double_t pE[2];
+  Double_t pW[2];
+  TF1 *fE,*fW;
+};
+
+trigg::trigg(TString year) {
+  
+  if (year==TString("2011-2012")) {   
+    pE[0] = -18.3615;
+    pE[1] = 47.5979;
+    pW[0] = -15.8085;
+    pW[1] = 46.3180;
+  }
+  else {
+    pE[0] = -13.6101;
+    pE[1] = 45.7509;
+    pW[0] = -16.9604;
+    pW[1] = 46.5911;
+  }
+  
+  fE = new TF1("fE","0.5+0.5*TMath::Erf((x-[0])/[1])",0.,1000.);
+  fW = new TF1("fW","0.5+0.5*TMath::Erf((x-[0])/[1])",0.,1000.);
+  
+};
+
+trigg::~trigg() {delete fE; delete fW;}
+
 
 // Function to return beta when given the kinetic energy of an electron
 Double_t returnBeta(Double_t En) { 
@@ -25,7 +62,7 @@ Double_t returnBeta(Double_t En) {
 
 void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum) {
 
-  bool rawAsymm=true; //Doesn't check for triggering if true
+  bool rawAsymm=false; //Doesn't check for triggering if true
 
   int badFiles[21] = {926,944,1605,2327,2614,2703,3109,3449,4494,4968,
 		      5531,5869,6216,6687,6863,7766,9225,9718,9798,9821,9959};
@@ -40,6 +77,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   //Initializing the separator
   //BackscatterSeparator sep;
   //sep.LoadCutCurve(fakeRunNumber);
+
+  trigg scintTrigg(year);
 
   TString field_prefix = ( field==TString("flat")?TString("FLAT_FIELD"):
 			   (field==TString("dip")?TString("FIELD_DIP"):
@@ -81,6 +120,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
   Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3],keInSD[24],primPos[4];
 
+  TRandom3 rand;
+
   //Start with East polarization
   for (int j=startFileNum; j<endFileNum; j+=2) {
     
@@ -120,27 +161,31 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       int realside = cosTheta>0.?1:0;
       int side = (keInSD[5]>keInSD[15])?0:1;
       bool trigger = false;
+
+      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
+      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+
       // Type 0
-      if ( EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
+      if ( scintEastTrigg && !scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
 	trigger=true;
 	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
-      else if ( EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
+      else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
 	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
-      else if ( EdepQ[0]>0. && EdepQ[1]>0. && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
+      else if ( scintEastTrigg && scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
 	trigger=true;
 	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
-      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( EdepQ[0]>0. || EdepQ[1]>0. ) ) {
+      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( scintEastTrigg || scintWestTrigg ) ) {
 	trigger=true;
 	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
@@ -200,30 +245,35 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       int side = (keInSD[5]>keInSD[15]?0:1);
 
       bool trigger = false;
+
+      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
+      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+
       // Type 0
-      if ( EdepQ[0]>0. && EdepQ[1]==0. && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
+      if ( scintEastTrigg && !scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
 	trigger=true;
 	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
-      else if ( EdepQ[1]>0. && EdepQ[0]==0. && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
+      else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
 	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
-      else if ( EdepQ[0]>0. && EdepQ[1]>0. && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
+      else if ( scintEastTrigg && scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]>0. ) {
 	trigger=true;
 	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
-      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( EdepQ[0]>0. || EdepQ[1]>0. ) ) {
+      else if ( MWPCEnergy[0]>0. && MWPCEnergy[1]>0. && ( scintEastTrigg || scintWestTrigg ) ) {
 	trigger=true;
 	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+
       }
 
       if (trigger || rawAsymm) {

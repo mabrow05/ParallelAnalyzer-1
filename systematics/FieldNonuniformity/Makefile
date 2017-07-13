@@ -12,7 +12,7 @@ VPATH = ./:../../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
-CXXFLAGS      = -O2 -Wall -fPIC -g
+CXXFLAGS      = -O2 -Wall -fPIC -g -std=c++11
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
@@ -27,6 +27,14 @@ FieldDipSystematic.exe: FieldDipSystematic.o $(objects)
 
 FieldDipSystematic_BHasymm.exe: FieldDipSystematic_BHasymm.o $(objects)
 	$(CXX) $(CXXFLAGS) -o FieldDipSystematic_BHasymm.exe FieldDipSystematic_BHasymm.o $(objects) $(LIBS)
+	@echo "Done"
+
+FieldDipSystematic_Erecon.exe: FieldDipSystematic_Erecon.o $(objects)
+	$(CXX) $(CXXFLAGS) -o FieldDipSystematic_Erecon.exe FieldDipSystematic_Erecon.o $(objects) $(LIBS)
+	@echo "Done"
+
+AsymmCalculator.exe: AsymmCalculator.o MBUtils.o BetaSpectrum.o
+	$(CXX) $(CXXFLAGS) -o AsymmCalculator.exe AsymmCalculator.o MBUtils.o BetaSpectrum.o $(LIBS)
 	@echo "Done"
 
 

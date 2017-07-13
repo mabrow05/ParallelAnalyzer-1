@@ -182,7 +182,7 @@ class uncertaintyHandler:
             correction = 100.
             if fabs(self.realA[i])>0.:
                 correction = A_corr[i]/self.realA[i] - 1. 
-            
+            print(correction)
             corr.append(correction)
             percErr.append( fabs(correction*0.2) )
             
@@ -534,7 +534,7 @@ class uncertaintyHandler:
 
 if __name__ == "__main__":
     
-    year=2011
+    year=2012
     uncert = uncertaintyHandler(year,"C")
     #uncert.minimizer()
 

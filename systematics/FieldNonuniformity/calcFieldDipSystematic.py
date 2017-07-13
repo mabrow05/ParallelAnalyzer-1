@@ -6,7 +6,7 @@ from math import *
 
 def readAsymm(year="2011-2012",field="good",filemin=0,filemax=1000):
     A = []
-    with open('%s_RAWasymmPrimKE_%sField_files_%i-%i.txt'%(year,field,filemin,filemax),'rb') as tsvin:
+    with open('%s_asymmPrimKE_%sField_files_%i-%i.txt'%(year,field,filemin,filemax),'rb') as tsvin:
     #with open('%s_BHasymm_%sField_polW.txt'%(year,field),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
@@ -21,6 +21,12 @@ def weightAsymm(data,emin,emax):
     denom = sum([ 1./x[2]**2 for x in data if emin<x[0]<emax ])
     return [numer/denom,sqrt(1./denom)]
 
+def writeCorrectionByBin(uncorr,corr,year):
+    with open("FieldDipCorr_%s.txt"%year,'w') as fout:
+        for i in range(0,len(uncorr)):
+            c = corr[i][1]/uncorr[i][1] if fabs(uncorr[i][1])>0. else 1.
+            fout.write("%f\t%0.10f\n"%(uncorr[i][0],c))
+            #print("%f\t%0.10f"%(uncorr[i][0],c))    
 
     
 if __name__=="__main__":
@@ -28,14 +34,16 @@ if __name__=="__main__":
     emin = 230.
     emax = 750.
     filemin = 0
-    filemax = 1000
+    filemax = 10000
     
-    A_dip = readAsymm(year,"symm",filemin,filemax)
+    A_dip = readAsymm(year,"dip",filemin,filemax)
     A_dip_int = weightAsymm(A_dip,emin,emax)
 
     A = readAsymm(year,"flat",filemin,filemax)
     A_int = weightAsymm(A,emin,emax)
     
+    writeCorrectionByBin(A_dip,A,year)
+
     print("A_flat = %f +/- %f"%(A_int[0],A_int[1]))
     print("A_dip = %f +/- %f"%(A_dip_int[0],A_dip_int[1]))
     print("DeltaFieldDip (DeltaA/A) = %f"%(A_int[0]/A_dip_int[0] - 1))
