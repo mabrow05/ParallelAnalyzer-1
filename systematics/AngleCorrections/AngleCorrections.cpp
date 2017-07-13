@@ -141,8 +141,8 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 
       bool mwpcEastTrigg = (MWPCEnergy[0]>0.)?true:false;
       bool mwpcWestTrigg = (MWPCEnergy[1]>0.)?true:false;
-      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
-      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+      bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());//EdepQ[0]>0.;// 
+      bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());//
 
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {
@@ -221,8 +221,8 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 
       bool mwpcEastTrigg = (MWPCEnergy[0]>0.)?true:false;
       bool mwpcWestTrigg = (MWPCEnergy[1]>0.)?true:false;
-      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
-      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+      bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());// EdepQ[0];//
+      bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());// EdepQ[1];//
 
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {

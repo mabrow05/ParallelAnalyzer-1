@@ -82,8 +82,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
   //For smearing
   double alpha = 0.4; // nPE/keV of roughly 400 PE per 1 GeV
-  Double_t g_d = 16.;
-  Double_t g_rest = 12500.;
+  Double_t g_d = 4.*16.;
+  Double_t g_rest = 4.*12500.;
 
   TString field_prefix = ( field==TString("flat")?TString("FLAT_FIELD"):
 			   (field==TString("dip")?TString("FIELD_DIP"):
@@ -172,8 +172,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
       EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 
-      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
-      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+      bool scintEastTrigg = (EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm()));
+      bool scintWestTrigg = (EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm()));
 
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
@@ -281,8 +281,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
       EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 
-      bool scintEastTrigg = scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
-      bool scintWestTrigg = scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+      bool scintEastTrigg = (EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm()));
+      bool scintWestTrigg = (EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm()));
 
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {

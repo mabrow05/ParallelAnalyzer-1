@@ -63,7 +63,7 @@ Double_t returnBeta(Double_t En) {
 
 void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startFileNum, int endFileNum) {
 
-  bool usePrimValues=true;
+  bool usePrimValues=false;
 
   double fidCut = 50.;
 
@@ -80,8 +80,8 @@ void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startF
 
   //For smearing
   double alpha = 0.4; // nPE/keV of roughly 400 PE per 1 GeV
-  Double_t g_d = 16.;
-  Double_t g_rest = 12500.;
+  Double_t g_d = 4.*16.;
+  Double_t g_rest = 4.*12500.;
   
   Double_t tot_rE_polE=0.;
   Double_t tot_rW_polE=0.;
