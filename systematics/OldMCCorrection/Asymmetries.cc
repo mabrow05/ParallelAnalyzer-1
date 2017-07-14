@@ -65,39 +65,23 @@ AsymmetryBase::AsymmetryBase(int oct, std::string anaCh, double enBinWidth, doub
   A10err.resize(2,std::vector <double> (numEnBins,0.));
   B10err.resize(2,std::vector <double> (numEnBins,0.));
 
-  A2Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B2Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A5Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B5Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A7Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B7Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A10Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B10Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A2errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B2errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A5errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B5errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A7errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B7errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A10errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B10errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A2_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B2_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A5_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B5_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A7_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B7_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A10_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B10_BS.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A2_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B2_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A5_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B5_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A7_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B7_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A10_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B10_BS_err.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   
-  A2Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B2Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A5Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B5Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A7Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B7Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A10Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B10Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A2errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B2errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A5errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B5errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A7errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B7errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  A10errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  B10errRad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   
   A2len.resize(2,std::vector <double> (2,0.));
   A5len.resize(2,std::vector <double> (2,0.));
@@ -330,17 +314,10 @@ void AsymmetryBase::loadRates() {
 	A2err[1] = bgSubtr->returnBGSubtRateError(1);
 
 	for (int i=0; i<4; ++i) {
-	  A2Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  A2errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  A2Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  A2errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
-	}
-
-	for (int i=0; i<6; ++i) {
-	  A2Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  A2errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  A2Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  A2errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
+	  A2_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  A2_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  A2_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  A2_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 	  
 	A2len[0] = bgSubtr->returnRunLengths(true);
@@ -353,17 +330,10 @@ void AsymmetryBase::loadRates() {
 	A5err[1] = bgSubtr->returnBGSubtRateError(1);
 
 	for (int i=0; i<4; ++i) {
-	  A5Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  A5errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  A5Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  A5errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
-	}
-
-	for (int i=0; i<6; ++i) {
-	  A5Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  A5errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  A5Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  A5errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
+	  A5_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  A5_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  A5_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  A5_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 	  
 	A5len[0] = bgSubtr->returnRunLengths(true);
@@ -376,19 +346,12 @@ void AsymmetryBase::loadRates() {
 	A7err[1] = bgSubtr->returnBGSubtRateError(1);
 
 	for (int i=0; i<4; ++i) {
-	  A7Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  A7errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  A7Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  A7errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
+	  A7_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  A7_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  A7_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  A7_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 
-	for (int i=0; i<6; ++i) {
-	  A7Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  A7errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  A7Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  A7errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
-	}
-	  
 	A7len[0] = bgSubtr->returnRunLengths(true);
 	A7len[1] = bgSubtr->returnRunLengths(false);
       }
@@ -399,19 +362,12 @@ void AsymmetryBase::loadRates() {
 	A10err[1] = bgSubtr->returnBGSubtRateError(1);
 
 	for (int i=0; i<4; ++i) {
-	  A10Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  A10errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  A10Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  A10errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
+	  A10_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  A10_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  A10_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  A10_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 
-	for (int i=0; i<6; ++i) {
-	  A10Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  A10errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  A10Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  A10errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
-	}
-	  
 	A10len[0] = bgSubtr->returnRunLengths(true);
 	A10len[1] = bgSubtr->returnRunLengths(false);
       }
@@ -422,19 +378,12 @@ void AsymmetryBase::loadRates() {
 	B2err[1] = bgSubtr->returnBGSubtRateError(1);
 	
 	for (int i=0; i<4; ++i) {
-	  B2Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  B2errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  B2Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  B2errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
+	  B2_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  B2_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  B2_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  B2_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 
-	for (int i=0; i<6; ++i) {
-	  B2Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  B2errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  B2Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  B2errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
-	}
-	  
 	B2len[0] = bgSubtr->returnRunLengths(true);
 	B2len[1] = bgSubtr->returnRunLengths(false);
       }
@@ -445,19 +394,12 @@ void AsymmetryBase::loadRates() {
 	B5err[1] = bgSubtr->returnBGSubtRateError(1);
 
 	for (int i=0; i<4; ++i) {
-	  B5Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  B5errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  B5Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  B5errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
+	  B5_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  B5_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  B5_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  B5_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 
-	for (int i=0; i<6; ++i) {
-	  B5Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  B5errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  B5Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  B5errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
-	}
-	  
 	B5len[0] = bgSubtr->returnRunLengths(true);
 	B5len[1] = bgSubtr->returnRunLengths(false);
       }
@@ -468,19 +410,12 @@ void AsymmetryBase::loadRates() {
 	B7err[1] = bgSubtr->returnBGSubtRateError(1);
 
 	for (int i=0; i<4; ++i) {
-	  B7Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  B7errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  B7Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  B7errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
+	  B7_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  B7_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  B7_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  B7_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 
-	for (int i=0; i<6; ++i) {
-	  B7Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  B7errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  B7Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  B7errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
-	}
-	  
 	B7len[0] = bgSubtr->returnRunLengths(true);
 	B7len[1] = bgSubtr->returnRunLengths(false);
       }
@@ -491,19 +426,12 @@ void AsymmetryBase::loadRates() {
 	B10err[1] = bgSubtr->returnBGSubtRateError(1);
 
 	for (int i=0; i<4; ++i) {
-	  B10Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
-	  B10errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
-	  B10Quad[i][1] = bgSubtr->returnBGSubtRateQuad(1,i);
-	  B10errQuad[i][1] = bgSubtr->returnBGSubtRateErrorQuad(1,i);
+	  B10_BS[i][0] = bgSubtr->returnDeltaBackscRate(0,i);
+	  B10_BS_err[i][0] = bgSubtr->returnDeltaBackscRateError(0,i);
+	  B10_BS[i][1] = bgSubtr->returnDeltaBackscRate(1,i);
+	  B10_BS_err[i][1] = bgSubtr->returnDeltaBackscRateError(1,i);
 	}
 
-	for (int i=0; i<6; ++i) {
-	  B10Rad[i][0] = bgSubtr->returnBGSubtRateRad(0,i);
-	  B10errRad[i][0] = bgSubtr->returnBGSubtRateErrorRad(0,i);
-	  B10Rad[i][1] = bgSubtr->returnBGSubtRateRad(1,i);
-	  B10errRad[i][1] = bgSubtr->returnBGSubtRateErrorRad(1,i);
-	}
-	  
 	B10len[0] = bgSubtr->returnRunLengths(true);
 	B10len[1] = bgSubtr->returnRunLengths(false);
       }
@@ -549,54 +477,28 @@ std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateError(s
 
 };
 
-std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateQuad(std::string runType,int quad) {
-  if (runType=="A2") return A2Quad[quad];
-  else if (runType=="A5") return A5Quad[quad];
-  else if (runType=="A7") return A7Quad[quad];
-  else if (runType=="A10") return A10Quad[quad];
-  else if (runType=="B2") return B2Quad[quad];
-  else if (runType=="B5") return B5Quad[quad];
-  else if (runType=="B7") return B7Quad[quad];
-  else if (runType=="B10") return B10Quad[quad];
+std::vector < std::vector<double> > AsymmetryBase::returnDeltaBackscRate(std::string runType,int bs) {
+  if (runType=="A2") return A2_BS[bs];
+  else if (runType=="A5") return A5_BS[bs];
+  else if (runType=="A7") return A7_BS[bs];
+  else if (runType=="A10") return A10_BS[bs];
+  else if (runType=="B2") return B2_BS[bs];
+  else if (runType=="B5") return B5_BS[bs];
+  else if (runType=="B7") return B7_BS[bs];
+  else if (runType=="B10") return B10_BS[bs];
   else throw "Bad Run Type given to returnBGsubtractedRate(string runType)";
 
 };
 
-std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateErrorQuad(std::string runType, int quad) {
-  if (runType=="A2") return A2errQuad[quad];
-  else if (runType=="A5") return A5errQuad[quad];
-  else if (runType=="A7") return A7errQuad[quad];
-  else if (runType=="A10") return A10errQuad[quad];
-  else if (runType=="B2") return B2errQuad[quad];
-  else if (runType=="B5") return B5errQuad[quad];
-  else if (runType=="B7") return B7errQuad[quad];
-  else if (runType=="B10") return B10errQuad[quad];
-  else throw "Bad Run Type given to returnBGsubtractedRateError(string runType)";
-
-};
-
-std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateRad(std::string runType,int rad) {
-  if (runType=="A2") return A2Rad[rad];
-  else if (runType=="A5") return A5Rad[rad];
-  else if (runType=="A7") return A7Rad[rad];
-  else if (runType=="A10") return A10Rad[rad];
-  else if (runType=="B2") return B2Rad[rad];
-  else if (runType=="B5") return B5Rad[rad];
-  else if (runType=="B7") return B7Rad[rad];
-  else if (runType=="B10") return B10Rad[rad];
-  else throw "Bad Run Type given to returnBGsubtractedRate(string runType)";
-
-};
-
-std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateErrorRad(std::string runType, int rad) {
-  if (runType=="A2") return A2errRad[rad];
-  else if (runType=="A5") return A5errRad[rad];
-  else if (runType=="A7") return A7errRad[rad];
-  else if (runType=="A10") return A10errRad[rad];
-  else if (runType=="B2") return B2errRad[rad];
-  else if (runType=="B5") return B5errRad[rad];
-  else if (runType=="B7") return B7errRad[rad];
-  else if (runType=="B10") return B10errRad[rad];
+std::vector < std::vector<double> > AsymmetryBase::returnDeltaBackscRateError(std::string runType, int bs) {
+  if (runType=="A2") return A2_BS_err[bs];
+  else if (runType=="A5") return A5_BS_err[bs];
+  else if (runType=="A7") return A7_BS_err[bs];
+  else if (runType=="A10") return A10_BS_err[bs];
+  else if (runType=="B2") return B2_BS_err[bs];
+  else if (runType=="B5") return B5_BS_err[bs];
+  else if (runType=="B7") return B7_BS_err[bs];
+  else if (runType=="B10") return B10_BS_err[bs];
   else throw "Bad Run Type given to returnBGsubtractedRateError(string runType)";
 
 };
@@ -609,12 +511,9 @@ OctetAsymmetry::OctetAsymmetry(int oct, std::string anaCh, double enBinWidth, do
     asymmetry.resize(numEnBins,0.);
     asymmetryError.resize(numEnBins,0.);
 
-    asymmetryQuad.resize(4,std::vector<double> (numEnBins,0.) );
-    asymmetryErrorQuad.resize(4,std::vector<double> (numEnBins,0.) );
+    asymmetryBS.resize(4,std::vector<double> (numEnBins,0.) );
+    asymmetryErrorBS.resize(4,std::vector<double> (numEnBins,0.) );
     
-    asymmetryRad.resize(6,std::vector<double> (numEnBins,0.) );
-    asymmetryErrorRad.resize(6,std::vector<double> (numEnBins,0.) );
-
     superSum.resize(numEnBins,0.);
     superSumError.resize(numEnBins,0.);
     loadRates(); // load the rates in the rate vectors for each run
@@ -636,18 +535,11 @@ void OctetAsymmetry::calcAsymmetryBinByBin() {
 			 A2err,A5err,A7err,A10err,B2err,B5err,B7err,B10err,
 			 asymmetry,asymmetryError);
   for (int i=0; i<4; ++i) {
-    calcBinByBinSuperRatio(A2Quad[i],A5Quad[i],A7Quad[i],A10Quad[i],
-			   B2Quad[i],B5Quad[i],B7Quad[i],B10Quad[i],
-			   A2errQuad[i],A5errQuad[i],A7errQuad[i],A10errQuad[i],
-			   B2errQuad[i],B5errQuad[i],B7errQuad[i],B10errQuad[i],
-			   asymmetryQuad[i],asymmetryErrorQuad[i]);
-  }
-  for (int i=0; i<6; ++i) {
-    calcBinByBinSuperRatio(A2Rad[i],A5Rad[i],A7Rad[i],A10Rad[i],
-			   B2Rad[i],B5Rad[i],B7Rad[i],B10Rad[i],
-			   A2errRad[i],A5errRad[i],A7errRad[i],A10errRad[i],
-			   B2errRad[i],B5errRad[i],B7errRad[i],B10errRad[i],
-			   asymmetryRad[i],asymmetryErrorRad[i]);
+    calcBinByBinSuperRatio(A2_BS[i],A5_BS[i],A7_BS[i],A10_BS[i],
+			   B2_BS[i],B5_BS[i],B7_BS[i],B10_BS[i],
+			   A2_BS_err[i],A5_BS_err[i],A7_BS_err[i],A10_BS_err[i],
+			   B2_BS_err[i],B5_BS_err[i],B7_BS_err[i],B10_BS_err[i],
+			   asymmetryBS[i],asymmetryErrorBS[i]);
   }
   boolAsymmetry = true;
 };
@@ -1073,38 +965,18 @@ void OctetAsymmetry::writeAsymToFile() {
   }
   outfile.close();
 
-  // Now for quadrants
+  // Now for corrected asymms
   for (int j=0; j<4; ++j) {
     
-    if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quadrant"+itos(j)+".dat";
-    else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quadrant"+itos(j)+".dat";
-    else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Quadrant"+itos(j)+".dat";
+    if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_DelatBS_"+itos(j)+".dat";
+    else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_DeltaBS_"+itos(j)+".dat";
+    else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_DeltaBS_"+itos(j)+".dat";
     outfile.open(outpath.c_str());
     outfile << std::setprecision(15);
     
     if (isFullOctet()) {
-      for (unsigned int i=0; i<asymmetryQuad[j].size(); i++) {
-	outfile << binLowerEdge[i] << " " << asymmetryQuad[j][i] << " " << asymmetryErrorQuad[j][i] << std::endl;
-	//std::cout << binLowerEdge[i] << " " << asymmetry[i] << " " << asymmetryError[i] << std::endl;
-      }
-    }
-    else {
-      outfile << "BAD OCTET";
-    }
-    outfile.close();
-  }
-
-  for (int j=0; j<6; ++j) {
-    
-    if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_RadialRing"+itos(j)+".dat";
-    else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_RadialRing"+itos(j)+".dat";
-    else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_RadialRing"+itos(j)+".dat";
-    outfile.open(outpath.c_str());
-    outfile << std::setprecision(15);
-    
-    if (isFullOctet()) {
-      for (unsigned int i=0; i<asymmetryRad[j].size(); i++) {
-	outfile << binLowerEdge[i] << " " << asymmetryRad[j][i] << " " << asymmetryErrorRad[j][i] << std::endl;
+      for (unsigned int i=0; i<asymmetryBS[j].size(); i++) {
+	outfile << binLowerEdge[i] << " " << asymmetryBS[j][i] << " " << asymmetryErrorBS[j][i] << std::endl;
 	//std::cout << binLowerEdge[i] << " " << asymmetry[i] << " " << asymmetryError[i] << std::endl;
       }
     }

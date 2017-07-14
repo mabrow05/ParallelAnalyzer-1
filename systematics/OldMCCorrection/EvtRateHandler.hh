@@ -41,20 +41,12 @@ public:
     return side==0 ? rateEerr : ( side==1 ? rateWerr : throw "BAD SIDE GIVEN TO getRateErrors"); 
   } ;
 
-  std::vector < std::vector <double> > getRateVectorsQuad(int side) { 
-    return side==0 ? rateEvecQuad : ( side==1 ? rateWvecQuad : throw "BAD SIDE GIVEN TO getRateVectorsQuad"); 
+  std::vector < std::vector <double> > getRateBS(int side) { 
+    return side==0 ? rateBS_E : ( side==1 ? rateBS_W : throw "BAD SIDE GIVEN TO getRateVectorsQuad"); 
   } ;
 
-  std::vector < std::vector <double> > getRateErrorsQuad(int side) {
-    return side==0 ? rateEerrQuad : ( side==1 ? rateWerrQuad : throw "BAD SIDE GIVEN TO getRateErrorsQuad"); 
-  } ;
-
-  std::vector < std::vector <double> > getRateVectorsRad(int side) { 
-    return side==0 ? rateEvecRad : ( side==1 ? rateWvecRad : throw "BAD SIDE GIVEN TO getRateVectorsRad"); 
-  } ;
-
-  std::vector < std::vector <double> > getRateErrorsRad(int side) {
-    return side==0 ? rateEerrRad : ( side==1 ? rateWerrRad : throw "BAD SIDE GIVEN TO getRateErrorsRad"); 
+  std::vector < std::vector <double> > getRateBSerr(int side) {
+    return side==0 ? rateBS_E_err : ( side==1 ? rateBS_W_err : throw "BAD SIDE GIVEN TO getRateErrorsQuad"); 
   } ;
 
 protected:
@@ -83,26 +75,19 @@ protected:
   std::vector <double>  UCNMonIntegral;
   
   TH1D *hisCounts[2];       // histogram for counts in an energy bin
-  TH1D *hisCountsQuad[4][2];       // histogram for counts in an energy bin for each quadrant
-  TH1D *hisCountsRad[6][2];       // histogram for counts in an energy bin for each annuli
+  TH1D *hisBS[4][2];       // histogram for counts in an energy bin for each quadrant
   
   std::vector <double> rateWvec;       //Stores the rate for each bin
   std::vector <double> rateEvec;
 
-  std::vector < std::vector<double> > rateWvecQuad;       //Stores the rate for each bin in each quadrant
-  std::vector < std::vector<double> > rateEvecQuad;
-
-  std::vector < std::vector<double> > rateWvecRad;       //Stores the rate for each bin in each annuli
-  std::vector < std::vector<double> > rateEvecRad;
+  std::vector < std::vector<double> > rateBS_E;       //Stores the rate for each bin in each quadrant
+  std::vector < std::vector<double> > rateBS_W;
   
   std::vector <double> rateEerr;       //Stores the statistical error for each Bin
   std::vector <double> rateWerr;
 
-  std::vector < std::vector<double> > rateWerrQuad;       //Stores the staterr for each bin in each quadrant
-  std::vector < std::vector<double> > rateEerrQuad;
-
-  std::vector < std::vector<double> > rateWerrRad;       //Stores the staterr for each bin in each annuli
-  std::vector < std::vector<double> > rateEerrRad;
+  std::vector < std::vector<double> > rateBS_E_err;       //Stores the staterr for each bin in each quadrant
+  std::vector < std::vector<double> > rateBS_W_err;
 
   std::vector <double> refSpectraE;       //Stores the reference runs event rate per bin
   std::vector <double> refSpectraW;       //Stores the reference runs event rate per bin
@@ -139,11 +124,8 @@ public:
   std::vector<double> returnBGSubtRate(int side);       //returns a vector holding all the BG subtracted rates.
   std::vector<double> returnBGSubtRateError(int side);       //Returns background subtracted rate statistical error
 
-  std::vector < double > returnBGSubtRateQuad(int side, int quad);       //returns a vector holding all the BG subtracted rates.
-  std::vector< double > returnBGSubtRateErrorQuad(int side, int quad);       //Returns background subtracted rate statistical error
-
-  std::vector < double > returnBGSubtRateRad(int side, int rad);       //returns a vector holding all the BG subtracted rates.
-  std::vector< double > returnBGSubtRateErrorRad(int side, int rad);       //Returns background subtracted rate statistical error
+  std::vector < double > returnDeltaBackscRate(int bs, int side);       //returns a vector holding all the BG subtracted rates.
+  std::vector < double > returnDeltaBackscRateError(int bs, int side);//Returns background subtracted rate statistical error
 
 private:
 
@@ -171,35 +153,10 @@ private:
   std::vector <double> FinalRateW;       //This is the difference in the rates
   std::vector <double> FinalRateErrorW;       //This is the statistical error in the difference in the rates
 
-  std::vector < std::vector <double> > BetaRateEQuad;       //Save the rates here for beta run
-  std::vector < std::vector <double> > BetaRateErrorEQuad;       //Save the error here for beta run
-  std::vector < std::vector <double> > BGRateEQuad;         // Save the background rates here
-  std::vector < std::vector <double> > BGRateErrorEQuad;         // Save the background rates here
-  std::vector < std::vector <double> > FinalRateEQuad;       //This is the difference in the rates
-  std::vector < std::vector <double> > FinalRateErrorEQuad;       //This is the statistical error in the difference in the rates
-  
-
-  std::vector < std::vector <double> > BetaRateWQuad;       //Save the rates here for beta run
-  std::vector < std::vector <double> > BetaRateErrorWQuad;       //Save the error here for beta run
-  std::vector < std::vector <double> > BGRateWQuad;         // Save the background rates here
-  std::vector < std::vector <double> > BGRateErrorWQuad;         // Save the background rates here
-  std::vector < std::vector <double> > FinalRateWQuad;       //This is the difference in the rates
-  std::vector < std::vector <double> > FinalRateErrorWQuad;       //This is the statistical error in the difference in the rates
-  
-  std::vector < std::vector <double> > BetaRateERad;       //Save the rates here for beta run
-  std::vector < std::vector <double> > BetaRateErrorERad;       //Save the error here for beta run
-  std::vector < std::vector <double> > BGRateERad;         // Save the background rates here
-  std::vector < std::vector <double> > BGRateErrorERad;         // Save the background rates here
-  std::vector < std::vector <double> > FinalRateERad;       //This is the difference in the rates
-  std::vector < std::vector <double> > FinalRateErrorERad;       //This is the statistical error in the difference in the rates
-  
-
-  std::vector < std::vector <double> > BetaRateWRad;       //Save the rates here for beta run
-  std::vector < std::vector <double> > BetaRateErrorWRad;       //Save the error here for beta run
-  std::vector < std::vector <double> > BGRateWRad;         // Save the background rates here
-  std::vector < std::vector <double> > BGRateErrorWRad;         // Save the background rates here
-  std::vector < std::vector <double> > FinalRateWRad;       //This is the difference in the rates
-  std::vector < std::vector <double> > FinalRateErrorWRad;       //This is the statistical error in the difference in the rates
+  std::vector < std::vector <double> > BS_E;       //Save the rates here for beta run
+  std::vector < std::vector <double> > BS_E_err;       //Save the error here for beta run
+  std::vector < std::vector <double> > BS_W;       //Save the rates here for beta run
+  std::vector < std::vector <double> > BS_W_err;       //Save the error here for beta run
 
   std::vector <double> runLengthBG;       // E/W
   std::vector <double> runLengthBeta;

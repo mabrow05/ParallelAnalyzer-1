@@ -16,6 +16,7 @@ simulation data
 #include <iomanip>
 
 #include <TString.h>
+#include <TMath.h>
 
 const bool writeRatesToFile = true;
 
@@ -35,16 +36,11 @@ EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, 
   rateEerr.resize(numEnergyBins,0.); 
   rateWerr.resize(numEnergyBins,0.);
 
-  rateEvecQuad.resize(4, std::vector<double> (numEnergyBins,0.) ); 
-  rateWvecQuad.resize(4, std::vector<double> (numEnergyBins,0.) );
-  rateEerrQuad.resize(4, std::vector<double> (numEnergyBins,0.) ); 
-  rateWerrQuad.resize(4, std::vector<double> (numEnergyBins,0.) );
-
-  rateEvecRad.resize(6, std::vector<double> (numEnergyBins,0.) ); 
-  rateWvecRad.resize(6, std::vector<double> (numEnergyBins,0.) );
-  rateEerrRad.resize(6, std::vector<double> (numEnergyBins,0.) ); 
-  rateWerrRad.resize(6, std::vector<double> (numEnergyBins,0.) );
-
+  rateBS_E.resize(4, std::vector<double> (numEnergyBins,0.) );
+  rateBS_W.resize(4, std::vector<double> (numEnergyBins,0.) );
+  rateBS_E_err.resize(4, std::vector<double> (numEnergyBins,0.) );
+  rateBS_W_err.resize(4, std::vector<double> (numEnergyBins,0.) ); 
+  
   refSpectraE.resize(numEnergyBins,0.);
   refSpectraW.resize(numEnergyBins,0.);
   totalRefTime = 0.;
@@ -55,10 +51,8 @@ EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, 
 
   totalCountsE=0.;
   totalCountsW=0.;
-  totalCountsEQuad.resize(4, 0.);
-  totalCountsWQuad.resize(4, 0.);
-  totalCountsERad.resize(6, 0.);
-  totalCountsWRad.resize(6, 0.);
+  //  totalCountsBS_E.resize(4, 0.);
+  //totalCountsBS_W.resize(4, 0.);
   
   runLength.resize(runs.size(), std::vector<double> (2,0.));
   totalRunLengthE = totalRunLengthW = 0.;
@@ -121,22 +115,12 @@ EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, 
   hisCounts[1] = new TH1D("WestCounts","West Event Hist",numEnergyBins,0.,1200.);
 
   for ( int i=0; i<4; ++i) {
-    hisCountsQuad[i][0] = new TH1D(TString::Format("EastQuad%i",i),TString::Format("EastQuad%i",i),
+    hisBS[i][0] = new TH1D(TString::Format("EastBS%i",i),TString::Format("EastBS%i",i),
 				   numEnergyBins,0.,1200.);
-    hisCountsQuad[i][1] = new TH1D(TString::Format("WestQuad%i",i),TString::Format("WestQuad%i",i),
+    hisBS[i][1] = new TH1D(TString::Format("WestBS%i",i),TString::Format("WestBS%i",i),
 				   numEnergyBins,0.,1200.);
   }
 
-  for ( int i=0; i<6; ++i) {
-    int radLow = i*10;
-    int radHigh = (1+1)*10;
-    hisCountsRad[i][0] = new TH1D(TString::Format("EastRad%i-%i",radLow,radHigh),
-				  TString::Format("EastRad%i-%i",radLow,radHigh),
-				  numEnergyBins,0.,1200.);
-    hisCountsRad[i][1] = new TH1D(TString::Format("WestRad%i-%i",radLow,radHigh),
-				  TString::Format("WestRad%i-%i",radLow,radHigh),
-				  numEnergyBins,0.,1200.);
-  }
 };
 
 EvtRateHandler::~EvtRateHandler() {
@@ -145,12 +129,8 @@ EvtRateHandler::~EvtRateHandler() {
     if (hisCounts[1]) delete hisCounts[1]; 
 
     for (int i=0; i<4; ++i) {
-      if (hisCountsQuad[i][0]) delete hisCountsQuad[i][0];
-      if (hisCountsQuad[i][1]) delete hisCountsQuad[i][1]; 
-    }
-    for (int i=0; i<6; ++i) {
-      if (hisCountsRad[i][0]) delete hisCountsRad[i][0];
-      if (hisCountsRad[i][1]) delete hisCountsRad[i][1]; 
+      if (hisBS[i][0]) delete hisBS[i][0];
+      if (hisBS[i][1]) delete hisBS[i][1]; 
     }
 };
 
@@ -252,38 +232,13 @@ void EvtRateHandler::CalcRates() {
     rateEerr[i] /= totalRunLengthE;
     rateWerr[i] /= totalRunLengthW;
 
-    
-    for (int j=0; j<4; ++j) {
-
-      binContentE = hisCountsQuad[j][0]->GetBinContent(i+1);
-      binContentW = hisCountsQuad[j][1]->GetBinContent(i+1);
-
-      rateEvecQuad[j][i] = binContentE / totalRunLengthE;
-      rateWvecQuad[j][i] = binContentW / totalRunLengthW;
-
-      rateEerrQuad[j][i] = ( binContentE > 25. || FG ) ? sqrt(binContentE) : referenceError(0,i,totalCountsEQuad[j]);
-      rateWerrQuad[j][i] = ( binContentW > 25. || FG ) ? sqrt(binContentW) : referenceError(1,i,totalCountsWQuad[j]);
-
-      rateEerrQuad[j][i] /= totalRunLengthE;
-      rateWerrQuad[j][i] /= totalRunLengthW;
+    for (int t=0;t<4;++t) {
+      rateBS_E[t][i] = hisBS[t][0]->GetBinContent(i+1)/totalRunLengthE;
+      rateBS_W[t][i] = hisBS[t][1]->GetBinContent(i+1)/totalRunLengthW;
+      rateBS_E_err[t][i] = sqrt(rateBS_E[t][i]/totalRunLengthE);
+      rateBS_W_err[t][i] = sqrt(rateBS_W[t][i]/totalRunLengthW);
     }
-
-    for (int j=0; j<6; ++j) {
-
-      binContentE = hisCountsRad[j][0]->GetBinContent(i+1);
-      binContentW = hisCountsRad[j][1]->GetBinContent(i+1);
-
-      rateEvecRad[j][i] = binContentE / totalRunLengthE;
-      rateWvecRad[j][i] = binContentW / totalRunLengthW;
-
-      rateEerrRad[j][i] = ( binContentE > 25. || FG ) ? sqrt(binContentE) : referenceError(0,i,totalCountsERad[j]);
-      rateWerrRad[j][i] = ( binContentW > 25. || FG ) ? sqrt(binContentW) : referenceError(1,i,totalCountsWRad[j]);
-
-      rateEerrRad[j][i] /= totalRunLengthE;
-      rateWerrRad[j][i] /= totalRunLengthW;
-    }
-
-    /*if ( binContentE < 25. || binContentW < 25. ) {
+      /*if ( binContentE < 25. || binContentW < 25. ) {
 
       std::cout << i << "\t" << binContentE << "\t" << rateEerr[i]*totalRunLengthE << "\t" 
 		<< binContentW << "\t" << rateWerr[i]*totalRunLengthW << "\n";
@@ -514,54 +469,29 @@ void EvtRateHandler::dataReader() {
 	  }
 	}
 	
-	//Determine Quadrant 
-	int quad = 0;
-	
-	if (Side==0) {
-	  if (EmwpcX>0.) quad = ( EmwpcY>0. ? 0 : 3 );
-	  else quad = ( EmwpcY>0. ? 1 : 2 );
-	}
-	else if (Side==1) {
-	  if (WmwpcX>0.) quad = ( WmwpcY>0. ? 0 : 3 );
-	  else quad = ( WmwpcY>0. ? 1 : 2 );
-	}
-
-	
-	//Determine Radial bin 
-	int rad = (int) ( Side==0 ? (sqrt(r2E)/10.) : (sqrt(r2W)/10.) );
-	if ( rad>5 ) rad = 5; // Catch the bad guys
-	
 	//Type0
 	if ( Type0 && Type==0 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	}
 	//Type1
 	else if ( Type1 && Type==1 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) { 
 	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	}
 	//Type2
 	else if ( Type2 && Type==2 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	}
 	//Type3
 	else if ( Type3 && Type==3 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) { 
 	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	} 
 
       }
@@ -572,16 +502,6 @@ void EvtRateHandler::dataReader() {
   totalCountsE = (double) hisCounts[0]->Integral(1,hisCounts[0]->GetNbinsX());
   totalCountsW = (double) hisCounts[1]->Integral(1,hisCounts[1]->GetNbinsX());
 
-  for (int i=0; i<4; ++i) {
-    totalCountsEQuad[i] = (double) hisCountsQuad[i][0]->Integral(1,hisCountsQuad[i][0]->GetNbinsX());
-    totalCountsWQuad[i] = (double) hisCountsQuad[i][1]->Integral(1,hisCountsQuad[i][1]->GetNbinsX());
-    std::cout << totalCountsEQuad[i] << " " << totalCountsWQuad[i] << std::endl;
-  }
-
-  for (int i=0; i<6; ++i) {
-    totalCountsERad[i] = (double) hisCountsRad[i][0]->Integral(1,hisCountsRad[i][0]->GetNbinsX());
-    totalCountsWRad[i] = (double) hisCountsRad[i][1]->Integral(1,hisCountsRad[i][1]->GetNbinsX());
-  }
     
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
 
@@ -642,6 +562,7 @@ void SimEvtRateHandler::dataReader() {
   double EmwpcX=0., EmwpcY=0., WmwpcX=0., WmwpcY=0.;
   int xE_nClipped, yE_nClipped, xW_nClipped, yW_nClipped;
   int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
+  double primKE, primTheta;
 
 
   xE_nClipped = yE_nClipped = xW_nClipped = yW_nClipped = 0;
@@ -655,7 +576,9 @@ void SimEvtRateHandler::dataReader() {
     Tin = (TTree*)input->Get("revCalSim");
     //std::cout << "made it here in dataReader\n";
     //Set branch addresses
-    
+
+    Tin->SetBranchAddress("primKE", &primKE);
+    Tin->SetBranchAddress("primTheta", &primTheta);
     Tin->SetBranchAddress("PID", &PID);
     Tin->SetBranchAddress("type", &Type);
     Tin->SetBranchAddress("side", &Side); 
@@ -699,6 +622,8 @@ void SimEvtRateHandler::dataReader() {
     // ADD IN WIRECHAMBER ENERGY DEPOSITION
     
 
+    int realSide= TMath::Cos(primTheta)>0.?1:0;
+    
     unsigned int nevents = Tin->GetEntriesFast();
     //std::cout << nevents << std::endl;
     
@@ -713,7 +638,7 @@ void SimEvtRateHandler::dataReader() {
     for (unsigned int i=0; i<nevents; ++i) {
       
       Tin->GetEvent(i);
-
+      
       if ( Type>3  || Side>1 || Erecon<=0. ) continue;
       
       if (PID==1) {
@@ -757,23 +682,7 @@ void SimEvtRateHandler::dataReader() {
 	    }
 	  }
 	}
-	  
-	//Determine Quadrant 
-	int quad = 0;
-	
-	if (Side==0) {
-	  if (EmwpcX>0.) quad = ( EmwpcY>0. ? 0 : 3 );
-	  else quad = ( EmwpcY>0. ? 1 : 2 );
-	}
-	else if (Side==1) {
-	  if (WmwpcX>0.) quad = ( WmwpcY>0. ? 0 : 3 );
-	  else quad = ( WmwpcY>0. ? 1 : 2 );
-	}
-
-	//Determine Radial bin 
-	int rad = (int) ( Side==0 ? (sqrt(r2E)/10.) : (sqrt(r2W)/10.) );
-	if ( rad>5 ) rad = 5; // catch any bad guys
-	
+	  	
 
 	// Fill histograms according to event types in this analysis choice
 	
@@ -781,34 +690,38 @@ void SimEvtRateHandler::dataReader() {
 	if ( Type0 && Type==0 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
+	    hisBS[0][realSide]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	}
 	//Type1
 	else if ( Type1 && Type==1 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) { 
-	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
+	     hisCounts[Side]->Fill(Erecon);
+	     hisBS[0][realSide]->Fill(Erecon);
+	     hisBS[1][realSide]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	}
 	//Type2
 	else if ( Type2 && Type==2 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
+	    hisBS[0][realSide]->Fill(Erecon);
+	    hisBS[1][realSide]->Fill(Erecon);
+	    hisBS[2][realSide]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	}
 	//Type3
 	else if ( Type3 && Type==3 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) { 
 	    hisCounts[Side]->Fill(Erecon);
-	    hisCountsQuad[quad][Side]->Fill(Erecon);
+	    hisBS[0][realSide]->Fill(Erecon);
+	    hisBS[1][realSide]->Fill(Erecon);
+	    hisBS[2][realSide]->Fill(Erecon);
+	    hisBS[3][realSide]->Fill(Erecon);
 	  }
-	  hisCountsRad[rad][Side]->Fill(Erecon);
 	} 
+
+	
 	
       }
     }
@@ -818,16 +731,6 @@ void SimEvtRateHandler::dataReader() {
   totalCountsE = (double) hisCounts[0]->Integral();
   totalCountsW = (double) hisCounts[1]->Integral();
 
-  for (int i=0; i<4; ++i) {
-    totalCountsEQuad[i] = (double) hisCountsQuad[i][0]->Integral(1,hisCountsQuad[i][0]->GetNbinsX());
-    totalCountsWQuad[i] = (double) hisCountsQuad[i][1]->Integral(1,hisCountsQuad[i][1]->GetNbinsX());
-  }
-
-  for (int i=0; i<6; ++i) {
-    totalCountsERad[i] = (double) hisCountsRad[i][0]->Integral(1,hisCountsRad[i][0]->GetNbinsX());
-    totalCountsWRad[i] = (double) hisCountsRad[i][1]->Integral(1,hisCountsRad[i][1]->GetNbinsX());
-  }
-    
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
 
   if (input) delete input;
@@ -853,32 +756,10 @@ BGSubtractedRate::BGSubtractedRate(std::vector <int> fgruns, std::vector <int> b
   BGRateErrorW.resize(numBins,0.);
   FinalRateErrorW.resize(numBins,0.);
 
-  BetaRateEQuad.resize(4,std::vector<double>(numBins,0.));
-  BGRateEQuad.resize(4,std::vector<double>(numBins,0.));
-  FinalRateEQuad.resize(4,std::vector<double>(numBins,0.));
-  BetaRateWQuad.resize(4,std::vector<double>(numBins,0.));
-  BGRateWQuad.resize(4,std::vector<double>(numBins,0.));
-  FinalRateWQuad.resize(4,std::vector<double>(numBins,0.));
-  BetaRateErrorEQuad.resize(4,std::vector<double>(numBins,0.));
-  BGRateErrorEQuad.resize(4,std::vector<double>(numBins,0.));
-  FinalRateErrorEQuad.resize(4,std::vector<double>(numBins,0.));
-  BetaRateErrorWQuad.resize(4,std::vector<double>(numBins,0.));
-  BGRateErrorWQuad.resize(4,std::vector<double>(numBins,0.));
-  FinalRateErrorWQuad.resize(4,std::vector<double>(numBins,0.));
-
-  BetaRateERad.resize(6,std::vector<double>(numBins,0.));
-  BGRateERad.resize(6,std::vector<double>(numBins,0.));
-  FinalRateERad.resize(6,std::vector<double>(numBins,0.));
-  BetaRateWRad.resize(6,std::vector<double>(numBins,0.));
-  BGRateWRad.resize(6,std::vector<double>(numBins,0.));
-  FinalRateWRad.resize(6,std::vector<double>(numBins,0.));
-  BetaRateErrorERad.resize(6,std::vector<double>(numBins,0.));
-  BGRateErrorERad.resize(6,std::vector<double>(numBins,0.));
-  FinalRateErrorERad.resize(6,std::vector<double>(numBins,0.));
-  BetaRateErrorWRad.resize(6,std::vector<double>(numBins,0.));
-  BGRateErrorWRad.resize(6,std::vector<double>(numBins,0.));
-  FinalRateErrorWRad.resize(6,std::vector<double>(numBins,0.));
-
+  BS_E.resize(4,std::vector<double>(numBins,0.));
+  BS_E_err.resize(4,std::vector<double>(numBins,0.));
+  BS_W.resize(4,std::vector<double>(numBins,0.));
+  BS_W_err.resize(4,std::vector<double>(numBins,0.));
 
   runLengthBeta.resize(2,0.);
   runLengthBG.resize(2,0.);
@@ -926,34 +807,18 @@ std::vector<double > BGSubtractedRate::returnBGSubtRateError(int side) {
   
 };
 
-std::vector< double > BGSubtractedRate::returnBGSubtRateQuad(int side, int quad) {  
+std::vector< double > BGSubtractedRate::returnDeltaBackscRate(int side, int bs) {  
 
-  if (side==0) return FinalRateEQuad[quad];
-  else if (side==1) return FinalRateWQuad[quad];
+  if (side==0) return BS_E[bs];
+  else if (side==1) return BS_W[bs];
   else throw "Invalid side when returning BG subtracted rate";
   
 };
 
-std::vector< double > BGSubtractedRate::returnBGSubtRateErrorQuad(int side, int quad) {
+std::vector< double > BGSubtractedRate::returnDeltaBackscRateError(int side, int bs) {
   
-  if (side==0) return FinalRateErrorEQuad[quad];
-  else if (side==1) return FinalRateErrorWQuad[quad];
-  else throw "Invalid side when returning BG subtracted rate error";
-  
-};
-
-std::vector< double > BGSubtractedRate::returnBGSubtRateRad(int side, int rad) {  
-
-  if (side==0) return FinalRateERad[rad];
-  else if (side==1) return FinalRateWRad[rad];
-  else throw "Invalid side when returning BG subtracted rate";
-  
-};
-
-std::vector< double > BGSubtractedRate::returnBGSubtRateErrorRad(int side, int rad) {
-  
-  if (side==0) return FinalRateErrorERad[rad];
-  else if (side==1) return FinalRateErrorWRad[rad];
+  if (side==0) return BS_E_err[bs];
+  else if (side==1) return BS_W_err[bs];
   else throw "Invalid side when returning BG subtracted rate error";
   
 };
@@ -969,14 +834,6 @@ void BGSubtractedRate::LoadRatesByBin() {
     BGRateErrorE =     evtBG->getRateErrors(0);
     BGRateW =          evtBG->getRateVectors(1);
     BGRateErrorW =     evtBG->getRateErrors(1);
-    BGRateEQuad =      evtBG->getRateVectorsQuad(0);
-    BGRateErrorEQuad = evtBG->getRateErrorsQuad(0);
-    BGRateWQuad =      evtBG->getRateVectorsQuad(1);
-    BGRateErrorWQuad = evtBG->getRateErrorsQuad(1);
-    BGRateERad =       evtBG->getRateVectorsRad(0);
-    BGRateErrorERad =  evtBG->getRateErrorsRad(0);
-    BGRateWRad =       evtBG->getRateVectorsRad(1);
-    BGRateErrorWRad =  evtBG->getRateErrorsRad(1);
     runLengthBG[0] =   evtBG->returnRunLength(0);
     runLengthBG[1] =   evtBG->returnRunLength(1);
     delete evtBG;
@@ -987,14 +844,6 @@ void BGSubtractedRate::LoadRatesByBin() {
     BetaRateErrorE =     evt->getRateErrors(0);
     BetaRateW =          evt->getRateVectors(1);
     BetaRateErrorW =     evt->getRateErrors(1);
-    BetaRateEQuad =      evt->getRateVectorsQuad(0);
-    BetaRateErrorEQuad = evt->getRateErrorsQuad(0);
-    BetaRateWQuad =      evt->getRateVectorsQuad(1);
-    BetaRateErrorWQuad = evt->getRateErrorsQuad(1);
-    BetaRateERad =       evt->getRateVectorsRad(0);
-    BetaRateErrorERad =  evt->getRateErrorsRad(0);
-    BetaRateWRad =       evt->getRateVectorsRad(1);
-    BetaRateErrorWRad =  evt->getRateErrorsRad(1);
     runLengthBeta[0] =   evt->returnRunLength(0);
     runLengthBeta[1] =   evt->returnRunLength(1);
     delete evt;
@@ -1003,7 +852,7 @@ void BGSubtractedRate::LoadRatesByBin() {
   else { 
 
     //Note that for the BG runs for simulation, we only need the errors. The rates remain initialized to zero
-    EvtRateHandler *evtBG = new EvtRateHandler(BGruns, false, analysisChoice, EnergyBinWidth, fiducialCut, true, UNBLIND);
+    /*    EvtRateHandler *evtBG = new EvtRateHandler(BGruns, false, analysisChoice, EnergyBinWidth, fiducialCut, true, UNBLIND);
     evtBG->CalcRates();
     BGRateErrorE =     evtBG->getRateErrors(0);
     BGRateErrorW =     evtBG->getRateErrors(1);
@@ -1014,7 +863,7 @@ void BGSubtractedRate::LoadRatesByBin() {
     runLengthBG[0] =   evtBG->returnRunLength(0);
     runLengthBG[1] =   evtBG->returnRunLength(1);
     delete evtBG;
-    
+    */
     // Simulation data
     SimEvtRateHandler *evt = new SimEvtRateHandler(FGruns, true, analysisChoice, EnergyBinWidth, fiducialCut, UNBLIND);
     evt->CalcRates();
@@ -1022,92 +871,18 @@ void BGSubtractedRate::LoadRatesByBin() {
     BetaRateErrorE =     evt->getRateErrors(0);
     BetaRateW =          evt->getRateVectors(1);
     BetaRateErrorW =     evt->getRateErrors(1);
-    BetaRateEQuad =      evt->getRateVectorsQuad(0);
-    BetaRateErrorEQuad = evt->getRateErrorsQuad(0);
-    BetaRateWQuad =      evt->getRateVectorsQuad(1);
-    BetaRateErrorWQuad = evt->getRateErrorsQuad(1);
-    BetaRateERad =       evt->getRateVectorsRad(0);
-    BetaRateErrorERad =  evt->getRateErrorsRad(0);
-    BetaRateWRad =       evt->getRateVectorsRad(1);
-    BetaRateErrorWRad =  evt->getRateErrorsRad(1);
+
+    BS_E = evt->getRateBS(0);
+    BS_E_err = evt->getRateBSerr(0);
+    BS_W = evt->getRateBS(1);
+    BS_W_err = evt->getRateBSerr(1);
+
     runLengthBeta[0] =   evt->returnRunLength(0);
     runLengthBeta[1] =   evt->returnRunLength(1);
     delete evt;
 
   }
 
-  if ( Simulation || writeRatesToFile ) {
-    std::ofstream ofileE, ofileW, ofileEquad, ofileWquad, ofileErad, ofileWrad;
-    if ( !Simulation ) {
-      
-      ofileE.open(TString::Format("BinByBinComparison/%sUK_Erun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
-				  FGruns[0],analysisChoice.c_str()).Data());
-      ofileW.open(TString::Format("BinByBinComparison/%sUK_Wrun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
-				  FGruns[0],analysisChoice.c_str()).Data());
-
-      ofileEquad.open(TString::Format("BinByBinComparison/%sUK_Erun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
-				      FGruns[0],analysisChoice.c_str()).Data());
-      ofileWquad.open(TString::Format("BinByBinComparison/%sUK_Wrun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
-				      FGruns[0],analysisChoice.c_str()).Data());
-      
-      ofileErad.open(TString::Format("BinByBinComparison/%sUK_Erun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
-				     FGruns[0],analysisChoice.c_str()).Data());
-      ofileWrad.open(TString::Format("BinByBinComparison/%sUK_Wrun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
-				     FGruns[0],analysisChoice.c_str()).Data());
-    }
-    else {
-      ofileE.open(TString::Format("BinByBinComparison/%sSIM_Erun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
-				  FGruns[0],analysisChoice.c_str()).Data());
-      ofileW.open(TString::Format("BinByBinComparison/%sSIM_Wrun%i_anaCh%s.dat",(UNBLIND?"UNBLINDED_":""),
-				  FGruns[0],analysisChoice.c_str()).Data());
-      
-      ofileEquad.open(TString::Format("BinByBinComparison/%sSIM_Erun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
-				      FGruns[0],analysisChoice.c_str()).Data());
-      ofileWquad.open(TString::Format("BinByBinComparison/%sSIM_Wrun%i_anaCh%s_Quadrants.dat",(UNBLIND?"UNBLINDED_":""),
-				      FGruns[0],analysisChoice.c_str()).Data());
-      
-      ofileErad.open(TString::Format("BinByBinComparison/%sSIM_Erun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
-				     FGruns[0],analysisChoice.c_str()).Data());
-      ofileWrad.open(TString::Format("BinByBinComparison/%sSIM_Wrun%i_anaCh%s_Radial.dat",(UNBLIND?"UNBLINDED_":""),
-				     FGruns[0],analysisChoice.c_str()).Data());
-    }
-    
-    ofileE << std::setprecision(15) << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-    ofileW << std::setprecision(15) << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-    ofileEquad << std::setprecision(15) << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-    ofileWquad << std::setprecision(15) << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-    ofileErad << std::setprecision(15) << "FG time = " << runLengthBeta[0] << "\tBG time = " << runLengthBG[0] << std::endl;
-    ofileWrad << std::setprecision(15) << "FG time = " << runLengthBeta[1] << "\tBG time = " << runLengthBG[1] << std::endl;
-
-    for ( unsigned int i = 0; i < BetaRateE.size(); ++i ) {
-      ofileE << i*10.+5. << "\t" << BetaRateE[i] << "\t" << BGRateE[i] << std::endl;
-      ofileW << i*10.+5. << "\t" << BetaRateW[i] << "\t" << BGRateW[i] << std::endl;
-
-      ofileEquad << i*10.+5. ;
-      ofileWquad << i*10.+5. ;
-
-      for ( unsigned int j = 0; j<4; ++j ) {
-	ofileEquad << "\t" << BetaRateEQuad[j][i] << "\t" << BGRateEQuad[j][i] ;
-	ofileWquad << "\t" << BetaRateWQuad[j][i] << "\t" << BGRateWQuad[j][i] ;
-      }
-
-      ofileEquad << "\n";
-      ofileWquad << "\n";
-
-      ofileErad << i*10.+5. ;
-      ofileWrad << i*10.+5. ;
-
-      for ( unsigned int j = 0; j<6; ++j ) {
-	ofileErad << "\t" << BetaRateERad[j][i] << "\t" << BGRateERad[j][i] ;
-	ofileWrad << "\t" << BetaRateWRad[j][i] << "\t" << BGRateWRad[j][i] ;
-      }
-
-      ofileErad << "\n";
-      ofileWrad << "\n";
-
-    }
-    ofileE.close(), ofileW.close(), ofileEquad.close(), ofileWquad.close(), ofileErad.close(), ofileWrad.close();
-  }
 };
 
 std::vector<double> BGSubtractedRate::returnRunLengths(bool beta) {
@@ -1140,55 +915,6 @@ void BGSubtractedRate::CalcFinalRate()  {
   }
   else throw "Number of energy bins do not agree between Beta and BG runs. Can't calculate final rate!";
 
-  for (int j=0; j<4; ++j) {
-
-    if (BetaRateEQuad[j].size()==BGRateEQuad[j].size()) {
-      FinalRateEQuad[j].resize(BetaRateEQuad[j].size(),0.);
-      for (unsigned int i=0; i<BetaRateEQuad[j].size(); i++)
-	{
-	  FinalRateEQuad[j][i] = BetaRateEQuad[j][i]-BGRateEQuad[j][i];
-	  FinalRateErrorEQuad[j][i] = sqrt(power(BetaRateErrorEQuad[j][i],2)+power(BGRateErrorEQuad[j][i],2));
-	  //std::cout << BetaRateE[i] << " " << BGRateE[i] << " " << FinalRateE[i] << std::endl;
-	}
-    }
-    else throw "Number of energy bins do not agree between Beta and BG runs. Can't calculate final rate!";
-    
-    if (BetaRateWQuad[j].size()==BGRateWQuad[j].size()) {
-      FinalRateWQuad[j].resize(BetaRateWQuad[j].size(),0.);
-      for (unsigned int i=0; i<BetaRateWQuad[j].size(); i++)
-	{
-	  FinalRateWQuad[j][i] = BetaRateWQuad[j][i]-BGRateWQuad[j][i];
-	  FinalRateErrorWQuad[j][i] = sqrt(power(BetaRateErrorWQuad[j][i],2)+power(BGRateErrorWQuad[j][i],2));
-	  //std::cout << BetaRateE[i] << " " << BGRateE[i] << " " << FinalRateE[i] << std::endl;
-	}
-    }
-    else throw "Number of energy bins do not agree between Beta and BG runs. Can't calculate final rate!";
-  }
-
-  for (int j=0; j<6; ++j) {
-
-    if (BetaRateERad[j].size()==BGRateERad[j].size()) {
-      FinalRateERad[j].resize(BetaRateERad[j].size(),0.);
-      for (unsigned int i=0; i<BetaRateERad[j].size(); i++)
-	{
-	  FinalRateERad[j][i] = BetaRateERad[j][i]-BGRateERad[j][i];
-	  FinalRateErrorERad[j][i] = sqrt(power(BetaRateErrorERad[j][i],2)+power(BGRateErrorERad[j][i],2));
-	  //std::cout << BetaRateE[i] << " " << BGRateE[i] << " " << FinalRateE[i] << std::endl;
-	}
-    }
-    else throw "Number of energy bins do not agree between Beta and BG runs. Can't calculate final rate!";
-    
-    if (BetaRateWRad[j].size()==BGRateWRad[j].size()) {
-      FinalRateWRad[j].resize(BetaRateWRad[j].size(),0.);
-      for (unsigned int i=0; i<BetaRateWRad[j].size(); i++)
-	{
-	  FinalRateWRad[j][i] = BetaRateWRad[j][i]-BGRateWRad[j][i];
-	  FinalRateErrorWRad[j][i] = sqrt(power(BetaRateErrorWRad[j][i],2)+power(BGRateErrorWRad[j][i],2));
-	  //std::cout << BetaRateE[i] << " " << BGRateE[i] << " " << FinalRateE[i] << std::endl;
-	}
-    }
-    else throw "Number of energy bins do not agree between Beta and BG runs. Can't calculate final rate!";
-  }
 
 };
 

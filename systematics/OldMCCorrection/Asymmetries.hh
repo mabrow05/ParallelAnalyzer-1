@@ -30,11 +30,8 @@ public:
   std::vector < std::vector<double> > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
   std::vector < std::vector<double> > returnBGsubtractedRateError(std::string runType);
   
-  std::vector < std::vector<double> > returnBGsubtractedRateQuad(std::string runType, int quad); // returns A2, A5, etc below
-  std::vector < std::vector<double> > returnBGsubtractedRateErrorQuad(std::string runType, int quad);
-  std::vector < std::vector<double> > returnBGsubtractedRateRad(std::string runType, int rad); // returns A2, A5, etc below
-  std::vector < std::vector<double> > returnBGsubtractedRateErrorRad(std::string runType, int rad);
-  //std::vector < double > returnRunLength(std::string runType); //Returns both beta and BG run length
+  std::vector < std::vector<double> > returnDeltaBackscRate(std::string runType, int bs); // returns A2, A5, etc below
+  std::vector < std::vector<double> > returnDeltaBackscRateError(std::string runType, int bs); // returns A2, A5, etc below
 
   
 
@@ -68,12 +65,8 @@ protected:
   std::vector < std::vector <double> > A2err, A5err, A7err, A10err, B2err, B5err, B7err, B10err; //BG subtr rates for each beta run
 
   // The following vectors sum over the appropriate event types for the analysisChoice [side][bin]
-  std::vector < std::vector < std::vector <double> > > A2Quad, A5Quad, A7Quad, A10Quad, B2Quad, B5Quad, B7Quad, B10Quad; //BG subtr rates for each beta run 
-  std::vector < std::vector < std::vector <double> > > A2errQuad, A5errQuad, A7errQuad, A10errQuad, B2errQuad, B5errQuad, B7errQuad, B10errQuad; //BG subtr rates for each beta run
-
-  // The following vectors sum over the appropriate event types for the analysisChoice [side][bin]
-  std::vector < std::vector < std::vector <double> > > A2Rad, A5Rad, A7Rad, A10Rad, B2Rad, B5Rad, B7Rad, B10Rad; //BG subtr rates for each beta run 
-  std::vector < std::vector < std::vector <double> > > A2errRad, A5errRad, A7errRad, A10errRad, B2errRad, B5errRad, B7errRad, B10errRad; //BG subtr rates for each beta run
+  std::vector < std::vector < std::vector <double> > > A2_BS, A5_BS, A7_BS, A10_BS, B2_BS, B5_BS, B7_BS, B10_BS; //BG subtr rates for each beta run 
+  std::vector < std::vector < std::vector <double> > > A2_BS_err, A5_BS_err, A7_BS_err, A10_BS_err, B2_BS_err, B5_BS_err, B7_BS_err, B10_BS_err; //BG subtr rates for each beta run
 
   std::vector<double> binLowerEdge;
   std::vector<double> binUpperEdge; //Hold the Energy of the upper and lower bin edges
@@ -107,12 +100,9 @@ private:
   std::vector <double> asymmetry; //Raw asymmetry in bins
   std::vector <double> asymmetryError; //Raw Asymmetry error in bins
 
-  std::vector < std::vector<double> > asymmetryQuad; //Raw asymmetry in bins
-  std::vector < std::vector<double> > asymmetryErrorQuad; //Raw Asymmetry error in bins
+  std::vector < std::vector<double> > asymmetryBS; //Raw asymmetry in bins
+  std::vector < std::vector<double> > asymmetryErrorBS; //Raw Asymmetry error in bins
   
-  std::vector < std::vector<double> > asymmetryRad; //Raw asymmetry in bins
-  std::vector < std::vector<double> > asymmetryErrorRad; //Raw Asymmetry error in bins
-
   std::vector <double> superSum; //Raw asymmetry in bins
   std::vector <double> superSumError; //Raw Asymmetry error in bins
   double totalAsymmetry; //Bin summed asymmetry
