@@ -622,7 +622,6 @@ void SimEvtRateHandler::dataReader() {
     // ADD IN WIRECHAMBER ENERGY DEPOSITION
     
 
-    int realSide= TMath::Cos(primTheta)>0.?1:0;
     
     unsigned int nevents = Tin->GetEntriesFast();
     //std::cout << nevents << std::endl;
@@ -638,6 +637,8 @@ void SimEvtRateHandler::dataReader() {
     for (unsigned int i=0; i<nevents; ++i) {
       
       Tin->GetEvent(i);
+
+      int realSide= TMath::Cos(primTheta)>0.?1:0;
       
       if ( Type>3  || Side>1 || Erecon<=0. ) continue;
       
