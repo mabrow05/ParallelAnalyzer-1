@@ -418,6 +418,7 @@ void asymm_vs_cal(TString year) {
   //Read in the error envelope from Kevin Hickerson
   std::ifstream errEnv(TString::Format("../../../systematics/EnergyUncertainty/envolopeValues-%i-deg2-cal5-curves1000.tsv",year==TString("2011-2012")?2011:2012));
   std::vector <Double_t> en;
+  std::vector<Double_t> maxEnv;
   std::vector <Double_t> low;
   std::vector <Double_t> high;
   std::vector <Double_t> yenv;
@@ -430,6 +431,7 @@ void asymm_vs_cal(TString year) {
     std::cout << e << " " << l << " " << h << std::endl;
     low.push_back(TMath::Abs(l));
     high.push_back(h);
+    maxEnv.push_back(h>TMath::Abs(l)? h : TMath::Abs(l));
     yenv.push_back(0.);
     xerr.push_back(5.);
   }
@@ -451,7 +453,7 @@ void asymm_vs_cal(TString year) {
   y_lower[0]=y_lower[1];
   */
 
-  TGraphAsymmErrors *finenv = new TGraphAsymmErrors(high.size(),&en[0],&yenv[0],&xerr[0],&xerr[0],&low[0],&high[0]);
+  TGraphAsymmErrors *finenv = new TGraphAsymmErrors(high.size(),&en[0],&yenv[0],&xerr[0],&xerr[0],&maxEnv[0],&maxEnv[0]);
   finenv->SetFillColor(kGray);
   finenv->SetFillStyle(3001);
   //finenv->Draw("3SAME");

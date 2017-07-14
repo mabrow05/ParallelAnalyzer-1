@@ -12,17 +12,21 @@ VPATH = ./:../../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
-CXXFLAGS      = -O2 -Wall -fPIC -g
+CXXFLAGS      = -O2 -Wall -fPIC -g -std=c++11
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)
 CXXFLAGS     += $(ROOTCFLAGS) -I../../include 
 LIBS         += -lSpectrum -lMinuit
 
-objects = MBUtils.o calibrationTools.o
+objects = MBUtils.o calibrationTools.o BetaSpectrum.o
 
 AngleCorrections.exe: AngleCorrections.o $(objects)
 	$(CXX) $(CXXFLAGS) -o AngleCorrections.exe AngleCorrections.o $(objects) $(LIBS)
+	@echo "Done"
+
+AsymmCalculator.exe: AsymmCalculator.o $(objects)
+	$(CXX) $(CXXFLAGS) -o AsymmCalculator.exe AsymmCalculator.o $(objects) $(LIBS)
 	@echo "Done"
 
 

@@ -13,7 +13,7 @@ from CorrectionsPlotter import *
 limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.025),(1200,1200*0.025)],
           2010:[(0,2.5),(200,200*0.0125),(500,500*0.0125),(1000,500*0.0125)],
           2011:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.0065),(1200,993.789*0.0065)], 
-          #2012:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.007),(1200,993.789*0.007)],
+          2012:[(0,0.017*130.3),(130.3,130.3*0.017),(368.49,0.010*368.49),(993.789,993.789*0.007),(1200,993.789*0.007)],
           #2012:[(0,0.017*130.3+10.),(130.3,130.3*0.017+10.),(368.49,0.010*368.49+10.),(993.789,993.789*0.0065+10.),(1200,993.789*0.0065+10.)]
 }
 
@@ -21,14 +21,17 @@ limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.0
 def readCalEnvelope(year=2011,upper=True):
         envLower = []
         envUpper = []
-        with open('envolopeValues-%i-deg2-cal5-curves1000.tsv'%year,'rb') as tsvin:
+        env = []
+        with open('envolopeValues-%i-deg2-cal4-curves1000.tsv'%year,'rb') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
                 for row in tsvin:
                         envLower.append( ( float(row[0]),fabs(float(row[1])) ) )
                         envUpper.append( ( float(row[0]),float(row[2]) ) )
+                        env.append( ( float(row[0]),max([fabs(float(row[1])),fabs(float(row[2]))]) ) )
                         print("%s\t%s\t%s"%(row[0],row[1],row[2]))
         limdat[year*10+1] = envLower
         limdat[year*10+2] = envUpper
+        limdat[year] = env
         #if upper:
         #        limdat[year] = envUpper
         #else:
@@ -80,19 +83,19 @@ def ObsAsymApprox(KE,year):
         
         elif year==2011 or year/10==2011:
                 A0 = .1184
-                p2 = 1.00231
-                p3 = 0.0000886218
-                p4 = 50.1891
-                p5 = 0.983511
-                p6 = -3.60345
+                p2 = 0.967004   #[0]
+                p3 = 0.000125724 #[1]
+                p4 = 69.4554    #[3]
+                p5 = 40.01147   #[4]
+                p6 = 0.158159  #[2]
 
         elif year==2012 or year/10==2012:
                 A0 = .1184
-                p2 = .976146
-                p3 = 0.000146057
-                p4 = 44.4746
-                p5 = 23.4241
-                p6 = 1.3252
+                p2 = 0.966143   #[0]
+                p3 = 0.000130679 #[1]
+                p4 = -230.862    #[3]
+                p5 = 47.5465   #[4]
+                p6 = 65.2350  #[2]
 
         # Functional Form is A0*beta(KE)*0.5*p2*(1+p3*KE)*(1+p6/(1+exp((KE-p4)/p5)))
 
@@ -107,7 +110,7 @@ def simpleAsym(KE,year):
 	return A0_PDG*beta(KE)*0.5
 
 def energyErrorA(E,year):
-	Eprim = E+calEnvelope(E,year)
+	Eprim = E+calEnvelope(E,year) # the minus side gives larger uncert
 	return ObsAsymApprox(Eprim,year)/ObsAsymApprox(E,year)-1.#simpleAsym(Eprim,year)/simpleAsym(E,year)-1.
 
 
@@ -177,10 +180,10 @@ def plotEnergyErrors(year=2011):
 					  key = graph.key.key(pos="tr"))
 	setTexrunner(gCx)
 			 
-        gdat = [ [x,100*energyErrorA(x,year),100*energyErrorSimple(x,year),100*energyErrorRC(x,year)] for x in unifrange(50,850.,800) ]
+        gdat = [ [x,100*fabs(energyErrorA(x,year)),100*energyErrorSimple(x,year),100*energyErrorRC(x,year)] for x in unifrange(50,850.,800) ]
 
-	gdatLower = [ [x,100*energyErrorA(x,year*10+1),100*energyErrorSimple(x,year*10+1),100*energyErrorRC(x,year*10+1)] for x in unifrange(50,850.,800) ]
-	gdatUpper = [ [x,100*energyErrorA(x,year*10+2),100*energyErrorSimple(x,year*10+2),100*energyErrorRC(x,year*10+2)] for x in unifrange(50,850.,800) ]
+	gdatLower = [ [x,100*fabs(energyErrorA(x,year*10+1)),100*energyErrorSimple(x,year*10+1),100*energyErrorRC(x,year*10+1)] for x in unifrange(50,850.,800) ]
+	gdatUpper = [ [x,100*fabs(energyErrorA(x,year*10+2)),100*energyErrorSimple(x,year*10+2),100*energyErrorRC(x,year*10+2)] for x in unifrange(50,850.,800) ]
 	#gdat2010 = [ [x,100*energyErrorA(x,2010),100*energyErrorSimple(x,2010),100*energyErrorRC(x,2010)] for x in unifrange(50,850.,800) ]
 	#gdat2012 = [ [x,100*energyErrorA(x,2012),100*energyErrorSimple(x,2012),100*energyErrorRC(x,2012)] for x in unifrange(50,850.,800) ]
 
@@ -233,7 +236,7 @@ def plotGainfluctErrors():
 			 
 	gCx.plot(graph.data.function("y(x)=0",title=None), [graph.style.line(lineattrs=[style.linestyle.dashed,]),])
 
- 	print "Eavg MC =",weightStats(gdat,220,670)
+ 	print "Eavg MC =",weightStats(gdat,230,750)
 	
 	gCx.writetofile("/Users/michael/Desktop/GainfluctsUncert.pdf")
 
@@ -243,7 +246,7 @@ if __name__=="__main__":
 	year = 2011
         readCalEnvelope(year)
         #gainUncertaintyTable(year,0.0064)
-	#linearityUncertaintyTable(year)
+	linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
 	plotEnergyErrors(year)
 	#plotGainfluctErrors()

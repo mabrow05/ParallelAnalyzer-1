@@ -63,7 +63,7 @@ Double_t returnBeta(Double_t En) {
 
 void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startFileNum, int endFileNum) {
 
-  bool usePrimValues=false;
+  bool usePrimValues=true;
 
   double fidCut = 50.;
 
