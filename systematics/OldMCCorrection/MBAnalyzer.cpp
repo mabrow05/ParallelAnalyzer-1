@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
       }*/
     
     // Loop over keys
-    int keys[] {};//{0,10,11,12,13};
+    int keys[] {0,10,11,12,13};
     
     for ( auto& k : keys ) {
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     }
 
    
-    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
+    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
     //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
     //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
     
