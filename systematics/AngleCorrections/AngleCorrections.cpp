@@ -77,6 +77,11 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   Double_t g_d = 4.*16.;
   Double_t g_rest = 4.*12500.;
 
+  std::vector <Double_t> aveThetaPure(100,0.);
+  std::vector <Double_t> PureEntries(100,0.);
+  std::vector <Double_t> aveThetaTrigg(100,0.);
+  std::vector <Double_t> TriggEntries(100,0.);
+
   std::vector <Double_t> aveThetaPureE(100,0.);
   std::vector <Double_t> PureEntriesE(100,0.);
   std::vector <Double_t> aveThetaTriggE(100,0.);
@@ -125,12 +130,12 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       Int_t side = TMath::Cos(primTheta)>0.?1:0;
 
       if (side==0) {
-	aveThetaPureE[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
-	PureEntriesE[(int)(primKE/10.)]+=1.;
+	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	PureEntries[(int)(primKE/10.)]+=1.;
       }
       else if (side==1) {
-	aveThetaPureW[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
-	PureEntriesW[(int)(primKE/10.)]+=1.;
+	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	PureEntries[(int)(primKE/10.)]+=1.;
       }
 
       bool trigger = false;
@@ -163,12 +168,12 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       }
 
       if (trigger && side==0) {
-	aveThetaTriggE[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntriesE[(int)(primKE/10.)]+=1.;
+	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	TriggEntries[(int)(primKE/10.)]+=1.;
       }
       else if (trigger && side==1) {
-	aveThetaTriggW[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntriesW[(int)(primKE/10.)]+=1.;
+	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	TriggEntries[(int)(primKE/10.)]+=1.;
       }
 
     }   
@@ -206,12 +211,12 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       Int_t side = TMath::Cos(primTheta)>0.?1:0;
 
       if (side==0) {
-	aveThetaPureE[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
-	PureEntriesE[(int)(primKE/10.)]+=1.;
+	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	PureEntries[(int)(primKE/10.)]+=1.;
       }
       else if (side==1) {
-	aveThetaPureW[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
-	PureEntriesW[(int)(primKE/10.)]+=1.;
+	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	PureEntries[(int)(primKE/10.)]+=1.;
       }
 
       EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
@@ -243,12 +248,12 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       }
 
       if (trigger && side==0) {
-	aveThetaTriggE[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntriesE[(int)(primKE/10.)]+=1.;
+	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	TriggEntries[(int)(primKE/10.)]+=1.;
       }
       else if (trigger && side==1) {
-	aveThetaTriggW[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntriesW[(int)(primKE/10.)]+=1.;
+	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	TriggEntries[(int)(primKE/10.)]+=1.;
       }
       
     }   
@@ -257,12 +262,12 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   }
 
 
-
+ 
   for (UInt_t b=0; b<100; ++b) {
-    aveThetaPureE[b]= ( PureEntriesE[b]>0.?aveThetaPureE[b]/PureEntriesE[b]:0. );
-    aveThetaTriggE[b]= ( TriggEntriesE[b]>0.?aveThetaTriggE[b]/TriggEntriesE[b]:0. );
-    aveThetaPureW[b]= ( PureEntriesW[b]>0.?aveThetaPureW[b]/PureEntriesW[b]:0. );
-    aveThetaTriggW[b]= ( TriggEntriesW[b]>0.?aveThetaTriggW[b]/TriggEntriesW[b]:0. );
+    aveThetaPure[b]= ( PureEntries[b]>0.?aveThetaPure[b]/PureEntries[b]:0. );
+    aveThetaTrigg[b]= ( TriggEntries[b]>0.?aveThetaTrigg[b]/TriggEntries[b]:0. );
+    //aveThetaPure[b]= ( PureEntries[b]>0.?aveThetaPure[b]/PureEntries[b]:0. );
+    //aveThetaTrigg[b]= ( TriggEntries[b]>0.?aveThetaTrigg[b]/TriggEntries[b]:0. );
   }
   
   
@@ -270,13 +275,13 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
-    double deltaEast = aveThetaTriggE[b]/aveThetaPureE[b];
-    double deltaWest = aveThetaTriggW[b]/aveThetaPureW[b];
+    double ratio = aveThetaPure[b]/aveThetaTrigg[b];
+    //double deltaEast = aveThetaTriggE[b]/aveThetaPureE[b];
+    //double deltaWest = aveThetaTriggW[b]/aveThetaPureW[b];
 
     ofile << 10.*b+5. << "\t" 
-	  << deltaEast << "\t" 
-	  << deltaWest << "\t"
-	  << 1./(7./8.*deltaWest+1./8.*deltaEast)-1. << std::endl;
+	  << ratio << "\t" 
+	  << ratio-1. << std::endl;
   }
   ofile.close();
     

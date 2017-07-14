@@ -73,8 +73,8 @@ def readAngleCorr(year="2011-2012",percErr=0.2):
     with open('angleCorr_%s.txt'%(year),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
-            A[0].append(float(row[3]))
-            A[1].append(fabs(float(row[3])*percErr))
+            A[0].append(float(row[2]))
+            A[1].append(fabs(float(row[2])*percErr))
             #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
 
     return A
@@ -83,9 +83,9 @@ def readAngleCorr(year="2011-2012",percErr=0.2):
 
     
 if __name__=="__main__":
-    year = "2011-2012"
-    emin = 230.
-    emax = 750.
+    year = "2012-2013"
+    emin = 220.
+    emax = 670.
     perc_Err=0.25
 
     angleCorr = readAngleCorr(year,percErr=perc_Err)
