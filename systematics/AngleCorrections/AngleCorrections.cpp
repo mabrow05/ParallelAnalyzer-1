@@ -163,11 +163,11 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       }
 
       if (trigger && side==0) {
-	aveThetaTriggE[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
+	aveThetaTriggE[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
 	TriggEntriesE[(int)(primKE/10.)]+=1.;
       }
       else if (trigger && side==1) {
-	aveThetaTriggW[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
+	aveThetaTriggW[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
 	TriggEntriesW[(int)(primKE/10.)]+=1.;
       }
 
@@ -243,11 +243,11 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       }
 
       if (trigger && side==0) {
-	aveThetaTriggE[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
+	aveThetaTriggE[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
 	TriggEntriesE[(int)(primKE/10.)]+=1.;
       }
       else if (trigger && side==1) {
-	aveThetaTriggW[(int)(primKE/10.)]+=TMath::Abs(TMath::Cos(primTheta));
+	aveThetaTriggW[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
 	TriggEntriesW[(int)(primKE/10.)]+=1.;
       }
       
