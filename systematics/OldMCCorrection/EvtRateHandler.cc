@@ -691,10 +691,10 @@ void SimEvtRateHandler::dataReader() {
 	if ( Type0 && Type==0 ) { 
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) {
 	    hisCounts[Side]->Fill(Erecon);
-	    hisBS[0][realSide]->Fill(primKE);
-	    hisBS[1][realSide]->Fill(primKE);
-	    hisBS[2][realSide]->Fill(primKE);
-	    hisBS[3][realSide]->Fill(primKE);
+	    hisBS[0][realSide]->Fill(Erecon);
+	    hisBS[1][realSide]->Fill(Erecon);
+	    hisBS[2][realSide]->Fill(Erecon);
+	    hisBS[3][realSide]->Fill(Erecon);
 	  }
 	  
 	}
@@ -703,9 +703,9 @@ void SimEvtRateHandler::dataReader() {
 	  if ( r2E<(fiducialCut*fiducialCut) && r2W<(fiducialCut*fiducialCut ) ) { 
 	     hisCounts[Side]->Fill(Erecon);
 	     hisBS[0][Side]->Fill(Erecon);
-	     hisBS[1][realSide]->Fill(primKE);
-	     hisBS[2][realSide]->Fill(primKE);
-	     hisBS[3][realSide]->Fill(primKE);
+	     hisBS[1][realSide]->Fill(Erecon);
+	     hisBS[2][realSide]->Fill(Erecon);
+	     hisBS[3][realSide]->Fill(Erecon);
 
 	  }
 	}
@@ -715,8 +715,8 @@ void SimEvtRateHandler::dataReader() {
 	    hisCounts[Side]->Fill(Erecon);
 	    hisBS[0][Side]->Fill(Erecon);
 	    hisBS[1][Side]->Fill(Erecon);
-	    hisBS[2][realSide]->Fill(primKE);
-	    hisBS[3][realSide]->Fill(primKE);
+	    hisBS[2][realSide]->Fill(Erecon);
+	    hisBS[3][realSide]->Fill(Erecon);
 	  }
 	}
 	//Type3
@@ -726,7 +726,7 @@ void SimEvtRateHandler::dataReader() {
 	    hisBS[0][Side]->Fill(Erecon);
 	    hisBS[1][Side]->Fill(Erecon);
 	    hisBS[2][Side]->Fill(Erecon);
-	    hisBS[3][realSide]->Fill(primKE);
+	    hisBS[3][realSide]->Fill(Erecon);
 	  }
 	} 
 

@@ -127,13 +127,14 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 
       if (rE>50. || rW>50. || rPrim>50.) continue;
 
-      Int_t side = TMath::Cos(primTheta)>0.?1:0;
-
-      if (side==0) {
+      Int_t realSide = TMath::Cos(primTheta)>0.?1:0;
+      Int_t side=-1;
+      Int_t type=-1;
+      if (realSide==0) {
 	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
 	PureEntries[(int)(primKE/10.)]+=1.;
       }
-      else if (side==1) {
+      else if (realSide==1) {
 	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
 	PureEntries[(int)(primKE/10.)]+=1.;
       }
@@ -149,33 +150,48 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());//EdepQ[0]>0.;// 
       bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());//
 
-      // Type 0
+      // Type 0                                                                                                                                
       if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {
-      	trigger=true;
+        trigger=true;
+        side=0;
+        type=0;
       }
       else if ( !scintEastTrigg && scintWestTrigg && !mwpcEastTrigg && mwpcWestTrigg ) {
-	trigger=true;
+        trigger=true;
+        side=1;
+        type=0;
+      }
+      //Type 1                                                                                                                                 
+      else if ( scintEastTrigg && scintWestTrigg && mwpcEastTrigg && mwpcWestTrigg ) {
+        trigger=true;
+        side=time[0]<time[1]?0:1;
+        type=1;
+      }
+      //Type 2/3                                                                                                                               
+      else if ( mwpcEastTrigg && mwpcWestTrigg && ( scintEastTrigg || scintWestTrigg ) ) {
+        trigger=true;
+        side=scintEastTrigg?0:1;
+        type=2;
       }
 
-      //Type 1
-      else if ( scintEastTrigg && scintWestTrigg && mwpcEastTrigg && mwpcWestTrigg ) {
-      	trigger=true;
+      if (trigger) {
+        double evis = type==1?(EdepQ[0]+EdepQ[1]):EdepQ[side];
+        double erecon = eRecon.getErecon(side,type,evis);
+        if (type==2) {
+          if (side==0) {
+	    type = sep.separate23(MWPCEnergy[0]);
+	    side = type==2 ? 1 : 0;
+	  }
+	  else if (side==1) {
+	    type = sep.separate23(MWPCEnergy[1]);
+	    side = type==2 ? 0 : 1;
+	  }
+	}
+
+	aveThetaTrigg[(int)(erecon/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	TriggEntries[(int)(erecon/10.)]+=1.;
       }
       
-      //Type 2/3
-      if ( (scintEastTrigg || scintWestTrigg) && mwpcEastTrigg && mwpcWestTrigg ) {
-      	trigger=true;
-      }
-
-      if (trigger && side==0) {
-	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntries[(int)(primKE/10.)]+=1.;
-      }
-      else if (trigger && side==1) {
-	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntries[(int)(primKE/10.)]+=1.;
-      }
-
     }   
     delete f;
     
@@ -208,55 +224,72 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 
       if (rE>50. || rW>50. || rPrim>50.) continue;
 
-      Int_t side = TMath::Cos(primTheta)>0.?1:0;
+      Int_t realSide = TMath::Cos(primTheta)>0.?1:0;
+      Int_t side=-1;
+      Int_t type=-1;
+      if (realSide==0) {
+	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	PureEntries[(int)(primKE/10.)]+=1.;
+      }
+      else if (realSide==1) {
+	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	PureEntries[(int)(primKE/10.)]+=1.;
+      }
 
-      if (side==0) {
-	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	PureEntries[(int)(primKE/10.)]+=1.;
-      }
-      else if (side==1) {
-	aveThetaPure[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	PureEntries[(int)(primKE/10.)]+=1.;
-      }
+      bool trigger = false;
 
       EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
       EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 
-      bool trigger=false;
 
       bool mwpcEastTrigg = (MWPCEnergy[0]>0.)?true:false;
       bool mwpcWestTrigg = (MWPCEnergy[1]>0.)?true:false;
-      bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());// EdepQ[0];//
-      bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());// EdepQ[1];//
+      bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());//EdepQ[0]>0.;// 
+      bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());//
 
-      // Type 0
+      // Type 0                                                                                                                                
       if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {
-      	trigger=true;
+        trigger=true;
+        side=0;
+        type=0;
       }
       else if ( !scintEastTrigg && scintWestTrigg && !mwpcEastTrigg && mwpcWestTrigg ) {
-	trigger=true;
+        trigger=true;
+        side=1;
+        type=0;
       }
-
-      //Type 1
+      //Type 1                                                                                                                                 
       else if ( scintEastTrigg && scintWestTrigg && mwpcEastTrigg && mwpcWestTrigg ) {
-      	trigger=true;
+        trigger=true;
+        side=time[0]<time[1]?0:1;
+        type=1;
       }
-      
-      //Type 2/3
-      if ( (scintEastTrigg || scintWestTrigg) && mwpcEastTrigg && mwpcWestTrigg ) {
-      	trigger=true;
+      //Type 2/3                                                                                                                               
+      else if ( mwpcEastTrigg && mwpcWestTrigg && ( scintEastTrigg || scintWestTrigg ) ) {
+        trigger=true;
+        side=scintEastTrigg?0:1;
+        type=2;
       }
 
-      if (trigger && side==0) {
-	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntries[(int)(primKE/10.)]+=1.;
-      }
-      else if (trigger && side==1) {
-	aveThetaTrigg[(int)(primKE/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
-	TriggEntries[(int)(primKE/10.)]+=1.;
+      if (trigger) {
+        double evis = type==1?(EdepQ[0]+EdepQ[1]):EdepQ[side];
+        double erecon = eRecon.getErecon(side,type,evis);
+        if (type==2) {
+          if (side==0) {
+	    type = sep.separate23(MWPCEnergy[0]);
+	    side = type==2 ? 1 : 0;
+	  }
+	  else if (side==1) {
+	    type = sep.separate23(MWPCEnergy[1]);
+	    side = type==2 ? 0 : 1;
+	  }
+	}
+
+	aveThetaTrigg[(int)(erecon/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
+	TriggEntries[(int)(erecon/10.)]+=1.;
       }
       
-    }   
+    }  
     delete f;
     
   }
@@ -275,7 +308,7 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
-    double ratio = aveThetaPure[b]/aveThetaTrigg[b];
+    double ratio = (returnBeta(10.*b+5.)/2.) / aveThetaTrigg[b];
     //double deltaEast = aveThetaTriggE[b]/aveThetaPureE[b];
     //double deltaWest = aveThetaTriggW[b]/aveThetaPureW[b];
 
