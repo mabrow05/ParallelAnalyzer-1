@@ -743,7 +743,7 @@ std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoin
 
 std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct) {
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-  if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
+  //  if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
 
   TString filename = TString::Format("../AngleCorrections/angleCorr_%s.txt",oct<60?"2011-2012":"2012-2013");
   //std::cout << filename.Data() << std::endl;                                                                                                 
