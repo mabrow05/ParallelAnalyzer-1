@@ -102,6 +102,7 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   std::vector <std::vector<Double_t>> UNCORR_rate_polE_err (2, std::vector<Double_t>(100,0.));
   std::vector <std::vector<Double_t>> UNCORR_rate_polW (2, std::vector<Double_t>(100,0.));  
   std::vector <std::vector<Double_t>> UNCORR_rate_polW_err (2, std::vector<Double_t>(100,0.)); 
+
   
   TString basepath = TString::Format("%s/",year==TString("2011-2012")?getenv("SIM_2011_2012"):
 				     (year==TString("2012-2013")?getenv("SIM_2012_2013"):getenv("SIM_2012_2013_ISOBUTANE")));
@@ -361,7 +362,7 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   std::vector <Double_t> asymm(100,0.);
   std::vector <Double_t> asymmErr(100,0.);
 
-  std::vector < std::vector<Double_t> > bsCorr(4,std::vector<Double_t>(100,1.));
+  std::vector < std::vector<Double_t> > bsCorr(5,std::vector<Double_t>(100,1.));
   
   for (UInt_t b=0;b<100;++b) {
 
@@ -395,6 +396,8 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
     bsCorr[1][b] = asymm[1]/asymm[0]-1.;
     bsCorr[2][b] = asymm[2]/asymm[1]-1.;
     bsCorr[3][b] = asymm[3]/asymm[2]-1.;
+    bsCorr[4][b] = asymm[3]/uncorrAsymm-1.;
+
   }
   
  
@@ -433,6 +436,16 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
     ofile.close();
   }
 
+
+  ofile.open(TString::Format("%s_deltaBS_ALL.txt",year.Data()).Data());
+  ofile << std::setprecision(10);
+  
+  for (int b=0;b<100;++b) {
+    ofile << 10.*b+5. << "\t" 
+	  << bsCorr[4][b] << std::endl;
+  }
+    
+  ofile.close();
 };
 
 int main(int argc, char *argv[]) {
