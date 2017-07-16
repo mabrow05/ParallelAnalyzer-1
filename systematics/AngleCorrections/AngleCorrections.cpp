@@ -91,6 +91,17 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   std::vector <Double_t> PureEntriesW(100,0.);
   std::vector <Double_t> aveThetaTriggW(100,0.);
   std::vector <Double_t> TriggEntriesW(100,0.);
+
+  //These are the successive corrected rates
+  std::vector <std::vector <std::vector <Double_t> > > rate_polE (4, std::vector<std::vector<Double_t>>(2, std::vector<Double_t>(100,0.)));
+  std::vector <std::vector <std::vector <Double_t> > > rate_polE_err (4, std::vector<std::vector<Double_t>>(2, std::vector<Double_t>(100,0.)));
+  std::vector <std::vector <std::vector <Double_t> > > rate_polW (4, std::vector<std::vector<Double_t>>(2, std::vector<Double_t>(100,0.)));
+  std::vector <std::vector <std::vector <Double_t> > > rate_polW_err (4, std::vector<std::vector<Double_t>>(2, std::vector<Double_t>(100,0.)));
+
+  std::vector <std::vector<Double_t>> UNCORR_rate_polE (2, std::vector<Double_t>(100,0.));  
+  std::vector <std::vector<Double_t>> UNCORR_rate_polE_err (2, std::vector<Double_t>(100,0.));
+  std::vector <std::vector<Double_t>> UNCORR_rate_polW (2, std::vector<Double_t>(100,0.));  
+  std::vector <std::vector<Double_t>> UNCORR_rate_polW_err (2, std::vector<Double_t>(100,0.)); 
   
   TString basepath = TString::Format("%s/",year==TString("2011-2012")?getenv("SIM_2011_2012"):
 				     (year==TString("2012-2013")?getenv("SIM_2012_2013"):getenv("SIM_2012_2013_ISOBUTANE")));
@@ -177,7 +188,20 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       if (trigger) {
         double evis = type==1?(EdepQ[0]+EdepQ[1]):EdepQ[side];
         double erecon = eRecon.getErecon(side,type,evis);
-        if (type==2) {
+
+	if (type==0) {
+	  UNCORR_rate_polE[side][erecon/10.]+=1.;
+	  rate_polE[0][realSide][erecon/10.]+=1.;
+	  rate_polE[1][realSide][erecon/10.]+=1.;
+	  rate_polE[2][realSide][erecon/10.]+=1.;
+	  rate_polE[3][realSide][erecon/10.]+=1.;
+	} else if (type==1) {
+	  UNCORR_rate_polE[side][erecon/10.]+=1.;
+	  rate_polE[0][side][erecon/10.]+=1.;
+	  rate_polE[1][realSide][erecon/10.]+=1.;
+	  rate_polE[2][realSide][erecon/10.]+=1.;
+	  rate_polE[3][realSide][erecon/10.]+=1.;
+	} else if (type==2) {
           if (side==0) {
 	    type = sep.separate23(MWPCEnergy[0]);
 	    side = type==2 ? 1 : 0;
@@ -185,6 +209,19 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 	  else if (side==1) {
 	    type = sep.separate23(MWPCEnergy[1]);
 	    side = type==2 ? 0 : 1;
+	  }
+	  if (type==2) {
+	    UNCORR_rate_polE[side][erecon/10.]+=1.;
+	    rate_polE[0][side][erecon/10.]+=1.;
+	    rate_polE[1][side][erecon/10.]+=1.;
+	    rate_polE[2][realSide][erecon/10.]+=1.;
+	    rate_polE[3][realSide][erecon/10.]+=1.;
+	  } else if (type==3) {
+	    UNCORR_rate_polE[side][erecon/10.]+=1.;
+	    rate_polE[0][side][erecon/10.]+=1.;
+	    rate_polE[1][side][erecon/10.]+=1.;
+	    rate_polE[2][side][erecon/10.]+=1.;
+	    rate_polE[3][realSide][erecon/10.]+=1.;
 	  }
 	}
 
@@ -274,7 +311,20 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
       if (trigger) {
         double evis = type==1?(EdepQ[0]+EdepQ[1]):EdepQ[side];
         double erecon = eRecon.getErecon(side,type,evis);
-        if (type==2) {
+
+	if (type==0) {
+	  UNCORR_rate_polW[side][erecon/10.]+=1.;
+	  rate_polW[0][realSide][erecon/10.]+=1.;
+	  rate_polW[1][realSide][erecon/10.]+=1.;
+	  rate_polW[2][realSide][erecon/10.]+=1.;
+	  rate_polW[3][realSide][erecon/10.]+=1.;
+	} else if (type==1) {
+	  UNCORR_rate_polW[side][erecon/10.]+=1.;
+	  rate_polW[0][side][erecon/10.]+=1.;
+	  rate_polW[1][realSide][erecon/10.]+=1.;
+	  rate_polW[2][realSide][erecon/10.]+=1.;
+	  rate_polW[3][realSide][erecon/10.]+=1.;
+	} else if (type==2) {
           if (side==0) {
 	    type = sep.separate23(MWPCEnergy[0]);
 	    side = type==2 ? 1 : 0;
@@ -283,8 +333,21 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 	    type = sep.separate23(MWPCEnergy[1]);
 	    side = type==2 ? 0 : 1;
 	  }
+	  if (type==2) {
+	    UNCORR_rate_polW[side][erecon/10.]+=1.;
+	    rate_polW[0][side][erecon/10.]+=1.;
+	    rate_polW[1][side][erecon/10.]+=1.;
+	    rate_polW[2][realSide][erecon/10.]+=1.;
+	    rate_polW[3][realSide][erecon/10.]+=1.;
+	  } else if (type==3) {
+	    UNCORR_rate_polW[side][erecon/10.]+=1.;
+	    rate_polW[0][side][erecon/10.]+=1.;
+	    rate_polW[1][side][erecon/10.]+=1.;
+	    rate_polW[2][side][erecon/10.]+=1.;
+	    rate_polW[3][realSide][erecon/10.]+=1.;
+	  }
 	}
-
+      
 	aveThetaTrigg[(int)(erecon/10.)]+=TMath::Abs(returnBeta(primKE)*TMath::Cos(primTheta));
 	TriggEntries[(int)(erecon/10.)]+=1.;
       }
@@ -295,6 +358,45 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   }
 
 
+  std::vector <Double_t> asymm(100,0.);
+  std::vector <Double_t> asymmErr(100,0.);
+
+  std::vector < std::vector<Double_t> > bsCorr(4,std::vector<Double_t>(100,1.));
+  
+  for (UInt_t b=0;b<100;++b) {
+
+    Double_t uncorrAsymm = 0.;
+
+    Double_t R = (UNCORR_rate_polW[0][b]*UNCORR_rate_polE[1][b]) / (UNCORR_rate_polE[0][b]*UNCORR_rate_polW[1][b]);
+    /*Double_t deltaR = TMath::Sqrt( TMath::Power( UNCORR_rate_polW[0]_err[b]*UNCORR_rate_polE[1][b]/(UNCORR_rate_polE[0][b]*UNCORR_rate_polW[1][b]), 2 ) + 
+				   TMath::Power( UNCORR_rate_polE[1]_err[b]*UNCORR_rate_polW[0][b]/(UNCORR_rate_polE[0][b]*UNCORR_rate_polW[1][b]), 2 ) +
+				   TMath::Power( UNCORR_rate_polE[0]_err[b]*(UNCORR_rate_polW[0][b]*UNCORR_rate_polE[1][b]) / (UNCORR_rate_polE[0][b]*UNCORR_rate_polE[0][b]*UNCORR_rate_polW[1][b]), 2 ) +
+				   TMath::Power( UNCORR_rate_polW[1]_err[b]*(UNCORR_rate_polW[0][b]*UNCORR_rate_polE[1][b]) / (UNCORR_rate_polE[0][b]*UNCORR_rate_polW[1][b]*UNCORR_rate_polW[1][b]), 2 ) );*/
+    
+    
+    uncorrAsymm = (1.-TMath::Sqrt(R))/(1.+TMath::Sqrt(R));
+    //asymmErr[j] = (deltaR)/(TMath::Sqrt(R)*TMath::Power((TMath::Sqrt(R)+1.),2));
+    
+    std::vector <Double_t> asymm(4,0.);
+
+    R=0.;
+
+    for (int j=0;j<4;++j) {
+
+      Double_t R = (rate_polW[j][0][b]*rate_polE[j][1][b]) / (rate_polE[j][0][b]*rate_polW[j][1][b]);
+
+    
+    asymm[j] = (1.-TMath::Sqrt(R))/(1.+TMath::Sqrt(R));
+    //asymmErr[j] = (deltaR)/(TMath::Sqrt(R)*TMath::Power((TMath::Sqrt(R)+1.),2));
+    
+    }
+
+    bsCorr[0][b] = asymm[0]/uncorrAsymm-1.;
+    bsCorr[1][b] = asymm[1]/asymm[0]-1.;
+    bsCorr[2][b] = asymm[2]/asymm[1]-1.;
+    bsCorr[3][b] = asymm[3]/asymm[2]-1.;
+  }
+  
  
   for (UInt_t b=0; b<100; ++b) {
     aveThetaPure[b]= ( PureEntries[b]>0.?aveThetaPure[b]/PureEntries[b]:0. );
@@ -304,7 +406,7 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
   }
   
   
-  ofstream ofile(TString::Format("angleCorr_%s.txt",year.Data()).Data());
+  std::ofstream ofile(TString::Format("angleCorr_%s.txt",year.Data()).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
@@ -317,8 +419,19 @@ void AngleCorr(TString year, int startFileNum, int endFileNum) {
 	  << ratio-1. << std::endl;
   }
   ofile.close();
-    
 
+  for (int j=0;j<4;++j) {
+    ofile.open(TString::Format("%s_deltaBS_%i.txt",year.Data(),j).Data());
+    ofile << std::setprecision(10);
+
+    for (int b=0;b<100;++b) {
+
+      ofile << 10.*b+5. << "\t" 
+	    << bsCorr[j][b] << std::endl;
+    }
+    
+    ofile.close();
+  }
 
 };
 
