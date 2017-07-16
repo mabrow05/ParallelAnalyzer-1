@@ -66,6 +66,8 @@ std::vector < std::vector <Double_t> >  LoadOctetSystematics(Int_t octet, std::s
 //Returns a vector containing all the theory corrections to A0 for a particular bin
 std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint);
 
+std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t octet);
+
 // Collects all the asymmetries, bin-by-bin, and produces a final asymmetry plot, both A_SR and 2*A/Beta, for whatever grouping provided ("Octet", "Quartet", "Pair"). Also makes a plot of the 
 // integrated asymmetry vs octet/quartet/pair number
 void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t Elow=220., Double_t Ehigh=680., Double_t enBinWidth=10., bool UKdata=true, bool simulation=false, bool UNBLIND=false, int key=0);
@@ -278,13 +280,13 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	  std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
 
 	  //if (groupType==std::string("Octet")) deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
-	  
+	  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet);
 	  
 	  Int_t i = 0;
 	  while (infile >> binEdge >> Asym >> AsymError) {
 	    groupRawAsymByBin[0][i] = binEdge;
-	    groupRawAsymByBin[1][i] += AsymError>0. ? 1./power(AsymError*deltaSys[i][0]/theoryCorr[i],2)*Asym*deltaSys[i][0]/theoryCorr[i] : 0.; //Applying Delta_exp here.. Should this affect AsymError???
-	    groupRawAsymByBin[2][i] += AsymError>0. ? 1/power(AsymError*deltaSys[i][0]/theoryCorr[i],2) : 0.;         // Since Asym is multiplied by delta, AsymError would be as well...
+	    groupRawAsymByBin[1][i] += AsymError>0. ? 1./power(AsymError*angleCorr[i]*deltaSys[i][0]/theoryCorr[i],2)*Asym*angleCorr[i]*deltaSys[i][0]/theoryCorr[i] : 0.; //Applying Delta_exp here.. Should this affect AsymError???
+	    groupRawAsymByBin[2][i] += AsymError>0. ? 1/power(AsymError*angleCorr[i]*deltaSys[i][0]/theoryCorr[i],2) : 0.;         // Since Asym is multiplied by delta, AsymError would be as well...
 	    //std::cout << binEdge << " " << groupRawAsymByBin[1][i] << " " << groupRawAsymByBin[2][i] << std::endl;
 	    i++;
 	  }
@@ -583,10 +585,11 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 
       //Loading theory systematics... 
       std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
-
+      std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet);
+      
       for (UInt_t i=0 ; i<AsymAndError[0].size() ; i++) {
-	AsymAndError[0][i] /= ( theoryCorr[i]); //Here is where the corrections to Ameas are made.. Need to add in delta theory
-	AsymAndError[1][i] /= ( theoryCorr[i]);
+	AsymAndError[0][i] *= (angleCorr[i] / theoryCorr[i]); //Here is where the corrections to Ameas are made.. Need to add in delta theory
+	AsymAndError[1][i] *= (angleCorr[i] / theoryCorr[i]);
 
 	if ( withPOL ) {
 	  double POL_ave=POL_ave2011;
@@ -735,5 +738,38 @@ std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoin
   }
 
   return syst;
+
+};
+
+std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct) {
+  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
+  if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
+
+  TString filename = TString::Format("../AngleCorrections/angleCorr_%s.txt",oct<60?"2011-2012":"2012-2013");
+  //std::cout << filename.Data() << std::endl;                                                                                                 
+
+  std::ifstream infile(filename.Data());
+
+  if (!infile.is_open()) throw "Couldn't open file in LoadFieldDipCorrections!";
+
+  //  std::cout << "\n";                                                                                                                       
+
+  //Read in the systematics                                                                                                                    
+  Double_t mid; //midpoint of bin                                                                                                              
+  std::string hold1;
+  std::string sys;  //systematics correction (Apure/Aproc)                                                                                     
+
+  Int_t it = 0;
+
+  while (infile >> mid >> hold1 >> sys) {
+    if (mid==enBinMidpoint[it]) {
+      syst[it] = (hold1!=std::string("inf") && sys!=std::string("inf")) ? atof(sys.c_str())+1. : 1.;
+      std::cout << mid << " " << atof(sys.c_str())+1. << "\n";
+      it++;
+    }
+  }
+
+  return syst;
+
 
 };
