@@ -22,6 +22,7 @@ or do both depending on the flags passed.
 #include <TGraphErrors.h>
 #include <TF1.h>
 #include <TStyle.h>
+#include <TMath.h>
 
 #include "BetaSpectrum.hh"
 
@@ -275,46 +276,62 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	  infile.open(path.c_str());
 	  //std::cout << path << std::endl;
 	  
-	  //Apply systematics if run is an octet
-	  //TODO: put in systematics for other types of runs...
-	  std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
-
-	  //if (groupType==std::string("Octet")) deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
-	  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet);
+	  
 	  
 	  Int_t i = 0;
 	  while (infile >> binEdge >> Asym >> AsymError) {
 	    groupRawAsymByBin[0][i] = binEdge;
-	    groupRawAsymByBin[1][i] += AsymError>0. ? 1./power(AsymError*angleCorr[i]*deltaSys[i][0]/theoryCorr[i],2)*Asym*angleCorr[i]*deltaSys[i][0]/theoryCorr[i] : 0.; //Applying Delta_exp here.. Should this affect AsymError???
-	    groupRawAsymByBin[2][i] += AsymError>0. ? 1/power(AsymError*angleCorr[i]*deltaSys[i][0]/theoryCorr[i],2) : 0.;         // Since Asym is multiplied by delta, AsymError would be as well...
+	    groupRawAsymByBin[1][i] += AsymError>0. ? 1./power(AsymError,2)*Asym : 0.; 
+	    groupRawAsymByBin[2][i] += AsymError>0. ? 1/power(AsymError,2) : 0.;         
 	    //std::cout << binEdge << " " << groupRawAsymByBin[1][i] << " " << groupRawAsymByBin[2][i] << std::endl;
 	    i++;
 	  }
 	  infile.close();
+
 	}
 	pair++;
       }
       quartet++;
     }
   }
+
+  //Apply systematics if run is an octet
+  //TODO: put in systematics for other types of runs...
+  std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
+  
+  //if (groupType==std::string("Octet")) deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
+  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octBegin);
+
   //Do final calculations of the rates in each bin and their associated errors
   for (unsigned int i=0; i<groupRawAsymByBin[1].size(); i++) {
     groupRawAsymByBin[1][i] = groupRawAsymByBin[2][i]>0. ? groupRawAsymByBin[1][i] / groupRawAsymByBin[2][i] : 0.; // This is sum of weights*Asym / sum of weights 
     groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i]>0. ? 1./sqrt(groupRawAsymByBin[2][i]) : 0.; // Sqrt of sum of weights
-    
-    groupAsymByBin[0][i] = groupRawAsymByBin[0][i];
-    groupAsymByBin[1][i] = 2*groupRawAsymByBin[1][i]/returnBeta(enBinMedian[i]); //Divide out the energy dependence...
-    groupAsymByBin[2][i] = 2*groupRawAsymByBin[2][i]/returnBeta(enBinMedian[i]);
 
     // Apply polarimetry correction if necessary
     if (withPOL) {
-      double POL_ave=POL_ave2011;
-      if (octBegin>59 && octEnd>59)  POL_ave = POL_ave2012;
-      groupRawAsymByBin[1][i] = groupRawAsymByBin[1][i] / ( POL_ave ); 
-      groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i] / ( POL_ave );
-      groupAsymByBin[1][i] = groupAsymByBin[1][i] / ( POL_ave ); 
-      groupAsymByBin[2][i] = groupAsymByBin[2][i] / ( POL_ave );
+      double P_p =  POL_plus2011; 
+      double P_m =  POL_minus2011;
+      if (octBegin>59 && octEnd>59)   P_p = POL_plus2012; P_m =  POL_minus2012;
+
+      Double_t gam = (groupRawAsymByBin[1][i]+1.)/(groupRawAsymByBin[1][i]-1.);
+      Double_t delta_gam = TMath::Abs(2.*groupRawAsymByBin[2][i]/TMath::Power(groupRawAsymByBin[1][i]-1.,2.));
+      groupRawAsymByBin[1][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
+      groupRawAsymByBin[2][i] = TMath::Abs((-gam*(P_p+P_m)/(2.*P_p*P_m) + (P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);
+
+      //gam = (groupAsymByBin[1][i]+1.)/(groupAsymByBin[1][i]-1.);
+      //delta_gam = TMath::Abs(2.*groupAsymByBin[2][i]/TMath::Power(groupAsymByBin[1][i]-1.,2.));
+      //groupAsymByBin[1][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
+      //groupAsymByBin[2][i] = TMath::Abs((-gam*(P_p+P_m)/(2.*P_p*P_m) + (P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);
+
     }
+
+    //Apply systematic corrections
+    groupRawAsymByBin[1][i] = groupRawAsymByBin[1][i]*angleCorr[i]*deltaSys[i][0]/theoryCorr[i];
+    groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i]*angleCorr[i]*deltaSys[i][0]/theoryCorr[i];
+
+    groupAsymByBin[0][i] = groupRawAsymByBin[0][i];
+    groupAsymByBin[1][i] = 2*groupRawAsymByBin[1][i]/returnBeta(enBinMedian[i]); //Divide out the energy dependence...
+    groupAsymByBin[2][i] = 2*groupRawAsymByBin[2][i]/returnBeta(enBinMedian[i]);
     
     std::cout << enBinMedian[i] << " " << groupAsymByBin[1][i] << " " << groupAsymByBin[2][i] << std::endl;
   }
@@ -566,15 +583,14 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       infile.open(infilePath.c_str());
 
       Int_t bin = 0;
-      
+
       while (infile >> eBinLow >> Asym >> AsymError) {
 	Double_t En = eBinLow+enBinWidth/2.;
 	enBinMedian.push_back(En);
-	Double_t Beta = returnBeta(En);
-	AsymAndError[0].push_back(Asym*2./Beta); 
-	AsymAndError[1].push_back(AsymError*2./Beta);
 	RawAsymAndError[0].push_back(Asym);
 	RawAsymAndError[1].push_back(AsymError);
+	AsymAndError[0].push_back(0.); // These are just being initialized 
+	AsymAndError[1].push_back(0.);
 	bin++;
       }
       
@@ -588,16 +604,24 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet);
       
       for (UInt_t i=0 ; i<AsymAndError[0].size() ; i++) {
+
+	if (withPOL) {
+	  Double_t P_p =  POL_plus2011; 
+	  Double_t P_m =  POL_minus2011;
+	  if (octet>59)   P_p = POL_plus2012; P_m =  POL_minus2012;
+	  
+	  Double_t gam = (RawAsymAndError[0][i]+1.)/(RawAsymAndError[0][i]-1.);
+	  Double_t delta_gam = TMath::Abs(2.*RawAsymAndError[1][i]/TMath::Power(RawAsymAndError[0][i]-1.,2.));
+	  RawAsymAndError[0][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
+	  RawAsymAndError[1][i] = TMath::Abs((-gam*(P_p+P_m)/(2.*P_p*P_m) + (P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);	  
+	}
+
+	Double_t Beta = returnBeta(enBinMedian[i]);
+	AsymAndError[0][i] = RawAsymAndError[0][i]*2./Beta; 
+	AsymAndError[1][i] = RawAsymAndError[1][i]*2./Beta; 
+	
 	AsymAndError[0][i] *= (angleCorr[i] / theoryCorr[i]); //Here is where the corrections to Ameas are made.. Need to add in delta theory
 	AsymAndError[1][i] *= (angleCorr[i] / theoryCorr[i]);
-
-	if ( withPOL ) {
-	  double POL_ave=POL_ave2011;
-	  if (octet>59)  POL_ave = POL_ave2012;
-	  AsymAndError[0][i] /= ( POL_ave ); 
-	  AsymAndError[1][i] /= ( POL_ave );
-
-	}	  
       }
 
 
@@ -743,7 +767,7 @@ std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoin
 
 std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct) {
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-  //  if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
+  // if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
 
   TString filename = TString::Format("../AngleCorrections/angleCorr_%s.txt",oct<60?"2011-2012":"2012-2013");
   //std::cout << filename.Data() << std::endl;                                                                                                 
