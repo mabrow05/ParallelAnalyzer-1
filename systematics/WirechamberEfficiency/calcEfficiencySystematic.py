@@ -6,7 +6,7 @@ from math import *
 
 def readAsymm(year,eastEff,westEff):
     A = []
-    with open('%s_asymmPrimKE_E%0.3f_W%0.3f.txt'%(year,eastEff,westEff),'rb') as tsvin:
+    with open('%s_asymmErecon_E%0.2f_W%0.2f.txt'%(year,eastEff,westEff),'rb') as tsvin:
     #with open('%s_BHasymm_%sField_polW.txt'%(year,field),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
@@ -37,12 +37,12 @@ if __name__=="__main__":
     emin = 230.
     emax = 750.
     filemin = 0
-    filemax = 2000
+    filemax = 200
     
-    A_eff = readAsymm(year,0.991,0.994)
+    A_eff = readAsymm(year,1.19,1.09)
     A_eff_int = weightAsymm(A_eff,emin,emax)
 
-    A = readAsymm(year,1.,1.)
+    A = readAsymm(year,0.,0.)
     A_int = weightAsymm(A,emin,emax)
 
     writeCorrectionByBin(A_eff,A,year)

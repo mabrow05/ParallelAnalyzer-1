@@ -25,6 +25,10 @@ AngleCorrections.exe: AngleCorrections.o $(objects)
 	$(CXX) $(CXXFLAGS) -o AngleCorrections.exe AngleCorrections.o $(objects) $(LIBS)
 	@echo "Done"
 
+processedDeltaAngle.exe: processedDeltaAngle.o $(objects)
+	$(CXX) $(CXXFLAGS) -o processedDeltaAngle.exe processedDeltaAngle.o $(objects) $(LIBS)
+	@echo "Done"
+
 AsymmCalculator.exe: AsymmCalculator.o $(objects)
 	$(CXX) $(CXXFLAGS) -o AsymmCalculator.exe AsymmCalculator.o $(objects) $(LIBS)
 	@echo "Done"

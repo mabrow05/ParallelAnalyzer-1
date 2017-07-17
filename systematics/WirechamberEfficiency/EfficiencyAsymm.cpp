@@ -61,9 +61,11 @@ Double_t returnBeta(Double_t En) {
 };
 
 
-void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startFileNum, int endFileNum) {
+void EfficiencyCorr(Double_t eastThresh, Double_t westThresh, TString year, int startFileNum, int endFileNum) {
 
-  bool usePrimValues=true;
+  // nominally, the eastThresh is 1.19 and westThresh is 1.09
+
+  bool usePrimValues=false;
 
   double fidCut = 50.;
 
@@ -165,8 +167,8 @@ void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startF
       EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 	  
       
-      bool mwpcEastTrigg = (rand.Rndm()<eastEff && MWPCEnergy[0]>0.)?true:false;
-      bool mwpcWestTrigg = (rand.Rndm()<westEff && MWPCEnergy[1]>0.)?true:false;
+      bool mwpcEastTrigg = (MWPCEnergy[0]>eastThresh)?true:false;
+      bool mwpcWestTrigg = (MWPCEnergy[1]>westThresh)?true:false;
       bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
       bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
 
@@ -264,8 +266,8 @@ void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startF
       EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 
       
-      bool mwpcEastTrigg = (rand.Rndm()<eastEff && MWPCEnergy[0]>0.)?true:false;
-      bool mwpcWestTrigg = (rand.Rndm()<westEff && MWPCEnergy[1]>0.)?true:false;
+      bool mwpcEastTrigg = (MWPCEnergy[0]>eastThresh)?true:false;
+      bool mwpcWestTrigg = (MWPCEnergy[1]>westThresh)?true:false;
       bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
       bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
 
@@ -368,8 +370,8 @@ void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startF
   tot_asymmErr = (deltaR)/(TMath::Sqrt(R)*TMath::Power((TMath::Sqrt(R)+1.),2));
   std::cout << " A = " << tot_asymm << " +/- " << tot_asymmErr << std::endl;
   
-  ofstream ofile(TString::Format("%s_asymm%s_E%0.3f_W%0.3f.txt",year.Data(),
-				 usePrimValues?"PrimKE":"Erecon",eastEff,westEff).Data());
+  ofstream ofile(TString::Format("asymms/%s_asymm%s_E%0.2f_W%0.2f.txt",year.Data(),
+				 usePrimValues?"PrimKE":"Erecon",eastThresh,westThresh).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
@@ -385,7 +387,7 @@ void EfficiencyCorr(Double_t eastEff, Double_t westEff, TString year, int startF
 int main(int argc, char *argv[]) {
 
   if (argc!=6) {
-    std::cout << "usage: ./EfficiencyCorr.exe [east eff] [west eff] [year] [minFileNum] [maxFileNum]\n";
+    std::cout << "usage: ./EfficiencyCorr.exe [east thresh] [west thresh] [year] [minFileNum] [maxFileNum]\n";
     exit(0);
   }
   

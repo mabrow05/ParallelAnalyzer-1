@@ -25,6 +25,10 @@ wirechamberEff.exe: wirechamberEff.o $(objects)
 	$(CXX) $(CXXFLAGS) -o wirechamberEff.exe wirechamberEff.o $(objects) $(LIBS)
 	@echo "Done"
 
+determineWirechamberThresh.exe: determineWirechamberThresh.o $(objects)
+	$(CXX) $(CXXFLAGS) -o determineWirechamberThresh.exe determineWirechamberThresh.o $(objects) $(LIBS)
+	@echo "Done"
+
 EfficiencyAsymm.exe: EfficiencyAsymm.o $(objects)
 	$(CXX) $(CXXFLAGS) -o EfficiencyAsymm.exe EfficiencyAsymm.o $(objects) $(LIBS)
 	@echo "Done"
