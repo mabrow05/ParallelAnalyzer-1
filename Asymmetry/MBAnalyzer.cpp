@@ -36,6 +36,10 @@ TString anaChoices[10] = {"A","B","C","D","E","F","G","H","J","K"};
 std::string corr ("UnCorr");//{"UnCorr","DeltaExpOnly","DeltaTheoryOnly","AllCorr"};
                              
 
+bool withPOL = true; //Set this to true to correct DATA for the polarimetry measurement
+bool dualPol = true; //Whether or not to use both pol measurements per Albert's Rx, or use ave.
+
+
 Double_t POL_minus2011 = 0.997;
 Double_t POL_plus2011 = 0.9939;
 Double_t delta_POL2011 = (POL_plus2011-POL_minus2011)/2.;
@@ -45,8 +49,6 @@ Double_t POL_minus2012 = 0.9979;
 Double_t POL_plus2012 = 0.9952;
 Double_t delta_POL2012 = (POL_plus2012-POL_minus2012)/2.;
 Double_t POL_ave2012 = (POL_plus2012+POL_minus2012) / 2.;
-
-bool withPOL = true; //Set this to true to correct DATA for the polarimetry measurement
 
 
 std::vector <Int_t> badOct {7,9,59,60,61,62,63,64,65,66,67,91,93,101,107,121}; // This includes all
@@ -382,10 +384,34 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	  
 	  Int_t i = 0;
 	  while (infile >> binEdge >> Asym >> AsymError) {
+
+	    // Apply polarimetry correction if necessary
+	    /*if (withPOL) {
+	      if (dualPol) {
+		double P_p =  POL_plus2011; 
+		double P_m =  POL_minus2011;
+		if (octet>59) P_p = POL_plus2012; P_m = POL_minus2012;
+		
+		Double_t R = backoutRfromA(Asym);
+		Double_t delta_R = backoutDeltaRfromA(Asym,AsymError);
+		Double_t gam = (R+1.)/(R-1.);
+		Double_t delta_gam = TMath::Abs(2.*delta_R/TMath::Power(R-1.,2.));
+		
+	        Asym = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
+		AsymError = TMath::Abs((-(P_p+P_m)/(2.*P_p*P_m) + gam*(P_p+P_m)*(P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);	
+	      } else {
+		double POL_ave=POL_ave2011;
+		if (octBegin>59 && octEnd>59)  POL_ave = POL_ave2012;
+	        Asym /= ( POL_ave ); 
+		AsymError /= ( POL_ave );
+	      }
+	      }*/
+
 	    groupRawAsymByBin[0][i] = binEdge;
 	    groupRawAsymByBin[1][i] += AsymError>0. ? 1./power(AsymError,2)*Asym: 0.; //Applying Delta_exp here.. Should this affect AsymError???
 	    groupRawAsymByBin[2][i] += AsymError>0. ? 1/power(AsymError,2) : 0.;         // Since Asym is multiplied by delta, AsymError would be as well...
 	    //std::cout << binEdge << " " << groupRawAsymByBin[1][i] << " " << groupRawAsymByBin[2][i] << std::endl;
+
 	    i++;
 	  }
 	  infile.close();
@@ -411,20 +437,26 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
     
     // Apply polarimetry correction if necessary
     if (withPOL) {
-      double P_p =  POL_plus2011; 
-      double P_m =  POL_minus2011;
-      if (octBegin>59 && octEnd>59)   P_p = POL_plus2012; P_m =  POL_minus2012;
-      
-      Double_t R = backoutRfromA(groupRawAsymByBin[1][i]);
-      Double_t delta_R = backoutDeltaRfromA(groupRawAsymByBin[1][i],groupRawAsymByBin[2][i]);
-      Double_t gam = (R+1.)/(R-1.);
-      Double_t delta_gam = TMath::Abs(2.*delta_R/TMath::Power(R-1.,2.));
-
-      groupRawAsymByBin[1][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
-      groupRawAsymByBin[2][i] = TMath::Abs((-(P_p+P_m)/(2.*P_p*P_m) + gam*(P_p+P_m)*(P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);
-      
+      if (dualPol) {
+	double P_p =  POL_plus2011; 
+	double P_m =  POL_minus2011;
+	if (octBegin>59) P_p = POL_plus2012; P_m = POL_minus2012;
+	
+	Double_t R = backoutRfromA(groupRawAsymByBin[1][i]);
+	Double_t delta_R = backoutDeltaRfromA(groupRawAsymByBin[1][i],groupRawAsymByBin[2][i]);
+	Double_t gam = (R+1.)/(R-1.);
+	Double_t delta_gam = TMath::Abs(2.*delta_R/TMath::Power(R-1.,2.));
+	
+	groupRawAsymByBin[1][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
+	groupRawAsymByBin[2][i] = TMath::Abs((-(P_p+P_m)/(2.*P_p*P_m) + gam*(P_p+P_m)*(P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);	
+      } else {
+	double POL_ave=POL_ave2011;
+	if (octBegin>59)  POL_ave = POL_ave2012;
+	groupRawAsymByBin[1][i] /= ( POL_ave ); 
+	groupRawAsymByBin[2][i] /= ( POL_ave );
+      }
     }
-    
+      
     //Apply systematic corrections
     groupRawAsymByBin[1][i] = groupRawAsymByBin[1][i]*angleCorr[i]*bsCorr[i]/theoryCorr[i];
     groupRawAsymByBin[2][i] = groupRawAsymByBin[2][i]*angleCorr[i]*bsCorr[i]/theoryCorr[i];
@@ -711,18 +743,25 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       for (UInt_t i=0 ; i<AsymAndError[0].size() ; i++) {
 	
 	if (withPOL) {
-	  Double_t P_p =  POL_plus2011; 
-	  Double_t P_m =  POL_minus2011;
-	  if (octet>59)   P_p = POL_plus2012; P_m =  POL_minus2012;
-	  Double_t R = backoutRfromA(RawAsymAndError[0][i]);
-	  Double_t delta_R = backoutDeltaRfromA(RawAsymAndError[0][i],RawAsymAndError[1][i]);
-	  Double_t gam = (R+1.)/(R-1.);
-	  Double_t delta_gam = TMath::Abs(2.*delta_R/TMath::Power((R-1.),2.));
-
-	  std::cout << enBinMedian[i] << "\t" << R << "\t" << delta_R << "\t"<< gam << "\t"<< delta_gam << "\n";  
-	  
-	  RawAsymAndError[0][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
-	  RawAsymAndError[1][i] = TMath::Abs( (-(P_p+P_m)/(2.*P_p*P_m) + gam*(P_p+P_m)*(P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m)) )*delta_gam);	  
+	  if (dualPol) {
+	    Double_t P_p =  POL_plus2011; 
+	    Double_t P_m =  POL_minus2011;
+	    if (octet>59)   P_p = POL_plus2012; P_m =  POL_minus2012;
+	    Double_t R = backoutRfromA(RawAsymAndError[0][i]);
+	    Double_t delta_R = backoutDeltaRfromA(RawAsymAndError[0][i],RawAsymAndError[1][i]);
+	    Double_t gam = (R+1.)/(R-1.);
+	    Double_t delta_gam = TMath::Abs(2.*delta_R/TMath::Power((R-1.),2.));
+	    
+	    //std::cout << enBinMedian[i] << "\t" << R << "\t" << delta_R << "\t"<< gam << "\t"<< delta_gam << "\n";  
+	    
+	    RawAsymAndError[0][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
+	    RawAsymAndError[1][i] = TMath::Abs( (-(P_p+P_m)/(2.*P_p*P_m) + gam*(P_p+P_m)*(P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m)) )*delta_gam);	  
+	  } else {
+	    double POL_ave=POL_ave2011;
+	    if (octet>59)  POL_ave = POL_ave2012;
+	    RawAsymAndError[0][i] /= ( POL_ave ); 
+	    RawAsymAndError[1][i] /= ( POL_ave );
+	  }
 	}
 	
 	Double_t Beta = returnBeta(enBinMedian[i]);
