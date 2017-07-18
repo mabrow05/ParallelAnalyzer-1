@@ -66,27 +66,27 @@ if __name__=="__main__":
                 filemax = filemin+numfiles-1
                 
                 A_dip = readAsymm(year,"dip",filemin,filemax)
-                #A_dip_int = weightAsymm(A_dip,emin,emax)
+                A_dip_int = weightAsymm(A_dip,emin,emax)
                 A = readAsymm(year,"flat",filemin,filemax)
-                #A_int = weightAsymm(A,emin,emax)
+                A_int = weightAsymm(A,emin,emax)
                 
-                writeCorrectionByBin(A_dip,A,year)
+                #writeCorrectionByBin(A_dip,A,year)
                 
-                os.system("./AsymmCalculator.exe C %i %i %f %f UnCorr false"%(octmin,octmax,emin,emax))
-                uncorrAsymm=0.
-                with open("asymm_hold.txt") as asym:
-                    for line in asym:
-                        l=line.split()
-                        uncorrAsymm = float(l[1])
+                #os.system("./AsymmCalculator.exe C %i %i %f %f UnCorr false"%(octmin,octmax,emin,emax))
+                #uncorrAsymm=0.
+                #with open("asymm_hold.txt") as asym:
+                #    for line in asym:
+                #        l=line.split()
+                #        uncorrAsymm = float(l[1])
 
-                os.system("./AsymmCalculator.exe C %i %i %f %f DeltaFieldDip false"%(octmin,octmax,emin,emax))
-                corrAsymm=0.
-                with open("asymm_hold.txt") as asym:
-                    for line in asym:
-                        l=line.split()
-                        corrAsymm = float(l[1])
+                #os.system("./AsymmCalculator.exe C %i %i %f %f DeltaFieldDip false"%(octmin,octmax,emin,emax))
+                #corrAsymm=0.
+                #with open("asymm_hold.txt") as asym:
+                #    for line in asym:
+                #        l=line.split()
+                #        corrAsymm = float(l[1])
 
-                fout.write("%0.10f\n"%(corrAsymm/uncorrAsymm-1.))
+                fout.write("%0.10f\n"%(A_int[0]/A_dip_int[0]-1.))
 
 
     
