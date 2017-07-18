@@ -161,7 +161,9 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
       if (rE>fidCut || rW>fidCut || rPrim>fidCut) continue;
 
-      double weight = 1.+0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
+      
+
+      double weight = 1.+0.1184*returnBeta(primKE)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
       int realside = cosTheta>0.?1:0;
       int windowSide = (keInSD[5]>keInSD[15])?0:1;
@@ -169,11 +171,14 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       int type=-1;
       bool trigger = false;
 
-      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
-      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
+      // Here is a costheta cut to check for consistency
+      //if (TMath::Abs(cosTheta)<TMath::Cos(45.*TMath::Pi()/180.)) continue;
 
-      bool scintEastTrigg = (EdepQ[0]>0.) ;// && scintTrigg.triggerE(&EdepQ[0],rand.Rndm()));
-      bool scintWestTrigg = (EdepQ[1]>0.) ;// && scintTrigg.triggerW(&EdepQ[1],rand.Rndm()));
+      //EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      //EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
+
+      bool scintEastTrigg = (EdepQ[0]>0.);// && scintTrigg.triggerE(&EdepQ[0],rand.Rndm()));
+      bool scintWestTrigg = (EdepQ[1]>0.);// && scintTrigg.triggerW(&EdepQ[1],rand.Rndm()));
 
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && MWPCEnergy[0]>0. && MWPCEnergy[1]==0. ) {
@@ -270,7 +275,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
       if (rE>fidCut || rW>fidCut || rPrim>fidCut) continue;
 
-      double weight = 1-0.1184*sqrt(primKE*primKE+2.*primKE*510.998928)/(primKE+510.998928)*TMath::Cos(primTheta);
+      double weight = 1-0.1184*returnBeta(primKE)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
       int realside = cosTheta>0.?1:0;
       int windowSide = (keInSD[5]>keInSD[15])?0:1;
@@ -278,8 +283,11 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
       int type=-1;
       bool trigger = false;
 
-      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
-      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
+      // Here is a costheta cut to check for consistency
+      //if (TMath::Abs(cosTheta)<TMath::Cos(45.*TMath::Pi()/180.)) continue;
+
+      //EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      //EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 
       bool scintEastTrigg = (EdepQ[0]>0.);// && scintTrigg.triggerE(&EdepQ[0],rand.Rndm()));
       bool scintWestTrigg = (EdepQ[1]>0.);// && scintTrigg.triggerW(&EdepQ[1],rand.Rndm()));
