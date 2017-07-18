@@ -1,12 +1,12 @@
-#!/usr/bin/python
+F#!/usr/bin/python
 import sys
 import csv
 import os
 from math import *
 
-def readAsymm(year,eastEff,westEff):
+def readAsymm(year,eastEff,westEff,fmin,fmax):
     A = []
-    with open('%s_asymmErecon_E%0.2f_W%0.2f.txt'%(year,eastEff,westEff),'rb') as tsvin:
+    with open('asymms/%s_asymmErecon_E%0.2f_W%0.2f_files_%i-%i.txt'%(year,eastEff,westEff,fmin,fmax),'rb') as tsvin:
     #with open('%s_BHasymm_%sField_polW.txt'%(year,field),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
@@ -34,22 +34,47 @@ def writeCorrectionByBin(uncorr,corr,year):
     
 if __name__=="__main__":
     year = "2011-2012"
-    emin = 230.
-    emax = 750.
-    filemin = 0
-    filemax = 200
+    emin = 220.
+    emax = 670.
     
-    A_eff = readAsymm(year,1.19,1.09)
-    A_eff_int = weightAsymm(A_eff,emin,emax)
 
-    A = readAsymm(year,0.,0.)
-    A_int = weightAsymm(A,emin,emax)
+    #filemin = 0
+    #filemax = 200
+    
+    #A_eff = readAsymm(year,1.19,1.09)
+    #A_eff_int = weightAsymm(A_eff,emin,emax)
 
-    writeCorrectionByBin(A_eff,A,year)
+    #A = readAsymm(year,0.,0.)
+    #A_int = weightAsymm(A,emin,emax)
+
+    #writeCorrectionByBin(A_eff,A,year)
     
-    print("A = %f +/- %f"%(A_int[0],A_int[1]))
-    print("A_eff = %f +/- %f"%(A_eff_int[0],A_eff_int[1]))
-    print("DeltaFieldDip (DeltaA/A) = %f"%(A_int[0]/A_eff_int[0] - 1))
-    print("UnCorrelated err = %f"%(fabs(A_int[0]/A_eff_int[0])*
-                      sqrt( (A_int[1]/A_int[0])**2 +(A_eff_int[1]/A_eff_int[0])**2 ) ) )
+    #print("A = %f +/- %f"%(A_int[0],A_int[1]))
+    #print("A_eff = %f +/- %f"%(A_eff_int[0],A_eff_int[1]))
+    #print("DeltaFieldDip (DeltaA/A) = %f"%(A_int[0]/A_eff_int[0] - 1))
+    #print("UnCorrelated err = %f"%(fabs(A_int[0]/A_eff_int[0])*
+     #                 sqrt( (A_int[1]/A_int[0])**2 +(A_eff_int[1]/A_eff_int[0])**2 ) ) )
     
+
+
+    if 1:
+
+        totalfiles = 2000
+        numruns = 50
+        numfiles = totalfiles/numruns
+
+    
+        with open("EfficiencyDistr_%s_%0.0f-%0.0f.txt"%(year,emin,emax),"w") as fout:
+            for i in range(0,numruns):
+                
+                filemin = i*numfiles
+                filemax = filemin+numfiles-1
+                
+                A_eff = readAsymm(year,1.19,1.09,filemin,filemax)
+                A_eff_int = weightAsymm(A_dip,emin,emax)
+                A = readAsymm(year,0.2,0.2,filemin,filemax)
+                A_int = weightAsymm(A,emin,emax)
+                
+                #writeCorrectionByBin(A_dip,A,year)
+
+                fout.write("%0.10f\n"%(A_int[0]/A_eff_int[0]-1.))

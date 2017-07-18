@@ -67,7 +67,7 @@ std::vector < std::vector <Double_t> >  LoadOctetSystematics(Int_t octet, std::s
 //Returns a vector containing all the theory corrections to A0 for a particular bin
 std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint);
 
-std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t octet);
+std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t octet,std::string anaCh);
 
 // Collects all the asymmetries, bin-by-bin, and produces a final asymmetry plot, both A_SR and 2*A/Beta, for whatever grouping provided ("Octet", "Quartet", "Pair"). Also makes a plot of the 
 // integrated asymmetry vs octet/quartet/pair number
@@ -300,7 +300,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
   
   //if (groupType==std::string("Octet")) deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
-  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octBegin);
+  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octBegin,anaChoice);
 
   //Do final calculations of the rates in each bin and their associated errors
   for (unsigned int i=0; i<groupRawAsymByBin[1].size(); i++) {
@@ -596,7 +596,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 
       //Loading theory systematics... 
       std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
-      std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet);
+      std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet,anaChoice);
       
       for (UInt_t i=0 ; i<AsymAndError[0].size() ; i++) {
 
@@ -760,11 +760,11 @@ std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoin
 
 };
 
-std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct) {
+std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct, std::string anaCh) {
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-  if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
+  //if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
 
-  TString filename = TString::Format("../AngleCorrections/angleCorr_%s.txt",oct<60?"2011-2012":"2012-2013");
+  TString filename = TString::Format("../AngleCorrections/%s_DeltaAngle_anaCh%s.txt",oct<60?"2011-2012":"2012-2013",anaCh.c_str());
   //std::cout << filename.Data() << std::endl;                                                                                                 
 
   std::ifstream infile(filename.Data());

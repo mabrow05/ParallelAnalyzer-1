@@ -163,14 +163,14 @@ void EfficiencyCorr(Double_t eastThresh, Double_t westThresh, TString year, int 
       int type=-1;
       bool trigger = false;
 
-      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
-      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
+      //      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      //EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
 	  
       
       bool mwpcEastTrigg = (MWPCEnergy[0]>eastThresh)?true:false;
       bool mwpcWestTrigg = (MWPCEnergy[1]>westThresh)?true:false;
-      bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
-      bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+      bool scintEastTrigg = EdepQ[0]>0.;// && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
+      bool scintWestTrigg = EdepQ[1]>0.;// && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
 
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {
@@ -262,14 +262,15 @@ void EfficiencyCorr(Double_t eastThresh, Double_t westThresh, TString year, int 
       int type=-1;
       bool trigger = false;
      
-      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
-      EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
-
+      //      EdepQ[0] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[0]))));
+      //EdepQ[1] = (1./(alpha*g_d*g_rest)) * (rand.Poisson(g_rest*rand.Poisson(g_d*rand.Poisson(alpha*EdepQ[1]))));
+	  
       
       bool mwpcEastTrigg = (MWPCEnergy[0]>eastThresh)?true:false;
       bool mwpcWestTrigg = (MWPCEnergy[1]>westThresh)?true:false;
-      bool scintEastTrigg = EdepQ[0]>0. && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
-      bool scintWestTrigg = EdepQ[1]>0. && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+      bool scintEastTrigg = EdepQ[0]>0.;// && scintTrigg.triggerE(&EdepQ[0],rand.Rndm());
+      bool scintWestTrigg = EdepQ[1]>0.;// && scintTrigg.triggerW(&EdepQ[1],rand.Rndm());
+
 
       // Type 0
       if ( scintEastTrigg && !scintWestTrigg && mwpcEastTrigg && !mwpcWestTrigg ) {
@@ -370,8 +371,8 @@ void EfficiencyCorr(Double_t eastThresh, Double_t westThresh, TString year, int 
   tot_asymmErr = (deltaR)/(TMath::Sqrt(R)*TMath::Power((TMath::Sqrt(R)+1.),2));
   std::cout << " A = " << tot_asymm << " +/- " << tot_asymmErr << std::endl;
   
-  ofstream ofile(TString::Format("asymms/%s_asymm%s_E%0.2f_W%0.2f.txt",year.Data(),
-				 usePrimValues?"PrimKE":"Erecon",eastThresh,westThresh).Data());
+  ofstream ofile(TString::Format("asymms/%s_asymm%s_E%0.2f_W%0.2f_files_%i-%i.txt",year.Data(),
+				 usePrimValues?"PrimKE":"Erecon",eastThresh,westThresh,startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {

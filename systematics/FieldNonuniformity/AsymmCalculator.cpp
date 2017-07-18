@@ -176,7 +176,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	if (infile.is_open()) {	  
 	  
 	  std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
-	  if (groupType=="Octet") deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);	  
+	  //if (groupType=="Octet") deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);	  
 	  std::vector <Double_t> fieldCorr = LoadFieldDipCorrections(enBinMedian,octet);
 
 	  Int_t i = 0;
