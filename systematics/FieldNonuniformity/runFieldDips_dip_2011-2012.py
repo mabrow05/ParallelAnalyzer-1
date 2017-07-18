@@ -5,7 +5,7 @@ import os
 from math import *
 
 totfiles = 10000
-numruns = 100
+numruns = 50
 numfiles = totfiles/numruns
 
 field = "dip"
@@ -22,5 +22,5 @@ with open("%s_%s_jobs.txt"%(year,field),"w") as jobfile:
         filestart+=numfiles
         filestop+=numfiles
 
-os.system("parallel -j3 < %s_%s_jobs.txt"%(year,field))
+os.system("parallel -j4 < %s_%s_jobs.txt"%(year,field))
 
