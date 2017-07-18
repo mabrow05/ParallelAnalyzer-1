@@ -1,4 +1,4 @@
-F#!/usr/bin/python
+#!/usr/bin/python
 import sys
 import csv
 import os
@@ -70,8 +70,8 @@ if __name__=="__main__":
                 filemin = i*numfiles
                 filemax = filemin+numfiles-1
                 
-                A_eff = readAsymm(year,1.19,1.09,filemin,filemax)
-                A_eff_int = weightAsymm(A_dip,emin,emax)
+                A_eff = readAsymm(year,1.04,1.04,filemin,filemax)
+                A_eff_int = weightAsymm(A_eff,emin,emax)
                 A = readAsymm(year,0.2,0.2,filemin,filemax)
                 A_int = weightAsymm(A,emin,emax)
                 
