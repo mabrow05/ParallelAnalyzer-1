@@ -370,7 +370,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   std::cout << " A = " << asymm[20] << " +/- " << asymmErr[20] << std::endl;
   
-  ofstream ofile(TString::Format("%s_%sasymmErecon_%sField_files_%i-%i.txt",year.Data(),rawAsymm?"RAW":"",field.Data(),startFileNum,endFileNum).Data());
+  ofstream ofile(TString::Format("asymms/%s_%sasymmErecon_%sField_files_%i-%i.txt",year.Data(),rawAsymm?"RAW":"",field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
@@ -378,7 +378,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   ofile.close();
 
-  ofile.open(TString::Format("%s_thetaBinsErecon_%sField_%i-%i_East.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofile.open(TString::Format("asymms/%s_thetaBinsErecon_%sField_%i-%i_East.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
   ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
   for (UInt_t b=0;b<eastType0.size();++b) {
@@ -389,7 +389,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   ofile.close();
  
-  ofile.open(TString::Format("%s_thetaBinsErecon_%sField_%i-%i_West.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
+  ofile.open(TString::Format("asymms/%s_thetaBinsErecon_%sField_%i-%i_West.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
   ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
   for (UInt_t b=0;b<westType0.size();++b) {

@@ -17,7 +17,7 @@ filestop=numfiles-1
 
 with open("%s_%s_jobs.txt"%(year,field),"w") as jobfile:
     for i in range(0,int(numruns)):
-        jobfile.write("./FieldDipSystematic.exe %s %s %i %i > %s_%s_log.txt\n"
+        jobfile.write("./FieldDipSystematic_Erecon.exe %s %s %i %i > %s_%s_log.txt\n"
                       %(field,year,filestart,filestop,year,field))
         filestart+=numfiles
         filestop+=numfiles
