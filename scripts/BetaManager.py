@@ -560,7 +560,7 @@ if __name__ == "__main__":
 
     ####### Complete list of processing beta runs assuming calibration and position maps are in place
     if 1: 
-        octet_range = [103,121]# [67,74][75,82][83,90][91,98][99,106][107,114][115,121]
+        octet_range = [16,16]# [67,74][75,82][83,90][91,98][99,106][107,114][115,121]
         beta = BetaReplayManager()
         for octet in range(octet_range[0],octet_range[1]+1,1):
             #beta.findPedestals(octet)
@@ -570,11 +570,11 @@ if __name__ == "__main__":
             #beta.runGainLED(octet)
             #beta.runReplayPass2(octet)
             #beta.findTriggerFunctions(octet)
-            beta.runReverseCalibration(octet)
+            #beta.runReverseCalibration(octet)
             #beta.runReplayPass3(octet,applyEndpointGain=False)
             #beta.runEndpointGain(octet)
-            beta.runReplayPass3(octet,applyEndpointGain=True)
-            beta.runWirechamberCal(octet)
+            #beta.runReplayPass3(octet,applyEndpointGain=True)
+            #beta.runWirechamberCal(octet)
             beta.runReplayPass3(octet,applyEndpointGain=True)
             #beta.runRootfileTranslator(octet)
             #beta.removeDepolRunFiles(octet)
