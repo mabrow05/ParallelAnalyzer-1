@@ -9,8 +9,15 @@
 
 int main() {
 
-  Double_t eastEff = 0.998;
-  Double_t westEff = 0.998;
+  /*East trigg = 25.7736 +/- 0.0356907
+    East no trigg = 0.0427383 +/- 0.00702683
+    East efficiency = 0.998345 +/- 0.000271735
+    West trigg = 25.2393 +/- 0.0353165
+    West no trigg = 0.0360786 +/- 0.00640295
+    West efficiency = 0.998573 +/- 0.000252966
+  */
+  Double_t eastEff = 0.9983;
+  Double_t westEff = 0.9986;
 
   std::vector <int> runs {18144,18147,18149,18152,18156,18159,18161,18164};//{19899,19900,19902,19904,19924,19925,19927,19929};//
 

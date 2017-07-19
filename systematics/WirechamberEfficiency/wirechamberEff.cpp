@@ -9,8 +9,8 @@
 
 int main() {
 
-  Double_t enlow = 303.;
-  Double_t enhigh = 423.;
+  Double_t enlow = 323.;
+  Double_t enhigh = 403.;
 
   std::vector <int> runs {19900,19902,19904,19924,19925,19927,19929};
   //{19899,19900,19902,19904,19924,19925,19927,19929}; // Sn
