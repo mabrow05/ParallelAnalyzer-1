@@ -11,10 +11,10 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
-std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year) {
+std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../OldMCCorrection/deltaBS%s_anaChC_%s.txt",corr.Data(),year.Data()));
+  std::ifstream infile(TString::Format("../OldMCCorrection/deltaBS%s_anaCh%s_%s.txt",corr.Data(),anaCh.Data(),year.Data()));
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
@@ -40,10 +40,10 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year) {
   return corrs;
 };
 
-std::vector <std::vector<Double_t> > readAngleCorr(TString year) {
+std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../AngleCorrections/%s_DeltaAngle_anaChC.txt",year.Data()));
+  std::ifstream infile(TString::Format("../AngleCorrections/%s_DeltaAngle_anaCh%s.txt",year.Data(),anaCh.Data()));
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
@@ -69,7 +69,7 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year) {
   return corrs;
 };
 
-void EnergyDependentCorrections() {
+void EnergyDependentCorrections(TString anaCh) {
 
   gStyle->SetOptStat(0);
   gStyle->SetTitleSize(0.07,"t");
@@ -103,20 +103,20 @@ void EnergyDependentCorrections() {
   int startPoint=1;
   
   TString year = "2011-2012";
-  std::vector<std::vector<Double_t> > bs0_2011 = readBSCorr("0",year);
-  std::vector<std::vector<Double_t> > bs1_2011 = readBSCorr("1",year);
-  std::vector<std::vector<Double_t> > bs2_2011 = readBSCorr("2",year);
-  std::vector<std::vector<Double_t> > bs3_2011 = readBSCorr("3",year);
-  std::vector<std::vector<Double_t> > bsALL_2011 = readBSCorr("ALL",year);
-  std::vector<std::vector<Double_t> > cosTheta_2011 = readAngleCorr(year);
+  std::vector<std::vector<Double_t> > bs0_2011 = readBSCorr("0",year,anaCh);
+  std::vector<std::vector<Double_t> > bs1_2011 = readBSCorr("1",year,anaCh);
+  std::vector<std::vector<Double_t> > bs2_2011 = readBSCorr("2",year,anaCh);
+  std::vector<std::vector<Double_t> > bs3_2011 = readBSCorr("3",year,anaCh);
+  std::vector<std::vector<Double_t> > bsALL_2011 = readBSCorr("ALL",year,anaCh);
+  std::vector<std::vector<Double_t> > cosTheta_2011 = readAngleCorr(year,anaCh);
 
   year = "2012-2013";
-  std::vector<std::vector<Double_t> > bs0_2012 = readBSCorr("0",year);
-  std::vector<std::vector<Double_t> > bs1_2012 = readBSCorr("1",year);
-  std::vector<std::vector<Double_t> > bs2_2012 = readBSCorr("2",year);
-  std::vector<std::vector<Double_t> > bs3_2012 = readBSCorr("3",year);
-  std::vector<std::vector<Double_t> > bsALL_2012 = readBSCorr("ALL",year);
-  std::vector<std::vector<Double_t> > cosTheta_2012 = readAngleCorr(year);
+  std::vector<std::vector<Double_t> > bs0_2012 = readBSCorr("0",year,anaCh);
+  std::vector<std::vector<Double_t> > bs1_2012 = readBSCorr("1",year,anaCh);
+  std::vector<std::vector<Double_t> > bs2_2012 = readBSCorr("2",year,anaCh);
+  std::vector<std::vector<Double_t> > bs3_2012 = readBSCorr("3",year,anaCh);
+  std::vector<std::vector<Double_t> > bsALL_2012 = readBSCorr("ALL",year,anaCh);
+  std::vector<std::vector<Double_t> > cosTheta_2012 = readAngleCorr(year,anaCh);
 
   std::vector<std::vector<Double_t> > totalCorr_2011(3,std::vector<Double_t>(0));
   std::vector<std::vector<Double_t> > totalCorr_2012(3,std::vector<Double_t>(0));
@@ -413,7 +413,7 @@ void EnergyDependentCorrections() {
   legTotalCorr->Draw("SAME");
   
 
-  TString pdffile = "MC_Corrections.pdf";
+  TString pdffile = TString::Format("MC_Corrections_anaCh%s.pdf",anaCh.Data());
 
   c0->Print(TString::Format("%s(",pdffile.Data()));
   c1->Print(pdffile);
