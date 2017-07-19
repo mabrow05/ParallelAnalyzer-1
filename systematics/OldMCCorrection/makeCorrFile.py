@@ -3,7 +3,7 @@ import sys
 from math import *
 
 
-anaCh = "C"
+anaCh = "D"
 
 #load uncorrected asymm by bin
 enlow = []

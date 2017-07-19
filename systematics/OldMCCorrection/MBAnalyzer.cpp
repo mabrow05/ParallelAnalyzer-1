@@ -300,7 +300,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
   
   //if (groupType==std::string("Octet")) deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
-  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octBegin,anaChoice);
+  std::vector <Double_t> angleCorr(enBinMedian.size(),1.);
+  angleCorr = LoadAngleCorrections(enBinMedian,octBegin,anaChoice);
 
   //Do final calculations of the rates in each bin and their associated errors
   for (unsigned int i=0; i<groupRawAsymByBin[1].size(); i++) {
