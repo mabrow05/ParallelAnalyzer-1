@@ -9,8 +9,8 @@ numruns = 50
 numfiles = totfiles/numruns
 
 year = "2011-2012"
-eastThresh = 1.043#0.2#
-westThresh = 1.043#0.2#
+eastThresh = 0.999#0.2#
+westThresh = 0.2#0.2#
 
 jobfile = None
 filestart=0
@@ -23,5 +23,5 @@ with open("%s_E%0.2f_W%0.2f_jobs.txt"%(year,eastThresh,westThresh),"w") as jobfi
         filestart+=numfiles
         filestop+=numfiles
 
-os.system("parallel -P 3 < %s_E%0.2f_W%0.2f_jobs.txt"%(year,eastThresh,westThresh))
+os.system("parallel -P 6 < %s_E%0.2f_W%0.2f_jobs.txt"%(year,eastThresh,westThresh))
 

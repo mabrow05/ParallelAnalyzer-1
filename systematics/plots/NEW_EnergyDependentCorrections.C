@@ -11,7 +11,7 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
-std::vector <std::vector<Double_t>> readBSCorr(TString corr,TString year) {
+std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year) {
 
   std::vector <std::vector<Double_t> > corrs;
   std::ifstream infile(TString::Format("../OldMCCorrection/deltaBS%s_anaChC_%s.txt",corr.Data(),year.Data()));
@@ -40,7 +40,7 @@ std::vector <std::vector<Double_t>> readBSCorr(TString corr,TString year) {
   return corrs;
 };
 
-std::vector <std::vector<Double_t>> readAngleCorr(TString year) {
+std::vector <std::vector<Double_t> > readAngleCorr(TString year) {
 
   std::vector <std::vector<Double_t> > corrs;
   std::ifstream infile(TString::Format("../AngleCorrections/%s_DeltaAngle_anaChC.txt",year.Data()));

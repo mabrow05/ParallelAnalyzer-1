@@ -9,8 +9,8 @@
 
 int main() {
 
-  Double_t eastEff = 0.998;
-  Double_t westEff = 0.998;
+  Double_t eastEff = 0.9988;
+  Double_t westEff = 1.;
 
   std::vector <int> runs {19899,19900,19902,19904,19924,19925,19927,19929};
 
