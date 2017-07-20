@@ -29,7 +29,9 @@ public:
   std::string getCurrentAnaChoice() {return analysisChoice;}
   std::vector < std::vector<double> > returnBGsubtractedRate(std::string runType); // returns A2, A5, etc below
   std::vector < std::vector<double> > returnBGsubtractedRateError(std::string runType);
-  
+
+  std::vector < std::vector<double> > returnBGsubtractedRateStrip(std::string runType, int strip); // returns A2, A5, etc below
+  std::vector < std::vector<double> > returnBGsubtractedRateErrorStrip(std::string runType, int strip);  
   std::vector < std::vector<double> > returnBGsubtractedRateQuad(std::string runType, int quad); // returns A2, A5, etc below
   std::vector < std::vector<double> > returnBGsubtractedRateErrorQuad(std::string runType, int quad);
   std::vector < std::vector<double> > returnBGsubtractedRateRad(std::string runType, int rad); // returns A2, A5, etc below
@@ -66,6 +68,10 @@ protected:
   // The following vectors sum over the appropriate event types for the analysisChoice [side][bin]
   std::vector < std::vector <double> > A2, A5, A7, A10, B2, B5, B7, B10; //BG subtr rates for each beta run 
   std::vector < std::vector <double> > A2err, A5err, A7err, A10err, B2err, B5err, B7err, B10err; //BG subtr rates for each beta run
+
+  // The following vectors sum over the appropriate event types for the analysisChoice [side][bin]
+  std::vector < std::vector < std::vector <double> > > A2Strip, A5Strip, A7Strip, A10Strip, B2Strip, B5Strip, B7Strip, B10Strip; //BG subtr rates for each beta run 
+  std::vector < std::vector < std::vector <double> > > A2errStrip, A5errStrip, A7errStrip, A10errStrip, B2errStrip, B5errStrip, B7errStrip, B10errStrip; //BG subtr rates for each beta run
 
   // The following vectors sum over the appropriate event types for the analysisChoice [side][bin]
   std::vector < std::vector < std::vector <double> > > A2Quad, A5Quad, A7Quad, A10Quad, B2Quad, B5Quad, B7Quad, B10Quad; //BG subtr rates for each beta run 
@@ -106,6 +112,9 @@ private:
 
   std::vector <double> asymmetry; //Raw asymmetry in bins
   std::vector <double> asymmetryError; //Raw Asymmetry error in bins
+
+  std::vector < std::vector<double> > asymmetryStrip; //Raw asymmetry in bins
+  std::vector < std::vector<double> > asymmetryErrorStrip; //Raw Asymmetry error in bins
 
   std::vector < std::vector<double> > asymmetryQuad; //Raw asymmetry in bins
   std::vector < std::vector<double> > asymmetryErrorQuad; //Raw Asymmetry error in bins

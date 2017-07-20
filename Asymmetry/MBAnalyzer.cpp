@@ -74,8 +74,8 @@ std::vector < std::vector <Double_t> >  LoadOctetSystematics(Int_t octet, std::s
 //Returns a vector containing all the theory corrections to A0 for a particular bin
 std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint);
 
-std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t octet);
-std::vector <Double_t> LoadBackscCorrections(std::vector <Double_t> enBinMidpoint,Int_t octet);
+std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t octet,std::string anaCh);
+std::vector <Double_t> LoadBackscCorrections(std::vector <Double_t> enBinMidpoint,Int_t octet,std::string anaCh);
 
 
 // Collects all the asymmetries, bin-by-bin, and produces a final asymmetry plot, both A_SR and 2*A/Beta, for whatever grouping provided ("Octet", "Quartet", "Pair"). Also makes a plot of the 
@@ -86,6 +86,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 // key==0 : Normal asymmetries
 // key>=10 : Quadrant asymmtries, where 10 is quadrant0, 11 is quadrant 1, etc
 // key>=20 : Radial Asymmetries, where 20 is radial cut 0, etc (in 10 mm incremements)
+// key>=30 : Strip Asymmetries, where 30 is center strip, 31 is elsewhere(Strip is +/- 12 mm
 
 
 
@@ -194,7 +195,7 @@ int main(int argc, char* argv[])
       }*/
     
     // Loop over keys
-    /*int keys[] {0,10,11,12,13,20,21,22,23,24,25};
+    /*int keys[] {0,10,11,12,13,20,21,22,23,24,25,30,31};
 
     for ( auto& k : keys ) {
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);
@@ -356,7 +357,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 			      ("Pair_"+quartetName[q]+itos(p)+"_"):"")+itos((int)Elow)+
 			     "-"+itos((int)Ehigh) + 
 			     ( key/10==1 ? "_Quadrant"+itos(key-10) : 
-			       ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) + ".dat");
+			       ( key/10==2 ? "_RadialRing"+itos(key-20) :
+				 ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) + ".dat");
 	//std::cout << path << std::endl;
 
 	std::ifstream infile(path.c_str());  
@@ -376,8 +378,13 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	  AsymByGroup[2].push_back(AsymError);
 	  infile.close();
 	
-	  path = basePath + "Octet_" + itos(octet) + "/" + groupType + "Asymmetry/" + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + anaChoice  +
-	    (isQuartet?("_Quartet_"+quartetName[q]):isPair?("_Pair_"+quartetName[q]+itos(p)):"")+( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) + ".dat"; 
+	  path = ( basePath + "Octet_" + itos(octet) + "/" + groupType + "Asymmetry/" +
+		   (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + anaChoice  +
+		   (isQuartet?("_Quartet_"+quartetName[q]):isPair?("_Pair_"+quartetName[q]+itos(p)):"")+
+		   ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+		     ( key/10==2 ? "_RadialRing"+itos(key-20) :
+		       ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) + ".dat" );
+	  
 	  infile.open(path.c_str());
 	  //std::cout << path << std::endl;
 	  
@@ -427,8 +434,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   //std::vector < std::vector <Double_t> > deltaSys(enBinMedian.size(),std::vector<Double_t>(2,1.));
   
   //if (groupType==std::string("Octet")) deltaSys = LoadOctetSystematics(octet,anaChoice,enBinMedian);
-  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octBegin);
-  std::vector <Double_t> bsCorr = LoadBackscCorrections(enBinMedian,octBegin);
+  std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octBegin,anaChoice);
+  std::vector <Double_t> bsCorr = LoadBackscCorrections(enBinMedian,octBegin,anaChoice);
 
   //Do final calculations of the rates in each bin and their associated errors
   for (unsigned int i=0; i<groupRawAsymByBin[1].size(); i++) {
@@ -440,7 +447,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
       if (dualPol) {
 	double P_p =  POL_plus2011; 
 	double P_m =  POL_minus2011;
-	if (octBegin>59) P_p = POL_plus2012; P_m = POL_minus2012;
+	if (octBegin>59) {P_p = POL_plus2012; P_m = POL_minus2012;}
 	
 	Double_t R = backoutRfromA(groupRawAsymByBin[1][i]);
 	Double_t delta_R = backoutDeltaRfromA(groupRawAsymByBin[1][i],groupRawAsymByBin[2][i]);
@@ -469,8 +476,13 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   }
 
   // Plotting stuff
-  std::string outFile = basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"") + corr + "_" + (withPOL?"withPOL_":"") + groupType +"Asymmetries_AnaCh" + anaChoice 
-    + std::string("_") + itos((int)Elow) + std::string("-") + itos((int)Ehigh) + "_Octets_" +itos(octBegin)+"-"+itos(octEnd)+( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) );
+  std::string outFile = ( basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"") + corr + "_" +
+			  (withPOL?"withPOL_":"") + groupType +"Asymmetries_AnaCh" + anaChoice 
+			  + std::string("_") + itos((int)Elow) + std::string("-") +
+			  itos((int)Ehigh) + "_Octets_" +itos(octBegin)+"-"+itos(octEnd)+
+			  ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+			    ( key/10==2 ? "_RadialRing"+itos(key-20) :
+			      ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) );
   
   std::string pdfFile = outFile+std::string(".pdf");
   std::string txtFile = outFile+std::string(".txt");
@@ -638,8 +650,12 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   asymFile.close();
 
   //Write out corrected (but energy dependent) bin-by-bin asymmetry for use in calculating effect from doing corrections
-  outFile = basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"") + corr + "_" + (withPOL?"withPOL_":"") + groupType +"Asymmetries_AnaCh" + anaChoice 
-    + std::string("_")  + "Octets_" +itos(octBegin)+"-"+itos(octEnd)+( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) ;
+  outFile = ( basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"") + corr + "_" + (withPOL?"withPOL_":"") + groupType +"Asymmetries_AnaCh" + anaChoice 
+	      + std::string("_")  + "Octets_" +itos(octBegin)+"-"+itos(octEnd)+
+	      ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+			       ( key/10==2 ? "_RadialRing"+itos(key-20) :
+				 ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) );
+  
   txtFile = outFile+std::string("_BinByBin_withEnergyDependence.txt");
   asymFile.open(txtFile.c_str());
   asymFile << std::setprecision(15);
@@ -686,7 +702,11 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
     {
       std::string basePath2 =basePath+ "Octet_"+itos(octet)+"/" + groupType + "Asymmetry/"; 
       std::string infilePath = basePath2 + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + anaChoice +( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) +  ".dat";
-      std::string outfilePath = basePath2 + (UNBLIND?"UNBLINDED_":"")+ corr +"_" + (withPOL?"withPOL_":"") +"FittedAsymmetry_Octet" + itos(octet) + "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) + ".dat";
+      std::string outfilePath =  ( basePath2 + (UNBLIND?"UNBLINDED_":"")+ corr +"_" + (withPOL?"withPOL_":"") +"FittedAsymmetry_Octet" +
+				   itos(octet) + "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +
+				   ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+				     ( key/10==2 ? "_RadialRing"+itos(key-20) :
+				       ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) + ".dat");
       
       //Remove old output files in case they were created on accident and aren't filled with good values
       std::string command = "rm " + outfilePath; 
@@ -736,8 +756,8 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       
       //Loading theory systematics... 
       std::vector <Double_t> theoryCorr = LoadTheoryCorrections(enBinMedian);
-      std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet);
-      std::vector <Double_t> bsCorr = LoadBackscCorrections(enBinMedian,octet);
+      std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octet,anaChoice);
+      std::vector <Double_t> bsCorr = LoadBackscCorrections(enBinMedian,octet,anaChoice);
       
       
       for (UInt_t i=0 ; i<AsymAndError[0].size() ; i++) {
@@ -746,7 +766,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	  if (dualPol) {
 	    Double_t P_p =  POL_plus2011; 
 	    Double_t P_m =  POL_minus2011;
-	    if (octet>59)   P_p = POL_plus2012; P_m =  POL_minus2012;
+	    if (octet>59) { P_p = POL_plus2012; P_m =  POL_minus2012;}
 	    Double_t R = backoutRfromA(RawAsymAndError[0][i]);
 	    Double_t delta_R = backoutDeltaRfromA(RawAsymAndError[0][i],RawAsymAndError[1][i]);
 	    Double_t gam = (R+1.)/(R-1.);
@@ -773,7 +793,11 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
       }
       
       
-      std::string pdfPath = basePath2 + (UNBLIND?"UNBLINDED_":"") + corr + "_" +  "Asymmetry_Octet" + itos(octet) + "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) + ".pdf";
+      std::string pdfPath = ( basePath2 + (UNBLIND?"UNBLINDED_":"") + corr + "_" +  "Asymmetry_Octet" + itos(octet) +
+			      "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +
+			      ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+				( key/10==2 ? "_RadialRing"+itos(key-20) :
+				  ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) + ".pdf");
       TCanvas *c1 = new TCanvas("c1", "c1",800, 400);
       gStyle->SetOptFit(1111);
       gStyle->SetTitleX(0.25);
@@ -810,7 +834,11 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	
       delete c1; delete gOct; delete fitOct;
 	
-      pdfPath = basePath2 + (UNBLIND?"UNBLINDED_":"") + corr + "_"  + (withPOL?"withPOL_":"") + "BetaCorrectedAsymmetry_Octet" + itos(octet) + "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + ( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) + ".pdf";
+      pdfPath = ( basePath2 + (UNBLIND?"UNBLINDED_":"") + corr + "_"  + (withPOL?"withPOL_":"") + "BetaCorrectedAsymmetry_Octet" +
+		  itos(octet) + "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +
+		  ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+		    ( key/10==2 ? "_RadialRing"+itos(key-20) :
+		      ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) + ".pdf");
       c1 = new TCanvas("c1", "c1",800, 400);
 	
       gOct = new TGraphErrors(enBinMedian.size(), &enBinMedian[0], &AsymAndError[0][0], 0, &AsymAndError[1][0]);
@@ -1385,8 +1413,100 @@ void ProduceRawAsymmetries(Int_t octBegin, Int_t octEnd, std::string anaChoice, 
 
 };
 
+/////////////////////// Corrections ////////////////////////////
+
+std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint) {
+
+  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
+
+  if ( corr!=std::string("DeltaTheoryOnly") && corr!=std::string("AllCorr") ) return syst;
+
+  for (UInt_t i=0; i<syst.size(); i++) {
+   
+    syst[i] = asymmetryCorrectionFactor(enBinMidpoint[i]); //As defined in BetaSpectrum.hh by MPM
+
+  }
+
+  return syst;
+};
+
+std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct, std::string anaCh) {
+  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
+  if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
+
+  TString filename = TString::Format("../AngleCorrections/%s_DeltaAngle_anaCh%s.txt",oct<60?"2011-2012":"2012-2013",anaCh.c_str());
+  //std::cout << filename.Data() << std::endl;                                                                                                 
+
+  std::ifstream infile(filename.Data());
+
+  if (!infile.is_open()) throw "Couldn't open file in LoadFieldDipCorrections!";
+
+  //  std::cout << "\n";                                                                                                                       
+
+  //Read in the systematics                                                                                                                    
+  Double_t mid; //midpoint of bin                                                                                                              
+  std::string hold1;
+  std::string sys;  //systematics correction (Apure/Aproc)                                                                                     
+
+  Int_t it = 0;
+
+  while (infile >> mid >> hold1 >> sys) {
+    if (mid==enBinMidpoint[it]) {
+      syst[it] = (hold1!=std::string("inf") && sys!=std::string("inf")) ? atof(sys.c_str())+1. : 1.;
+      std::cout << mid << " " << atof(sys.c_str())+1. << "\n";
+      it++;
+    }
+  }
+
+  return syst;
+
+
+};
+
+
+
+std::vector <Double_t> LoadBackscCorrections(std::vector <Double_t> enBinMidpoint, Int_t oct, std::string anaCh) {
+  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
+  if (corr.size()<7) return syst;
+  if ( corr.substr(0,7)!=std::string("AllCorr") && corr.substr(0,7)!=std::string("DeltaBa") ) return syst;
+
+  std::string c = corr.substr(0,7)==std::string("DeltaBa")?corr.substr(10,1):"ALL";
+  TString filename = TString::Format("../systematics/OldMCCorrection/deltaBS%s_anaCh%s_%s.txt",
+				     (c==std::string("0")?"0":
+				      c==std::string("1")?"1":
+				      c==std::string("2")?"2":
+				      c==std::string("3")?"3":"ALL"),
+				     anaCh.c_str(),
+				     oct<60?"2011-2012":"2012-2013");
+  //std::cout << filename.Data() << std::endl;
   
-std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, std::string anaChoice, std::vector <Double_t> enBinMidpoint) {
+  std::ifstream infile(filename.Data());
+
+  if (!infile.is_open()) throw "Couldn't open file in LoadFieldDipCorrections!";
+
+  //  std::cout << "\n";
+
+  //Read in the systematics
+  Double_t mid; //midpoint of bin
+  std::string sys;  //systematics correction (Apure/Aproc)
+  std::string hold;
+
+  Int_t it = 0;
+
+  while (infile >> mid >> sys >> hold) {
+    if (mid==enBinMidpoint[it]) {
+      syst[it] = (sys!=std::string("inf") && sys!=std::string("-nan") && sys!=std::string("nan")) ? atof(sys.c_str())+1. : 1.;
+      std::cout << mid << " " << syst[it]<< "\n";
+      it++;
+    }
+  }
+
+  return syst;
+
+
+};
+
+/*std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, std::string anaChoice, std::vector <Double_t> enBinMidpoint) {
 
   Int_t iAnaChoice;
 
@@ -1436,93 +1556,4 @@ std::vector < std::vector <Double_t> > LoadOctetSystematics(Int_t octet, std::st
 
   return syst;
 };
-
-std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint) {
-
-  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-
-  if ( corr!=std::string("DeltaTheoryOnly") && corr!=std::string("AllCorr") ) return syst;
-
-  for (UInt_t i=0; i<syst.size(); i++) {
-   
-    syst[i] = asymmetryCorrectionFactor(enBinMidpoint[i]); //As defined in BetaSpectrum.hh by MPM
-
-  }
-
-  return syst;
-
-};
-
-std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct) {
-  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-  // if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
-  
-  TString filename = TString::Format("../systematics/AngleCorrections/angleCorr_%s.txt",oct<60?"2011-2012":"2012-2013");
-  //std::cout << filename.Data() << std::endl;                                                                                                 
-
-  std::ifstream infile(filename.Data());
-
-  if (!infile.is_open()) throw "Couldn't open file in LoadFieldDipCorrections!";
-
-  //  std::cout << "\n";                                                                                                                       
-
-  //Read in the systematics                                                                                                                    
-  Double_t mid; //midpoint of bin                                                                                                              
-  std::string hold1;
-  std::string sys;  //systematics correction (Apure/Aproc)                                                                                     
-
-  Int_t it = 0;
-
-  while (infile >> mid >> hold1 >> sys) {
-    if (mid==enBinMidpoint[it]) {
-      syst[it] = (hold1!=std::string("inf") && sys!=std::string("inf")) ? atof(sys.c_str())+1. : 1.;
-      std::cout << mid << " " << atof(sys.c_str())+1. << "\n";
-      it++;
-    }
-  }
-
-  return syst;
-
-
-};
-
-std::vector <Double_t> LoadBackscCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct) {
-  std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-  if (corr.size()<7) return syst;
-  if ( corr.substr(0,7)!=std::string("AllCorr") && corr.substr(0,7)!=std::string("DeltaBa") ) return syst;
-
-  std::string c = corr.substr(0,7)==std::string("DeltaBa")?corr.substr(10,1):"ALL";
-  TString filename = TString::Format("../systematics/OldMCCorrection/deltaBS%s_%s.txt",
-				     (c==std::string("0")?"0":
-				      c==std::string("1")?"1":
-				      c==std::string("2")?"2":
-				      c==std::string("3")?"3":"ALL"),
-				     oct<60?"2011-2012":"2012-2013");
-  //std::cout << filename.Data() << std::endl;
-  
-  std::ifstream infile(filename.Data());
-
-  if (!infile.is_open()) throw "Couldn't open file in LoadFieldDipCorrections!";
-
-  //  std::cout << "\n";
-
-  //Read in the systematics
-  Double_t mid; //midpoint of bin
-  std::string sys;  //systematics correction (Apure/Aproc)
-  std::string hold;
-
-  Int_t it = 0;
-
-  while (infile >> mid >> sys >> hold) {
-    if (mid==enBinMidpoint[it]) {
-      syst[it] = (sys!=std::string("inf") && sys!=std::string("-nan") && sys!=std::string("nan")) ? atof(sys.c_str())+1. : 1.;
-      std::cout << mid << " " << syst[it]<< "\n";
-      it++;
-    }
-  }
-
-  return syst;
-
-
-};
-
+*/

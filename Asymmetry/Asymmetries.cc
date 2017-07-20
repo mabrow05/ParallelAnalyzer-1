@@ -65,6 +65,23 @@ AsymmetryBase::AsymmetryBase(int oct, std::string anaCh, double enBinWidth, doub
   A10err.resize(2,std::vector <double> (numEnBins,0.));
   B10err.resize(2,std::vector <double> (numEnBins,0.));
 
+  A2Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B2Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A5Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B5Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A7Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B7Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A10Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B10Strip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A2errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B2errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A5errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B5errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A7errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B7errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  A10errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+  B10errStrip.resize(2,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
+
   A2Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   B2Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   A5Quad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
@@ -81,7 +98,7 @@ AsymmetryBase::AsymmetryBase(int oct, std::string anaCh, double enBinWidth, doub
   B7errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   A10errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   B10errQuad.resize(4,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
-  
+
   A2Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   B2Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
   A5Rad.resize(6,std::vector< std::vector<double> > (2,std::vector <double> (numEnBins,0.)));
@@ -329,6 +346,13 @@ void AsymmetryBase::loadRates() {
 	A2[1] = bgSubtr->returnBGSubtRate(1);
 	A2err[1] = bgSubtr->returnBGSubtRateError(1);
 
+	for (int i=0; i<2; ++i) {
+	  A2Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  A2errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  A2Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  A2errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
+
 	for (int i=0; i<4; ++i) {
 	  A2Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
 	  A2errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
@@ -351,6 +375,13 @@ void AsymmetryBase::loadRates() {
 	A5err[0] = bgSubtr->returnBGSubtRateError(0);
 	A5[1] = bgSubtr->returnBGSubtRate(1);
 	A5err[1] = bgSubtr->returnBGSubtRateError(1);
+
+	for (int i=0; i<2; ++i) {
+	  A5Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  A5errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  A5Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  A5errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
 
 	for (int i=0; i<4; ++i) {
 	  A5Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
@@ -375,6 +406,13 @@ void AsymmetryBase::loadRates() {
 	A7[1] = bgSubtr->returnBGSubtRate(1);
 	A7err[1] = bgSubtr->returnBGSubtRateError(1);
 
+	for (int i=0; i<2; ++i) {
+	  A7Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  A7errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  A7Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  A7errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
+
 	for (int i=0; i<4; ++i) {
 	  A7Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
 	  A7errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
@@ -397,6 +435,13 @@ void AsymmetryBase::loadRates() {
 	A10err[0] = bgSubtr->returnBGSubtRateError(0);
 	A10[1] = bgSubtr->returnBGSubtRate(1);
 	A10err[1] = bgSubtr->returnBGSubtRateError(1);
+
+	for (int i=0; i<2; ++i) {
+	  A10Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  A10errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  A10Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  A10errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
 
 	for (int i=0; i<4; ++i) {
 	  A10Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
@@ -421,6 +466,13 @@ void AsymmetryBase::loadRates() {
 	B2[1] = bgSubtr->returnBGSubtRate(1);
 	B2err[1] = bgSubtr->returnBGSubtRateError(1);
 	
+	for (int i=0; i<2; ++i) {
+	  B2Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  B2errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  B2Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  B2errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
+
 	for (int i=0; i<4; ++i) {
 	  B2Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
 	  B2errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
@@ -443,6 +495,13 @@ void AsymmetryBase::loadRates() {
 	B5err[0] = bgSubtr->returnBGSubtRateError(0);
 	B5[1] = bgSubtr->returnBGSubtRate(1);
 	B5err[1] = bgSubtr->returnBGSubtRateError(1);
+
+	for (int i=0; i<2; ++i) {
+	  B5Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  B5errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  B5Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  B5errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
 
 	for (int i=0; i<4; ++i) {
 	  B5Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
@@ -467,6 +526,13 @@ void AsymmetryBase::loadRates() {
 	B7[1] = bgSubtr->returnBGSubtRate(1);
 	B7err[1] = bgSubtr->returnBGSubtRateError(1);
 
+	for (int i=0; i<2; ++i) {
+	  B7Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  B7errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  B7Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  B7errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
+
 	for (int i=0; i<4; ++i) {
 	  B7Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
 	  B7errQuad[i][0] = bgSubtr->returnBGSubtRateErrorQuad(0,i);
@@ -489,6 +555,13 @@ void AsymmetryBase::loadRates() {
 	B10err[0] = bgSubtr->returnBGSubtRateError(0);
 	B10[1] = bgSubtr->returnBGSubtRate(1);
 	B10err[1] = bgSubtr->returnBGSubtRateError(1);
+
+	for (int i=0; i<2; ++i) {
+	  B10Strip[i][0] = bgSubtr->returnBGSubtRateStrip(0,i);
+	  B10errStrip[i][0] = bgSubtr->returnBGSubtRateErrorStrip(0,i);
+	  B10Strip[i][1] = bgSubtr->returnBGSubtRateStrip(1,i);
+	  B10errStrip[i][1] = bgSubtr->returnBGSubtRateErrorStrip(1,i);
+	}
 
 	for (int i=0; i<4; ++i) {
 	  B10Quad[i][0] = bgSubtr->returnBGSubtRateQuad(0,i);
@@ -545,6 +618,32 @@ std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateError(s
   else if (runType=="B5") return B5err;
   else if (runType=="B7") return B7err;
   else if (runType=="B10") return B10err;
+  else throw "Bad Run Type given to returnBGsubtractedRateError(string runType)";
+
+};
+
+std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateStrip(std::string runType,int strip) {
+  if (runType=="A2") return A2Strip[strip];
+  else if (runType=="A5") return A5Strip[strip];
+  else if (runType=="A7") return A7Strip[strip];
+  else if (runType=="A10") return A10Strip[strip];
+  else if (runType=="B2") return B2Strip[strip];
+  else if (runType=="B5") return B5Strip[strip];
+  else if (runType=="B7") return B7Strip[strip];
+  else if (runType=="B10") return B10Strip[strip];
+  else throw "Bad Run Type given to returnBGsubtractedRate(string runType)";
+
+};
+
+std::vector < std::vector<double> > AsymmetryBase::returnBGsubtractedRateErrorStrip(std::string runType, int strip) {
+  if (runType=="A2") return A2errStrip[strip];
+  else if (runType=="A5") return A5errStrip[strip];
+  else if (runType=="A7") return A7errStrip[strip];
+  else if (runType=="A10") return A10errStrip[strip];
+  else if (runType=="B2") return B2errStrip[strip];
+  else if (runType=="B5") return B5errStrip[strip];
+  else if (runType=="B7") return B7errStrip[strip];
+  else if (runType=="B10") return B10errStrip[strip];
   else throw "Bad Run Type given to returnBGsubtractedRateError(string runType)";
 
 };
@@ -609,9 +708,12 @@ OctetAsymmetry::OctetAsymmetry(int oct, std::string anaCh, double enBinWidth, do
     asymmetry.resize(numEnBins,0.);
     asymmetryError.resize(numEnBins,0.);
 
+    asymmetryStrip.resize(2,std::vector<double> (numEnBins,0.) );
+    asymmetryErrorStrip.resize(2,std::vector<double> (numEnBins,0.) );
+
     asymmetryQuad.resize(4,std::vector<double> (numEnBins,0.) );
     asymmetryErrorQuad.resize(4,std::vector<double> (numEnBins,0.) );
-    
+
     asymmetryRad.resize(6,std::vector<double> (numEnBins,0.) );
     asymmetryErrorRad.resize(6,std::vector<double> (numEnBins,0.) );
 
@@ -635,6 +737,13 @@ void OctetAsymmetry::calcAsymmetryBinByBin() {
   calcBinByBinSuperRatio(A2,A5,A7,A10,B2,B5,B7,B10,
 			 A2err,A5err,A7err,A10err,B2err,B5err,B7err,B10err,
 			 asymmetry,asymmetryError);
+  for (int i=0; i<2; ++i) {
+    calcBinByBinSuperRatio(A2Strip[i],A5Strip[i],A7Strip[i],A10Strip[i],
+			   B2Strip[i],B5Strip[i],B7Strip[i],B10Strip[i],
+			   A2errStrip[i],A5errStrip[i],A7errStrip[i],A10errStrip[i],
+			   B2errStrip[i],B5errStrip[i],B7errStrip[i],B10errStrip[i],
+			   asymmetryStrip[i],asymmetryErrorStrip[i]);
+  }
   for (int i=0; i<4; ++i) {
     calcBinByBinSuperRatio(A2Quad[i],A5Quad[i],A7Quad[i],A10Quad[i],
 			   B2Quad[i],B5Quad[i],B7Quad[i],B10Quad[i],
@@ -1072,6 +1181,28 @@ void OctetAsymmetry::writeAsymToFile() {
     outfile << "BAD OCTET";
   }
   outfile.close();
+
+  // Now for strip
+  for (int j=0; j<2; ++j) {
+    
+    if (Simulation) outpath = std::string(getenv("SIM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Strip"+itos(j)+".dat";
+    else if (UKdata) outpath = std::string(getenv("ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Strip"+itos(j)+".dat";
+    else outpath = std::string(getenv("MPM_ANALYSIS_RESULTS")) + "Octet_" + itos(octet) + "/OctetAsymmetry/"+ (UNBLIND?"UNBLINDED_":"")+"rawAsymmetry_Octet" + itos(octet)+"_AnaCh"+analysisChoice+"_Strip"+itos(j)+".dat";
+    outfile.open(outpath.c_str());
+    outfile << std::setprecision(15);
+    
+    if (isFullOctet()) {
+      for (unsigned int i=0; i<asymmetryStrip[j].size(); i++) {
+	outfile << binLowerEdge[i] << " " << asymmetryStrip[j][i] << " " << asymmetryErrorStrip[j][i] << std::endl;
+	//std::cout << binLowerEdge[i] << " " << asymmetry[i] << " " << asymmetryError[i] << std::endl;
+      }
+    }
+    else {
+      outfile << "BAD OCTET";
+    }
+    outfile.close();
+  }
+
 
   // Now for quadrants
   for (int j=0; j<4; ++j) {
