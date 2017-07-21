@@ -17,6 +17,8 @@ simulation data
 
 #include <TString.h>
 
+const Double_t stripLimit = 15.; //This is +/- the y-cut for the strip asymmetry
+
 const bool writeRatesToFile = true;
 
 const std::vector<UInt_t> neutronPoisonedBGruns {17274,18209,21433,21890,22311};
@@ -553,10 +555,10 @@ void EvtRateHandler::dataReader() {
 	int strip = 0;
 	
 	if (Side==0) {
-	  if (TMath::Abs(EmwpcY)>12.) strip = 1;
+	  if (TMath::Abs(EmwpcY)>stripLimit) strip = 1;
 	}
 	else if (Side==1) {
-	  if (TMath::Abs(WmwpcY)>12.) strip = 1;
+	  if (TMath::Abs(WmwpcY)>stripLimit) strip = 1;
 	}
 
 	//Determine Quadrant 
@@ -817,10 +819,10 @@ void SimEvtRateHandler::dataReader() {
 	int strip = 0;
 	
 	if (Side==0) {
-	  if (TMath::Abs(EmwpcY)>12.) strip = 1;
+	  if (TMath::Abs(EmwpcY)>stripLimit) strip = 1;
 	}
 	else if (Side==1) {
-	  if (TMath::Abs(WmwpcY)>12.) strip = 1;
+	  if (TMath::Abs(WmwpcY)>stripLimit) strip = 1;
 	}
 	
 	//Determine Quadrant 

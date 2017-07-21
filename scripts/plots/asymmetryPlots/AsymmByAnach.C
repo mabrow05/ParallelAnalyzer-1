@@ -3,11 +3,11 @@
 void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=680) {
 
   bool readInAsymms = true;
-  bool withSim = false;
+  bool withSim = true;
   bool CorrAndUnCorr = false;
 
-  double ymin0 = -0.129;
-  double ymax0 = -0.1175;
+  double ymin0 = -0.125;
+  double ymax0 = -0.1150;
   
   const Int_t numAnaChT0 = 4;
   const Int_t numAnaChBacksc = 5;
@@ -77,7 +77,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
       
       infile.close();
       
-      infile.open(TString::Format("%s/Asymmetries/%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+      infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
 				  getenv("SIM_ANALYSIS_RESULTS"),corrections.Data(),
 				  anaChoicesT0[i].Data(),ebinLow,ebinHigh,
 				  year==TString("2011-2012")?"0-59":"60-121").Data() );
@@ -124,7 +124,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
       
       infile.close();
       
-      infile.open(TString::Format("%s/Asymmetries/%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+      infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
 				  getenv("SIM_ANALYSIS_RESULTS"),corrections.Data(),
 				  anaChoicesBacksc[i].Data(),ebinLow,ebinHigh,
 				  year==TString("2011-2012")?"0-59":"60-121").Data() );
@@ -164,7 +164,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   gStyle->SetPadLeftMargin(0.1);
   gStyle->SetTitleXOffset(1.2);
   gStyle->SetGridStyle(8);
-  gStyle->SetGridColor(kBlue);
+  //gStyle->SetGridColor(kBlue);
   
   TCanvas *c1 = new TCanvas("c1","demo bin labels",10,10,600,600);
 
@@ -283,7 +283,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   dataBacksc->GetXaxis()->SetTitleSize(0.05);
   dataBacksc->GetXaxis()->CenterTitle();
   dataBacksc->GetYaxis()->CenterTitle();
-  dataBacksc->SetMinimum(-0.2);
+  dataBacksc->SetMinimum(-0.35);
   dataBacksc->SetMaximum(0.025);
 
   dataBacksc->Draw("EX0");

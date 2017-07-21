@@ -60,18 +60,36 @@ def getAsymmetry(anaCh,octLow,octHigh,elow,ehigh,sim=True):
         infile.close()
     return asymm
 
-def readAngleCorr(year=2011,percErr=0.2):
+def readAngleCorr(year=2011,anaCh="C",percErr=0.2):
     A = [[],[]]
     yearString=None
     if year==2011:
         yearString = "2011-2012"
     else:
         yearString = "2012-2013"
-    with open('AngleCorrections/angleCorr_%s.txt'%(yearString),'rb') as tsvin:
+    with open(os.environ["ANALYSIS_CODE"]+'systematics/AngleCorrections/%s_DeltaAngle_anaCh%s.txt'%(yearString,anaCh),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
-            A[0].append(float(row[3]))
-            A[1].append(fabs(float(row[3])*percErr))
+            A[0].append(float(row[2]))
+            A[1].append(fabs(float(row[2])*percErr))
+            #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
+
+    return A
+
+def readBackscCorr(year=2011,anaCh="C",percErr=0.2):
+    A = [[],[]]
+    yearString=None
+    if year==2011:
+        yearString = "2011-2012"
+    else:
+        yearString = "2012-2013"
+        
+    with open(os.environ["ANALYSIS_CODE"]+"/systematics/OldMCCorrection/"+
+              "deltaBSALL_anaCh%s_%s.txt"%(anaCh,yearString),'rb') as tsvin:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+        for row in tsvin:
+            A[0].append(float(row[1]))
+            A[1].append(fabs(float(row[1])*percErr))
             #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
 
     return A
@@ -80,6 +98,7 @@ def readAngleCorr(year=2011,percErr=0.2):
 class uncertaintyHandler:
     
     def __init__(self,year,anaChoice="C"):
+        self.geom = None
         self.anaChoice = anaChoice
         self.stats = []
         self.A0 = 0.
@@ -100,10 +119,12 @@ class uncertaintyHandler:
         self.year = year
         
         if self.year == 2011:
+            self.geom = "2011-2012"
             self.octLow = 0
             self.octHigh = 59
             
         elif self.year == 2012:
+            self.geom = "2012-2013"
             self.octLow = 60
             self.octHigh = 121
         else:
@@ -190,104 +211,7 @@ class uncertaintyHandler:
         self.syst_err = percErr
         self.syst_corr = corr
 
-    def calcMCSystematicError(self,elow,ehigh,BStypes=[]):
-
-        percErrType0Sim = 0
-
-        t0errs = []
-       
-        infile = None
-
-        #read in Type 0 MC error from Type 1 shuffle
-        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f -0.1 0.0 0.0 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
-        infile = open("resultHolderEventShuffle.txt",'r')
     
-        if infile:
-            for line in infile:
-                if line[0]=="p":
-                    entry = line.split()
-                    t0errs.append(float(entry[1]))
-                    #percErrType0Sim = float(entry[1])
-                    #print("perc Err on T0 %f"%percErrType0Sim)
-
-        infile.close()
-        
-        #read in Type 0 MC error from Type 2 shuffle
-        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 -0.25 0.0 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
-        infile = open("resultHolderEventShuffle.txt",'r')
-    
-        if infile:
-            for line in infile:
-                if line[0]=="p":
-                    entry = line.split()
-                    t0errs.append(float(entry[1]))
-                    #percErrType0Sim = float(entry[1])
-                    #print("perc Err on T0 %f"%percErrType0Sim)
-
-        infile.close()
-
-        #read in Type 0 MC error from Type 3 shuffle
-        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 0.0 -0.05 0.0 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
-        infile = open("resultHolderEventShuffle.txt",'r')
-    
-        if infile:
-            for line in infile:
-                if line[0]=="p":
-                    entry = line.split()
-                    t0errs.append(float(entry[1]))
-                    #percErrType0Sim = float(entry[1])
-                    #print("perc Err on T0 %f"%percErrType0Sim)
-
-        infile.close()
-        
-        #read in Type 0 MC error from Type 4 shuffle
-        os.system("./MC_Corrections/EventShuffle.exe %i %i %f %f 0.0 0.0 0.0 0.25 > log.txt"%(self.octLow, self.octHigh, elow,ehigh))
-        infile = open("resultHolderEventShuffle.txt",'r')
-    
-        if infile:
-            for line in infile:
-                if line[0]=="p":
-                    entry = line.split()
-                    t0errs.append(float(entry[1]))
-                    #percErrType0Sim = float(entry[1])
-                    #print("perc Err on T0 %f"%percErrType0Sim)
-
-        infile.close()
-        
-        
-        percErrType0Sim = sqrt( sum(err*err for err in t0errs) )
-        #print(percErrType0Sim)
-       
-        asymm = []
-        A = []
-        deltaA_MC = [] 
-        deltaA_Stat = []
-
-        asymm = getAsymmetry("D",self.octLow,self.octHigh,elow,ehigh,sim=False)
-       
-        A.append( asymm[0] )
-        deltaA_MC.append( fabs(asymm[0]*percErrType0Sim) )
-        deltaA_Stat.append( fabs(asymm[1]) )
-        print("D asymm: %f +/- %f +/- %f"%(A[0],asymm[1],deltaA_MC[0]))
-
-        for bs in BStypes:
-            asymm = getAsymmetry(bs,self.octLow,self.octHigh,elow,ehigh,sim=False)
-            print("%s asymm: %f +/- %f +/- %f(%f)"%(bs,asymm[0],asymm[1],fabs(asymm[0]-A[0]),
-                                                    sqrt(asymm[1]**2+deltaA_Stat[0]**2))
-                  )
-            A.append( asymm[0] )
-            deltaA_MC.append( fabs(asymm[0]-A[0]) )
-            deltaA_Stat.append( fabs(asymm[1]) )
-            
-        
-
-        deltaA_MCFinal = sqrt(sum( (deltaA_MC[i]/deltaA_Stat[i]**2)**2 for i in range(0,len(A)) ) ) / sum( 1/err**2 for err in deltaA_Stat )
-        A_final = sum( A[i]/deltaA_Stat[i]**2 for i in range(0,len(A)) ) / sum( 1/err**2 for err in deltaA_Stat )
-
-        return fabs(deltaA_MCFinal/A_final)
-        
-
-        
 
 
     def readEnergyUncertainties(self):
@@ -312,67 +236,26 @@ class uncertaintyHandler:
 
         self.energy_err = percErr
 
-    def makeSystematicCorrections(self,errFac=0.2):
+    def makeSystematicCorrections(self,errFacDeltaBS=0.2,errFacDeltaAngle=0.25):
         """Read in the systematic correction bin-by-bin for final
         asymmetries, calculates delta_A/A, and then multiplies by the 
         error factor before filling the percent error for every bin."""
 
-        A_uncorr = []
-        A_corr = []
+        BS_corr = readBackscCorr(self.year,self.anaChoice,errFacDeltaBS)
+        Angle_corr = readAngleCorr(self.year,self.anaChoice,errFacDeltaAngle)
 
-        # begin with uncorrected asymmetry
-        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Asymmetries/"+
-                       "UnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
-                       %(self.anaChoice,self.octLow,self.octHigh),'r' )
-
-        if infile:
-            for line in infile:
-                l = line.split()
-                if float(l[0])<1000.:
-                    A_uncorr.append(float(l[1]))
-
-        else: 
-            print("Couldn't open file for statistical uncertainties")
-            exit(0)
-
-         
-
-        infile.close()
-
-        # Now read in corrected asymmetry
-        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Asymmetries/"+
-                       "DeltaExpOnly_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
-                       %(self.anaChoice,self.octLow,self.octHigh),'r' )
-
-        if infile:
-            for line in infile:
-                l = line.split()
-                if float(l[0])<1000.:
-                    A_corr.append(float(l[1]))
-
-        else: 
-            print("Couldn't open file for statistical uncertainties")
-            exit(0)
-
-        infile.close()
-
-        #for x in A_corr:
-        #    print(x)
-
-        # Calculate the percent error on the correction
-        corr = []
-        percErr = []
+        MC_corr = []
+        MC_corrErr = []
         
-        for i in range( 0, len(A_corr) ):
-            correction = 100.
-            if fabs(A_uncorr[i])>0.:
-                correction = A_corr[i]/A_uncorr[i] - 1. 
+        for i in range( 0, len(BS_corr[0]) ):
+       
+            MC_corr.append( (1+BS_corr[0][i])*(1+Angle_corr[0][i])-1. )
+            MC_corrErr.append( sqrt( ((1+BS_corr[0][i])*Angle_corr[1][i])**2 + ((1+Angle_corr[0][i])*BS_corr[1][i])**2) )
+            #if fabs(A_uncorr[i])>0.:
+            #     correction = A_BScorr[i]/A_uncorr[i] - 1. 
             
-            corr.append(correction)
-            percErr.append( fabs(correction*errFac) )
-
-        self.syst_err = percErr
-        self.syst_corr = corr
+        self.syst_err = MC_corrErr
+        self.syst_corr = MC_corr
 
 
     
@@ -439,21 +322,12 @@ class uncertaintyHandler:
 
 
 
-    def minimizer(self):
+    def minimizer(self,errFacDeltaBS=0.2,errFacDeltaAngle=0.2):
         """Minimizes the error and outputs all errors in order or largest to smallest"""
-        
-        BStypes = []
-
-        if self.anaChoice=="A":
-            BStypes = ["F","G"]
-        elif self.anaChoice=="B":
-            BStypes = ["F"]
-        elif self.anaChoice=="C":
-            BStypes = ["F","J","K"]
 
         self.statUncertainties()
         self.readEnergyUncertainties()
-        #self.makeSystematicCorrections()
+        self.makeSystematicCorrections(errFacDeltaBS,errFacDeltaAngle)
         #self.readMCSystematicCorrections()
 
         ofile = open("%i_Uncertainties.txt"%self.year, 'w')
@@ -466,9 +340,9 @@ class uncertaintyHandler:
         enBinLow = None
         enBinHigh = None
 
-        minNumBins = 40
+        minNumBins = 30
         lowbound = 10
-        upperbound = 76
+        upperbound = 75
         for lowBin in range(lowbound,upperbound+1-minNumBins):
             for highBin in range(lowBin+minNumBins,upperbound+1):
 
@@ -476,20 +350,7 @@ class uncertaintyHandler:
 
                 Errors.append( self.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
                 Errors.append( self.calcStatUncert(       getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) )
-                
-                ##### Systematic error handling
-
-                # calcSystematicUncert applies a uniform percent uncertainty to every bin correction
-                #Errors.append( self.calcSystematicUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
-                
-                # Ignores systematics in minimization
-                #Errors.append(0.)
-
-                # Multiplies final correction by some fractional percent uncertainty ( 20% in 2010 )
-                #Errors.append( fabs( weightRealStats(self.syst_corr,self.stat_percent_err,getBinEnergyMid(lowBin),getBinEnergyMid(highBin)) ) * 0.2)
-
-                Errors.append( self.calcMCSystematicError(getBinEnergyLowEdge(lowBin),
-                                                          getBinEnergyUpperEdge(highBin),BStypes) );
+                Errors.append( self.calcSystematicUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
 
                 errSum = sumErrors(Errors)
                 
@@ -534,45 +395,44 @@ class uncertaintyHandler:
 
 if __name__ == "__main__":
     
-    year=2012
+    year=2011
     uncert = uncertaintyHandler(year,"C")
-    #uncert.minimizer()
+    #uncert.minimizer(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
 
-    percErrAngle = 0.25
-    percErrBS = 0.25
-    low = 230
-    high = 750
-    print("Energy Uncert: %f"%uncert.calcEnergyUncert(low,high))
-    print("Stat Uncert: %f"%uncert.calcStatUncert(low,high))
+    #2011: Energy Range = 210.-760. for bsErr=0.25 and angleErr=0.25 : 0.0074
+    #2012: Energy Range = 210.-760. for bsErr=0.25 and angleErr=0.25 : 0.0084
+
+    #2011: Energy Range = 210.-750. for bsErr=0.2 and angleErr=0.25 : 0.006945
+    #2012: Energy Range = 200.-740. for bsErr=0.2 and angleErr=0.25 : 0.00811
+    # BUT!!! 2012 gives same uncertainty of 2011 energy range
+
+    #2011: Energy Range = 230.-740. for bsErr=0.2 and angleErr=0.2
+    #2012: Energy Range = 190.-760. for bsErr=0.2 and angleErr=0.2
+
+    #also consider analysis choice "B" which seems to have the lowers Total uncert
+
+    if 1:
     
+        lowBin = 21
+        highBin = 74
+        
+        uncert.statUncertainties()
+        uncert.readEnergyUncertainties()
+        uncert.makeSystematicCorrections(errFacDeltaBS=0.20,errFacDeltaAngle=0.25)
+        
+        Errors = []
+        
+        Errors.append( uncert.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
+        Errors.append( uncert.calcStatUncert(       getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) )
+        Errors.append( uncert.calcSystematicUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
+        
+        errSum = sumErrors(Errors)
+        
+       
+        print("\nAsymm = %f\n"%uncert.A0)
+        print("Weighted Energy Error: %f"%Errors[0])
+        print("Total Statistical Error: %f"%Errors[1])
+        print("Total Systematic Error: %f"%Errors[2])
+        print("%i-%i keV total Error = %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
+        
 
-    angleCorr = readAngleCorr(year,percErr=percErrAngle)
-    uncert.readMCSystematicCorrections()
-    deltaBS = [ (1.+uncert.syst_corr[i])/(1.+angleCorr[0][i])-1. for i in range(0,100) ]
-    deltaBSerr = [percErrBS*x for x in deltaBS]
-
-    deltaBSsum = weightRealStats(deltaBS,uncert.stat_percent_err,low,high)
-    deltaBSerrSum = weightRealStats(deltaBSerr,uncert.stat_percent_err,low,high)
-    deltaAngleSum = weightRealStats(angleCorr[0],uncert.stat_percent_err,low,high)
-    deltaAngleErrSum = weightRealStats(angleCorr[1],uncert.stat_percent_err,low,high)
-    
-    print("BS corr : %f +/- %f"%(deltaBSsum,deltaBSerrSum))
-    print("Angle corr : %f +/- %f"%(deltaAngleSum,deltaAngleErrSum))
-    print("MC Corr: %f +/- %f"%((1.+deltaBSsum)*(1.+deltaAngleSum)-1.,sumErrors([deltaBSerrSum,deltaAngleErrSum])))
-
-    
-    asymm = getAsymmetry(uncert.anaChoice,uncert.octLow,uncert.octHigh,low,high,False)
-    totalErr = sumErrors([uncert.calcEnergyUncert(low,high),fabs( asymm[1]/asymm[0] ),sumErrors([deltaBSerrSum,deltaAngleErrSum])])
-    print("A: %f +/- %f (%f percent Uncertainty)"%(asymm[0],totalErr*fabs(asymm[0]),totalErr))
-
-
-    #print(uncert.calcSystematicUncert(low,high))
-    #print(uncert.calcMCSystematicError(low,high,["F","J","K"]) )
-    #asymm = getAsymmetry(uncert.anaChoice,uncert.octLow,uncert.octHigh,low,high,False)
-    #print(sumErrors([uncert.calcEnergyUncert(low,high),fabs( asymm[1]/asymm[0] ),uncert.calcMCSystematicError(low,high,["F","J","K"])]))
-   # print("A: %f +/- %f"%(asymm[0],asymm[1]))
-
-    #print("Gain Err: +/- %f"%uncert.gainUncert(low,high))
-    #220-750 for 2011 : 0.00612 
-    
-    #290-750 for 2012 : 0.01114

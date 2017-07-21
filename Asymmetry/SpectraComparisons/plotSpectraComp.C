@@ -5,10 +5,10 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TString normType = "0";
 
-  Double_t normLow = 230.;
+  Double_t normLow = 0.;
   Double_t normHigh = 750.;
   
-  Double_t xAxisMax = 1200.;
+  Double_t xAxisMax = 800.;
 
   //Storing event fractions for data, E/W and sfON/OFF
   Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t2E_sfON, t2E_sfOFF, t3E_sfON, t3E_sfOFF;
@@ -345,22 +345,23 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   dataALL->SetTitle("Super-Sum All Event Types");
   dataALL->SetMarkerColor(kBlue);
-  dataALL->SetMarkerStyle(22);
+  dataALL->SetMarkerStyle(24);
   dataALL->SetMarkerSize(0.75);
   dataALL->SetLineColor(kBlue);
   //dataALL->SetFillStyle(3002);
   //dataALL->SetFillColor(kBlue);
   dataALL->SetLineWidth(3);
-  simALL->SetMarkerColor(kRed);
-  simALL->SetLineColor(kRed);
-  simALL->SetMarkerSize(0.75);
-  simALL->SetMarkerStyle(20);
   dataALL->GetXaxis()->SetRangeUser(0., xAxisMax);
-  dataALL->SetMaximum(dataALL->GetMaximum()*1.2);
-  dataALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  simALL->SetLineWidth(2);
+  simALL->SetMarkerColor(kBlack);
+  simALL->SetLineColor(kBlack);
+  simALL->SetMarkerSize(0);
+  simALL->SetMarkerStyle(24);
+  simALL->SetMaximum(dataALL->GetMaximum()*1.2);
+  simALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
   simALL->GetXaxis()->SetRangeUser(0., xAxisMax);
-  dataALL->Draw("HISTE0");
-  simALL->Draw("SAMEE0");
+  simALL->Draw("HIST C");
+  dataALL->Draw("SAMEE0");
 
   BG_dataALL->SetMarkerColor(1);
   BG_dataALL->SetMarkerStyle(20);
@@ -422,22 +423,22 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   data0->SetTitle("Super-Sum Type 0");
   data0->SetMarkerColor(kBlue);
-  data0->SetMarkerStyle(22);
+  data0->SetMarkerStyle(24);
   data0->SetMarkerSize(0.75);
   data0->SetLineColor(kBlue);
   //data0->SetFillStyle(3002);
   //data0->SetFillColor(kBlue);
   data0->SetLineWidth(3);
-  sim0->SetMarkerColor(kRed);
-  sim0->SetLineColor(kRed);
-  sim0->SetMarkerSize(0.75);
-  sim0->SetMarkerStyle(20);
-  data0->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data0->SetMaximum(data0->GetMaximum()*1.2);
-  data0->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim0->SetLineWidth(2);
+  sim0->SetMarkerColor(kBlack);
+  sim0->SetLineColor(kBlack);
+  sim0->SetMarkerSize(0);
+  sim0->SetMarkerStyle(24);
+  sim0->SetMaximum(data0->GetMaximum()*1.2);
+  sim0->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim0->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data0->Draw("HISTE0");
-  sim0->Draw("SAMEE0");
+  sim0->Draw("HIST C");
+  data0->Draw("SAMEE0");
 
   BG_data0->SetMarkerColor(1);
   BG_data0->SetMarkerStyle(20);
@@ -492,22 +493,22 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   data1->SetTitle("Super-Sum Type 1");
   data1->SetMarkerColor(kBlue);
-  data1->SetMarkerStyle(22);
+  data1->SetMarkerStyle(24);
   data1->SetMarkerSize(0.75);
   data1->SetLineColor(kBlue);
   //data1->SetFillStyle(3002);
   //data1->SetFillColor(kBlue);
   data1->SetLineWidth(3);
-  sim1->SetMarkerColor(kRed);
-  sim1->SetLineColor(kRed);
-  sim1->SetMarkerSize(0.75);
-  sim1->SetMarkerStyle(20);
-  data1->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data1->SetMaximum(data1->GetMaximum()*1.2);
-  data1->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim1->SetLineWidth(2);
+  sim1->SetMarkerColor(kBlack);
+  sim1->SetLineColor(kBlack);
+  sim1->SetMarkerSize(0);
+  sim1->SetMarkerStyle(24);
+  sim1->SetMaximum(data1->GetMaximum()*1.2);
+  sim1->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim1->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data1->Draw("HISTE0");
-  sim1->Draw("SAMEE0");
+  sim1->Draw("HIST C");
+  data1->Draw("SAMEE0");
 
   BG_data1->SetMarkerColor(1);
   BG_data1->SetMarkerStyle(20);
@@ -560,22 +561,22 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   data2->SetTitle("Super-Sum Type 2");
   data2->SetMarkerColor(kBlue);
-  data2->SetMarkerStyle(22);
+  data2->SetMarkerStyle(24);
   data2->SetMarkerSize(0.75);
   data2->SetLineColor(kBlue);
   //data1->SetFillStyle(3002);
   //data1->SetFillColor(kBlue);
   data2->SetLineWidth(3);
-  sim2->SetMarkerColor(kRed);
-  sim2->SetLineColor(kRed);
-  sim2->SetMarkerSize(0.75);
-  sim2->SetMarkerStyle(20);
-  data2->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data2->SetMaximum(data2->GetMaximum()*1.2);
-  data2->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim2->SetLineWidth(2);
+  sim2->SetMarkerColor(kBlack);
+  sim2->SetLineColor(kBlack);
+  sim2->SetMarkerSize(0);
+  sim2->SetMarkerStyle(24);
+  sim2->SetMaximum(data2->GetMaximum()*1.2);
+  sim2->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim2->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data2->Draw("HISTE0");
-  sim2->Draw("SAMEE0");
+  sim2->Draw("HIST C");
+  data2->Draw("SAMEE0");
 
   BG_data2->SetMarkerColor(1);
   BG_data2->SetMarkerStyle(20);
@@ -628,22 +629,22 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   data3->SetTitle("Super-Sum Type 3");
   data3->SetMarkerColor(kBlue);
-  data3->SetMarkerStyle(22);
+  data3->SetMarkerStyle(24);
   data3->SetMarkerSize(0.75);
   data3->SetLineColor(kBlue);
   //data3->SetFillStyle(3002);
   //data3->SetFillColor(kBlue);
   data3->SetLineWidth(3);
-  sim3->SetMarkerColor(kRed);
-  sim3->SetLineColor(kRed);
-  sim3->SetMarkerSize(0.75);
-  sim3->SetMarkerStyle(20);
-  data3->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data3->SetMaximum(data3->GetMaximum()*1.2);
-  data3->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  sim3->SetLineWidth(2);
+  sim3->SetMarkerColor(kBlack);
+  sim3->SetLineColor(kBlack);
+  sim3->SetMarkerSize(0);
+  sim3->SetMarkerStyle(24);
+  sim3->SetMaximum(data3->GetMaximum()*1.2);
+  sim3->GetYaxis()->SetTitle("event rate (mHz/keV)");
   sim3->GetXaxis()->SetRangeUser(0., xAxisMax);
-  data3->Draw("HISTE0");
-  sim3->Draw("SAMEE0");
+  sim3->Draw("HIST C");
+  data3->Draw("SAMEE0");
 
   BG_data3->SetMarkerColor(1);
   BG_data3->SetMarkerStyle(20);

@@ -138,8 +138,8 @@ int main(int argc, char* argv[])
   Int_t octBegin = argc>2 ? atoi(argv[2]) : 0;
   Int_t octEnd = argc>2 ? atoi(argv[3]) : 1;
   Double_t enBinWidth = 10.;
-  Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
-  Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
+  Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;
+  Double_t Ehigh = argc>4 ? atoi(argv[5]) : 670.;
   if ( argc>6 ) corr = std::string(argv[6]);
   int key = 0;
   if ( argc==9 ) key = atoi(argv[8]);
@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = false;
+  bool UNBLIND = true;
 
 
   if (UNBLIND) {
@@ -186,13 +186,13 @@ int main(int argc, char* argv[])
     for (UInt_t i=0; i<theoryCorr.size(); i++) std::cout << enBinMedian[i] << " " << theoryCorr[i] << "\n";*/
     
     
-    /*std::vector<TString> aCh {"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<TString> aCh {"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
-      ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
+      //ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
-      //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-      //PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-      }*/
+      PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+      PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
+      }
     
     // Loop over keys
     /*int keys[] {0,10,11,12,13,20,21,22,23,24,25,30,31};
@@ -204,8 +204,8 @@ int main(int argc, char* argv[])
 
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
-    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
+    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, key);
     
 
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, UNBLIND);
@@ -701,7 +701,11 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
     if (groupType=="Octet")
     {
       std::string basePath2 =basePath+ "Octet_"+itos(octet)+"/" + groupType + "Asymmetry/"; 
-      std::string infilePath = basePath2 + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + itos(octet) + "_AnaCh" + anaChoice +( key/10==1 ? "_Quadrant"+itos(key-10) : ( key/10==2 ? "_RadialRing"+itos(key-20) :"" ) ) +  ".dat";
+      std::string infilePath = ( basePath2 + (UNBLIND?"UNBLINDED_":"") + "rawAsymmetry_Octet" + 
+				 itos(octet) + "_AnaCh" + anaChoice +
+				 ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+				   ( key/10==2 ? "_RadialRing"+itos(key-20) :
+				     ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) + ".dat");
       std::string outfilePath =  ( basePath2 + (UNBLIND?"UNBLINDED_":"")+ corr +"_" + (withPOL?"withPOL_":"") +"FittedAsymmetry_Octet" +
 				   itos(octet) + "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +
 				   ( key/10==1 ? "_Quadrant"+itos(key-10) : 
@@ -1434,12 +1438,12 @@ std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
   if ( corr!=std::string("DeltaAngle") && corr!=std::string("AllCorr") ) return syst;
 
-  TString filename = TString::Format("../AngleCorrections/%s_DeltaAngle_anaCh%s.txt",oct<60?"2011-2012":"2012-2013",anaCh.c_str());
+  TString filename = TString::Format("../systematics/AngleCorrections/%s_DeltaAngle_anaCh%s.txt",oct<60?"2011-2012":"2012-2013",anaCh.c_str());
   //std::cout << filename.Data() << std::endl;                                                                                                 
 
   std::ifstream infile(filename.Data());
 
-  if (!infile.is_open()) throw "Couldn't open file in LoadFieldDipCorrections!";
+  if (!infile.is_open()) throw "Couldn't open file in LoadAngleCorrections!";
 
   //  std::cout << "\n";                                                                                                                       
 
