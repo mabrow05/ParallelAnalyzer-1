@@ -112,7 +112,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   std::vector <UInt_t> westType23(90,0);
   std::vector <UInt_t> westType3(90,0);
 
-  TString basepath = TString::Format("/scratch/mabr239/output/%s_1e-3_%s/",field_prefix.Data(),year.Data());
+
 
   TFile *f;
   
@@ -128,7 +128,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   TRandom3 rand;
 
   //Start with East polarization
-  for (int j=startFileNum; j<endFileNum; j+=2) {
+  for (int j=startFileNum; j<endFileNum; ++j) {
     
     bool skip = false;
     for (int n=0;n<21;++n) {
@@ -138,6 +138,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
     if (skip) continue;
     std::cout << "in file " << j << std::endl;
 
+    TString basepath = TString::Format("/scratch/mabr239/output/1_%s_polE_%s_n1_f_p_pE/",year.Data(),field_prefix.Data());
+    
     f = new TFile(TString::Format("%s/analyzed_%i.root",basepath.Data(),j),"READ");
     TTree *t = (TTree*)f->Get("anaTree");
     t->SetBranchAddress("EdepQ",EdepQ);
@@ -161,9 +163,6 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
       if (rE>fidCut || rW>fidCut || rPrim>fidCut) continue;
 
-      
-
-      double weight = 1.+0.1184*returnBeta(primKE)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
       int realside = cosTheta>0.?1:0;
       int windowSide = (keInSD[5]>keInSD[15])?0:1;
@@ -228,8 +227,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	      side = type==2 ? 0 : 1;
 	    }
 	}
-	if (side==0) hisE_polE->Fill(erecon,weight);
-	else if (side==1) hisW_polE->Fill(erecon,weight);
+	if (side==0) hisE_polE->Fill(erecon);
+	else if (side==1) hisW_polE->Fill(erecon);
       }
       
     }  
@@ -241,7 +240,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
   //Now West polarization
   
-  for (int j=startFileNum+1; j<endFileNum; j+=2) {
+  for (int j=startFileNum; j<endFileNum; ++j) {
     std::cout << "in file " << j << std::endl;
 
     bool skip = false;
@@ -250,6 +249,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
     }
 
     if (skip) continue;
+
+    TString basepath = TString::Format("/scratch/mabr239/output/1_%s_polW_%s_n1_f_p_pW/",year.Data(),field_prefix.Data());
     
     f = new TFile(TString::Format("%s/analyzed_%i.root",basepath.Data(),j),"READ");
     TTree *t = (TTree*)f->Get("anaTree");
@@ -275,7 +276,6 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
       if (rE>fidCut || rW>fidCut || rPrim>fidCut) continue;
 
-      double weight = 1-0.1184*returnBeta(primKE)*TMath::Cos(primTheta);
       double cosTheta = TMath::Cos(primTheta);
       int realside = cosTheta>0.?1:0;
       int windowSide = (keInSD[5]>keInSD[15])?0:1;
@@ -339,8 +339,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	      side = type==2 ? 0 : 1;
 	    }
 	}
-	if (side==0) hisE_polW->Fill(erecon,weight);
-	else if (side==1) hisW_polW->Fill(erecon,weight);
+	if (side==0) hisE_polW->Fill(erecon);
+	else if (side==1) hisW_polW->Fill(erecon);
       }
     }
    
@@ -378,7 +378,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   }
   std::cout << " A = " << asymm[20] << " +/- " << asymmErr[20] << std::endl;
   
-  ofstream ofile(TString::Format("asymms/%s_%sasymmErecon_%sField_files_%i-%i.txt",year.Data(),rawAsymm?"RAW":"",field.Data(),startFileNum,endFileNum).Data());
+  std::ofstream ofile(TString::Format("asymms/%s_%sasymmErecon_%sField_files_%i-%i.txt",year.Data(),rawAsymm?"RAW":"",field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
 
   for (int b=0;b<100;++b) {
