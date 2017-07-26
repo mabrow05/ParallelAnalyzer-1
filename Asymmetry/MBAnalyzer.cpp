@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
   // CLOCK TIMES.
   //****************************************************************
   //****************************************************************
-  bool UNBLIND = true;
+  bool UNBLIND = false;
 
 
   if (UNBLIND) {
