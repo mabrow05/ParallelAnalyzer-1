@@ -12,7 +12,7 @@ VPATH = ./:../../include/
 
 # Work with Linux with egcs	
 CXX           = g++ 
-CXXFLAGS      = -O2 -Wall -fPIC -g -std=c++11
+CXXFLAGS      = -g -Wall -fPIC -g -std=c++11
 LD            = g++
 SOFLAGS       = -shared
 LIBS          = $(ROOTLIBS) $(ROOTGLIBS)

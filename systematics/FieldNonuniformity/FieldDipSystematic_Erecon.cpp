@@ -64,9 +64,12 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
   bool rawAsymm=false; //Doesn't check for triggering if true
 
-  int badFiles[21] = {926,944,1605,2327,2614,2703,3109,3449,4494,4968,
-		      5531,5869,6216,6687,6863,7766,9225,9718,9798,9821,9959};
+  //int badFiles[21] = {926,944,1605,2327,2614,2703,3109,3449,4494,4968,
+  //		      5531,5869,6216,6687,6863,7766,9225,9718,9798,9821,9959};
 
+  std::vector <int> badFilesPolE {92,107,139,153,177,254,388};
+  std::vector <int> badFilesPolW {219,323,343,357};
+    
   double fidCut = 50.;
 
   //Load the simulated relationship between EQ and Etrue
@@ -85,11 +88,11 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   Double_t g_d = 4.*16.;
   Double_t g_rest = 4.*12500.;
 
-  TString field_prefix = ( field==TString("flat")?TString("FLAT_FIELD"):
-			   (field==TString("dip")?TString("FIELD_DIP"):
-			    (field==TString("symm")?TString("SYMMETRIC_FIELD_DIP"):"") ) );
+  //TString field_prefix = ( field==TString("flat")?TString("FLAT_FIELD"):
+  //(field==TString("dip")?TString("FIELD_DIP"):
+  //(field==TString("symm")?TString("SYMMETRIC_FIELD_DIP"):"") ) );
 
-  if ( field_prefix==TString("") ) {
+  if ( field!=TString("flat") && field!=TString("dip") ) {
     std::cout << "bad field type\n"; exit(0);
   }
 
@@ -102,7 +105,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   std::vector <Double_t> rW_polW (100,0.);
   std::vector <Double_t> rW_polW_err (100,0.);  
 
-  std::vector <UInt_t> eastType0(90,0);
+  /*std::vector <UInt_t> eastType0(90,0);
   std::vector <UInt_t> eastType1(90,0);
   std::vector <UInt_t> eastType23(90,0);
   std::vector <UInt_t> eastType3(90,0);
@@ -111,16 +114,23 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   std::vector <UInt_t> westType1(90,0);
   std::vector <UInt_t> westType23(90,0);
   std::vector <UInt_t> westType3(90,0);
-
+  */
 
 
   TFile *f;
   
-  TH1D *hisE_polE = new TH1D("hisE_polE","hisE",100,0.,1000.);
+  /*TH1D *hisE_polE = new TH1D("hisE_polE","hisE",100,0.,1000.);
   TH1D *hisW_polE = new TH1D("hisW_polE","hisW",100,0.,1000.);
 
   TH1D *hisE_polW = new TH1D("hisE_polW","hisE",100,0.,1000.);
   TH1D *hisW_polW = new TH1D("hisW_polW","hisW",100,0.,1000.);
+  */
+
+  TH1D hisE_polE("hisE_polE","hisE",100,0.,1000.);
+  TH1D hisW_polE("hisW_polE","hisW",100,0.,1000.);
+
+  TH1D hisE_polW("hisE_polW","hisE",100,0.,1000.);
+  TH1D hisW_polW("hisW_polW","hisW",100,0.,1000.);
 
 
   Double_t EdepQ[2],MWPCEnergy[2],time[2],primKE,primTheta,ScintPosE[3],ScintPosW[3],keInSD[24],primPos[4];
@@ -128,17 +138,20 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
   TRandom3 rand;
 
   //Start with East polarization
-  for (int j=startFileNum; j<endFileNum; ++j) {
+  for (int j=startFileNum; j<=endFileNum; ++j) {
     
     bool skip = false;
-    for (int n=0;n<21;++n) {
-      if (j==badFiles[n]) skip=true;
+    for (auto bf:badFilesPolE) {
+      if (j==bf) skip=true;
     }
+    //for (int n=0;n<21;++n) {
+    //  if (j==badFiles[n]) skip=true;
+    //}
 
     if (skip) continue;
     std::cout << "in file " << j << std::endl;
 
-    TString basepath = TString::Format("/scratch/mabr239/output/1_%s_polE_%s_n1_f_p_pE/",year.Data(),field_prefix.Data());
+    TString basepath = TString::Format("/scratch/mabr239/output/1_%s_polE_%sfield_n1_f_p_pE/",year.Data(),field.Data());
     
     f = new TFile(TString::Format("%s/analyzed_%i.root",basepath.Data(),j),"READ");
     TTree *t = (TTree*)f->Get("anaTree");
@@ -184,15 +197,15 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=0;
 	type=0;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        //else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
 	side=1;
 	type=0;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        //else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
@@ -200,8 +213,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=time[0]<time[1]?0:1;
 	type=1;
-	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-        else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        //else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
@@ -209,8 +222,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=scintEastTrigg?0:1;
 	type=2;
-	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-	else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
 
       }
 
@@ -227,8 +240,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	      side = type==2 ? 0 : 1;
 	    }
 	}
-	if (side==0) hisE_polE->Fill(erecon);
-	else if (side==1) hisW_polE->Fill(erecon);
+	if (side==0) hisE_polE.Fill(erecon);
+	else if (side==1) hisW_polE.Fill(erecon);
       }
       
     }  
@@ -240,17 +253,20 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
   //Now West polarization
   
-  for (int j=startFileNum; j<endFileNum; ++j) {
+  for (int j=startFileNum; j<=endFileNum; ++j) {
     std::cout << "in file " << j << std::endl;
 
     bool skip = false;
-    for (int n=0;n<21;++n) {
-      if (j==badFiles[n]) skip=true;
+    for (auto bf:badFilesPolW) {
+      if (j==bf) skip=true;
     }
+    //for (int n=0;n<21;++n) {
+    //  if (j==badFiles[n]) skip=true;
+    //}
 
     if (skip) continue;
 
-    TString basepath = TString::Format("/scratch/mabr239/output/1_%s_polW_%s_n1_f_p_pW/",year.Data(),field_prefix.Data());
+    TString basepath = TString::Format("/scratch/mabr239/output/1_%s_polW_%sfield_n1_f_p_pW/",year.Data(),field.Data());
     
     f = new TFile(TString::Format("%s/analyzed_%i.root",basepath.Data(),j),"READ");
     TTree *t = (TTree*)f->Get("anaTree");
@@ -297,15 +313,15 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=0;
 	type=0;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        //else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       else if (!scintEastTrigg && scintWestTrigg && MWPCEnergy[1]>0. && MWPCEnergy[0]==0. ) {
 	trigger=true;
 	side=1;
 	type=0;
-	if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-        else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//if (side==0) eastType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        //else if (side==1) westType0[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       //Type 1
@@ -313,8 +329,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=time[0]<time[1]?0:1;
 	type=1;
-	if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-        else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//if (side==0) eastType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        //else if (side==1) westType1[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
       
       //Type 2/3
@@ -322,8 +338,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	trigger=true;
 	side=scintEastTrigg?0:1;
 	type=2;
-	if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
-        else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+	//if (side==0) eastType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
+        //else if (side==1) westType23[(int)(TMath::ACos(TMath::Abs(cosTheta))*180./TMath::Pi())]+=1;
       }
 
       if (trigger) {
@@ -339,8 +355,8 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	      side = type==2 ? 0 : 1;
 	    }
 	}
-	if (side==0) hisE_polW->Fill(erecon);
-	else if (side==1) hisW_polW->Fill(erecon);
+	if (side==0) hisE_polW.Fill(erecon);
+	else if (side==1) hisW_polW.Fill(erecon);
       }
     }
    
@@ -350,16 +366,16 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 
   
   for (UInt_t b=0; b<100; ++b) {
-    rE_polE[b] = hisE_polE->GetBinContent(b+1); rE_polE_err[b] = TMath::Sqrt(rE_polE[b]);
-    rW_polE[b] = hisW_polE->GetBinContent(b+1); rW_polE_err[b] = TMath::Sqrt(rW_polE[b]);
-    rE_polW[b] = hisE_polW->GetBinContent(b+1); rE_polW_err[b] = TMath::Sqrt(rE_polW[b]);
-    rW_polW[b] = hisW_polW->GetBinContent(b+1); rW_polW_err[b] = TMath::Sqrt(rW_polW[b]);
+    rE_polE[b] = hisE_polE.GetBinContent(b+1); rE_polE_err[b] = TMath::Sqrt(rE_polE[b]);
+    rW_polE[b] = hisW_polE.GetBinContent(b+1); rW_polE_err[b] = TMath::Sqrt(rW_polE[b]);
+    rE_polW[b] = hisE_polW.GetBinContent(b+1); rE_polW_err[b] = TMath::Sqrt(rE_polW[b]);
+    rW_polW[b] = hisW_polW.GetBinContent(b+1); rW_polW_err[b] = TMath::Sqrt(rW_polW[b]);
   }
   
-  delete hisE_polE;
-  delete hisW_polE;
-  delete hisE_polW;
-  delete hisW_polW;
+  //delete hisE_polE;
+  //delete hisW_polE;
+  //delete hisE_polW;
+  //delete hisW_polW;
   
   std::vector <Double_t> asymm(100,0.);
   std::vector <Double_t> asymmErr(100,0.);
@@ -385,7 +401,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
     ofile << 10.*b+5. << "\t" << asymm[b] << "\t" << asymmErr[b] << std::endl;
   }
   ofile.close();
-
+  /*
   ofile.open(TString::Format("asymms/%s_thetaBinsErecon_%sField_%i-%i_East.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
   ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
@@ -396,7 +412,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	  << eastType23[b] << "\n";
   }
   ofile.close();
- 
+  
   ofile.open(TString::Format("asymms/%s_thetaBinsErecon_%sField_%i-%i_West.txt",year.Data(),field.Data(),startFileNum,endFileNum).Data());
   ofile << std::setprecision(10);
   ofile << "Abs(theta)\tType0\t\tType1\t\tType23\n";
@@ -406,7 +422,7 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	  << westType1[b] << "\t\t" 
 	  << westType23[b] << "\n";
   }
-  ofile.close();
+  ofile.close();*/
  
 
 
