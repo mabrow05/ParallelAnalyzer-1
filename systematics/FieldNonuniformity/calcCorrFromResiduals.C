@@ -4,7 +4,7 @@
 
   TString year = "2011-2012";
   Int_t emin = 220;
-  Int_t emax = 670;
+  Int_t emax = 750;
     
   ifstream infile(TString::Format("fieldDipDistr_%s_%i-%i.txt",year.Data(),emin,emax));
 
@@ -16,7 +16,7 @@
 
   
   //calculate RMS, mean, sigma
-  TH1D *h = new TH1D("h","Field Non-Uniformity Correction",20,-0.015,0.015);
+  TH1D *h = new TH1D("h","Field Non-Uniformity Correction",15,-0.025,0.025);
   Double_t RMS = 0., mean=0., sigma=0.;
   
   for (UInt_t i=0;i<res.size();++i) { 

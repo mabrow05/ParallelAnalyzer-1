@@ -33,28 +33,28 @@ if __name__=="__main__":
     year = "2011-2012"
 
     octmin = 0 if year=="2011-2012" else 60
-    octmax = 59 if year=="2011-2012" else 121
+    octmax = 59 if year=="2012-2013" else 121
 
     emin = 220.
-    emax = 670.
+    emax = 750.
 
-    #filemin=0
-    #filemax=99
+    #filemin=200
+    #filemax=220
     #A_dip = readAsymm(year,"dip",filemin,filemax)
     #A_dip_int = weightAsymm(A_dip,emin,emax)
     #A = readAsymm(year,"flat",filemin,filemax)
     #A_int = weightAsymm(A,emin,emax)
-    #writeCorrectionByBin(A_dip,A,year)
-   # print("A_flat = %f +/- %f"%(A_int[0],A_int[1]))
+    ##writeCorrectionByBin(A_dip,A,year)
+    #print("A_flat = %f +/- %f"%(A_int[0],A_int[1]))
     #print("A_dip = %f +/- %f"%(A_dip_int[0],A_dip_int[1]))
     #print("DeltaFieldDip (DeltaA/A) = %f"%(A_int[0]/A_dip_int[0] - 1))
     #print("UnCorrelated err = %f"%(fabs(A_int[0]/A_dip_int[0])*
-    #                  sqrt( (A_int[1]/A_int[0])**2 +(A_dip_int[1]/A_dip_int[0])**2 ) ) )
+    #                               sqrt( (A_int[1]/A_int[0])**2 +(A_dip_int[1]/A_dip_int[0])**2 ) ) )
     
 
     if 1:
 
-        totalfiles = 10000
+        totalfiles = 400
         numruns = 50
         numfiles = totalfiles/numruns
 
