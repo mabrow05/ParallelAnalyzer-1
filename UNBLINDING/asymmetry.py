@@ -3,8 +3,9 @@
 import sys
 import os
 from math import *
-#sys.path.append(".")
+sys.path.append("../systematics")
 from EnergyUncertainty.EnergyErrors import *
+from CombineCorrelated import *
 
 # I need to read in statistical uncertainties to store in the 
 
@@ -47,8 +48,10 @@ def totalStatErr(data,dataErr,e0,e1):
 def sumErrors(err):
     return sqrt(sum([er**2 for er in err]))
 
-def getAsymmetry(anaCh,octLow,octHigh,elow,ehigh,sim=True):
-    os.system("./MC_Corrections/AsymmCalculator.exe %s %i %i %f %f %i false > log.txt"%(anaCh,octLow, octHigh, elow,ehigh,int(sim)))
+def getAsymmetry(anaCh,octLow,octHigh,elow,ehigh,corr="UnCorr",sim=False):
+    #print("../Asymmetry/MBAnalyzer.exe %s %i %i %f %f %s %s 0 false > log.txt"%(anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false"))
+    #exit(0)
+    os.system("cd ../Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s 0 %s false > log.txt"%(anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false"))
     infile = open("asymm_hold.txt",'r')
     asymm=[0,0]
     if infile:
@@ -282,11 +285,11 @@ class uncertaintyHandler:
             
         #return totalStatErr(self.realA,self.realAerr,emin,emax) 
         asymm = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,False)
+                             emax,"AllCorr",False)
         self.A0 = asymm[0]
         return fabs( asymm[1]/asymm[0] )
 
-    def calcSystematicUncert(self,emin,emax):
+    def calcSystematicUncert(self,emin,emax,percErrBS=0.25,percErrAngle=0.25):
 
         if len(self.syst_err)==0: 
             self.makeSystematicCorrections() 
@@ -294,7 +297,66 @@ class uncertaintyHandler:
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
+        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        
+        UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"UnCorr",False)
+        AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"DeltaAngleOnly",False)
+        BSCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"DeltaBackscatterOnly",False)
+
+        deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
+        deltaBS = (BSCorr[0]/UnCorr[0]-1.)
+        deltaCorr = (1.+deltaAngle)*(1+deltaBS)
+        deltaCorrErr = sqrt( (percErrAngle*deltaAngle/(1.+deltaAngle))**2 + (percErrBS*deltaBS/(1.+deltaBS))**2)
+
+        print("deltaBS: %f +/- %f"%(deltaBS,percErrBS*deltaBS))
+        print("deltaAngle: %f +/- %f"%(deltaAngle,percErrAngle*deltaAngle))
+        return deltaCorrErr
+
+    def calcAngleUncert(self,emin,emax,percErrAngle=0.25):
+
+        if len(self.syst_err)==0: 
+            self.makeSystematicCorrections() 
+            
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
+        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        
+        UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"UnCorr",False)
+        AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"DeltaAngleOnly",False)
+        
+        deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
+        print("deltaAngle: %f +/- %f"%(deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))))
+        return [deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))]
+
+
+    def calcBackscUncert(self,emin,emax,percErrBacksc=0.25):
+
+        if len(self.syst_err)==0: 
+            self.makeSystematicCorrections() 
+            
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
+        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        
+        UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"UnCorr",False)
+        BackscCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"DeltaBackscALL",False)
+        
+        deltaBacksc = (BackscCorr[0]/UnCorr[0]-1.)
+        print("deltaBacksc: %f +/- %f"%(deltaBacksc/(1.+deltaBacksc),fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))))
+        return [deltaBacksc/(1.+deltaBacksc),fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))]
+        
 
     def gainUncert(self,emin,emax):
 
@@ -350,7 +412,8 @@ class uncertaintyHandler:
 
                 Errors.append( self.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
                 Errors.append( self.calcStatUncert(       getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) )
-                Errors.append( self.calcSystematicUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
+                Errors.append( self.calcAngleUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errFacDeltaAngle )[1] )
+                Errors.append( self.calcBackscUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errFacDeltaBS )[1] )
 
                 errSum = sumErrors(Errors)
                 
@@ -411,28 +474,212 @@ if __name__ == "__main__":
 
     #also consider analysis choice "B" which seems to have the lowers Total uncert
 
-    if 1:
+    if 0:
     
-        lowBin = 21
-        highBin = 74
+        lowBin = 22
+        highBin = 70
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
-        uncert.makeSystematicCorrections(errFacDeltaBS=0.20,errFacDeltaAngle=0.25)
+        uncert.makeSystematicCorrections(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
         
         Errors = []
         
         Errors.append( uncert.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
         Errors.append( uncert.calcStatUncert(       getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) )
-        Errors.append( uncert.calcSystematicUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
-        
+        Errors.append( uncert.calcAngleUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25 )[1] )
+        Errors.append( uncert.calcBackscUncert( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25 )[1] )
+                
         errSum = sumErrors(Errors)
         
        
         print("\nAsymm = %f\n"%uncert.A0)
         print("Weighted Energy Error: %f"%Errors[0])
         print("Total Statistical Error: %f"%Errors[1])
-        print("Total Systematic Error: %f"%Errors[2])
+        print("Total Angle Corr Error: %f"%Errors[2])
+        print("Total backsc Corr Error: %f"%Errors[3])
         print("%i-%i keV total Error = %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
         
 
+
+    if 1:
+        lowBin = 22
+        highBin = 70
+        
+        errDeltaBS = 0.2
+        errDeltaAngle = 0.2
+
+        #### ************ make sure these are correct values
+        deltaGainErr = 0.0018
+        deltaMuonVetoErr = 0.0003
+        deltaNeutronBG = 0.0001
+        deltaNeutronBGErr = 0.0002
+        deltaTheoryROErr = 0.0003
+        deltaTheoryRadErr = 0.0005
+
+        ############### 2011-2012 #####################
+        deltaEff2011 = 0.0019
+        deltaEff2011Err = 0.00014
+
+        deltaField2011 = 0.
+        deltaField2011Err = 0.001
+        
+        A2011 = uncertaintyHandler(2011,"C")
+        A2011.statUncertainties()
+        A2011.readEnergyUncertainties()
+        A2011.makeSystematicCorrections(errDeltaBS,errDeltaAngle)
+
+        statErr = A2011.calcStatUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
+        energyErr = A2011.calcEnergyUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
+        deltaBacksc = A2011.calcBackscUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaBS)
+        deltaAngle = A2011.calcAngleUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaBS)
+        
+        A0_2011 = A2011.A0*(1.+deltaEff2011)*(1.+deltaField2011)*(1.+deltaNeutronBG/(1.-deltaNeutronBG))
+
+        enUncert2011 = fabs(energyErr*A0_2011)
+        statUncert2011 = fabs(statErr*A0_2011)
+        angleUncert2011 = fabs(deltaAngle[1]*A0_2011)
+        backscUncert2011 = fabs(deltaBacksc[1]*A0_2011)
+        fieldUncert2011 = fabs(deltaField2011Err/(1.+deltaField2011)*A0_2011)
+        effUncert2011 = fabs(deltaEff2011Err/(1.+deltaEff2011)*A0_2011)
+         
+        depolCorr2011 = 0.001
+        depolCorr2011Err = 0.003
+
+
+        #### 2011 uncertainty table
+        print("\n\n****************** 2011-2012 ****************\n\n")
+        print("A0 = %0.6f +/- %0.6f"%(A0_2011,sumErrors([enUncert2011,statUncert2011,angleUncert2011,backscUncert2011,fieldUncert2011,effUncert2011,depolCorr2011Err*A0_2011,
+                                                         deltaGainErr*A0_2011,deltaMuonVetoErr*A0_2011,deltaNeutronBGErr*A0_2011,deltaTheoryROErr*A0_2011,deltaTheoryRadErr*A0_2011])))
+        print("")
+
+        print("\t\t% Corr\t\t% Unc.")
+        print("depol\t\t%0.2f\t\t%0.2f"%(depolCorr2011*100.,depolCorr2011Err*100.))
+        print("Energy\t\t\t\t%0.2f"%(energyErr*100.))
+        print("BS\t\t%0.2f\t\t%0.2f"%(deltaBacksc[0]*100.,deltaBacksc[1]*100.))
+        print("Angle\t\t%0.2f\t\t%0.2f"%(deltaAngle[0]*100.,deltaAngle[1]*100.))
+        print("gain\t\t\t\t%0.2f"%(deltaGainErr*100.))
+        print("MWPC eff\t%0.2f\t\t%0.2f"%(deltaEff2011/(1+deltaEff2011)*100.,deltaEff2011Err/(1.+deltaEff2011)*100.))
+        print("field\t\t\t\t%0.2f"%(deltaField2011Err*100.))
+        print("UCN Bg\t\t%0.2f\t\t%0.2f"%(deltaNeutronBG*100.,deltaNeutronBGErr*100.))
+        print("muon\t\t\t\t%0.2f\n"%(deltaMuonVetoErr*100.))
+        print("-----------------------------------------------")
+        print("Stats\t\t\t\t%0.2f"%(statErr*100.))
+        print("-----------------------------------------------")
+        print("\tTheory Corrections")
+        print("R.O.\t\t%0.2f\t\t%0.2f"%(0.*100.,0.*100.))
+        print("Rad\t\t%0.2f\t\t%0.2f"%(0.*100.,0.*100.))
+        
+        MC = MeasCombiner()
+        
+        mu0 = MC.new_meas_mu(A0_2011)
+        stat0 = MC.new_meas_err(mu0,statUncert2011)	# stat
+        err01 = MC.new_meas_err(mu0,enUncert2011) # syst - energy
+        err02 = MC.new_meas_err(mu0,angleUncert2011) # syst - MC Angle
+        err03 = MC.new_meas_err(mu0,backscUncert2011) # syst - MC Backsc
+        #dst0 = MC.new_meas_err(mu0,0.00*A0_2011) # depol stat
+        #err03 = MC.new_meas_err(mu0,0.000*A0_2011) # depol syst
+        err04 = MC.new_meas_err(mu0,depolCorr2011Err*A0_2011) # depol total
+        err05 = MC.new_meas_err(mu0,effUncert2011) # MWPC eff
+        err06 = MC.new_meas_err(mu0,fieldUncert2011) # Field Dip
+        err07 = MC.new_meas_err(mu0,fabs(deltaGainErr*A0_2011)) # gain
+        err08 = MC.new_meas_err(mu0,fabs(deltaMuonVetoErr*A0_2011)) # MuonVeto
+        err09 = MC.new_meas_err(mu0,fabs(deltaNeutronBGErr*A0_2011)) # NeutronBG
+        err010 = MC.new_meas_err(mu0,fabs(deltaTheoryROErr*A0_2011)) # R.O. Corr
+        err011 = MC.new_meas_err(mu0,fabs(deltaTheoryRadErr*A0_2011)) # Radiative Corr
+        
+        
+
+        ############### 2012-2013 #####################
+        deltaEff2012 = 0.0017
+        deltaEff2012Err = 0.00013
+
+        deltaField2012 = 0.
+        deltaField2012Err = 0.001
+        
+        A2012 = uncertaintyHandler(2012,"C")
+        A2012.statUncertainties()
+        A2012.readEnergyUncertainties()
+        A2012.makeSystematicCorrections(errDeltaBS,errDeltaAngle)
+
+        statErr = A2012.calcStatUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
+        energyErr = A2012.calcEnergyUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
+        deltaBacksc = A2012.calcBackscUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaBS)
+        deltaAngle = A2012.calcAngleUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaBS)
+        
+        A0_2012 = A2012.A0*(1.+deltaEff2012)*(1.+deltaField2012)*(1.+deltaNeutronBG/(1.-deltaNeutronBG))
+
+        enUncert2012 = fabs(energyErr*A0_2012)
+        statUncert2012 = fabs(statErr*A0_2012)
+        angleUncert2012 = fabs(deltaAngle[1]*A0_2012)
+        backscUncert2012 = fabs(deltaBacksc[1]*A0_2012)
+        fieldUncert2012 = fabs(deltaField2012Err/(1.+deltaField2012)*A0_2012)
+        effUncert2012 = fabs(deltaEff2012Err/(1.+deltaEff2012)*A0_2012)
+         
+        depolCorr2012 = 0.001
+        depolCorr2012Err = 0.003
+
+
+        #### 2012 uncertainty table
+        print("\n\n****************** 2012-2013 ****************\n\n")
+        print("A0 = %0.6f +/- %0.6f"%(A0_2012,sumErrors([enUncert2012,statUncert2012,angleUncert2012,backscUncert2012,fieldUncert2012,effUncert2012,depolCorr2012Err*A0_2012,
+                                                         deltaGainErr*A0_2012,deltaMuonVetoErr*A0_2012,deltaNeutronBGErr*A0_2012,deltaTheoryROErr*A0_2012,deltaTheoryRadErr*A0_2012])))
+        print("")
+
+        print("\t\t% Corr\t\t% Unc.")
+        print("depol\t\t%0.2f\t\t%0.2f"%(depolCorr2012*100.,depolCorr2012Err*100.))
+        print("Energy\t\t\t\t%0.2f"%(energyErr*100.))
+        print("BS\t\t%0.2f\t\t%0.2f"%(deltaBacksc[0]*100.,deltaBacksc[1]*100.))
+        print("Angle\t\t%0.2f\t\t%0.2f"%(deltaAngle[0]*100.,deltaAngle[1]*100.))
+        print("gain\t\t\t\t%0.2f"%(deltaGainErr*100.))
+        print("MWPC eff\t%0.2f\t\t%0.2f"%(deltaEff2012/(1+deltaEff2012)*100.,deltaEff2012Err/(1.+deltaEff2012)*100.))
+        print("field\t\t\t\t%0.2f"%(deltaField2012Err*100.))
+        print("UCN Bg\t\t%0.2f\t\t%0.2f"%(deltaNeutronBG*100.,deltaNeutronBGErr*100.))
+        print("muon\t\t\t\t%0.2f\n"%(deltaMuonVetoErr*100.))
+        print("-----------------------------------------------")
+        print("Stats\t\t\t\t%0.2f"%(statErr*100.))
+        print("-----------------------------------------------")
+        print("\tTheory Corrections")
+        print("R.O.\t\t%0.2f\t\t%0.2f"%(0.*100.,0.*100.))
+        print("Rad\t\t%0.2f\t\t%0.2f"%(0.*100.,0.*100.))
+        
+
+        mu1 = MC.new_meas_mu(A0_2012)
+        stat1 = MC.new_meas_err(mu1,statUncert2012)	# stat
+        err11 = MC.new_meas_err(mu1,enUncert2012) # syst - energy
+        err12 = MC.new_meas_err(mu1,angleUncert2012) # syst - MC Angle
+        err13 = MC.new_meas_err(mu1,backscUncert2012) # syst - MC Backsc
+        #dst1 = MC.new_meas_err(mu1,0.00*A0_2012) # depol stat
+        #err13 = MC.new_meas_err(mu1,0.000*A0_2012) # depol syst
+        err14 = MC.new_meas_err(mu1,depolCorr2012Err*A0_2012) # depol total
+        err15 = MC.new_meas_err(mu1,effUncert2012) # MWPC eff
+        err16 = MC.new_meas_err(mu1,fieldUncert2012) # Field Dip
+        err17 = MC.new_meas_err(mu1,fabs(deltaGainErr*A0_2012)) # gain
+        err18 = MC.new_meas_err(mu1,fabs(deltaMuonVetoErr*A0_2012)) # MuonVeto
+        err19 = MC.new_meas_err(mu1,fabs(deltaNeutronBGErr*A0_2012)) # NeutronBG
+        err110 = MC.new_meas_err(mu1,fabs(deltaTheoryROErr*A0_2012)) # R.O. Corr
+        err111 = MC.new_meas_err(mu1,fabs(deltaTheoryRadErr*A0_2012)) # Radiative Corr
+        
+        
+    
+	
+        
+        MC.add_correlation(err02,err12,1.0)
+        MC.add_correlation(err03,err13,1.0)
+        MC.add_correlation(err04,err14,1.0)
+        MC.add_correlation(err05,err15,1.0)
+        MC.add_correlation(err06,err16,1.0)
+        MC.add_correlation(err07,err17,1.0)
+        MC.add_correlation(err08,err18,1.0)
+        MC.add_correlation(err09,err19,1.0)
+        MC.add_correlation(err010,err110,1.0)
+        MC.add_correlation(err011,err111,1.0)
+
+        MC.calc_combo()
+
+        #print "stat =",MC.errcombo([stat0,stat1])
+        #print "syst =",MC.errcombo([err01,err11,err02,err12,err04,err14,err05,err15])
+        #print "depol =",MC.errcombo([err03,err13])#([dst0,dst1,err02,err12])
+        #print "systot =",MC.errcombo([err01,err11,err02,err12,err04,err14,err05,err15,err03,err13])
+        #print
+        

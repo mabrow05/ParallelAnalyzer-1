@@ -16,18 +16,18 @@ int main() {
     West no trigg = 0.0360786 +/- 0.00640295
     West efficiency = 0.998573 +/- 0.000252966
   */
-  Double_t eastEff = 0.9983;
-  Double_t westEff = 0.9986;
+  Double_t eastEff = 0.99912;
+  Double_t westEff = 0.99974;
 
-  std::vector <int> runs {18144,18147,18149,18152,18156,18159,18161,18164};
+  std::vector <int> runs {19899,19900,19902,19904,19924,19925,19927,19929};//{18144,18147,18149,18152,18156,18159,18161,18164};
   //{18144,18147,18149,18152,18156,18159,18161,18164};
   //{19899,19900,19902,19904,19924,19925,19927,19929};//
 
   TChain *chain = new TChain("revCalSim");
 
   for (auto run:runs) {
-    //chain->Add(TString::Format("%s/sources/revCalSim_%i_Sn113.root",getenv("REVCALSIM"),run));
-    chain->Add(TString::Format("%s/beta_highStatistics/revCalSim_%i_Beta.root",getenv("REVCALSIM"),run));
+    chain->Add(TString::Format("%s/sources/revCalSim_%i_Sn113.root",getenv("REVCALSIM"),run));
+    //chain->Add(TString::Format("%s/beta_highStatistics/revCalSim_%i_Beta.root",getenv("REVCALSIM"),run));
   }
   
   Double_t eastThresh = 0.5;

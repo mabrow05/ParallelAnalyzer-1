@@ -9,8 +9,8 @@ numruns = 50
 numfiles = totfiles/numruns
 
 year = "2012-2013"
-eastThresh = 0.2#1.002#
-westThresh = 0.2#0.983#
+eastThresh = 0.969#1.002#
+westThresh = 0.874#0.983#
 
 jobfile = None
 filestart=0
