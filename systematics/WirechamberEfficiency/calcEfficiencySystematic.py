@@ -70,7 +70,7 @@ if __name__=="__main__":
                 filemin = i*numfiles
                 filemax = filemin+numfiles-1
                 
-                A_eff = readAsymm(year,1.00,0.98,filemin,filemax)
+                A_eff = readAsymm(year,0.969,0.874,filemin,filemax)
                 A_eff_int = weightAsymm(A_eff,emin,emax)
                 A = readAsymm(year,0.2,0.2,filemin,filemax)
                 A_int = weightAsymm(A,emin,emax)
