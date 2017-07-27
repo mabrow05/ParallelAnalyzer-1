@@ -1423,12 +1423,16 @@ std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoin
 
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
 
-  if ( corr!=std::string("DeltaTheoryOnly") && corr!=std::string("AllCorr") ) return syst;
+  if (corr.size()<7) return syst;
+  if ( corr.substr(0,7)!=std::string("AllCorr") && corr.substr(0,7)!=std::string("DeltaTh") ) return syst;
 
+  std::string c = corr.substr(0,7)==std::string("DeltaTh")?corr.substr(11,3):"ALL"; // options are DeltaTheoryRecoil,DeltaTheoryRadiative,DeltaTheoryALL
+
+  double WE=0.;
   for (UInt_t i=0; i<syst.size(); i++) {
-   
-    syst[i] = asymmetryCorrectionFactor(enBinMidpoint[i]); //As defined in BetaSpectrum.hh by MPM
-
+    WE = (enBinMidpoint[i]+m_e)/m_e;
+    if (c==std::string("Rec") || c==std::string("ALL") ) syst[i] *= (1.+WilkinsonACorrection(WE));
+    if (c==std::string("Rad") || c==std::string("ALL") ) syst[i] *= (1.+shann_h_minus_g_a2pi(WE));
   }
 
   return syst;
