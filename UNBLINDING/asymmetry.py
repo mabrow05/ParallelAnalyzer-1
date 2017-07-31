@@ -52,7 +52,7 @@ def sumErrors(err):
 def getAsymmetry(anaCh,octLow,octHigh,elow,ehigh,corr="UnCorr",sim=False):
     #print("../Asymmetry/MBAnalyzer.exe %s %i %i %f %f %s %s 0 false > log.txt"%(anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false"))
     #exit(0)
-    os.system("cd ../Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s 0 %s false %s > log.txt"%(anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false", "true" if UNBLIND else "false"))
+    os.system("cd ../Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s %s 0 false %s > log.txt"%(anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false", "true" if UNBLIND else "false"))
     infile = open("asymm_hold.txt",'r')
     asymm=[0,0]
     if infile:
@@ -549,10 +549,10 @@ if __name__ == "__main__":
         lowBin = 22
         highBin = 66
         
-        errDeltaBS = 0.2
-        errDeltaAngle = 0.2
-        errDeltaRecoil = 0.0002
-        errDeltaRadiative = 0.0002
+        errDeltaBS = 0.25
+        errDeltaAngle = 0.25
+        errDeltaRecoil = 0.005 # These need to be fixed
+        errDeltaRadiative = 0.005
 
         #### ************ make sure these are correct values
         deltaGainErr = 0.0018
@@ -574,10 +574,10 @@ if __name__ == "__main__":
 
         statErr = A2011.calcStatUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
         energyErr = A2011.calcEnergyUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
-        deltaBacksc = A2011.calcBackscUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaBS)
-        deltaAngle = A2011.calcAngleUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaAngle)
-        deltaRecoil = A2011.calcRecoilCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaRecoil)
-        deltaRadiative = A2011.calcRadiativeCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaRadiative)
+        deltaBacksc = A2011.calcBackscCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaBS)
+        deltaAngle = A2011.calcAngleCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaAngle)
+        deltaRecoil = A2011.calcRecoilOrderCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRecoil)
+        deltaRadiative = A2011.calcRadiativeCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRadiative)
         
         A0_2011 = A2011.A0*(1.+deltaEff2011)*(1.+deltaField2011)*(1.+deltaNeutronBG/(1.-deltaNeutronBG))
 
@@ -586,7 +586,7 @@ if __name__ == "__main__":
         angleUncert2011 = fabs(deltaAngle[1]*A0_2011)
         backscUncert2011 = fabs(deltaBacksc[1]*A0_2011)
         radiativeUncert2011 = fabs(deltaRadiative[1]*A0_2011)
-        recoilcUncert2011 = fabs(deltaRecoil[1]*A0_2011)
+        recoilUncert2011 = fabs(deltaRecoil[1]*A0_2011)
         fieldUncert2011 = fabs(deltaField2011Err/(1.+deltaField2011)*A0_2011)
         effUncert2011 = fabs(deltaEff2011Err/(1.+deltaEff2011)*A0_2011)
          
@@ -615,8 +615,8 @@ if __name__ == "__main__":
         print("Stats\t\t\t\t%0.2f"%(statErr*100.))
         print("-----------------------------------------------")
         print("\tTheory Corrections")
-        print("R.O.\t\t%0.2f\t\t%0.2f"%(deltaRecoil[0]*100.,deltaRecoil[1]*100.))
-        print("Rad\t\t%0.2f\t\t%0.2f"%(deltaRadiative[0]*100.,deltaRadiative[1]*100.))
+        print("R.O.\t\t%0.2f\t\t%0.2f"%(deltaRecoil[0]*100.,0.03))#deltaRecoil[1]*100.))
+        print("Rad\t\t%0.2f\t\t%0.2f"%(deltaRadiative[0]*100.,0.05) )#deltaRadiative[1]*100.))
         
         MC = MeasCombiner()
         
@@ -652,10 +652,10 @@ if __name__ == "__main__":
 
         statErr = A2012.calcStatUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
         energyErr = A2012.calcEnergyUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
-        deltaBacksc = A2012.calcBackscUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaBS)
-        deltaAngle = A2012.calcAngleUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaBS)
-        deltaRecoil = A2012.calcRecoilCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaRecoil)
-        deltaRadiative = A2012.calcRadiativeCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errDeltaRadiative)
+        deltaBacksc = A2012.calcBackscCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaBS)
+        deltaAngle = A2012.calcAngleCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaAngle)
+        deltaRecoil = A2012.calcRecoilOrderCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRecoil)
+        deltaRadiative = A2012.calcRadiativeCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRadiative)
         
         A0_2012 = A2012.A0*(1.+deltaEff2012)*(1.+deltaField2012)*(1.+deltaNeutronBG/(1.-deltaNeutronBG))
 
@@ -664,7 +664,7 @@ if __name__ == "__main__":
         angleUncert2012 = fabs(deltaAngle[1]*A0_2012)
         backscUncert2012 = fabs(deltaBacksc[1]*A0_2012)
         radiativeUncert2012 = fabs(deltaRadiative[1]*A0_2012)
-        recoilcUncert2012 = fabs(deltaRecoil[1]*A0_2012)
+        recoilUncert2012 = fabs(deltaRecoil[1]*A0_2012)
         fieldUncert2012 = fabs(deltaField2012Err/(1.+deltaField2012)*A0_2012)
         effUncert2012 = fabs(deltaEff2012Err/(1.+deltaEff2012)*A0_2012)
          
@@ -693,8 +693,8 @@ if __name__ == "__main__":
         print("Stats\t\t\t\t%0.2f"%(statErr*100.))
         print("-----------------------------------------------")
         print("\tTheory Corrections")
-        print("R.O.\t\t%0.2f\t\t%0.2f"%(deltaRecoil[0]*100.,deltaRecoil[1]*100.))
-        print("Rad\t\t%0.2f\t\t%0.2f"%(deltaRadiative[0]*100.,deltaRadiative[1]*100.))
+        print("R.O.\t\t%0.2f\t\t%0.2f"%(deltaRecoil[0]*100.,0.03))#deltaRecoil[1]*100.))
+        print("Rad\t\t%0.2f\t\t%0.2f"%(deltaRadiative[0]*100.,0.05))#deltaRadiative[1]*100.))
         
 
         mu1 = MC.new_meas_mu(A0_2012)
@@ -715,9 +715,9 @@ if __name__ == "__main__":
         
     
 	
-        
-        MC.add_correlation(err02,err12,1.0)
-        MC.add_correlation(err03,err13,1.0)
+        #MC.add_correlation(err01,err11,1.0)
+        MC.add_correlation(err02,err12,1.)
+        MC.add_correlation(err03,err13,1.)
         MC.add_correlation(err04,err14,1.0)
         MC.add_correlation(err05,err15,1.0)
         MC.add_correlation(err06,err16,1.0)
@@ -729,9 +729,9 @@ if __name__ == "__main__":
 
         MC.calc_combo()
 
-        #print "stat =",MC.errcombo([stat0,stat1])
-        #print "syst =",MC.errcombo([err01,err11,err02,err12,err04,err14,err05,err15])
-        #print "depol =",MC.errcombo([err03,err13])#([dst0,dst1,err02,err12])
+        print "stat =",MC.errcombo([stat0,stat1])
+        print "syst =",MC.errcombo([err01,err11,err02,err12,err04,err14,err05,err15])
+        print "depol =",MC.errcombo([err03,err13])#([dst0,dst1,err02,err12])
         #print "systot =",MC.errcombo([err01,err11,err02,err12,err04,err14,err05,err15,err03,err13])
         #print
         
