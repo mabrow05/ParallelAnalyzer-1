@@ -35,6 +35,10 @@
   std::cout << "Mean = " << mean << std::endl;
   std::cout << "Sigma = " << sigma << std::endl;
 
+
+  std::cout << std::endl;
+
+  h->Fit("gaus");
   h->Draw();
 }
 
