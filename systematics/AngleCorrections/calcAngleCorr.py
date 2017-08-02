@@ -3,92 +3,35 @@ import sys
 import csv
 import os
 from math import *
-
-def getEnergyBin(energy):
-    return int(energy)/10
-    
-def getBinEnergyMid(b):
-    return b*10. + 5.
-
-def getBinEnergyLowEdge(b):
-    return b*10.
-
-def getBinEnergyUpperEdge(b):
-    return (b+1.)*10.
-
-def weightRealStats(data,stats,e0,e1):
-        """Weight the given data array by the real experimental statistics"""
-
-        numer = sum([(1./stats[i])**2 * data[i] 
-                     for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
-        denom = sum([(1./stats[i])**2  
-                     for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
+sys.path.append("../../UNBLINDING")
+from asymmetry import *
         
-        return numer/denom
-
-
-def statUncertainties(year="2011-2012"):
-    """Reads in the Statistical Uncertainty of every bin, calculates and 
-        stores the total fitted asymmetry and the total percent error
-        from statistics alone"""
-    octLow=0
-    octHigh=59
-    if year!="2011-2012":
-        octLow=60
-        octHigh=121
-    
-    infile = open( os.environ["ANALYSIS_RESULTS"]+"/Asymmetries/"+
-                   "UnCorr_OctetAsymmetries_AnaChC_Octets_%i-%i_BinByBin.txt"
-                   %(octLow,octHigh),'r' )
-    A_en = []
-    A = []
-    Aerr = []
-    percErr = []
-    
-    if infile:
-        for line in infile:
-            l = line.split()
-            if float(l[0])<1000.:
-                A_en.append(float(l[0]))
-                A.append(float(l[1]))
-                Aerr.append(float(l[2]))
-                if float(l[1])!=0.: 
-                    percErr.append( fabs( float(l[2])/float(l[1]) ) )
-                    
-                else:
-                    percErr.append( 1. )
-
-    else: 
-        print("Couldn't open file for statistical uncertainties")
-        exit(0)
-
-
-    return percErr
-        
-
-        
-
-def readAngleCorr(year="2011-2012",percErr=0.2):
-    A = [[],[]]
-    with open('angleCorr_%s.txt'%(year),'rb') as tsvin:
-        tsvin = csv.reader(tsvin, delimiter='\t')
-        for row in tsvin:
-            A[0].append(float(row[2]))
-            A[1].append(fabs(float(row[2])*percErr))
-            #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
-
-    return A
-
-
-
     
 if __name__=="__main__":
-    year = "2012-2013"
+    year = 2011
     emin = 220.
     emax = 670.
-    perc_Err=0.25
+    delta0fracShift = 0.
+    delta1fracShift = 0.
+    delta2fracShift = 0.
+    delta3fracShift = 0.
 
-    angleCorr = readAngleCorr(year,percErr=perc_Err)
-    statErr = statUncertainties(year)
-    print(weightRealStats(angleCorr[0],statErr,emin,emax))
-    print(weightRealStats(angleCorr[1],statErr,emin,emax))
+    # create objects for each event type and total asymmetry
+    A = uncertaintyHandler(year,"C")
+    type0A = uncertaintyHandler(year,"D")
+    type1A = uncertaintyHandler(year,"F")
+    type2A = uncertaintyHandler(year,"J")
+    type3A = uncertaintyHandler(year,"K")
+
+    # Load each of their statistical uncertainties and UnCorr A values
+    A.statUncertainties()
+    type0A.statUncertainties()
+    type1A.statUncertainties()
+    type2A.statUncertainties()
+    type3A.statUncertainties()
+
+    # 
+    
+    # store fractions, delta_i values, and A_i values with errors
+    frac0 = [ A.stat_percent_err[i]**2/typ0A.stat_percent_err[i]**2 for i in range(0,len(A.stat_percent_err)) ]
+    delta0 = readAngleCorr(year,"D") 
