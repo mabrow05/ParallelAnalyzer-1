@@ -15,6 +15,42 @@ using std::ifstream;
 using std::ofstream;
 using namespace std;
 
+class trigg {
+
+public: 
+  trigg(TString year) ;
+  ~trigg();
+  bool triggerE(Double_t *eq,Double_t rand) {return (fE->EvalPar(eq,pE)>rand)?true:false;};
+  bool triggerW(Double_t *eq,Double_t rand) {return (fW->EvalPar(eq,pW)>rand)?true:false;};
+protected:
+  Double_t pE[2];
+  Double_t pW[2];
+  TF1 *fE,*fW;
+};
+
+trigg::trigg(TString year) {
+  
+  if (year==TString("2011-2012")) {   
+    pE[0] = -18.3615;
+    pE[1] = 47.5979;
+    pW[0] = -15.8085;
+    pW[1] = 46.3180;
+  }
+  else {
+    pE[0] = -13.6101;
+    pE[1] = 45.7509;
+    pW[0] = -16.9604;
+    pW[1] = 46.5911;
+  }
+  
+  fE = new TF1("fE","0.5+0.5*TMath::Erf((x-[0])/[1])",0.,1000.);
+  fW = new TF1("fW","0.5+0.5*TMath::Erf((x-[0])/[1])",0.,1000.);
+  
+};
+
+trigg::~trigg() {delete fE; delete fW;}
+
+
 DataTree::DataTree() : inputFile(NULL), inputTree(NULL) { };
 
 DataTree::~DataTree() {
@@ -79,11 +115,14 @@ int main(int argc, char *argv[]) {
   
 
   double alpha = 0.4; // nPE/keV of roughly 400 PE per 1 GeV
-  Double_t g_d = 16.;
-  Double_t g_rest = 12500.;
+  Double_t g_d = 4.*16.;
+  Double_t g_rest = 4.*12500.;
   TRandom3 *rand = new TRandom3();
   TRandom3 *rand1 = new TRandom3(rand->Rndm()*1000);
   TRandom3 *rand2 = new TRandom3(rand->Rndm()*1000);
+
+  TString year = ( geometry==TString("2011-2012")?geometry:TString("2012-2013") );
+  trigg scintTrigg(year);
 
   #define pi M_PI
 
@@ -180,6 +219,9 @@ int main(int argc, char *argv[]) {
 	    
 	    if ( r2E > FidRad*FidRad || r2W > FidRad*FidRad ) continue; 
 
+	    bool scintEastTrigg = Tin.EdepQ.EdepQE>0. && scintTrigg.triggerE(&Tin.EdepQ.EdepQE,rand->Rndm());
+	    bool scintWestTrigg = Tin.EdepQ.EdepQW>0. && scintTrigg.triggerW(&Tin.EdepQ.EdepQW,rand->Rndm());
+
 	    //Calculate smeared energies
 	    //Tin.EdepQ.EdepQE = rand->Gaus(Tin.EdepQ.EdepQE, sqrt(Tin.EdepQ.EdepQE/alpha));
 	    //Tin.EdepQ.EdepQW = rand->Gaus(Tin.EdepQ.EdepQW, sqrt(Tin.EdepQ.EdepQW/alpha));
@@ -191,26 +233,26 @@ int main(int argc, char *argv[]) {
 	      if (Emin[Nhist]<=Tin.primKE && Tin.primKE<Emax[Nhist]) break; 
 	    
             //TYPE 0E EVENTS
-            if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE > 0 &&
-                Tin.MWPCEnergy.MWPCEnergyW == 0 && Tin.EdepQ.EdepQW == 0) 
+            if (Tin.MWPCEnergy.MWPCEnergyE > 0 && scintEastTrigg &&
+                Tin.MWPCEnergy.MWPCEnergyW == 0 && !scintWestTrigg) 
 	      EDepQType0E[Nhist]->Fill(Tin.EdepQ.EdepQE);
 	    
             //TYPE 0W EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE == 0 && Tin.EdepQ.EdepQE == 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW > 0)
+            else if (Tin.MWPCEnergy.MWPCEnergyE == 0 && !scintEastTrigg &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && scintWestTrigg)
 	      EDepQType0W[Nhist]->Fill(Tin.EdepQ.EdepQW);
 	    
             //TYPE 1E & 1W EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE > 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW > 0)
+            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && scintEastTrigg &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && scintWestTrigg)
 	      {
 		if (Tin.time.timeE < Tin.time.timeW) EDepQType1E[Nhist]->Fill(Tin.EdepQ.EdepQE+Tin.EdepQ.EdepQW);
 		else EDepQType1W[Nhist]->Fill(Tin.EdepQ.EdepQW+Tin.EdepQ.EdepQE);
 	      }
 	    
             //TYPE 3E & 2E EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE > 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW == 0)
+            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && scintEastTrigg &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && !scintWestTrigg)
 	      {
 		EDepQType23E[Nhist]->Fill(Tin.EdepQ.EdepQE);
 		if (Tin.primTheta>pi/2.) EDepQType3E[Nhist]->Fill(Tin.EdepQ.EdepQE);
@@ -218,8 +260,8 @@ int main(int argc, char *argv[]) {
 	      }
 	    
             //TYPE 2W & 3W EVENTS
-            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && Tin.EdepQ.EdepQE == 0 &&
-                     Tin.MWPCEnergy.MWPCEnergyW > 0 && Tin.EdepQ.EdepQW > 0)
+            else if (Tin.MWPCEnergy.MWPCEnergyE > 0 && !scintEastTrigg &&
+                     Tin.MWPCEnergy.MWPCEnergyW > 0 && scintWestTrigg)
 	      {
 		EDepQType23W[Nhist]->Fill(Tin.EdepQ.EdepQW);
 		if (Tin.primTheta<pi/2) EDepQType3W[Nhist]->Fill(Tin.EdepQ.EdepQW);

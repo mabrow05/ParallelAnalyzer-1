@@ -10,11 +10,21 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   Double_t xAxisMax = 800.;
 
+  Double_t minEnBin = 22; //Energy bins to integrate event types over
+  Double_t maxEnBin = 66;
+
   //Storing event fractions for data, E/W and sfON/OFF
   Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t2E_sfON, t2E_sfOFF, t3E_sfON, t3E_sfOFF;
   Double_t t0W_sfON, t0W_sfOFF, t1W_sfON, t1W_sfOFF, t2W_sfON, t2W_sfOFF, t3W_sfON, t3W_sfOFF;
   t0E_sfON = t0E_sfOFF = t1E_sfON = t1E_sfOFF = t23E_sfON = t2E_sfOFF = t3E_sfOFF = 0;
   t0W_sfON = t0W_sfOFF = t1W_sfON = t1W_sfOFF = t23W_sfON = t2W_sfOFF = t3E_sfOFF = 0.;
+
+  //Storing event fractions for sim, E/W and sfON/OFF
+  Double_t sim_t0E_sfON, sim_t0E_sfOFF, sim_t1E_sfON, sim_t1E_sfOFF, sim_t2E_sfON, sim_t2E_sfOFF, sim_t3E_sfON, sim_t3E_sfOFF;
+  Double_t sim_t0W_sfON, sim_t0W_sfOFF, sim_t1W_sfON, sim_t1W_sfOFF, sim_t2W_sfON, sim_t2W_sfOFF, sim_t3W_sfON, sim_t3W_sfOFF;
+  sim_t0E_sfON = sim_t0E_sfOFF = sim_t1E_sfON = sim_t1E_sfOFF = sim_t23E_sfON = sim_t2E_sfOFF = sim_t3E_sfOFF = 0;
+  sim_t0W_sfON = sim_t0W_sfOFF = sim_t1W_sfON = sim_t1W_sfOFF = sim_t23W_sfON = sim_t2W_sfOFF = sim_t3E_sfOFF = 0.;
+
   
   TFile *data_file = new TFile(TString::Format("Octets_%i-%i_DATA.root",octetStart,octetEnd),"READ");
   TFile *sim_file = new TFile(TString::Format("Octets_%i-%i_SIM.root",octetStart,octetEnd),"READ");
@@ -113,32 +123,40 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   TH1D *sim3_sfON_W = (TH1D*)sim_file->Get("Erecon3_sfON_W");
   
 
-  t0E_sfOFF = data0_sfOFF_E->Integral(18,79);
-  t0E_sfON = data0_sfON_E->Integral(18,79);
-  t1E_sfOFF = data1_sfOFF_E->Integral(18,79);
-  t1E_sfON = data1_sfON_E->Integral(18,79);
-  t2E_sfOFF = data2_sfOFF_E->Integral(18,79);
-  t2E_sfON = data2_sfON_E->Integral(18,79);
-  t3E_sfOFF = data3_sfOFF_E->Integral(18,79);
-  t3E_sfON = data3_sfON_E->Integral(18,79);
-  t0W_sfOFF = data0_sfOFF_W->Integral(18,79);
-  t0W_sfON = data0_sfON_W->Integral(18,79);
-  t1W_sfOFF = data1_sfOFF_W->Integral(18,79);
-  t1W_sfON = data1_sfON_W->Integral(18,79);
-  t2W_sfOFF = data2_sfOFF_W->Integral(18,79);
-  t2W_sfON = data2_sfON_W->Integral(18,79);
-  t3W_sfOFF = data3_sfOFF_W->Integral(18,79);
-  t3W_sfON = data3_sfON_W->Integral(18,79);
+  t0E_sfOFF = data0_sfOFF_E->Integral(minEnBin,maxEnBin);
+  t0E_sfON = data0_sfON_E->Integral(minEnBin,maxEnBin);
+  t1E_sfOFF = data1_sfOFF_E->Integral(minEnBin,maxEnBin);
+  t1E_sfON = data1_sfON_E->Integral(minEnBin,maxEnBin);
+  t2E_sfOFF = data2_sfOFF_E->Integral(minEnBin,maxEnBin);
+  t2E_sfON = data2_sfON_E->Integral(minEnBin,maxEnBin);
+  t3E_sfOFF = data3_sfOFF_E->Integral(minEnBin,maxEnBin);
+  t3E_sfON = data3_sfON_E->Integral(minEnBin,maxEnBin);
+  t0W_sfOFF = data0_sfOFF_W->Integral(minEnBin,maxEnBin);
+  t0W_sfON = data0_sfON_W->Integral(minEnBin,maxEnBin);
+  t1W_sfOFF = data1_sfOFF_W->Integral(minEnBin,maxEnBin);
+  t1W_sfON = data1_sfON_W->Integral(minEnBin,maxEnBin);
+  t2W_sfOFF = data2_sfOFF_W->Integral(minEnBin,maxEnBin);
+  t2W_sfON = data2_sfON_W->Integral(minEnBin,maxEnBin);
+  t3W_sfOFF = data3_sfOFF_W->Integral(minEnBin,maxEnBin);
+  t3W_sfON = data3_sfON_W->Integral(minEnBin,maxEnBin);
   
 
-  double totalE_sfOFF = t0E_sfOFF + t1E_sfOFF + t2E_sfOFF + t3E_sfOFF;
-  double totalE_sfON = t0E_sfON + t1E_sfON + t2E_sfON + t3E_sfON;
-  double totalW_sfOFF = t0W_sfOFF + t1W_sfOFF + t2W_sfOFF + t3W_sfOFF;
-  double totalW_sfON = t0W_sfON + t1W_sfON + t2W_sfON + t3W_sfON;
+  double totalE_sfOFF = t0E_sfOFF;// + t1E_sfOFF + t2E_sfOFF + t3E_sfOFF;
+  double totalE_sfON = t0E_sfON;// + t1E_sfON + t2E_sfON + t3E_sfON;
+  double totalW_sfOFF = t0W_sfOFF;// + t1W_sfOFF + t2W_sfOFF + t3W_sfOFF;
+  double totalW_sfON = t0W_sfON;// + t1W_sfON + t2W_sfON + t3W_sfON;
 
+  double fracData1 = 100.*data1->Integral(minEnBin,maxEnBin)/data0->Integral(minEnBin,maxEnBin);
+  double fracData2 = 100.*data2->Integral(minEnBin,maxEnBin)/data0->Integral(minEnBin,maxEnBin);
+  double fracData3 = 100.*data3->Integral(minEnBin,maxEnBin)/data0->Integral(minEnBin,maxEnBin);  
+  double fracSim1 = 100.*sim1->Integral(minEnBin,maxEnBin)/sim0->Integral(minEnBin,maxEnBin);
+  double fracSim2 = 100.*sim2->Integral(minEnBin,maxEnBin)/sim0->Integral(minEnBin,maxEnBin);
+  double fracSim3 = 100.*sim3->Integral(minEnBin,maxEnBin)/sim0->Integral(minEnBin,maxEnBin);  
   
+  std::cout << std::fixed;
+  std::cout << std::setprecision(2);
   std::cout << "********************************************\n"
-	    << "          Event ratios (180-780 keV)\n\n"
+	    << "          Event ratios (220-670 keV)\n\n"
 	    << "\t\tsfON\t\t\tsfOFF\n"
 	    << "Type 0E:\t" << t0E_sfON/totalE_sfON << "\t\t" << t0E_sfOFF/totalE_sfOFF << "\n"
 	    << "Type 0W:\t" << t0W_sfON/totalW_sfON << "\t\t" << t0W_sfOFF/totalW_sfOFF << "\n\n"
@@ -148,8 +166,15 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 	    << "Type 2W:\t" << t2W_sfON/totalW_sfON << "\t\t" << t2W_sfOFF/totalW_sfOFF << "\n\n"
 	    << "Type 3E:\t" << t3E_sfON/totalE_sfON << "\t\t" << t3E_sfOFF/totalE_sfOFF << "\n"
 	    << "Type 3W:\t" << t3W_sfON/totalW_sfON << "\t\t" << t3W_sfOFF/totalW_sfOFF << "\n\n"
-	    << "********************************************\n";
-    
+	    << "********************************************\n\n"
+	    << "          Total Fractions (as % of type0)\n"
+	    << "Type\t\t1\t2\t3\n"
+	    << "Data\t\t"<<fracData1<<"\t"<<fracData2<<"\t"<<fracData3<<"\n"
+	    << "Sim\t\t"<<fracSim1<<"\t"<<fracSim2<<"\t"<<fracSim3<<"\n"
+	    << "% Diff\t\t"
+	    << (fracSim1-fracData1)/fracSim1*100.<<"\t"
+	    << (fracSim2-fracData2)/fracSim2*100.<<"\t"
+	    << (fracSim3-fracData3)/fracSim3*100.<<"\n\n***************************************\n\n";
  
     
   //Normalize
