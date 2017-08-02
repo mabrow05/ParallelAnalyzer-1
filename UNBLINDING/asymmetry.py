@@ -102,7 +102,8 @@ def readBackscCorr(year=2011,anaCh="C",percErr=0.2):
 
 class uncertaintyHandler:
     
-    def __init__(self,year,anaChoice="C"):
+    def __init__(self,year,anaChoice="C",sim=False):
+        self.sim = sim
         self.geom = None
         self.anaChoice = anaChoice
         self.stats = []
@@ -141,8 +142,8 @@ class uncertaintyHandler:
         stores the total fitted asymmetry and the total percent error
         from statistics alone"""
         os.system("cd ../Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s %s 0 false %s %s 2&>1 log.txt"%(self.anaChoice,self.octLow,self.octHigh, 220, 670, 
-                                                                                                    "UnCorr","false", "false", "false"))
-        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Asymmetries/"+
+                                                                                                    "UnCorr",self.sim, "false", "false"))
+        infile = open( os.environ["%sANALYSIS_RESULTS"%("SIM_" if self.sim else "")]+"/Asymmetries/"+
                        "UnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
                        %(self.anaChoice,self.octLow,self.octHigh),'r' )
         A_en = []
@@ -285,14 +286,14 @@ class uncertaintyHandler:
         
 
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                              emax,"AllCorr",False,False)
+                              emax,"AllCorr",self.sim,False)
         PolCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                               emax,"AllCorr",False,True)
+                               emax,"AllCorr",self.sim,True)
         
         deltaPol = (PolCorr[0]/UnCorr[0]-1.)
         #print("deltaPol: %f"%(deltaPol/(1.+deltaPol)))
 
-        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Corrections/"+
+        infile = open( os.environ["%sANALYSIS_RESULTS"%("SIM_" if self.sim else "")]+"/Corrections/"+
                        "PolUncertOctetAsymmetries_AnaCh%s_Octets_%i-%i.txt"%(self.anaChoice,self.octLow,self.octHigh))
         
         percErr = []
@@ -319,7 +320,7 @@ class uncertaintyHandler:
             
         #return totalStatErr(self.realA,self.realAerr,emin,emax) 
         asymm = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"AllCorr",False)
+                             emax,"AllCorr",self.sim)
         self.A0 = asymm[0]
         return fabs( asymm[1]/asymm[0] )
 
@@ -335,11 +336,11 @@ class uncertaintyHandler:
         #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"UnCorr",False)
+                              emax,"UnCorr",self.sim)
         AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"DeltaAngleOnly",False)
+                                 emax,"DeltaAngleOnly",self.cim)
         BSCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"DeltaBackscatterOnly",False)
+                              emax,"DeltaBackscatterOnly",self.sim)
 
         deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
         deltaBS = (BSCorr[0]/UnCorr[0]-1.)
@@ -362,9 +363,9 @@ class uncertaintyHandler:
         #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"UnCorr",False)
+                              emax,"UnCorr",self.sim)
         AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"DeltaAngleOnly",False)
+                                 emax,"DeltaAngleOnly",self.sim)
         
         deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
         #print("deltaAngle: %f +/- %f"%(deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))))
@@ -383,9 +384,9 @@ class uncertaintyHandler:
         #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"UnCorr",False)
+                              emax,"UnCorr",self.sim)
         BackscCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"DeltaBackscALL",False)
+                                  emax,"DeltaBackscALL",self.sim)
         
         deltaBacksc = (BackscCorr[0]/UnCorr[0]-1.)
         #print("deltaBacksc: %f +/- %f"%(deltaBacksc/(1.+deltaBacksc),fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))))
@@ -404,9 +405,9 @@ class uncertaintyHandler:
         #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"UnCorr",False)
+                              emax,"UnCorr",self.sim)
         Corr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"DeltaTheoryRecoil",False)
+                             emax,"DeltaTheoryRecoil",self.sim)
         
         delta = (Corr[0]/UnCorr[0]-1.)
         #print("delta: %f +/- %f"%(delta/(1.+delta),fabs(percErr*delta/(1.+delta))))
@@ -425,9 +426,9 @@ class uncertaintyHandler:
         #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"UnCorr",False)
+                              emax,"UnCorr",self.sim)
         Corr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                             emax,"DeltaTheoryRadiative",False)
+                             emax,"DeltaTheoryRadiative",self.sim)
         
         delta = (Corr[0]/UnCorr[0]-1.)
         #print("delta: %f +/- %f"%(delta/(1.+delta),fabs(percErr*delta/(1.+delta))))
