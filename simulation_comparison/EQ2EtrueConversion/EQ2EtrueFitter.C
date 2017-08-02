@@ -29,9 +29,9 @@ void EQ2EtrueFitter(TString geom) {
   TString fileName  = TString::Format("HistMeans_%s.dat",geom.Data());
   ifstream infile(fileName.Data());
 
-  int type0lowOffset = 7;
-  int type1lowOffset = 13;
-  int type23lowOffset = 15;
+  int type0lowOffset = 10; //7
+  int type1lowOffset = 16;//13;
+  int type23lowOffset = 18;//15;
   
   int type0highOffset = 2;
   int type1highOffset = 4;
@@ -145,13 +145,13 @@ void EQ2EtrueFitter(TString geom) {
   t23E->SetMarkerColor(kGreen);
   t23E->SetMarkerStyle(22);
 
-  //t0E->Fit(func0,"","",EQtype0E[type0lowOffset-1],800.);
-  //t1E->Fit(func1,"","",EQtype1E[type1lowOffset-1],800.);
-  //t23E->Fit(func23,"","",EQtype23E[type23lowOffset-1],800.);
+  t0E->Fit(func0,"","",EQtype0E[type0lowOffset-1],800.);
+  t1E->Fit(func1,"","",EQtype1E[type1lowOffset-1],800.);
+  t23E->Fit(func23,"","",EQtype23E[type23lowOffset-1],800.);
 
-  t0E->Fit(func0,"R");
-  t1E->Fit(func1,"R");
-  t23E->Fit(func23,"R");
+  //t0E->Fit(func0,"R");
+  //t1E->Fit(func1,"R");
+  //t23E->Fit(func23,"R");
 
 
   //Now Calculate the extrapolations to zero

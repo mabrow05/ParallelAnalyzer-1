@@ -43,13 +43,13 @@ bool realOutput = true; // Whether or not the real output should be recorded. If
 
 bool unblind = false;
 
-Double_t POL_minus2011 = 0.997;
-Double_t POL_plus2011 = 0.9939;
+Double_t POL_minus2011 = 0.997; Double_t POL_minus2011err = 0.003*POL_minus2011;
+Double_t POL_plus2011 = 0.9939; Double_t POL_plus2011err = 0.0025*POL_plus2011;
 Double_t delta_POL2011 = (POL_plus2011-POL_minus2011)/2.;
 Double_t POL_ave2011 = (POL_plus2011+POL_minus2011) / 2.;
 
-Double_t POL_minus2012 = 0.9979;
-Double_t POL_plus2012 = 0.9952;
+Double_t POL_minus2012 = 0.9979; Double_t POL_minus2012err = 0.0015*POL_minus2012;
+Double_t POL_plus2012 = 0.9952;  Double_t POL_plus2012err = 0.0020*POL_plus2012;
 Double_t delta_POL2012 = (POL_plus2012-POL_minus2012)/2.;
 Double_t POL_ave2012 = (POL_plus2012+POL_minus2012) / 2.;
 
@@ -105,7 +105,16 @@ Double_t backoutRfromA(Double_t A) {
 
 Double_t backoutDeltaRfromA(Double_t A,Double_t Aerr) {
   return TMath::Abs(4.*(A-1.)/TMath::Power((A+1.),3.)*Aerr);
-}
+};
+
+Double_t dA_dP1(Double_t gamma, Double_t P1, Double_t P2) {
+  return ( (2.*P1*P2-gamma*gamma*(P1*P2+P2*P2))/(2.*P2*P1*P1*TMath::Sqrt(gamma*gamma*(P1+P2)*(P1+P2)-4.*P1*P2)) 
+	   + gamma/(2.*P1*P1) );
+};
+Double_t polErrorInEnergyBin(Double_t R, Double_t p1, Double_t p1err, Double_t p2, Double_t p2err) {
+  Double_t gamma = (R+1.)/(R-1.);
+  return TMath::Sqrt( TMath::Power(dA_dP1(gamma,p1,p2)*p1err,2.) + TMath::Power(dA_dP1(gamma,p2,p1)*p2err,2.) ) ;
+};
 
 
 
@@ -133,7 +142,7 @@ int main(int argc, char* argv[])
   */	
 
   if (argc==1) {
-    std::cout << "USAGE: ./MBAnalyzer.exe [anaChoice] [octmin] [octmax] [analysis window min] [analysis window max] [corrections] [bool simulation] [key] [realOutput=true] [UNBLIND=false]\n";
+    std::cout << "USAGE: ./MBAnalyzer.exe [anaChoice] [octmin] [octmax] [analysis window min] [analysis window max] [corrections] [bool simulation] [key] [realOutput=true] [withPol=true] [UNBLIND=false] \n";
     exit(0);
   }
     
@@ -153,7 +162,8 @@ int main(int argc, char* argv[])
 
  
   if (argc>9) realOutput = TString(argv[9])==TString("true")?true:false;
-  if (argc>10) unblind = TString(argv[10])==TString("true")?true:false;
+  if (argc>10) withPOL = TString(argv[10])==TString("true")?true:false;
+  if (argc>11) unblind = TString(argv[11])==TString("true")?true:false;
 
   if (simulation) withPOL=false;
 
@@ -191,12 +201,12 @@ int main(int argc, char* argv[])
       exit(0);
     }
     
-    std::vector<TString> aCh {};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<TString> aCh {"C","D","F","J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
-      //ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
+      ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
-      PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
-      PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
+      //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
+      //PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
       }
     
     // Loop over keys
@@ -444,6 +454,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   std::vector <Double_t> angleCorr = LoadAngleCorrections(enBinMedian,octBegin,anaChoice);
   std::vector <Double_t> bsCorr = LoadBackscCorrections(enBinMedian,octBegin,anaChoice);
 
+  std::vector <Double_t> polErrors(enBinMedian.size(),0.);
+
   //Do final calculations of the rates in each bin and their associated errors
   for (unsigned int i=0; i<groupRawAsymByBin[1].size(); i++) {
     groupRawAsymByBin[1][i] = groupRawAsymByBin[2][i]>0. ? groupRawAsymByBin[1][i] / groupRawAsymByBin[2][i] : 0.; // This is sum of weights*Asym / sum of weights 
@@ -454,7 +466,9 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
       if (dualPol) {
 	double P_p =  POL_plus2011; 
 	double P_m =  POL_minus2011;
-	if (octBegin>59) {P_p = POL_plus2012; P_m = POL_minus2012;}
+	double P_p_err = POL_plus2011err;
+	double P_m_err = POL_minus2011err;
+	if (octBegin>59) {P_p = POL_plus2012; P_m = POL_minus2012; P_p_err = POL_plus2012err; P_m_err = POL_minus2012err;}
 	
 	Double_t R = backoutRfromA(groupRawAsymByBin[1][i]);
 	Double_t delta_R = backoutDeltaRfromA(groupRawAsymByBin[1][i],groupRawAsymByBin[2][i]);
@@ -462,7 +476,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	Double_t delta_gam = TMath::Abs(2.*delta_R/TMath::Power(R-1.,2.));
 	
 	groupRawAsymByBin[1][i] = (-gam*(P_p+P_m)+TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m))/(2.*P_p*P_m);
-	groupRawAsymByBin[2][i] = TMath::Abs((-(P_p+P_m)/(2.*P_p*P_m) + gam*(P_p+P_m)*(P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);	
+	groupRawAsymByBin[2][i] = TMath::Abs((-(P_p+P_m)/(2.*P_p*P_m) + gam*(P_p+P_m)*(P_p+P_m)/(2.*P_p*P_m*TMath::Sqrt(gam*gam*(P_p+P_m)*(P_p+P_m)-4.*P_p*P_m)))*delta_gam);
+	polErrors[i] = 	TMath::Abs( groupRawAsymByBin[1][i]!=0.?polErrorInEnergyBin(R, P_p, P_p_err, P_m, P_m_err)/groupRawAsymByBin[1][i]:1. );
       } else {
 	double POL_ave=POL_ave2011;
 	if (octBegin>59)  POL_ave = POL_ave2012;
@@ -670,31 +685,46 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 
   //Write out corrected (but energy dependent) bin-by-bin asymmetry for use in calculating effect from doing corrections
 
-  if (realOutput) {
-    outFile = ( basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"") + corr + "_" + (withPOL?"withPOL_":"") + groupType +"Asymmetries_AnaCh" + anaChoice 
+  
+  outFile = ( basePath + "Asymmetries/"+(UNBLIND?"UNBLINDED_":"") + corr + "_" + (withPOL?"withPOL_":"") + groupType +"Asymmetries_AnaCh" + anaChoice 
+	      + std::string("_")  + "Octets_" +itos(octBegin)+"-"+itos(octEnd)+
+	      ( key/10==1 ? "_Quadrant"+itos(key-10) : 
+		( key/10==2 ? "_RadialRing"+itos(key-20) :
+		  ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) );
+  
+  txtFile = outFile+std::string("_BinByBin_withEnergyDependence.txt");
+  asymFile.open(txtFile.c_str());
+  asymFile << std::setprecision(15);
+  
+  for (UInt_t n=0; n<enBinMedian.size(); n++) {
+    asymFile << enBinMedian[n] << "\t" << groupRawAsymByBin[1][n] << "\t" << groupRawAsymByBin[2][n] << "\n";
+  }
+  asymFile.close();
+  
+  //Write out corrected bin-by-bin asymmetry for use in calculating effect from doing corrections
+  txtFile = outFile+std::string("_BinByBin.txt");
+  asymFile.open(txtFile.c_str());
+  asymFile << std::setprecision(10);
+  
+  for (UInt_t n=0; n<enBinMedian.size(); n++) {
+    asymFile << enBinMedian[n] << "\t" << groupAsymByBin[1][n] << "\t" << groupAsymByBin[2][n] << "\n";
+  }
+  asymFile.close();
+
+
+  //Write out polarimetry errors if applicable
+  if (withPOL && dualPol) {
+    outFile = ( basePath + "Corrections/PolUncert"+ groupType +"Asymmetries_AnaCh" + anaChoice 
 		+ std::string("_")  + "Octets_" +itos(octBegin)+"-"+itos(octEnd)+
 		( key/10==1 ? "_Quadrant"+itos(key-10) : 
 		  ( key/10==2 ? "_RadialRing"+itos(key-20) :
-		    ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) );
-  
-    txtFile = outFile+std::string("_BinByBin_withEnergyDependence.txt");
-    asymFile.open(txtFile.c_str());
-    asymFile << std::setprecision(15);
-    
-    for (UInt_t n=0; n<enBinMedian.size(); n++) {
-      asymFile << enBinMedian[n] << "\t" << groupRawAsymByBin[1][n] << "\t" << groupRawAsymByBin[2][n] << "\n";
+		    ( key/10==3 ? "_Strip"+itos(key-30) :"" ) ) ) +".txt");
+    std::ofstream polFile(outFile);
+    polFile << std::setprecision(15);
+    for (unsigned i=0;i<enBinMedian.size();++i) {
+      polFile << enBinMedian[i] << "\t" << polErrors[i] << std::endl;
     }
-    asymFile.close();
-
-    //Write out corrected bin-by-bin asymmetry for use in calculating effect from doing corrections
-    txtFile = outFile+std::string("_BinByBin.txt");
-    asymFile.open(txtFile.c_str());
-    asymFile << std::setprecision(10);
-    
-    for (UInt_t n=0; n<enBinMedian.size(); n++) {
-      asymFile << enBinMedian[n] << "\t" << groupAsymByBin[1][n] << "\t" << groupAsymByBin[2][n] << "\n";
-    }
-    asymFile.close();
+    polFile.close();
   }
   
   delete c1; 

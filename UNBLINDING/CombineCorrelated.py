@@ -65,6 +65,7 @@ class MeasCombiner:
 		print
 		print "err =",err
 		print "combo =",combo
+                return [combo,err]
 
 	def errcombo(self,errlist):
 		err = 0
