@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
   int octetNumStart = year==TString("2011-2012")?0:60;
   int octetNumEnd = year==TString("2011-2012")?59:121;
 
-   BackscatterSeparator sep;
+  BackscatterSeparator sep;
   
 
   std::vector <Int_t> runs;
@@ -53,8 +53,8 @@ int main(int argc, char* argv[]) {
 
   // Vectors to hold the BetaCosTheta in every energy bin
   // and the total number of entries
-  std::vector <std::vector<Double_t> > aveBetaCosTheta(anaChoices.size(),std::vector<Double_t>(1200,0.));
-  std::vector <std::vector<Double_t> > counts(anaChoices.size(),std::vector<Double_t>(1200,0.));
+  std::vector <std::vector<Double_t> > aveBetaCosTheta(anaChoices.size(),std::vector<Double_t>(120,0.));
+  std::vector <std::vector<Double_t> > counts(anaChoices.size(),std::vector<Double_t>(120,0.));
 
   // loop over all files of these runs, fill vectors
 
@@ -161,11 +161,11 @@ int main(int argc, char* argv[]) {
 	if (Type==2) {
 	  
 	  if (Side==0) {
-	    Type = sep.separate23(MWPCEnergyE);
+	    Type = sep.separate23(MWPCEnergyE,Erecon);
 	    Side = Type==2 ? 1 : 0;
 	  }
 	  else if (Side==1) {
-	    Type = sep.separate23(MWPCEnergyW);
+	    Type = sep.separate23(MWPCEnergyW,Erecon);
 	    Side = Type==2 ? 0 : 1;
 	  }
 	}

@@ -201,13 +201,13 @@ void EfficiencyCorr(Double_t eastThresh, Double_t westThresh, TString year, int 
 	double erecon = eRecon.getErecon(side,type,evis);
 	if (type==2) {
 	  if (side==0) {
-	      type = sep.separate23(MWPCEnergy[0]);
-	      side = type==2 ? 1 : 0;
-	    }
-	    else if (side==1) {
-	      type = sep.separate23(MWPCEnergy[1]);
-	      side = type==2 ? 0 : 1;
-	    }
+	    type = sep.separate23(MWPCEnergy[0],erecon);
+	    side = type==2 ? 1 : 0;
+	  }
+	  else if (side==1) {
+	    type = sep.separate23(MWPCEnergy[1],erecon);
+	    side = type==2 ? 0 : 1;
+	  }
 	}
 	if (!usePrimValues) {
 	  if (side==0) { hisE_polE->Fill(erecon); tot_rE_polE+=(erecon>220. && erecon<670.)?1.:0.;}
@@ -301,13 +301,13 @@ void EfficiencyCorr(Double_t eastThresh, Double_t westThresh, TString year, int 
 	double erecon = eRecon.getErecon(side,type,evis);
 	if (type==2) {
 	  if (side==0) {
-	      type = sep.separate23(MWPCEnergy[0]);
-	      side = type==2 ? 1 : 0;
-	    }
-	    else if (side==1) {
-	      type = sep.separate23(MWPCEnergy[1]);
-	      side = type==2 ? 0 : 1;
-	    }
+	    type = sep.separate23(MWPCEnergy[0],erecon);
+	    side = type==2 ? 1 : 0;
+	  }
+	  else if (side==1) {
+	    type = sep.separate23(MWPCEnergy[1],erecon);
+	    side = type==2 ? 0 : 1;
+	  }
 	}
 	if (!usePrimValues) {
 	  if (side==0) { hisE_polW->Fill(erecon); tot_rE_polW+=(erecon>220. && erecon<670.)?1.:0.;}

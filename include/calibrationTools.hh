@@ -97,7 +97,7 @@ public:
   ~BackscatterSeparator() {};
   void LoadCutCurve(int run);
 
-  Int_t separate23(Double_t en); 
+  Int_t separate23(Double_t mwpcEn, Double_t erecon); 
 
 private:
   Int_t _run;            // Current run

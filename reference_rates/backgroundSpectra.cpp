@@ -313,11 +313,11 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 	if (t.Erecon>0. && t.Type==2) {
 	  
 	  if (t.Side==0) {
-	    t.Type = sep.separate23(t.EMWPC_E);
+	    t.Type = sep.separate23(t.EMWPC_E,t.Erecon);
 	    t.Side = t.Type==2 ? 1 : 0;
 	  }
 	  else if (t.Side==1) {
-	    t.Type = sep.separate23(t.EMWPC_W);
+	    t.Type = sep.separate23(t.EMWPC_W,t.Erecon);
 	    t.Side = t.Type==2 ? 0 : 1;
 	  }
 	  
@@ -442,11 +442,11 @@ void doBackgroundSpectra (int octetMin, int octetMax)
 	if (t.Erecon>0. && t.Type==2) {
 	  
 	  if (t.Side==0) {
-	    t.Type = sep.separate23(t.EMWPC_E);
+	    t.Type = sep.separate23(t.EMWPC_E,t.Erecon);
 	    t.Side = t.Type==2 ? 1 : 0;
 	  }
 	  else if (t.Side==1) {
-	    t.Type = sep.separate23(t.EMWPC_W);
+	    t.Type = sep.separate23(t.EMWPC_W,t.Erecon);
 	    t.Side = t.Type==2 ? 0 : 1;
 	  }
 	  

@@ -23,6 +23,30 @@ const bool writeRatesToFile = true;
 
 const std::vector<UInt_t> neutronPoisonedBGruns {17274,18209,21433,21890,22311};
 
+std::vector <Int_t> getEreconPMTQuality(Int_t runNumber) {
+  //Read in PMT quality file
+  std::cout << "Reading in PMT Quality file ...\n";
+  std::vector <Int_t>  pmtQuality (8,0);
+  Char_t temp[200];
+  sprintf(temp,"%s/residuals/PMT_EreconQuality_master.dat",getenv("ANALYSIS_CODE")); 
+  std::ifstream pmt;
+  std::cout << temp << std::endl;
+  pmt.open(temp);
+  Int_t run_hold;
+  while (pmt >> run_hold >> pmtQuality[0] >> pmtQuality[1] >> pmtQuality[2]
+	 >> pmtQuality[3] >> pmtQuality[4] >> pmtQuality[5]
+	 >> pmtQuality[6] >> pmtQuality[7]) {
+    if (run_hold==runNumber) break;
+    if (pmt.fail()) break;
+  }
+  pmt.close();
+  if (run_hold!=runNumber) {
+    std::cout << "Run not found in PMT quality file!" << std::endl;
+    exit(0);
+  }
+  return pmtQuality;
+};
+
 
 EvtRateHandler::EvtRateHandler(std::vector<int> rn, bool fg, std::string anaCh, double enBinWidth, double fidCut, bool ukdata, bool unblind) : runs(rn),FG(fg),analysisChoice(anaCh),fiducialCut(fidCut),UKdata(ukdata),unblinded(unblind),pol(0) {
   
@@ -231,7 +255,7 @@ void EvtRateHandler::loadReferenceSpectra() {
     
     ++inc;
 
-    if (inc > 9 && inc < 15) std::cout << binMid << "\t" << eastRef << "\t" << westRef << std::endl; 
+    //if (inc > 9 && inc < 15) std::cout << binMid << "\t" << eastRef << "\t" << westRef << std::endl; 
     
   }
 
@@ -347,6 +371,9 @@ void EvtRateHandler::dataReader() {
   BackscatterSeparator sep;
   sep.LoadCutCurve(runs[0]);
 
+  std::vector <Int_t> pmtQuality = getEreconPMTQuality(runs[0]);
+
+  EreconParameterization eRecon(runs[0]);
 
   //Event types
   bool Type0=false, Type1=false, Type2=false, Type3=false;
@@ -369,6 +396,15 @@ void EvtRateHandler::dataReader() {
   int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
   int badTimeFlag = 0; 
 
+  double EnPE1,EnPE2,EnPE3,EnPE4;
+  double WnPE1,WnPE2,WnPE3,WnPE4;
+
+  double E_e1,E_e2,E_e3,E_e4;
+  double W_e1,W_e2,W_e3,W_e4;
+
+  double EvisE, EvisW;
+  
+
   int xeRC=0, yeRC=0, xwRC=0, ywRC=0; //  Wirechamber response class variables 
 
   int PID, Side, Type;
@@ -376,6 +412,13 @@ void EvtRateHandler::dataReader() {
   Bool_t EvnbGood, BkhfGood;
 
   Bool_t skipFirst100s = false;
+  
+  Int_t num2=0, num3=0;
+
+  Int_t quad, strip, rad;
+
+  Double_t totalEvis;
+  Int_t typeIndex;
 
   for ( UInt_t i=0; i<runs.size(); i++ ) {
 
@@ -420,6 +463,24 @@ void EvtRateHandler::dataReader() {
       Tin->GetBranch("yE")->GetLeaf("mult")->SetAddress(&yE_mult);
       Tin->GetBranch("xW")->GetLeaf("mult")->SetAddress(&xW_mult);
       Tin->GetBranch("yW")->GetLeaf("mult")->SetAddress(&yW_mult);
+
+      Tin->GetBranch("ScintE")->GetLeaf("nPE1")->SetAddress(&EnPE1);
+      Tin->GetBranch("ScintE")->GetLeaf("nPE2")->SetAddress(&EnPE2);
+      Tin->GetBranch("ScintE")->GetLeaf("nPE3")->SetAddress(&EnPE3);
+      Tin->GetBranch("ScintE")->GetLeaf("nPE4")->SetAddress(&EnPE4);
+      Tin->GetBranch("ScintW")->GetLeaf("nPE1")->SetAddress(&WnPE1);
+      Tin->GetBranch("ScintW")->GetLeaf("nPE2")->SetAddress(&WnPE2);
+      Tin->GetBranch("ScintW")->GetLeaf("nPE3")->SetAddress(&WnPE3);
+      Tin->GetBranch("ScintW")->GetLeaf("nPE4")->SetAddress(&WnPE4);
+
+      Tin->GetBranch("ScintE")->GetLeaf("e1")->SetAddress(&E_e1);
+      Tin->GetBranch("ScintE")->GetLeaf("e2")->SetAddress(&E_e2);
+      Tin->GetBranch("ScintE")->GetLeaf("e3")->SetAddress(&E_e3);
+      Tin->GetBranch("ScintE")->GetLeaf("e4")->SetAddress(&E_e4);
+      Tin->GetBranch("ScintW")->GetLeaf("e1")->SetAddress(&W_e1);
+      Tin->GetBranch("ScintW")->GetLeaf("e2")->SetAddress(&W_e2);
+      Tin->GetBranch("ScintW")->GetLeaf("e3")->SetAddress(&W_e3);
+      Tin->GetBranch("ScintW")->GetLeaf("e4")->SetAddress(&W_e4);
 
       Tin->SetBranchAddress("xeRC", &xeRC);
       Tin->SetBranchAddress("yeRC", &yeRC);
@@ -534,25 +595,86 @@ void EvtRateHandler::dataReader() {
 	
 
 	if ( r2E>3600. || r2W>3600. ) continue;
-	  
+
+	/*	
+	/////////////////////////////////////////////////////////////////////
+	//Energy reconstruction
+	double numer = 0.; 
+	numer  = ( ( (pmtQuality[0]) ? EnPE1 : 0.) +
+		   ( (pmtQuality[1]) ? EnPE2 : 0.) +
+		   ( (pmtQuality[2]) ? EnPE1 : 0.)+ 
+		   ( (pmtQuality[3]) ? EnPE1 : 0.) ); 
+
+	double denom = 0.;
+	
+	denom  = ( ( (pmtQuality[0] && E_e1>0.) ? TMath::Abs(EnPE1/E_e1) : 0.) +
+		   ( (pmtQuality[1] && E_e2>0.) ? TMath::Abs(EnPE2/E_e2) : 0.) +
+		   ( (pmtQuality[2] && E_e3>0.) ? TMath::Abs(EnPE1/E_e3) : 0.)+ 
+		   ( (pmtQuality[3] && E_e4>0.) ? TMath::Abs(EnPE1/E_e4) : 0.) );
+	
+	
+	
+	EvisE = (denom!=0. ? numer/denom : 0.);
+	
+	
+	//WEST
+	numer = denom = 0.;
+	
+	numer  = ( ( (pmtQuality[4]) ? WnPE1 : 0.) +
+		   ( (pmtQuality[5]) ? WnPE2 : 0.) +
+		   ( (pmtQuality[6]) ? WnPE1 : 0.)+ 
+		   ( (pmtQuality[7]) ? WnPE1 : 0.) ); 
+
+	
+	denom  = ( ( (pmtQuality[4] && W_e1>0.) ? TMath::Abs(WnPE1/W_e1) : 0.) +
+		   ( (pmtQuality[5] && W_e2>0.) ? TMath::Abs(WnPE2/W_e2) : 0.) +
+		   ( (pmtQuality[6] && W_e3>0.) ? TMath::Abs(WnPE1/W_e3) : 0.)+ 
+		   ( (pmtQuality[7] && W_e4>0.) ? TMath::Abs(WnPE1/W_e4) : 0.) );
+		
+	EvisW = (denom!=0. ? numer/denom : 0.);
+	
+	typeIndex = Type==0 ? 0:(Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+      
+	totalEvis=0.;
+	
+	if (Side==0) {
+	  totalEvis = Type==1 ? (EvisE+EvisW):EvisE;
+	  if (EvisE>0. && totalEvis>0.) {
+	    Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+	  }
+	  else Erecon=-1.;
+	}
+	if (Side==1) {
+	  totalEvis = Type==1 ? (EvisE+EvisW):EvisW;
+	  if (EvisW>0. && totalEvis>0.) {
+	    Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
+	  }
+	  else Erecon=-1.;
+	}
+	//////////////////////////////////////////////////////////////////////////////////
+	*/
+	
 	// If the analysis choice calls for separation of 2/3, do it here
 	if ( sep23 ) {
 	  if (Erecon>0. && Type==2) {
 	    
 	    if (Side==0) {
-	      Type = sep.separate23(MWPCEnergyE);
+	      Type = sep.separate23(MWPCEnergyE,Erecon);
 	      Side = Type==2 ? 1 : 0;
 	      //std::cout << "Side 0: " << MWPCEnergyE << "\t" << Type << "\t" << Side << std::endl;
 	    }
 	    else if (Side==1) {
-	      Type = sep.separate23(MWPCEnergyW);
+	      Type = sep.separate23(MWPCEnergyW,Erecon);
 	      Side = Type==2 ? 0 : 1;
 	    }
+	    if (Type==2) num2++;
+	    else num3++;
 	  }
+	  
 	}
 	
 	//Determine strip , 0=center 1=outside center strip 
-	int strip = 0;
+        strip = 0;
 	
 	if (Side==0) {
 	  if (TMath::Abs(EmwpcY)>stripLimit) strip = 1;
@@ -562,7 +684,7 @@ void EvtRateHandler::dataReader() {
 	}
 
 	//Determine Quadrant 
-	int quad = 0;
+	quad = 0;
 	
 	if (Side==0) {
 	  if (EmwpcX>0.) quad = ( EmwpcY>0. ? 0 : 3 );
@@ -575,7 +697,7 @@ void EvtRateHandler::dataReader() {
 
 	
 	//Determine Radial bin 
-	int rad = (int) ( Side==0 ? (sqrt(r2E)/10.) : (sqrt(r2W)/10.) );
+	rad = (int) ( Side==0 ? (sqrt(r2E)/10.) : (sqrt(r2W)/10.) );
 	if ( rad>5 ) rad = 5; // Catch the bad guys
 	
 	//Type0
@@ -620,19 +742,20 @@ void EvtRateHandler::dataReader() {
     input->Close();
   }
 
+  
   totalCountsE = (double) hisCounts[0]->Integral(1,hisCounts[0]->GetNbinsX());
   totalCountsW = (double) hisCounts[1]->Integral(1,hisCounts[1]->GetNbinsX());
 
   for (int i=0; i<2; ++i) {
     totalCountsEStrip[i] = (double) hisCountsStrip[i][0]->Integral(1,hisCountsStrip[i][0]->GetNbinsX());
     totalCountsWStrip[i] = (double) hisCountsStrip[i][1]->Integral(1,hisCountsStrip[i][1]->GetNbinsX());
-    std::cout << totalCountsEStrip[i] << " " << totalCountsWStrip[i] << std::endl;
+    //std::cout << totalCountsEStrip[i] << " " << totalCountsWStrip[i] << std::endl;
   }
 
   for (int i=0; i<4; ++i) {
     totalCountsEQuad[i] = (double) hisCountsQuad[i][0]->Integral(1,hisCountsQuad[i][0]->GetNbinsX());
     totalCountsWQuad[i] = (double) hisCountsQuad[i][1]->Integral(1,hisCountsQuad[i][1]->GetNbinsX());
-    std::cout << totalCountsEQuad[i] << " " << totalCountsWQuad[i] << std::endl;
+    //std::cout << totalCountsEQuad[i] << " " << totalCountsWQuad[i] << std::endl;
   }
 
   for (int i=0; i<6; ++i) {
@@ -641,7 +764,8 @@ void EvtRateHandler::dataReader() {
   }
     
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
-
+  std::cout << "Type2: " << (double)num2/(totalCountsE+totalCountsW) << "\tType3: " 
+	    << (double)num3/(totalCountsE+totalCountsW) << std::endl;
   // Output the integrated crap to file
   /*std::ofstream integralsT("integrals_timeNorm.txt",std::ofstream::app);
   integralsT << runs[0] << "\t\tE = " << hisCounts[0]->Integral(18,77)/totalRunLengthE 
@@ -680,6 +804,14 @@ void SimEvtRateHandler::dataReader() {
   if ( analysisChoice=="A" || analysisChoice=="B" || analysisChoice=="C" || analysisChoice=="E" || analysisChoice=="F" ) Type1 = true;
   if ( analysisChoice=="A" || analysisChoice=="C" || analysisChoice=="E" || analysisChoice=="G" || analysisChoice=="H" || analysisChoice=="J" ) Type2 = true;
   if ( analysisChoice=="A" || analysisChoice=="C" || analysisChoice=="E" || analysisChoice=="G" || analysisChoice=="H" || analysisChoice=="K") Type3 = true;
+
+
+  BackscatterSeparator sep;
+  sep.LoadCutCurve(runs[0]);
+
+  std::vector <Int_t> pmtQuality = getEreconPMTQuality(runs[0]);
+
+  EreconParameterization eRecon(runs[0]);
   
   char temp[100];
   std::string infile;
@@ -700,6 +832,20 @@ void SimEvtRateHandler::dataReader() {
   int xE_nClipped, yE_nClipped, xW_nClipped, yW_nClipped;
   int xE_mult=0, yE_mult=0, xW_mult=0, yW_mult=0;
 
+  double EnPE1,EnPE2,EnPE3,EnPE4;
+  double WnPE1,WnPE2,WnPE3,WnPE4;
+
+  double E_e1,E_e2,E_e3,E_e4;
+  double W_e1,W_e2,W_e3,W_e4;
+
+  double EvisE, EvisW;
+  
+  Int_t quad, strip, rad;
+
+  Double_t totalEvis;
+  Int_t typeIndex;
+
+  Int_t num2=0, num3=0;
 
   xE_nClipped = yE_nClipped = xW_nClipped = yW_nClipped = 0;
   
@@ -753,6 +899,25 @@ void SimEvtRateHandler::dataReader() {
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyE")->SetAddress(&MWPCEnergyE);
     Tin->GetBranch("MWPCEnergy")->GetLeaf("MWPCEnergyW")->SetAddress(&MWPCEnergyW);
 
+
+    Tin->GetBranch("PMT")->GetLeaf("nPE0")->SetAddress(&EnPE1);
+    Tin->GetBranch("PMT")->GetLeaf("nPE1")->SetAddress(&EnPE2);
+    Tin->GetBranch("PMT")->GetLeaf("nPE2")->SetAddress(&EnPE3);
+    Tin->GetBranch("PMT")->GetLeaf("nPE3")->SetAddress(&EnPE4);
+    Tin->GetBranch("PMT")->GetLeaf("nPE4")->SetAddress(&WnPE1);
+    Tin->GetBranch("PMT")->GetLeaf("nPE5")->SetAddress(&WnPE2);
+    Tin->GetBranch("PMT")->GetLeaf("nPE6")->SetAddress(&WnPE3);
+    Tin->GetBranch("PMT")->GetLeaf("nPE7")->SetAddress(&WnPE4);
+    
+    Tin->GetBranch("PMT")->GetLeaf("Evis0")->SetAddress(&E_e1);
+    Tin->GetBranch("PMT")->GetLeaf("Evis1")->SetAddress(&E_e2);
+    Tin->GetBranch("PMT")->GetLeaf("Evis2")->SetAddress(&E_e3);
+    Tin->GetBranch("PMT")->GetLeaf("Evis3")->SetAddress(&E_e4);
+    Tin->GetBranch("PMT")->GetLeaf("Evis4")->SetAddress(&W_e1);
+    Tin->GetBranch("PMT")->GetLeaf("Evis5")->SetAddress(&W_e2);
+    Tin->GetBranch("PMT")->GetLeaf("Evis6")->SetAddress(&W_e3);
+    Tin->GetBranch("PMT")->GetLeaf("Evis7")->SetAddress(&W_e4);
+
     // ADD IN WIRECHAMBER ENERGY DEPOSITION
     
 
@@ -764,8 +929,6 @@ void SimEvtRateHandler::dataReader() {
     double r2E = 0.; //position of event squared
     double r2W = 0.;
 
-    BackscatterSeparator sep;
-    sep.LoadCutCurve(runs[0]);
     
     for (unsigned int i=0; i<nevents; ++i) {
       
@@ -801,22 +964,85 @@ void SimEvtRateHandler::dataReader() {
 	  
 	if ( r2E>3600. || r2W>3600. ) continue;
 
+	/*
+	/////////////////////////////////////////////////////////////////////
+	//Energy reconstruction
+	double numer = 0.; 
+	numer  = ( ( (pmtQuality[0]) ? EnPE1 : 0.) +
+		   ( (pmtQuality[1]) ? EnPE2 : 0.) +
+		   ( (pmtQuality[2]) ? EnPE1 : 0.)+ 
+		   ( (pmtQuality[3]) ? EnPE1 : 0.) ); 
+
+	double denom = 0.;
+	
+	denom  = ( ( (pmtQuality[0] && E_e1>0.) ? TMath::Abs(EnPE1/E_e1) : 0.) +
+		   ( (pmtQuality[1] && E_e2>0.) ? TMath::Abs(EnPE2/E_e2) : 0.) +
+		   ( (pmtQuality[2] && E_e3>0.) ? TMath::Abs(EnPE1/E_e3) : 0.)+ 
+		   ( (pmtQuality[3] && E_e4>0.) ? TMath::Abs(EnPE1/E_e4) : 0.) );
+	
+	
+	
+	EvisE = (denom!=0. ? numer/denom : 0.);
+	
+	
+	//WEST
+	numer = denom = 0.;
+	
+	numer  = ( ( (pmtQuality[4]) ? WnPE1 : 0.) +
+		   ( (pmtQuality[5]) ? WnPE2 : 0.) +
+		   ( (pmtQuality[6]) ? WnPE1 : 0.)+ 
+		   ( (pmtQuality[7]) ? WnPE1 : 0.) ); 
+
+	
+	denom  = ( ( (pmtQuality[4] && W_e1>0.) ? TMath::Abs(WnPE1/W_e1) : 0.) +
+		   ( (pmtQuality[5] && W_e2>0.) ? TMath::Abs(WnPE2/W_e2) : 0.) +
+		   ( (pmtQuality[6] && W_e3>0.) ? TMath::Abs(WnPE1/W_e3) : 0.)+ 
+		   ( (pmtQuality[7] && W_e4>0.) ? TMath::Abs(WnPE1/W_e4) : 0.) );
+	
+
+	
+	
+	EvisW = (denom!=0. ? numer/denom : 0.);
+	
+	typeIndex = Type==0 ? 0:(Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
+      
+	totalEvis=0.;
+	
+	if (Side==0) {
+	  totalEvis = Type==1 ? (EvisE+EvisW):EvisE;
+	  if (EvisE>0. && totalEvis>0.) {
+	    Erecon = eRecon.getErecon(0,typeIndex,totalEvis);
+	  }
+	  else Erecon=-1.;
+	}
+	if (Side==1) {
+	  totalEvis = Type==1 ? (EvisE+EvisW):EvisW;
+	  if (EvisW>0. && totalEvis>0.) {
+	    Erecon = eRecon.getErecon(1,typeIndex,totalEvis);
+	  }
+	  else Erecon=-1.;
+	}
+	///////////////////////////////////////////////////////////////////////
+	*/
+
 	if ( sep23 ) {
 	  if (Type==2) {
 	    
 	    if (Side==0) {
-	      Type = sep.separate23(MWPCEnergyE);
+	      Type = sep.separate23(MWPCEnergyE,Erecon);
 	      Side = Type==2 ? 1 : 0;
 	    }
 	    else if (Side==1) {
-	      Type = sep.separate23(MWPCEnergyW);
+	      Type = sep.separate23(MWPCEnergyW,Erecon);
 	      Side = Type==2 ? 0 : 1;
 	    }
+	    if (Type==2) num2++;
+	    else num3++;
 	  }
 	}
 
 	//Determine strip , 0=center 1=outside center strip 
-	int strip = 0;
+	strip = 0;
 	
 	if (Side==0) {
 	  if (TMath::Abs(EmwpcY)>stripLimit) strip = 1;
@@ -826,7 +1052,7 @@ void SimEvtRateHandler::dataReader() {
 	}
 	
 	//Determine Quadrant 
-	int quad = 0;
+	quad = 0;
 	
 	if (Side==0) {
 	  if (EmwpcX>0.) quad = ( EmwpcY>0. ? 0 : 3 );
@@ -838,7 +1064,7 @@ void SimEvtRateHandler::dataReader() {
 	}
 
 	//Determine Radial bin 
-	int rad = (int) ( Side==0 ? (sqrt(r2E)/10.) : (sqrt(r2W)/10.) );
+	rad = (int) ( Side==0 ? (sqrt(r2E)/10.) : (sqrt(r2W)/10.) );
 	if ( rad>5 ) rad = 5; // catch any bad guys
 	
 
@@ -905,7 +1131,8 @@ void SimEvtRateHandler::dataReader() {
   }
     
   std::cout << "Beta Events: " << totalCountsE+totalCountsW << std::endl;
-
+  std::cout << "Type2: " << (double)num2/(totalCountsE+totalCountsW) << "\tType3: " 
+	    << (double)num3/(totalCountsE+totalCountsW) << std::endl;
   if (input) delete input;
   
 };

@@ -3,7 +3,7 @@
 import sys
 import os
 from math import *
-sys.path.append("../systematics")
+sys.path.append("%s/systematics"%os.environ["ANALYSIS_CODE"])
 from EnergyUncertainty.EnergyErrors import *
 from CombineCorrelated import *
 
@@ -27,9 +27,9 @@ def getBinEnergyUpperEdge(b):
 def weightRealStats(data,stats,e0,e1):
         """Weight the given data array by the real experimental statistics"""
 
-        numer = sum([(1./stats[i])**2 * data[i] 
+        numer = sum([ ( (1./stats[i])**2 * data[i] if stats[i]!=0. else 0. )
                      for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
-        denom = sum([(1./stats[i])**2  
+        denom = sum([ ( (1./stats[i])**2 if stats[i]!=0. else 0. )
                      for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
         
         return numer/denom
@@ -39,10 +39,10 @@ def totalStatErr(data,dataErr,e0,e1):
     if len(data)!=len(dataErr):
         return 0
 
-    numer = sum([(1./dataErr[i])**2 * data[i] 
-                 for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
-    weightsum = sum([(1./dataErr[i])**2 
-                     for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
+    numer = sum([ ((1./dataErr[i])**2 * data[i] if dataErr[i]!=0. else 0. )
+                  for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
+    weightsum = sum([ ( (1./dataErr[i])**2 if dataErr[i]!=0. else 0. )
+                      for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
     A = numer/weightsum if weightsum>0. else 1.
     return fabs( ( 1./sqrt(weightsum) ) / A ) if weightsum>0. and fabs(A)>0. else 1.
 
@@ -50,9 +50,7 @@ def sumErrors(err):
     return sqrt(sum([er**2 for er in err]))
 
 def getAsymmetry(anaCh,octLow,octHigh,elow,ehigh,corr="UnCorr",sim=False,withPOL=True):
-    #print("../Asymmetry/MBAnalyzer.exe %s %i %i %f %f %s %s 0 false > log.txt"%(anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false"))
-    #exit(0)
-    os.system("cd ../Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s %s 0 false %s %s > log.txt"%(anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false", "true" if withPOL else "false",
+    os.system("cd %s/Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s %s 0 false %s %s > log.txt"%(os.environ["ANALYSIS_CODE"],anaCh,octLow, octHigh, elow, ehigh, corr, "true" if sim else "false", "true" if withPOL else "false",
                                                                                                 "true" if UNBLIND else "false"))
     infile = open("asymm_hold.txt",'r')
     asymm=[0,0]
@@ -136,16 +134,20 @@ class uncertaintyHandler:
         else:
             print('bad year given!!')
             exit(0)
-
+            
     def statUncertainties(self):
         """Reads in the Statistical Uncertainty of every bin, calculates and 
         stores the total fitted asymmetry and the total percent error
-        from statistics alone"""
-        os.system("cd ../Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s %s 0 false %s %s 2&>1 log.txt"%(self.anaChoice,self.octLow,self.octHigh, 220, 670, 
-                                                                                                    "UnCorr",self.sim, "false", "false"))
+        from statistics alone""" #
+        os.system("cd %s/Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s %s 0 false %s %s 2&>1 log.txt"%(os.environ["ANALYSIS_CODE"],self.anaChoice,self.octLow,self.octHigh, 220, 670, 
+                                                                                                    "UnCorr","true" if self.sim else "false", "false", "false"))
         infile = open( os.environ["%sANALYSIS_RESULTS"%("SIM_" if self.sim else "")]+"/Asymmetries/"+
                        "UnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
                        %(self.anaChoice,self.octLow,self.octHigh),'r' )
+
+        print(os.environ["%sANALYSIS_RESULTS"%("SIM_" if self.sim else "")]+"/Asymmetries/"+
+              "UnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
+              %(self.anaChoice,self.octLow,self.octHigh))
         A_en = []
         A = []
         Aerr = []
@@ -162,7 +164,7 @@ class uncertaintyHandler:
                         percErr.append( fabs( float(l[2])/float(l[1]) ) )
                     
                     else:
-                        percErr.append( 1. )
+                        percErr.append( 0. )
 
         else: 
             print("Couldn't open file for statistical uncertainties")
@@ -322,6 +324,8 @@ class uncertaintyHandler:
         asymm = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                              emax,"AllCorr",self.sim)
         self.A0 = asymm[0]
+        asymm = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                             emax,"UnCorr",self.sim,False)
         return fabs( asymm[1]/asymm[0] )
 
     def calcSystematicUncert(self,emin,emax,percErrBS=0.25,percErrAngle=0.25):
@@ -344,7 +348,7 @@ class uncertaintyHandler:
 
         deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
         deltaBS = (BSCorr[0]/UnCorr[0]-1.)
-        deltaCorr = (1.+deltaAngle)*(1+deltaBS)
+        deltaCorr = (1.+deltaAngle)*(1+deltaBS)-1.
         deltaCorrErr = sqrt( (percErrAngle*deltaAngle/(1.+deltaAngle))**2 + (percErrBS*deltaBS/(1.+deltaBS))**2)
 
         #print("deltaBS: %f +/- %f"%(deltaBS,percErrBS*deltaBS))
@@ -584,8 +588,8 @@ if __name__ == "__main__":
         lowBin = 22
         highBin = 66
         
-        errDeltaBS = 0.25
-        errDeltaAngle = 0.25
+        errDeltaBS = 0.20
+        errDeltaAngle = 0.20
         errDeltaRecoil = 0.005 # These need to be fixed
         errDeltaRadiative = 0.005
 

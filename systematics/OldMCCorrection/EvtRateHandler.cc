@@ -458,12 +458,12 @@ void EvtRateHandler::dataReader() {
 	  if (Erecon>0. && Type==2) {
 	    
 	    if (Side==0) {
-	      Type = sep.separate23(MWPCEnergyE);
+	      Type = sep.separate23(MWPCEnergyE,Erecon);
 	      Side = Type==2 ? 1 : 0;
 	      //std::cout << "Side 0: " << MWPCEnergyE << "\t" << Type << "\t" << Side << std::endl;
 	    }
 	    else if (Side==1) {
-	      Type = sep.separate23(MWPCEnergyW);
+	      Type = sep.separate23(MWPCEnergyW,Erecon);
 	      Side = Type==2 ? 0 : 1;
 	    }
 	  }
@@ -674,11 +674,11 @@ void SimEvtRateHandler::dataReader() {
 	  if (Type==2) {
 	    
 	    if (Side==0) {
-	      Type = sep.separate23(MWPCEnergyE);
+	      Type = sep.separate23(MWPCEnergyE,Erecon);
 	      Side = Type==2 ? 1 : 0;
 	    }
 	    else if (Side==1) {
-	      Type = sep.separate23(MWPCEnergyW);
+	      Type = sep.separate23(MWPCEnergyW,Erecon);
 	      Side = Type==2 ? 0 : 1;
 	    }
 	  }

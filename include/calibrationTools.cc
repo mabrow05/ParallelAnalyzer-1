@@ -164,11 +164,11 @@ void BackscatterSeparator::LoadCutCurve(int run) {
   infile.close();
 }
 
-Int_t BackscatterSeparator::separate23(Double_t en) {
+Int_t BackscatterSeparator::separate23(Double_t mwpcEn, Double_t erecon) {
 
-  Double_t cut = _func->EvalPar(&en,&params[0]);
+  Double_t cut = _func->EvalPar(&erecon,&params[0]);
 
-  Int_t type = ( en > cut ) ? 3 : 2;  
+  Int_t type = ( mwpcEn > cut ) ? 3 : 2;  
   
   return type;
 };

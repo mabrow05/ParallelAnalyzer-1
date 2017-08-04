@@ -103,13 +103,13 @@ ereconWPMT2 = []
 ereconWPMT3 = []
 ereconWPMT4 = []
 
-ereconEPMT1_runRanges = [] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
+ereconEPMT1_runRanges = []# [(20000,24000)]#[] #These hold chunks of runs where for one reason or another we don't want to use the PMT in the energy reconstruction
 ereconEPMT2_runRanges = []
 ereconEPMT3_runRanges = []
 ereconEPMT4_runRanges = [(20000,24000)]
-ereconWPMT1_runRanges = [(17359,18055)] #PMTW1 Bi pulser fell off for (17359,18055)
+ereconWPMT1_runRanges = [(17359,18055)]#,(20000,24000)] #PMTW1 Bi pulser fell off for (17359,18055)
 ereconWPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
-ereconWPMT3_runRanges = []
+ereconWPMT3_runRanges = []#[(20000,24000)]
 ereconWPMT4_runRanges = [(18712,19999),(20000,24000)]
 #(18712,19999) WPMT4 becomes unreliable and there is no way to avoid affecting all of these runs due to erecon Xe maps & Calibrations for this PMT
 

@@ -135,16 +135,20 @@ int main(int argc, char* argv[])
     
     
     
-    /*std::vector<TString> aCh {"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<std::string> aCh {"A","B","D","F","G"};//{"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
-      ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
-      //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, UNBLIND);
-      //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-      //PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND);
-      }*/
+      ProcessOctets(octBegin, octEnd, ach, enBinWidth, UKdata, simulation, UNBLIND);
+      
+      int keys[] {0,10,11,12,13};
+      
+      for ( auto& k : keys ) {
+	PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, ach, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);
+	PlotFinalAsymmetries("Octet",octBegin, octEnd, ach, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);
+      }
+    }
     
     // Loop over keys
-    int keys[] {0,10,11,12,13};
+    int keys[] {};//{0,10,11,12,13};
     
     for ( auto& k : keys ) {
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);

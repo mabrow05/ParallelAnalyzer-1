@@ -3,9 +3,9 @@
 void plotSpectraComp(int octetStart, int octetEnd) {
   gStyle->SetOptStat(0);
 
-  TString normType = "0";
+  TString normType = "ALL";
 
-  Double_t normLow = 0.;
+  Double_t normLow = 220.;
   Double_t normHigh = 750.;
   
   Double_t xAxisMax = 800.;

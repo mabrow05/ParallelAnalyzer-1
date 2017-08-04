@@ -33,7 +33,7 @@ def writeCorrectionByBin(uncorr,corr,year):
 
     
 if __name__=="__main__":
-    year = "2012-2013"
+    year = "2011-2012"
     emin = 220.
     emax = 670.
     

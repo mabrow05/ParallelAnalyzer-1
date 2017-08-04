@@ -232,13 +232,13 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	double erecon = eRecon.getErecon(side,type,evis);
 	if (type==2) {
 	  if (side==0) {
-	      type = sep.separate23(MWPCEnergy[0]);
-	      side = type==2 ? 1 : 0;
-	    }
-	    else if (side==1) {
-	      type = sep.separate23(MWPCEnergy[1]);
-	      side = type==2 ? 0 : 1;
-	    }
+	    type = sep.separate23(MWPCEnergy[0],erecon);
+	    side = type==2 ? 1 : 0;
+	  }
+	  else if (side==1) {
+	    type = sep.separate23(MWPCEnergy[1],erecon);
+	    side = type==2 ? 0 : 1;
+	  }
 	}
 	if (side==0) hisE_polE.Fill(erecon);
 	else if (side==1) hisW_polE.Fill(erecon);
@@ -347,11 +347,11 @@ void FieldAsymmetry(TString field,TString year, int startFileNum, int endFileNum
 	double erecon = eRecon.getErecon(side,type,evis);
 	if (type==2) {
 	  if (side==0) {
-	      type = sep.separate23(MWPCEnergy[0]);
+	    type = sep.separate23(MWPCEnergy[0],erecon);
 	      side = type==2 ? 1 : 0;
 	    }
 	    else if (side==1) {
-	      type = sep.separate23(MWPCEnergy[1]);
+	      type = sep.separate23(MWPCEnergy[1],erecon);
 	      side = type==2 ? 0 : 1;
 	    }
 	}
