@@ -1,13 +1,13 @@
 
 
-void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=680) {
+void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=670) {
 
   bool readInAsymms = true;
   bool withSim = true;
   bool CorrAndUnCorr = false;
 
-  double ymin0 = -0.125;
-  double ymax0 = -0.1150;
+  double ymin0 = corrections==TString("UnCorr")?-0.130:-0.125;
+  double ymax0 = corrections==TString("UnCorr")?-0.117:-0.1150;
   
   const Int_t numAnaChT0 = 4;
   const Int_t numAnaChBacksc = 5;

@@ -5,13 +5,13 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TString normType = "ALL";
 
-  Double_t normLow = 220.;
+  Double_t normLow = 190.;
   Double_t normHigh = 750.;
   
   Double_t xAxisMax = 800.;
 
-  Double_t minEnBin = 22; //Energy bins to integrate event types over
-  Double_t maxEnBin = 66;
+  Double_t minEnBin = 19; //Energy bins to integrate event types over
+  Double_t maxEnBin = 74;
 
   //Storing event fractions for data, E/W and sfON/OFF
   Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t2E_sfON, t2E_sfOFF, t3E_sfON, t3E_sfOFF;
@@ -172,9 +172,9 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 	    << "Data\t\t"<<fracData1<<"\t"<<fracData2<<"\t"<<fracData3<<"\n"
 	    << "Sim\t\t"<<fracSim1<<"\t"<<fracSim2<<"\t"<<fracSim3<<"\n"
 	    << "% Diff\t\t"
-	    << (fracSim1-fracData1)/fracSim1*100.<<"\t"
-	    << (fracSim2-fracData2)/fracSim2*100.<<"\t"
-	    << (fracSim3-fracData3)/fracSim3*100.<<"\n\n***************************************\n\n";
+	    << (fracSim1-fracData1)/fracData1*100.<<"\t"
+	    << (fracSim2-fracData2)/fracData2*100.<<"\t"
+	    << (fracSim3-fracData3)/fracData3*100.<<"\n\n***************************************\n\n";
  
     
   //Normalize
@@ -329,7 +329,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // All Types
 
   //Residuals...
-  TCanvas *c1 = new TCanvas("c1","c1", 1600., 600.);
+  TCanvas *c1 = new TCanvas("c1","c1", 1200., 600.);
   c1->Divide(2,1);
   c1->cd(2);
   Int_t nBins = dataALL->GetNbinsX();
@@ -350,7 +350,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TH1D *perc_residALL = new TH1D("perc_residALL","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_residALL->Add(simALL,dataALL,1,-1);
-  perc_residALL->Divide(perc_residALL,simALL,1.,1.);
+  perc_residALL->Divide(perc_residALL,dataALL,1.,1.);
   perc_residALL->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_residALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
   perc_residALL->SetMaximum(.1);
@@ -359,8 +359,8 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
 
 
-  //perc_residALL->Draw();
-  residALL->Draw("E0");
+  perc_residALL->Draw();
+  //residALL->Draw("E0");
   c1->Update();
   TLine *l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
@@ -399,7 +399,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 0
 
   //Residuals...
-  TCanvas *c2 = new TCanvas("c2","c2", 1600., 600.);
+  TCanvas *c2 = new TCanvas("c2","c2", 1200., 600.);
   c2->Divide(2,1);
   c2->cd(2);
   Int_t nBins = data0->GetNbinsX();
@@ -420,7 +420,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TH1D *perc_resid0 = new TH1D("perc_resid0","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid0->Add(sim0,data0,1,-1);
-  perc_resid0->Divide(perc_resid0,sim0,1.,1.);
+  perc_resid0->Divide(perc_resid0,data0,1.,1.);
   perc_resid0->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid0->GetYaxis()->SetTitle("event rate (mHz/keV)");
   perc_resid0->SetMaximum(.1);
@@ -437,8 +437,8 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   }
 
 
-  //perc_resid0->Draw();
-  resid0->Draw("E0");
+  perc_resid0->Draw();
+  //resid0->Draw("E0");
   c2->Update();
   TLine *l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
@@ -477,7 +477,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 1
 
   //Residuals...
-  TCanvas *c3 = new TCanvas("c3","c3", 1600., 600.);
+  TCanvas *c3 = new TCanvas("c3","c3", 1200., 600.);
   c3->Divide(2,1);
   c3->cd(2);
   Int_t nBins = data1->GetNbinsX();
@@ -498,17 +498,17 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TH1D *perc_resid1 = new TH1D("perc_resid1","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid1->Add(sim1,data1,1,-1);
-  perc_resid1->Divide(perc_resid1,sim1,1.,1.);
+  perc_resid1->Divide(perc_resid1,data1,1.,1.);
   perc_resid1->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid1->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  perc_resid1->SetMaximum(.1);
-  perc_resid1->SetMinimum(-.1);
+  perc_resid1->SetMaximum(.5);
+  perc_resid1->SetMinimum(-.5);
   perc_resid1->SetLineWidth(2);
   
 
 
-  //perc_resid1->Draw();
-  resid1->Draw("E0");
+  perc_resid1->Draw();
+  //resid1->Draw("E0");
   c3->Update();
   TLine *l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
@@ -545,7 +545,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 2
 
   //Residuals...
-  TCanvas *c4 = new TCanvas("c4","c4", 1600., 600.);
+  TCanvas *c4 = new TCanvas("c4","c4", 1200., 600.);
   c4->Divide(2,1);
   c4->cd(2);
   Int_t nBins = data2->GetNbinsX();
@@ -566,17 +566,17 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TH1D *perc_resid2 = new TH1D("perc_resid2","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid2->Add(sim2,data2,1,-1);
-  perc_resid2->Divide(perc_resid2,sim2,1.,1.);
+  perc_resid2->Divide(perc_resid2,data2,1.,1.);
   perc_resid2->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid2->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  perc_resid2->SetMaximum(.1);
-  perc_resid2->SetMinimum(-.1);
+  perc_resid2->SetMaximum(.5);
+  perc_resid2->SetMinimum(-.5);
   perc_resid2->SetLineWidth(2);
   
 
 
-  //perc_resid2->Draw();
-  resid2->Draw("E0");
+  perc_resid2->Draw();
+  //resid2->Draw("E0");
   c4->Update();
   TLine *l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
@@ -613,7 +613,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 3
 
   //Residuals...
-  TCanvas *c5 = new TCanvas("c5","c5", 1600., 600.);
+  TCanvas *c5 = new TCanvas("c5","c5", 1200., 600.);
   c5->Divide(2,1);
   c5->cd(2);
   Int_t nBins = data3->GetNbinsX();
@@ -634,17 +634,17 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 
   TH1D *perc_resid3 = new TH1D("perc_resid3","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid3->Add(sim3,data3,1,-1);
-  perc_resid3->Divide(perc_resid3,sim3,1.,1.);
+  perc_resid3->Divide(perc_resid3,data3,1.,1.);
   perc_resid3->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid3->GetYaxis()->SetTitle("event rate (mHz/keV)");
-  perc_resid3->SetMaximum(.1);
-  perc_resid3->SetMinimum(-.1);
+  perc_resid3->SetMaximum(.5);
+  perc_resid3->SetMinimum(-.5);
   perc_resid3->SetLineWidth(2);
   
 
 
-  //perc_resid3->Draw();
-  resid3->Draw("E0");
+  perc_resid3->Draw();
+  //resid3->Draw("E0");
   c5->Update();
   TLine *l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
@@ -695,7 +695,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // All Event types
 
   //Residuals...
-  TCanvas *c1_sfOFF_E = new TCanvas("c1_sfOFF_E","c1_sfOFF_E", 1600., 600.);
+  TCanvas *c1_sfOFF_E = new TCanvas("c1_sfOFF_E","c1_sfOFF_E", 1200., 600.);
   c1_sfOFF_E->Divide(2,1);
   c1_sfOFF_E->cd(2);
   nBins = dataALL_sfOFF_E->GetNbinsX();
@@ -764,7 +764,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 0
 
   //Residuals...
-  TCanvas *c2_sfOFF_E = new TCanvas("c2_sfOFF_E","c2_sfOFF_E", 1600., 600.);
+  TCanvas *c2_sfOFF_E = new TCanvas("c2_sfOFF_E","c2_sfOFF_E", 1200., 600.);
   c2_sfOFF_E->Divide(2,1);
   c2_sfOFF_E->cd(2);
   nBins = data0_sfOFF_E->GetNbinsX();
@@ -842,7 +842,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 1
 
   //Residuals...
-  TCanvas *c3_sfOFF_E = new TCanvas("c3_sfOFF_E","c3_sfOFF_E", 1600., 600.);
+  TCanvas *c3_sfOFF_E = new TCanvas("c3_sfOFF_E","c3_sfOFF_E", 1200., 600.);
   c3_sfOFF_E->Divide(2,1);
   c3_sfOFF_E->cd(2);
   nBins = data1_sfOFF_E->GetNbinsX();
@@ -911,7 +911,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 2
 
   //Residuals...
-  TCanvas *c4_sfOFF_E = new TCanvas("c4_sfOFF_E","c4_sfOFF_E", 1600., 600.);
+  TCanvas *c4_sfOFF_E = new TCanvas("c4_sfOFF_E","c4_sfOFF_E", 1200., 600.);
   c4_sfOFF_E->Divide(2,1);
   c4_sfOFF_E->cd(2);
   nBins = data2_sfOFF_E->GetNbinsX();
@@ -980,7 +980,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 3
 
   //Residuals...
-  TCanvas *c5_sfOFF_E = new TCanvas("c5_sfOFF_E","c5_sfOFF_E", 1600., 600.);
+  TCanvas *c5_sfOFF_E = new TCanvas("c5_sfOFF_E","c5_sfOFF_E", 1200., 600.);
   c5_sfOFF_E->Divide(2,1);
   c5_sfOFF_E->cd(2);
   nBins = data3_sfOFF_E->GetNbinsX();
@@ -1062,7 +1062,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // All Event types
 
   //Residuals...
-  TCanvas *c1_sfON_E = new TCanvas("c1_sfON_E","c1_sfON_E", 1600., 600.);
+  TCanvas *c1_sfON_E = new TCanvas("c1_sfON_E","c1_sfON_E", 1200., 600.);
   c1_sfON_E->Divide(2,1);
   c1_sfON_E->cd(2);
   nBins = dataALL_sfON_E->GetNbinsX();
@@ -1130,7 +1130,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 0
 
   //Residuals...
-  TCanvas *c2_sfON_E = new TCanvas("c2_sfON_E","c2_sfON_E", 1600., 600.);
+  TCanvas *c2_sfON_E = new TCanvas("c2_sfON_E","c2_sfON_E", 1200., 600.);
   c2_sfON_E->Divide(2,1);
   c2_sfON_E->cd(2);
   nBins = data0_sfON_E->GetNbinsX();
@@ -1207,7 +1207,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 1
 
   //Residuals...
-  TCanvas *c3_sfON_E = new TCanvas("c3_sfON_E","c3_sfON_E", 1600., 600.);
+  TCanvas *c3_sfON_E = new TCanvas("c3_sfON_E","c3_sfON_E", 1200., 600.);
   c3_sfON_E->Divide(2,1);
   c3_sfON_E->cd(2);
   nBins = data1_sfON_E->GetNbinsX();
@@ -1276,7 +1276,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 2
 
   //Residuals...
-  TCanvas *c4_sfON_E = new TCanvas("c4_sfON_E","c4_sfON_E", 1600., 600.);
+  TCanvas *c4_sfON_E = new TCanvas("c4_sfON_E","c4_sfON_E", 1200., 600.);
   c4_sfON_E->Divide(2,1);
   c4_sfON_E->cd(2);
   nBins = data2_sfON_E->GetNbinsX();
@@ -1345,7 +1345,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 3
 
   //Residuals...
-  TCanvas *c5_sfON_E = new TCanvas("c5_sfON_E","c5_sfON_E", 1600., 600.);
+  TCanvas *c5_sfON_E = new TCanvas("c5_sfON_E","c5_sfON_E", 1200., 600.);
   c5_sfON_E->Divide(2,1);
   c5_sfON_E->cd(2);
   nBins = data3_sfON_E->GetNbinsX();
@@ -1426,7 +1426,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // All Event types
 
   //Residuals...
-  TCanvas *c1_sfOFF_W = new TCanvas("c1_sfOFF_W","c1_sfOFF_W", 1600., 600.);
+  TCanvas *c1_sfOFF_W = new TCanvas("c1_sfOFF_W","c1_sfOFF_W", 1200., 600.);
   c1_sfOFF_W->Divide(2,1);
   c1_sfOFF_W->cd(2);
   nBins = dataALL_sfOFF_W->GetNbinsX();
@@ -1495,7 +1495,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 0
 
   //Residuals...
-  TCanvas *c2_sfOFF_W = new TCanvas("c2_sfOFF_W","c2_sfOFF_W", 1600., 600.);
+  TCanvas *c2_sfOFF_W = new TCanvas("c2_sfOFF_W","c2_sfOFF_W", 1200., 600.);
   c2_sfOFF_W->Divide(2,1);
   c2_sfOFF_W->cd(2);
   nBins = data0_sfOFF_W->GetNbinsX();
@@ -1571,7 +1571,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 1
 
   //Residuals...
-  TCanvas *c3_sfOFF_W = new TCanvas("c3_sfOFF_W","c3_sfOFF_W", 1600., 600.);
+  TCanvas *c3_sfOFF_W = new TCanvas("c3_sfOFF_W","c3_sfOFF_W", 1200., 600.);
   c3_sfOFF_W->Divide(2,1);
   c3_sfOFF_W->cd(2);
   nBins = data1_sfOFF_W->GetNbinsX();
@@ -1640,7 +1640,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 2
 
   //Residuals...
-  TCanvas *c4_sfOFF_W = new TCanvas("c4_sfOFF_W","c4_sfOFF_W", 1600., 600.);
+  TCanvas *c4_sfOFF_W = new TCanvas("c4_sfOFF_W","c4_sfOFF_W", 1200., 600.);
   c4_sfOFF_W->Divide(2,1);
   c4_sfOFF_W->cd(2);
   nBins = data2_sfOFF_W->GetNbinsX();
@@ -1709,7 +1709,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 3
 
   //Residuals...
-  TCanvas *c5_sfOFF_W = new TCanvas("c5_sfOFF_W","c5_sfOFF_W", 1600., 600.);
+  TCanvas *c5_sfOFF_W = new TCanvas("c5_sfOFF_W","c5_sfOFF_W", 1200., 600.);
   c5_sfOFF_W->Divide(2,1);
   c5_sfOFF_W->cd(2);
   nBins = data3_sfOFF_W->GetNbinsX();
@@ -1792,7 +1792,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // All Event types
 
   //Residuals...
-  TCanvas *c1_sfON_W = new TCanvas("c1_sfON_W","c1_sfON_W", 1600., 600.);
+  TCanvas *c1_sfON_W = new TCanvas("c1_sfON_W","c1_sfON_W", 1200., 600.);
   c1_sfON_W->Divide(2,1);
   c1_sfON_W->cd(2);
   nBins = dataALL_sfON_W->GetNbinsX();
@@ -1861,7 +1861,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 0
 
   //Residuals...
-  TCanvas *c2_sfON_W = new TCanvas("c2_sfON_W","c2_sfON_W", 1600., 600.);
+  TCanvas *c2_sfON_W = new TCanvas("c2_sfON_W","c2_sfON_W", 1200., 600.);
   c2_sfON_W->Divide(2,1);
   c2_sfON_W->cd(2);
   nBins = data0_sfON_W->GetNbinsX();
@@ -1938,7 +1938,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 1
 
   //Residuals...
-  TCanvas *c3_sfON_W = new TCanvas("c3_sfON_W","c3_sfON_W", 1600., 600.);
+  TCanvas *c3_sfON_W = new TCanvas("c3_sfON_W","c3_sfON_W", 1200., 600.);
   c3_sfON_W->Divide(2,1);
   c3_sfON_W->cd(2);
   nBins = data1_sfON_W->GetNbinsX();
@@ -2007,7 +2007,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 2
 
   //Residuals...
-  TCanvas *c4_sfON_W = new TCanvas("c4_sfON_W","c4_sfON_W", 1600., 600.);
+  TCanvas *c4_sfON_W = new TCanvas("c4_sfON_W","c4_sfON_W", 1200., 600.);
   c4_sfON_W->Divide(2,1);
   c4_sfON_W->cd(2);
   nBins = data2_sfON_W->GetNbinsX();
@@ -2076,7 +2076,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   // Type 3
 
   //Residuals...
-  TCanvas *c5_sfON_W = new TCanvas("c5_sfON_W","c5_sfON_W", 1600., 600.);
+  TCanvas *c5_sfON_W = new TCanvas("c5_sfON_W","c5_sfON_W", 1200., 600.);
   c5_sfON_W->Divide(2,1);
   c5_sfON_W->cd(2);
   nBins = data3_sfON_W->GetNbinsX();

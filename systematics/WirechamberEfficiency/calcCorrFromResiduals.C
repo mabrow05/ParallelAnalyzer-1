@@ -16,9 +16,9 @@
   //gStyle->SetStatX(0.75);
   //gStyle->SetStatY(0.80);
 
-  TString year = "2011-2012";
-  Int_t emin = 220;
-  Int_t emax = 670;
+  TString year = "2012-2013";
+  Int_t emin = 190;
+  Int_t emax = 750;
     
   ifstream infile(TString::Format("EfficiencyDistr_%s_%i-%i.txt",year.Data(),emin,emax));
 

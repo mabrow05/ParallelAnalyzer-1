@@ -114,7 +114,8 @@ class uncertaintyHandler:
         self.realAerr = []
         self.stat_percent_err = []
         self.energy_err = []
-        self.theory_err = []
+        self.rad_err = []
+        self.recoil_err = []
         self.theory_corr = []
         self.systA = []
         self.syst_err = []
@@ -245,6 +246,47 @@ class uncertaintyHandler:
 
         self.energy_err = percErr
 
+    def readTheoryUncertainties(self):
+        """Read in the Energy uncertainties and store the percent 
+        error from every bin."""
+        
+        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Corrections/"+
+                       "RadiativeUncertainty_%i.txt"%self.year)
+
+        percErr = []
+
+        if infile:
+            for line in infile:
+                if line[0]!="#":
+                    l = line.split()
+                    percErr.append( fabs(float(l[3])) )
+
+        else: 
+            print("Couldn't open file for Energy uncertainties")
+            exit(0)
+        
+
+        self.rad_err = percErr
+        infile.close()
+
+        infile = open( os.environ["ANALYSIS_RESULTS"]+"/Corrections/"+
+                       "RecoilOrderUncertainty_%i.txt"%self.year)
+
+        percErr = []
+
+        if infile:
+            for line in infile:
+                if line[0]!="#":
+                    l = line.split()
+                    percErr.append( fabs(float(l[3])) )
+
+        else: 
+            print("Couldn't open file for Energy uncertainties")
+            exit(0)
+        
+
+        self.recoil_err = percErr
+
     def makeSystematicCorrections(self,errFacDeltaBS=0.2,errFacDeltaAngle=0.25):
         """Read in the systematic correction bin-by-bin for final
         asymmetries, calculates delta_A/A, and then multiplies by the 
@@ -283,6 +325,26 @@ class uncertaintyHandler:
             self.statUncertainties() 
             
         return weightRealStats(self.energy_err,self.stat_percent_err,emin,emax)
+
+    def calcRadiativeUncert(self,emin,emax):
+
+        if len(self.rad_err)==0: 
+            self.readTheoryUncertainties() 
+            
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        return weightRealStats(self.rad_err,self.stat_percent_err,emin,emax)
+
+    def calcRecoilUncert(self,emin,emax):
+
+        if len(self.recoil_err)==0: 
+            self.readTheoryUncertainties() 
+            
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        return weightRealStats(self.recoil_err,self.stat_percent_err,emin,emax)
 
     def calcPolarimetryCorr(self,emin,emax):
         
@@ -543,8 +605,8 @@ if __name__ == "__main__":
     uncert = uncertaintyHandler(year,"C")
     #uncert.minimizer(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
 
-    #2011: Energy Range = 210.-760. for bsErr=0.25 and angleErr=0.25 : 0.0074
-    #2012: Energy Range = 210.-760. for bsErr=0.25 and angleErr=0.25 : 0.0084
+    #2011: Energy Range = 220.-750. for bsErr=0.25 and angleErr=0.25 : 0.0064, but can go as low as 190-750
+    #2012: Energy Range = 180.-740. for bsErr=0.25 and angleErr=0.25 : 0.00765. but same for 190-750
 
     #2011: Energy Range = 210.-750. for bsErr=0.2 and angleErr=0.25 : 0.006945
     #2012: Energy Range = 200.-740. for bsErr=0.2 and angleErr=0.25 : 0.00811
@@ -557,11 +619,12 @@ if __name__ == "__main__":
 
     if 0:
     
-        lowBin = 22
-        highBin = 66
+        lowBin = 19
+        highBin = 74
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
+        uncert.readTheoryUncertainties()
         uncert.makeSystematicCorrections(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
         
         Errors = []
@@ -581,15 +644,17 @@ if __name__ == "__main__":
         print("Total backsc Corr Error: %f"%Errors[3])
         print("%i-%i keV total Error = %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
         
-
-
+        print("Weighted Radiative Corr Error: %f"%uncert.calcRadiativeUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin)))
+        print("Weighted Recoil Corr Error: %f"%uncert.calcRecoilUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin)))
+        
+        
     if 1:
         anaChoice = "C"
-        lowBin = 22
-        highBin = 66
+        lowBin = 19
+        highBin = 74
         
-        errDeltaBS = 0.20
-        errDeltaAngle = 0.20
+        errDeltaBS = 0.25
+        errDeltaAngle = 0.25
         errDeltaRecoil = 0.005 # These need to be fixed
         errDeltaRadiative = 0.005
 
@@ -600,8 +665,8 @@ if __name__ == "__main__":
         deltaNeutronBGErr = 0.0002
         
         ############### 2011-2012 #####################
-        deltaEff2011 = 0.0011
-        deltaEff2011Err = 0.0008
+        deltaEff2011 = 0.0013
+        deltaEff2011Err = 0.0001
 
         deltaField2011 = 0.
         deltaField2011Err = 0.001
@@ -677,8 +742,8 @@ if __name__ == "__main__":
         
 
         ############### 2012-2013 #####################
-        deltaEff2012 = 0.0009
-        deltaEff2012Err = 0.0006
+        deltaEff2012 = 0.0012
+        deltaEff2012Err = 0.0001
 
         deltaField2012 = 0.
         deltaField2012Err = 0.001
@@ -753,7 +818,7 @@ if __name__ == "__main__":
         
     
 	
-        #MC.add_correlation(err01,err11,1.0)
+        MC.add_correlation(err01,err11,1.0)
         MC.add_correlation(err02,err12,1.)
         MC.add_correlation(err03,err13,1.)
         MC.add_correlation(err04,err14,1.0)

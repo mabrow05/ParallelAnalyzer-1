@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
       exit(0);
     }
     
-    std::vector<TString> aCh {};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<TString> aCh {"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       // ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
       }*/
 
    
-    ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, unblind);
+    //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, unblind);
     //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
     //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
     

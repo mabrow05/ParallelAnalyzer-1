@@ -8,9 +8,9 @@ from asymmetry import *
         
     
 if __name__=="__main__":
-    year = 2011
-    emin = 220.
-    emax = 670.
+    year = 2012
+    emin = 190.
+    emax = 750.
     delta0fracShift = 0.25 # 20% = 0.20
     delta1fracShift = 0.25
     delta2fracShift = 0.25
@@ -141,5 +141,25 @@ if __name__=="__main__":
     print("Type 1: %f"%fabs(delta1fracShift*total_delta_31/(1.+total_delta_31)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
     print("Type 2: %f"%fabs(delta1fracShift*total_delta_32/(1.+total_delta_32)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
     print("Type 3: %f"%fabs(delta1fracShift*total_delta_33/(1.+total_delta_33)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
+
+    with open("%s_delta_30.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+        for i in range(0,len(delta_30[0])):
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_30[0][i],fabs(delta_30[1][i]*delta_30[0][i])))
+
+    with open("%s_delta_31.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+        for i in range(0,len(delta_31[0])):
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_31[0][i],fabs(delta_31[1][i]*delta_31[0][i])))
+
+    with open("%s_delta_32.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+        for i in range(0,len(delta_32[0])):
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_32[0][i],fabs(delta_32[1][i]*delta_32[0][i])))
     
+    with open("%s_delta_33.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+        for i in range(0,len(delta_33[0])):
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_33[0][i],fabs(delta_33[1][i]*delta_33[0][i])))
+
+            
+    with open("%s_delta_3.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+        for i in range(0,len(delta_3[0])):
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_3[0][i],fabs(delta_3[1][i])))
 

@@ -120,8 +120,74 @@ def energyErrorSimple(E,year):
 
 def energyErrorRC(E,year):
 	Eprim = E+calEnvelope(E,year)
-	return simpleAsym(Eprim,year)*(1+WilkinsonRWM(Eprim))/(simpleAsym(E,year)*(1+WilkinsonRWM(E)))-1.
+	return (WilkinsonRWM(E)-WilkinsonRWM(Eprim))/(1+WilkinsonRWM(E))
 
+def energyErrorRad(E,year):
+        Eprim = E+calEnvelope(E,year)
+        return (shann_h_minus_g_a2pi(E)-shann_h_minus_g_a2pi(Eprim))/(1+shann_h_minus_g_a2pi(E)) 
+	#return simpleAsym(Eprim,year)*(1+shann_h_minus_g_a2pi(Eprim))/(simpleAsym(E,year)*(1+shann_h_minus_g_a2pi(E)))-1.
+
+def theoryUncertaintyTable(year=2011):
+	"""Uncertainty due to energy calibration errors; see EnergyErrorsRevis.pdf"""
+        
+        year2 = year*10+1
+
+	edges = bin_edges()
+	dat = []
+	errmax = 0
+	for i in range(len(edges)-1)[-1::-1]:
+		c = 0.5*(edges[i]+edges[i+1])
+                Eprim = c+calEnvelope(c,year2)
+		err = energyErrorRC(c,year2)
+		if err > errmax:
+			errmax = err
+		#dat.append((edges[i],edges[i+1],0.0,errmax))
+		dat.append((edges[i],edges[i+1],0.0,err))
+		print c,Eprim,ObsAsymApprox(c,year2),err,errmax
+                #print c,Eprim,simpleAsym(c,year),err,errmax
+	dat = dat[::-1]
+	fout = open(baseOutPath+"/Corrections/RecoilOrderUncertainty_%i.txt"%year,"w")
+	fout.write("# Uncertainty from R.O. for %i data\n"%year)
+	writeUncertaintyTable(fout,dat)
+
+        dat = []
+	errmax = 0
+        for i in range(len(edges)-1)[-1::-1]:
+		c = 0.5*(edges[i]+edges[i+1])
+                Eprim = c+calEnvelope(c,year2)
+		err = energyErrorRad(c,year2)
+		if err > errmax:
+			errmax = err
+		#dat.append((edges[i],edges[i+1],0.0,errmax))
+		dat.append((edges[i],edges[i+1],0.0,err))
+		print c,Eprim,ObsAsymApprox(c,year2),err,errmax
+                #print c,Eprim,simpleAsym(c,year),err,errmax
+	dat = dat[::-1]
+	fout = open(baseOutPath+"/Corrections/RadiativeUncertainty_%i.txt"%year,"w")
+	fout.write("# Uncertainty from Radiative Corr for %i data\n"%year)
+	writeUncertaintyTable(fout,dat)
+
+def plotTheoryErrors(year=2011):
+
+	gCx=graph.graphxy(width=15,height=8,
+					  x=graph.axis.lin(title="Energy [keV]",min=0,max=780),
+					  y=graph.axis.lin(title="uncertainty $\\Delta A/A$ [\\%]",min=0,max=3.),
+					  key = graph.key.key(pos="tl"))
+	setTexrunner(gCx)
+			 
+        gdat = [ [x,100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,795.,79)  ]
+
+
+        gCx.plot(graph.data.points(gdat,x=1,y=2,title="Recoil Order"),
+                 [ graph.style.line([style.linewidth.THick]),])
+        gCx.plot(graph.data.points(gdat,x=1,y=3,title="Radiative"),
+                 [ graph.style.line([style.linewidth.THick,style.linestyle.dotted]),])
+       
+	
+	print "%s Eavg Radiative = "%year,weightStats(gdat,220,670)
+        print "%s Eavg Recoil = "%year,weightStats( [ [ x[0],x[2] ] for x in gdat ] ,220,670)
+
+	gCx.writetofile("%s/Corrections/TheoryUncert%i.pdf"%(baseOutPath,year))
 
 def linearityUncertaintyTable(year=2011):
 	"""Uncertainty due to energy calibration errors; see EnergyErrorsRevis.pdf"""
@@ -133,8 +199,8 @@ def linearityUncertaintyTable(year=2011):
 	errmax = 0
 	for i in range(len(edges)-1)[-1::-1]:
 		c = 0.5*(edges[i]+edges[i+1])
-		Eprim = c+calEnvelope(c,year2)
-		err = ObsAsymApprox(Eprim,year2)/ObsAsymApprox(c,year2)-1
+		Eprim = c+calEnvelope(c,year)
+		err = ObsAsymApprox(Eprim,year)/ObsAsymApprox(c,year)-1
 		if err > errmax:
 			errmax = err
 		#dat.append((edges[i],edges[i+1],0.0,errmax))
@@ -243,8 +309,10 @@ def plotGainfluctErrors():
 
 
 if __name__=="__main__":
-	year = 2011
+	year = 2012
         readCalEnvelope(year)
+        theoryUncertaintyTable(year)
+        plotTheoryErrors(year)
         #gainUncertaintyTable(year,0.0064)
 	linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
