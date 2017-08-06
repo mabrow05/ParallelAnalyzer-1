@@ -9,6 +9,7 @@ from asymmetry import *
     
 if __name__=="__main__":
     year = 2012
+    anaCh = "C"
     emin = 190.
     emax = 750.
     delta0fracShift = 0.25 # 20% = 0.20
@@ -23,7 +24,18 @@ if __name__=="__main__":
     type2A = uncertaintyHandler(year,"J",sim=True)
     type3A = uncertaintyHandler(year,"K",sim=True)
     
-   
+    Type0=False
+    Type1=False
+    Type2=False
+    Type3=False
+    if anaCh=="A" or anaCh=="B" or anaCh=="C" or anaCh=="D" or anaCh=="E":
+         Type0 = true
+    if anaCh=="A" or anaCh=="B" or anaCh=="C" or anaCh=="E" or anaCh=="F":
+         Type1 = true
+    if anaCh=="A" or anaCh=="C" or anaCh=="E" or anaCh=="G" or anaCh=="H" or anaCh=="J":
+        Type2 = true
+    if anaCh=="A" or anaCh=="C" or anaCh=="E" or anaCh=="G" or anaCh=="H" or anaCh=="K":
+        Type3 = true
 
     # Load each of their statistical uncertainties and UnCorr A values
     A.statUncertainties()
@@ -39,33 +51,33 @@ if __name__=="__main__":
     # 
     
     # store fractions, delta_i values, and A_i values with errors
-    totaldenom = [ ( ( 1./type0A.realAerr[i]**2 if type0A.realAerr[i]>0. else 0.)
-                     +( 1./type1A.realAerr[i]**2 if type1A.realAerr[i]>0. else 0.)
-                     +( 1./type2A.realAerr[i]**2 if type2A.realAerr[i]>0. else 0.)
-                     +( 1./type3A.realAerr[i]**2 if type3A.realAerr[i]>0. else 0.) )
+    totaldenom = [ ( ( 1./type0A.realAerr[i]**2 if type0A.realAerr[i]>0. and Type0 else 0.)
+                     +( 1./type1A.realAerr[i]**2 if type1A.realAerr[i]>0. and Type1 else 0.)
+                     +( 1./type2A.realAerr[i]**2 if type2A.realAerr[i]>0. and Type2 else 0.)
+                     +( 1./type3A.realAerr[i]**2 if type3A.realAerr[i]>0. and Type3 else 0.) )
                    for i in range(0,len(type0A.realAerr)) ]
     
     #calculate the weighted average A
-    weightedA = [ [( ((1./type0A.realAerr[i])**2*type0A.realA[i] if type0A.realAerr[i]>0. else 0.)+
-                    ((1./type1A.realAerr[i])**2*type1A.realA[i] if type1A.realAerr[i]>0. else 0.)+
-                    ((1./type2A.realAerr[i])**2*type2A.realA[i] if type2A.realAerr[i]>0. else 0.)+
-                    ((1./type3A.realAerr[i])**2*type3A.realA[i] if type3A.realAerr[i]>0. else 0.))/(totaldenom[i] if totaldenom[i]!=0. else 1.)
+    weightedA = [ [( ((1./type0A.realAerr[i])**2*type0A.realA[i] if type0A.realAerr[i]>0. and Type0 else 0.)+
+                    ((1./type1A.realAerr[i])**2*type1A.realA[i] if type1A.realAerr[i]>0. and Type1 else 0.)+
+                    ((1./type2A.realAerr[i])**2*type2A.realA[i] if type2A.realAerr[i]>0. and Type2 else 0.)+
+                    ((1./type3A.realAerr[i])**2*type3A.realA[i] if type3A.realAerr[i]>0. and Type3 else 0.))/(totaldenom[i] if totaldenom[i]!=0. else 1.)
                    for i in range(0,len(type0A.realAerr))],
                   [ 1./totaldenom[i]**2 if totaldenom[i]!=0. else 0. for i in range(0,len(type0A.realAerr))] ]
                   
                   
 
 
-    frac0 = [ ((1./type0A.realAerr[i])**2/totaldenom[i] if type0A.realAerr[i]>0. else 0.) for i in range(0,len(type0A.realAerr)) ]
+    frac0 = [ ((1./type0A.realAerr[i])**2/totaldenom[i] if type0A.realAerr[i]>0. and Type0 else 0.) for i in range(0,len(type0A.realAerr)) ]
     delta0 = readAngleCorr(year,"D",delta0fracShift) 
     
-    frac1 = [ ((1./type1A.realAerr[i])**2/totaldenom[i] if type1A.realAerr[i]>0. else 0.) for i in range(0,len(type1A.realAerr)) ]
+    frac1 = [ ((1./type1A.realAerr[i])**2/totaldenom[i] if type1A.realAerr[i]>0. and Type1 else 0.) for i in range(0,len(type1A.realAerr)) ]
     delta1 = readAngleCorr(year,"F",delta1fracShift) 
     
-    frac2 = [ ((1./type2A.realAerr[i])**2/totaldenom[i] if type2A.realAerr[i]>0. else 0.) for i in range(0,len(type2A.realAerr)) ]
+    frac2 = [ ((1./type2A.realAerr[i])**2/totaldenom[i] if type2A.realAerr[i]>0. and Type2 else 0.) for i in range(0,len(type2A.realAerr)) ]
     delta2 = readAngleCorr(year,"J",delta2fracShift)
     
-    frac3 = [ ((1./type3A.realAerr[i])**2/totaldenom[i] if type3A.realAerr[i]>0. else 0.) for i in range(0,len(type3A.realAerr)) ]
+    frac3 = [ ((1./type3A.realAerr[i])**2/totaldenom[i] if type3A.realAerr[i]>0. and Type3 else 0.) for i in range(0,len(type3A.realAerr)) ]
     delta3 = readAngleCorr(year,"K",delta3fracShift)
 
 
@@ -142,24 +154,24 @@ if __name__=="__main__":
     print("Type 2: %f"%fabs(delta1fracShift*total_delta_32/(1.+total_delta_32)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
     print("Type 3: %f"%fabs(delta1fracShift*total_delta_33/(1.+total_delta_33)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
 
-    with open("%s_delta_30.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+    with open("%s_delta_30_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_30[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_30[0][i],fabs(delta_30[1][i]*delta_30[0][i])))
 
-    with open("%s_delta_31.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+    with open("%s_delta_31_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_31[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_31[0][i],fabs(delta_31[1][i]*delta_31[0][i])))
 
-    with open("%s_delta_32.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+    with open("%s_delta_32_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_32[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_32[0][i],fabs(delta_32[1][i]*delta_32[0][i])))
     
-    with open("%s_delta_33.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+    with open("%s_delta_33_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_33[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_33[0][i],fabs(delta_33[1][i]*delta_33[0][i])))
 
             
-    with open("%s_delta_3.txt"%("2011-2012" if year==2011 else "2012-2013"),"w") as f:
+    with open("%s_delta_3_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_3[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_3[0][i],fabs(delta_3[1][i])))
 
