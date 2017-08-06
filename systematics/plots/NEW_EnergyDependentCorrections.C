@@ -43,24 +43,43 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TStrin
 std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../AngleCorrections/%s_DeltaAngle_anaCh%s.txt",year.Data(),anaCh.Data()));
+  std::ifstream infile;
+  if ( anaCh==TString("C") ) infile.open(TString::Format("../AngleCorrections/%s_delta_3.txt",year.Data()));
+  else infile.open(TString::Format("../AngleCorrections/%s_DeltaAngle_anaCh%s.txt",year.Data(),anaCh.Data()));
+  
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
-  Double_t en, frachold,corrhold;
+  Double_t en;
+  TString hold1,hold2;
   Int_t i=0;
-  Double_t aveEn=0., aveCorr=0.;
-  while (infile >> en >> frachold >> corrhold && en<800.) {
-    //std::cout << en << " " << corrhold << " " << errhold << "\n";
-    if (i<4) {
-      aveEn+=en;
-      aveCorr+=corrhold;
-      i++;
-    } else {
-      enbin.push_back(aveEn/4.);
-      c.push_back(aveCorr/4.*100.);
-      cerr.push_back(0.25*aveCorr/4.*100.);
-      i=0,aveEn=0.,aveCorr=0.;
+  Double_t aveEn=0., aveCorr=0., aveErr=0.;
+  while (infile >> en >> hold1 >> hold2 && en<800.) {
+    //std::cout << en << " " << hold2 << " " << errhold << "\n";
+    if ( anaCh==TString("C") ) {
+      if (i<4) {
+	aveEn+=en;
+	aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+	aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
+	i++;
+      } else {
+	enbin.push_back(aveEn/4.);
+	c.push_back(aveCorr/4.*100.);
+	cerr.push_back(aveErr/4.*100.);
+	i=0,aveEn=0.,aveCorr=0., aveErr=0.;
+      }
+    }
+    else {
+      if (i<4) {
+	aveEn+=en;
+	aveCorr+=atof(hold2.Data());
+	i++;
+      } else {
+	enbin.push_back(aveEn/4.);
+	c.push_back(aveCorr/4.*100.);
+	cerr.push_back(0.25*aveCorr/4.*100.);
+	i=0,aveEn=0.,aveCorr=0.;
+      }
     }
   }
   corrs.push_back(enbin);
@@ -142,7 +161,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mg0 = new TMultiGraph();
-  mg0->SetTitle("#Delta_{BS,0} vs. Energy");  
+  mg0->SetTitle("#Delta_{2,0} vs. Energy");  
   
   TGraphErrors *g_bs0_2011 = new TGraphErrors(bs0_2011[0].size()-startPoint,&bs0_2011[0][startPoint],&bs0_2011[1][startPoint],0,&bs0_2011[2][startPoint]);
   g_bs0_2011->SetMarkerStyle(0);
@@ -182,7 +201,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mg1 = new TMultiGraph();
-  mg1->SetTitle("#Delta_{BS,1} vs. Energy");  
+  mg1->SetTitle("#Delta_{2,1} vs. Energy");  
   
   TGraphErrors *g_bs1_2011 = new TGraphErrors(bs1_2011[0].size()-startPoint,&bs1_2011[0][startPoint],&bs1_2011[1][startPoint],0,&bs1_2011[2][startPoint]);
   g_bs1_2011->SetMarkerStyle(0);
@@ -221,7 +240,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mg2 = new TMultiGraph();
-  mg2->SetTitle("#Delta_{BS,2} vs. Energy");  
+  mg2->SetTitle("#Delta_{2,2} vs. Energy");  
   
   TGraphErrors *g_bs2_2011 = new TGraphErrors(bs2_2011[0].size()-startPoint,&bs2_2011[0][startPoint],&bs2_2011[1][startPoint],0,&bs2_2011[2][startPoint]);
   g_bs2_2011->SetMarkerStyle(0);
@@ -260,7 +279,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mg3 = new TMultiGraph();
-  mg3->SetTitle("#Delta_{BS,3} vs. Energy");  
+  mg3->SetTitle("#Delta_{2,3} vs. Energy");  
   
   TGraphErrors *g_bs3_2011 = new TGraphErrors(bs3_2011[0].size()-startPoint,&bs3_2011[0][startPoint],&bs3_2011[1][startPoint],0,&bs3_2011[2][startPoint]);
   g_bs3_2011->SetMarkerStyle(0);
@@ -300,7 +319,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mgALLBS = new TMultiGraph();
-  mgALLBS->SetTitle("#Delta_{BS} vs. Energy");  
+  mgALLBS->SetTitle("#Delta_{2} vs. Energy");  
   
   TGraphErrors *g_bsALL_2011 = new TGraphErrors(bsALL_2011[0].size()-startPoint,&bsALL_2011[0][startPoint],&bsALL_2011[1][startPoint],0,&bsALL_2011[2][startPoint]);
   g_bsALL_2011->SetMarkerStyle(0);
@@ -339,7 +358,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mgAngle = new TMultiGraph();
-  mgAngle->SetTitle("#Delta_{cos#theta} vs. Energy");  
+  mgAngle->SetTitle("#Delta_{3} vs. Energy");  
   
   TGraphErrors *g_cosTheta_2011 = new TGraphErrors(cosTheta_2011[0].size()-startPoint,&cosTheta_2011[0][startPoint],&cosTheta_2011[1][startPoint],0,&cosTheta_2011[2][startPoint]);
   g_cosTheta_2011->SetMarkerStyle(0);
