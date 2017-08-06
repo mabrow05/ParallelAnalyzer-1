@@ -1502,10 +1502,25 @@ std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoin
 
 std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct, std::string anaCh) {
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
-  if ( corr!=std::string("DeltaAngleOnly") && corr!=std::string("AllCorr") ) return syst;
+  if (corr.size()<7) return syst;
+  if ( corr.substr(0,7)!=std::string("AllCorr") && corr.substr(0,7)!=std::string("DeltaAn") ) return syst;
 
-  TString filename = TString::Format("../systematics/AngleCorrections/%s_DeltaAngle_anaCh%s.txt",oct<60?"2011-2012":"2012-2013",anaCh.c_str());
-  //std::cout << filename.Data() << std::endl;                                                                                                 
+  std::string c;
+  TString filename;
+  
+  if ( anaCh==std::string("C") ) {
+    c = corr.substr(0,7)==std::string("DeltaAn")?corr.substr(10,1):"ALL";
+    filename = TString::Format("../systematics/AngleCorrections/%s_delta_3%s.txt",
+			       oct<60?"2011-2012":"2012-2013",
+			       (c==std::string("0")?"0":
+				(c==std::string("1")?"1":
+				 (c==std::string("2")?"2":
+				  (c==std::string("3")?"3":"")))));
+  } else {
+    filename = TString::Format("../systematics/AngleCorrections/%s_DeltaAngle_anaCh%s.txt",oct<60?"2011-2012":"2012-2013",anaCh.c_str());
+  }
+
+  std::cout << filename << std::endl;                                                                                                 
 
   std::ifstream infile(filename.Data());
 
@@ -1516,20 +1531,25 @@ std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint
   //Read in the systematics                                                                                                                    
   Double_t mid; //midpoint of bin                                                                                                              
   std::string hold1;
-  std::string sys;  //systematics correction (Apure/Aproc)                                                                                     
+  std::string hold2;  //systematics correction (Apure/Aproc)                                                                                     
 
   Int_t it = 0;
 
-  while (infile >> mid >> hold1 >> sys) {
+  while (infile >> mid >> hold1 >> hold2) {
     if (mid==enBinMidpoint[it]) {
-      syst[it] = (hold1!=std::string("inf") && sys!=std::string("inf")) ? atof(sys.c_str())+1. : 1.;
-      std::cout << mid << " " << atof(sys.c_str())+1. << "\n";
+      if (anaCh==std::string("C") ) {
+	syst[it] = (hold1!=std::string("nan") && hold1!=std::string("-nan")) ? atof(hold1.c_str())+1. : 1.;
+	std::cout << mid << " " << atof(hold1.c_str())+1. << "\n";
+      } else {
+	syst[it] = (hold1!=std::string("inf") && hold2!=std::string("inf")) ? atof(hold2.c_str())+1. : 1.;
+	std::cout << mid << " " << atof(hold2.c_str())+1. << "\n";
+      }
       it++;
     }
   }
-
+    
   return syst;
-
+  
 
 };
 

@@ -10,8 +10,8 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   Double_t xAxisMax = 800.;
 
-  Double_t minEnBin = 19; //Energy bins to integrate event types over
-  Double_t maxEnBin = 74;
+  Double_t minEnBin = 22; //Energy bins to integrate event types over
+  Double_t maxEnBin = 66;
 
   //Storing event fractions for data, E/W and sfON/OFF
   Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t2E_sfON, t2E_sfOFF, t3E_sfON, t3E_sfOFF;
