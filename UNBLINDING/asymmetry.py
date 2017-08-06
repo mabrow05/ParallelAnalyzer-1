@@ -390,34 +390,7 @@ class uncertaintyHandler:
                              emax,"UnCorr",self.sim,False)
         return fabs( asymm[1]/asymm[0] )
 
-    def calcSystematicUncert(self,emin,emax,percErrBS=0.25,percErrAngle=0.25):
-
-        if len(self.syst_err)==0: 
-            self.makeSystematicCorrections() 
-            
-        if len(self.stat_percent_err)==0: 
-            self.statUncertainties() 
-            
-        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
-        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
-        
-        UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                              emax,"UnCorr",self.sim)
-        AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                                 emax,"DeltaAngleOnly",self.cim)
-        BSCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                              emax,"DeltaBackscatterOnly",self.sim)
-
-        deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
-        deltaBS = (BSCorr[0]/UnCorr[0]-1.)
-        deltaCorr = (1.+deltaAngle)*(1+deltaBS)-1.
-        deltaCorrErr = sqrt( (percErrAngle*deltaAngle/(1.+deltaAngle))**2 + (percErrBS*deltaBS/(1.+deltaBS))**2)
-
-        #print("deltaBS: %f +/- %f"%(deltaBS,percErrBS*deltaBS))
-        #print("deltaAngle: %f +/- %f"%(deltaAngle,percErrAngle*deltaAngle))
-        return deltaCorrErr
-
-    def calcAngleCorr(self,emin,emax,percErrAngle=0.25):
+    def calcMCCorr(self,emin,emax,percErrBS=0.25,percErrAngle=0.25):
 
         if len(self.syst_err)==0: 
             self.makeSystematicCorrections() 
@@ -432,13 +405,40 @@ class uncertaintyHandler:
                               emax,"UnCorr",self.sim)
         AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                                  emax,"DeltaAngleOnly",self.sim)
+        BSCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                              emax,"DeltaBackscatterOnly",self.sim)
+
+        deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
+        deltaBS = (BSCorr[0]/UnCorr[0]-1.)
+        deltaCorr = (1.+deltaAngle)*(1+deltaBS)-1.
+        deltaCorrErr = sqrt( (percErrAngle*deltaAngle/(1.+deltaAngle))**2 + (percErrBS*deltaBS/(1.+deltaBS))**2)
+
+        #print("deltaBS: %f +/- %f"%(deltaBS,percErrBS*deltaBS))
+        #print("deltaAngle: %f +/- %f"%(deltaAngle,percErrAngle*deltaAngle))
+        return [deltaCorr/(1+deltaCorr),deltaCorrErr/(1+deltaCorr)]
+
+    def calcAngleCorr(self,emin,emax,percErrAngle=0.25,BStype="ALL"):
+
+        if len(self.syst_err)==0: 
+            self.makeSystematicCorrections() 
+            
+        if len(self.stat_percent_err)==0: 
+            self.statUncertainties() 
+            
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
+        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        
+        UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                              emax,"UnCorr",self.sim)
+        AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
+                                 emax,"DeltaAngle%s"%BStype,self.sim)
         
         deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
         #print("deltaAngle: %f +/- %f"%(deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))))
         return [deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))]
 
 
-    def calcBackscCorr(self,emin,emax,percErrBacksc=0.25):
+    def calcBackscCorr(self,emin,emax,percErrBacksc=0.25, BStype="ALL"):
 
         if len(self.syst_err)==0: 
             self.makeSystematicCorrections() 
@@ -452,7 +452,7 @@ class uncertaintyHandler:
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                               emax,"UnCorr",self.sim)
         BackscCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
-                                  emax,"DeltaBackscALL",self.sim)
+                                  emax,"DeltaBacksc%s"%BStype,self.sim)
         
         deltaBacksc = (BackscCorr[0]/UnCorr[0]-1.)
         #print("deltaBacksc: %f +/- %f"%(deltaBacksc/(1.+deltaBacksc),fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))))
@@ -601,7 +601,7 @@ class uncertaintyHandler:
 
 if __name__ == "__main__":
     
-    year=2011
+    year=2012
     uncert = uncertaintyHandler(year,"C")
     #uncert.minimizer(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
 
@@ -619,8 +619,8 @@ if __name__ == "__main__":
 
     if 0:
     
-        lowBin = 19
-        highBin = 74
+        lowBin = 22
+        highBin = 66
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
@@ -646,7 +646,47 @@ if __name__ == "__main__":
         
         print("Weighted Radiative Corr Error: %f"%uncert.calcRadiativeUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin)))
         print("Weighted Recoil Corr Error: %f"%uncert.calcRecoilUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin)))
-        
+        print
+        print("Total delta_20: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[1]))
+        print("Total delta_21: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[1]))
+        print("Total delta_22: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[1]))
+        print("Total delta_23: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[1]))
+        print("Total delta_2: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[1]))
+
+        print
+        print("Total delta_30: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[1]))
+        print("Total delta_31: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[1]))
+        print("Total delta_32: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[1]))
+        print("Total delta_33: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[1]))
+        print("Total delta_3: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[1]))
+        print
+        print("Total delta_MC: %0.6f +/- %0.6f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[0],
+                                                 uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[1]))
+             
+        print
+        delta20 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.10,"0")
+        delta21 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.30,"1")
+        delta22 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.40,"2")
+        delta23 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.20,"3")        
+        delta30 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.10,"0")
+        delta31 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.30,"1")
+        delta32 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.40,"2")
+        delta33 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.20,"3")        
+
+
+        indErrors = sumErrors([delta20[1],delta21[1],delta22[1],delta23[1],delta30[1],delta31[1],delta32[1],delta33[1]])
+        print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[0],
+                                                       indErrors))
         
     if 1:
         anaChoice = "C"
@@ -669,7 +709,7 @@ if __name__ == "__main__":
         deltaEff2011Err = 0.0001
 
         deltaField2011 = 0.
-        deltaField2011Err = 0.001
+        deltaField2011Err = 0.0012
         
         A2011 = uncertaintyHandler(2011,anaChoice)
         A2011.statUncertainties()
