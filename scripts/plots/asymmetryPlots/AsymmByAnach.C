@@ -7,7 +7,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   bool CorrAndUnCorr = false;
 
   double ymin0 = corrections==TString("UnCorr")?-0.130:-0.125;
-  double ymax0 = corrections==TString("UnCorr")?-0.117:-0.1150;
+  double ymax0 = ( (!withSim && corrections==TString("UnCorr"))?-0.1195:
+		   (withSim && corrections==TString("UnCorr"))?-0.118:-0.1150 );
   
   const Int_t numAnaChT0 = 4;
   const Int_t numAnaChBacksc = 5;
@@ -165,6 +166,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   gStyle->SetTitleXOffset(1.2);
   gStyle->SetGridStyle(8);
   //gStyle->SetGridColor(kBlue);
+
+  
   
   TCanvas *c1 = new TCanvas("c1","demo bin labels",10,10,600,600);
 
@@ -204,6 +207,11 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   data->SetMaximum(ymax0);
 
   data->Draw("EX0");
+
+  TLine *line1 = new TLine(data->GetXaxis()->GetXmin(),-0.1184,data->GetXaxis()->GetXmax(),-0.1184);
+  line1->SetLineStyle(7);
+  line1->SetLineWidth(2);
+  if (corrections==TString("AllCorr")) line1->Draw("SAME");
 
   TH1F * corrData = new TH1F("","CorrData vs MC Blinded Asymmetries",AsymmCorrDataT0.size(),0.5,AsymmCorrDataT0.size()+0.5);
   corrData->SetMarkerColor(kRed);
@@ -283,10 +291,16 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   dataBacksc->GetXaxis()->SetTitleSize(0.05);
   dataBacksc->GetXaxis()->CenterTitle();
   dataBacksc->GetYaxis()->CenterTitle();
-  dataBacksc->SetMinimum(-0.35);
-  dataBacksc->SetMaximum(0.025);
+  dataBacksc->SetMinimum(-0.2);
+  dataBacksc->SetMaximum(0.0);
 
   dataBacksc->Draw("EX0");
+
+  TLine *line2 = new TLine(dataBacksc->GetXaxis()->GetXmin(),-0.1184,dataBacksc->GetXaxis()->GetXmax(),-0.1184);
+  line2->SetLineStyle(7);
+  line2->SetLineWidth(2);
+  line2->Draw("SAME");
+
 
   TH1F * corrDataBacksc = new TH1F("","CorrDataBacksc vs MC Blinded Asymmetries",AsymmCorrDataBacksc.size(),0.5,AsymmCorrDataBacksc.size()+0.5);
   corrDataBacksc->SetMarkerColor(kRed);

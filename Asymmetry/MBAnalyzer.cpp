@@ -1482,7 +1482,6 @@ void ProduceRawAsymmetries(Int_t octBegin, Int_t octEnd, std::string anaChoice, 
 /////////////////////// Corrections ////////////////////////////
 
 std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoint) {
-
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
 
   if (corr.size()<7) return syst;
@@ -1501,6 +1500,9 @@ std::vector <Double_t> LoadTheoryCorrections(std::vector <Double_t> enBinMidpoin
 };
 
 std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint,Int_t oct, std::string anaCh) {
+
+  bool useDelta3i = true;
+
   std::vector <Double_t> syst(enBinMidpoint.size(), 1.);
   if (corr.size()<7) return syst;
   if ( corr.substr(0,7)!=std::string("AllCorr") && corr.substr(0,7)!=std::string("DeltaAn") ) return syst;
@@ -1508,14 +1510,14 @@ std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint
   std::string c;
   TString filename;
   
-  if ( anaCh==std::string("C") ) {
+  if ( useDelta3i ) { //anaCh==std::string("C") ) {
     c = corr.substr(0,7)==std::string("DeltaAn")?corr.substr(10,1):"ALL";
-    filename = TString::Format("../systematics/AngleCorrections/%s_delta_3%s.txt",
+    filename = TString::Format("../systematics/AngleCorrections/%s_delta_3%s_anaCh%s.txt",
 			       oct<60?"2011-2012":"2012-2013",
 			       (c==std::string("0")?"0":
 				(c==std::string("1")?"1":
 				 (c==std::string("2")?"2":
-				  (c==std::string("3")?"3":"")))));
+				  (c==std::string("3")?"3":"")))),anaCh.c_str());
   } else {
     filename = TString::Format("../systematics/AngleCorrections/%s_DeltaAngle_anaCh%s.txt",oct<60?"2011-2012":"2012-2013",anaCh.c_str());
   }
@@ -1537,7 +1539,7 @@ std::vector <Double_t> LoadAngleCorrections(std::vector <Double_t> enBinMidpoint
 
   while (infile >> mid >> hold1 >> hold2) {
     if (mid==enBinMidpoint[it]) {
-      if (anaCh==std::string("C") ) {
+      if ( useDelta3i ) {//anaCh==std::string("C") ) {
 	syst[it] = (hold1!=std::string("nan") && hold1!=std::string("-nan")) ? atof(hold1.c_str())+1. : 1.;
 	std::cout << mid << " " << atof(hold1.c_str())+1. << "\n";
       } else {

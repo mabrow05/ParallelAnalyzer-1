@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     
     
     
-    std::vector<std::string> aCh {"A","B","D","F","G"};//{"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<std::string> aCh {};//{"A","B","D","F","G"};//{"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, ach, enBinWidth, UKdata, simulation, UNBLIND);
       
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     }
     
     // Loop over keys
-    int keys[] {};//{0,10,11,12,13};
+    int keys[] {0,10,11,12,13};
     
     for ( auto& k : keys ) {
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);

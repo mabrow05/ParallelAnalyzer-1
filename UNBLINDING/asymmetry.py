@@ -91,7 +91,8 @@ def readBackscCorr(year=2011,anaCh="C",percErr=0.2):
               "deltaBSALL_anaCh%s_%s.txt"%(anaCh,yearString),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
-            A[0].append(float(row[1]))
+            A[0].append(float(row[1]) if row[1]!="nan" and row[1]!="-nan" 
+                        and row[1]!="inf" and row[1]!="-inf" else 0.)
             A[1].append(fabs(float(row[1])*percErr))
             #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
 

@@ -6,36 +6,34 @@ from math import *
 sys.path.append("../../UNBLINDING")
 from asymmetry import *
         
-    
-if __name__=="__main__":
-    year = 2012
-    anaCh = "C"
-    emin = 190.
-    emax = 750.
-    delta0fracShift = 0.25 # 20% = 0.20
-    delta1fracShift = 0.25
-    delta2fracShift = 0.25
-    delta3fracShift = 0.25
+delta0fracShift = 0.10 # 20% = 0.20
+delta1fracShift = 0.30
+delta2fracShift = 0.40
+delta3fracShift = 0.20
 
-    # create objects for each event type and total asymmetry
-    A = uncertaintyHandler(year,"C",sim=True)
-    type0A = uncertaintyHandler(year,"D",sim=True)
-    type1A = uncertaintyHandler(year,"F",sim=True)
-    type2A = uncertaintyHandler(year,"J",sim=True)
-    type3A = uncertaintyHandler(year,"K",sim=True)
+incStatErr = True
+
+def doAngleCorr(year,anaCh,emin,emax):
     
     Type0=False
     Type1=False
     Type2=False
     Type3=False
     if anaCh=="A" or anaCh=="B" or anaCh=="C" or anaCh=="D" or anaCh=="E":
-         Type0 = true
+        Type0 = True
     if anaCh=="A" or anaCh=="B" or anaCh=="C" or anaCh=="E" or anaCh=="F":
-         Type1 = true
+        Type1 = True
     if anaCh=="A" or anaCh=="C" or anaCh=="E" or anaCh=="G" or anaCh=="H" or anaCh=="J":
-        Type2 = true
+        Type2 = True
     if anaCh=="A" or anaCh=="C" or anaCh=="E" or anaCh=="G" or anaCh=="H" or anaCh=="K":
-        Type3 = true
+        Type3 = True
+
+     # create objects for each event type and total asymmetry
+    A = uncertaintyHandler(year,"C",sim=True)
+    type0A = uncertaintyHandler(year,"D",sim=True)
+    type1A = uncertaintyHandler(year,"F",sim=True)
+    type2A = uncertaintyHandler(year,"J",sim=True)
+    type3A = uncertaintyHandler(year,"K",sim=True)
 
     # Load each of their statistical uncertainties and UnCorr A values
     A.statUncertainties()
@@ -59,12 +57,12 @@ if __name__=="__main__":
     
     #calculate the weighted average A
     weightedA = [ [( ((1./type0A.realAerr[i])**2*type0A.realA[i] if type0A.realAerr[i]>0. and Type0 else 0.)+
-                    ((1./type1A.realAerr[i])**2*type1A.realA[i] if type1A.realAerr[i]>0. and Type1 else 0.)+
-                    ((1./type2A.realAerr[i])**2*type2A.realA[i] if type2A.realAerr[i]>0. and Type2 else 0.)+
-                    ((1./type3A.realAerr[i])**2*type3A.realA[i] if type3A.realAerr[i]>0. and Type3 else 0.))/(totaldenom[i] if totaldenom[i]!=0. else 1.)
+                     ((1./type1A.realAerr[i])**2*type1A.realA[i] if type1A.realAerr[i]>0. and Type1 else 0.)+
+                     ((1./type2A.realAerr[i])**2*type2A.realA[i] if type2A.realAerr[i]>0. and Type2 else 0.)+
+                     ((1./type3A.realAerr[i])**2*type3A.realA[i] if type3A.realAerr[i]>0. and Type3 else 0.))/(totaldenom[i] if totaldenom[i]!=0. else 1.)
                    for i in range(0,len(type0A.realAerr))],
                   [ 1./totaldenom[i]**2 if totaldenom[i]!=0. else 0. for i in range(0,len(type0A.realAerr))] ]
-                  
+    
                   
 
 
@@ -83,28 +81,30 @@ if __name__=="__main__":
 
     # now create the total delta_3i corrections and their fractional uncertainties
 
-    delta_30 = [ [(frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type0A.realA))],
-                 [delta0fracShift for i in range(0,len(type0A.realA))] ]
-    
-    delta_31 = [ [(frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type1A.realA))],
-                 [delta1fracShift for i in range(0,len(type1A.realA))] ]
-
-    delta_32 = [ [(frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type2A.realA))],
-                 [delta2fracShift for i in range(0,len(type2A.realA))] ]
-
-    delta_33 = [ [(frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type3A.realA))],
-                 [delta3fracShift for i in range(0,len(type3A.realA))] ]
-
-    ##### including statistical err on correction
     #delta_30 = [ [(frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type0A.realA))],
-    #             [sqrt(delta0fracShift**2+type0A.stat_percent_err[i]**2) for i in range(0,len(type0A.realA))] ]
+    #             [delta0fracShift for i in range(0,len(type0A.realA))] ]
     
     #delta_31 = [ [(frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type1A.realA))],
-    #             [sqrt(delta1fracShift**2+type1A.stat_percent_err[i]**2) for i in range(0,len(type1A.realA))] ]
+    #             [delta1fracShift for i in range(0,len(type1A.realA))] ]
+
     #delta_32 = [ [(frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type2A.realA))],
-    #             [sqrt(delta2fracShift**2+type2A.stat_percent_err[i]**2) for i in range(0,len(type2A.realA))] ]
+    #             [delta2fracShift for i in range(0,len(type2A.realA))] ]
+
     #delta_33 = [ [(frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type3A.realA))],
-    #             [sqrt(delta3fracShift**2+type3A.stat_percent_err[i]**2) for i in range(0,len(type3A.realA))] ]
+    #             [delta3fracShift for i in range(0,len(type3A.realA))] ]
+
+    ##### including statistical err on correction
+    delta_30 = [ [(frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type0A.realA))],
+                 [sqrt(delta0fracShift**2+(type0A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
+    
+    delta_31 = [ [(frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type1A.realA))],
+                 [sqrt(delta1fracShift**2+(type1A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
+
+    delta_32 = [ [(frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type2A.realA))],
+                 [sqrt(delta2fracShift**2+(type2A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
+
+    delta_33 = [ [(frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type3A.realA))],
+                 [sqrt(delta3fracShift**2+(type3A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
 
     # create the total delta_3 correction from the above corrections with the actual uncertainty
 
@@ -149,29 +149,46 @@ if __name__=="__main__":
     print("Type 2: %f"%fabs(delta2fracShift*total_delta_32/(1.+total_delta_32)))
     print("Type 3: %f"%fabs(delta3fracShift*total_delta_33/(1.+total_delta_33)))
     print
-    print("fractional Contribution to the total uncertainty as ratio of Delta_3i/Delta_30")
-    print("Type 1: %f"%fabs(delta1fracShift*total_delta_31/(1.+total_delta_31)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
-    print("Type 2: %f"%fabs(delta1fracShift*total_delta_32/(1.+total_delta_32)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
-    print("Type 3: %f"%fabs(delta1fracShift*total_delta_33/(1.+total_delta_33)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
+    #print("fractional Contribution to the total uncertainty as ratio of Delta_3i/Delta_30")
+    #print("Type 1: %f"%fabs(delta1fracShift*total_delta_31/(1.+total_delta_31)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
+    #print("Type 2: %f"%fabs(delta1fracShift*total_delta_32/(1.+total_delta_32)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
+    #print("Type 3: %f"%fabs(delta1fracShift*total_delta_33/(1.+total_delta_33)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
 
-    with open("%s_delta_30_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
+    with open("%s_delta_30_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_30[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_30[0][i],fabs(delta_30[1][i]*delta_30[0][i])))
 
-    with open("%s_delta_31_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
+    with open("%s_delta_31_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_31[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_31[0][i],fabs(delta_31[1][i]*delta_31[0][i])))
 
-    with open("%s_delta_32_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
+    with open("%s_delta_32_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_32[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_32[0][i],fabs(delta_32[1][i]*delta_32[0][i])))
-    
-    with open("%s_delta_33_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
+            
+    with open("%s_delta_33_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_33[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_33[0][i],fabs(delta_33[1][i]*delta_33[0][i])))
 
             
-    with open("%s_delta_3_%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
+    with open("%s_delta_3_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_3[0])):
             f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_3[0][i],fabs(delta_3[1][i])))
+
+
+
+if __name__=="__main__":
+    
+    Year = [2011,2012]
+    anaChoices = ["A","B","C","D","F","G","H","J","K"]
+    
+    emin = 190.
+    emax = 750.
+    
+    #doAngleCorr(2011,"C",emin,emax)
+    for year in Year:
+        for anaCh in anaChoices:
+            doAngleCorr(year,anaCh,emin,emax)
+    
+    
 
