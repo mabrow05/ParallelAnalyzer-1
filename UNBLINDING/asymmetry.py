@@ -32,7 +32,7 @@ def weightRealStats(data,stats,e0,e1):
         denom = sum([ ( (1./stats[i])**2 if stats[i]!=0. else 0. )
                      for i in range(getEnergyBin(e0),getEnergyBin(e1)) if e0<=getBinEnergyMid(i)<=e1])
         
-        return numer/denom
+        return numer/denom if denom!=0. else 0.
 
 def totalStatErr(data,dataErr,e0,e1):
 
@@ -79,7 +79,7 @@ def readAngleCorr(year=2011,anaCh="C",percErr=0.2):
 
     return A
 
-def readBackscCorr(year=2011,anaCh="C",percErr=0.2):
+def readBackscCorr(year=2011,anaCh="C",percErr=0.2,bsType="ALL"):
     A = [[],[]]
     yearString=None
     if year==2011:
@@ -88,7 +88,7 @@ def readBackscCorr(year=2011,anaCh="C",percErr=0.2):
         yearString = "2012-2013"
         
     with open(os.environ["ANALYSIS_CODE"]+"/systematics/OldMCCorrection/"+
-              "deltaBSALL_anaCh%s_%s.txt"%(anaCh,yearString),'rb') as tsvin:
+              "deltaBS%s_anaCh%s_%s.txt"%(bsType,anaCh,yearString),'rb') as tsvin:
         tsvin = csv.reader(tsvin, delimiter='\t')
         for row in tsvin:
             A[0].append(float(row[1]) if row[1]!="nan" and row[1]!="-nan" 
