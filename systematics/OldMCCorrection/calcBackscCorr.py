@@ -42,6 +42,11 @@ def doBackscCorr(year,anaCh,emin,emax):
     type2A.statUncertainties()
     type3A.statUncertainties()
 
+    #for i in range(0,len(type2A.realA)):
+    #    print("%f %f %f %f"%((i*10.+5.),type2A.realA[i],type2A.realAerr[i],type2A.stat_percent_err[i]))
+
+    #exit(0)
+
     #print(totalStatErr(A.realA,A.realAerr,emin, emax))
     #print(totalStatErr(type3A.realA,type3A.realAerr,emin, emax))
     #exit(0)
@@ -67,18 +72,18 @@ def doBackscCorr(year,anaCh,emin,emax):
 
 
     frac0 = [ ((1./type0A.realAerr[i])**2/totaldenom[i] if type0A.realAerr[i]>0. and Type0 else 0.) for i in range(0,len(type0A.realAerr)) ]
-    delta0 = readBackscCorr(year,anaCh,delta0fracShift,"0")     
+    delta0 = readOldBackscCorr(year,anaCh,delta0fracShift,"0")     
     
     frac1 = [ ((1./type1A.realAerr[i])**2/totaldenom[i] if type1A.realAerr[i]>0. and Type1 else 0.) for i in range(0,len(type1A.realAerr)) ]
-    delta1 = readBackscCorr(year,anaCh,delta1fracShift,"1") 
+    delta1 = readOldBackscCorr(year,anaCh,delta1fracShift,"1") 
     
     frac2 = [ ((1./type2A.realAerr[i])**2/totaldenom[i] if type2A.realAerr[i]>0. and Type2 else 0.) for i in range(0,len(type2A.realAerr)) ]
-    delta2 = readBackscCorr(year,anaCh,delta2fracShift,"2")
+    delta2 = readOldBackscCorr(year,anaCh,delta2fracShift,"2")
     
     frac3 = [ ((1./type3A.realAerr[i])**2/totaldenom[i] if type3A.realAerr[i]>0. and Type3 else 0.) for i in range(0,len(type3A.realAerr)) ]
-    delta3 = readBackscCorr(year,anaCh,delta3fracShift,"3")
-    for i in range(0,len(frac3)):
-        print("%f %f"%(delta3[0][i],frac3[i]))
+    delta3 = readOldBackscCorr(year,anaCh,delta3fracShift,"3")
+    #for i in range(0,len(frac3)):
+    #    print("%f %f"%(delta3[0][i],frac3[i]))
 
     # now create the total delta_2i corrections and their fractional uncertainties
 
@@ -192,7 +197,7 @@ if __name__=="__main__":
     emin = 190.
     emax = 750.
     
-    #doBackscCorr(2011,"C",emin,emax)
+    #doBackscCorr(2012,"C",emin,emax)
     for year in Year:
         for anaCh in anaChoices:
             doBackscCorr(year,anaCh,emin,emax)

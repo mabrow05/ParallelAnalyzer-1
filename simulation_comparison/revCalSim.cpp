@@ -415,7 +415,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
 
   //Set random number generator
 
-  TRandom3 *seed = new TRandom3( 3*runNumber ); // seed generator
+  TRandom3 *seed = new TRandom3( 5*runNumber ); // seed generator, was 3, now 5
   TRandom3 *rand0 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
   TRandom3 *rand1 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );
   TRandom3 *rand2 = new TRandom3( (unsigned int) (seed->Rndm()*10000.) );

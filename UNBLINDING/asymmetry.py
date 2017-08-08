@@ -63,7 +63,7 @@ def getAsymmetry(anaCh,octLow,octHigh,elow,ehigh,corr="UnCorr",sim=False,withPOL
         infile.close()
     return asymm
 
-def readAngleCorr(year=2011,anaCh="C",percErr=0.2):
+def readOldAngleCorr(year=2011,anaCh="C",percErr=0.2):
     A = [[],[]]
     yearString=None
     if year==2011:
@@ -79,7 +79,7 @@ def readAngleCorr(year=2011,anaCh="C",percErr=0.2):
 
     return A
 
-def readBackscCorr(year=2011,anaCh="C",percErr=0.2,bsType="ALL"):
+def readOldBackscCorr(year=2011,anaCh="C",percErr=0.2,bsType="ALL"):
     A = [[],[]]
     yearString=None
     if year==2011:
@@ -97,6 +97,46 @@ def readBackscCorr(year=2011,anaCh="C",percErr=0.2,bsType="ALL"):
             #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
 
     return A
+
+
+def readAngleCorr(year=2011,anaCh="C",bsType="ALL"):
+    A = [[],[]]
+    yearString=None
+    if year==2011:
+        yearString = "2011-2012"
+    else:
+        yearString = "2012-2013"
+    with open(os.environ["ANALYSIS_CODE"]+"/systematics/AngleCorrections/" +
+              "%s_delta_3%s_anaCh%s.txt"
+              %(yearString,(bsType if bsType!="ALL" else ""),anaCh),'rb') as tsvin:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+        for row in tsvin:
+            A[0].append(float(row[1]) if row[1]!="nan" and row[1]!="-nan" 
+                        and row[1]!="inf" and row[1]!="-inf" else 0.)
+            A[1].append(fabs(float(row[2])))
+            #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
+
+    return A
+
+def readBackscCorr(year=2011,anaCh="C",bsType="ALL"):
+    A = [[],[]]
+    yearString=None
+    if year==2011:
+        yearString = "2011-2012"
+    else:
+        yearString = "2012-2013"
+    with open(os.environ["ANALYSIS_CODE"]+"/systematics/OldMCCorrection/" +
+              "%s_delta_2%s_anaCh%s.txt"
+              %(yearString,(bsType if bsType!="ALL" else ""),anaCh),'rb') as tsvin:
+        tsvin = csv.reader(tsvin, delimiter='\t')
+        for row in tsvin:
+            A[0].append(float(row[1]) if row[1]!="nan" and row[1]!="-nan" 
+                        and row[1]!="inf" and row[1]!="-inf" else 0.)
+            A[1].append(fabs(float(row[2])))
+            #print("%s\t%s\t%s"%(row[0],row[1],row[2]))
+
+    return A
+
 
 
 class uncertaintyHandler:
@@ -119,8 +159,8 @@ class uncertaintyHandler:
         self.recoil_err = []
         self.theory_corr = []
         self.systA = []
-        self.syst_err = []
-        self.syst_corr = []
+        self.BS_corr = []
+        self.Angle_corr = []
 
         self.year = year
         
@@ -288,29 +328,14 @@ class uncertaintyHandler:
 
         self.recoil_err = percErr
 
-    def makeSystematicCorrections(self,errFacDeltaBS=0.2,errFacDeltaAngle=0.25):
+    def makeSystematicCorrections(self):
         """Read in the systematic correction bin-by-bin for final
         asymmetries, calculates delta_A/A, and then multiplies by the 
         error factor before filling the percent error for every bin."""
 
-        BS_corr = readBackscCorr(self.year,self.anaChoice,errFacDeltaBS)
-        Angle_corr = readAngleCorr(self.year,self.anaChoice,errFacDeltaAngle)
-
-        MC_corr = []
-        MC_corrErr = []
+        self.BS_corr = readBackscCorr(self.year,self.anaChoice)
+        self.Angle_corr = readAngleCorr(self.year,self.anaChoice)
         
-        for i in range( 0, len(BS_corr[0]) ):
-       
-            MC_corr.append( (1+BS_corr[0][i])*(1+Angle_corr[0][i])-1. )
-            MC_corrErr.append( sqrt( ((1+BS_corr[0][i])*Angle_corr[1][i])**2 + ((1+Angle_corr[0][i])*BS_corr[1][i])**2) )
-            #if fabs(A_uncorr[i])>0.:
-            #     correction = A_BScorr[i]/A_uncorr[i] - 1. 
-            
-        self.syst_err = MC_corrErr
-        self.syst_corr = MC_corr
-
-
-    
 
 
     def makeTheoryUncertainties(self,lambda_err=0.):
@@ -325,7 +350,7 @@ class uncertaintyHandler:
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        return weightRealStats(self.energy_err,self.stat_percent_err,emin,emax)
+        return weightRealStats(self.energy_err,self.realAerr,emin,emax)
 
     def calcRadiativeUncert(self,emin,emax):
 
@@ -335,7 +360,7 @@ class uncertaintyHandler:
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        return weightRealStats(self.rad_err,self.stat_percent_err,emin,emax)
+        return weightRealStats(self.rad_err,self.realAerr,emin,emax)
 
     def calcRecoilUncert(self,emin,emax):
 
@@ -345,7 +370,7 @@ class uncertaintyHandler:
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        return weightRealStats(self.recoil_err,self.stat_percent_err,emin,emax)
+        return weightRealStats(self.recoil_err,self.realAerr,emin,emax)
 
     def calcPolarimetryCorr(self,emin,emax):
         
@@ -373,7 +398,7 @@ class uncertaintyHandler:
             print("Couldn't open file for depol uncertainties")
             exit(0)
         
-        uncert = weightRealStats(percErr,self.stat_percent_err,emin,emax)
+        uncert = weightRealStats(percErr,self.realAerr,emin,emax)
 
         return [deltaPol/(1.+deltaPol),uncert]
 
@@ -393,14 +418,14 @@ class uncertaintyHandler:
 
     def calcMCCorr(self,emin,emax,percErrBS=0.25,percErrAngle=0.25):
 
-        if len(self.syst_err)==0: 
+        if len(self.BS_corr[0])==0: 
             self.makeSystematicCorrections() 
             
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
-        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.realAerr,emin,emax)
+        #return weightRealStats(self.syst_err,self.realAerr,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                               emax,"UnCorr",self.sim)
@@ -418,16 +443,16 @@ class uncertaintyHandler:
         #print("deltaAngle: %f +/- %f"%(deltaAngle,percErrAngle*deltaAngle))
         return [deltaCorr/(1+deltaCorr),deltaCorrErr/(1+deltaCorr)]
 
-    def calcAngleCorr(self,emin,emax,percErrAngle=0.25,BStype="ALL"):
+    def calcAngleCorr(self,emin,emax,BStype="ALL"):
 
-        if len(self.syst_err)==0: 
+        if len(self.BS_corr[0])==0: 
             self.makeSystematicCorrections() 
             
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
-        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.realAerr,emin,emax)
+        #return weightRealStats(self.syst_err,self.realAerr,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                               emax,"UnCorr",self.sim)
@@ -436,19 +461,19 @@ class uncertaintyHandler:
         
         deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
         #print("deltaAngle: %f +/- %f"%(deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))))
-        return [deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))]
+        return [deltaAngle/(1.+deltaAngle),weightRealStats([self.Angle_corr[1][i]/(1.+self.Angle_corr[0][i]) for i in range(0,len(self.Angle_corr[0]))],self.realAerr,emin,emax)]#fabs(percErrAngle*deltaAngle/(1.+deltaAngle))]
 
 
-    def calcBackscCorr(self,emin,emax,percErrBacksc=0.25, BStype="ALL"):
+    def calcBackscCorr(self,emin,emax, BStype="ALL"):
 
-        if len(self.syst_err)==0: 
+        if len(self.BS_corr[0])==0: 
             self.makeSystematicCorrections() 
             
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
-        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.realAerr,emin,emax)
+        #return weightRealStats(self.syst_err,self.realAerr,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                               emax,"UnCorr",self.sim)
@@ -457,19 +482,16 @@ class uncertaintyHandler:
         
         deltaBacksc = (BackscCorr[0]/UnCorr[0]-1.)
         #print("deltaBacksc: %f +/- %f"%(deltaBacksc/(1.+deltaBacksc),fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))))
-        return [deltaBacksc/(1.+deltaBacksc),fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))]
+        return [deltaBacksc/(1.+deltaBacksc),weightRealStats([self.BS_corr[1][i]/(1.+self.BS_corr[0][i]) for i in range(0,len(self.BS_corr[0]))],self.realAerr,emin,emax)]#fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))]
 
 
     def calcRecoilOrderCorr(self,emin,emax,percErr=0.02):
-
-        if len(self.syst_err)==0: 
-            self.makeSystematicCorrections() 
             
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
-        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.realAerr,emin,emax)
+        #return weightRealStats(self.syst_err,self.realAerr,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                               emax,"UnCorr",self.sim)
@@ -483,14 +505,11 @@ class uncertaintyHandler:
     
     def calcRadiativeCorr(self,emin,emax,percErr=0.02):
 
-        if len(self.syst_err)==0: 
-            self.makeSystematicCorrections() 
-            
         if len(self.stat_percent_err)==0: 
             self.statUncertainties() 
             
-        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.stat_percent_err,emin,emax)
-        #return weightRealStats(self.syst_err,self.stat_percent_err,emin,emax)
+        #return weightRealStats([self.syst_err[i]/fabs(self.syst_corr[i]+1) for i in range(len(self.syst_err))],self.realAerr,emin,emax)
+        #return weightRealStats(self.syst_err,self.realAerr,emin,emax)
         
         UnCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                               emax,"UnCorr",self.sim)
@@ -524,16 +543,16 @@ class uncertaintyHandler:
             exit(0)
         
             
-        return weightRealStats(gainErr,self.stat_percent_err,emin,emax)
+        return weightRealStats(gainErr,self.realAerr,emin,emax)
 
 
 
-    def minimizer(self,errFacDeltaBS=0.2,errFacDeltaAngle=0.2):
+    def minimizer(self):
         """Minimizes the error and outputs all errors in order or largest to smallest"""
 
         self.statUncertainties()
         self.readEnergyUncertainties()
-        self.makeSystematicCorrections(errFacDeltaBS,errFacDeltaAngle)
+        self.makeSystematicCorrections()
         #self.readMCSystematicCorrections()
 
         ofile = open("%i_Uncertainties.txt"%self.year, 'w')
@@ -556,8 +575,8 @@ class uncertaintyHandler:
 
                 Errors.append( self.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
                 Errors.append( self.calcStatUncert(       getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) )
-                Errors.append( self.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errFacDeltaAngle )[1] )
-                Errors.append( self.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),errFacDeltaBS )[1] )
+                Errors.append( self.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
+                Errors.append( self.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
 
                 errSum = sumErrors(Errors)
                 
@@ -590,7 +609,7 @@ class uncertaintyHandler:
 
         ofile.close()
 
-       # minSystCorrTotal = weightRealStats(self.syst_corr,self.stat_percent_err,getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh))
+       # minSystCorrTotal = weightRealStats(self.syst_corr,self.realAerr,getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh))
         print
         #print("Systematic Correction: %f"%minSystCorrTotal)
         print
@@ -602,7 +621,7 @@ class uncertaintyHandler:
 
 if __name__ == "__main__":
     
-    year=2012
+    year=2011
     uncert = uncertaintyHandler(year,"C")
     #uncert.minimizer(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
 
@@ -620,20 +639,20 @@ if __name__ == "__main__":
 
     if 0:
     
-        lowBin = 22
-        highBin = 66
+        lowBin = 19
+        highBin = 74
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
         uncert.readTheoryUncertainties()
-        uncert.makeSystematicCorrections(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
+        uncert.makeSystematicCorrections()
         
         Errors = []
         
         Errors.append( uncert.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
         Errors.append( uncert.calcStatUncert(       getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) )
-        Errors.append( uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25 )[1] )
-        Errors.append( uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25 )[1] )
+        Errors.append( uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
+        Errors.append( uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
                 
         errSum = sumErrors(Errors)
         
@@ -648,45 +667,47 @@ if __name__ == "__main__":
         print("Weighted Radiative Corr Error: %f"%uncert.calcRadiativeUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin)))
         print("Weighted Recoil Corr Error: %f"%uncert.calcRecoilUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin)))
         print
-        print("Total delta_20: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[0],
-                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[1]))
-        print("Total delta_21: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[0],
-                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[1]))
-        print("Total delta_22: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[0],
-                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[1]))
-        print("Total delta_23: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[0],
-                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[1]))
-        print("Total delta_2: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[0],
-                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[1]))
+        print("Total delta_20: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"0" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"0" )[1]))
+        print("Total delta_21: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"1" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"1" )[1]))
+        print("Total delta_22: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"2" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"2" )[1]))
+        print("Total delta_23: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"3" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"3" )[1]))
+        print("Total delta_2: %0.6f +/- %0.6f"%(uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL" )[0],
+                                                 uncert.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL" )[1]))
 
         print
-        print("Total delta_30: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[0],
-                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"0" )[1]))
-        print("Total delta_31: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[0],
-                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"1" )[1]))
-        print("Total delta_32: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[0],
-                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"2" )[1]))
-        print("Total delta_33: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[0],
-                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"3" )[1]))
-        print("Total delta_3: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[0],
-                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,"ALL" )[1]))
+        print("Total delta_30: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"0" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"0" )[1]))
+        print("Total delta_31: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"1" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"1" )[1]))
+        print("Total delta_32: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"2" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"2" )[1]))
+        print("Total delta_33: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"3" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"3" )[1]))
+        print("Total delta_3: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL" )[0],
+                                                 uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL" )[1]))
         print
         print("Total delta_MC: %0.6f +/- %0.6f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[0],
                                                  uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[1]))
              
         print
-        delta20 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.10,"0")
-        delta21 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.30,"1")
-        delta22 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.40,"2")
-        delta23 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.20,"3")        
-        delta30 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.10,"0")
-        delta31 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.30,"1")
-        delta32 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.40,"2")
-        delta33 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.20,"3")        
+        delta20 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"0")
+        delta21 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"1")
+        delta22 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"2")
+        delta23 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"3") 
+        delta2 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL") 
+        delta30 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"0")
+        delta31 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"1")
+        delta32 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"2")
+        delta33 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"3") 
+        delta3 = uncert.calcAngleCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL") 
 
 
-        indErrors = sumErrors([delta20[1],delta21[1],delta22[1],delta23[1],delta30[1],delta31[1],delta32[1],delta33[1]])
-        print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[0],
+        indErrors = sumErrors([delta2[1],delta3[1]])
+        print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
     if 1:
@@ -694,8 +715,6 @@ if __name__ == "__main__":
         lowBin = 19
         highBin = 74
         
-        errDeltaBS = 0.25
-        errDeltaAngle = 0.25
         errDeltaRecoil = 0.005 # These need to be fixed
         errDeltaRadiative = 0.005
 
@@ -715,12 +734,12 @@ if __name__ == "__main__":
         A2011 = uncertaintyHandler(2011,anaChoice)
         A2011.statUncertainties()
         A2011.readEnergyUncertainties()
-        A2011.makeSystematicCorrections(errDeltaBS,errDeltaAngle)
+        A2011.makeSystematicCorrections()
 
         statErr2011 = A2011.calcStatUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
         energyErr2011 = A2011.calcEnergyUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
-        deltaBacksc2011 = A2011.calcBackscCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaBS)
-        deltaAngle2011 = A2011.calcAngleCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaAngle)
+        deltaBacksc2011 = A2011.calcBackscCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin))
+        deltaAngle2011 = A2011.calcAngleCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin))
         deltaRecoil2011 = A2011.calcRecoilOrderCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRecoil)
         deltaRadiative2011 = A2011.calcRadiativeCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRadiative)
         
@@ -792,12 +811,12 @@ if __name__ == "__main__":
         A2012 = uncertaintyHandler(2012,anaChoice)
         A2012.statUncertainties()
         A2012.readEnergyUncertainties()
-        A2012.makeSystematicCorrections(errDeltaBS,errDeltaAngle)
+        A2012.makeSystematicCorrections()
 
         statErr2012 = A2012.calcStatUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
         energyErr2012 = A2012.calcEnergyUncert(getBinEnergyMid(lowBin),getBinEnergyMid(highBin))
-        deltaBacksc2012 = A2012.calcBackscCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaBS)
-        deltaAngle2012 = A2012.calcAngleCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaAngle)
+        deltaBacksc2012 = A2012.calcBackscCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin))
+        deltaAngle2012 = A2012.calcAngleCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin))
         deltaRecoil2012 = A2012.calcRecoilOrderCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRecoil)
         deltaRadiative2012 = A2012.calcRadiativeCorr(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errDeltaRadiative)
         

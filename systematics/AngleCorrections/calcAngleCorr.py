@@ -67,16 +67,16 @@ def doAngleCorr(year,anaCh,emin,emax):
 
 
     frac0 = [ ((1./type0A.realAerr[i])**2/totaldenom[i] if type0A.realAerr[i]>0. and Type0 else 0.) for i in range(0,len(type0A.realAerr)) ]
-    delta0 = readAngleCorr(year,"D",delta0fracShift) 
+    delta0 = readOldAngleCorr(year,"D",delta0fracShift) 
     
     frac1 = [ ((1./type1A.realAerr[i])**2/totaldenom[i] if type1A.realAerr[i]>0. and Type1 else 0.) for i in range(0,len(type1A.realAerr)) ]
-    delta1 = readAngleCorr(year,"F",delta1fracShift) 
+    delta1 = readOldAngleCorr(year,"F",delta1fracShift) 
     
     frac2 = [ ((1./type2A.realAerr[i])**2/totaldenom[i] if type2A.realAerr[i]>0. and Type2 else 0.) for i in range(0,len(type2A.realAerr)) ]
-    delta2 = readAngleCorr(year,"J",delta2fracShift)
+    delta2 = readOldAngleCorr(year,"J",delta2fracShift)
     
     frac3 = [ ((1./type3A.realAerr[i])**2/totaldenom[i] if type3A.realAerr[i]>0. and Type3 else 0.) for i in range(0,len(type3A.realAerr)) ]
-    delta3 = readAngleCorr(year,"K",delta3fracShift)
+    delta3 = readOldAngleCorr(year,"K",delta3fracShift)
 
 
     # now create the total delta_3i corrections and their fractional uncertainties

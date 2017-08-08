@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
   Int_t octEnd = argc>2 ? atoi(argv[3]) : 1;
   Double_t enBinWidth = 10.;
   Double_t Elow = argc>4 ? atoi(argv[4]) : 220.;//220
-  Double_t Ehigh = argc>4 ? atoi(argv[5]) : 680.;//680
+  Double_t Ehigh = argc>4 ? atoi(argv[5]) : 670.;//680
   corr = "DeltaTheoryOnly";
   int key = 0;
   if ( argc==7 ) key = atoi(argv[6]);
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     
     
     
-    std::vector<std::string> aCh {};//{"A","B","D","F","G"};//{"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<std::string> aCh {"K"};//{"A","B","D","F","G"};//{"J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       ProcessOctets(octBegin, octEnd, ach, enBinWidth, UKdata, simulation, UNBLIND);
       
@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
     }
     
     // Loop over keys
-    int keys[] {0,10,11,12,13};
+    int keys[] {};//{0,10,11,12,13};
     
     for ( auto& k : keys ) {
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, UNBLIND, k);
