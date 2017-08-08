@@ -11,27 +11,35 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
+Int_t groupBin=5;
+Double_t enStart=40.;
+
 std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../OldMCCorrection/deltaBS%s_anaCh%s_%s.txt",corr.Data(),anaCh.Data(),year.Data()));
+  //  std::ifstream infile(TString::Format("../OldMCCorrection/deltaBS%s_anaCh%s_%s.txt",corr.Data(),anaCh.Data(),year.Data()));
+  std::ifstream infile(TString::Format("../OldMCCorrection/%s_delta_2%s_anaCh%s.txt",year.Data(),corr!=std::string("ALL")?corr.Data():"",anaCh.Data()));
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
-  Double_t en, corrhold,errhold;
+  Double_t en;
+  TString hold1,hold2;
   Int_t i=0;
-  Double_t aveEn=0., aveCorr=0.;
-  while (infile >> en >> corrhold >> errhold && en<800.) {
-    //std::cout << en << " " << corrhold << " " << errhold << "\n";
-    if (i<4) {
+  Double_t aveEn=0., aveCorr=0.,aveErr=0.;
+  while (infile >> en >> hold1 >> hold2 && en<(780+groupBin*10.)) {
+    if (en<enStart) continue;
+    std::cout << en << " " << hold1 << " " << hold2 << "\n";
+    if (i<groupBin) {
       aveEn+=en;
-      aveCorr+=corrhold;
+      aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+      aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
       i++;
     } else {
-      enbin.push_back(aveEn/4.);
-      c.push_back(aveCorr/4.*100.);
-      cerr.push_back(0.25*aveCorr/4.*100.);
-      i=0,aveEn=0.,aveCorr=0.;
+      enbin.push_back(aveEn/groupBin);
+      c.push_back(aveCorr/groupBin*100.);
+      cerr.push_back(aveErr/groupBin*100.);
+      std::cout << aveErr/groupBin*100. << std::endl;
+      i=0,aveEn=0.,aveCorr=0.,aveErr=0.;
     }
   }
   corrs.push_back(enbin);
@@ -54,10 +62,11 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
   TString hold1,hold2;
   Int_t i=0;
   Double_t aveEn=0., aveCorr=0., aveErr=0.;
-  while (infile >> en >> hold1 >> hold2 && en<800.) {
+  while (infile >> en >> hold1 >> hold2 && en<(780+groupBin*10.)) {
+    if (en<enStart) continue;
     //std::cout << en << " " << hold2 << " " << errhold << "\n";
     if ( anaCh==TString("C") ) {
-      if (i<4) {
+      if (i<groupBin) {
 	aveEn+=en;
 	aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
 	aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
@@ -70,7 +79,7 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
       }
     }
     else {
-      if (i<4) {
+      if (i<groupBin) {
 	aveEn+=en;
 	aveCorr+=atof(hold2.Data());
 	i++;
