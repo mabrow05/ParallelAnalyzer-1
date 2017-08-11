@@ -10,9 +10,9 @@ void CombinedTwoDim_ErrorPlotter() {
   gStyle->SetPadRightMargin(0.15);
   gStyle->SetPadBottomMargin(0.15);
   gStyle->SetTitleYSize(0.04);//0.5
-  gStyle->SetTitleYOffset(1.9);//1.3
+  gStyle->SetTitleYOffset(1.7);//1.3
   gStyle->SetTitleXSize(0.04);
-  gStyle->SetTitleXOffset(1.9);
+  gStyle->SetTitleXOffset(1.7);
   gStyle->SetTitleSize(0.04,"Z");
   gStyle->SetTitleOffset(1.6,"Z");
   gStyle->SetLabelSize(0.04,"xyz");
@@ -88,9 +88,9 @@ void CombinedTwoDim_ErrorPlotter() {
 
     if ( lowerWindow==190. ) {
       minPlotEn.push_back(upperWindow);
-      minPlotStat.push_back(stat_hold);
-      minPlotSyst.push_back(syst_hold);
-      minPlotTot.push_back(tot_hold);
+      minPlotStat.push_back(stat_hold*100.);
+      minPlotSyst.push_back(syst_hold*100.);
+      minPlotTot.push_back(tot_hold*100.);
     }
     if ( lowerWindow==150. ) {
       std::cout << lowerWindow << endl;
@@ -308,11 +308,21 @@ void CombinedTwoDim_ErrorPlotter() {
 
   TGraph *t = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotTot[0]);
   t->SetLineWidth(2);
-  t->SetLineStyle(4);
+  t->SetLineStyle(6);
 
   TMultiGraph *minplot = new TMultiGraph();
   minplot->Add(st,"L");
   minplot->Add(sys,"L");
   minplot->Add(t,"L");
+  minplot->SetTitle("Systematic and Statistical Uncertainty vs. Upper Analysis Cut");
   minplot->Draw("A");
+  minplot->GetXaxis()->SetTitle("Upper Analysis Cut (keV)");
+  minplot->GetYaxis()->SetTitle("#DeltaA/A (%)");				
+
+  TLegend *l = new TLegend(0.6,0.45,0.8,0.65);
+  l->AddEntry(t,"Total","l");
+  l->AddEntry(st,"Statistics","l");
+  l->AddEntry(sys,"Systematics","l");
+  l->Draw("SAME");
+  c10->Update();
 }
