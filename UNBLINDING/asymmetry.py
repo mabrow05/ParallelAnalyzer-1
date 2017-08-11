@@ -641,7 +641,7 @@ def minimizerCombo():
         enBinLow = None
         enBinHigh = None
 
-        minNumBins = 30
+        minNumBins = 10
         lowbound = 10
         upperbound = 75
         for lowBin in range(lowbound,upperbound+1-minNumBins):
