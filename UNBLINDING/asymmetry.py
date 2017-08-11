@@ -182,14 +182,14 @@ class uncertaintyHandler:
         stores the total fitted asymmetry and the total percent error
         from statistics alone""" #
         os.system("cd %s/Asymmetry; ./MBAnalyzer.exe %s %i %i %f %f %s %s 0 false %s %s 2&>1 log.txt"%(os.environ["ANALYSIS_CODE"],self.anaChoice,self.octLow,self.octHigh, 220, 670, 
-                                                                                                    "UnCorr","true" if self.sim else "false", "false", "false"))
+                                                                                                    "UnCorr","true" if self.sim else "false", "false", "true" if self.sim else "false"))
         infile = open( os.environ["%sANALYSIS_RESULTS"%("SIM_" if self.sim else "")]+"/Asymmetries/"+
-                       "UnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
-                       %(self.anaChoice,self.octLow,self.octHigh),'r' )
+                       "%sUnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
+                       %(("UNBLINDED_" if self.sim else ""),self.anaChoice,self.octLow,self.octHigh),'r' )
 
-        print(os.environ["%sANALYSIS_RESULTS"%("SIM_" if self.sim else "")]+"/Asymmetries/"+
-              "UnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
-              %(self.anaChoice,self.octLow,self.octHigh))
+        #print(os.environ["%sANALYSIS_RESULTS"%("SIM_" if self.sim else "")]+"/Asymmetries/"+
+         #     "UnCorr_OctetAsymmetries_AnaCh%s_Octets_%i-%i_BinByBin.txt"
+          #    %(self.anaChoice,self.octLow,self.octHigh))
         A_en = []
         A = []
         Aerr = []
@@ -619,14 +619,118 @@ class uncertaintyHandler:
         print("Min total Err = %f"%minErr)
         print("Energy Range = %f-%f"%(getBinEnergyLowEdge(enBinLow),getBinEnergyUpperEdge(enBinHigh)))
 
+def minimizerCombo():
+        """Minimizes the error and outputs all errors in order or largest to smallest"""
+
+        a2011 = uncertaintyHandler(2011,"C")
+        a2012 = uncertaintyHandler(2012,"C")
+        
+        a2011.statUncertainties()
+        a2011.readEnergyUncertainties()
+        a2011.makeSystematicCorrections()
+        a2012.statUncertainties()
+        a2012.readEnergyUncertainties()
+        a2012.makeSystematicCorrections()
+        
+        ofile = open("CombinedUncertainties.txt", 'w')
+        
+
+        minErr = 100.
+        minStatisticalErr = 0.
+        minSystematicErr = 0.
+        enBinLow = None
+        enBinHigh = None
+
+        minNumBins = 30
+        lowbound = 10
+        upperbound = 75
+        for lowBin in range(lowbound,upperbound+1-minNumBins):
+            for highBin in range(lowBin+minNumBins,upperbound+1):
+
+                SysErr = []
+                SysErr.append( a2011.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
+                SysErr.append( a2011.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
+                SysErr.append( a2011.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
+                
+                systErr2011 = sumErrors(SysErr)
+                statErr2011 = a2011.calcStatUncert(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) 
+
+                SysErr = []
+                SysErr.append( a2012.calcEnergyUncert(     getBinEnergyMid(lowBin),getBinEnergyMid(highBin) ) )
+                SysErr.append( a2012.calcBackscCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
+                SysErr.append( a2012.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin) )[1] )
+                
+                systErr2012 = sumErrors(SysErr)
+                statErr2012 = a2012.calcStatUncert(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin) ) 
+
+                MC = MeasCombiner()
+                
+                mu0 = MC.new_meas_mu(a2011.A0)
+                stat0 = MC.new_meas_err(mu0,statErr2011*a2011.A0)	# stat
+                err01 = MC.new_meas_err(mu0,systErr2011*a2011.A0) # syst - energy
+                
+                mu1 = MC.new_meas_mu(a2012.A0)
+                stat1 = MC.new_meas_err(mu1,statErr2012*a2012.A0)	# stat
+                err11 = MC.new_meas_err(mu1,systErr2012*a2012.A0) # syst - energy
+        
+    
+                MC.add_correlation(err01,err11,1.0)
+
+                result = MC.calc_combo()
+ 
+                totalStat = fabs(MC.errcombo([stat0,stat1])/result[0])#1./sqrt(1./statErr2011**2 + 1./statErr2012**2)
+                totalSyst = fabs(MC.errcombo([err01,err11])/result[0])#sumErrors([systErr2011,systErr2012])
+
+                errSum = fabs(result[1]/result[0])#sumErrors([totalStat,totalSyst])
+                
+
+
+                print("****************************")
+                print("%i-%i keV total Error = %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
+                print("Asymm2011 = %f\n"%a2011.A0)
+                print("Asymm2012 = %f\n"%a2012.A0)
+                print("Total Statistical Error: %f"%totalStat)
+                print("Total Systematic Error: %f"%totalSyst)
+
+                
+                ofile.write("****************************\n")
+                ofile.write("%i-%i keV total Error = %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
+                ofile.write("Asymm2011 = %f\n"%a2011.A0)
+                ofile.write("Asymm2012 = %f\n"%a2012.A0)
+                ofile.write("Total Statistical Error: %f\n"%totalStat)
+                ofile.write("Total Systematic Error: %f\n"%totalSyst)
+
+                
+                if errSum < minErr:
+                    minErr = errSum
+                    enBinLow = lowBin
+                    enBinHigh = highBin
+                    minStatisticalErr = totalStat
+                    minSystematicErr = totalSyst
+
+
+        ofile.close()
+
+       # minSystCorrTotal = weightRealStats(self.syst_corr,self.realAerr,getBinEnergyMid(enBinLow),getBinEnergyMid(enBinHigh))
+        print
+        #print("Systematic Correction: %f"%minSystCorrTotal)
+        print
+        print("Total Statistical Error: %f"%minStatisticalErr)
+        print("Total Systematic Error: %f"%minSystematicErr)
+        print("Min total Err = %f"%minErr)
+        print("Energy Range = %f-%f"%(getBinEnergyLowEdge(enBinLow),getBinEnergyUpperEdge(enBinHigh)))
+
+
 if __name__ == "__main__":
     
-    year=2011
-    uncert = uncertaintyHandler(year,"C")
-    #uncert.minimizer(errFacDeltaBS=0.25,errFacDeltaAngle=0.25)
+    minimizerCombo() # 180-740 with uncertainty of 0.006019 
 
-    #2011: Energy Range = 220.-750. for bsErr=0.25 and angleErr=0.25 : 0.0064, but can go as low as 190-750
-    #2012: Energy Range = 180.-740. for bsErr=0.25 and angleErr=0.25 : 0.00765. but same for 190-750
+    year=2012
+    #uncert = uncertaintyHandler(year,"C")
+    #uncert.minimizer()
+
+    #2011: Energy Range = 160.-740. for 0.005791
+    #2012: Energy Range = 120.-740. for 0.007205. but same for 190-750
 
     #2011: Energy Range = 210.-750. for bsErr=0.2 and angleErr=0.25 : 0.006945
     #2012: Energy Range = 200.-740. for bsErr=0.2 and angleErr=0.25 : 0.00811
@@ -640,7 +744,7 @@ if __name__ == "__main__":
     if 0:
     
         lowBin = 19
-        highBin = 74
+        highBin = 73
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
@@ -710,7 +814,7 @@ if __name__ == "__main__":
         print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
-    if 1:
+    if 0:
         anaChoice = "C"
         lowBin = 19
         highBin = 74

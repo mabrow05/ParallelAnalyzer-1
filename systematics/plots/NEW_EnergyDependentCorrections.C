@@ -12,7 +12,12 @@
 #include <TMath.h>
 
 Int_t groupBin=5;
-Double_t enStart=40.;
+Double_t enStart=40.;//10.*groupBin;
+
+Double_t BSlimitLow = -1., BSlimitHigh = 3.;
+Double_t AnglelimitLow = -5., AnglelimitHigh = 3.;
+
+TString drawOpt = "0AL3";//"0AC4" "0AL3"
 
 std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TString anaCh) {
 
@@ -26,7 +31,7 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TStrin
   TString hold1,hold2;
   Int_t i=0;
   Double_t aveEn=0., aveCorr=0.,aveErr=0.;
-  while (infile >> en >> hold1 >> hold2 && en<(780+groupBin*10.)) {
+  while (infile >> en >> hold1 >> hold2 && en<800) {
     if (en<enStart) continue;
     std::cout << en << " " << hold1 << " " << hold2 << "\n";
     if (i<groupBin) {
@@ -42,6 +47,9 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TStrin
       i=0,aveEn=0.,aveCorr=0.,aveErr=0.;
     }
   }
+  enbin.push_back(enbin[enbin.size()-1]+10.*groupBin);
+  c.push_back(c[c.size()-1]);
+  cerr.push_back(cerr[cerr.size()-1]);
   corrs.push_back(enbin);
   corrs.push_back(c);
   corrs.push_back(cerr);
@@ -62,7 +70,7 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
   TString hold1,hold2;
   Int_t i=0;
   Double_t aveEn=0., aveCorr=0., aveErr=0.;
-  while (infile >> en >> hold1 >> hold2 && en<(780+groupBin*10.)) {
+  while (infile >> en >> hold1 >> hold2 && en<800.) {
     if (en<enStart) continue;
     //std::cout << en << " " << hold2 << " " << errhold << "\n";
     if ( anaCh==TString("C") ) {
@@ -72,9 +80,9 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
 	aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
 	i++;
       } else {
-	enbin.push_back(aveEn/4.);
-	c.push_back(aveCorr/4.*100.);
-	cerr.push_back(aveErr/4.*100.);
+	enbin.push_back(aveEn/groupBin);
+	c.push_back(aveCorr/groupBin*100.);
+	cerr.push_back(aveErr/groupBin*100.);
 	i=0,aveEn=0.,aveCorr=0., aveErr=0.;
       }
     }
@@ -91,6 +99,9 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
       }
     }
   }
+  enbin.push_back(enbin[enbin.size()-1]+10.*groupBin);
+  c.push_back(c[c.size()-1]);
+  cerr.push_back(cerr[cerr.size()-1]);
   corrs.push_back(enbin);
   corrs.push_back(c);
   corrs.push_back(cerr);
@@ -128,7 +139,7 @@ void EnergyDependentCorrections(TString anaCh) {
   int col2011 = 4;
   int col2012 = 3;
 
-  int startPoint=1;
+  int startPoint=0;
   
   TString year = "2011-2012";
   std::vector<std::vector<Double_t> > bs0_2011 = readBSCorr("0",year,anaCh);
@@ -188,14 +199,15 @@ void EnergyDependentCorrections(TString anaCh) {
   
   mg0->Add(g_bs0_2011);
   mg0->Add(g_bs0_2012);
-  mg0->SetMinimum(-5.);
-  mg0->SetMaximum(5.);
+  mg0->SetMinimum(BSlimitLow);
+  mg0->SetMaximum(BSlimitHigh);
   
-  mg0->Draw("ALP3");
+  mg0->Draw(drawOpt);
   mg0->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg0->GetYaxis()->CenterTitle();
   mg0->GetXaxis()->SetTitle("Energy (keV)");
   mg0->GetXaxis()->CenterTitle();
+  mg0->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
 
   TLegend *leg0 = new TLegend(0.57,0.7,0.87,0.8);
@@ -228,14 +240,16 @@ void EnergyDependentCorrections(TString anaCh) {
   
   mg1->Add(g_bs1_2011);
   mg1->Add(g_bs1_2012);
-  mg1->SetMinimum(-5.);
-  mg1->SetMaximum(5.);
+  mg1->SetMinimum(BSlimitLow);
+  mg1->SetMaximum(BSlimitHigh);
   
-  mg1->Draw("ALP3");
+  mg1->Draw(drawOpt);
   mg1->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg1->GetYaxis()->CenterTitle();
   mg1->GetXaxis()->SetTitle("Energy (keV)");
   mg1->GetXaxis()->CenterTitle();
+  mg1->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *leg1 = new TLegend(0.57,0.7,0.87,0.8);
@@ -267,14 +281,16 @@ void EnergyDependentCorrections(TString anaCh) {
   
   mg2->Add(g_bs2_2011);
   mg2->Add(g_bs2_2012);
-  mg2->SetMinimum(-5.);
-  mg2->SetMaximum(5.);
+  mg2->SetMinimum(BSlimitLow);
+  mg2->SetMaximum(BSlimitHigh);
   
-  mg2->Draw("ALP3");
+  mg2->Draw(drawOpt);
   mg2->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg2->GetYaxis()->CenterTitle();
   mg2->GetXaxis()->SetTitle("Energy (keV)");
   mg2->GetXaxis()->CenterTitle();
+  mg2->GetXaxis()->SetLimits(0.,780.);
+    
   gPad->Modified();
 
   TLegend *leg2 = new TLegend(0.57,0.7,0.87,0.8);
@@ -306,14 +322,16 @@ void EnergyDependentCorrections(TString anaCh) {
   
   mg3->Add(g_bs3_2011);
   mg3->Add(g_bs3_2012);
-  mg3->SetMinimum(-5.);
-  mg3->SetMaximum(5.);
+  mg3->SetMinimum(BSlimitLow);
+  mg3->SetMaximum(BSlimitHigh);
   
-  mg3->Draw("ALP3");
+  mg3->Draw(drawOpt);
   mg3->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg3->GetYaxis()->CenterTitle();
   mg3->GetXaxis()->SetTitle("Energy (keV)");
   mg3->GetXaxis()->CenterTitle();
+  mg3->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *leg3 = new TLegend(0.57,0.7,0.87,0.8);
@@ -346,14 +364,16 @@ void EnergyDependentCorrections(TString anaCh) {
   
   mgALLBS->Add(g_bsALL_2011);
   mgALLBS->Add(g_bsALL_2012);
-  mgALLBS->SetMinimum(-5.);
-  mgALLBS->SetMaximum(5.);
+  mgALLBS->SetMinimum(BSlimitLow);
+  mgALLBS->SetMaximum(BSlimitHigh);
   
-  mgALLBS->Draw("ALP3");
+  mgALLBS->Draw(drawOpt);
   mgALLBS->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgALLBS->GetYaxis()->CenterTitle();
   mgALLBS->GetXaxis()->SetTitle("Energy (keV)");
   mgALLBS->GetXaxis()->CenterTitle();
+  mgALLBS->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *legALLBS = new TLegend(0.57,0.7,0.87,0.8);
@@ -385,14 +405,16 @@ void EnergyDependentCorrections(TString anaCh) {
   
   mgAngle->Add(g_cosTheta_2011);
   mgAngle->Add(g_cosTheta_2012);
-  mgAngle->SetMinimum(-5.);
-  mgAngle->SetMaximum(5.);
+  mgAngle->SetMinimum(AnglelimitLow);
+  mgAngle->SetMaximum(AnglelimitHigh);
   
-  mgAngle->Draw("ALP3");
+  mgAngle->Draw(drawOpt);
   mgAngle->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgAngle->GetYaxis()->CenterTitle();
   mgAngle->GetXaxis()->SetTitle("Energy (keV)");
   mgAngle->GetXaxis()->CenterTitle();
+  mgAngle->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *legAngle = new TLegend(0.57,0.7,0.87,0.8);
@@ -424,14 +446,16 @@ void EnergyDependentCorrections(TString anaCh) {
   
   mgTotalCorr->Add(g_totalCorr_2011);
   mgTotalCorr->Add(g_totalCorr_2012);
-  mgTotalCorr->SetMinimum(-5.);
-  mgTotalCorr->SetMaximum(5.);
+  mgTotalCorr->SetMinimum(AnglelimitLow);
+  mgTotalCorr->SetMaximum(AnglelimitHigh);
   
-  mgTotalCorr->Draw("ALP3");
+  mgTotalCorr->Draw(drawOpt);
   mgTotalCorr->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgTotalCorr->GetYaxis()->CenterTitle();
   mgTotalCorr->GetXaxis()->SetTitle("Energy (keV)");
   mgTotalCorr->GetXaxis()->CenterTitle();
+  mgTotalCorr->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *legTotalCorr = new TLegend(0.57,0.7,0.87,0.8);

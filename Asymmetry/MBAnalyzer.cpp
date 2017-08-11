@@ -210,7 +210,7 @@ int main(int argc, char* argv[])
       exit(0);
     }
     
-    std::vector<TString> aCh {};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<TString> aCh {"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
       // ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
@@ -228,8 +228,8 @@ int main(int argc, char* argv[])
 
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, unblind);
-    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
-    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
+    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
+    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
     
 
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, unblind);
@@ -1563,13 +1563,13 @@ std::vector <Double_t> LoadBackscCorrections(std::vector <Double_t> enBinMidpoin
   if ( corr.substr(0,7)!=std::string("AllCorr") && corr.substr(0,7)!=std::string("DeltaBa") ) return syst;
 
   std::string c = corr.substr(0,7)==std::string("DeltaBa")?corr.substr(11,1):"ALL";
-  TString filename = TString::Format("../systematics/OldMCCorrection/deltaBS%s_anaCh%s_%s.txt",
+  TString filename = TString::Format("../systematics/OldMCCorrection/%s_delta_2%s_anaCh%s.txt",
+				     oct<60?"2011-2012":"2012-2013",
 				     (c==std::string("0")?"0":
 				      c==std::string("1")?"1":
 				      c==std::string("2")?"2":
-				      c==std::string("3")?"3":"ALL"),
-				     anaCh.c_str(),
-				     oct<60?"2011-2012":"2012-2013");
+				      c==std::string("3")?"3":""),
+				     anaCh.c_str());
   //std::cout << filename.Data() << std::endl;
   
   std::ifstream infile(filename.Data());

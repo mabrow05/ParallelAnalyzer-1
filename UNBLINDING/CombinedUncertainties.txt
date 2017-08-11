@@ -1,0 +1,3996 @@
+****************************
+100-410 keV total Error = 0.006358
+Asymm2011 = -0.122742
+Asymm2012 = -0.123689
+Total Statistical Error: 0.004198
+Total Systematic Error: 0.004775
+****************************
+100-420 keV total Error = 0.006273
+Asymm2011 = -0.122811
+Asymm2012 = -0.123560
+Total Statistical Error: 0.004123
+Total Systematic Error: 0.004728
+****************************
+100-430 keV total Error = 0.006197
+Asymm2011 = -0.122866
+Asymm2012 = -0.123261
+Total Statistical Error: 0.004055
+Total Systematic Error: 0.004686
+****************************
+100-440 keV total Error = 0.006126
+Asymm2011 = -0.122719
+Asymm2012 = -0.123180
+Total Statistical Error: 0.003995
+Total Systematic Error: 0.004644
+****************************
+100-450 keV total Error = 0.006062
+Asymm2011 = -0.122754
+Asymm2012 = -0.123093
+Total Statistical Error: 0.003935
+Total Systematic Error: 0.004610
+****************************
+100-460 keV total Error = 0.006000
+Asymm2011 = -0.122767
+Asymm2012 = -0.123210
+Total Statistical Error: 0.003879
+Total Systematic Error: 0.004578
+****************************
+100-470 keV total Error = 0.005945
+Asymm2011 = -0.122685
+Asymm2012 = -0.123318
+Total Statistical Error: 0.003828
+Total Systematic Error: 0.004548
+****************************
+100-480 keV total Error = 0.005896
+Asymm2011 = -0.122632
+Asymm2012 = -0.123394
+Total Statistical Error: 0.003781
+Total Systematic Error: 0.004524
+****************************
+100-490 keV total Error = 0.005850
+Asymm2011 = -0.122551
+Asymm2012 = -0.123510
+Total Statistical Error: 0.003737
+Total Systematic Error: 0.004501
+****************************
+100-500 keV total Error = 0.005807
+Asymm2011 = -0.122527
+Asymm2012 = -0.123470
+Total Statistical Error: 0.003697
+Total Systematic Error: 0.004479
+****************************
+100-510 keV total Error = 0.005768
+Asymm2011 = -0.122489
+Asymm2012 = -0.123403
+Total Statistical Error: 0.003660
+Total Systematic Error: 0.004457
+****************************
+100-520 keV total Error = 0.005732
+Asymm2011 = -0.122512
+Asymm2012 = -0.123397
+Total Statistical Error: 0.003624
+Total Systematic Error: 0.004441
+****************************
+100-530 keV total Error = 0.005699
+Asymm2011 = -0.122519
+Asymm2012 = -0.123443
+Total Statistical Error: 0.003591
+Total Systematic Error: 0.004424
+****************************
+100-540 keV total Error = 0.005667
+Asymm2011 = -0.122607
+Asymm2012 = -0.123334
+Total Statistical Error: 0.003560
+Total Systematic Error: 0.004409
+****************************
+100-550 keV total Error = 0.005640
+Asymm2011 = -0.122608
+Asymm2012 = -0.123392
+Total Statistical Error: 0.003532
+Total Systematic Error: 0.004398
+****************************
+100-560 keV total Error = 0.005615
+Asymm2011 = -0.122564
+Asymm2012 = -0.123490
+Total Statistical Error: 0.003507
+Total Systematic Error: 0.004386
+****************************
+100-570 keV total Error = 0.005594
+Asymm2011 = -0.122681
+Asymm2012 = -0.123483
+Total Statistical Error: 0.003481
+Total Systematic Error: 0.004379
+****************************
+100-580 keV total Error = 0.005575
+Asymm2011 = -0.122631
+Asymm2012 = -0.123573
+Total Statistical Error: 0.003461
+Total Systematic Error: 0.004370
+****************************
+100-590 keV total Error = 0.005561
+Asymm2011 = -0.122599
+Asymm2012 = -0.123465
+Total Statistical Error: 0.003444
+Total Systematic Error: 0.004367
+****************************
+100-600 keV total Error = 0.005546
+Asymm2011 = -0.122689
+Asymm2012 = -0.123519
+Total Statistical Error: 0.003424
+Total Systematic Error: 0.004362
+****************************
+100-610 keV total Error = 0.005534
+Asymm2011 = -0.122706
+Asymm2012 = -0.123466
+Total Statistical Error: 0.003409
+Total Systematic Error: 0.004359
+****************************
+100-620 keV total Error = 0.005525
+Asymm2011 = -0.122711
+Asymm2012 = -0.123460
+Total Statistical Error: 0.003396
+Total Systematic Error: 0.004358
+****************************
+100-630 keV total Error = 0.005514
+Asymm2011 = -0.122782
+Asymm2012 = -0.123547
+Total Statistical Error: 0.003382
+Total Systematic Error: 0.004356
+****************************
+100-640 keV total Error = 0.005505
+Asymm2011 = -0.122809
+Asymm2012 = -0.123581
+Total Statistical Error: 0.003370
+Total Systematic Error: 0.004353
+****************************
+100-650 keV total Error = 0.005498
+Asymm2011 = -0.122837
+Asymm2012 = -0.123606
+Total Statistical Error: 0.003360
+Total Systematic Error: 0.004352
+****************************
+100-660 keV total Error = 0.005493
+Asymm2011 = -0.122792
+Asymm2012 = -0.123646
+Total Statistical Error: 0.003353
+Total Systematic Error: 0.004351
+****************************
+100-670 keV total Error = 0.005491
+Asymm2011 = -0.122790
+Asymm2012 = -0.123611
+Total Statistical Error: 0.003347
+Total Systematic Error: 0.004353
+****************************
+100-680 keV total Error = 0.005487
+Asymm2011 = -0.122782
+Asymm2012 = -0.123616
+Total Statistical Error: 0.003341
+Total Systematic Error: 0.004353
+****************************
+100-690 keV total Error = 0.005484
+Asymm2011 = -0.122791
+Asymm2012 = -0.123605
+Total Statistical Error: 0.003337
+Total Systematic Error: 0.004353
+****************************
+100-700 keV total Error = 0.005483
+Asymm2011 = -0.122764
+Asymm2012 = -0.123681
+Total Statistical Error: 0.003333
+Total Systematic Error: 0.004353
+****************************
+100-710 keV total Error = 0.005481
+Asymm2011 = -0.122768
+Asymm2012 = -0.123683
+Total Statistical Error: 0.003330
+Total Systematic Error: 0.004353
+****************************
+100-720 keV total Error = 0.005480
+Asymm2011 = -0.122767
+Asymm2012 = -0.123673
+Total Statistical Error: 0.003328
+Total Systematic Error: 0.004354
+****************************
+100-730 keV total Error = 0.005480
+Asymm2011 = -0.122760
+Asymm2012 = -0.123674
+Total Statistical Error: 0.003326
+Total Systematic Error: 0.004355
+****************************
+100-740 keV total Error = 0.005479
+Asymm2011 = -0.122770
+Asymm2012 = -0.123687
+Total Statistical Error: 0.003325
+Total Systematic Error: 0.004355
+****************************
+100-750 keV total Error = 0.005480
+Asymm2011 = -0.122771
+Asymm2012 = -0.123652
+Total Statistical Error: 0.003324
+Total Systematic Error: 0.004357
+****************************
+100-760 keV total Error = 0.005480
+Asymm2011 = -0.122771
+Asymm2012 = -0.123638
+Total Statistical Error: 0.003324
+Total Systematic Error: 0.004357
+****************************
+110-420 keV total Error = 0.006195
+Asymm2011 = -0.122774
+Asymm2012 = -0.123639
+Total Statistical Error: 0.004150
+Total Systematic Error: 0.004600
+****************************
+110-430 keV total Error = 0.006121
+Asymm2011 = -0.122831
+Asymm2012 = -0.123334
+Total Statistical Error: 0.004081
+Total Systematic Error: 0.004563
+****************************
+110-440 keV total Error = 0.006053
+Asymm2011 = -0.122683
+Asymm2012 = -0.123249
+Total Statistical Error: 0.004020
+Total Systematic Error: 0.004525
+****************************
+110-450 keV total Error = 0.005991
+Asymm2011 = -0.122719
+Asymm2012 = -0.123159
+Total Statistical Error: 0.003959
+Total Systematic Error: 0.004496
+****************************
+110-460 keV total Error = 0.005931
+Asymm2011 = -0.122733
+Asymm2012 = -0.123276
+Total Statistical Error: 0.003902
+Total Systematic Error: 0.004467
+****************************
+110-470 keV total Error = 0.005877
+Asymm2011 = -0.122651
+Asymm2012 = -0.123384
+Total Statistical Error: 0.003850
+Total Systematic Error: 0.004441
+****************************
+110-480 keV total Error = 0.005830
+Asymm2011 = -0.122599
+Asymm2012 = -0.123459
+Total Statistical Error: 0.003802
+Total Systematic Error: 0.004420
+****************************
+110-490 keV total Error = 0.005786
+Asymm2011 = -0.122517
+Asymm2012 = -0.123574
+Total Statistical Error: 0.003758
+Total Systematic Error: 0.004399
+****************************
+110-500 keV total Error = 0.005745
+Asymm2011 = -0.122494
+Asymm2012 = -0.123532
+Total Statistical Error: 0.003717
+Total Systematic Error: 0.004380
+****************************
+110-510 keV total Error = 0.005706
+Asymm2011 = -0.122456
+Asymm2012 = -0.123463
+Total Statistical Error: 0.003680
+Total Systematic Error: 0.004361
+****************************
+110-520 keV total Error = 0.005672
+Asymm2011 = -0.122480
+Asymm2012 = -0.123456
+Total Statistical Error: 0.003643
+Total Systematic Error: 0.004347
+****************************
+110-530 keV total Error = 0.005639
+Asymm2011 = -0.122488
+Asymm2012 = -0.123502
+Total Statistical Error: 0.003610
+Total Systematic Error: 0.004333
+****************************
+110-540 keV total Error = 0.005609
+Asymm2011 = -0.122577
+Asymm2012 = -0.123390
+Total Statistical Error: 0.003578
+Total Systematic Error: 0.004319
+****************************
+110-550 keV total Error = 0.005583
+Asymm2011 = -0.122579
+Asymm2012 = -0.123448
+Total Statistical Error: 0.003549
+Total Systematic Error: 0.004310
+****************************
+110-560 keV total Error = 0.005559
+Asymm2011 = -0.122535
+Asymm2012 = -0.123546
+Total Statistical Error: 0.003524
+Total Systematic Error: 0.004300
+****************************
+110-570 keV total Error = 0.005539
+Asymm2011 = -0.122654
+Asymm2012 = -0.123539
+Total Statistical Error: 0.003498
+Total Systematic Error: 0.004295
+****************************
+110-580 keV total Error = 0.005520
+Asymm2011 = -0.122603
+Asymm2012 = -0.123629
+Total Statistical Error: 0.003477
+Total Systematic Error: 0.004287
+****************************
+110-590 keV total Error = 0.005507
+Asymm2011 = -0.122571
+Asymm2012 = -0.123519
+Total Statistical Error: 0.003460
+Total Systematic Error: 0.004285
+****************************
+110-600 keV total Error = 0.005492
+Asymm2011 = -0.122663
+Asymm2012 = -0.123573
+Total Statistical Error: 0.003440
+Total Systematic Error: 0.004282
+****************************
+110-610 keV total Error = 0.005481
+Asymm2011 = -0.122680
+Asymm2012 = -0.123519
+Total Statistical Error: 0.003425
+Total Systematic Error: 0.004279
+****************************
+110-620 keV total Error = 0.005473
+Asymm2011 = -0.122685
+Asymm2012 = -0.123513
+Total Statistical Error: 0.003411
+Total Systematic Error: 0.004280
+****************************
+110-630 keV total Error = 0.005462
+Asymm2011 = -0.122757
+Asymm2012 = -0.123600
+Total Statistical Error: 0.003397
+Total Systematic Error: 0.004278
+****************************
+110-640 keV total Error = 0.005454
+Asymm2011 = -0.122784
+Asymm2012 = -0.123634
+Total Statistical Error: 0.003385
+Total Systematic Error: 0.004276
+****************************
+110-650 keV total Error = 0.005447
+Asymm2011 = -0.122812
+Asymm2012 = -0.123659
+Total Statistical Error: 0.003375
+Total Systematic Error: 0.004275
+****************************
+110-660 keV total Error = 0.005442
+Asymm2011 = -0.122767
+Asymm2012 = -0.123699
+Total Statistical Error: 0.003368
+Total Systematic Error: 0.004274
+****************************
+110-670 keV total Error = 0.005440
+Asymm2011 = -0.122765
+Asymm2012 = -0.123664
+Total Statistical Error: 0.003362
+Total Systematic Error: 0.004277
+****************************
+110-680 keV total Error = 0.005437
+Asymm2011 = -0.122758
+Asymm2012 = -0.123668
+Total Statistical Error: 0.003356
+Total Systematic Error: 0.004277
+****************************
+110-690 keV total Error = 0.005434
+Asymm2011 = -0.122767
+Asymm2012 = -0.123657
+Total Statistical Error: 0.003352
+Total Systematic Error: 0.004277
+****************************
+110-700 keV total Error = 0.005432
+Asymm2011 = -0.122739
+Asymm2012 = -0.123734
+Total Statistical Error: 0.003348
+Total Systematic Error: 0.004278
+****************************
+110-710 keV total Error = 0.005431
+Asymm2011 = -0.122744
+Asymm2012 = -0.123735
+Total Statistical Error: 0.003345
+Total Systematic Error: 0.004279
+****************************
+110-720 keV total Error = 0.005430
+Asymm2011 = -0.122743
+Asymm2012 = -0.123725
+Total Statistical Error: 0.003343
+Total Systematic Error: 0.004280
+****************************
+110-730 keV total Error = 0.005430
+Asymm2011 = -0.122735
+Asymm2012 = -0.123727
+Total Statistical Error: 0.003341
+Total Systematic Error: 0.004281
+****************************
+110-740 keV total Error = 0.005429
+Asymm2011 = -0.122745
+Asymm2012 = -0.123739
+Total Statistical Error: 0.003339
+Total Systematic Error: 0.004281
+****************************
+110-750 keV total Error = 0.005430
+Asymm2011 = -0.122747
+Asymm2012 = -0.123704
+Total Statistical Error: 0.003339
+Total Systematic Error: 0.004282
+****************************
+110-760 keV total Error = 0.005430
+Asymm2011 = -0.122746
+Asymm2012 = -0.123690
+Total Statistical Error: 0.003338
+Total Systematic Error: 0.004283
+****************************
+120-430 keV total Error = 0.006085
+Asymm2011 = -0.122977
+Asymm2012 = -0.123364
+Total Statistical Error: 0.004106
+Total Systematic Error: 0.004491
+****************************
+120-440 keV total Error = 0.006017
+Asymm2011 = -0.122823
+Asymm2012 = -0.123278
+Total Statistical Error: 0.004044
+Total Systematic Error: 0.004456
+****************************
+120-450 keV total Error = 0.005955
+Asymm2011 = -0.122855
+Asymm2012 = -0.123186
+Total Statistical Error: 0.003982
+Total Systematic Error: 0.004429
+****************************
+120-460 keV total Error = 0.005896
+Asymm2011 = -0.122865
+Asymm2012 = -0.123303
+Total Statistical Error: 0.003923
+Total Systematic Error: 0.004402
+****************************
+120-470 keV total Error = 0.005843
+Asymm2011 = -0.122779
+Asymm2012 = -0.123411
+Total Statistical Error: 0.003871
+Total Systematic Error: 0.004377
+****************************
+120-480 keV total Error = 0.005796
+Asymm2011 = -0.122723
+Asymm2012 = -0.123487
+Total Statistical Error: 0.003822
+Total Systematic Error: 0.004358
+****************************
+120-490 keV total Error = 0.005753
+Asymm2011 = -0.122637
+Asymm2012 = -0.123603
+Total Statistical Error: 0.003777
+Total Systematic Error: 0.004339
+****************************
+120-500 keV total Error = 0.005712
+Asymm2011 = -0.122611
+Asymm2012 = -0.123560
+Total Statistical Error: 0.003735
+Total Systematic Error: 0.004322
+****************************
+120-510 keV total Error = 0.005674
+Asymm2011 = -0.122570
+Asymm2012 = -0.123490
+Total Statistical Error: 0.003697
+Total Systematic Error: 0.004304
+****************************
+120-520 keV total Error = 0.005640
+Asymm2011 = -0.122592
+Asymm2012 = -0.123482
+Total Statistical Error: 0.003660
+Total Systematic Error: 0.004291
+****************************
+120-530 keV total Error = 0.005608
+Asymm2011 = -0.122598
+Asymm2012 = -0.123528
+Total Statistical Error: 0.003626
+Total Systematic Error: 0.004278
+****************************
+120-540 keV total Error = 0.005578
+Asymm2011 = -0.122686
+Asymm2012 = -0.123414
+Total Statistical Error: 0.003594
+Total Systematic Error: 0.004266
+****************************
+120-550 keV total Error = 0.005553
+Asymm2011 = -0.122686
+Asymm2012 = -0.123472
+Total Statistical Error: 0.003565
+Total Systematic Error: 0.004257
+****************************
+120-560 keV total Error = 0.005529
+Asymm2011 = -0.122640
+Asymm2012 = -0.123571
+Total Statistical Error: 0.003539
+Total Systematic Error: 0.004248
+****************************
+120-570 keV total Error = 0.005509
+Asymm2011 = -0.122759
+Asymm2012 = -0.123564
+Total Statistical Error: 0.003513
+Total Systematic Error: 0.004243
+****************************
+120-580 keV total Error = 0.005491
+Asymm2011 = -0.122706
+Asymm2012 = -0.123654
+Total Statistical Error: 0.003492
+Total Systematic Error: 0.004237
+****************************
+120-590 keV total Error = 0.005478
+Asymm2011 = -0.122673
+Asymm2012 = -0.123543
+Total Statistical Error: 0.003475
+Total Systematic Error: 0.004235
+****************************
+120-600 keV total Error = 0.005463
+Asymm2011 = -0.122764
+Asymm2012 = -0.123597
+Total Statistical Error: 0.003455
+Total Systematic Error: 0.004233
+****************************
+120-610 keV total Error = 0.005452
+Asymm2011 = -0.122780
+Asymm2012 = -0.123542
+Total Statistical Error: 0.003439
+Total Systematic Error: 0.004231
+****************************
+120-620 keV total Error = 0.005444
+Asymm2011 = -0.122785
+Asymm2012 = -0.123536
+Total Statistical Error: 0.003425
+Total Systematic Error: 0.004232
+****************************
+120-630 keV total Error = 0.005434
+Asymm2011 = -0.122857
+Asymm2012 = -0.123624
+Total Statistical Error: 0.003411
+Total Systematic Error: 0.004230
+****************************
+120-640 keV total Error = 0.005426
+Asymm2011 = -0.122884
+Asymm2012 = -0.123658
+Total Statistical Error: 0.003399
+Total Systematic Error: 0.004229
+****************************
+120-650 keV total Error = 0.005419
+Asymm2011 = -0.122911
+Asymm2012 = -0.123683
+Total Statistical Error: 0.003389
+Total Systematic Error: 0.004228
+****************************
+120-660 keV total Error = 0.005414
+Asymm2011 = -0.122865
+Asymm2012 = -0.123724
+Total Statistical Error: 0.003381
+Total Systematic Error: 0.004228
+****************************
+120-670 keV total Error = 0.005412
+Asymm2011 = -0.122863
+Asymm2012 = -0.123688
+Total Statistical Error: 0.003375
+Total Systematic Error: 0.004231
+****************************
+120-680 keV total Error = 0.005409
+Asymm2011 = -0.122855
+Asymm2012 = -0.123693
+Total Statistical Error: 0.003370
+Total Systematic Error: 0.004231
+****************************
+120-690 keV total Error = 0.005406
+Asymm2011 = -0.122864
+Asymm2012 = -0.123681
+Total Statistical Error: 0.003365
+Total Systematic Error: 0.004232
+****************************
+120-700 keV total Error = 0.005405
+Asymm2011 = -0.122836
+Asymm2012 = -0.123758
+Total Statistical Error: 0.003361
+Total Systematic Error: 0.004233
+****************************
+120-710 keV total Error = 0.005404
+Asymm2011 = -0.122840
+Asymm2012 = -0.123760
+Total Statistical Error: 0.003358
+Total Systematic Error: 0.004234
+****************************
+120-720 keV total Error = 0.005403
+Asymm2011 = -0.122839
+Asymm2012 = -0.123750
+Total Statistical Error: 0.003356
+Total Systematic Error: 0.004235
+****************************
+120-730 keV total Error = 0.005403
+Asymm2011 = -0.122832
+Asymm2012 = -0.123751
+Total Statistical Error: 0.003354
+Total Systematic Error: 0.004236
+****************************
+120-740 keV total Error = 0.005402
+Asymm2011 = -0.122841
+Asymm2012 = -0.123764
+Total Statistical Error: 0.003352
+Total Systematic Error: 0.004236
+****************************
+120-750 keV total Error = 0.005403
+Asymm2011 = -0.122843
+Asymm2012 = -0.123728
+Total Statistical Error: 0.003352
+Total Systematic Error: 0.004238
+****************************
+120-760 keV total Error = 0.005403
+Asymm2011 = -0.122842
+Asymm2012 = -0.123714
+Total Statistical Error: 0.003351
+Total Systematic Error: 0.004238
+****************************
+130-440 keV total Error = 0.005990
+Asymm2011 = -0.122714
+Asymm2012 = -0.123297
+Total Statistical Error: 0.004078
+Total Systematic Error: 0.004387
+****************************
+130-450 keV total Error = 0.005928
+Asymm2011 = -0.122750
+Asymm2012 = -0.123203
+Total Statistical Error: 0.004015
+Total Systematic Error: 0.004361
+****************************
+130-460 keV total Error = 0.005869
+Asymm2011 = -0.122764
+Asymm2012 = -0.123322
+Total Statistical Error: 0.003955
+Total Systematic Error: 0.004336
+****************************
+130-470 keV total Error = 0.005816
+Asymm2011 = -0.122679
+Asymm2012 = -0.123431
+Total Statistical Error: 0.003901
+Total Systematic Error: 0.004314
+****************************
+130-480 keV total Error = 0.005770
+Asymm2011 = -0.122625
+Asymm2012 = -0.123507
+Total Statistical Error: 0.003851
+Total Systematic Error: 0.004296
+****************************
+130-490 keV total Error = 0.005726
+Asymm2011 = -0.122540
+Asymm2012 = -0.123625
+Total Statistical Error: 0.003805
+Total Systematic Error: 0.004279
+****************************
+130-500 keV total Error = 0.005686
+Asymm2011 = -0.122516
+Asymm2012 = -0.123581
+Total Statistical Error: 0.003762
+Total Systematic Error: 0.004263
+****************************
+130-510 keV total Error = 0.005648
+Asymm2011 = -0.122477
+Asymm2012 = -0.123509
+Total Statistical Error: 0.003724
+Total Systematic Error: 0.004247
+****************************
+130-520 keV total Error = 0.005614
+Asymm2011 = -0.122501
+Asymm2012 = -0.123501
+Total Statistical Error: 0.003686
+Total Systematic Error: 0.004235
+****************************
+130-530 keV total Error = 0.005583
+Asymm2011 = -0.122509
+Asymm2012 = -0.123547
+Total Statistical Error: 0.003651
+Total Systematic Error: 0.004223
+****************************
+130-540 keV total Error = 0.005553
+Asymm2011 = -0.122599
+Asymm2012 = -0.123431
+Total Statistical Error: 0.003619
+Total Systematic Error: 0.004212
+****************************
+130-550 keV total Error = 0.005528
+Asymm2011 = -0.122601
+Asymm2012 = -0.123490
+Total Statistical Error: 0.003589
+Total Systematic Error: 0.004205
+****************************
+130-560 keV total Error = 0.005504
+Asymm2011 = -0.122555
+Asymm2012 = -0.123590
+Total Statistical Error: 0.003562
+Total Systematic Error: 0.004196
+****************************
+130-570 keV total Error = 0.005484
+Asymm2011 = -0.122677
+Asymm2012 = -0.123582
+Total Statistical Error: 0.003536
+Total Systematic Error: 0.004193
+****************************
+130-580 keV total Error = 0.005466
+Asymm2011 = -0.122624
+Asymm2012 = -0.123674
+Total Statistical Error: 0.003514
+Total Systematic Error: 0.004187
+****************************
+130-590 keV total Error = 0.005454
+Asymm2011 = -0.122591
+Asymm2012 = -0.123561
+Total Statistical Error: 0.003496
+Total Systematic Error: 0.004186
+****************************
+130-600 keV total Error = 0.005439
+Asymm2011 = -0.122685
+Asymm2012 = -0.123616
+Total Statistical Error: 0.003476
+Total Systematic Error: 0.004184
+****************************
+130-610 keV total Error = 0.005429
+Asymm2011 = -0.122702
+Asymm2012 = -0.123560
+Total Statistical Error: 0.003460
+Total Systematic Error: 0.004183
+****************************
+130-620 keV total Error = 0.005421
+Asymm2011 = -0.122708
+Asymm2012 = -0.123553
+Total Statistical Error: 0.003446
+Total Systematic Error: 0.004184
+****************************
+130-630 keV total Error = 0.005411
+Asymm2011 = -0.122780
+Asymm2012 = -0.123642
+Total Statistical Error: 0.003431
+Total Systematic Error: 0.004183
+****************************
+130-640 keV total Error = 0.005402
+Asymm2011 = -0.122808
+Asymm2012 = -0.123676
+Total Statistical Error: 0.003419
+Total Systematic Error: 0.004182
+****************************
+130-650 keV total Error = 0.005395
+Asymm2011 = -0.122837
+Asymm2012 = -0.123702
+Total Statistical Error: 0.003409
+Total Systematic Error: 0.004182
+****************************
+130-660 keV total Error = 0.005391
+Asymm2011 = -0.122790
+Asymm2012 = -0.123743
+Total Statistical Error: 0.003401
+Total Systematic Error: 0.004182
+****************************
+130-670 keV total Error = 0.005389
+Asymm2011 = -0.122788
+Asymm2012 = -0.123706
+Total Statistical Error: 0.003395
+Total Systematic Error: 0.004186
+****************************
+130-680 keV total Error = 0.005386
+Asymm2011 = -0.122781
+Asymm2012 = -0.123711
+Total Statistical Error: 0.003389
+Total Systematic Error: 0.004186
+****************************
+130-690 keV total Error = 0.005384
+Asymm2011 = -0.122790
+Asymm2012 = -0.123699
+Total Statistical Error: 0.003384
+Total Systematic Error: 0.004187
+****************************
+130-700 keV total Error = 0.005382
+Asymm2011 = -0.122762
+Asymm2012 = -0.123778
+Total Statistical Error: 0.003380
+Total Systematic Error: 0.004188
+****************************
+130-710 keV total Error = 0.005381
+Asymm2011 = -0.122766
+Asymm2012 = -0.123779
+Total Statistical Error: 0.003377
+Total Systematic Error: 0.004189
+****************************
+130-720 keV total Error = 0.005380
+Asymm2011 = -0.122765
+Asymm2012 = -0.123769
+Total Statistical Error: 0.003375
+Total Systematic Error: 0.004190
+****************************
+130-730 keV total Error = 0.005380
+Asymm2011 = -0.122758
+Asymm2012 = -0.123770
+Total Statistical Error: 0.003374
+Total Systematic Error: 0.004191
+****************************
+130-740 keV total Error = 0.005380
+Asymm2011 = -0.122768
+Asymm2012 = -0.123783
+Total Statistical Error: 0.003372
+Total Systematic Error: 0.004192
+****************************
+130-750 keV total Error = 0.005380
+Asymm2011 = -0.122769
+Asymm2012 = -0.123747
+Total Statistical Error: 0.003371
+Total Systematic Error: 0.004193
+****************************
+130-760 keV total Error = 0.005380
+Asymm2011 = -0.122769
+Asymm2012 = -0.123733
+Total Statistical Error: 0.003371
+Total Systematic Error: 0.004194
+****************************
+140-450 keV total Error = 0.005907
+Asymm2011 = -0.122619
+Asymm2012 = -0.123063
+Total Statistical Error: 0.004054
+Total Systematic Error: 0.004296
+****************************
+140-460 keV total Error = 0.005848
+Asymm2011 = -0.122637
+Asymm2012 = -0.123188
+Total Statistical Error: 0.003992
+Total Systematic Error: 0.004273
+****************************
+140-470 keV total Error = 0.005795
+Asymm2011 = -0.122555
+Asymm2012 = -0.123303
+Total Statistical Error: 0.003937
+Total Systematic Error: 0.004252
+****************************
+140-480 keV total Error = 0.005748
+Asymm2011 = -0.122503
+Asymm2012 = -0.123384
+Total Statistical Error: 0.003885
+Total Systematic Error: 0.004236
+****************************
+140-490 keV total Error = 0.005705
+Asymm2011 = -0.122420
+Asymm2012 = -0.123506
+Total Statistical Error: 0.003838
+Total Systematic Error: 0.004221
+****************************
+140-500 keV total Error = 0.005665
+Asymm2011 = -0.122398
+Asymm2012 = -0.123464
+Total Statistical Error: 0.003794
+Total Systematic Error: 0.004206
+****************************
+140-510 keV total Error = 0.005627
+Asymm2011 = -0.122361
+Asymm2012 = -0.123393
+Total Statistical Error: 0.003755
+Total Systematic Error: 0.004191
+****************************
+140-520 keV total Error = 0.005593
+Asymm2011 = -0.122388
+Asymm2012 = -0.123387
+Total Statistical Error: 0.003716
+Total Systematic Error: 0.004181
+****************************
+140-530 keV total Error = 0.005562
+Asymm2011 = -0.122398
+Asymm2012 = -0.123436
+Total Statistical Error: 0.003680
+Total Systematic Error: 0.004170
+****************************
+140-540 keV total Error = 0.005532
+Asymm2011 = -0.122492
+Asymm2012 = -0.123321
+Total Statistical Error: 0.003647
+Total Systematic Error: 0.004160
+****************************
+140-550 keV total Error = 0.005508
+Asymm2011 = -0.122495
+Asymm2012 = -0.123382
+Total Statistical Error: 0.003617
+Total Systematic Error: 0.004154
+****************************
+140-560 keV total Error = 0.005484
+Asymm2011 = -0.122451
+Asymm2012 = -0.123485
+Total Statistical Error: 0.003590
+Total Systematic Error: 0.004146
+****************************
+140-570 keV total Error = 0.005464
+Asymm2011 = -0.122575
+Asymm2012 = -0.123479
+Total Statistical Error: 0.003562
+Total Systematic Error: 0.004144
+****************************
+140-580 keV total Error = 0.005446
+Asymm2011 = -0.122523
+Asymm2012 = -0.123573
+Total Statistical Error: 0.003540
+Total Systematic Error: 0.004139
+****************************
+140-590 keV total Error = 0.005434
+Asymm2011 = -0.122491
+Asymm2012 = -0.123460
+Total Statistical Error: 0.003522
+Total Systematic Error: 0.004139
+****************************
+140-600 keV total Error = 0.005420
+Asymm2011 = -0.122587
+Asymm2012 = -0.123516
+Total Statistical Error: 0.003501
+Total Systematic Error: 0.004137
+****************************
+140-610 keV total Error = 0.005409
+Asymm2011 = -0.122605
+Asymm2012 = -0.123460
+Total Statistical Error: 0.003485
+Total Systematic Error: 0.004137
+****************************
+140-620 keV total Error = 0.005401
+Asymm2011 = -0.122612
+Asymm2012 = -0.123455
+Total Statistical Error: 0.003470
+Total Systematic Error: 0.004139
+****************************
+140-630 keV total Error = 0.005391
+Asymm2011 = -0.122686
+Asymm2012 = -0.123545
+Total Statistical Error: 0.003455
+Total Systematic Error: 0.004138
+****************************
+140-640 keV total Error = 0.005383
+Asymm2011 = -0.122715
+Asymm2012 = -0.123581
+Total Statistical Error: 0.003443
+Total Systematic Error: 0.004138
+****************************
+140-650 keV total Error = 0.005376
+Asymm2011 = -0.122744
+Asymm2012 = -0.123607
+Total Statistical Error: 0.003433
+Total Systematic Error: 0.004138
+****************************
+140-660 keV total Error = 0.005372
+Asymm2011 = -0.122698
+Asymm2012 = -0.123649
+Total Statistical Error: 0.003425
+Total Systematic Error: 0.004138
+****************************
+140-670 keV total Error = 0.005370
+Asymm2011 = -0.122696
+Asymm2012 = -0.123613
+Total Statistical Error: 0.003419
+Total Systematic Error: 0.004142
+****************************
+140-680 keV total Error = 0.005367
+Asymm2011 = -0.122689
+Asymm2012 = -0.123618
+Total Statistical Error: 0.003413
+Total Systematic Error: 0.004143
+****************************
+140-690 keV total Error = 0.005365
+Asymm2011 = -0.122698
+Asymm2012 = -0.123606
+Total Statistical Error: 0.003408
+Total Systematic Error: 0.004144
+****************************
+140-700 keV total Error = 0.005363
+Asymm2011 = -0.122670
+Asymm2012 = -0.123685
+Total Statistical Error: 0.003404
+Total Systematic Error: 0.004145
+****************************
+140-710 keV total Error = 0.005362
+Asymm2011 = -0.122674
+Asymm2012 = -0.123687
+Total Statistical Error: 0.003400
+Total Systematic Error: 0.004146
+****************************
+140-720 keV total Error = 0.005362
+Asymm2011 = -0.122674
+Asymm2012 = -0.123677
+Total Statistical Error: 0.003398
+Total Systematic Error: 0.004147
+****************************
+140-730 keV total Error = 0.005362
+Asymm2011 = -0.122666
+Asymm2012 = -0.123678
+Total Statistical Error: 0.003396
+Total Systematic Error: 0.004149
+****************************
+140-740 keV total Error = 0.005361
+Asymm2011 = -0.122676
+Asymm2012 = -0.123692
+Total Statistical Error: 0.003395
+Total Systematic Error: 0.004149
+****************************
+140-750 keV total Error = 0.005362
+Asymm2011 = -0.122678
+Asymm2012 = -0.123655
+Total Statistical Error: 0.003394
+Total Systematic Error: 0.004151
+****************************
+140-760 keV total Error = 0.005362
+Asymm2011 = -0.122677
+Asymm2012 = -0.123640
+Total Statistical Error: 0.003394
+Total Systematic Error: 0.004151
+****************************
+150-460 keV total Error = 0.005828
+Asymm2011 = -0.122649
+Asymm2012 = -0.122954
+Total Statistical Error: 0.004032
+Total Systematic Error: 0.004208
+****************************
+150-470 keV total Error = 0.005775
+Asymm2011 = -0.122565
+Asymm2012 = -0.123078
+Total Statistical Error: 0.003975
+Total Systematic Error: 0.004189
+****************************
+150-480 keV total Error = 0.005728
+Asymm2011 = -0.122512
+Asymm2012 = -0.123166
+Total Statistical Error: 0.003922
+Total Systematic Error: 0.004175
+****************************
+150-490 keV total Error = 0.005685
+Asymm2011 = -0.122427
+Asymm2012 = -0.123296
+Total Statistical Error: 0.003873
+Total Systematic Error: 0.004161
+****************************
+150-500 keV total Error = 0.005645
+Asymm2011 = -0.122405
+Asymm2012 = -0.123258
+Total Statistical Error: 0.003828
+Total Systematic Error: 0.004148
+****************************
+150-510 keV total Error = 0.005607
+Asymm2011 = -0.122367
+Asymm2012 = -0.123191
+Total Statistical Error: 0.003788
+Total Systematic Error: 0.004135
+****************************
+150-520 keV total Error = 0.005574
+Asymm2011 = -0.122394
+Asymm2012 = -0.123189
+Total Statistical Error: 0.003748
+Total Systematic Error: 0.004126
+****************************
+150-530 keV total Error = 0.005542
+Asymm2011 = -0.122404
+Asymm2012 = -0.123242
+Total Statistical Error: 0.003711
+Total Systematic Error: 0.004116
+****************************
+150-540 keV total Error = 0.005513
+Asymm2011 = -0.122499
+Asymm2012 = -0.123128
+Total Statistical Error: 0.003677
+Total Systematic Error: 0.004107
+****************************
+150-550 keV total Error = 0.005488
+Asymm2011 = -0.122502
+Asymm2012 = -0.123194
+Total Statistical Error: 0.003646
+Total Systematic Error: 0.004102
+****************************
+150-560 keV total Error = 0.005465
+Asymm2011 = -0.122457
+Asymm2012 = -0.123301
+Total Statistical Error: 0.003618
+Total Systematic Error: 0.004096
+****************************
+150-570 keV total Error = 0.005445
+Asymm2011 = -0.122583
+Asymm2012 = -0.123297
+Total Statistical Error: 0.003590
+Total Systematic Error: 0.004094
+****************************
+150-580 keV total Error = 0.005427
+Asymm2011 = -0.122531
+Asymm2012 = -0.123395
+Total Statistical Error: 0.003567
+Total Systematic Error: 0.004090
+****************************
+150-590 keV total Error = 0.005415
+Asymm2011 = -0.122498
+Asymm2012 = -0.123282
+Total Statistical Error: 0.003549
+Total Systematic Error: 0.004091
+****************************
+150-600 keV total Error = 0.005401
+Asymm2011 = -0.122595
+Asymm2012 = -0.123341
+Total Statistical Error: 0.003528
+Total Systematic Error: 0.004090
+****************************
+150-610 keV total Error = 0.005390
+Asymm2011 = -0.122613
+Asymm2012 = -0.123286
+Total Statistical Error: 0.003511
+Total Systematic Error: 0.004090
+****************************
+150-620 keV total Error = 0.005383
+Asymm2011 = -0.122620
+Asymm2012 = -0.123282
+Total Statistical Error: 0.003496
+Total Systematic Error: 0.004093
+****************************
+150-630 keV total Error = 0.005373
+Asymm2011 = -0.122695
+Asymm2012 = -0.123375
+Total Statistical Error: 0.003481
+Total Systematic Error: 0.004093
+****************************
+150-640 keV total Error = 0.005365
+Asymm2011 = -0.122725
+Asymm2012 = -0.123412
+Total Statistical Error: 0.003468
+Total Systematic Error: 0.004093
+****************************
+150-650 keV total Error = 0.005358
+Asymm2011 = -0.122754
+Asymm2012 = -0.123440
+Total Statistical Error: 0.003457
+Total Systematic Error: 0.004093
+****************************
+150-660 keV total Error = 0.005353
+Asymm2011 = -0.122707
+Asymm2012 = -0.123483
+Total Statistical Error: 0.003449
+Total Systematic Error: 0.004094
+****************************
+150-670 keV total Error = 0.005352
+Asymm2011 = -0.122706
+Asymm2012 = -0.123447
+Total Statistical Error: 0.003443
+Total Systematic Error: 0.004098
+****************************
+150-680 keV total Error = 0.005349
+Asymm2011 = -0.122698
+Asymm2012 = -0.123453
+Total Statistical Error: 0.003437
+Total Systematic Error: 0.004099
+****************************
+150-690 keV total Error = 0.005347
+Asymm2011 = -0.122707
+Asymm2012 = -0.123441
+Total Statistical Error: 0.003432
+Total Systematic Error: 0.004100
+****************************
+150-700 keV total Error = 0.005345
+Asymm2011 = -0.122679
+Asymm2012 = -0.123522
+Total Statistical Error: 0.003428
+Total Systematic Error: 0.004102
+****************************
+150-710 keV total Error = 0.005344
+Asymm2011 = -0.122683
+Asymm2012 = -0.123525
+Total Statistical Error: 0.003424
+Total Systematic Error: 0.004103
+****************************
+150-720 keV total Error = 0.005344
+Asymm2011 = -0.122683
+Asymm2012 = -0.123514
+Total Statistical Error: 0.003422
+Total Systematic Error: 0.004104
+****************************
+150-730 keV total Error = 0.005344
+Asymm2011 = -0.122675
+Asymm2012 = -0.123516
+Total Statistical Error: 0.003420
+Total Systematic Error: 0.004106
+****************************
+150-740 keV total Error = 0.005343
+Asymm2011 = -0.122685
+Asymm2012 = -0.123529
+Total Statistical Error: 0.003419
+Total Systematic Error: 0.004106
+****************************
+150-750 keV total Error = 0.005344
+Asymm2011 = -0.122687
+Asymm2012 = -0.123492
+Total Statistical Error: 0.003418
+Total Systematic Error: 0.004108
+****************************
+150-760 keV total Error = 0.005344
+Asymm2011 = -0.122686
+Asymm2012 = -0.123477
+Total Statistical Error: 0.003418
+Total Systematic Error: 0.004108
+****************************
+160-470 keV total Error = 0.005764
+Asymm2011 = -0.122514
+Asymm2012 = -0.122855
+Total Statistical Error: 0.004019
+Total Systematic Error: 0.004132
+****************************
+160-480 keV total Error = 0.005717
+Asymm2011 = -0.122461
+Asymm2012 = -0.122951
+Total Statistical Error: 0.003964
+Total Systematic Error: 0.004120
+****************************
+160-490 keV total Error = 0.005674
+Asymm2011 = -0.122376
+Asymm2012 = -0.123089
+Total Statistical Error: 0.003914
+Total Systematic Error: 0.004107
+****************************
+160-500 keV total Error = 0.005633
+Asymm2011 = -0.122355
+Asymm2012 = -0.123055
+Total Statistical Error: 0.003867
+Total Systematic Error: 0.004096
+****************************
+160-510 keV total Error = 0.005596
+Asymm2011 = -0.122317
+Asymm2012 = -0.122991
+Total Statistical Error: 0.003825
+Total Systematic Error: 0.004084
+****************************
+160-520 keV total Error = 0.005562
+Asymm2011 = -0.122346
+Asymm2012 = -0.122993
+Total Statistical Error: 0.003784
+Total Systematic Error: 0.004076
+****************************
+160-530 keV total Error = 0.005530
+Asymm2011 = -0.122357
+Asymm2012 = -0.123051
+Total Statistical Error: 0.003747
+Total Systematic Error: 0.004068
+****************************
+160-540 keV total Error = 0.005501
+Asymm2011 = -0.122455
+Asymm2012 = -0.122938
+Total Statistical Error: 0.003712
+Total Systematic Error: 0.004060
+****************************
+160-550 keV total Error = 0.005476
+Asymm2011 = -0.122459
+Asymm2012 = -0.123008
+Total Statistical Error: 0.003679
+Total Systematic Error: 0.004056
+****************************
+160-560 keV total Error = 0.005453
+Asymm2011 = -0.122414
+Asymm2012 = -0.123120
+Total Statistical Error: 0.003651
+Total Systematic Error: 0.004050
+****************************
+160-570 keV total Error = 0.005433
+Asymm2011 = -0.122542
+Asymm2012 = -0.123119
+Total Statistical Error: 0.003622
+Total Systematic Error: 0.004049
+****************************
+160-580 keV total Error = 0.005415
+Asymm2011 = -0.122490
+Asymm2012 = -0.123221
+Total Statistical Error: 0.003599
+Total Systematic Error: 0.004046
+****************************
+160-590 keV total Error = 0.005403
+Asymm2011 = -0.122457
+Asymm2012 = -0.123108
+Total Statistical Error: 0.003580
+Total Systematic Error: 0.004048
+****************************
+160-600 keV total Error = 0.005389
+Asymm2011 = -0.122556
+Asymm2012 = -0.123170
+Total Statistical Error: 0.003558
+Total Systematic Error: 0.004047
+****************************
+160-610 keV total Error = 0.005378
+Asymm2011 = -0.122575
+Asymm2012 = -0.123116
+Total Statistical Error: 0.003541
+Total Systematic Error: 0.004048
+****************************
+160-620 keV total Error = 0.005371
+Asymm2011 = -0.122582
+Asymm2012 = -0.123113
+Total Statistical Error: 0.003526
+Total Systematic Error: 0.004051
+****************************
+160-630 keV total Error = 0.005361
+Asymm2011 = -0.122659
+Asymm2012 = -0.123208
+Total Statistical Error: 0.003510
+Total Systematic Error: 0.004052
+****************************
+160-640 keV total Error = 0.005353
+Asymm2011 = -0.122688
+Asymm2012 = -0.123247
+Total Statistical Error: 0.003497
+Total Systematic Error: 0.004052
+****************************
+160-650 keV total Error = 0.005346
+Asymm2011 = -0.122719
+Asymm2012 = -0.123276
+Total Statistical Error: 0.003486
+Total Systematic Error: 0.004053
+****************************
+160-660 keV total Error = 0.005342
+Asymm2011 = -0.122671
+Asymm2012 = -0.123321
+Total Statistical Error: 0.003478
+Total Systematic Error: 0.004054
+****************************
+160-670 keV total Error = 0.005340
+Asymm2011 = -0.122670
+Asymm2012 = -0.123285
+Total Statistical Error: 0.003471
+Total Systematic Error: 0.004059
+****************************
+160-680 keV total Error = 0.005337
+Asymm2011 = -0.122662
+Asymm2012 = -0.123291
+Total Statistical Error: 0.003465
+Total Systematic Error: 0.004060
+****************************
+160-690 keV total Error = 0.005335
+Asymm2011 = -0.122672
+Asymm2012 = -0.123280
+Total Statistical Error: 0.003460
+Total Systematic Error: 0.004061
+****************************
+160-700 keV total Error = 0.005334
+Asymm2011 = -0.122643
+Asymm2012 = -0.123363
+Total Statistical Error: 0.003455
+Total Systematic Error: 0.004063
+****************************
+160-710 keV total Error = 0.005332
+Asymm2011 = -0.122648
+Asymm2012 = -0.123366
+Total Statistical Error: 0.003452
+Total Systematic Error: 0.004064
+****************************
+160-720 keV total Error = 0.005332
+Asymm2011 = -0.122647
+Asymm2012 = -0.123356
+Total Statistical Error: 0.003450
+Total Systematic Error: 0.004066
+****************************
+160-730 keV total Error = 0.005332
+Asymm2011 = -0.122639
+Asymm2012 = -0.123357
+Total Statistical Error: 0.003448
+Total Systematic Error: 0.004067
+****************************
+160-740 keV total Error = 0.005331
+Asymm2011 = -0.122650
+Asymm2012 = -0.123371
+Total Statistical Error: 0.003446
+Total Systematic Error: 0.004068
+****************************
+160-750 keV total Error = 0.005332
+Asymm2011 = -0.122651
+Asymm2012 = -0.123334
+Total Statistical Error: 0.003446
+Total Systematic Error: 0.004070
+****************************
+160-760 keV total Error = 0.005332
+Asymm2011 = -0.122651
+Asymm2012 = -0.123319
+Total Statistical Error: 0.003445
+Total Systematic Error: 0.004070
+****************************
+170-480 keV total Error = 0.005714
+Asymm2011 = -0.122512
+Asymm2012 = -0.122975
+Total Statistical Error: 0.004007
+Total Systematic Error: 0.004074
+****************************
+170-490 keV total Error = 0.005670
+Asymm2011 = -0.122424
+Asymm2012 = -0.123116
+Total Statistical Error: 0.003955
+Total Systematic Error: 0.004063
+****************************
+170-500 keV total Error = 0.005629
+Asymm2011 = -0.122400
+Asymm2012 = -0.123080
+Total Statistical Error: 0.003907
+Total Systematic Error: 0.004053
+****************************
+170-510 keV total Error = 0.005591
+Asymm2011 = -0.122361
+Asymm2012 = -0.123014
+Total Statistical Error: 0.003864
+Total Systematic Error: 0.004042
+****************************
+170-520 keV total Error = 0.005557
+Asymm2011 = -0.122389
+Asymm2012 = -0.123015
+Total Statistical Error: 0.003822
+Total Systematic Error: 0.004035
+****************************
+170-530 keV total Error = 0.005525
+Asymm2011 = -0.122400
+Asymm2012 = -0.123074
+Total Statistical Error: 0.003783
+Total Systematic Error: 0.004028
+****************************
+170-540 keV total Error = 0.005496
+Asymm2011 = -0.122499
+Asymm2012 = -0.122959
+Total Statistical Error: 0.003747
+Total Systematic Error: 0.004021
+****************************
+170-550 keV total Error = 0.005471
+Asymm2011 = -0.122502
+Asymm2012 = -0.123030
+Total Statistical Error: 0.003714
+Total Systematic Error: 0.004017
+****************************
+170-560 keV total Error = 0.005447
+Asymm2011 = -0.122455
+Asymm2012 = -0.123144
+Total Statistical Error: 0.003684
+Total Systematic Error: 0.004012
+****************************
+170-570 keV total Error = 0.005427
+Asymm2011 = -0.122586
+Asymm2012 = -0.123142
+Total Statistical Error: 0.003655
+Total Systematic Error: 0.004013
+****************************
+170-580 keV total Error = 0.005409
+Asymm2011 = -0.122532
+Asymm2012 = -0.123246
+Total Statistical Error: 0.003631
+Total Systematic Error: 0.004010
+****************************
+170-590 keV total Error = 0.005398
+Asymm2011 = -0.122498
+Asymm2012 = -0.123130
+Total Statistical Error: 0.003611
+Total Systematic Error: 0.004012
+****************************
+170-600 keV total Error = 0.005383
+Asymm2011 = -0.122598
+Asymm2012 = -0.123193
+Total Statistical Error: 0.003589
+Total Systematic Error: 0.004012
+****************************
+170-610 keV total Error = 0.005373
+Asymm2011 = -0.122617
+Asymm2012 = -0.123138
+Total Statistical Error: 0.003571
+Total Systematic Error: 0.004014
+****************************
+170-620 keV total Error = 0.005365
+Asymm2011 = -0.122624
+Asymm2012 = -0.123135
+Total Statistical Error: 0.003556
+Total Systematic Error: 0.004017
+****************************
+170-630 keV total Error = 0.005355
+Asymm2011 = -0.122701
+Asymm2012 = -0.123232
+Total Statistical Error: 0.003539
+Total Systematic Error: 0.004018
+****************************
+170-640 keV total Error = 0.005347
+Asymm2011 = -0.122731
+Asymm2012 = -0.123271
+Total Statistical Error: 0.003526
+Total Systematic Error: 0.004019
+****************************
+170-650 keV total Error = 0.005340
+Asymm2011 = -0.122762
+Asymm2012 = -0.123301
+Total Statistical Error: 0.003515
+Total Systematic Error: 0.004020
+****************************
+170-660 keV total Error = 0.005336
+Asymm2011 = -0.122713
+Asymm2012 = -0.123347
+Total Statistical Error: 0.003506
+Total Systematic Error: 0.004022
+****************************
+170-670 keV total Error = 0.005335
+Asymm2011 = -0.122712
+Asymm2012 = -0.123310
+Total Statistical Error: 0.003500
+Total Systematic Error: 0.004026
+****************************
+170-680 keV total Error = 0.005332
+Asymm2011 = -0.122704
+Asymm2012 = -0.123316
+Total Statistical Error: 0.003493
+Total Systematic Error: 0.004028
+****************************
+170-690 keV total Error = 0.005329
+Asymm2011 = -0.122713
+Asymm2012 = -0.123305
+Total Statistical Error: 0.003488
+Total Systematic Error: 0.004029
+****************************
+170-700 keV total Error = 0.005328
+Asymm2011 = -0.122684
+Asymm2012 = -0.123389
+Total Statistical Error: 0.003484
+Total Systematic Error: 0.004031
+****************************
+170-710 keV total Error = 0.005327
+Asymm2011 = -0.122689
+Asymm2012 = -0.123391
+Total Statistical Error: 0.003480
+Total Systematic Error: 0.004033
+****************************
+170-720 keV total Error = 0.005326
+Asymm2011 = -0.122688
+Asymm2012 = -0.123381
+Total Statistical Error: 0.003478
+Total Systematic Error: 0.004034
+****************************
+170-730 keV total Error = 0.005326
+Asymm2011 = -0.122680
+Asymm2012 = -0.123383
+Total Statistical Error: 0.003476
+Total Systematic Error: 0.004036
+****************************
+170-740 keV total Error = 0.005326
+Asymm2011 = -0.122691
+Asymm2012 = -0.123397
+Total Statistical Error: 0.003474
+Total Systematic Error: 0.004037
+****************************
+170-750 keV total Error = 0.005327
+Asymm2011 = -0.122692
+Asymm2012 = -0.123359
+Total Statistical Error: 0.003473
+Total Systematic Error: 0.004039
+****************************
+170-760 keV total Error = 0.005327
+Asymm2011 = -0.122692
+Asymm2012 = -0.123343
+Total Statistical Error: 0.003473
+Total Systematic Error: 0.004039
+****************************
+180-490 keV total Error = 0.005670
+Asymm2011 = -0.122376
+Asymm2012 = -0.123277
+Total Statistical Error: 0.004001
+Total Systematic Error: 0.004017
+****************************
+180-500 keV total Error = 0.005628
+Asymm2011 = -0.122353
+Asymm2012 = -0.123236
+Total Statistical Error: 0.003952
+Total Systematic Error: 0.004008
+****************************
+180-510 keV total Error = 0.005590
+Asymm2011 = -0.122314
+Asymm2012 = -0.123165
+Total Statistical Error: 0.003907
+Total Systematic Error: 0.003998
+****************************
+180-520 keV total Error = 0.005555
+Asymm2011 = -0.122344
+Asymm2012 = -0.123163
+Total Statistical Error: 0.003863
+Total Systematic Error: 0.003992
+****************************
+180-530 keV total Error = 0.005523
+Asymm2011 = -0.122356
+Asymm2012 = -0.123220
+Total Statistical Error: 0.003823
+Total Systematic Error: 0.003986
+****************************
+180-540 keV total Error = 0.005493
+Asymm2011 = -0.122458
+Asymm2012 = -0.123100
+Total Statistical Error: 0.003786
+Total Systematic Error: 0.003980
+****************************
+180-550 keV total Error = 0.005468
+Asymm2011 = -0.122462
+Asymm2012 = -0.123170
+Total Statistical Error: 0.003752
+Total Systematic Error: 0.003978
+****************************
+180-560 keV total Error = 0.005445
+Asymm2011 = -0.122415
+Asymm2012 = -0.123284
+Total Statistical Error: 0.003722
+Total Systematic Error: 0.003974
+****************************
+180-570 keV total Error = 0.005424
+Asymm2011 = -0.122548
+Asymm2012 = -0.123280
+Total Statistical Error: 0.003691
+Total Systematic Error: 0.003975
+****************************
+180-580 keV total Error = 0.005406
+Asymm2011 = -0.122494
+Asymm2012 = -0.123384
+Total Statistical Error: 0.003666
+Total Systematic Error: 0.003973
+****************************
+180-590 keV total Error = 0.005394
+Asymm2011 = -0.122459
+Asymm2012 = -0.123265
+Total Statistical Error: 0.003646
+Total Systematic Error: 0.003976
+****************************
+180-600 keV total Error = 0.005380
+Asymm2011 = -0.122562
+Asymm2012 = -0.123327
+Total Statistical Error: 0.003623
+Total Systematic Error: 0.003977
+****************************
+180-610 keV total Error = 0.005369
+Asymm2011 = -0.122582
+Asymm2012 = -0.123270
+Total Statistical Error: 0.003605
+Total Systematic Error: 0.003979
+****************************
+180-620 keV total Error = 0.005361
+Asymm2011 = -0.122589
+Asymm2012 = -0.123265
+Total Statistical Error: 0.003589
+Total Systematic Error: 0.003983
+****************************
+180-630 keV total Error = 0.005351
+Asymm2011 = -0.122668
+Asymm2012 = -0.123363
+Total Statistical Error: 0.003572
+Total Systematic Error: 0.003984
+****************************
+180-640 keV total Error = 0.005343
+Asymm2011 = -0.122699
+Asymm2012 = -0.123403
+Total Statistical Error: 0.003559
+Total Systematic Error: 0.003985
+****************************
+180-650 keV total Error = 0.005336
+Asymm2011 = -0.122731
+Asymm2012 = -0.123432
+Total Statistical Error: 0.003547
+Total Systematic Error: 0.003987
+****************************
+180-660 keV total Error = 0.005332
+Asymm2011 = -0.122681
+Asymm2012 = -0.123478
+Total Statistical Error: 0.003538
+Total Systematic Error: 0.003989
+****************************
+180-670 keV total Error = 0.005331
+Asymm2011 = -0.122680
+Asymm2012 = -0.123440
+Total Statistical Error: 0.003531
+Total Systematic Error: 0.003993
+****************************
+180-680 keV total Error = 0.005328
+Asymm2011 = -0.122672
+Asymm2012 = -0.123446
+Total Statistical Error: 0.003525
+Total Systematic Error: 0.003995
+****************************
+180-690 keV total Error = 0.005326
+Asymm2011 = -0.122682
+Asymm2012 = -0.123434
+Total Statistical Error: 0.003519
+Total Systematic Error: 0.003997
+****************************
+180-700 keV total Error = 0.005324
+Asymm2011 = -0.122652
+Asymm2012 = -0.123519
+Total Statistical Error: 0.003515
+Total Systematic Error: 0.003999
+****************************
+180-710 keV total Error = 0.005323
+Asymm2011 = -0.122657
+Asymm2012 = -0.123522
+Total Statistical Error: 0.003511
+Total Systematic Error: 0.004001
+****************************
+180-720 keV total Error = 0.005323
+Asymm2011 = -0.122656
+Asymm2012 = -0.123511
+Total Statistical Error: 0.003509
+Total Systematic Error: 0.004002
+****************************
+180-730 keV total Error = 0.005323
+Asymm2011 = -0.122648
+Asymm2012 = -0.123513
+Total Statistical Error: 0.003507
+Total Systematic Error: 0.004004
+****************************
+180-740 keV total Error = 0.005322
+Asymm2011 = -0.122659
+Asymm2012 = -0.123527
+Total Statistical Error: 0.003505
+Total Systematic Error: 0.004005
+****************************
+180-750 keV total Error = 0.005323
+Asymm2011 = -0.122661
+Asymm2012 = -0.123488
+Total Statistical Error: 0.003504
+Total Systematic Error: 0.004007
+****************************
+180-760 keV total Error = 0.005323
+Asymm2011 = -0.122660
+Asymm2012 = -0.123472
+Total Statistical Error: 0.003504
+Total Systematic Error: 0.004007
+****************************
+190-500 keV total Error = 0.005641
+Asymm2011 = -0.122226
+Asymm2012 = -0.123109
+Total Statistical Error: 0.004006
+Total Systematic Error: 0.003972
+****************************
+190-510 keV total Error = 0.005602
+Asymm2011 = -0.122190
+Asymm2012 = -0.123039
+Total Statistical Error: 0.003959
+Total Systematic Error: 0.003963
+****************************
+190-520 keV total Error = 0.005566
+Asymm2011 = -0.122223
+Asymm2012 = -0.123040
+Total Statistical Error: 0.003914
+Total Systematic Error: 0.003958
+****************************
+190-530 keV total Error = 0.005533
+Asymm2011 = -0.122238
+Asymm2012 = -0.123101
+Total Statistical Error: 0.003872
+Total Systematic Error: 0.003953
+****************************
+190-540 keV total Error = 0.005503
+Asymm2011 = -0.122344
+Asymm2012 = -0.122980
+Total Statistical Error: 0.003833
+Total Systematic Error: 0.003948
+****************************
+190-550 keV total Error = 0.005477
+Asymm2011 = -0.122350
+Asymm2012 = -0.123054
+Total Statistical Error: 0.003798
+Total Systematic Error: 0.003946
+****************************
+190-560 keV total Error = 0.005453
+Asymm2011 = -0.122304
+Asymm2012 = -0.123173
+Total Statistical Error: 0.003766
+Total Systematic Error: 0.003943
+****************************
+190-570 keV total Error = 0.005432
+Asymm2011 = -0.122442
+Asymm2012 = -0.123171
+Total Statistical Error: 0.003735
+Total Systematic Error: 0.003945
+****************************
+190-580 keV total Error = 0.005414
+Asymm2011 = -0.122388
+Asymm2012 = -0.123279
+Total Statistical Error: 0.003709
+Total Systematic Error: 0.003943
+****************************
+190-590 keV total Error = 0.005402
+Asymm2011 = -0.122354
+Asymm2012 = -0.123158
+Total Statistical Error: 0.003688
+Total Systematic Error: 0.003947
+****************************
+190-600 keV total Error = 0.005387
+Asymm2011 = -0.122460
+Asymm2012 = -0.123223
+Total Statistical Error: 0.003664
+Total Systematic Error: 0.003948
+****************************
+190-610 keV total Error = 0.005376
+Asymm2011 = -0.122481
+Asymm2012 = -0.123165
+Total Statistical Error: 0.003646
+Total Systematic Error: 0.003951
+****************************
+190-620 keV total Error = 0.005368
+Asymm2011 = -0.122490
+Asymm2012 = -0.123161
+Total Statistical Error: 0.003629
+Total Systematic Error: 0.003955
+****************************
+190-630 keV total Error = 0.005357
+Asymm2011 = -0.122571
+Asymm2012 = -0.123262
+Total Statistical Error: 0.003612
+Total Systematic Error: 0.003957
+****************************
+190-640 keV total Error = 0.005349
+Asymm2011 = -0.122604
+Asymm2012 = -0.123304
+Total Statistical Error: 0.003598
+Total Systematic Error: 0.003958
+****************************
+190-650 keV total Error = 0.005342
+Asymm2011 = -0.122636
+Asymm2012 = -0.123334
+Total Statistical Error: 0.003586
+Total Systematic Error: 0.003960
+****************************
+190-660 keV total Error = 0.005338
+Asymm2011 = -0.122586
+Asymm2012 = -0.123381
+Total Statistical Error: 0.003577
+Total Systematic Error: 0.003963
+****************************
+190-670 keV total Error = 0.005337
+Asymm2011 = -0.122585
+Asymm2012 = -0.123343
+Total Statistical Error: 0.003569
+Total Systematic Error: 0.003968
+****************************
+190-680 keV total Error = 0.005334
+Asymm2011 = -0.122577
+Asymm2012 = -0.123349
+Total Statistical Error: 0.003563
+Total Systematic Error: 0.003970
+****************************
+190-690 keV total Error = 0.005331
+Asymm2011 = -0.122588
+Asymm2012 = -0.123337
+Total Statistical Error: 0.003557
+Total Systematic Error: 0.003972
+****************************
+190-700 keV total Error = 0.005330
+Asymm2011 = -0.122558
+Asymm2012 = -0.123425
+Total Statistical Error: 0.003552
+Total Systematic Error: 0.003974
+****************************
+190-710 keV total Error = 0.005329
+Asymm2011 = -0.122563
+Asymm2012 = -0.123428
+Total Statistical Error: 0.003549
+Total Systematic Error: 0.003975
+****************************
+190-720 keV total Error = 0.005329
+Asymm2011 = -0.122563
+Asymm2012 = -0.123417
+Total Statistical Error: 0.003546
+Total Systematic Error: 0.003977
+****************************
+190-730 keV total Error = 0.005329
+Asymm2011 = -0.122554
+Asymm2012 = -0.123418
+Total Statistical Error: 0.003544
+Total Systematic Error: 0.003979
+****************************
+190-740 keV total Error = 0.005328
+Asymm2011 = -0.122565
+Asymm2012 = -0.123433
+Total Statistical Error: 0.003542
+Total Systematic Error: 0.003980
+****************************
+190-750 keV total Error = 0.005329
+Asymm2011 = -0.122567
+Asymm2012 = -0.123393
+Total Statistical Error: 0.003542
+Total Systematic Error: 0.003982
+****************************
+190-760 keV total Error = 0.005329
+Asymm2011 = -0.122567
+Asymm2012 = -0.123377
+Total Statistical Error: 0.003541
+Total Systematic Error: 0.003982
+****************************
+200-510 keV total Error = 0.005617
+Asymm2011 = -0.122209
+Asymm2012 = -0.122817
+Total Statistical Error: 0.004013
+Total Systematic Error: 0.003931
+****************************
+200-520 keV total Error = 0.005580
+Asymm2011 = -0.122243
+Asymm2012 = -0.122824
+Total Statistical Error: 0.003965
+Total Systematic Error: 0.003927
+****************************
+200-530 keV total Error = 0.005547
+Asymm2011 = -0.122258
+Asymm2012 = -0.122891
+Total Statistical Error: 0.003922
+Total Systematic Error: 0.003922
+****************************
+200-540 keV total Error = 0.005515
+Asymm2011 = -0.122366
+Asymm2012 = -0.122771
+Total Statistical Error: 0.003882
+Total Systematic Error: 0.003918
+****************************
+200-550 keV total Error = 0.005489
+Asymm2011 = -0.122372
+Asymm2012 = -0.122850
+Total Statistical Error: 0.003845
+Total Systematic Error: 0.003918
+****************************
+200-560 keV total Error = 0.005464
+Asymm2011 = -0.122325
+Asymm2012 = -0.122976
+Total Statistical Error: 0.003812
+Total Systematic Error: 0.003915
+****************************
+200-570 keV total Error = 0.005443
+Asymm2011 = -0.122466
+Asymm2012 = -0.122976
+Total Statistical Error: 0.003779
+Total Systematic Error: 0.003917
+****************************
+200-580 keV total Error = 0.005424
+Asymm2011 = -0.122410
+Asymm2012 = -0.123089
+Total Statistical Error: 0.003753
+Total Systematic Error: 0.003916
+****************************
+200-590 keV total Error = 0.005412
+Asymm2011 = -0.122375
+Asymm2012 = -0.122968
+Total Statistical Error: 0.003731
+Total Systematic Error: 0.003920
+****************************
+200-600 keV total Error = 0.005396
+Asymm2011 = -0.122483
+Asymm2012 = -0.123037
+Total Statistical Error: 0.003706
+Total Systematic Error: 0.003922
+****************************
+200-610 keV total Error = 0.005385
+Asymm2011 = -0.122504
+Asymm2012 = -0.122979
+Total Statistical Error: 0.003687
+Total Systematic Error: 0.003925
+****************************
+200-620 keV total Error = 0.005377
+Asymm2011 = -0.122513
+Asymm2012 = -0.122977
+Total Statistical Error: 0.003670
+Total Systematic Error: 0.003930
+****************************
+200-630 keV total Error = 0.005367
+Asymm2011 = -0.122596
+Asymm2012 = -0.123082
+Total Statistical Error: 0.003652
+Total Systematic Error: 0.003932
+****************************
+200-640 keV total Error = 0.005358
+Asymm2011 = -0.122629
+Asymm2012 = -0.123126
+Total Statistical Error: 0.003638
+Total Systematic Error: 0.003934
+****************************
+200-650 keV total Error = 0.005351
+Asymm2011 = -0.122662
+Asymm2012 = -0.123158
+Total Statistical Error: 0.003625
+Total Systematic Error: 0.003936
+****************************
+200-660 keV total Error = 0.005347
+Asymm2011 = -0.122611
+Asymm2012 = -0.123207
+Total Statistical Error: 0.003616
+Total Systematic Error: 0.003939
+****************************
+200-670 keV total Error = 0.005346
+Asymm2011 = -0.122610
+Asymm2012 = -0.123168
+Total Statistical Error: 0.003608
+Total Systematic Error: 0.003944
+****************************
+200-680 keV total Error = 0.005343
+Asymm2011 = -0.122602
+Asymm2012 = -0.123176
+Total Statistical Error: 0.003601
+Total Systematic Error: 0.003946
+****************************
+200-690 keV total Error = 0.005340
+Asymm2011 = -0.122612
+Asymm2012 = -0.123164
+Total Statistical Error: 0.003595
+Total Systematic Error: 0.003948
+****************************
+200-700 keV total Error = 0.005339
+Asymm2011 = -0.122582
+Asymm2012 = -0.123254
+Total Statistical Error: 0.003591
+Total Systematic Error: 0.003951
+****************************
+200-710 keV total Error = 0.005337
+Asymm2011 = -0.122587
+Asymm2012 = -0.123257
+Total Statistical Error: 0.003587
+Total Systematic Error: 0.003953
+****************************
+200-720 keV total Error = 0.005337
+Asymm2011 = -0.122586
+Asymm2012 = -0.123246
+Total Statistical Error: 0.003584
+Total Systematic Error: 0.003955
+****************************
+200-730 keV total Error = 0.005337
+Asymm2011 = -0.122578
+Asymm2012 = -0.123248
+Total Statistical Error: 0.003582
+Total Systematic Error: 0.003956
+****************************
+200-740 keV total Error = 0.005337
+Asymm2011 = -0.122589
+Asymm2012 = -0.123263
+Total Statistical Error: 0.003580
+Total Systematic Error: 0.003957
+****************************
+200-750 keV total Error = 0.005337
+Asymm2011 = -0.122591
+Asymm2012 = -0.123223
+Total Statistical Error: 0.003579
+Total Systematic Error: 0.003959
+****************************
+200-760 keV total Error = 0.005338
+Asymm2011 = -0.122590
+Asymm2012 = -0.123207
+Total Statistical Error: 0.003579
+Total Systematic Error: 0.003960
+****************************
+210-520 keV total Error = 0.005598
+Asymm2011 = -0.122314
+Asymm2012 = -0.122760
+Total Statistical Error: 0.004019
+Total Systematic Error: 0.003896
+****************************
+210-530 keV total Error = 0.005563
+Asymm2011 = -0.122327
+Asymm2012 = -0.122831
+Total Statistical Error: 0.003974
+Total Systematic Error: 0.003893
+****************************
+210-540 keV total Error = 0.005531
+Asymm2011 = -0.122437
+Asymm2012 = -0.122709
+Total Statistical Error: 0.003932
+Total Systematic Error: 0.003890
+****************************
+210-550 keV total Error = 0.005504
+Asymm2011 = -0.122441
+Asymm2012 = -0.122792
+Total Statistical Error: 0.003894
+Total Systematic Error: 0.003890
+****************************
+210-560 keV total Error = 0.005478
+Asymm2011 = -0.122392
+Asymm2012 = -0.122921
+Total Statistical Error: 0.003860
+Total Systematic Error: 0.003888
+****************************
+210-570 keV total Error = 0.005457
+Asymm2011 = -0.122535
+Asymm2012 = -0.122923
+Total Statistical Error: 0.003826
+Total Systematic Error: 0.003891
+****************************
+210-580 keV total Error = 0.005437
+Asymm2011 = -0.122477
+Asymm2012 = -0.123040
+Total Statistical Error: 0.003798
+Total Systematic Error: 0.003891
+****************************
+210-590 keV total Error = 0.005425
+Asymm2011 = -0.122440
+Asymm2012 = -0.122916
+Total Statistical Error: 0.003776
+Total Systematic Error: 0.003895
+****************************
+210-600 keV total Error = 0.005409
+Asymm2011 = -0.122550
+Asymm2012 = -0.122987
+Total Statistical Error: 0.003750
+Total Systematic Error: 0.003898
+****************************
+210-610 keV total Error = 0.005397
+Asymm2011 = -0.122571
+Asymm2012 = -0.122928
+Total Statistical Error: 0.003730
+Total Systematic Error: 0.003901
+****************************
+210-620 keV total Error = 0.005389
+Asymm2011 = -0.122579
+Asymm2012 = -0.122927
+Total Statistical Error: 0.003712
+Total Systematic Error: 0.003906
+****************************
+210-630 keV total Error = 0.005378
+Asymm2011 = -0.122664
+Asymm2012 = -0.123035
+Total Statistical Error: 0.003694
+Total Systematic Error: 0.003909
+****************************
+210-640 keV total Error = 0.005369
+Asymm2011 = -0.122697
+Asymm2012 = -0.123080
+Total Statistical Error: 0.003679
+Total Systematic Error: 0.003911
+****************************
+210-650 keV total Error = 0.005362
+Asymm2011 = -0.122731
+Asymm2012 = -0.123113
+Total Statistical Error: 0.003666
+Total Systematic Error: 0.003914
+****************************
+210-660 keV total Error = 0.005358
+Asymm2011 = -0.122678
+Asymm2012 = -0.123164
+Total Statistical Error: 0.003656
+Total Systematic Error: 0.003916
+****************************
+210-670 keV total Error = 0.005357
+Asymm2011 = -0.122676
+Asymm2012 = -0.123124
+Total Statistical Error: 0.003649
+Total Systematic Error: 0.003922
+****************************
+210-680 keV total Error = 0.005353
+Asymm2011 = -0.122668
+Asymm2012 = -0.123132
+Total Statistical Error: 0.003641
+Total Systematic Error: 0.003924
+****************************
+210-690 keV total Error = 0.005351
+Asymm2011 = -0.122678
+Asymm2012 = -0.123120
+Total Statistical Error: 0.003635
+Total Systematic Error: 0.003927
+****************************
+210-700 keV total Error = 0.005350
+Asymm2011 = -0.122647
+Asymm2012 = -0.123212
+Total Statistical Error: 0.003630
+Total Systematic Error: 0.003929
+****************************
+210-710 keV total Error = 0.005348
+Asymm2011 = -0.122652
+Asymm2012 = -0.123216
+Total Statistical Error: 0.003626
+Total Systematic Error: 0.003931
+****************************
+210-720 keV total Error = 0.005348
+Asymm2011 = -0.122651
+Asymm2012 = -0.123205
+Total Statistical Error: 0.003624
+Total Systematic Error: 0.003933
+****************************
+210-730 keV total Error = 0.005348
+Asymm2011 = -0.122643
+Asymm2012 = -0.123207
+Total Statistical Error: 0.003622
+Total Systematic Error: 0.003935
+****************************
+210-740 keV total Error = 0.005347
+Asymm2011 = -0.122654
+Asymm2012 = -0.123222
+Total Statistical Error: 0.003620
+Total Systematic Error: 0.003936
+****************************
+210-750 keV total Error = 0.005348
+Asymm2011 = -0.122656
+Asymm2012 = -0.123181
+Total Statistical Error: 0.003619
+Total Systematic Error: 0.003938
+****************************
+210-760 keV total Error = 0.005348
+Asymm2011 = -0.122656
+Asymm2012 = -0.123164
+Total Statistical Error: 0.003618
+Total Systematic Error: 0.003939
+****************************
+220-530 keV total Error = 0.005586
+Asymm2011 = -0.122438
+Asymm2012 = -0.122950
+Total Statistical Error: 0.004028
+Total Systematic Error: 0.003870
+****************************
+220-540 keV total Error = 0.005553
+Asymm2011 = -0.122549
+Asymm2012 = -0.122821
+Total Statistical Error: 0.003985
+Total Systematic Error: 0.003867
+****************************
+220-550 keV total Error = 0.005525
+Asymm2011 = -0.122552
+Asymm2012 = -0.122904
+Total Statistical Error: 0.003945
+Total Systematic Error: 0.003868
+****************************
+220-560 keV total Error = 0.005499
+Asymm2011 = -0.122499
+Asymm2012 = -0.123036
+Total Statistical Error: 0.003910
+Total Systematic Error: 0.003867
+****************************
+220-570 keV total Error = 0.005476
+Asymm2011 = -0.122644
+Asymm2012 = -0.123035
+Total Statistical Error: 0.003874
+Total Systematic Error: 0.003870
+****************************
+220-580 keV total Error = 0.005456
+Asymm2011 = -0.122583
+Asymm2012 = -0.123154
+Total Statistical Error: 0.003846
+Total Systematic Error: 0.003871
+****************************
+220-590 keV total Error = 0.005443
+Asymm2011 = -0.122544
+Asymm2012 = -0.123025
+Total Statistical Error: 0.003822
+Total Systematic Error: 0.003876
+****************************
+220-600 keV total Error = 0.005427
+Asymm2011 = -0.122656
+Asymm2012 = -0.123097
+Total Statistical Error: 0.003796
+Total Systematic Error: 0.003879
+****************************
+220-610 keV total Error = 0.005415
+Asymm2011 = -0.122676
+Asymm2012 = -0.123036
+Total Statistical Error: 0.003775
+Total Systematic Error: 0.003883
+****************************
+220-620 keV total Error = 0.005406
+Asymm2011 = -0.122683
+Asymm2012 = -0.123033
+Total Statistical Error: 0.003756
+Total Systematic Error: 0.003888
+****************************
+220-630 keV total Error = 0.005395
+Asymm2011 = -0.122769
+Asymm2012 = -0.123143
+Total Statistical Error: 0.003737
+Total Systematic Error: 0.003891
+****************************
+220-640 keV total Error = 0.005386
+Asymm2011 = -0.122802
+Asymm2012 = -0.123188
+Total Statistical Error: 0.003722
+Total Systematic Error: 0.003894
+****************************
+220-650 keV total Error = 0.005379
+Asymm2011 = -0.122836
+Asymm2012 = -0.123222
+Total Statistical Error: 0.003708
+Total Systematic Error: 0.003897
+****************************
+220-660 keV total Error = 0.005374
+Asymm2011 = -0.122781
+Asymm2012 = -0.123273
+Total Statistical Error: 0.003698
+Total Systematic Error: 0.003899
+****************************
+220-670 keV total Error = 0.005373
+Asymm2011 = -0.122779
+Asymm2012 = -0.123232
+Total Statistical Error: 0.003690
+Total Systematic Error: 0.003905
+****************************
+220-680 keV total Error = 0.005370
+Asymm2011 = -0.122770
+Asymm2012 = -0.123240
+Total Statistical Error: 0.003683
+Total Systematic Error: 0.003908
+****************************
+220-690 keV total Error = 0.005367
+Asymm2011 = -0.122780
+Asymm2012 = -0.123227
+Total Statistical Error: 0.003676
+Total Systematic Error: 0.003910
+****************************
+220-700 keV total Error = 0.005366
+Asymm2011 = -0.122748
+Asymm2012 = -0.123322
+Total Statistical Error: 0.003671
+Total Systematic Error: 0.003913
+****************************
+220-710 keV total Error = 0.005364
+Asymm2011 = -0.122753
+Asymm2012 = -0.123325
+Total Statistical Error: 0.003667
+Total Systematic Error: 0.003915
+****************************
+220-720 keV total Error = 0.005364
+Asymm2011 = -0.122752
+Asymm2012 = -0.123313
+Total Statistical Error: 0.003664
+Total Systematic Error: 0.003917
+****************************
+220-730 keV total Error = 0.005364
+Asymm2011 = -0.122743
+Asymm2012 = -0.123315
+Total Statistical Error: 0.003662
+Total Systematic Error: 0.003919
+****************************
+220-740 keV total Error = 0.005364
+Asymm2011 = -0.122755
+Asymm2012 = -0.123331
+Total Statistical Error: 0.003660
+Total Systematic Error: 0.003920
+****************************
+220-750 keV total Error = 0.005364
+Asymm2011 = -0.122756
+Asymm2012 = -0.123289
+Total Statistical Error: 0.003660
+Total Systematic Error: 0.003922
+****************************
+220-760 keV total Error = 0.005365
+Asymm2011 = -0.122756
+Asymm2012 = -0.123271
+Total Statistical Error: 0.003659
+Total Systematic Error: 0.003923
+****************************
+230-540 keV total Error = 0.005586
+Asymm2011 = -0.122463
+Asymm2012 = -0.122699
+Total Statistical Error: 0.004049
+Total Systematic Error: 0.003849
+****************************
+230-550 keV total Error = 0.005557
+Asymm2011 = -0.122467
+Asymm2012 = -0.122788
+Total Statistical Error: 0.004007
+Total Systematic Error: 0.003850
+****************************
+230-560 keV total Error = 0.005530
+Asymm2011 = -0.122414
+Asymm2012 = -0.122925
+Total Statistical Error: 0.003970
+Total Systematic Error: 0.003849
+****************************
+230-570 keV total Error = 0.005506
+Asymm2011 = -0.122565
+Asymm2012 = -0.122926
+Total Statistical Error: 0.003933
+Total Systematic Error: 0.003853
+****************************
+230-580 keV total Error = 0.005485
+Asymm2011 = -0.122503
+Asymm2012 = -0.123050
+Total Statistical Error: 0.003903
+Total Systematic Error: 0.003854
+****************************
+230-590 keV total Error = 0.005472
+Asymm2011 = -0.122464
+Asymm2012 = -0.122919
+Total Statistical Error: 0.003878
+Total Systematic Error: 0.003860
+****************************
+230-600 keV total Error = 0.005455
+Asymm2011 = -0.122580
+Asymm2012 = -0.122994
+Total Statistical Error: 0.003851
+Total Systematic Error: 0.003863
+****************************
+230-610 keV total Error = 0.005442
+Asymm2011 = -0.122602
+Asymm2012 = -0.122933
+Total Statistical Error: 0.003829
+Total Systematic Error: 0.003868
+****************************
+230-620 keV total Error = 0.005433
+Asymm2011 = -0.122610
+Asymm2012 = -0.122931
+Total Statistical Error: 0.003810
+Total Systematic Error: 0.003874
+****************************
+230-630 keV total Error = 0.005421
+Asymm2011 = -0.122699
+Asymm2012 = -0.123045
+Total Statistical Error: 0.003790
+Total Systematic Error: 0.003877
+****************************
+230-640 keV total Error = 0.005412
+Asymm2011 = -0.122733
+Asymm2012 = -0.123092
+Total Statistical Error: 0.003774
+Total Systematic Error: 0.003879
+****************************
+230-650 keV total Error = 0.005405
+Asymm2011 = -0.122768
+Asymm2012 = -0.123127
+Total Statistical Error: 0.003760
+Total Systematic Error: 0.003883
+****************************
+230-660 keV total Error = 0.005400
+Asymm2011 = -0.122712
+Asymm2012 = -0.123181
+Total Statistical Error: 0.003749
+Total Systematic Error: 0.003886
+****************************
+230-670 keV total Error = 0.005398
+Asymm2011 = -0.122711
+Asymm2012 = -0.123139
+Total Statistical Error: 0.003741
+Total Systematic Error: 0.003892
+****************************
+230-680 keV total Error = 0.005395
+Asymm2011 = -0.122701
+Asymm2012 = -0.123147
+Total Statistical Error: 0.003733
+Total Systematic Error: 0.003895
+****************************
+230-690 keV total Error = 0.005392
+Asymm2011 = -0.122713
+Asymm2012 = -0.123134
+Total Statistical Error: 0.003726
+Total Systematic Error: 0.003897
+****************************
+230-700 keV total Error = 0.005391
+Asymm2011 = -0.122679
+Asymm2012 = -0.123231
+Total Statistical Error: 0.003721
+Total Systematic Error: 0.003900
+****************************
+230-710 keV total Error = 0.005389
+Asymm2011 = -0.122685
+Asymm2012 = -0.123235
+Total Statistical Error: 0.003717
+Total Systematic Error: 0.003903
+****************************
+230-720 keV total Error = 0.005389
+Asymm2011 = -0.122684
+Asymm2012 = -0.123223
+Total Statistical Error: 0.003714
+Total Systematic Error: 0.003905
+****************************
+230-730 keV total Error = 0.005389
+Asymm2011 = -0.122675
+Asymm2012 = -0.123225
+Total Statistical Error: 0.003712
+Total Systematic Error: 0.003907
+****************************
+230-740 keV total Error = 0.005388
+Asymm2011 = -0.122687
+Asymm2012 = -0.123242
+Total Statistical Error: 0.003710
+Total Systematic Error: 0.003908
+****************************
+230-750 keV total Error = 0.005389
+Asymm2011 = -0.122689
+Asymm2012 = -0.123198
+Total Statistical Error: 0.003709
+Total Systematic Error: 0.003910
+****************************
+230-760 keV total Error = 0.005389
+Asymm2011 = -0.122688
+Asymm2012 = -0.123180
+Total Statistical Error: 0.003708
+Total Systematic Error: 0.003911
+****************************
+240-550 keV total Error = 0.005594
+Asymm2011 = -0.122466
+Asymm2012 = -0.122759
+Total Statistical Error: 0.004072
+Total Systematic Error: 0.003836
+****************************
+240-560 keV total Error = 0.005565
+Asymm2011 = -0.122411
+Asymm2012 = -0.122902
+Total Statistical Error: 0.004033
+Total Systematic Error: 0.003835
+****************************
+240-570 keV total Error = 0.005540
+Asymm2011 = -0.122567
+Asymm2012 = -0.122904
+Total Statistical Error: 0.003994
+Total Systematic Error: 0.003840
+****************************
+240-580 keV total Error = 0.005519
+Asymm2011 = -0.122503
+Asymm2012 = -0.123032
+Total Statistical Error: 0.003963
+Total Systematic Error: 0.003841
+****************************
+240-590 keV total Error = 0.005504
+Asymm2011 = -0.122463
+Asymm2012 = -0.122897
+Total Statistical Error: 0.003937
+Total Systematic Error: 0.003847
+****************************
+240-600 keV total Error = 0.005486
+Asymm2011 = -0.122582
+Asymm2012 = -0.122975
+Total Statistical Error: 0.003908
+Total Systematic Error: 0.003851
+****************************
+240-610 keV total Error = 0.005474
+Asymm2011 = -0.122605
+Asymm2012 = -0.122911
+Total Statistical Error: 0.003885
+Total Systematic Error: 0.003856
+****************************
+240-620 keV total Error = 0.005464
+Asymm2011 = -0.122613
+Asymm2012 = -0.122910
+Total Statistical Error: 0.003865
+Total Systematic Error: 0.003862
+****************************
+240-630 keV total Error = 0.005452
+Asymm2011 = -0.122705
+Asymm2012 = -0.123027
+Total Statistical Error: 0.003844
+Total Systematic Error: 0.003866
+****************************
+240-640 keV total Error = 0.005442
+Asymm2011 = -0.122740
+Asymm2012 = -0.123076
+Total Statistical Error: 0.003828
+Total Systematic Error: 0.003869
+****************************
+240-650 keV total Error = 0.005434
+Asymm2011 = -0.122776
+Asymm2012 = -0.123112
+Total Statistical Error: 0.003813
+Total Systematic Error: 0.003872
+****************************
+240-660 keV total Error = 0.005429
+Asymm2011 = -0.122719
+Asymm2012 = -0.123167
+Total Statistical Error: 0.003802
+Total Systematic Error: 0.003876
+****************************
+240-670 keV total Error = 0.005427
+Asymm2011 = -0.122717
+Asymm2012 = -0.123124
+Total Statistical Error: 0.003793
+Total Systematic Error: 0.003882
+****************************
+240-680 keV total Error = 0.005424
+Asymm2011 = -0.122707
+Asymm2012 = -0.123133
+Total Statistical Error: 0.003785
+Total Systematic Error: 0.003885
+****************************
+240-690 keV total Error = 0.005421
+Asymm2011 = -0.122719
+Asymm2012 = -0.123120
+Total Statistical Error: 0.003778
+Total Systematic Error: 0.003888
+****************************
+240-700 keV total Error = 0.005419
+Asymm2011 = -0.122685
+Asymm2012 = -0.123220
+Total Statistical Error: 0.003773
+Total Systematic Error: 0.003891
+****************************
+240-710 keV total Error = 0.005418
+Asymm2011 = -0.122690
+Asymm2012 = -0.123223
+Total Statistical Error: 0.003768
+Total Systematic Error: 0.003893
+****************************
+240-720 keV total Error = 0.005418
+Asymm2011 = -0.122689
+Asymm2012 = -0.123211
+Total Statistical Error: 0.003765
+Total Systematic Error: 0.003895
+****************************
+240-730 keV total Error = 0.005418
+Asymm2011 = -0.122680
+Asymm2012 = -0.123213
+Total Statistical Error: 0.003763
+Total Systematic Error: 0.003898
+****************************
+240-740 keV total Error = 0.005417
+Asymm2011 = -0.122692
+Asymm2012 = -0.123230
+Total Statistical Error: 0.003761
+Total Systematic Error: 0.003899
+****************************
+240-750 keV total Error = 0.005418
+Asymm2011 = -0.122694
+Asymm2012 = -0.123186
+Total Statistical Error: 0.003760
+Total Systematic Error: 0.003901
+****************************
+240-760 keV total Error = 0.005418
+Asymm2011 = -0.122694
+Asymm2012 = -0.123167
+Total Statistical Error: 0.003759
+Total Systematic Error: 0.003902
+****************************
+250-560 keV total Error = 0.005606
+Asymm2011 = -0.122502
+Asymm2012 = -0.123017
+Total Statistical Error: 0.004097
+Total Systematic Error: 0.003826
+****************************
+250-570 keV total Error = 0.005580
+Asymm2011 = -0.122662
+Asymm2012 = -0.123016
+Total Statistical Error: 0.004057
+Total Systematic Error: 0.003831
+****************************
+250-580 keV total Error = 0.005557
+Asymm2011 = -0.122594
+Asymm2012 = -0.123147
+Total Statistical Error: 0.004024
+Total Systematic Error: 0.003833
+****************************
+250-590 keV total Error = 0.005542
+Asymm2011 = -0.122552
+Asymm2012 = -0.123006
+Total Statistical Error: 0.003997
+Total Systematic Error: 0.003839
+****************************
+250-600 keV total Error = 0.005523
+Asymm2011 = -0.122674
+Asymm2012 = -0.123085
+Total Statistical Error: 0.003966
+Total Systematic Error: 0.003843
+****************************
+250-610 keV total Error = 0.005510
+Asymm2011 = -0.122695
+Asymm2012 = -0.123018
+Total Statistical Error: 0.003943
+Total Systematic Error: 0.003849
+****************************
+250-620 keV total Error = 0.005499
+Asymm2011 = -0.122703
+Asymm2012 = -0.123015
+Total Statistical Error: 0.003922
+Total Systematic Error: 0.003855
+****************************
+250-630 keV total Error = 0.005487
+Asymm2011 = -0.122797
+Asymm2012 = -0.123136
+Total Statistical Error: 0.003900
+Total Systematic Error: 0.003859
+****************************
+250-640 keV total Error = 0.005476
+Asymm2011 = -0.122832
+Asymm2012 = -0.123185
+Total Statistical Error: 0.003882
+Total Systematic Error: 0.003862
+****************************
+250-650 keV total Error = 0.005468
+Asymm2011 = -0.122869
+Asymm2012 = -0.123221
+Total Statistical Error: 0.003867
+Total Systematic Error: 0.003866
+****************************
+250-660 keV total Error = 0.005463
+Asymm2011 = -0.122809
+Asymm2012 = -0.123278
+Total Statistical Error: 0.003856
+Total Systematic Error: 0.003870
+****************************
+250-670 keV total Error = 0.005461
+Asymm2011 = -0.122807
+Asymm2012 = -0.123233
+Total Statistical Error: 0.003846
+Total Systematic Error: 0.003876
+****************************
+250-680 keV total Error = 0.005457
+Asymm2011 = -0.122796
+Asymm2012 = -0.123241
+Total Statistical Error: 0.003838
+Total Systematic Error: 0.003880
+****************************
+250-690 keV total Error = 0.005454
+Asymm2011 = -0.122808
+Asymm2012 = -0.123228
+Total Statistical Error: 0.003831
+Total Systematic Error: 0.003882
+****************************
+250-700 keV total Error = 0.005452
+Asymm2011 = -0.122772
+Asymm2012 = -0.123330
+Total Statistical Error: 0.003825
+Total Systematic Error: 0.003886
+****************************
+250-710 keV total Error = 0.005451
+Asymm2011 = -0.122778
+Asymm2012 = -0.123333
+Total Statistical Error: 0.003820
+Total Systematic Error: 0.003888
+****************************
+250-720 keV total Error = 0.005450
+Asymm2011 = -0.122777
+Asymm2012 = -0.123321
+Total Statistical Error: 0.003817
+Total Systematic Error: 0.003890
+****************************
+250-730 keV total Error = 0.005450
+Asymm2011 = -0.122767
+Asymm2012 = -0.123323
+Total Statistical Error: 0.003815
+Total Systematic Error: 0.003893
+****************************
+250-740 keV total Error = 0.005450
+Asymm2011 = -0.122780
+Asymm2012 = -0.123340
+Total Statistical Error: 0.003813
+Total Systematic Error: 0.003894
+****************************
+250-750 keV total Error = 0.005451
+Asymm2011 = -0.122782
+Asymm2012 = -0.123294
+Total Statistical Error: 0.003812
+Total Systematic Error: 0.003896
+****************************
+250-760 keV total Error = 0.005451
+Asymm2011 = -0.122781
+Asymm2012 = -0.123275
+Total Statistical Error: 0.003811
+Total Systematic Error: 0.003897
+****************************
+260-570 keV total Error = 0.005628
+Asymm2011 = -0.122514
+Asymm2012 = -0.123094
+Total Statistical Error: 0.004130
+Total Systematic Error: 0.003823
+****************************
+260-580 keV total Error = 0.005604
+Asymm2011 = -0.122446
+Asymm2012 = -0.123228
+Total Statistical Error: 0.004095
+Total Systematic Error: 0.003826
+****************************
+260-590 keV total Error = 0.005588
+Asymm2011 = -0.122405
+Asymm2012 = -0.123081
+Total Statistical Error: 0.004067
+Total Systematic Error: 0.003833
+****************************
+260-600 keV total Error = 0.005568
+Asymm2011 = -0.122533
+Asymm2012 = -0.123161
+Total Statistical Error: 0.004035
+Total Systematic Error: 0.003837
+****************************
+260-610 keV total Error = 0.005554
+Asymm2011 = -0.122557
+Asymm2012 = -0.123091
+Total Statistical Error: 0.004010
+Total Systematic Error: 0.003842
+****************************
+260-620 keV total Error = 0.005543
+Asymm2011 = -0.122566
+Asymm2012 = -0.123088
+Total Statistical Error: 0.003988
+Total Systematic Error: 0.003849
+****************************
+260-630 keV total Error = 0.005529
+Asymm2011 = -0.122664
+Asymm2012 = -0.123212
+Total Statistical Error: 0.003965
+Total Systematic Error: 0.003853
+****************************
+260-640 keV total Error = 0.005518
+Asymm2011 = -0.122702
+Asymm2012 = -0.123262
+Total Statistical Error: 0.003947
+Total Systematic Error: 0.003857
+****************************
+260-650 keV total Error = 0.005510
+Asymm2011 = -0.122741
+Asymm2012 = -0.123299
+Total Statistical Error: 0.003931
+Total Systematic Error: 0.003861
+****************************
+260-660 keV total Error = 0.005504
+Asymm2011 = -0.122680
+Asymm2012 = -0.123357
+Total Statistical Error: 0.003919
+Total Systematic Error: 0.003865
+****************************
+260-670 keV total Error = 0.005502
+Asymm2011 = -0.122678
+Asymm2012 = -0.123310
+Total Statistical Error: 0.003909
+Total Systematic Error: 0.003872
+****************************
+260-680 keV total Error = 0.005498
+Asymm2011 = -0.122668
+Asymm2012 = -0.123318
+Total Statistical Error: 0.003900
+Total Systematic Error: 0.003875
+****************************
+260-690 keV total Error = 0.005495
+Asymm2011 = -0.122681
+Asymm2012 = -0.123304
+Total Statistical Error: 0.003893
+Total Systematic Error: 0.003878
+****************************
+260-700 keV total Error = 0.005493
+Asymm2011 = -0.122645
+Asymm2012 = -0.123409
+Total Statistical Error: 0.003886
+Total Systematic Error: 0.003881
+****************************
+260-710 keV total Error = 0.005491
+Asymm2011 = -0.122650
+Asymm2012 = -0.123413
+Total Statistical Error: 0.003882
+Total Systematic Error: 0.003884
+****************************
+260-720 keV total Error = 0.005491
+Asymm2011 = -0.122650
+Asymm2012 = -0.123400
+Total Statistical Error: 0.003878
+Total Systematic Error: 0.003887
+****************************
+260-730 keV total Error = 0.005491
+Asymm2011 = -0.122640
+Asymm2012 = -0.123402
+Total Statistical Error: 0.003876
+Total Systematic Error: 0.003889
+****************************
+260-740 keV total Error = 0.005490
+Asymm2011 = -0.122653
+Asymm2012 = -0.123419
+Total Statistical Error: 0.003873
+Total Systematic Error: 0.003890
+****************************
+260-750 keV total Error = 0.005491
+Asymm2011 = -0.122655
+Asymm2012 = -0.123372
+Total Statistical Error: 0.003872
+Total Systematic Error: 0.003893
+****************************
+260-760 keV total Error = 0.005491
+Asymm2011 = -0.122654
+Asymm2012 = -0.123352
+Total Statistical Error: 0.003872
+Total Systematic Error: 0.003893
+****************************
+270-580 keV total Error = 0.005653
+Asymm2011 = -0.122534
+Asymm2012 = -0.123062
+Total Statistical Error: 0.004169
+Total Systematic Error: 0.003818
+****************************
+270-590 keV total Error = 0.005636
+Asymm2011 = -0.122489
+Asymm2012 = -0.122911
+Total Statistical Error: 0.004139
+Total Systematic Error: 0.003826
+****************************
+270-600 keV total Error = 0.005615
+Asymm2011 = -0.122620
+Asymm2012 = -0.122997
+Total Statistical Error: 0.004105
+Total Systematic Error: 0.003830
+****************************
+270-610 keV total Error = 0.005600
+Asymm2011 = -0.122645
+Asymm2012 = -0.122927
+Total Statistical Error: 0.004079
+Total Systematic Error: 0.003836
+****************************
+270-620 keV total Error = 0.005588
+Asymm2011 = -0.122653
+Asymm2012 = -0.122925
+Total Statistical Error: 0.004056
+Total Systematic Error: 0.003844
+****************************
+270-630 keV total Error = 0.005573
+Asymm2011 = -0.122754
+Asymm2012 = -0.123055
+Total Statistical Error: 0.004032
+Total Systematic Error: 0.003848
+****************************
+270-640 keV total Error = 0.005562
+Asymm2011 = -0.122792
+Asymm2012 = -0.123108
+Total Statistical Error: 0.004012
+Total Systematic Error: 0.003852
+****************************
+270-650 keV total Error = 0.005553
+Asymm2011 = -0.122831
+Asymm2012 = -0.123148
+Total Statistical Error: 0.003995
+Total Systematic Error: 0.003856
+****************************
+270-660 keV total Error = 0.005547
+Asymm2011 = -0.122768
+Asymm2012 = -0.123208
+Total Statistical Error: 0.003983
+Total Systematic Error: 0.003860
+****************************
+270-670 keV total Error = 0.005544
+Asymm2011 = -0.122766
+Asymm2012 = -0.123161
+Total Statistical Error: 0.003973
+Total Systematic Error: 0.003867
+****************************
+270-680 keV total Error = 0.005540
+Asymm2011 = -0.122755
+Asymm2012 = -0.123170
+Total Statistical Error: 0.003963
+Total Systematic Error: 0.003871
+****************************
+270-690 keV total Error = 0.005537
+Asymm2011 = -0.122767
+Asymm2012 = -0.123156
+Total Statistical Error: 0.003955
+Total Systematic Error: 0.003874
+****************************
+270-700 keV total Error = 0.005534
+Asymm2011 = -0.122730
+Asymm2012 = -0.123265
+Total Statistical Error: 0.003949
+Total Systematic Error: 0.003878
+****************************
+270-710 keV total Error = 0.005533
+Asymm2011 = -0.122735
+Asymm2012 = -0.123269
+Total Statistical Error: 0.003944
+Total Systematic Error: 0.003880
+****************************
+270-720 keV total Error = 0.005532
+Asymm2011 = -0.122735
+Asymm2012 = -0.123256
+Total Statistical Error: 0.003940
+Total Systematic Error: 0.003883
+****************************
+270-730 keV total Error = 0.005532
+Asymm2011 = -0.122724
+Asymm2012 = -0.123258
+Total Statistical Error: 0.003938
+Total Systematic Error: 0.003885
+****************************
+270-740 keV total Error = 0.005531
+Asymm2011 = -0.122738
+Asymm2012 = -0.123277
+Total Statistical Error: 0.003935
+Total Systematic Error: 0.003887
+****************************
+270-750 keV total Error = 0.005532
+Asymm2011 = -0.122740
+Asymm2012 = -0.123227
+Total Statistical Error: 0.003934
+Total Systematic Error: 0.003889
+****************************
+270-760 keV total Error = 0.005532
+Asymm2011 = -0.122739
+Asymm2012 = -0.123207
+Total Statistical Error: 0.003934
+Total Systematic Error: 0.003890
+****************************
+280-590 keV total Error = 0.005693
+Asymm2011 = -0.122469
+Asymm2012 = -0.123015
+Total Statistical Error: 0.004216
+Total Systematic Error: 0.003826
+****************************
+280-600 keV total Error = 0.005671
+Asymm2011 = -0.122606
+Asymm2012 = -0.123103
+Total Statistical Error: 0.004180
+Total Systematic Error: 0.003831
+****************************
+280-610 keV total Error = 0.005655
+Asymm2011 = -0.122631
+Asymm2012 = -0.123028
+Total Statistical Error: 0.004153
+Total Systematic Error: 0.003837
+****************************
+280-620 keV total Error = 0.005642
+Asymm2011 = -0.122640
+Asymm2012 = -0.123025
+Total Statistical Error: 0.004128
+Total Systematic Error: 0.003845
+****************************
+280-630 keV total Error = 0.005626
+Asymm2011 = -0.122744
+Asymm2012 = -0.123159
+Total Statistical Error: 0.004103
+Total Systematic Error: 0.003850
+****************************
+280-640 keV total Error = 0.005614
+Asymm2011 = -0.122784
+Asymm2012 = -0.123213
+Total Statistical Error: 0.004082
+Total Systematic Error: 0.003854
+****************************
+280-650 keV total Error = 0.005604
+Asymm2011 = -0.122825
+Asymm2012 = -0.123253
+Total Statistical Error: 0.004065
+Total Systematic Error: 0.003858
+****************************
+280-660 keV total Error = 0.005598
+Asymm2011 = -0.122759
+Asymm2012 = -0.123315
+Total Statistical Error: 0.004052
+Total Systematic Error: 0.003863
+****************************
+280-670 keV total Error = 0.005595
+Asymm2011 = -0.122757
+Asymm2012 = -0.123265
+Total Statistical Error: 0.004041
+Total Systematic Error: 0.003870
+****************************
+280-680 keV total Error = 0.005591
+Asymm2011 = -0.122746
+Asymm2012 = -0.123274
+Total Statistical Error: 0.004031
+Total Systematic Error: 0.003874
+****************************
+280-690 keV total Error = 0.005587
+Asymm2011 = -0.122759
+Asymm2012 = -0.123259
+Total Statistical Error: 0.004023
+Total Systematic Error: 0.003877
+****************************
+280-700 keV total Error = 0.005585
+Asymm2011 = -0.122720
+Asymm2012 = -0.123373
+Total Statistical Error: 0.004016
+Total Systematic Error: 0.003881
+****************************
+280-710 keV total Error = 0.005583
+Asymm2011 = -0.122726
+Asymm2012 = -0.123376
+Total Statistical Error: 0.004010
+Total Systematic Error: 0.003884
+****************************
+280-720 keV total Error = 0.005582
+Asymm2011 = -0.122725
+Asymm2012 = -0.123362
+Total Statistical Error: 0.004007
+Total Systematic Error: 0.003886
+****************************
+280-730 keV total Error = 0.005582
+Asymm2011 = -0.122714
+Asymm2012 = -0.123364
+Total Statistical Error: 0.004004
+Total Systematic Error: 0.003889
+****************************
+280-740 keV total Error = 0.005581
+Asymm2011 = -0.122728
+Asymm2012 = -0.123383
+Total Statistical Error: 0.004001
+Total Systematic Error: 0.003890
+****************************
+280-750 keV total Error = 0.005582
+Asymm2011 = -0.122730
+Asymm2012 = -0.123332
+Total Statistical Error: 0.004000
+Total Systematic Error: 0.003893
+****************************
+280-760 keV total Error = 0.005582
+Asymm2011 = -0.122730
+Asymm2012 = -0.123312
+Total Statistical Error: 0.004000
+Total Systematic Error: 0.003894
+****************************
+290-600 keV total Error = 0.005729
+Asymm2011 = -0.122551
+Asymm2012 = -0.122974
+Total Statistical Error: 0.004264
+Total Systematic Error: 0.003827
+****************************
+290-610 keV total Error = 0.005712
+Asymm2011 = -0.122578
+Asymm2012 = -0.122898
+Total Statistical Error: 0.004235
+Total Systematic Error: 0.003834
+****************************
+290-620 keV total Error = 0.005698
+Asymm2011 = -0.122588
+Asymm2012 = -0.122897
+Total Statistical Error: 0.004208
+Total Systematic Error: 0.003842
+****************************
+290-630 keV total Error = 0.005682
+Asymm2011 = -0.122697
+Asymm2012 = -0.123037
+Total Statistical Error: 0.004182
+Total Systematic Error: 0.003847
+****************************
+290-640 keV total Error = 0.005669
+Asymm2011 = -0.122739
+Asymm2012 = -0.123094
+Total Statistical Error: 0.004160
+Total Systematic Error: 0.003851
+****************************
+290-650 keV total Error = 0.005658
+Asymm2011 = -0.122781
+Asymm2012 = -0.123137
+Total Statistical Error: 0.004141
+Total Systematic Error: 0.003856
+****************************
+290-660 keV total Error = 0.005651
+Asymm2011 = -0.122714
+Asymm2012 = -0.123202
+Total Statistical Error: 0.004127
+Total Systematic Error: 0.003860
+****************************
+290-670 keV total Error = 0.005648
+Asymm2011 = -0.122712
+Asymm2012 = -0.123151
+Total Statistical Error: 0.004116
+Total Systematic Error: 0.003868
+****************************
+290-680 keV total Error = 0.005643
+Asymm2011 = -0.122700
+Asymm2012 = -0.123161
+Total Statistical Error: 0.004105
+Total Systematic Error: 0.003872
+****************************
+290-690 keV total Error = 0.005639
+Asymm2011 = -0.122714
+Asymm2012 = -0.123146
+Total Statistical Error: 0.004097
+Total Systematic Error: 0.003876
+****************************
+290-700 keV total Error = 0.005637
+Asymm2011 = -0.122674
+Asymm2012 = -0.123263
+Total Statistical Error: 0.004089
+Total Systematic Error: 0.003879
+****************************
+290-710 keV total Error = 0.005635
+Asymm2011 = -0.122680
+Asymm2012 = -0.123267
+Total Statistical Error: 0.004084
+Total Systematic Error: 0.003882
+****************************
+290-720 keV total Error = 0.005634
+Asymm2011 = -0.122679
+Asymm2012 = -0.123253
+Total Statistical Error: 0.004080
+Total Systematic Error: 0.003885
+****************************
+290-730 keV total Error = 0.005633
+Asymm2011 = -0.122668
+Asymm2012 = -0.123256
+Total Statistical Error: 0.004077
+Total Systematic Error: 0.003888
+****************************
+290-740 keV total Error = 0.005632
+Asymm2011 = -0.122683
+Asymm2012 = -0.123275
+Total Statistical Error: 0.004074
+Total Systematic Error: 0.003889
+****************************
+290-750 keV total Error = 0.005633
+Asymm2011 = -0.122685
+Asymm2012 = -0.123223
+Total Statistical Error: 0.004073
+Total Systematic Error: 0.003892
+****************************
+290-760 keV total Error = 0.005633
+Asymm2011 = -0.122684
+Asymm2012 = -0.123201
+Total Statistical Error: 0.004072
+Total Systematic Error: 0.003893
+****************************
+300-610 keV total Error = 0.005771
+Asymm2011 = -0.122776
+Asymm2012 = -0.122949
+Total Statistical Error: 0.004314
+Total Systematic Error: 0.003833
+****************************
+300-620 keV total Error = 0.005756
+Asymm2011 = -0.122784
+Asymm2012 = -0.122947
+Total Statistical Error: 0.004287
+Total Systematic Error: 0.003842
+****************************
+300-630 keV total Error = 0.005739
+Asymm2011 = -0.122894
+Asymm2012 = -0.123092
+Total Statistical Error: 0.004258
+Total Systematic Error: 0.003847
+****************************
+300-640 keV total Error = 0.005725
+Asymm2011 = -0.122936
+Asymm2012 = -0.123151
+Total Statistical Error: 0.004235
+Total Systematic Error: 0.003851
+****************************
+300-650 keV total Error = 0.005713
+Asymm2011 = -0.122978
+Asymm2012 = -0.123195
+Total Statistical Error: 0.004215
+Total Systematic Error: 0.003857
+****************************
+300-660 keV total Error = 0.005706
+Asymm2011 = -0.122907
+Asymm2012 = -0.123262
+Total Statistical Error: 0.004201
+Total Systematic Error: 0.003861
+****************************
+300-670 keV total Error = 0.005702
+Asymm2011 = -0.122903
+Asymm2012 = -0.123209
+Total Statistical Error: 0.004189
+Total Systematic Error: 0.003869
+****************************
+300-680 keV total Error = 0.005697
+Asymm2011 = -0.122891
+Asymm2012 = -0.123219
+Total Statistical Error: 0.004178
+Total Systematic Error: 0.003873
+****************************
+300-690 keV total Error = 0.005693
+Asymm2011 = -0.122904
+Asymm2012 = -0.123203
+Total Statistical Error: 0.004168
+Total Systematic Error: 0.003877
+****************************
+300-700 keV total Error = 0.005690
+Asymm2011 = -0.122861
+Asymm2012 = -0.123325
+Total Statistical Error: 0.004161
+Total Systematic Error: 0.003881
+****************************
+300-710 keV total Error = 0.005688
+Asymm2011 = -0.122867
+Asymm2012 = -0.123329
+Total Statistical Error: 0.004155
+Total Systematic Error: 0.003884
+****************************
+300-720 keV total Error = 0.005687
+Asymm2011 = -0.122866
+Asymm2012 = -0.123314
+Total Statistical Error: 0.004151
+Total Systematic Error: 0.003887
+****************************
+300-730 keV total Error = 0.005686
+Asymm2011 = -0.122855
+Asymm2012 = -0.123317
+Total Statistical Error: 0.004148
+Total Systematic Error: 0.003890
+****************************
+300-740 keV total Error = 0.005685
+Asymm2011 = -0.122869
+Asymm2012 = -0.123337
+Total Statistical Error: 0.004145
+Total Systematic Error: 0.003892
+****************************
+300-750 keV total Error = 0.005686
+Asymm2011 = -0.122872
+Asymm2012 = -0.123282
+Total Statistical Error: 0.004144
+Total Systematic Error: 0.003894
+****************************
+300-760 keV total Error = 0.005686
+Asymm2011 = -0.122871
+Asymm2012 = -0.123260
+Total Statistical Error: 0.004143
+Total Systematic Error: 0.003895
+****************************
+310-620 keV total Error = 0.005828
+Asymm2011 = -0.122762
+Asymm2012 = -0.122628
+Total Statistical Error: 0.004380
+Total Systematic Error: 0.003844
+****************************
+310-630 keV total Error = 0.005809
+Asymm2011 = -0.122878
+Asymm2012 = -0.122782
+Total Statistical Error: 0.004350
+Total Systematic Error: 0.003850
+****************************
+310-640 keV total Error = 0.005793
+Asymm2011 = -0.122921
+Asymm2012 = -0.122847
+Total Statistical Error: 0.004325
+Total Systematic Error: 0.003854
+****************************
+310-650 keV total Error = 0.005781
+Asymm2011 = -0.122965
+Asymm2012 = -0.122896
+Total Statistical Error: 0.004304
+Total Systematic Error: 0.003860
+****************************
+310-660 keV total Error = 0.005773
+Asymm2011 = -0.122891
+Asymm2012 = -0.122968
+Total Statistical Error: 0.004289
+Total Systematic Error: 0.003865
+****************************
+310-670 keV total Error = 0.005769
+Asymm2011 = -0.122887
+Asymm2012 = -0.122914
+Total Statistical Error: 0.004276
+Total Systematic Error: 0.003873
+****************************
+310-680 keV total Error = 0.005763
+Asymm2011 = -0.122874
+Asymm2012 = -0.122926
+Total Statistical Error: 0.004264
+Total Systematic Error: 0.003877
+****************************
+310-690 keV total Error = 0.005759
+Asymm2011 = -0.122888
+Asymm2012 = -0.122911
+Total Statistical Error: 0.004254
+Total Systematic Error: 0.003881
+****************************
+310-700 keV total Error = 0.005755
+Asymm2011 = -0.122844
+Asymm2012 = -0.123039
+Total Statistical Error: 0.004246
+Total Systematic Error: 0.003885
+****************************
+310-710 keV total Error = 0.005753
+Asymm2011 = -0.122851
+Asymm2012 = -0.123044
+Total Statistical Error: 0.004240
+Total Systematic Error: 0.003888
+****************************
+310-720 keV total Error = 0.005752
+Asymm2011 = -0.122849
+Asymm2012 = -0.123029
+Total Statistical Error: 0.004235
+Total Systematic Error: 0.003892
+****************************
+310-730 keV total Error = 0.005751
+Asymm2011 = -0.122837
+Asymm2012 = -0.123032
+Total Statistical Error: 0.004232
+Total Systematic Error: 0.003894
+****************************
+310-740 keV total Error = 0.005750
+Asymm2011 = -0.122852
+Asymm2012 = -0.123054
+Total Statistical Error: 0.004229
+Total Systematic Error: 0.003896
+****************************
+310-750 keV total Error = 0.005751
+Asymm2011 = -0.122855
+Asymm2012 = -0.122997
+Total Statistical Error: 0.004228
+Total Systematic Error: 0.003899
+****************************
+310-760 keV total Error = 0.005751
+Asymm2011 = -0.122854
+Asymm2012 = -0.122974
+Total Statistical Error: 0.004227
+Total Systematic Error: 0.003900
+****************************
+320-630 keV total Error = 0.005875
+Asymm2011 = -0.122957
+Asymm2012 = -0.122751
+Total Statistical Error: 0.004441
+Total Systematic Error: 0.003846
+****************************
+320-640 keV total Error = 0.005859
+Asymm2011 = -0.123002
+Asymm2012 = -0.122819
+Total Statistical Error: 0.004415
+Total Systematic Error: 0.003851
+****************************
+320-650 keV total Error = 0.005846
+Asymm2011 = -0.123047
+Asymm2012 = -0.122870
+Total Statistical Error: 0.004393
+Total Systematic Error: 0.003857
+****************************
+320-660 keV total Error = 0.005837
+Asymm2011 = -0.122969
+Asymm2012 = -0.122946
+Total Statistical Error: 0.004376
+Total Systematic Error: 0.003862
+****************************
+320-670 keV total Error = 0.005832
+Asymm2011 = -0.122965
+Asymm2012 = -0.122890
+Total Statistical Error: 0.004362
+Total Systematic Error: 0.003871
+****************************
+320-680 keV total Error = 0.005826
+Asymm2011 = -0.122951
+Asymm2012 = -0.122903
+Total Statistical Error: 0.004350
+Total Systematic Error: 0.003875
+****************************
+320-690 keV total Error = 0.005821
+Asymm2011 = -0.122965
+Asymm2012 = -0.122887
+Total Statistical Error: 0.004340
+Total Systematic Error: 0.003879
+****************************
+320-700 keV total Error = 0.005817
+Asymm2011 = -0.122919
+Asymm2012 = -0.123020
+Total Statistical Error: 0.004331
+Total Systematic Error: 0.003883
+****************************
+320-710 keV total Error = 0.005814
+Asymm2011 = -0.122925
+Asymm2012 = -0.123025
+Total Statistical Error: 0.004324
+Total Systematic Error: 0.003887
+****************************
+320-720 keV total Error = 0.005813
+Asymm2011 = -0.122923
+Asymm2012 = -0.123010
+Total Statistical Error: 0.004320
+Total Systematic Error: 0.003890
+****************************
+320-730 keV total Error = 0.005813
+Asymm2011 = -0.122911
+Asymm2012 = -0.123013
+Total Statistical Error: 0.004316
+Total Systematic Error: 0.003893
+****************************
+320-740 keV total Error = 0.005811
+Asymm2011 = -0.122926
+Asymm2012 = -0.123036
+Total Statistical Error: 0.004313
+Total Systematic Error: 0.003895
+****************************
+320-750 keV total Error = 0.005812
+Asymm2011 = -0.122929
+Asymm2012 = -0.122976
+Total Statistical Error: 0.004312
+Total Systematic Error: 0.003897
+****************************
+320-760 keV total Error = 0.005812
+Asymm2011 = -0.122928
+Asymm2012 = -0.122952
+Total Statistical Error: 0.004311
+Total Systematic Error: 0.003899
+****************************
+330-640 keV total Error = 0.005941
+Asymm2011 = -0.122845
+Asymm2012 = -0.122589
+Total Statistical Error: 0.004521
+Total Systematic Error: 0.003854
+****************************
+330-650 keV total Error = 0.005926
+Asymm2011 = -0.122893
+Asymm2012 = -0.122644
+Total Statistical Error: 0.004496
+Total Systematic Error: 0.003861
+****************************
+330-660 keV total Error = 0.005916
+Asymm2011 = -0.122813
+Asymm2012 = -0.122725
+Total Statistical Error: 0.004479
+Total Systematic Error: 0.003866
+****************************
+330-670 keV total Error = 0.005911
+Asymm2011 = -0.122810
+Asymm2012 = -0.122668
+Total Statistical Error: 0.004464
+Total Systematic Error: 0.003875
+****************************
+330-680 keV total Error = 0.005904
+Asymm2011 = -0.122796
+Asymm2012 = -0.122682
+Total Statistical Error: 0.004451
+Total Systematic Error: 0.003880
+****************************
+330-690 keV total Error = 0.005899
+Asymm2011 = -0.122811
+Asymm2012 = -0.122667
+Total Statistical Error: 0.004440
+Total Systematic Error: 0.003884
+****************************
+330-700 keV total Error = 0.005895
+Asymm2011 = -0.122764
+Asymm2012 = -0.122807
+Total Statistical Error: 0.004430
+Total Systematic Error: 0.003888
+****************************
+330-710 keV total Error = 0.005892
+Asymm2011 = -0.122771
+Asymm2012 = -0.122813
+Total Statistical Error: 0.004423
+Total Systematic Error: 0.003892
+****************************
+330-720 keV total Error = 0.005890
+Asymm2011 = -0.122770
+Asymm2012 = -0.122798
+Total Statistical Error: 0.004418
+Total Systematic Error: 0.003896
+****************************
+330-730 keV total Error = 0.005890
+Asymm2011 = -0.122757
+Asymm2012 = -0.122801
+Total Statistical Error: 0.004415
+Total Systematic Error: 0.003899
+****************************
+330-740 keV total Error = 0.005888
+Asymm2011 = -0.122773
+Asymm2012 = -0.122825
+Total Statistical Error: 0.004411
+Total Systematic Error: 0.003900
+****************************
+330-750 keV total Error = 0.005889
+Asymm2011 = -0.122776
+Asymm2012 = -0.122763
+Total Statistical Error: 0.004410
+Total Systematic Error: 0.003903
+****************************
+330-760 keV total Error = 0.005889
+Asymm2011 = -0.122775
+Asymm2012 = -0.122739
+Total Statistical Error: 0.004409
+Total Systematic Error: 0.003904
+****************************
+340-650 keV total Error = 0.006006
+Asymm2011 = -0.123219
+Asymm2012 = -0.122492
+Total Statistical Error: 0.004595
+Total Systematic Error: 0.003868
+****************************
+340-660 keV total Error = 0.005995
+Asymm2011 = -0.123132
+Asymm2012 = -0.122578
+Total Statistical Error: 0.004576
+Total Systematic Error: 0.003874
+****************************
+340-670 keV total Error = 0.005989
+Asymm2011 = -0.123127
+Asymm2012 = -0.122519
+Total Statistical Error: 0.004560
+Total Systematic Error: 0.003883
+****************************
+340-680 keV total Error = 0.005982
+Asymm2011 = -0.123110
+Asymm2012 = -0.122535
+Total Statistical Error: 0.004546
+Total Systematic Error: 0.003888
+****************************
+340-690 keV total Error = 0.005976
+Asymm2011 = -0.123125
+Asymm2012 = -0.122520
+Total Statistical Error: 0.004534
+Total Systematic Error: 0.003893
+****************************
+340-700 keV total Error = 0.005971
+Asymm2011 = -0.123074
+Asymm2012 = -0.122667
+Total Statistical Error: 0.004524
+Total Systematic Error: 0.003897
+****************************
+340-710 keV total Error = 0.005968
+Asymm2011 = -0.123080
+Asymm2012 = -0.122674
+Total Statistical Error: 0.004517
+Total Systematic Error: 0.003901
+****************************
+340-720 keV total Error = 0.005966
+Asymm2011 = -0.123078
+Asymm2012 = -0.122658
+Total Statistical Error: 0.004511
+Total Systematic Error: 0.003905
+****************************
+340-730 keV total Error = 0.005966
+Asymm2011 = -0.123064
+Asymm2012 = -0.122662
+Total Statistical Error: 0.004508
+Total Systematic Error: 0.003908
+****************************
+340-740 keV total Error = 0.005964
+Asymm2011 = -0.123081
+Asymm2012 = -0.122687
+Total Statistical Error: 0.004504
+Total Systematic Error: 0.003910
+****************************
+340-750 keV total Error = 0.005965
+Asymm2011 = -0.123084
+Asymm2012 = -0.122623
+Total Statistical Error: 0.004502
+Total Systematic Error: 0.003912
+****************************
+340-760 keV total Error = 0.005965
+Asymm2011 = -0.123083
+Asymm2012 = -0.122597
+Total Statistical Error: 0.004501
+Total Systematic Error: 0.003914
+****************************
+350-660 keV total Error = 0.006084
+Asymm2011 = -0.123081
+Asymm2012 = -0.122720
+Total Statistical Error: 0.004686
+Total Systematic Error: 0.003881
+****************************
+350-670 keV total Error = 0.006077
+Asymm2011 = -0.123076
+Asymm2012 = -0.122657
+Total Statistical Error: 0.004669
+Total Systematic Error: 0.003890
+****************************
+350-680 keV total Error = 0.006069
+Asymm2011 = -0.123059
+Asymm2012 = -0.122673
+Total Statistical Error: 0.004654
+Total Systematic Error: 0.003896
+****************************
+350-690 keV total Error = 0.006062
+Asymm2011 = -0.123074
+Asymm2012 = -0.122656
+Total Statistical Error: 0.004641
+Total Systematic Error: 0.003900
+****************************
+350-700 keV total Error = 0.006057
+Asymm2011 = -0.123021
+Asymm2012 = -0.122810
+Total Statistical Error: 0.004631
+Total Systematic Error: 0.003905
+****************************
+350-710 keV total Error = 0.006054
+Asymm2011 = -0.123028
+Asymm2012 = -0.122817
+Total Statistical Error: 0.004622
+Total Systematic Error: 0.003909
+****************************
+350-720 keV total Error = 0.006052
+Asymm2011 = -0.123026
+Asymm2012 = -0.122800
+Total Statistical Error: 0.004617
+Total Systematic Error: 0.003913
+****************************
+350-730 keV total Error = 0.006051
+Asymm2011 = -0.123011
+Asymm2012 = -0.122804
+Total Statistical Error: 0.004613
+Total Systematic Error: 0.003916
+****************************
+350-740 keV total Error = 0.006049
+Asymm2011 = -0.123029
+Asymm2012 = -0.122830
+Total Statistical Error: 0.004609
+Total Systematic Error: 0.003918
+****************************
+350-750 keV total Error = 0.006050
+Asymm2011 = -0.123032
+Asymm2012 = -0.122762
+Total Statistical Error: 0.004607
+Total Systematic Error: 0.003921
+****************************
+350-760 keV total Error = 0.006050
+Asymm2011 = -0.123031
+Asymm2012 = -0.122735
+Total Statistical Error: 0.004606
+Total Systematic Error: 0.003922
+****************************
+360-670 keV total Error = 0.006171
+Asymm2011 = -0.123034
+Asymm2012 = -0.122892
+Total Statistical Error: 0.004785
+Total Systematic Error: 0.003898
+****************************
+360-680 keV total Error = 0.006162
+Asymm2011 = -0.123017
+Asymm2012 = -0.122907
+Total Statistical Error: 0.004769
+Total Systematic Error: 0.003903
+****************************
+360-690 keV total Error = 0.006155
+Asymm2011 = -0.123033
+Asymm2012 = -0.122888
+Total Statistical Error: 0.004755
+Total Systematic Error: 0.003908
+****************************
+360-700 keV total Error = 0.006149
+Asymm2011 = -0.122977
+Asymm2012 = -0.123049
+Total Statistical Error: 0.004744
+Total Systematic Error: 0.003913
+****************************
+360-710 keV total Error = 0.006145
+Asymm2011 = -0.122985
+Asymm2012 = -0.123055
+Total Statistical Error: 0.004735
+Total Systematic Error: 0.003917
+****************************
+360-720 keV total Error = 0.006143
+Asymm2011 = -0.122983
+Asymm2012 = -0.123036
+Total Statistical Error: 0.004729
+Total Systematic Error: 0.003921
+****************************
+360-730 keV total Error = 0.006142
+Asymm2011 = -0.122967
+Asymm2012 = -0.123040
+Total Statistical Error: 0.004724
+Total Systematic Error: 0.003925
+****************************
+360-740 keV total Error = 0.006140
+Asymm2011 = -0.122986
+Asymm2012 = -0.123067
+Total Statistical Error: 0.004720
+Total Systematic Error: 0.003927
+****************************
+360-750 keV total Error = 0.006140
+Asymm2011 = -0.122989
+Asymm2012 = -0.122996
+Total Statistical Error: 0.004718
+Total Systematic Error: 0.003930
+****************************
+360-760 keV total Error = 0.006140
+Asymm2011 = -0.122988
+Asymm2012 = -0.122967
+Total Statistical Error: 0.004717
+Total Systematic Error: 0.003931
+****************************
+370-680 keV total Error = 0.006263
+Asymm2011 = -0.123048
+Asymm2012 = -0.123162
+Total Statistical Error: 0.004888
+Total Systematic Error: 0.003915
+****************************
+370-690 keV total Error = 0.006254
+Asymm2011 = -0.123065
+Asymm2012 = -0.123141
+Total Statistical Error: 0.004873
+Total Systematic Error: 0.003920
+****************************
+370-700 keV total Error = 0.006248
+Asymm2011 = -0.123006
+Asymm2012 = -0.123309
+Total Statistical Error: 0.004861
+Total Systematic Error: 0.003925
+****************************
+370-710 keV total Error = 0.006243
+Asymm2011 = -0.123014
+Asymm2012 = -0.123314
+Total Statistical Error: 0.004852
+Total Systematic Error: 0.003930
+****************************
+370-720 keV total Error = 0.006241
+Asymm2011 = -0.123011
+Asymm2012 = -0.123294
+Total Statistical Error: 0.004845
+Total Systematic Error: 0.003934
+****************************
+370-730 keV total Error = 0.006240
+Asymm2011 = -0.122995
+Asymm2012 = -0.123297
+Total Statistical Error: 0.004840
+Total Systematic Error: 0.003937
+****************************
+370-740 keV total Error = 0.006237
+Asymm2011 = -0.123015
+Asymm2012 = -0.123325
+Total Statistical Error: 0.004835
+Total Systematic Error: 0.003940
+****************************
+370-750 keV total Error = 0.006238
+Asymm2011 = -0.123018
+Asymm2012 = -0.123250
+Total Statistical Error: 0.004834
+Total Systematic Error: 0.003943
+****************************
+370-760 keV total Error = 0.006238
+Asymm2011 = -0.123017
+Asymm2012 = -0.123220
+Total Statistical Error: 0.004833
+Total Systematic Error: 0.003944
+****************************
+380-690 keV total Error = 0.006369
+Asymm2011 = -0.122911
+Asymm2012 = -0.123132
+Total Statistical Error: 0.005011
+Total Systematic Error: 0.003931
+****************************
+380-700 keV total Error = 0.006361
+Asymm2011 = -0.122850
+Asymm2012 = -0.123309
+Total Statistical Error: 0.004997
+Total Systematic Error: 0.003936
+****************************
+380-710 keV total Error = 0.006356
+Asymm2011 = -0.122859
+Asymm2012 = -0.123315
+Total Statistical Error: 0.004987
+Total Systematic Error: 0.003941
+****************************
+380-720 keV total Error = 0.006353
+Asymm2011 = -0.122857
+Asymm2012 = -0.123293
+Total Statistical Error: 0.004980
+Total Systematic Error: 0.003945
+****************************
+380-730 keV total Error = 0.006352
+Asymm2011 = -0.122840
+Asymm2012 = -0.123297
+Total Statistical Error: 0.004975
+Total Systematic Error: 0.003949
+****************************
+380-740 keV total Error = 0.006349
+Asymm2011 = -0.122861
+Asymm2012 = -0.123327
+Total Statistical Error: 0.004970
+Total Systematic Error: 0.003951
+****************************
+380-750 keV total Error = 0.006350
+Asymm2011 = -0.122865
+Asymm2012 = -0.123247
+Total Statistical Error: 0.004968
+Total Systematic Error: 0.003954
+****************************
+380-760 keV total Error = 0.006349
+Asymm2011 = -0.122864
+Asymm2012 = -0.123215
+Total Statistical Error: 0.004967
+Total Systematic Error: 0.003956
+****************************
+390-700 keV total Error = 0.006472
+Asymm2011 = -0.122732
+Asymm2012 = -0.123754
+Total Statistical Error: 0.005136
+Total Systematic Error: 0.003938
+****************************
+390-710 keV total Error = 0.006466
+Asymm2011 = -0.122741
+Asymm2012 = -0.123758
+Total Statistical Error: 0.005125
+Total Systematic Error: 0.003943
+****************************
+390-720 keV total Error = 0.006463
+Asymm2011 = -0.122740
+Asymm2012 = -0.123734
+Total Statistical Error: 0.005117
+Total Systematic Error: 0.003947
+****************************
+390-730 keV total Error = 0.006461
+Asymm2011 = -0.122722
+Asymm2012 = -0.123737
+Total Statistical Error: 0.005112
+Total Systematic Error: 0.003951
+****************************
+390-740 keV total Error = 0.006458
+Asymm2011 = -0.122745
+Asymm2012 = -0.123767
+Total Statistical Error: 0.005106
+Total Systematic Error: 0.003954
+****************************
+390-750 keV total Error = 0.006458
+Asymm2011 = -0.122749
+Asymm2012 = -0.123683
+Total Statistical Error: 0.005104
+Total Systematic Error: 0.003957
+****************************
+390-760 keV total Error = 0.006458
+Asymm2011 = -0.122748
+Asymm2012 = -0.123649
+Total Statistical Error: 0.005103
+Total Systematic Error: 0.003959
+****************************
+400-710 keV total Error = 0.006595
+Asymm2011 = -0.122864
+Asymm2012 = -0.123460
+Total Statistical Error: 0.005276
+Total Systematic Error: 0.003956
+****************************
+400-720 keV total Error = 0.006591
+Asymm2011 = -0.122862
+Asymm2012 = -0.123436
+Total Statistical Error: 0.005268
+Total Systematic Error: 0.003961
+****************************
+400-730 keV total Error = 0.006589
+Asymm2011 = -0.122843
+Asymm2012 = -0.123439
+Total Statistical Error: 0.005262
+Total Systematic Error: 0.003966
+****************************
+400-740 keV total Error = 0.006585
+Asymm2011 = -0.122867
+Asymm2012 = -0.123472
+Total Statistical Error: 0.005255
+Total Systematic Error: 0.003968
+****************************
+400-750 keV total Error = 0.006586
+Asymm2011 = -0.122871
+Asymm2012 = -0.123384
+Total Statistical Error: 0.005253
+Total Systematic Error: 0.003972
+****************************
+400-760 keV total Error = 0.006586
+Asymm2011 = -0.122869
+Asymm2012 = -0.123347
+Total Statistical Error: 0.005252
+Total Systematic Error: 0.003973
+****************************
+410-720 keV total Error = 0.006728
+Asymm2011 = -0.122809
+Asymm2012 = -0.123646
+Total Statistical Error: 0.005428
+Total Systematic Error: 0.003976
+****************************
+410-730 keV total Error = 0.006726
+Asymm2011 = -0.122789
+Asymm2012 = -0.123649
+Total Statistical Error: 0.005421
+Total Systematic Error: 0.003980
+****************************
+410-740 keV total Error = 0.006722
+Asymm2011 = -0.122814
+Asymm2012 = -0.123684
+Total Statistical Error: 0.005415
+Total Systematic Error: 0.003983
+****************************
+410-750 keV total Error = 0.006722
+Asymm2011 = -0.122818
+Asymm2012 = -0.123589
+Total Statistical Error: 0.005413
+Total Systematic Error: 0.003987
+****************************
+410-760 keV total Error = 0.006722
+Asymm2011 = -0.122817
+Asymm2012 = -0.123550
+Total Statistical Error: 0.005411
+Total Systematic Error: 0.003988
+****************************
+420-730 keV total Error = 0.006877
+Asymm2011 = -0.122667
+Asymm2012 = -0.123892
+Total Statistical Error: 0.005596
+Total Systematic Error: 0.003997
+****************************
+420-740 keV total Error = 0.006872
+Asymm2011 = -0.122694
+Asymm2012 = -0.123928
+Total Statistical Error: 0.005589
+Total Systematic Error: 0.003999
+****************************
+420-750 keV total Error = 0.006873
+Asymm2011 = -0.122699
+Asymm2012 = -0.123827
+Total Statistical Error: 0.005586
+Total Systematic Error: 0.004003
+****************************
+420-760 keV total Error = 0.006872
+Asymm2011 = -0.122697
+Asymm2012 = -0.123786
+Total Statistical Error: 0.005584
+Total Systematic Error: 0.004005
+****************************
+430-740 keV total Error = 0.007032
+Asymm2011 = -0.122575
+Asymm2012 = -0.124582
+Total Statistical Error: 0.005770
+Total Systematic Error: 0.004019
+****************************
+430-750 keV total Error = 0.007032
+Asymm2011 = -0.122580
+Asymm2012 = -0.124473
+Total Statistical Error: 0.005768
+Total Systematic Error: 0.004024
+****************************
+430-760 keV total Error = 0.007032
+Asymm2011 = -0.122579
+Asymm2012 = -0.124428
+Total Statistical Error: 0.005765
+Total Systematic Error: 0.004026
+****************************
+440-750 keV total Error = 0.007194
+Asymm2011 = -0.122886
+Asymm2012 = -0.124748
+Total Statistical Error: 0.005952
+Total Systematic Error: 0.004041
+****************************
+440-760 keV total Error = 0.007194
+Asymm2011 = -0.122885
+Asymm2012 = -0.124700
+Total Statistical Error: 0.005950
+Total Systematic Error: 0.004043
+****************************
+450-760 keV total Error = 0.007385
+Asymm2011 = -0.122812
+Asymm2012 = -0.125037
+Total Statistical Error: 0.006165
+Total Systematic Error: 0.004066
