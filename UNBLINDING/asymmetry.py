@@ -694,11 +694,11 @@ def minimizerCombo():
 
                 
                 ofile.write("****************************\n")
-                ofile.write("%i-%i keV total Error = %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
-                ofile.write("Asymm2011 = %f\n"%a2011.A0)
-                ofile.write("Asymm2012 = %f\n"%a2012.A0)
-                ofile.write("Total Statistical Error: %f\n"%totalStat)
-                ofile.write("Total Systematic Error: %f\n"%totalSyst)
+                ofile.write("%i-%i_keV_total_Error= %f\n"%(getBinEnergyLowEdge(lowBin),getBinEnergyUpperEdge(highBin),errSum))
+                ofile.write("Asymm2011= %f\n"%a2011.A0)
+                ofile.write("Asymm2012= %f\n"%a2012.A0)
+                ofile.write("Total_Statistical_Error: %f\n"%totalStat)
+                ofile.write("Total_Systematic_Error: %f\n"%totalSyst)
 
                 
                 if errSum < minErr:
