@@ -3,7 +3,7 @@
 #include <vector>
 
 // year = 2011 or 2012
-void TwoDim_ErrorPlotter(Int_t year) {
+void CombinedTwoDim_ErrorPlotter() {
 
   gStyle->SetTitleSize(0.08,"t");
   gStyle->SetPadLeftMargin(0.15);
@@ -35,7 +35,6 @@ void TwoDim_ErrorPlotter(Int_t year) {
   //gStyle->SetTitleBorderSize(0);
 
   std::vector < Double_t > asymm;
-  std::vector < Double_t > energy;
   std::vector < Double_t > statistics;
   std::vector < Double_t > sim;
   std::vector < Double_t > total;
@@ -61,28 +60,38 @@ void TwoDim_ErrorPlotter(Int_t year) {
   Double_t as_minval=1000., as_maxval=-1000.;
   Double_t en_minval=1000., en_maxval=-1000.;
   Double_t stat_minval=1000., stat_maxval=-1000.;
-  Double_t mc_minval=1000., mc_maxval=-1000.;
+  Double_t syst_minval=1000., syst_maxval=-1000.;
   Double_t tot_minval=1000., tot_maxval=-1000.;
 
-  ifstream infile(TString::Format("%i_Uncertainties.txt",year).Data());
+  std::vector<Double_t> minPlotEn;
+  std::vector<Double_t> minPlotStat;
+  std::vector<Double_t> minPlotSyst;
+  std::vector<Double_t> minPlotTot;
+  
+  ifstream infile(TString::Format("CombinedUncertainties.txt").Data());
 
   std::string stars = "";
   std::string windowStr = "";
   std::string txtHold = "";
-  Double_t asymm_hold,en_hold,stat_hold,mc_hold,tot_hold;
+  Double_t asymm_hold,stat_hold,syst_hold,tot_hold;
   
   while ( infile >> stars 
+	  >> windowStr >> tot_hold
 	  >> txtHold >> asymm_hold
-	  >> windowStr
-	  >> txtHold >> tot_hold  
-	  >> txtHold >> en_hold
+	  >> txtHold >> asymm_hold
 	  >> txtHold >> stat_hold
-	  >> txtHold >> mc_hold )  {
+	  >> txtHold >> syst_hold )  {
 
     Double_t upperWindow = atof(windowStr.substr(4,3).c_str());
     Double_t lowerWindow = atof(windowStr.substr(0,3).c_str());
 
-    
+
+    if ( lowerWindow==190. ) {
+      minPlotEn.push_back(upperWindow);
+      minPlotStat.push_back(stat_hold);
+      minPlotSyst.push_back(syst_hold);
+      minPlotTot.push_back(tot_hold);
+    }
     if ( lowerWindow==150. ) {
       std::cout << lowerWindow << endl;
       
@@ -107,18 +116,15 @@ void TwoDim_ErrorPlotter(Int_t year) {
     }
     
     tot_hold*=100.;
-    en_hold*=100.;
-    mc_hold*=100.;
+    syst_hold*=100.;
     stat_hold*=100.;
 
     if (as_minval>asymm_hold) as_minval=asymm_hold;
     if (as_maxval<asymm_hold) as_maxval=asymm_hold;
-    if (en_minval>en_hold) en_minval=en_hold;
-    if (en_maxval<en_hold) en_maxval=en_hold;
     if (stat_minval>stat_hold) stat_minval=stat_hold;
     if (stat_maxval<stat_hold) stat_maxval=stat_hold;
-    if (mc_minval>mc_hold) mc_minval=mc_hold;
-    if (mc_maxval<mc_hold) mc_maxval=mc_hold;
+    if (syst_minval>syst_hold) syst_minval=syst_hold;
+    if (syst_maxval<syst_hold) syst_maxval=syst_hold;
     if (tot_minval>tot_hold) tot_minval=tot_hold;
     if (tot_maxval<tot_hold) tot_maxval=tot_hold;
     
@@ -126,9 +132,8 @@ void TwoDim_ErrorPlotter(Int_t year) {
     yBinVal.push_back( lowerWindow );
 
     asymm.push_back(asymm_hold);
-    energy.push_back(en_hold);
     statistics.push_back(stat_hold);
-    sim.push_back(mc_hold);
+    sim.push_back(syst_hold);
     total.push_back(tot_hold);
     
   }
@@ -144,13 +149,10 @@ void TwoDim_ErrorPlotter(Int_t year) {
   TH2D *as = new TH2D("as","Asymmetry vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
   
-  TH2D *en = new TH2D("en","Energy Uncertainty vs. Analysis Window",
-		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
-
   TH2D *stat = new TH2D("stat","Statistical Uncertainty vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
 
-  TH2D *mc = new TH2D("mc","Monte Carlo Uncertainty vs. Analysis Window",
+  TH2D *syst = new TH2D("syst","Systematic Uncertainty vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
 
   TH2D *tot = new TH2D("tot","Total Uncertainty vs. Analysis Window",
@@ -163,9 +165,8 @@ void TwoDim_ErrorPlotter(Int_t year) {
 
     as->SetBinContent(xbin,ybin,-asymm[bin]);
     as->SetBinError(xbin,ybin,-asymm[bin]*statistics[bin]/100.);
-    en->SetBinContent(xbin,ybin,energy[bin]);
     stat->SetBinContent(xbin,ybin,statistics[bin]);
-    mc->SetBinContent(xbin,ybin,sim[bin]);
+    syst->SetBinContent(xbin,ybin,sim[bin]);
     tot->SetBinContent(xbin,ybin,total[bin]);
 
   }
@@ -181,16 +182,6 @@ void TwoDim_ErrorPlotter(Int_t year) {
   TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nb);*/
 
   gStyle->SetPalette(104);
-  
-  TCanvas *cEn = new TCanvas("cEn","cEn");
-  en->Draw("LEGO20");
-  en->GetXaxis()->SetTitle("Maximum Energy (keV)");
-  en->GetYaxis()->SetTitle("Minimum Energy (keV)");
-  en->GetZaxis()->SetRangeUser(en_minval*0.99,en_maxval);
-  en->GetZaxis()->SetTitle("% Error");
-  en->GetXaxis()->CenterTitle();
-  en->GetYaxis()->CenterTitle();
-  en->GetZaxis()->CenterTitle();  
     
   TCanvas *cStat = new TCanvas("cStat","cStat");
   stat->Draw("lego20");
@@ -202,15 +193,15 @@ void TwoDim_ErrorPlotter(Int_t year) {
   stat->GetYaxis()->CenterTitle();
   stat->GetZaxis()->CenterTitle();
   
-  TCanvas *cMc = new TCanvas("cMc","cMc");
-  mc->Draw("lego20");
-  mc->GetXaxis()->SetTitle("Maximum Energy (keV)");
-  mc->GetYaxis()->SetTitle("Minimum Energy (keV)");
-  mc->GetZaxis()->SetRangeUser(mc_minval*0.99,mc_maxval);
-  mc->GetZaxis()->SetTitle("% Error");
-  mc->GetXaxis()->CenterTitle();
-  mc->GetYaxis()->CenterTitle();
-  mc->GetZaxis()->CenterTitle();
+  TCanvas *cSyst = new TCanvas("cSyst","cSyst");
+  syst->Draw("lego20");
+  syst->GetXaxis()->SetTitle("Maximum Energy (keV)");
+  syst->GetYaxis()->SetTitle("Minimum Energy (keV)");
+  syst->GetZaxis()->SetRangeUser(syst_minval*0.99,syst_maxval);
+  syst->GetZaxis()->SetTitle("% Error");
+  syst->GetXaxis()->CenterTitle();
+  syst->GetYaxis()->CenterTitle();
+  syst->GetZaxis()->CenterTitle();
 
 
   /*Length[1] = tot_minval;
@@ -304,5 +295,24 @@ void TwoDim_ErrorPlotter(Int_t year) {
   g300->SetTitle("Lower Window Edge at 300 keV");
 
   g300->Draw("AP");
-  
+
+
+  TCanvas *c10 = new TCanvas("c10","c10");
+  TGraph *st = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotStat[0]);
+  st->SetLineWidth(2);
+  st->SetLineStyle(1);
+
+  TGraph *sys = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotSyst[0]);
+  sys->SetLineWidth(2);
+  sys->SetLineStyle(2);
+
+  TGraph *t = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotTot[0]);
+  t->SetLineWidth(2);
+  t->SetLineStyle(4);
+
+  TMultiGraph *minplot = new TMultiGraph();
+  minplot->Add(st,"L");
+  minplot->Add(sys,"L");
+  minplot->Add(t,"L");
+  minplot->Draw("A");
 }
