@@ -86,7 +86,7 @@ void CombinedTwoDim_ErrorPlotter() {
     Double_t lowerWindow = atof(windowStr.substr(0,3).c_str());
 
 
-    if ( lowerWindow==190. ) {
+    if ( lowerWindow==180. ) {
       minPlotEn.push_back(upperWindow);
       minPlotStat.push_back(stat_hold*100.);
       minPlotSyst.push_back(syst_hold*100.);
@@ -138,11 +138,11 @@ void CombinedTwoDim_ErrorPlotter() {
     
   }
   Double_t ybinLow = 95.;//495.;
-  Double_t ybinHigh = 495.;//805.;
+  Double_t ybinHigh = 655.;//805.;
   Int_t nbinsY = (ybinHigh-ybinLow)/10.;
 
-  Double_t xbinLow = 495.;//95.;
-  Double_t xbinHigh = 805.;//495;
+  Double_t xbinLow = 195.;//95.;
+  Double_t xbinHigh = 755.;//495;
   Int_t nbinsX = (xbinHigh-xbinLow)/10.;
   
   //Two dimensional plots for each error in minimization
@@ -319,7 +319,7 @@ void CombinedTwoDim_ErrorPlotter() {
   minplot->GetXaxis()->SetTitle("Upper Analysis Cut (keV)");
   minplot->GetYaxis()->SetTitle("#DeltaA/A (%)");				
 
-  TLegend *l = new TLegend(0.6,0.45,0.8,0.65);
+  TLegend *l = new TLegend(0.6,0.65,0.8,0.85);
   l->AddEntry(t,"Total","l");
   l->AddEntry(st,"Statistics","l");
   l->AddEntry(sys,"Systematics","l");
