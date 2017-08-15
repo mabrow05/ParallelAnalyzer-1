@@ -138,6 +138,11 @@ def readBackscCorr(year=2011,anaCh="C",bsType="ALL"):
     return A
 
 
+def calcLambda(A0,A0err):
+    l = (-1.-sqrt(1.-3*A0**2-2*A0))/(3*A0+2)
+    lerr = fabs( ( (3*A0+5.)/((3*A0+2)**2*sqrt(1.-3*A0**2-2*A0)) + 3/(3*A0+2)**2 ) * A0err )
+    return [l,lerr]
+
 
 class uncertaintyHandler:
     
@@ -458,10 +463,13 @@ class uncertaintyHandler:
                               emax,"UnCorr",self.sim)
         AngleCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                                  emax,"DeltaAngle%s"%BStype,self.sim)
+
+        Angle_corr = readAngleCorr(self.year,self.anaChoice,BStype)
+
         
         deltaAngle = (AngleCorr[0]/UnCorr[0]-1.)
         #print("deltaAngle: %f +/- %f"%(deltaAngle/(1.+deltaAngle),fabs(percErrAngle*deltaAngle/(1.+deltaAngle))))
-        return [deltaAngle/(1.+deltaAngle),weightRealStats([self.Angle_corr[1][i]/(1.+self.Angle_corr[0][i]) for i in range(0,len(self.Angle_corr[0]))],self.realAerr,emin,emax)]#fabs(percErrAngle*deltaAngle/(1.+deltaAngle))]
+        return [deltaAngle/(1.+deltaAngle),weightRealStats([Angle_corr[1][i]/(1.+Angle_corr[0][i]) for i in range(0,len(Angle_corr[0]))],self.realAerr,emin,emax)]#fabs(percErrAngle*deltaAngle/(1.+deltaAngle))]
 
 
     def calcBackscCorr(self,emin,emax, BStype="ALL"):
@@ -480,9 +488,11 @@ class uncertaintyHandler:
         BackscCorr = getAsymmetry(self.anaChoice,self.octLow,self.octHigh,emin,
                                   emax,"DeltaBacksc%s"%BStype,self.sim)
         
+        BS_corr = readBackscCorr(self.year,self.anaChoice,BStype)
+        
         deltaBacksc = (BackscCorr[0]/UnCorr[0]-1.)
         #print("deltaBacksc: %f +/- %f"%(deltaBacksc/(1.+deltaBacksc),fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))))
-        return [deltaBacksc/(1.+deltaBacksc),weightRealStats([self.BS_corr[1][i]/(1.+self.BS_corr[0][i]) for i in range(0,len(self.BS_corr[0]))],self.realAerr,emin,emax)]#fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))]
+        return [deltaBacksc/(1.+deltaBacksc),weightRealStats([BS_corr[1][i]/(1.+BS_corr[0][i]) for i in range(0,len(BS_corr[0]))],self.realAerr,emin,emax)]#fabs(percErrBacksc*deltaBacksc/(1.+deltaBacksc))]
 
 
     def calcRecoilOrderCorr(self,emin,emax,percErr=0.02):
@@ -723,10 +733,10 @@ def minimizerCombo():
 
 if __name__ == "__main__":
     
-    minimizerCombo() # 180-740 with uncertainty of 0.006019 
+    #minimizerCombo() # 180-740 with uncertainty of 0.006019 
 
     year=2012
-    #uncert = uncertaintyHandler(year,"C")
+    uncert = uncertaintyHandler(year,"C")
     #uncert.minimizer()
 
     #2011: Energy Range = 160.-740. for 0.005791
@@ -743,7 +753,7 @@ if __name__ == "__main__":
 
     if 0:
     
-        lowBin = 19
+        lowBin = 18
         highBin = 73
         
         uncert.statUncertainties()
@@ -794,8 +804,8 @@ if __name__ == "__main__":
         print("Total delta_3: %0.6f +/- %0.6f"%(uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL" )[0],
                                                  uncert.calcAngleCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"ALL" )[1]))
         print
-        print("Total delta_MC: %0.6f +/- %0.6f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[0],
-                                                 uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[1]))
+        #print("Total delta_MC: %0.6f +/- %0.6f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[0],
+         #                                        uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin),0.25,0.25)[1]))
              
         print
         delta20 = uncert.calcBackscCorr(getBinEnergyMid(lowBin),getBinEnergyMid(highBin),"0")
@@ -814,10 +824,10 @@ if __name__ == "__main__":
         print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
-    if 0:
+    if 1:
         anaChoice = "C"
-        lowBin = 19
-        highBin = 74
+        lowBin = 18
+        highBin = 73
         
         errDeltaRecoil = 0.005 # These need to be fixed
         errDeltaRadiative = 0.005
@@ -1003,7 +1013,9 @@ if __name__ == "__main__":
         print "stat =",MC.errcombo([stat0,stat1])
         print "syst =",MC.errcombo([err01,err11,err02,err12,err03,err13,err04,err14,err05,err15,err06,err16,err07,err17,err08,err18,err09,err19,err010,err110,err011,err111])
         print("")
-
+        l = calcLambda(result[0],result[1])
+        print("lambda = %0.6f +/- %0.6f"%(l[0],l[1]))
+        print
         print("\t\t% Corr2011\t% Corr2012\t% Unc.")
         print("depol\t\t%0.2f\t\t%0.2f\t\t%0.2f"%(depolCorr2011[0]*100.,depolCorr2012[0]*100.,fabs(MC.errcombo([err04,err14])/result[0])*100.))
         print("Energy\t\t\t\t\t\t%0.2f"%(fabs(MC.errcombo([err01,err11])/result[0])*100.))
