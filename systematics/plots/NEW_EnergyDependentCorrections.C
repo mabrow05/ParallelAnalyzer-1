@@ -11,7 +11,7 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
-Int_t groupBin=5;
+Int_t groupBin=1;
 Double_t enStart=40.;//10.*groupBin;
 
 Double_t BSlimitLow = -1., BSlimitHigh = 3.;
