@@ -107,20 +107,16 @@ def doBackscCorr(year,anaCh,emin,emax):
 
     ##### including statistical err on correction
     delta_20 = [ [delta0[0][i] if frac0[i]>0. and delta0[0][i]!=-1. else 0. for i in range(0,len(type0A.realA))],
-                 [sqrt(delta0fracShift**2+(type0A.stat_percent_err[i]**2 if incStatErr else 0.)
-                       +(effStatErr0**2 if useEffStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
+                 [sqrt(delta0fracShift**2+(type0A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
     
     delta_21 = [ [delta1[0][i] if frac1[i]>0. and delta1[0][i]!=-1. else 0. for i in range(0,len(type1A.realA))],
-                 [sqrt(delta1fracShift**2+(type1A.stat_percent_err[i]**2 if incStatErr else 0.)
-                       +(effStatErr1**2 if useEffStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
+                 [sqrt(delta1fracShift**2+(type1A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
 
     delta_22 = [ [delta2[0][i] if frac2[i]>0. and delta2[0][i]!=-1. else 0. for i in range(0,len(type2A.realA))],
-                 [sqrt(delta2fracShift**2+(type2A.stat_percent_err[i]**2 if incStatErr else 0.)
-                       +(effStatErr2**2 if useEffStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
+                 [sqrt(delta2fracShift**2+(type2A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
 
     delta_23 = [ [delta3[0][i] if frac3[i]>0. and delta3[0][i]!=-1. else 0. for i in range(0,len(type3A.realA))],
-                 [sqrt(delta3fracShift**2+(type3A.stat_percent_err[i]**2 if incStatErr else 0.)
-                       +(effStatErr3**2 if useEffStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
+                 [sqrt(delta3fracShift**2+(type3A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
 
     # create the total delta_2 correction from the above corrections with the actual uncertainty
 
@@ -178,7 +174,7 @@ def doBackscCorr(year,anaCh,emin,emax):
 
     with open("%s_delta_20_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_20[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_20[0][i],fabs(delta_20[1][i]*delta_20[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_20[0][i],sqrt((delta_20[1][i]*delta_20[0][i])**2+effStatErr0**2)))
 
     with open("%s_delta_21_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_21[0])):
@@ -195,7 +191,7 @@ def doBackscCorr(year,anaCh,emin,emax):
             
     with open("%s_delta_2_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_2[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_2[0][i],fabs(delta_2[1][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_2[0][i],sqrt(delta_2[1][i]**2+effStatErr0**2)))#fabs(delta_2[1][i])))
 
 
 
