@@ -11,6 +11,12 @@ delta1fracShift = 0.30
 delta2fracShift = 0.40
 delta3fracShift = 0.20
 
+useEffStatErr=True
+effStatErr0 = 0.002
+effStatErr1 = 0.002
+effStatErr2 = 0.002
+effStatErr3 = 0.002
+
 incStatErr = True
 
 def doBackscCorr(year,anaCh,emin,emax):
@@ -101,16 +107,20 @@ def doBackscCorr(year,anaCh,emin,emax):
 
     ##### including statistical err on correction
     delta_20 = [ [delta0[0][i] if frac0[i]>0. and delta0[0][i]!=-1. else 0. for i in range(0,len(type0A.realA))],
-                 [sqrt(delta0fracShift**2+(type0A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
+                 [sqrt(delta0fracShift**2+(type0A.stat_percent_err[i]**2 if incStatErr else 0.)
+                       +(effStatErr0**2 if useEffStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
     
     delta_21 = [ [delta1[0][i] if frac1[i]>0. and delta1[0][i]!=-1. else 0. for i in range(0,len(type1A.realA))],
-                 [sqrt(delta1fracShift**2+(type1A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
+                 [sqrt(delta1fracShift**2+(type1A.stat_percent_err[i]**2 if incStatErr else 0.)
+                       +(effStatErr1**2 if useEffStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
 
     delta_22 = [ [delta2[0][i] if frac2[i]>0. and delta2[0][i]!=-1. else 0. for i in range(0,len(type2A.realA))],
-                 [sqrt(delta2fracShift**2+(type2A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
+                 [sqrt(delta2fracShift**2+(type2A.stat_percent_err[i]**2 if incStatErr else 0.)
+                       +(effStatErr2**2 if useEffStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
 
     delta_23 = [ [delta3[0][i] if frac3[i]>0. and delta3[0][i]!=-1. else 0. for i in range(0,len(type3A.realA))],
-                 [sqrt(delta3fracShift**2+(type3A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
+                 [sqrt(delta3fracShift**2+(type3A.stat_percent_err[i]**2 if incStatErr else 0.)
+                       +(effStatErr3**2 if useEffStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
 
     # create the total delta_2 correction from the above corrections with the actual uncertainty
 
