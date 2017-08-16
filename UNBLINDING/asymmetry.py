@@ -753,8 +753,8 @@ if __name__ == "__main__":
 
     if 0:
     
-        lowBin = 18
-        highBin = 73
+        lowBin = 19
+        highBin = 74
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
@@ -826,8 +826,8 @@ if __name__ == "__main__":
         
     if 1:
         anaChoice = "C"
-        lowBin = 18
-        highBin = 73
+        lowBin = 22
+        highBin = 66
         
         errDeltaRecoil = 0.005 # These need to be fixed
         errDeltaRadiative = 0.005

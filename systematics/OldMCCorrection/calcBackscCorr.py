@@ -6,7 +6,7 @@ from math import *
 sys.path.append("../../UNBLINDING")
 from asymmetry import *
         
-delta0fracShift = 0.05 # 20% = 0.20
+delta0fracShift = 0.10 # 20% = 0.20
 delta1fracShift = 0.30
 delta2fracShift = 0.40
 delta3fracShift = 0.20
