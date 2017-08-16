@@ -733,7 +733,7 @@ def minimizerCombo():
 
 if __name__ == "__main__":
     
-    #minimizerCombo() # 180-740 with uncertainty of 0.006019 
+    minimizerCombo() # 180-740 with uncertainty of 0.006019 
 
     year=2012
     uncert = uncertaintyHandler(year,"C")
@@ -824,10 +824,10 @@ if __name__ == "__main__":
         print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
-    if 1:
+    if 0:
         anaChoice = "C"
-        lowBin = 22
-        highBin = 66
+        lowBin = 19
+        highBin = 74
         
         errDeltaRecoil = 0.005 # These need to be fixed
         errDeltaRadiative = 0.005

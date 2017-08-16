@@ -101,23 +101,23 @@ def doAngleCorr(year,anaCh,emin,emax):
 
     ##### including statistical err on correction
     delta_30 = [ [(frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type0A.realA))],
-                 [sqrt((delta0fracShift**2+type0A.stat_percent_err**2)
-                       *(frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                 [sqrt((delta0fracShift**2+type0A.stat_percent_err[i]**2)
+                       *((frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]))**2 if weightedA[0][i]!=0. else 0.)
                        +(effStatErr0**2 if useEffStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
     
     delta_31 = [ [(frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type1A.realA))],
-                 [sqrt((delta1fracShift**2+type1A.stat_percent_err**2)
-                       *(frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                 [sqrt((delta1fracShift**2+type1A.stat_percent_err[i]**2)
+                       *((frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]))**2 if weightedA[0][i]!=0. else 0.)
                        +(effStatErr1**2 if useEffStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
     
     delta_32 = [ [(frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type2A.realA))],
-                 [sqrt((delta2fracShift**2+type2A.stat_percent_err**2)
-                       *(frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                 [sqrt((delta2fracShift**2+type2A.stat_percent_err[i]**2)
+                       *((frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]))**2 if weightedA[0][i]!=0. else 0.)
                        +(effStatErr2**2 if useEffStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
     
     delta_33 = [ [(frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type3A.realA))],
-                 [sqrt((delta3fracShift**2+type3A.stat_percent_err**2)
-                       *(frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                 [sqrt((delta3fracShift**2+type3A.stat_percent_err[i]**2)
+                       *((frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]))**2 if weightedA[0][i]!=0. else 0.)
                        +(effStatErr3**2 if useEffStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
     # create the total delta_3 correction from the above corrections with the actual uncertainty
 
