@@ -13,9 +13,9 @@ delta3fracShift = 0.20
 
 useEffStatErr=True
 effStatErr0 = 0.0025
-effStatErr1 = 0.001
-effStatErr2 = 0.001
-effStatErr3 = 0.001
+effStatErr1 = 0.00074
+effStatErr2 = 0.00062
+effStatErr3 = 0.00059
 
 incStatErr = True
 
