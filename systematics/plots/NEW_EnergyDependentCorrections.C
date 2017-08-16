@@ -45,6 +45,10 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TStrin
       cerr.push_back(aveErr/groupBin*100.);
       std::cout << aveErr/groupBin*100. << std::endl;
       i=0,aveEn=0.,aveCorr=0.,aveErr=0.;
+      aveEn+=en;
+      aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+      aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
+      i++;
     }
   }
   enbin.push_back(enbin[enbin.size()-1]+10.*groupBin);
@@ -84,6 +88,10 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
 	c.push_back(aveCorr/groupBin*100.);
 	cerr.push_back(aveErr/groupBin*100.);
 	i=0,aveEn=0.,aveCorr=0., aveErr=0.;
+	aveEn+=en;
+	aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+	aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
+	i++;
       }
     }
     else {
@@ -176,7 +184,6 @@ void EnergyDependentCorrections(TString anaCh) {
     totalCorr_2012[1].push_back(c2012);
     totalCorr_2012[2].push_back(c2012err);    
   }
-  
   TCanvas *c0 = new TCanvas("c0","c0");
   gPad->SetGrid(0,1);
 
@@ -189,7 +196,30 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs0_2011->SetLineColor(col2011);
   g_bs0_2011->SetFillColor(col2011);
   g_bs0_2011->SetFillStyle(fill2011);
+
+  TGraph *g_bs0_2011_noErr = new TGraph(bs0_2011[0].size()-startPoint,&bs0_2011[0][startPoint],&bs0_2011[1][startPoint]);
+  TCanvas *fit = new TCanvas("fit","fit");
+
+  TF1 *f0 = new TF1("f0","[0]*TMath::Exp(-[1]*x)+pol3(2)",200.,750.);//+[2]+[3]*x+[4]*x*x",100.,700.);
+  f0->SetParameters(1.,0.,1.,0.,0.,0.);
+  g_bs0_2011_noErr->Fit(f0,"R");
+  g_bs0_2011_noErr->Draw("AL");
+
+  //calculate the err from fit 
+  Double_t sigma = 0.;
+  Double_t num=0.;
+  for ( UInt_t i=0;i<bs0_2011[1].size();++i) {
+    if (bs0_2011[0][i]>=200. && bs0_2011[0][i]<=750.) {
+      sigma+=TMath::Power(bs0_2011[1][i]-f0->Eval(bs0_2011[0][i]),2);
+      //std::cout << bs0_2011[1][i] << " - " << f0->Eval(bs0_2011[0][i]) << " = " << bs0_2011[1][i]-f0->Eval(bs0_2011[0][i]) << "\n";
+      num+=1.;
+    }
+  }
+  sigma/=(num);
+  sigma = TMath::Sqrt(sigma);
+  std::cout << "SIGMA = " << sigma << std::endl;
   
+  c0->cd();
   TGraphErrors *g_bs0_2012 = new TGraphErrors(bs0_2012[0].size()-startPoint,&bs0_2012[0][startPoint],&bs0_2012[1][startPoint],0,&bs0_2012[2][startPoint]);
   g_bs0_2012->SetMarkerStyle(0);
   g_bs0_2012->SetLineWidth(3);

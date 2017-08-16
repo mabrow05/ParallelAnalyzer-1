@@ -6,16 +6,16 @@ from math import *
 sys.path.append("../../UNBLINDING")
 from asymmetry import *
         
-delta0fracShift = 0.10 # 20% = 0.20
+delta0fracShift = 0.05 # 20% = 0.20
 delta1fracShift = 0.30
 delta2fracShift = 0.40
 delta3fracShift = 0.20
 
 useEffStatErr=True
-effStatErr0 = 0.002
-effStatErr1 = 0.002
-effStatErr2 = 0.002
-effStatErr3 = 0.002
+effStatErr0 = 0.0025
+effStatErr1 = 0.001
+effStatErr2 = 0.001
+effStatErr3 = 0.001
 
 incStatErr = True
 
@@ -107,23 +107,31 @@ def doBackscCorr(year,anaCh,emin,emax):
 
     ##### including statistical err on correction
     delta_20 = [ [delta0[0][i] if frac0[i]>0. and delta0[0][i]!=-1. else 0. for i in range(0,len(type0A.realA))],
-                 [sqrt(delta0fracShift**2+(type0A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
+                 [sqrt((delta0fracShift*delta0[0][i])**2
+                       +((type0A.stat_percent_err[i]*delta0[0][i])**2 if incStatErr else 0.)
+                       +(effStatErr0**2 if useEffStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
     
     delta_21 = [ [delta1[0][i] if frac1[i]>0. and delta1[0][i]!=-1. else 0. for i in range(0,len(type1A.realA))],
-                 [sqrt(delta1fracShift**2+(type1A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
+                 [sqrt((delta1fracShift*delta1[0][i])**2
+                       +((type1A.stat_percent_err[i]*delta1[0][i])**2 if incStatErr else 0.)
+                       +(effStatErr1**2 if useEffStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
 
     delta_22 = [ [delta2[0][i] if frac2[i]>0. and delta2[0][i]!=-1. else 0. for i in range(0,len(type2A.realA))],
-                 [sqrt(delta2fracShift**2+(type2A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
+                 [sqrt((delta2fracShift*delta2[0][i])**2
+                       +((type2A.stat_percent_err[i]*delta2[0][i])**2 if incStatErr else 0.)
+                       +(effStatErr2**2 if useEffStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
 
     delta_23 = [ [delta3[0][i] if frac3[i]>0. and delta3[0][i]!=-1. else 0. for i in range(0,len(type3A.realA))],
-                 [sqrt(delta3fracShift**2+(type3A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
+                 [sqrt((delta3fracShift*delta3[0][i])**2
+                       +((type3A.stat_percent_err[i]*delta2[0][i])**2 if incStatErr else 0.)
+                       +(effStatErr3**2 if useEffStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
 
     # create the total delta_2 correction from the above corrections with the actual uncertainty
 
     delta_2 = [ [(1.+delta_20[0][i])*(1.+delta_21[0][i])*(1.+delta_22[0][i])*(1.+delta_23[0][i])-1. for i in range(0,len(delta_20[0]))],
                 [((1.+delta_20[0][i])*(1.+delta_21[0][i])*(1.+delta_22[0][i])*(1.+delta_23[0][i]))*
-                 sqrt( (delta_20[1][i]*delta_20[0][i]/(1.+delta_20[0][i]))**2 + (delta_21[1][i]*delta_21[0][i]/(1.+delta_21[0][i]))**2
-                       + (delta_22[1][i]*delta_22[0][i]/(1.+delta_22[0][i]))**2 + (delta_23[1][i]*delta_23[0][i]/(1.+delta_23[0][i]))**2 )for i in range(0,len(delta_20[0]))] ]
+                 sqrt( (delta_20[1][i]/(1.+delta_20[0][i]))**2 + (delta_21[1][i]/(1.+delta_21[0][i]))**2
+                       + (delta_22[1][i]/(1.+delta_22[0][i]))**2 + (delta_23[1][i]/(1.+delta_23[0][i]))**2 )for i in range(0,len(delta_20[0]))] ]
 
     #for i in range(0,len(delta_2[0])):
     #    print("%0.0f %0.7f %0.7f"%(10.*i+5.,delta_2[0][i],(delta_2[1][i]/delta_2[0][i] if delta_2[0][i]!=0. else 0.)))
@@ -147,10 +155,10 @@ def doBackscCorr(year,anaCh,emin,emax):
     total_delta_22 = weightRealStats([delta_22[0][i]/(1+delta_22[0][i]) for i in range(0,len(delta_22[0]))],statUncert,emin,emax)
     total_delta_23 = weightRealStats([delta_23[0][i]/(1+delta_23[0][i]) for i in range(0,len(delta_23[0]))],statUncert,emin,emax)
     
-    total_delta_20err = weightRealStats([delta_20[1][i]*delta_20[0][i]/(1+delta_20[0][i]) for i in range(0,len(delta_20[0]))],statUncert,emin,emax)
-    total_delta_21err = weightRealStats([delta_21[1][i]*delta_21[0][i]/(1+delta_21[0][i]) for i in range(0,len(delta_21[0]))],statUncert,emin,emax)
-    total_delta_22err = weightRealStats([delta_22[1][i]*delta_22[0][i]/(1+delta_22[0][i]) for i in range(0,len(delta_22[0]))],statUncert,emin,emax)
-    total_delta_23err = weightRealStats([delta_23[1][i]*delta_23[0][i]/(1+delta_23[0][i]) for i in range(0,len(delta_23[0]))],statUncert,emin,emax)
+    total_delta_20err = weightRealStats([delta_20[1][i]/(1+delta_20[0][i]) for i in range(0,len(delta_20[0]))],statUncert,emin,emax)
+    total_delta_21err = weightRealStats([delta_21[1][i]/(1+delta_21[0][i]) for i in range(0,len(delta_21[0]))],statUncert,emin,emax)
+    total_delta_22err = weightRealStats([delta_22[1][i]/(1+delta_22[0][i]) for i in range(0,len(delta_22[0]))],statUncert,emin,emax)
+    total_delta_23err = weightRealStats([delta_23[1][i]/(1+delta_23[0][i]) for i in range(0,len(delta_23[0]))],statUncert,emin,emax)
     
 
     print
@@ -174,24 +182,24 @@ def doBackscCorr(year,anaCh,emin,emax):
 
     with open("%s_delta_20_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_20[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_20[0][i],sqrt((delta_20[1][i]*delta_20[0][i])**2+effStatErr0**2)))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_20[0][i],fabs(delta_20[1][i])))
 
     with open("%s_delta_21_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_21[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_21[0][i],fabs(delta_21[1][i]*delta_21[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_21[0][i],fabs(delta_21[1][i])))
 
     with open("%s_delta_22_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_22[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_22[0][i],fabs(delta_22[1][i]*delta_22[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_22[0][i],fabs(delta_22[1][i])))
             
     with open("%s_delta_23_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_23[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_23[0][i],fabs(delta_23[1][i]*delta_23[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_23[0][i],fabs(delta_23[1][i])))
 
             
     with open("%s_delta_2_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_2[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_2[0][i],sqrt(delta_2[1][i]**2+effStatErr0**2)))#fabs(delta_2[1][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_2[0][i],fabs(delta_2[1][i])))
 
 
 
