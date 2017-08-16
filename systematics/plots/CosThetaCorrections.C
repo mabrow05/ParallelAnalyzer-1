@@ -11,34 +11,13 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
-std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TString anaCh) {
+Int_t groupBin=1;
+Double_t enStart=40.;//10.*groupBin;
 
-  std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../OldMCCorrection/deltaBS%s_anaCh%s_%s.txt",corr.Data(),anaCh.Data(),year.Data()));
-  std::vector<Double_t> enbin;
-  std::vector<Double_t> c;
-  std::vector<Double_t> cerr;
-  Double_t en, corrhold,errhold;
-  Int_t i=0;
-  Double_t aveEn=0., aveCorr=0.;
-  while (infile >> en >> corrhold >> errhold && en<800.) {
-    //std::cout << en << " " << corrhold << " " << errhold << "\n";
-    if (i<4) {
-      aveEn+=en;
-      aveCorr+=corrhold;
-      i++;
-    } else {
-      enbin.push_back(aveEn/4.);
-      c.push_back(aveCorr/4.*100.);
-      cerr.push_back(0.25*aveCorr/4.*100.);
-      i=0,aveEn=0.,aveCorr=0.;
-    }
-  }
-  corrs.push_back(enbin);
-  corrs.push_back(c);
-  corrs.push_back(cerr);
-  return corrs;
-};
+Double_t BSlimitLow = -1., BSlimitHigh = 3.;
+Double_t AnglelimitLow = -5., AnglelimitHigh = 3.;
+
+TString drawOpt = "0AL3";//"0AC4" "0AL3"
 
 std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
 
@@ -47,21 +26,27 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
-  TString en, errhold,corrhold;
+  TString hold1,hold2;
+  Double_t en;
   Int_t i=0;
   Double_t aveEn=0., aveCorr=0., aveErr=0.;
-  while (infile >> en >> corrhold >> errhold && atof(en.Data())<800.) {
-    //std::cout << en << " " << corrhold << " " << errhold << "\n";
-    if (i<4) {
-      aveEn+=atof(en.Data());
-      aveCorr+=( corrhold==TString("nan")||corrhold==TString("-nan"))?0.:atof(corrhold.Data());
-      aveErr+=(corrhold==TString("nan")||corrhold==TString("-nan"))?0.:atof(errhold);
+  while (infile >> en >> hold1 >> hold2 && en<800.) {
+    if (en<enStart) continue;
+    //std::cout << en << " " << hold2 << " " << errhold << "\n";
+    if (i<groupBin) {
+      aveEn+=en;
+      aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+      aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
       i++;
     } else {
-      enbin.push_back(aveEn/4.);
-      c.push_back(aveCorr/4.*100.);
-      cerr.push_back(aveErr/4.*100.);
+      enbin.push_back(aveEn/groupBin);
+      c.push_back(aveCorr/groupBin*100.);
+      cerr.push_back(aveErr/groupBin*100.);
       i=0,aveEn=0.,aveCorr=0., aveErr=0.;
+      aveEn+=en;
+      aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+      aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
+      i++;
     }
   }
   corrs.push_back(enbin);
@@ -70,7 +55,7 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
   return corrs;
 };
 
-void EnergyDependentCorrections() {
+void CosThetaCorrections() {
 
   gStyle->SetOptStat(0);
   gStyle->SetTitleSize(0.07,"t");
@@ -101,7 +86,7 @@ void EnergyDependentCorrections() {
   int col2011 = 4;
   int col2012 = 3;
 
-  int startPoint=1;
+  int startPoint=0;
   
   TString year = "2011-2012";
   std::vector<std::vector<Double_t> > delta30_2011 = readAngleCorr(year,"0");
@@ -140,8 +125,8 @@ void EnergyDependentCorrections() {
   
   mg0->Add(g_delta30_2011);
   mg0->Add(g_delta30_2012);
-  mg0->SetMinimum(-5.);
-  mg0->SetMaximum(5.);
+  mg0->SetMinimum(AnglelimitLow);
+  mg0->SetMaximum(AnglelimitHigh);
   
   mg0->Draw("ALP3");
   mg0->GetYaxis()->SetTitle("#DeltaA/A (%)");
@@ -180,8 +165,8 @@ void EnergyDependentCorrections() {
   
   mg1->Add(g_delta31_2011);
   mg1->Add(g_delta31_2012);
-  mg1->SetMinimum(-5.);
-  mg1->SetMaximum(5.);
+  mg1->SetMinimum(AnglelimitLow);
+  mg1->SetMaximum(AnglelimitHigh);
   
   mg1->Draw("ALP3");
   mg1->GetYaxis()->SetTitle("#DeltaA/A (%)");
@@ -219,8 +204,8 @@ void EnergyDependentCorrections() {
   
   mg2->Add(g_delta32_2011);
   mg2->Add(g_delta32_2012);
-  mg2->SetMinimum(-5.);
-  mg2->SetMaximum(5.);
+  mg2->SetMinimum(AnglelimitLow);
+  mg2->SetMaximum(AnglelimitHigh);
   
   mg2->Draw("ALP3");
   mg2->GetYaxis()->SetTitle("#DeltaA/A (%)");
@@ -258,8 +243,8 @@ void EnergyDependentCorrections() {
   
   mg3->Add(g_delta33_2011);
   mg3->Add(g_delta33_2012);
-  mg3->SetMinimum(-5.);
-  mg3->SetMaximum(5.);
+  mg3->SetMinimum(AnglelimitLow);
+  mg3->SetMaximum(AnglelimitHigh);
   
   mg3->Draw("ALP3");
   mg3->GetYaxis()->SetTitle("#DeltaA/A (%)");
@@ -298,8 +283,8 @@ void EnergyDependentCorrections() {
   
   mgDELTA3->Add(g_delta3_2011);
   mgDELTA3->Add(g_delta3_2012);
-  mgDELTA3->SetMinimum(-5.);
-  mgDELTA3->SetMaximum(5.);
+  mgDELTA3->SetMinimum(AnglelimitLow);
+  mgDELTA3->SetMaximum(AnglelimitHigh);
   
   mgDELTA3->Draw("ALP3");
   mgDELTA3->GetYaxis()->SetTitle("#DeltaA/A (%)");

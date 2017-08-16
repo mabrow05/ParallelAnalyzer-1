@@ -11,6 +11,12 @@ delta1fracShift = 0.30
 delta2fracShift = 0.40
 delta3fracShift = 0.20
 
+useEffStatErr=True
+effStatErr0 = 0.0004
+effStatErr1 = 0.0005
+effStatErr2 = 0.0002
+effStatErr3 = 0.0002
+
 incStatErr = True
 
 def doAngleCorr(year,anaCh,emin,emax):
@@ -95,23 +101,30 @@ def doAngleCorr(year,anaCh,emin,emax):
 
     ##### including statistical err on correction
     delta_30 = [ [(frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type0A.realA))],
-                 [sqrt(delta0fracShift**2+(type0A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
+                 [sqrt((delta0fracShift**2+type0A.stat_percent_err**2)
+                       *(frac0[i]*delta0[0][i]*fabs(type0A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                       +(effStatErr0**2 if useEffStatErr else 0.)) for i in range(0,len(type0A.realA))] ]
     
     delta_31 = [ [(frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type1A.realA))],
-                 [sqrt(delta1fracShift**2+(type1A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
-
+                 [sqrt((delta1fracShift**2+type1A.stat_percent_err**2)
+                       *(frac1[i]*delta1[0][i]*fabs(type1A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                       +(effStatErr1**2 if useEffStatErr else 0.)) for i in range(0,len(type1A.realA))] ]
+    
     delta_32 = [ [(frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type2A.realA))],
-                 [sqrt(delta2fracShift**2+(type2A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
-
+                 [sqrt((delta2fracShift**2+type2A.stat_percent_err**2)
+                       *(frac2[i]*delta2[0][i]*fabs(type2A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                       +(effStatErr2**2 if useEffStatErr else 0.)) for i in range(0,len(type2A.realA))] ]
+    
     delta_33 = [ [(frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.) for i in range(0,len(type3A.realA))],
-                 [sqrt(delta3fracShift**2+(type3A.stat_percent_err[i]**2 if incStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
-
+                 [sqrt((delta3fracShift**2+type3A.stat_percent_err**2)
+                       *(frac3[i]*delta3[0][i]*fabs(type3A.realA[i]/weightedA[0][i]) if weightedA[0][i]!=0. else 0.)**2
+                       +(effStatErr3**2 if useEffStatErr else 0.)) for i in range(0,len(type3A.realA))] ]
     # create the total delta_3 correction from the above corrections with the actual uncertainty
 
     delta_3 = [ [(1.+delta_30[0][i])*(1.+delta_31[0][i])*(1.+delta_32[0][i])*(1.+delta_33[0][i])-1. for i in range(0,len(delta_30[0]))],
                 [((1.+delta_30[0][i])*(1.+delta_31[0][i])*(1.+delta_32[0][i])*(1.+delta_33[0][i]))*
-                 sqrt( (delta_30[1][i]*delta_30[0][i]/(1.+delta_30[0][i]))**2 + (delta_31[1][i]*delta_31[0][i]/(1.+delta_31[0][i]))**2
-                       + (delta_32[1][i]*delta_32[0][i]/(1.+delta_32[0][i]))**2 + (delta_33[1][i]*delta_33[0][i]/(1.+delta_33[0][i]))**2 )for i in range(0,len(delta_30[0]))] ]
+                 sqrt( (delta_30[1][i]/(1.+delta_30[0][i]))**2 + (delta_31[1][i]/(1.+delta_31[0][i]))**2
+                       + (delta_32[1][i]/(1.+delta_32[0][i]))**2 + (delta_33[1][i]/(1.+delta_33[0][i]))**2 )for i in range(0,len(delta_30[0]))] ]
 
     #for i in range(0,len(delta_3[0])):
     #    print("%0.0f %0.7f %0.7f"%(10.*i+5.,delta_3[0][i],(delta_3[1][i]/delta_3[0][i] if delta_3[0][i]!=0. else 0.)))
@@ -134,6 +147,12 @@ def doAngleCorr(year,anaCh,emin,emax):
     total_delta_31 = weightRealStats([delta_31[0][i]/(1+delta_31[0][i]) for i in range(0,len(delta_31[0]))],statUncert,220.,670.)
     total_delta_32 = weightRealStats([delta_32[0][i]/(1+delta_32[0][i]) for i in range(0,len(delta_32[0]))],statUncert,220.,670.)
     total_delta_33 = weightRealStats([delta_33[0][i]/(1+delta_33[0][i]) for i in range(0,len(delta_33[0]))],statUncert,220.,670.)
+
+    total_delta_30err = weightRealStats([delta_30[1][i]/(1+delta_30[0][i]) for i in range(0,len(delta_30[0]))],statUncert,emin,emax)
+    total_delta_31err = weightRealStats([delta_31[1][i]/(1+delta_31[0][i]) for i in range(0,len(delta_31[0]))],statUncert,emin,emax)
+    total_delta_32err = weightRealStats([delta_32[1][i]/(1+delta_32[0][i]) for i in range(0,len(delta_32[0]))],statUncert,emin,emax)
+    total_delta_33err = weightRealStats([delta_33[1][i]/(1+delta_33[0][i]) for i in range(0,len(delta_33[0]))],statUncert,emin,emax)
+    
     
     print
     print("Idividual fractional Correction on A")
@@ -144,10 +163,10 @@ def doAngleCorr(year,anaCh,emin,emax):
 
     print
     print("Idividual fractional uncertainties on A")
-    print("Type 0: %f"%fabs(delta0fracShift*total_delta_30/(1.+total_delta_30)))
-    print("Type 1: %f"%fabs(delta1fracShift*total_delta_31/(1.+total_delta_31)))
-    print("Type 2: %f"%fabs(delta2fracShift*total_delta_32/(1.+total_delta_32)))
-    print("Type 3: %f"%fabs(delta3fracShift*total_delta_33/(1.+total_delta_33)))
+    print("Type 0: %f"%fabs(total_delta_30err))
+    print("Type 1: %f"%fabs(total_delta_31err))
+    print("Type 2: %f"%fabs(total_delta_32err))
+    print("Type 3: %f"%fabs(total_delta_33err))
     print
     #print("fractional Contribution to the total uncertainty as ratio of Delta_3i/Delta_30")
     #print("Type 1: %f"%fabs(delta1fracShift*total_delta_31/(1.+total_delta_31)/(delta0fracShift*total_delta_30/(1.+total_delta_30))))
@@ -156,19 +175,19 @@ def doAngleCorr(year,anaCh,emin,emax):
 
     with open("%s_delta_30_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_30[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_30[0][i],fabs(delta_30[1][i]*delta_30[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_30[0][i],fabs(delta_30[1][i])))
 
     with open("%s_delta_31_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_31[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_31[0][i],fabs(delta_31[1][i]*delta_31[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_31[0][i],fabs(delta_31[1][i])))
 
     with open("%s_delta_32_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_32[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_32[0][i],fabs(delta_32[1][i]*delta_32[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_32[0][i],fabs(delta_32[1][i])))
             
     with open("%s_delta_33_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
         for i in range(0,len(delta_33[0])):
-            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_33[0][i],fabs(delta_33[1][i]*delta_33[0][i])))
+            f.write("%f\t%0.7f\t%0.7f\n"%((i*10.+5.),delta_33[0][i],fabs(delta_33[1][i])))
 
             
     with open("%s_delta_3_anaCh%s.txt"%("2011-2012" if year==2011 else "2012-2013",anaCh),"w") as f:
