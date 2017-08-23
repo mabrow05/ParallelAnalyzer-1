@@ -16,9 +16,9 @@
   //gStyle->SetStatX(0.75);
   //gStyle->SetStatY(0.80);
 
-  TString year = "2012-2013";
+  TString year = "2011-2012";
   Int_t emin = 190;
-  Int_t emax = 750;
+  Int_t emax = 740;
     
   ifstream infile(TString::Format("EfficiencyDistr_%s_%i-%i.txt",year.Data(),emin,emax));
 
@@ -32,7 +32,7 @@
   //calculate RMS, mean, sigma
   TCanvas *c1 = new TCanvas("c1");
   
-  TH1D *h = new TH1D("h","Efficiency Correction",30,-1.0,1.0);
+  TH1D *h = new TH1D("h","Efficiency Correction",35,-1.0,1.0);
   h->GetXaxis()->SetTitle("#Delta_{MWPC} (%)");
   h->GetXaxis()->CenterTitle();
   h->SetLineWidth(3);

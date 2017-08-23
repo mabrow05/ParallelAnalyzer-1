@@ -33,9 +33,9 @@ def writeCorrectionByBin(uncorr,corr,year):
 
     
 if __name__=="__main__":
-    year = "2012-2013"
-    emin = 190.
-    emax = 750.
+    year = "2011-2012"
+    emin = 180.
+    emax = 740.
     
 
     #filemin = 0

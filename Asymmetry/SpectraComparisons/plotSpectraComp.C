@@ -10,8 +10,8 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
   Double_t xAxisMax = 800.;
 
-  Double_t minEnBin = 22; //Energy bins to integrate event types over
-  Double_t maxEnBin = 66;
+  Double_t minEnBin = 19; //Energy bins to integrate event types over
+  Double_t maxEnBin = 73;
 
   //Storing event fractions for data, E/W and sfON/OFF
   Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t2E_sfON, t2E_sfOFF, t3E_sfON, t3E_sfOFF;
@@ -2151,7 +2151,59 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   c4_sfON_W->Print(TString::Format("%s",pdfFile.Data()));
   c5_sfON_W->Print(TString::Format("%s)",pdfFile.Data()));
 
+  ////////////////////////// Plot for Brad /////////////////////////////////////
   
+  gStyle->SetLegendBorderSize(0);
+  gStyle->SetFillStyle(0);
+  gStyle->SetPadLeftMargin(0.12);
+  //gStyle->SetTitleOffset(0.1,"XY");
+  gStyle->SetPadBottomMargin(0.12);
+  //gStyle->SetTitleOffset(0.5);
+
+  if (false) {
+    
+
+    TCanvas *cBrad = new TCanvas("cBrad","cBrad",500,500);
+  
+    simALL->SetTitle("");
+    dataALL->SetMarkerColor(kBlue);
+    dataALL->SetMarkerStyle(24);
+    dataALL->SetMarkerSize(0.75);
+    dataALL->SetLineColor(kBlue);
+    //dataALL->SetFillStyle(3002);
+    //dataALL->SetFillColor(kBlue);
+    dataALL->SetLineWidth(3);
+    dataALL->GetXaxis()->SetRangeUser(0., xAxisMax);
+    simALL->SetLineWidth(2);
+    simALL->SetMarkerColor(kBlack);
+    simALL->SetLineColor(kBlack);
+    simALL->SetMarkerSize(0);
+    simALL->SetMarkerStyle(24);
+    simALL->SetMaximum(dataALL->GetMaximum()*1.2);
+    simALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
+    simALL->GetYaxis()->CenterTitle();
+    simALL->GetXaxis()->CenterTitle();
+    simALL->GetXaxis()->SetTitleOffset(1.5);
+    simALL->GetYaxis()->SetTitleOffset(1.5);
+    simALL->GetXaxis()->SetRangeUser(0., xAxisMax);
+    simALL->Draw("HIST C");
+    dataALL->Draw("SAMEE0");
+
+    BG_dataALL->SetMarkerColor(1);
+    BG_dataALL->SetMarkerStyle(20);
+    BG_dataALL->SetMarkerSize(0.6);
+    BG_dataALL->SetLineColor(1);
+    BG_dataALL->SetLineWidth(3);
+    BG_dataALL->Draw("SAMEE0");
+
+    TLegend *leg = new TLegend(0.58,0.65,0.85,0.85);
+    leg->AddEntry(dataALL,"Data","p");
+    leg->AddEntry(simALL,"Monte Carlo","l");
+    leg->AddEntry(BG_dataALL,"Background","p");
+    leg->Draw("SAME");
+
+    cBrad->Print("SpectraForBrad.pdf");
+  }
    
 }
   

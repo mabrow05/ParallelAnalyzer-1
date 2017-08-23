@@ -210,9 +210,9 @@ int main(int argc, char* argv[])
       exit(0);
     }
     
-    std::vector<TString> aCh {"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<TString> aCh {"A","B","C","D","F","G","H","J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
-      // ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
+      //ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
       PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
       PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
@@ -533,10 +533,12 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   gStyle->SetPadLeftMargin(0.12);
   gStyle->SetLabelSize(0.06,"xyz");
 
-  gStyle->SetOptFit(1111);
+  gStyle->SetOptFit(1111);//1111);
   gStyle->SetTitleX(0.5);
   gStyle->SetStatX(0.75);
-  gStyle->SetStatY(0.80);
+  gStyle->SetStatY(0.90);
+  //gStyle->SetStatBorderSize(0);
+
 
   TCanvas *c1 = new TCanvas("c1", "c1", 1000., 1800.);
   c1->Divide(1,4);
@@ -737,6 +739,45 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
     polFile.close();
   }
   
+  if (false) {
+    gStyle->SetTitleSize(0.04,"x");
+    gStyle->SetTitleSize(0.04,"y");
+    gStyle->SetStatX(0.75);
+    gStyle->SetStatY(0.9);
+    gStyle->SetStatBorderSize(0);
+    //gStyle->SetOptStat(0);
+    //gStyle->SetTitleOffset(0.85,"y");
+    gStyle->SetPadTopMargin(0.05);
+    gStyle->SetPadBottomMargin(0.15);
+    gStyle->SetPadLeftMargin(0.17);
+    gStyle->SetLabelSize(0.03,"xyz");
+    //gStyle->SetPadLeftMargin(0.12);
+    //gStyle->SetPadBottomMargin(0.12);
+    TCanvas *cBrad = new TCanvas("cBrad","cBrad",700,500);
+    gBeta2->SetTitle("");
+    gBeta2->SetMarkerStyle(20);
+    gBeta2->SetLineWidth(2);
+    gBeta2->GetXaxis()->SetLimits(0., 800.);
+    gBeta2->GetXaxis()->SetTitle("Energy (keV)");
+    gBeta2->GetXaxis()->SetTitleOffset(1.1);
+    gBeta2->GetYaxis()->SetTitleOffset(1.3);
+    gBeta2->GetYaxis()->SetTitle("Asymmetry");
+    gBeta2->GetXaxis()->CenterTitle();
+    gBeta2->GetYaxis()->CenterTitle();
+  
+    //TF1 *fitBeta2 = new TF1("fitBeta2","[0]",Elow, Ehigh);
+    //fitBeta2->SetLineColor(kRed);
+    //fitBeta2->SetLineWidth(3);
+    //fitBeta2->SetParameter(0,-0.12);
+    //gBeta2->Fit("fitBeta2","R");
+  
+    gBeta2->Draw("AP");
+    gBeta2->SetMinimum(fitBeta2->GetParameter(0)-0.04);//(simulation && !AsymmOn) ? -0.5 : -0.16);
+    gBeta2->SetMaximum(fitBeta2->GetParameter(0)+0.05);//(simulation && !AsymmOn) ? 0.5 : -0.07);
+    cBrad->Print("asymmetryForBrad.pdf");
+    delete cBrad;
+  }
+
   delete c1; 
   if (realOutput ) { delete g; delete fit; delete gBeta; delete fitBeta; }
   delete g2; delete gBeta2; delete fitBeta2;
