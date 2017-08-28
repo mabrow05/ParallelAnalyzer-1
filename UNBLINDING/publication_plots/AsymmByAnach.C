@@ -1,8 +1,8 @@
 
 
-void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=670) {
+void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=670) {
   
-  bool color = true;
+  bool color = false;
   
   bool withSim = false;//true;
   bool CorrAndUnCorr = true;//false;
@@ -11,7 +11,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   double ymax0 = -0.108;
   
   double yminBS = -0.2;
-  double ymaxBS = 0.0;
+  double ymaxBS = 0.01;
 
   const Int_t numAnaChT0 = 9;
   const Int_t numAnaChBacksc = 9;
@@ -25,6 +25,8 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   Int_t markerCorrBS = 21;
   Int_t colorBS = color?2:1;
   Int_t color0 = color?4:1;
+
+  TString year = "2011-2012";
   
 
   std::vector <TString> anaChoicesALL;
@@ -158,6 +160,141 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
     infile.close();
     
   }
+
+  year = "2012-2013";
+  
+
+  std::vector <TString> anaChoicesALL_2012;
+  std::vector <Double_t> indicesALL_2012;
+  std::vector <Double_t> AsymmDataALL_2012;
+  std::vector <Double_t> AsymmDataErrALL_2012; //Statistical Errors
+  std::vector <Double_t> AsymmCorrDataALL_2012;
+  std::vector <Double_t> AsymmCorrDataErrALL_2012; //Statistical Errors
+ 
+  std::vector <TString> anaChoicesT0_2012;
+  std::vector <Double_t> indicesT0_2012;
+  std::vector <Double_t> AsymmDataT0_2012;
+  std::vector <Double_t> AsymmDataErrT0_2012; //Statistical Errors
+  std::vector <Double_t> AsymmCorrDataT0_2012;
+  std::vector <Double_t> AsymmCorrDataErrT0_2012; //Statistical Errors
+  
+
+  std::vector <TString> anaChoicesBacksc_2012;
+  std::vector <Double_t> indicesBacksc_2012;
+  std::vector <Double_t> AsymmDataBacksc_2012;
+  std::vector <Double_t> AsymmDataErrBacksc_2012; //Statistical Errors
+  std::vector <Double_t> AsymmCorrDataBacksc_2012;
+  std::vector <Double_t> AsymmCorrDataErrBacksc_2012; //Statistical Errors
+  std::vector <Double_t> AsymmSimBacksc_2012;
+  std::vector <Double_t> AsymmSimErrBacksc_2012; //Statistical Errors
+
+  //Fill anaChoices
+  for (Int_t i=0; i< sizeof(anChT0)/sizeof(TString); i++) 
+    { anaChoicesT0_2012.push_back(anChT0[i]); indicesT0_2012.push_back(i+1);
+      anaChoicesALL_2012.push_back(anChALL[i]); indicesALL_2012.push_back(i+1);}
+
+  for (Int_t i=0; i< sizeof(anChBacksc)/sizeof(TString); i++) 
+    { anaChoicesBacksc_2012.push_back(anChBacksc[i]); indicesBacksc_2012.push_back(i+1); }
+  
+  
+  //Read in Asymmetries
+  ifstream infile;
+  std::string strHold;
+  
+  for (Int_t i=0; i<anaChoicesT0_2012.size(); i++) {
+    infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				(withPOL?"_withPOL":""),anaChoicesT0_2012[i].Data(),
+				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+    
+    Double_t AsymHold = 0.;
+    Double_t AsymErrHold = 0.;
+    if (infile.is_open()) {
+      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+    }
+    AsymmDataT0_2012.push_back(AsymHold);
+    AsymmDataErrT0_2012.push_back(AsymErrHold);
+    
+    infile.close();
+    
+    infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				getenv("ANALYSIS_RESULTS"),"AllCorr",
+				(withPOL?"_withPOL":""),anaChoicesT0_2012[i].Data(),
+				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+    
+    AsymHold = 0.;
+    AsymErrHold = 0.;
+    if (infile.is_open()) {
+      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+    }
+    AsymmCorrDataT0_2012.push_back(AsymHold);
+    AsymmCorrDataErrT0_2012.push_back(AsymErrHold);
+    
+    infile.close();
+    
+    infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				getenv("ANALYSIS_RESULTS"),corrections.Data(),(withPOL?"_withPOL":""),
+				anaChoicesALL_2012[i].Data(),ebinLow,ebinHigh,
+				year==TString("2011-2012")?"0-59":"60-121").Data() );
+    
+    AsymHold = 0.;
+    AsymErrHold = 0.;
+    if (infile.is_open()) {
+      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+    }
+    AsymmDataALL_2012.push_back(AsymHold);
+    AsymmDataErrALL_2012.push_back(AsymErrHold);
+    
+    infile.close();
+
+    infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				getenv("ANALYSIS_RESULTS"),"AllCorr",(withPOL?"_withPOL":""),
+				anaChoicesALL_2012[i].Data(),ebinLow,ebinHigh,
+				year==TString("2011-2012")?"0-59":"60-121").Data() );
+    
+    AsymHold = 0.;
+    AsymErrHold = 0.;
+    if (infile.is_open()) {
+      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+    }
+    AsymmCorrDataALL_2012.push_back(AsymHold);
+    AsymmCorrDataErrALL_2012.push_back(AsymErrHold);
+    
+    infile.close();
+  }
+  
+  for (Int_t i=0; i<anaChoicesBacksc_2012.size(); i++) {
+    infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				(withPOL?"_withPOL":""),anaChoicesBacksc_2012[i].Data(),
+				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+    
+    Double_t AsymHold = 0.;
+    Double_t AsymErrHold = 0.;
+    if (infile.is_open()) {
+      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+    }
+    AsymmDataBacksc_2012.push_back(AsymHold);
+    AsymmDataErrBacksc_2012.push_back(AsymErrHold);
+    
+    infile.close();
+    
+    infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
+				getenv("ANALYSIS_RESULTS"),"AllCorr",
+				(withPOL?"_withPOL":""),anaChoicesBacksc_2012[i].Data(),
+				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
+    
+    AsymHold = 0.;
+    AsymErrHold = 0.;
+    if (infile.is_open()) {
+      for (Int_t j=0; j<3; j++) infile >> strHold >> AsymHold >> AsymErrHold;
+    }
+    AsymmCorrDataBacksc_2012.push_back(AsymHold);
+    AsymmCorrDataErrBacksc_2012.push_back(AsymErrHold);
+    
+    infile.close();
+    
+  }
       
 
   Double_t xerr[10] = {0.};
@@ -167,19 +304,25 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
 
   gStyle->SetLegendBorderSize(0);
   gStyle->SetFillStyle(0);
+  //gStyle->SetPadTopMargin(0.01);
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetPadBottomMargin(0.15);
   gStyle->SetGridStyle(8);
   gStyle->SetGridColor(kBlack);
+  gStyle->SetTitleSize(0.08,"t");
+  gStyle->SetTitleAlign(23);
 
   
   // First make one plot with same scale for all event types
-  TCanvas *c1 = new TCanvas("c1","demo bin labels",900,600);
-
+  TCanvas *c1 = new TCanvas("c1","demo bin labels",900,900);
+  c1->Divide(1,2);
   c1->SetLeftMargin(0.15);
   c1->SetBottomMargin(0.15);
 
+  c1->cd(1);
+
   gPad->SetGridy();
+  gPad->SetTopMargin(0.0);
 
   TH1F * dataALL = new TH1F("dataALL","",AsymmDataALL.size(),0.5,AsymmDataALL.size()+0.5);
   dataALL->SetMarkerColor(color0);
@@ -206,7 +349,7 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   dataALL->GetXaxis()->SetBinLabel(7,"2,3");
   dataALL->GetXaxis()->SetBinLabel(8,"2");
   dataALL->GetXaxis()->SetBinLabel(9,"3");
-  dataALL->GetXaxis()->SetLabelSize(0.05);
+  dataALL->GetXaxis()->SetLabelSize(0.06);
   dataALL->GetXaxis()->SetTitle("Event Types Included");
   dataALL->GetYaxis()->SetTitle("Asymmetry");
   dataALL->GetXaxis()->SetTitleSize(0.05);
@@ -240,13 +383,92 @@ void AsymmByAnach(TString year, TString corrections, bool withPOL, Int_t ebinLow
   if (CorrAndUnCorr) corrDataALL->Draw("SAME EX0");
   
   
-  TLegend *leg = new TLegend(0.25,0.75,0.6,0.9);
-  //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
+  TLegend *leg = new TLegend(0.2,0.65,0.5,0.9);
+  leg->SetHeader("2011-2012"); // option "C" allows to center the header
+  TLegendEntry *header = (TLegendEntry*)leg->GetListOfPrimitives()->First();
+  header->SetTextSize(0.05);
   leg->AddEntry(dataALL,"Uncorrected Data","p");
   leg->AddEntry(corrDataALL,"Corrected Data","p");
   leg->Draw();
 
   c1->Print(TString::Format("CorrVsUncorr_singleAxis_%s%s.pdf",year.Data(),(color?"_color":"")));
+
+  /// 2012-2013
+
+  // First make one plot with same scale for all event types
+  c1->cd(2);
+  gPad->SetGridy();
+  gPad->SetTopMargin(0.0);
+
+
+  TH1F * dataALL_2012 = new TH1F("dataALL_2012","",AsymmDataALL_2012.size(),0.5,AsymmDataALL_2012.size()+0.5);
+  dataALL_2012->SetMarkerColor(color0);
+  dataALL_2012->SetLineColor(color0);
+  dataALL_2012->SetLineWidth(3);
+  dataALL_2012->SetMarkerStyle(markerUncorr0);
+  dataALL_2012->GetYaxis()->SetNdivisions(512);
+  //dataALL_2012->SetCanExtend(TH1::kAllAxes);
+  dataALL_2012->SetStats(0);
+
+  for (Int_t i=0;i<AsymmDataT0.size();++i) {
+    dataALL_2012->SetBinContent(i+1,AsymmDataALL_2012[i]);
+    dataALL_2012->SetBinError(i+1,AsymmDataErrALL_2012[i]);
+  }
+  //dataALL_2012->LabelsDeflate("X");
+  //dataALL_2012->LabelsDeflate("Y");
+  //dataALL_2012->LabelsOption("v");
+  dataALL_2012->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
+  dataALL_2012->GetXaxis()->SetBinLabel(2,"0,1");//B
+  dataALL_2012->GetXaxis()->SetBinLabel(3,"0,1,2,3");//C
+  dataALL_2012->GetXaxis()->SetBinLabel(4,"0");//D
+  dataALL_2012->GetXaxis()->SetBinLabel(5,"1");
+  dataALL_2012->GetXaxis()->SetBinLabel(6,"2*,3*");
+  dataALL_2012->GetXaxis()->SetBinLabel(7,"2,3");
+  dataALL_2012->GetXaxis()->SetBinLabel(8,"2");
+  dataALL_2012->GetXaxis()->SetBinLabel(9,"3");
+  dataALL_2012->GetXaxis()->SetLabelSize(0.06);
+  dataALL_2012->GetXaxis()->SetTitle("Event Types Included");
+  dataALL_2012->GetYaxis()->SetTitle("Asymmetry");
+  dataALL_2012->GetXaxis()->SetTitleSize(0.05);
+  dataALL_2012->GetYaxis()->SetTitleSize(0.05);
+  dataALL_2012->GetXaxis()->CenterTitle();
+  dataALL_2012->GetYaxis()->CenterTitle();
+  dataALL_2012->SetMinimum(yminBS);
+  dataALL_2012->SetMaximum(ymaxBS);
+
+  dataALL_2012->Draw("EX0");
+
+  TLine *line1_2012 = new TLine(dataALL_2012->GetXaxis()->GetXmin(),-0.1184,dataALL_2012->GetXaxis()->GetXmax(),-0.1184);
+  line1_2012->SetLineStyle(7);
+  line1_2012->SetLineWidth(2);
+  if (corrections==TString("AllCorr")) line1->Draw("SAME");
+
+  TH1F * corrDataALL_2012 = new TH1F("corrDataALL_2012","",AsymmCorrDataALL_2012.size(),0.5,AsymmCorrDataALL_2012.size()+0.5);
+  corrDataALL_2012->SetMarkerColor(color0);
+  corrDataALL_2012->SetLineColor(color0);
+  corrDataALL_2012->SetLineWidth(3);
+  corrDataALL_2012->SetMarkerStyle(markerCorr0);
+  //corrDataALL_2012->GetXaxis()->SetNdivisions();
+  //corrDataALL_2012->SetCanExtend(TH1::kAllAxes);
+  corrDataALL_2012->SetStats(0);
+
+  for (Int_t i=0;i<AsymmCorrDataT0.size();++i) {
+    corrDataALL_2012->SetBinContent(i+1,AsymmCorrDataALL_2012[i]);
+    corrDataALL_2012->SetBinError(i+1,AsymmCorrDataErrALL_2012[i]);
+  }
+
+  if (CorrAndUnCorr) corrDataALL_2012->Draw("SAME EX0");
+  
+  
+  TLegend *leg_2012 = new TLegend(0.2,0.65,0.5,0.9);
+  leg_2012->SetHeader("2012-2013"); // option "C" allows to center the header
+  header = (TLegendEntry*)leg->GetListOfPrimitives()->First();
+  header->SetTextSize(0.05);
+  leg_2012->AddEntry(dataALL_2012,"Uncorrected Data","p");
+  leg_2012->AddEntry(corrDataALL_2012,"Corrected Data","p");
+  leg_2012->Draw();
+
+  c1->Print(TString::Format("CorrVsUncorr_singleAxis%s.pdf",(color?"_color":"")));
 
   ///////////////// Multiple Axes /////////////////////////
 
