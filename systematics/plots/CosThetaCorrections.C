@@ -11,8 +11,8 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
-Int_t groupBin=1;
-Double_t enStart=40.;//10.*groupBin;
+Int_t groupBin=4;
+Double_t enStart=50.;//10.*groupBin;
 
 Double_t BSlimitLow = -1., BSlimitHigh = 3.;
 Double_t AnglelimitLow = -5., AnglelimitHigh = 3.;
@@ -301,7 +301,7 @@ void CosThetaCorrections() {
 
   
 
-  TString pdffile = TString::Format("Delta_3_byType_anaChC.pdf");
+  TString pdffile = TString::Format("Delta_3_byType_anaChC_%iBinAve.pdf",groupBin);
 
   c0->Print(TString::Format("%s(",pdffile.Data()));
   c1->Print(pdffile);

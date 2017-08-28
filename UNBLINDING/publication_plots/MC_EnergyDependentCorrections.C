@@ -11,7 +11,10 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
-Int_t groupBin=4;
+// Remember to print whichever one you want at the bottom to a pdf
+bool color = false;
+
+Int_t groupBin=5;
 Double_t enStart=50.;//10.*groupBin;
 
 Double_t BSlimitLow = -1., BSlimitHigh = 3.;
@@ -23,7 +26,7 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TStrin
 
   std::vector <std::vector<Double_t> > corrs;
   //  std::ifstream infile(TString::Format("../OldMCCorrection/deltaBS%s_anaCh%s_%s.txt",corr.Data(),anaCh.Data(),year.Data()));
-  std::ifstream infile(TString::Format("../OldMCCorrection/%s_delta_2%s_anaCh%s.txt",year.Data(),corr!=std::string("ALL")?corr.Data():"",anaCh.Data()));
+  std::ifstream infile(TString::Format("../../systematics/OldMCCorrection/%s_delta_2%s_anaCh%s.txt",year.Data(),corr!=std::string("ALL")?corr.Data():"",anaCh.Data()));
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
@@ -64,8 +67,8 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
 
   std::vector <std::vector<Double_t> > corrs;
   std::ifstream infile;
-  if ( anaCh==TString("C") ) infile.open(TString::Format("../AngleCorrections/%s_delta_3.txt",year.Data()));
-  else infile.open(TString::Format("../AngleCorrections/%s_DeltaAngle_anaCh%s.txt",year.Data(),anaCh.Data()));
+  if ( anaCh==TString("C") ) infile.open(TString::Format("../../systematics/AngleCorrections/%s_delta_3.txt",year.Data()));
+  else infile.open(TString::Format("../../systematics/AngleCorrections/%s_DeltaAngle_anaCh%s.txt",year.Data(),anaCh.Data()));
   
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
@@ -141,11 +144,14 @@ void EnergyDependentCorrections(TString anaCh) {
   //Int_t octmin = year==2011?0:60;
   //Int_t octmax = year==2011?59:121;
 
-  int fill2011 = 3001;
-  int fill2012 = 3001;
-
-  int col2011 = 4;
-  int col2012 = 3;
+  Int_t col2011 = color?9:1;
+  Int_t col2012 = color?8:1;
+  Int_t fill2011 = 3004;
+  Int_t fill2012 = 3005;
+  Int_t marker2011 = 20;
+  Int_t marker2012 = 21;
+  Int_t lineStyle2011 = 1;
+  Int_t lineStyle2012 = color?1:2;
 
   int startPoint=0;
   
@@ -196,6 +202,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs0_2011->SetLineColor(col2011);
   g_bs0_2011->SetFillColor(col2011);
   g_bs0_2011->SetFillStyle(fill2011);
+  g_bs0_2011->SetLineStyle(lineStyle2011);
+  
 
   TGraph *g_bs0_2011_noErr = new TGraph(bs0_2011[0].size()-startPoint,&bs0_2011[0][startPoint],&bs0_2011[1][startPoint]);
  
@@ -205,7 +213,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs0_2012->SetLineColor(col2012);
   g_bs0_2012->SetFillColor(col2012);
   g_bs0_2012->SetFillStyle(fill2012);
-  
+  g_bs0_2012->SetLineStyle(lineStyle2012);
+
   mg0->Add(g_bs0_2011);
   mg0->Add(g_bs0_2012);
   mg0->SetMinimum(BSlimitLow);
@@ -239,6 +248,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs1_2011->SetLineColor(col2011);
   g_bs1_2011->SetFillColor(col2011);
   g_bs1_2011->SetFillStyle(fill2011);
+  g_bs1_2011->SetLineStyle(lineStyle2011);
+
   
   TGraphErrors *g_bs1_2012 = new TGraphErrors(bs1_2012[0].size()-startPoint,&bs1_2012[0][startPoint],&bs1_2012[1][startPoint],0,&bs1_2012[2][startPoint]);
   g_bs1_2012->SetMarkerStyle(0);
@@ -246,6 +257,7 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs1_2012->SetLineColor(col2012);
   g_bs1_2012->SetFillColor(col2012);
   g_bs1_2012->SetFillStyle(fill2012);
+  g_bs1_2012->SetLineStyle(lineStyle2012);
   
   mg1->Add(g_bs1_2011);
   mg1->Add(g_bs1_2012);
@@ -280,6 +292,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs2_2011->SetLineColor(col2011);
   g_bs2_2011->SetFillColor(col2011);
   g_bs2_2011->SetFillStyle(fill2011);
+  g_bs2_2011->SetLineStyle(lineStyle2011);
+
   
   TGraphErrors *g_bs2_2012 = new TGraphErrors(bs2_2012[0].size()-startPoint,&bs2_2012[0][startPoint],&bs2_2012[1][startPoint],0,&bs2_2012[2][startPoint]);
   g_bs2_2012->SetMarkerStyle(0);
@@ -287,6 +301,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs2_2012->SetLineColor(col2012);
   g_bs2_2012->SetFillColor(col2012);
   g_bs2_2012->SetFillStyle(fill2012);
+  g_bs2_2012->SetLineStyle(lineStyle2012);
+
   
   mg2->Add(g_bs2_2011);
   mg2->Add(g_bs2_2012);
@@ -321,14 +337,16 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bs3_2011->SetLineColor(col2011);
   g_bs3_2011->SetFillColor(col2011);
   g_bs3_2011->SetFillStyle(fill2011);
-  
+  g_bs3_2011->SetLineStyle(lineStyle2011);
+
   TGraphErrors *g_bs3_2012 = new TGraphErrors(bs3_2012[0].size()-startPoint,&bs3_2012[0][startPoint],&bs3_2012[1][startPoint],0,&bs3_2012[2][startPoint]);
   g_bs3_2012->SetMarkerStyle(0);
   g_bs3_2012->SetLineWidth(3);
   g_bs3_2012->SetLineColor(col2012);
   g_bs3_2012->SetFillColor(col2012);
   g_bs3_2012->SetFillStyle(fill2012);
-  
+  g_bs3_2012->SetLineStyle(lineStyle2012);
+
   mg3->Add(g_bs3_2011);
   mg3->Add(g_bs3_2012);
   mg3->SetMinimum(BSlimitLow);
@@ -363,6 +381,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bsALL_2011->SetLineColor(col2011);
   g_bsALL_2011->SetFillColor(col2011);
   g_bsALL_2011->SetFillStyle(fill2011);
+  g_bsALL_2011->SetLineStyle(lineStyle2011);
+
   
   TGraphErrors *g_bsALL_2012 = new TGraphErrors(bsALL_2012[0].size()-startPoint,&bsALL_2012[0][startPoint],&bsALL_2012[1][startPoint],0,&bsALL_2012[2][startPoint]);
   g_bsALL_2012->SetMarkerStyle(0);
@@ -370,7 +390,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_bsALL_2012->SetLineColor(col2012);
   g_bsALL_2012->SetFillColor(col2012);
   g_bsALL_2012->SetFillStyle(fill2012);
-  
+  g_bsALL_2012->SetLineStyle(lineStyle2012);
+    
   mgALLBS->Add(g_bsALL_2011);
   mgALLBS->Add(g_bsALL_2012);
   mgALLBS->SetMinimum(BSlimitLow);
@@ -404,6 +425,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_cosTheta_2011->SetLineColor(col2011);
   g_cosTheta_2011->SetFillColor(col2011);
   g_cosTheta_2011->SetFillStyle(fill2011);
+  g_cosTheta_2011->SetLineStyle(lineStyle2011);
+
   
   TGraphErrors *g_cosTheta_2012 = new TGraphErrors(cosTheta_2012[0].size()-startPoint,&cosTheta_2012[0][startPoint],&cosTheta_2012[1][startPoint],0,&cosTheta_2012[2][startPoint]);
   g_cosTheta_2012->SetMarkerStyle(0);
@@ -411,7 +434,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_cosTheta_2012->SetLineColor(col2012);
   g_cosTheta_2012->SetFillColor(col2012);
   g_cosTheta_2012->SetFillStyle(fill2012);
-  
+  g_cosTheta_2012->SetLineStyle(lineStyle2012);
+
   mgAngle->Add(g_cosTheta_2011);
   mgAngle->Add(g_cosTheta_2012);
   mgAngle->SetMinimum(AnglelimitLow);
@@ -445,6 +469,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_totalCorr_2011->SetLineColor(col2011);
   g_totalCorr_2011->SetFillColor(col2011);
   g_totalCorr_2011->SetFillStyle(fill2011);
+  g_totalCorr_2011->SetLineStyle(lineStyle2011);
+
   
   TGraphErrors *g_totalCorr_2012 = new TGraphErrors(totalCorr_2012[0].size()-startPoint,&totalCorr_2012[0][startPoint],&totalCorr_2012[1][startPoint],0,&totalCorr_2012[2][startPoint]);
   g_totalCorr_2012->SetMarkerStyle(0);
@@ -452,7 +478,8 @@ void EnergyDependentCorrections(TString anaCh) {
   g_totalCorr_2012->SetLineColor(col2012);
   g_totalCorr_2012->SetFillColor(col2012);
   g_totalCorr_2012->SetFillStyle(fill2012);
-  
+  g_totalCorr_2012->SetLineStyle(lineStyle2012);
+
   mgTotalCorr->Add(g_totalCorr_2011);
   mgTotalCorr->Add(g_totalCorr_2012);
   mgTotalCorr->SetMinimum(AnglelimitLow);
@@ -474,14 +501,14 @@ void EnergyDependentCorrections(TString anaCh) {
   legTotalCorr->Draw("SAME");
   
 
-  TString pdffile = TString::Format("MC_Corrections_anaCh%s_%iBinAve.pdf",anaCh.Data(),groupBin);
+  TString pdffile = TString::Format("TOTAL_MC_Corrections_anaCh%s_%iBinAve%s.pdf",anaCh.Data(),groupBin,(color?"_color":""));
 
-  c0->Print(TString::Format("%s(",pdffile.Data()));
-  c1->Print(pdffile);
-  c2->Print(pdffile);
-  c3->Print(pdffile);
-  cALLBS->Print(pdffile);
-  cAngle->Print(pdffile);
-  cTotalCorr->Print(TString::Format("%s)",pdffile.Data()));
+  //c0->Print(TString::Format("%s(",pdffile.Data()));
+  //c1->Print(pdffile);
+  //c2->Print(pdffile);
+  //c3->Print(pdffile);
+  //cALLBS->Print(pdffile);
+  //cAngle->Print(pdffile);
+  cTotalCorr->Print(TString::Format("%s",pdffile.Data()));
   
 }
