@@ -100,7 +100,7 @@ void errorEnvelope() {
   Int_t fill2011 = 3004;
   Int_t fill2012 = 3005;
   Int_t marker2011 = 20;
-  Int_t marker2012 = 21;
+  Int_t marker2012 = 24;
 
   Double_t sep = 20.;
 
@@ -254,8 +254,8 @@ void errorEnvelope() {
   zeroLine->Draw("SAME");
 
   TLegend *leg = new TLegend(0.65,0.70,0.875,0.875);
-  leg->AddEntry(gr2011,0,"lfp");
-  leg->AddEntry(gr2012,0,"lfp");
+  leg->AddEntry(gr2011,0,"fp");
+  leg->AddEntry(gr2012,0,"fp");
   leg->Draw();
 
 
