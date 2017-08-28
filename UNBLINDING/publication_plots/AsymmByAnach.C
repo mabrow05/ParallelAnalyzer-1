@@ -327,7 +327,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * dataALL = new TH1F("dataALL","",AsymmDataALL.size(),0.5,AsymmDataALL.size()+0.5);
   dataALL->SetMarkerColor(color0);
   dataALL->SetLineColor(color0);
-  dataALL->SetLineWidth(3);
+  dataALL->SetLineWidth(2);
   dataALL->SetMarkerStyle(markerUncorr0);
   dataALL->GetYaxis()->SetNdivisions(512);
   //dataALL->SetCanExtend(TH1::kAllAxes);
@@ -359,7 +359,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   dataALL->SetMinimum(yminBS);
   dataALL->SetMaximum(ymaxBS);
 
-  dataALL->Draw("EX0");
+  dataALL->Draw("E1X0");
 
   TLine *line1 = new TLine(dataALL->GetXaxis()->GetXmin(),-0.1184,dataALL->GetXaxis()->GetXmax(),-0.1184);
   line1->SetLineStyle(7);
@@ -369,7 +369,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * corrDataALL = new TH1F("corrDataALL","",AsymmCorrDataALL.size(),0.5,AsymmCorrDataALL.size()+0.5);
   corrDataALL->SetMarkerColor(color0);
   corrDataALL->SetLineColor(color0);
-  corrDataALL->SetLineWidth(3);
+  corrDataALL->SetLineWidth(2);
   corrDataALL->SetMarkerStyle(markerCorr0);
   //corrDataALL->GetXaxis()->SetNdivisions();
   //corrDataALL->SetCanExtend(TH1::kAllAxes);
@@ -380,7 +380,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     corrDataALL->SetBinError(i+1,AsymmCorrDataErrALL[i]);
   }
 
-  if (CorrAndUnCorr) corrDataALL->Draw("SAME EX0");
+  if (CorrAndUnCorr) corrDataALL->Draw("SAME E1X0");
   
   
   TLegend *leg = new TLegend(0.2,0.65,0.5,0.9);
@@ -404,7 +404,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * dataALL_2012 = new TH1F("dataALL_2012","",AsymmDataALL_2012.size(),0.5,AsymmDataALL_2012.size()+0.5);
   dataALL_2012->SetMarkerColor(color0);
   dataALL_2012->SetLineColor(color0);
-  dataALL_2012->SetLineWidth(3);
+  dataALL_2012->SetLineWidth(2);
   dataALL_2012->SetMarkerStyle(markerUncorr0);
   dataALL_2012->GetYaxis()->SetNdivisions(512);
   //dataALL_2012->SetCanExtend(TH1::kAllAxes);
@@ -436,7 +436,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   dataALL_2012->SetMinimum(yminBS);
   dataALL_2012->SetMaximum(ymaxBS);
 
-  dataALL_2012->Draw("EX0");
+  dataALL_2012->Draw("E1X0");
 
   TLine *line1_2012 = new TLine(dataALL_2012->GetXaxis()->GetXmin(),-0.1184,dataALL_2012->GetXaxis()->GetXmax(),-0.1184);
   line1_2012->SetLineStyle(7);
@@ -446,7 +446,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * corrDataALL_2012 = new TH1F("corrDataALL_2012","",AsymmCorrDataALL_2012.size(),0.5,AsymmCorrDataALL_2012.size()+0.5);
   corrDataALL_2012->SetMarkerColor(color0);
   corrDataALL_2012->SetLineColor(color0);
-  corrDataALL_2012->SetLineWidth(3);
+  corrDataALL_2012->SetLineWidth(2);
   corrDataALL_2012->SetMarkerStyle(markerCorr0);
   //corrDataALL_2012->GetXaxis()->SetNdivisions();
   //corrDataALL_2012->SetCanExtend(TH1::kAllAxes);
@@ -457,7 +457,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     corrDataALL_2012->SetBinError(i+1,AsymmCorrDataErrALL_2012[i]);
   }
 
-  if (CorrAndUnCorr) corrDataALL_2012->Draw("SAME EX0");
+  if (CorrAndUnCorr) corrDataALL_2012->Draw("SAME E1X0");
   
   
   TLegend *leg_2012 = new TLegend(0.2,0.65,0.5,0.9);
@@ -484,7 +484,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * data = new TH1F("data","",AsymmDataT0.size(),0.5,AsymmDataT0.size()+0.5);
   data->SetMarkerColor(color0);
   data->SetLineColor(color0);
-  data->SetLineWidth(3);
+  data->SetLineWidth(2);
   data->SetMarkerStyle(markerUncorr0);
   data->GetYaxis()->SetNdivisions(512);
   //data->SetCanExtend(TH1::kAllAxes);
@@ -526,7 +526,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * corrData = new TH1F("corrData","",AsymmCorrDataT0.size(),0.5,AsymmCorrDataT0.size()+0.5);
   corrData->SetMarkerColor(color0);
   corrData->SetLineColor(color0);
-  corrData->SetLineWidth(3);
+  corrData->SetLineWidth(2);
   corrData->SetMarkerStyle(markerCorr0);
   //corrData->GetXaxis()->SetNdivisions();
   //corrData->SetCanExtend(TH1::kAllAxes);
@@ -541,7 +541,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * dataBacksc = new TH1F("dataBacksc","",AsymmDataBacksc.size(),0.5,AsymmDataBacksc.size()+0.5);
   dataBacksc->SetMarkerColor(colorBS);
   dataBacksc->SetLineColor(colorBS);
-  dataBacksc->SetLineWidth(3);
+  dataBacksc->SetLineWidth(2);
   dataBacksc->SetMarkerStyle(markerUncorrBS);
   dataBacksc->GetYaxis()->SetNdivisions(512);
   //dataBacksc->SetCanExtend(TH1::kAllAxes);
@@ -579,7 +579,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TH1F * corrDataBacksc = new TH1F("","CorrDataBacksc vs MC Blinded Asymmetries",AsymmCorrDataBacksc.size(),0.5,AsymmCorrDataBacksc.size()+0.5);
   corrDataBacksc->SetMarkerColor(colorBS);
   corrDataBacksc->SetLineColor(colorBS);
-  corrDataBacksc->SetLineWidth(3);
+  corrDataBacksc->SetLineWidth(2);
   corrDataBacksc->SetMarkerStyle(markerCorrBS);
   //corrDataBacksc->GetXaxis()->SetNdivisions();
   //corrDataBacksc->SetCanExtend(TH1::kAllAxes);
@@ -590,12 +590,12 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     corrDataBacksc->SetBinError(i+1,AsymmCorrDataErrBacksc[i]);
   }
 
-  if (CorrAndUnCorr) corrDataBacksc->Draw("SAME EX0");
+  if (CorrAndUnCorr) corrDataBacksc->Draw("SAME E1X0");
 
   TH1F * simBacksc = new TH1F("","Sim vs MC Blinded Asymmetries",AsymmSimBacksc.size(),0.5,AsymmSimBacksc.size()+0.5);
   simBacksc->SetMarkerColor(kRed);
   simBacksc->SetLineColor(kRed);
-  simBacksc->SetLineWidth(3);
+  simBacksc->SetLineWidth(2);
   simBacksc->SetMarkerStyle(kFullSquare);
   //simBacksc->GetXaxis()->SetNdivisions();
   //simBacksc->SetCanExtend(TH1::kAllAxes);
@@ -606,7 +606,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     simBacksc->SetBinError(i+1,AsymmSimErrBacksc[i]);
   }
   
-  if (withSim) simBacksc->Draw("SAME EX0");
+  if (withSim) simBacksc->Draw("SAME E1X0");
 
   pad1->Draw();
   pad1->SetGridy();
@@ -614,15 +614,15 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
 
   data->GetYaxis()->SetAxisColor(color0);
   data->GetYaxis()->SetLabelColor(color0);
-  data->Draw("EX0");
-  corrData->Draw("EX0 SAME");
+  data->Draw("E1X0");
+  corrData->Draw("E1X0 SAME");
 
   pad2->Draw();
   pad2->cd();
   dataBacksc->GetYaxis()->SetAxisColor(colorBS);
   dataBacksc->GetYaxis()->SetLabelColor(colorBS);
-  dataBacksc->Draw("EX0 Y+");
-  corrDataBacksc->Draw("EX0 SAME");
+  dataBacksc->Draw("E1X0 Y+");
+  corrDataBacksc->Draw("E1X0 SAME");
 
   TLegend *leg1 = new TLegend(0.15,0.65,0.5,0.85);
   //leg->SetHeader("The Legend Title","C"); // option "C" allows to center the header
