@@ -461,7 +461,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mgTotalCorr = new TMultiGraph();
-  mgTotalCorr->SetTitle("#Delta_{MC} vs. Energy");  
+  //mgTotalCorr->SetTitle("#Delta_{MC} vs. Energy");  
   
   TGraphErrors *g_totalCorr_2011 = new TGraphErrors(totalCorr_2011[0].size()-startPoint,&totalCorr_2011[0][startPoint],&totalCorr_2011[1][startPoint],0,&totalCorr_2011[2][startPoint]);
   g_totalCorr_2011->SetMarkerStyle(0);
