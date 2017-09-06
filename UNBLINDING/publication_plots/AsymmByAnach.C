@@ -305,7 +305,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   //gStyle->SetPadTopMargin(0.01);
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetPadBottomMargin(0.15);
-  gStyle->SetGridStyle(8);
+  gStyle->SetGridStyle(2);
   gStyle->SetGridColor(kBlack);
   gStyle->SetTitleSize(0.08,"t");
   gStyle->SetTitleAlign(23);
@@ -317,24 +317,25 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   c1->SetLeftMargin(0.15);
   c1->SetBottomMargin(0.15);
 
-  TPad *p2011 = new TPad("p2011","p2011",0.17,0.75,0.47,0.95);
+  TPad *p2011 = new TPad("p2011","p2011",0.19,0.75,0.49,0.95);
   p2011->SetBottomMargin(0.12);
   p2011->SetTopMargin(0.);
   p2011->SetLeftMargin(0.2);
-  p2011->SetGridy();
+  //p2011->SetGridy();
   //p2011->SetBorderMode(0);
   //p2011->SetBorderSize(2);
   p2011->Draw();
-  TPad *p2012 = new TPad("p2012","p2012",0.17,0.25,0.47,0.45);
+  TPad *p2012 = new TPad("p2012","p2012",0.19,0.25,0.49,0.45);
   p2012->SetBottomMargin(0.12);
   p2012->SetTopMargin(0.);
   p2012->SetLeftMargin(0.2);
-  p2012->SetGridy();
+  //p2012->SetGridy();
   p2012->Draw();
 
   c1->cd(1);
 
   gPad->SetGridy();
+  gPad->SetTicks(0,1);
   gPad->SetTopMargin(0.0);
 
   TH1F * dataALL = new TH1F("dataALL","",AsymmDataALL.size(),0.5,AsymmDataALL.size()+0.5);
@@ -400,7 +401,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
 
   
   
-  TLegend *leg = new TLegend(0.6,0.74,0.9,0.99);
+  TLegend *leg = new TLegend(0.6,0.745,0.9,0.995);
   leg->SetHeader("2011-2012"); // option "C" allows to center the header
   TLegendEntry *header = (TLegendEntry*)leg->GetListOfPrimitives()->First();
   header->SetTextSize(0.07);
@@ -458,6 +459,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   // First make one plot with same scale for all event types
   c1->cd(2);
   gPad->SetGridy();
+  gPad->SetTicks(0,1);
   gPad->SetTopMargin(0.0);
 
 
@@ -523,7 +525,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   if (CorrAndUnCorr) corrDataALL_2012->Draw("SAME E1X0");
   
   
-  TLegend *leg_2012 = new TLegend(0.6,0.74,0.9,0.99);
+  TLegend *leg_2012 = new TLegend(0.6,0.745,0.9,0.995);
   leg_2012->SetHeader("2012-2013"); // option "C" allows to center the header
   TLegendEntry *header2012 = (TLegendEntry*)leg_2012->GetListOfPrimitives()->First();
   header2012->SetTextSize(0.07);
