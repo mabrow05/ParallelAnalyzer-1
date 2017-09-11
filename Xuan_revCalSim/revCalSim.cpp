@@ -243,10 +243,13 @@ void SetUpTree(TTree *tree) {
 
 void revCalSimulation (Int_t runNumber, string b, string A) 
 {
+
+  int numFiles = 1;//(b==std::string("inf")?200:(A==std::string("-1")?200:20));
+
   bool allEvtsTrigg = false; //This just removes the use of the trigger function for an initial calibration. 
                             // Once a calibration is established (or if running on Betas), you can keep this false
 
-  bool simProperStatistics = false; // If True, this uses the actual data run to determine the number of Type 0s to simulate
+  bool simProperStatistics = true; // If True, this uses the actual data run to determine the number of Type 0s to simulate
 
   
   cout << "Running reverse calibration for run " << runNumber << endl;  
@@ -311,13 +314,13 @@ void revCalSimulation (Int_t runNumber, string b, string A)
   //Decide which simulation to use...
   TChain *chain = new TChain("anaTree"); 
   
-  TString fileLocation = TString::Format("/extern/mabrow05/ucna/xuan_stuff/A_%s_b_%s/",A.c_str(),b.c_str());
+  TString fileLocation = TString::Format("/extern/mabrow05/ucna/xuan_stuff/fromSept2017Onwards/A_%s_b_%s/",A.c_str(),b.c_str());
  
   std::cout << "Using simulation from " << fileLocation << "...\n";
 
   //Read in simulated data and put in a TChain
   TRandom3 *randFile = new TRandom3(runNumber*2);
-  int numFiles = 10;
+  
   int fileNum = (int)(randFile->Rndm()*numFiles);
   delete randFile;
   for (int i=0; i<numFiles; i++) {

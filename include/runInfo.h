@@ -59,7 +59,7 @@ unsigned int getSrcRunPeriod(int runNumber) {
   else if (runNumber <= 22630) { // Octets 96-105
     calibrationPeriod=22;
   }
-  else if (runNumber <= 23173) { // Octets 106-121
+  else if (runNumber <= 24000) { // Octets 106-121 and to APD
     calibrationPeriod=23;
   }
   return calibrationPeriod;
@@ -91,7 +91,7 @@ unsigned int getXeRunPeriod(int runNumber) {
   else if (runNumber <= 22238) {
     calibrationPeriod=9;
   }
-  else if (runNumber <= 23173) {
+  else if (runNumber <= 24000) {
     calibrationPeriod=10;
   }
   else {
@@ -128,7 +128,7 @@ unsigned int getXeRunPeriodForMWPCmap(int runNumber) {
   else if (runNumber <= 22238) {
     calibrationPeriod=9;
   }
-  else if (runNumber <= 23173) {
+  else if (runNumber <= 24000) {
     calibrationPeriod=10;
   }
   else {
