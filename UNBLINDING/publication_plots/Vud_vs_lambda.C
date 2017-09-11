@@ -43,7 +43,7 @@ Double_t getVudUncert(Double_t x, Double_t tau, Double_t dtau) {
 
 void Vud_vs_lambda() {
 
-  bool color = false;
+  bool color = true;
   bool data = true;
   
   Int_t fillStyle_vud = color?3002:3002;//3345;//3004;//3018;
@@ -92,8 +92,8 @@ void Vud_vs_lambda() {
   Double_t dTau1 = weightedAveErr(Tau1vecErr);
 
   //beam
-  std::vector<Double_t> Tau2vec {887.7,889.2,886.3};
-  std::vector<Double_t> Tau2vecErr {2.2,4.8,3.4}; 
+  std::vector<Double_t> Tau2vec {887.7,889.2};
+  std::vector<Double_t> Tau2vecErr {2.2,4.8}; 
   Double_t Tau2 = weightedAve(Tau2vec,Tau2vecErr);
   Double_t dTau2 = weightedAveErr(Tau2vecErr);
   
@@ -287,7 +287,7 @@ void Vud_vs_lambda() {
   tTau1->GetLine(0)->SetTextSize(0.035);
   tTau1->Draw();
 
-  TPaveText *tTau2 = new TPaveText(0.15,0.79,0.27,0.83,"nbNDC");
+  TPaveText *tTau2 = new TPaveText(0.137,0.79,0.257,0.83,"nbNDC");
   tTau2->SetBorderSize(0);
   tTau2->SetTextColor(color?fillColor_tau2:1);
   tTau2->AddText("Beam #tau_{n}");

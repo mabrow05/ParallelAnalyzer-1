@@ -5,21 +5,22 @@ void betaAsymmetryFitter() {
   bool color = false;
   UInt_t nskip=4;
 
-  gStyle->SetTitleSize(0.08,"t");
-  gStyle->SetTitleSize(0.08,"x");
-  gStyle->SetTitleSize(0.08,"y");
+  //gStyle->SetTitleSize(0.1,"t");
+  //gStyle->SetTitleSize(0.1,"x");
+  //gStyle->SetTitleSize(0.1,"y");
   gStyle->SetStatX(0.75);
   gStyle->SetStatY(0.9);
   gStyle->SetStatBorderSize(0);
   //gStyle->SetOptStat(0);
   //gStyle->SetTitleOffset(0.85,"y");
-  gStyle->SetPadTopMargin(0.0);
-  gStyle->SetPadBottomMargin(0.15);
+  gStyle->SetPadTopMargin(0.06);
+  gStyle->SetPadRightMargin(0.05);
+  gStyle->SetPadBottomMargin(0.11);
   gStyle->SetPadLeftMargin(0.12);
-  gStyle->SetLabelSize(0.07,"xyz");
+  //gStyle->SetLabelSize(0.1,"xyz");
   
 
-  gStyle->SetOptFit(1);//(1111);
+  gStyle->SetOptFit(0);//(1111);
   gStyle->SetStatY(0.85);
   gStyle->SetStatX(0.7);
   //gStyle->SetStatW(.09);
@@ -175,28 +176,34 @@ void betaAsymmetryFitter() {
 
 
   /////////////////////////////////////////////////////////////////////////////////////////
-  TCanvas *c2 = new TCanvas("c2","c2",700,1000);
+  TCanvas *c2 = new TCanvas("c2","c2",700,700);
   TPad *p1 = new TPad("p1","p1",0.,0.5,1.,1.);
-  TPad *p2 = new TPad("p2","p2",0.,0.25,1.,0.5);
-  TPad *p3 = new TPad("p3","p3",0.,0.,1.,0.25);
+  TPad *p2 = new TPad("p2","p2",0.,0.28,1.,0.5);
+  TPad *p3 = new TPad("p3","p3",0.,0.06,1.,0.28);
   //p2->SetBottomMargin(0.3);
   p1->Draw();
   p2->Draw();
   p3->Draw();
+  
   p2->cd();
 
   TGraphErrors *gr2 = new TGraphErrors(energy2011.size()-nskip,&energy2011[nskip],&Asym2011[nskip],NULL,&AsymErr2011[nskip]);
-  gr2->SetTitle("2011-2012");//TString::Format("A_{0} vs. Energy for 2011-2012").Data());
-  gr2->GetXaxis()->SetTitle("Energy (keV)");
+  gr2->SetTitle("");//TString::Format("A_{0} vs. Energy for 2011-2012").Data());
+  //gr2->GetXaxis()->SetTitle("Energy (keV)");
   gr2->GetYaxis()->SetTitle("A_{0}");
+  gr2->GetYaxis()->SetLabelSize(0.12);
+  gr2->GetYaxis()->SetTitleOffset(0.32);
+  gr2->GetYaxis()->SetTitleSize(0.18);
+  gr2->GetXaxis()->SetLabelSize(0.12);
   gr2->GetXaxis()->CenterTitle();
   gr2->GetYaxis()->CenterTitle();
   gr2->SetMarkerStyle(20);
   gr2->SetLineWidth(2);
   gr2->GetXaxis()->SetLimits(0., 800.);
-  gr2->SetMarkerSize(0.8);
+  gr2->GetYaxis()->SetNdivisions(508);
+  gr2->SetMarkerSize(1);
   gr2->GetXaxis()->SetTitleOffset(1.);
-  gr2->GetYaxis()->SetTitleOffset(0.8);
+  
   
   TF1 *f3 = new TF1("f3","[0]",190.,740.);
   f3->SetParameter(0,-0.1184);
@@ -205,26 +212,41 @@ void betaAsymmetryFitter() {
   f3->SetLineWidth(3);
   f3->SetParName(0,"A_{0}");
 
+  
   gr2->Fit("f3","LR");
-  gr2->SetMinimum(f3->GetParameter(0)-0.03);
-  gr2->SetMaximum(f3->GetParameter(0)+0.045);
+  gr2->SetMinimum(-0.138);//f3->GetParameter(0)-0.02);
+  gr2->SetMaximum(-0.094);//f3->GetParameter(0)+0.03);
   
   gr2->Draw("AP0");
 
+  TPaveText *pv2011 = new TPaveText(0.3,0.67,0.7,0.95,"nbNDC");
+  pv2011->SetBorderSize(0);
+  pv2011->AddText(TString::Format("2011-2012: A_{0} = %0.5f #pm %0.5f",
+				  f3->GetParameter(0),f3->GetParError(0)));
+  pv2011->GetLine(0)->SetTextSize(0.13);
+  pv2011->GetLine(0)->SetTextFont(42);
+  pv2011->Draw();
+
   p3->cd();
+  //p3->SetBottomMargin(0.25);
 
   TGraphErrors *gr2_2012 = new TGraphErrors(energy2012.size()-nskip,&energy2012[nskip],&Asym2012[nskip],NULL,&AsymErr2012[nskip]);
-  gr2_2012->SetTitle("2012-2013");//TString::Format("A_{0} vs. Energy for 2012-2013").Data());
-  gr2_2012->GetXaxis()->SetTitle("Energy (keV)");
+  gr2_2012->SetTitle("");//TString::Format("A_{0} vs. Energy for 2012-2013").Data());
+  //gr2_2012->GetXaxis()->SetTitle("Energy (keV)");
   gr2_2012->GetYaxis()->SetTitle("A_{0}");
+  gr2_2012->GetYaxis()->SetLabelSize(0.12);
+  gr2_2012->GetYaxis()->SetTitleOffset(0.32);
+  gr2_2012->GetYaxis()->SetTitleSize(0.18);
+  gr2_2012->GetXaxis()->SetLabelSize(0.12);
   gr2_2012->GetXaxis()->CenterTitle();
   gr2_2012->GetYaxis()->CenterTitle();
   gr2_2012->SetMarkerStyle(20);
   gr2_2012->SetLineWidth(2);
   gr2_2012->GetXaxis()->SetLimits(0., 800.);
-  gr2_2012->SetMarkerSize(0.8);
+  gr2_2012->GetYaxis()->SetNdivisions(508);
+  gr2_2012->SetMarkerSize(1);
   gr2_2012->GetXaxis()->SetTitleOffset(1.);
-  gr2_2012->GetYaxis()->SetTitleOffset(0.8);
+  
   
   TF1 *f3_2012 = new TF1("f3_2012","[0]",190.,740.);
   f3_2012->SetParameter(0,-0.1184);
@@ -234,14 +256,27 @@ void betaAsymmetryFitter() {
   f3_2012->SetParName(0,"A_{0}");
 
   gr2_2012->Fit("f3_2012","LR");
-  gr2_2012->SetMinimum(f3_2012->GetParameter(0)-0.03);
-  gr2_2012->SetMaximum(f3_2012->GetParameter(0)+0.045);
+  gr2_2012->SetMinimum(-0.138);
+  gr2_2012->SetMaximum(-0.094);
+  //gr2_2012->SetMinimum(f3_2012->GetParameter(0)-0.02);
+  //gr2_2012->SetMaximum(f3_2012->GetParameter(0)+0.03);
   
   gr2_2012->Draw("AP0");
 
-  
-  
 
+  TPaveText *pv2012 = new TPaveText(0.3,0.67,0.7,0.95,"nbNDC");
+  pv2012->SetBorderSize(0);
+  pv2012->AddText(TString::Format("2012-2013: A_{0} = %0.5f #pm %0.5f",
+				  f3_2012->GetParameter(0),f3_2012->GetParError(0)));
+  pv2012->GetLine(0)->SetTextSize(0.13);
+  pv2012->GetLine(0)->SetTextFont(42);
+  pv2012->Draw();
+
+  
+  
+  
+  ////////////////////////////////////////////////////////////////////////////
+  
   Double_t normLow = 190.;
   Double_t normHigh = 740.;
   
@@ -481,6 +516,7 @@ void betaAsymmetryFitter() {
   //c1->cd(1);
 
   p1->cd();
+  p1->SetBottomMargin(0.06);
   
   dataALL->SetTitle("");
   dataALL->SetMarkerColor(color?kBlue:kBlack);
@@ -497,23 +533,38 @@ void betaAsymmetryFitter() {
   simALL->SetMarkerSize(0);
   simALL->SetMarkerStyle(24);
   simALL->SetMaximum(dataALL->GetMaximum()*1.2);
-  simALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  simALL->GetYaxis()->SetTitle("Event Rate (mHz/keV)");
+  simALL->GetYaxis()->SetLabelSize(0.06);
+  simALL->GetXaxis()->SetLabelSize(0.055);
+  simALL->GetYaxis()->SetTitleOffset(0.7);
+  simALL->GetYaxis()->SetTitleSize(0.07);
+  simALL->GetXaxis()->SetTitle("");
   simALL->GetXaxis()->SetRangeUser(0., xAxisMax);
   simALL->Draw("HIST C");
   dataALL->Draw("SAMEE0");
 
   BG_dataALL->SetMarkerColor(1);
   BG_dataALL->SetMarkerStyle(20);
-  BG_dataALL->SetMarkerSize(0.6);
+  BG_dataALL->SetMarkerSize(0.75);
   BG_dataALL->SetLineColor(1);
   BG_dataALL->SetLineWidth(3);
   BG_dataALL->Draw("SAMEE0");
 
-  TLegend *leg = new TLegend(0.58,0.65,0.85,0.85);
+  TLegend *leg = new TLegend(0.61,0.60,0.88,0.85);
   leg->AddEntry(dataALL,"Data","p");
   leg->AddEntry(simALL,"Monte Carlo","l");
   leg->AddEntry(BG_dataALL,"Background","p");
   leg->Draw("SAME");
+
+  c2->Update();
+
+  c2->cd();
+  TPaveText *pv_xTitle = new TPaveText(0.3,0.01,0.7,0.04,"nbNDC");
+  pv_xTitle->SetBorderSize(0);
+  pv_xTitle->AddText("Energy (keV)");
+  pv_xTitle->GetLine(0)->SetTextSize(0.035);
+  pv_xTitle->GetLine(0)->SetTextFont(42);
+  pv_xTitle->Draw();
   
   c2->Print(TString::Format("AsymmetryVsEnergy%s.pdf",(color?"_color":"")));
   

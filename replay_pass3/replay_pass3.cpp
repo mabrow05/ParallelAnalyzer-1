@@ -763,10 +763,15 @@ int main(int argc, char *argv[])
 	  typeIndex=2;
 	  t->Type=2;
 	  t->Side = t->EvisE>t->EvisW?0:1;
-	} else if (t->PassedCathE || t->PassedCathW) {
+	} else if (t->PassedCathE) {
 	  typeIndex=0;
 	  t->Type=0;
-	  t->Side = t->EvisE>t->EvisW?0:1;
+	  t->Side = 0;
+	}
+	else if (t->PassedCathW) {
+	  typeIndex=0;
+	  t->Type=0;
+	  t->Side = 1;
 	} else t->Side=2; //This won't create an Erecon.
 	
       }
