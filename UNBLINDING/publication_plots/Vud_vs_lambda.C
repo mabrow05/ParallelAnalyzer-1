@@ -43,7 +43,8 @@ Double_t getVudUncert(Double_t x, Double_t tau, Double_t dtau) {
 
 void Vud_vs_lambda() {
 
-  bool color = true;
+  bool color = false;
+  bool data = true;
   
   Int_t fillStyle_vud = color?3002:3002;//3345;//3004;//3018;
   Int_t fillStyle_lambda1 = color?3002:3002;//3354;//3005;//3017;
@@ -71,7 +72,7 @@ void Vud_vs_lambda() {
 
   std::vector<TString> Lambda1name {"Abele et al.","Mund et al.","Mendenhall et al.","Brown et al.","Schumann et al."};
   std::vector<Double_t> Lambda1year {2002,2012,2013,2017,2008};
-  std::vector<Double_t> Lambda1vec {1.2739,1.2761,1.2756,1.2783,1.275};
+  std::vector<Double_t> Lambda1vec {1.2739,1.2761,1.2756,1.2783,1.275}; //Brown result 1.2783 +/- 0.0022
   std::vector<Double_t> Lambda1vecErr {0.0019,0.0017,0.0030,0.0022,0.016};
   Double_t Lambda1 = weightedAve(Lambda1vec,Lambda1vecErr);//1.2755;
   Double_t Lambda1_err = weightedAveErr(Lambda1vecErr);//0.0005;
@@ -84,13 +85,15 @@ void Vud_vs_lambda() {
   Double_t Lambda2_err = weightedAveErr(Lambda2vecErr);
 
 
-  std::vector<Double_t> Tau1vec {878.5};
-  std::vector<Double_t> Tau1vecErr {0.8}; 
+  //UCN
+  std::vector<Double_t> Tau1vec {880.2,882.5,880.7,878.5,882.6,877.7};
+  std::vector<Double_t> Tau1vecErr {1.2,2.1,1.8,0.8,2.7,0.8}; 
   Double_t Tau1 = weightedAve(Tau1vec,Tau1vecErr);
   Double_t dTau1 = weightedAveErr(Tau1vecErr);
 
-  std::vector<Double_t> Tau2vec {887.7};
-  std::vector<Double_t> Tau2vecErr {2.2}; 
+  //beam
+  std::vector<Double_t> Tau2vec {887.7,889.2,886.3};
+  std::vector<Double_t> Tau2vecErr {2.2,4.8,3.4}; 
   Double_t Tau2 = weightedAve(Tau2vec,Tau2vecErr);
   Double_t dTau2 = weightedAveErr(Tau2vecErr);
   
@@ -187,62 +190,64 @@ void Vud_vs_lambda() {
   lambdaMeas10->SetTitle("");
   lambdaMeas10->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas10->SetMarkerStyle(23);
-  lambdaMeas10->Draw("APY+");
-  lambdaMeas10->GetXaxis()->SetLimits(xmin,xmax);
-  //lambdaMeas10->GetXaxis()->SetNdivisions(505);
-  lambdaMeas10->GetYaxis()->SetTitle("Year of Publication");
-  lambdaMeas10->GetYaxis()->CenterTitle();
-  lambdaMeas10->GetYaxis()->SetTitleOffset(1);
-  lambdaMeas10->SetMinimum(1960);
-  lambdaMeas10->SetMaximum(2020);
+  if (data) {
+    lambdaMeas10->Draw("APY+");
+    lambdaMeas10->GetXaxis()->SetLimits(xmin,xmax);
+    //lambdaMeas10->GetXaxis()->SetNdivisions(505);
+    lambdaMeas10->GetYaxis()->SetTitle("Year of Publication");
+    lambdaMeas10->GetYaxis()->CenterTitle();
+    lambdaMeas10->GetYaxis()->SetTitleOffset(1);
+    lambdaMeas10->SetMinimum(1960);
+    lambdaMeas10->SetMaximum(2020);
+  }
 
   TGraphErrors *lambdaMeas11 = new TGraphErrors(1,&Lambda1vec[1],&Lambda1year[1],&Lambda1vecErr[1],0);
   lambdaMeas11->SetTitle("");
   lambdaMeas11->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas11->SetMarkerStyle(22);
-  lambdaMeas11->Draw("P SAME");
+  if (data) lambdaMeas11->Draw("P SAME");
 
   TGraphErrors *lambdaMeas12 = new TGraphErrors(1,&Lambda1vec[2],&Lambda1year[2],&Lambda1vecErr[2],0);
   lambdaMeas12->SetTitle("");
   lambdaMeas12->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas12->SetMarkerStyle(21);
-  lambdaMeas12->Draw("P SAME");
+  if (data) lambdaMeas12->Draw("P SAME");
 
   TGraphErrors *lambdaMeas13 = new TGraphErrors(1,&Lambda1vec[3],&Lambda1year[3],&Lambda1vecErr[3],0);
   lambdaMeas13->SetTitle("");
   lambdaMeas13->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas13->SetMarkerStyle(20);
-  lambdaMeas13->Draw("P SAME");
+  if (data) lambdaMeas13->Draw("P SAME");
 
   TGraphErrors *lambdaMeas14 = new TGraphErrors(1,&Lambda1vec[4],&Lambda1year[4],&Lambda1vecErr[4],0);
   lambdaMeas14->SetTitle("");
   lambdaMeas14->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas14->SetMarkerStyle(34);
-  lambdaMeas14->Draw("P SAME");
+  if (data) lambdaMeas14->Draw("P SAME");
 
   TGraphErrors *lambdaMeas20 = new TGraphErrors(1,&Lambda2vec[0],&Lambda2year[0],&Lambda2vecErr[0],0);
   lambdaMeas20->SetTitle("");
   lambdaMeas20->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas20->SetMarkerStyle(24);//33);
-  lambdaMeas20->Draw("P SAME");
+  if (data) lambdaMeas20->Draw("P SAME");
 
   TGraphErrors *lambdaMeas21 = new TGraphErrors(1,&Lambda2vec[1],&Lambda2year[1],&Lambda2vecErr[1],0);
   lambdaMeas21->SetTitle("");
   lambdaMeas21->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas21->SetMarkerStyle(25);//);
-  lambdaMeas21->Draw("P SAME");
+  if (data) lambdaMeas21->Draw("P SAME");
 
   TGraphErrors *lambdaMeas22 = new TGraphErrors(1,&Lambda2vec[2],&Lambda2year[2],&Lambda2vecErr[2],0);
   lambdaMeas22->SetTitle("");
   lambdaMeas22->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas22->SetMarkerStyle(26);//34);
-  lambdaMeas22->Draw("P SAME");
+  if (data) lambdaMeas22->Draw("P SAME");
 
   TGraphErrors *lambdaMeas23 = new TGraphErrors(1,&Lambda2vec[3],&Lambda2year[3],&Lambda2vecErr[3],0);
   lambdaMeas23->SetTitle("");
   lambdaMeas23->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas23->SetMarkerStyle(28);//25);
-  lambdaMeas23->Draw("P SAME");
+  if (data) lambdaMeas23->Draw("P SAME");
 
   
   
@@ -258,14 +263,14 @@ void Vud_vs_lambda() {
   legA->AddEntry(lambdaMeas20,Lambda2name[0],"p");
   //legA->AddEntry(lambdaMeas14,Lambda1name[4],"p"); 
   //legA->AddEntry(lambdaMeas23,Lambda2name[3],"p");
-  legA->Draw("SAME");
+  if (data) legA->Draw("SAME");
 
   TLegend *legB = new TLegend(0.44,0.16,0.74,0.26);
   legB->SetTextSize(0.030);
   legB->SetHeader("Other measurements");
   legB->AddEntry(lambdaMeas14,Lambda1name[4],"p");
   legB->AddEntry(lambdaMeas23,Lambda2name[3],"p"); 
-  legB->Draw("SAME");
+  if (data) legB->Draw("SAME");
 
   TPaveText *tVud = new TPaveText(0.13,0.505,0.3,0.535,"nbNDC");
   tVud->SetBorderSize(0);
@@ -274,7 +279,7 @@ void Vud_vs_lambda() {
   tVud->GetLine(0)->SetTextSize(0.035);
   tVud->Draw();
 
-  TPaveText *tTau1 = new TPaveText(0.452,0.79,0.592,0.83,"nbNDC");
+  TPaveText *tTau1 = new TPaveText(0.432,0.79,0.592,0.83,"nbNDC");
   tTau1->SetBorderSize(0);
   tTau1->SetTextColor(color?fillColor_tau2:1);
   tTau1->AddText("Bottle #tau_{n}");
@@ -282,14 +287,30 @@ void Vud_vs_lambda() {
   tTau1->GetLine(0)->SetTextSize(0.035);
   tTau1->Draw();
 
-  TPaveText *tTau2 = new TPaveText(0.13,0.79,0.27,0.83,"nbNDC");
+  TPaveText *tTau2 = new TPaveText(0.15,0.79,0.27,0.83,"nbNDC");
   tTau2->SetBorderSize(0);
   tTau2->SetTextColor(color?fillColor_tau2:1);
   tTau2->AddText("Beam #tau_{n}");
   tTau2->GetLine(0)->SetTextAngle(-42.2);
   tTau2->GetLine(0)->SetTextSize(0.035);
   tTau2->Draw();
+
+  TPaveText *tLambda1 = new TPaveText(0.683,0.532,0.832,0.664,"nbNDC");
+  tLambda1->SetBorderSize(0);
+  tLambda1->SetTextColor(color?fillColor_lambda2:1);
+  tLambda1->AddText("Post-2002 #lambda");
+  tLambda1->GetLine(0)->SetTextAngle(-90);
+  tLambda1->GetLine(0)->SetTextSize(0.035);
+  tLambda1->Draw();
+
+  TPaveText *tLambda2 = new TPaveText(0.234,0.541,0.434,0.640,"nbNDC");
+  tLambda2->SetBorderSize(0);
+  tLambda2->SetTextColor(color?fillColor_lambda2:1);
+  tLambda2->AddText("Pre-2002 #lambda");
+  tLambda2->GetLine(0)->SetTextAngle(-90);
+  tLambda2->GetLine(0)->SetTextSize(0.035);
+  tLambda2->Draw();
   
   c1->Update();
-  c1->Print(TString::Format("vud_vs_lambda%s.pdf",color?"_color":""));
+  c1->Print(TString::Format("vud_vs_lambda%s%s.pdf",data?"":"_noData",color?"_color":""));
 }
