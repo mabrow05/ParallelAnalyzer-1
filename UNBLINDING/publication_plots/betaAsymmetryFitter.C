@@ -19,7 +19,7 @@ void betaAsymmetryFitter() {
   gStyle->SetLabelSize(0.05,"xyz");
   
 
-  gStyle->SetOptFit(1111);//(1111);
+  gStyle->SetOptFit(1);//(1111);
   gStyle->SetStatY(0.85);
   gStyle->SetStatX(0.7);
   //gStyle->SetStatW(.09);
@@ -80,10 +80,10 @@ void betaAsymmetryFitter() {
   infile.close();
 
   // Load the beta/2 corrected data first
-  TString fname = TString::Format("%s/Asymmetries/UNBLINDED_AllCorr_withPOL_OctetAsymmetries_AnaChC_Octets_%s_BinByBin.txt",getenv("ANALYSIS_RESULTS"),octets2012.Data());
+  fname = TString::Format("%s/Asymmetries/UNBLINDED_AllCorr_withPOL_OctetAsymmetries_AnaChC_Octets_%s_BinByBin.txt",getenv("ANALYSIS_RESULTS"),octets2012.Data());
   //UNBLINDED_
 
-  std::ifstream infile(fname.Data());
+  infile.open(fname.Data());
   
   while ( infile >> en >> a >> aErr ) {
     //cout << en << "\t" << a << "\t" << aErr << "\t\n";
@@ -161,7 +161,6 @@ void betaAsymmetryFitter() {
   gr1_2012->GetXaxis()->SetTitleOffset(1.);
   gr1_2012->GetYaxis()->SetTitleOffset(1.2);
   
-  Double_t A0 = -0.1184;
   TF1 *f1_2012 = new TF1("f1_2012","([0]/2.*sqrt(x*x+2.*x*510.99892)/(x+510.99892))",190.,740.);
   f1_2012->SetParameter(0,-0.12);
   f1_2012->SetParName(0,"A_{0}");

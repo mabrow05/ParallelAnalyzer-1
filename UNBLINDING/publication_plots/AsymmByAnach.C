@@ -10,14 +10,14 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   double ymin0 = -0.128;
   double ymax0 = -0.108;
   
-  double yminBS = -0.2;
-  double ymaxBS = 0.01;
+  double yminBS = -0.17;
+  double ymaxBS = -0.005;
 
-  const Int_t numAnaChT0 = 9;
-  const Int_t numAnaChBacksc = 9;
-  TString anChALL[numAnaChT0] = {"A","B","C","D","F","G","H","J","K"};//
-  TString anChT0[numAnaChT0] = {"A","B","C","D","","","","",""};//
-  TString anChBacksc[numAnaChBacksc] = {"","","","","F","G","H","J","K"};
+  const Int_t numAnaChT0 = 7;
+  const Int_t numAnaChBacksc = 7;
+  TString anChALL[numAnaChT0] = {"B","C","D","F","H","J","K"};//
+  TString anChT0[numAnaChT0] = {"B","C","D","","","",""};//
+  TString anChBacksc[numAnaChBacksc] = {"","","","F","H","J","K"};
 
   Int_t markerUncorr0 = 24;
   Int_t markerCorr0 = 20;
@@ -198,8 +198,6 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   
   
   //Read in Asymmetries
-  ifstream infile;
-  std::string strHold;
   
   for (Int_t i=0; i<anaChoicesT0_2012.size(); i++) {
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
@@ -314,10 +312,25 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
 
   
   // First make one plot with same scale for all event types
-  TCanvas *c1 = new TCanvas("c1","demo bin labels",900,900);
+  TCanvas *c1 = new TCanvas("c1","demo bin labels",700,900);
   c1->Divide(1,2);
   c1->SetLeftMargin(0.15);
   c1->SetBottomMargin(0.15);
+
+  TPad *p2011 = new TPad("p2011","p2011",0.17,0.75,0.47,0.95);
+  p2011->SetBottomMargin(0.12);
+  p2011->SetTopMargin(0.);
+  p2011->SetLeftMargin(0.2);
+  p2011->SetGridy();
+  //p2011->SetBorderMode(0);
+  //p2011->SetBorderSize(2);
+  p2011->Draw();
+  TPad *p2012 = new TPad("p2012","p2012",0.17,0.25,0.47,0.45);
+  p2012->SetBottomMargin(0.12);
+  p2012->SetTopMargin(0.);
+  p2012->SetLeftMargin(0.2);
+  p2012->SetGridy();
+  p2012->Draw();
 
   c1->cd(1);
 
@@ -328,7 +341,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   dataALL->SetMarkerColor(color0);
   dataALL->SetLineColor(color0);
   dataALL->SetLineWidth(2);
-  dataALL->SetMarkerStyle(markerUncorr0);
+  dataALL->SetMarkerStyle(markerUncorrBS);
   dataALL->GetYaxis()->SetNdivisions(512);
   //dataALL->SetCanExtend(TH1::kAllAxes);
   dataALL->SetStats(0);
@@ -340,18 +353,21 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   //dataALL->LabelsDeflate("X");
   //dataALL->LabelsDeflate("Y");
   //dataALL->LabelsOption("v");
-  dataALL->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
-  dataALL->GetXaxis()->SetBinLabel(2,"0,1");//B
-  dataALL->GetXaxis()->SetBinLabel(3,"0,1,2,3");//C
-  dataALL->GetXaxis()->SetBinLabel(4,"0");//D
-  dataALL->GetXaxis()->SetBinLabel(5,"1");
-  dataALL->GetXaxis()->SetBinLabel(6,"2*,3*");
-  dataALL->GetXaxis()->SetBinLabel(7,"2,3");
-  dataALL->GetXaxis()->SetBinLabel(8,"2");
-  dataALL->GetXaxis()->SetBinLabel(9,"3");
-  dataALL->GetXaxis()->SetLabelSize(0.06);
+  //dataALL->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
+  dataALL->GetXaxis()->SetBinLabel(1,"0,1");//B
+  dataALL->GetXaxis()->SetBinLabel(2,"0,1,2,3");//C
+  dataALL->GetXaxis()->SetBinLabel(3,"0");//D
+  dataALL->GetXaxis()->SetBinLabel(4,"1");
+  //dataALL->GetXaxis()->SetBinLabel(6,"2*,3*");
+  dataALL->GetXaxis()->SetBinLabel(5,"2,3");
+  dataALL->GetXaxis()->SetBinLabel(6,"2");
+  dataALL->GetXaxis()->SetBinLabel(7,"3");
+  dataALL->GetXaxis()->SetLabelSize(0.08);
+  dataALL->GetYaxis()->SetLabelSize(0.05);
   dataALL->GetXaxis()->SetTitle("Event Types Included");
   dataALL->GetYaxis()->SetTitle("Asymmetry");
+  dataALL->GetYaxis()->SetTitleOffset(1.5);
+  dataALL->GetXaxis()->SetTitleOffset(1.2);
   dataALL->GetXaxis()->SetTitleSize(0.05);
   dataALL->GetYaxis()->SetTitleSize(0.05);
   dataALL->GetXaxis()->CenterTitle();
@@ -370,7 +386,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   corrDataALL->SetMarkerColor(color0);
   corrDataALL->SetLineColor(color0);
   corrDataALL->SetLineWidth(2);
-  corrDataALL->SetMarkerStyle(markerCorr0);
+  corrDataALL->SetMarkerStyle(markerCorrBS);
   //corrDataALL->GetXaxis()->SetNdivisions();
   //corrDataALL->SetCanExtend(TH1::kAllAxes);
   corrDataALL->SetStats(0);
@@ -381,17 +397,61 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   }
 
   if (CorrAndUnCorr) corrDataALL->Draw("SAME E1X0");
+
   
   
-  TLegend *leg = new TLegend(0.2,0.65,0.5,0.9);
+  TLegend *leg = new TLegend(0.6,0.74,0.9,0.99);
   leg->SetHeader("2011-2012"); // option "C" allows to center the header
   TLegendEntry *header = (TLegendEntry*)leg->GetListOfPrimitives()->First();
-  header->SetTextSize(0.05);
+  header->SetTextSize(0.07);
   leg->AddEntry(dataALL,"Uncorrected Data","p");
   leg->AddEntry(corrDataALL,"Corrected Data","p");
   leg->Draw();
 
-  c1->Print(TString::Format("CorrVsUncorr_singleAxis_%s%s.pdf",year.Data(),(color?"_color":"")));
+  p2011->cd();
+  
+  TH1F * t0_2011 = new TH1F("t0_2011","",3,0.5,3.+0.5);
+  t0_2011->SetMarkerColor(color0);
+  t0_2011->SetLineColor(color0);
+  t0_2011->SetLineWidth(2);
+  t0_2011->SetMarkerStyle(markerUncorrBS);
+  t0_2011->GetYaxis()->SetNdivisions(506);
+  //t0_2011->SetCanExtend(TH1::kAllAxes);
+  t0_2011->SetStats(0);
+
+  for (Int_t i=0;i<3;++i) {
+    t0_2011->SetBinContent(i+1,AsymmDataALL[i]);
+    t0_2011->SetBinError(i+1,AsymmDataErrALL[i]);
+  }
+  //t0_2011->LabelsDeflate("X");
+  //t0_2011->LabelsDeflate("Y");
+  //t0_2011->LabelsOption("v");
+  //t0_2011->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
+  t0_2011->GetXaxis()->SetBinLabel(1,"0,1");//B
+  t0_2011->GetXaxis()->SetBinLabel(2,"0,1,2,3");//C
+  t0_2011->GetXaxis()->SetBinLabel(3,"0");//D
+  t0_2011->GetXaxis()->SetLabelSize(0.13);
+  t0_2011->GetYaxis()->SetLabelSize(0.08);
+  t0_2011->SetMinimum(-0.126);
+  t0_2011->SetMaximum(-0.1190);
+
+  t0_2011->Draw("E1X0");
+
+  TH1F * corrt0_2011 = new TH1F("corrt0_2011","",3,0.5,3.+0.5);
+  corrt0_2011->SetMarkerColor(color0);
+  corrt0_2011->SetLineColor(color0);
+  corrt0_2011->SetLineWidth(2);
+  corrt0_2011->SetMarkerStyle(markerCorrBS);
+  //corrt0_2011->GetXaxis()->SetNdivisions();
+  //corrt0_2011->SetCanExtend(TH1::kAllAxes);
+  corrt0_2011->SetStats(0);
+
+  for (Int_t i=0;i<3;++i) {
+    corrt0_2011->SetBinContent(i+1,AsymmCorrDataALL[i]);
+    corrt0_2011->SetBinError(i+1,AsymmCorrDataErrALL[i]);
+  }
+  corrt0_2011->Draw("E1X0 SAME");
+  
 
   /// 2012-2013
 
@@ -405,7 +465,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   dataALL_2012->SetMarkerColor(color0);
   dataALL_2012->SetLineColor(color0);
   dataALL_2012->SetLineWidth(2);
-  dataALL_2012->SetMarkerStyle(markerUncorr0);
+  dataALL_2012->SetMarkerStyle(markerUncorrBS);
   dataALL_2012->GetYaxis()->SetNdivisions(512);
   //dataALL_2012->SetCanExtend(TH1::kAllAxes);
   dataALL_2012->SetStats(0);
@@ -417,18 +477,21 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   //dataALL_2012->LabelsDeflate("X");
   //dataALL_2012->LabelsDeflate("Y");
   //dataALL_2012->LabelsOption("v");
-  dataALL_2012->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
-  dataALL_2012->GetXaxis()->SetBinLabel(2,"0,1");//B
-  dataALL_2012->GetXaxis()->SetBinLabel(3,"0,1,2,3");//C
-  dataALL_2012->GetXaxis()->SetBinLabel(4,"0");//D
-  dataALL_2012->GetXaxis()->SetBinLabel(5,"1");
-  dataALL_2012->GetXaxis()->SetBinLabel(6,"2*,3*");
-  dataALL_2012->GetXaxis()->SetBinLabel(7,"2,3");
-  dataALL_2012->GetXaxis()->SetBinLabel(8,"2");
-  dataALL_2012->GetXaxis()->SetBinLabel(9,"3");
-  dataALL_2012->GetXaxis()->SetLabelSize(0.06);
+  //dataALL_2012->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
+  dataALL_2012->GetXaxis()->SetBinLabel(1,"0,1");//B
+  dataALL_2012->GetXaxis()->SetBinLabel(2,"0,1,2,3");//C
+  dataALL_2012->GetXaxis()->SetBinLabel(3,"0");//D
+  dataALL_2012->GetXaxis()->SetBinLabel(4,"1");
+  //dataALL_2012->GetXaxis()->SetBinLabel(6,"2*,3*");
+  dataALL_2012->GetXaxis()->SetBinLabel(5,"2,3");
+  dataALL_2012->GetXaxis()->SetBinLabel(6,"2");
+  dataALL_2012->GetXaxis()->SetBinLabel(7,"3");
+  dataALL_2012->GetXaxis()->SetLabelSize(0.08);
+  dataALL_2012->GetYaxis()->SetLabelSize(0.05);
   dataALL_2012->GetXaxis()->SetTitle("Event Types Included");
   dataALL_2012->GetYaxis()->SetTitle("Asymmetry");
+  dataALL_2012->GetYaxis()->SetTitleOffset(1.5);
+  dataALL_2012->GetXaxis()->SetTitleOffset(1.2);
   dataALL_2012->GetXaxis()->SetTitleSize(0.05);
   dataALL_2012->GetYaxis()->SetTitleSize(0.05);
   dataALL_2012->GetXaxis()->CenterTitle();
@@ -447,7 +510,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   corrDataALL_2012->SetMarkerColor(color0);
   corrDataALL_2012->SetLineColor(color0);
   corrDataALL_2012->SetLineWidth(2);
-  corrDataALL_2012->SetMarkerStyle(markerCorr0);
+  corrDataALL_2012->SetMarkerStyle(markerCorrBS);
   //corrDataALL_2012->GetXaxis()->SetNdivisions();
   //corrDataALL_2012->SetCanExtend(TH1::kAllAxes);
   corrDataALL_2012->SetStats(0);
@@ -460,13 +523,57 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   if (CorrAndUnCorr) corrDataALL_2012->Draw("SAME E1X0");
   
   
-  TLegend *leg_2012 = new TLegend(0.2,0.65,0.5,0.9);
+  TLegend *leg_2012 = new TLegend(0.6,0.74,0.9,0.99);
   leg_2012->SetHeader("2012-2013"); // option "C" allows to center the header
-  header = (TLegendEntry*)leg->GetListOfPrimitives()->First();
-  header->SetTextSize(0.05);
+  TLegendEntry *header2012 = (TLegendEntry*)leg_2012->GetListOfPrimitives()->First();
+  header2012->SetTextSize(0.07);
   leg_2012->AddEntry(dataALL_2012,"Uncorrected Data","p");
   leg_2012->AddEntry(corrDataALL_2012,"Corrected Data","p");
   leg_2012->Draw();
+
+  p2012->cd();
+  
+  TH1F * t0_2012 = new TH1F("t0_2012","",3,0.5,3.+0.5);
+  t0_2012->SetMarkerColor(color0);
+  t0_2012->SetLineColor(color0);
+  t0_2012->SetLineWidth(2);
+  t0_2012->SetMarkerStyle(markerUncorrBS);
+  t0_2012->GetYaxis()->SetNdivisions(506);
+  //t0_2012->SetCanExtend(TH1::kAllAxes);
+  t0_2012->SetStats(0);
+
+  for (Int_t i=0;i<3;++i) {
+    t0_2012->SetBinContent(i+1,AsymmDataALL_2012[i]);
+    t0_2012->SetBinError(i+1,AsymmDataErrALL_2012[i]);
+  }
+  //t0_2012->LabelsDeflate("X");
+  //t0_2012->LabelsDeflate("Y");
+  //t0_2012->LabelsOption("v");
+  //t0_2012->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
+  t0_2012->GetXaxis()->SetBinLabel(1,"0,1");//B
+  t0_2012->GetXaxis()->SetBinLabel(2,"0,1,2,3");//C
+  t0_2012->GetXaxis()->SetBinLabel(3,"0");//D
+  t0_2012->GetXaxis()->SetLabelSize(0.13);
+  t0_2012->GetYaxis()->SetLabelSize(0.08);
+  t0_2012->SetMinimum(-0.1272);
+  t0_2012->SetMaximum(-0.1195);
+
+  t0_2012->Draw("E1X0");
+
+  TH1F * corrt0_2012 = new TH1F("corrt0_2012","",3,0.5,3.+0.5);
+  corrt0_2012->SetMarkerColor(color0);
+  corrt0_2012->SetLineColor(color0);
+  corrt0_2012->SetLineWidth(2);
+  corrt0_2012->SetMarkerStyle(markerCorrBS);
+  //corrt0_2012->GetXaxis()->SetNdivisions();
+  //corrt0_2012->SetCanExtend(TH1::kAllAxes);
+  corrt0_2012->SetStats(0);
+
+  for (Int_t i=0;i<3;++i) {
+    corrt0_2012->SetBinContent(i+1,AsymmCorrDataALL_2012[i]);
+    corrt0_2012->SetBinError(i+1,AsymmCorrDataErrALL_2012[i]);
+  }
+  corrt0_2012->Draw("E1X0 SAME");
 
   c1->Print(TString::Format("CorrVsUncorr_singleAxis%s.pdf",(color?"_color":"")));
 
@@ -497,15 +604,15 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   //data->LabelsDeflate("X");
   //data->LabelsDeflate("Y");
   //data->LabelsOption("v");
-  data->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
-  data->GetXaxis()->SetBinLabel(2,"0,1");//B
-  data->GetXaxis()->SetBinLabel(3,"0,1,2,3");//C
-  data->GetXaxis()->SetBinLabel(4,"0");//D
-  data->GetXaxis()->SetBinLabel(5,"1");
-  data->GetXaxis()->SetBinLabel(6,"2*,3*");
-  data->GetXaxis()->SetBinLabel(7,"2,3");
-  data->GetXaxis()->SetBinLabel(8,"2");
-  data->GetXaxis()->SetBinLabel(9,"3");
+  //data->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
+  data->GetXaxis()->SetBinLabel(1,"0,1");//B
+  data->GetXaxis()->SetBinLabel(2,"0,1,2,3");//C
+  data->GetXaxis()->SetBinLabel(3,"0");//D
+  data->GetXaxis()->SetBinLabel(4,"1");
+  //data->GetXaxis()->SetBinLabel(6,"2*,3*");
+  data->GetXaxis()->SetBinLabel(5,"2,3");
+  data->GetXaxis()->SetBinLabel(6,"2");
+  data->GetXaxis()->SetBinLabel(7,"3");
   data->GetXaxis()->SetLabelSize(0.05);
   data->GetXaxis()->SetTitle("Event Types Included");
   data->GetYaxis()->SetTitle("Asymmetry");
@@ -517,8 +624,8 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   data->SetMinimum(ymin0);
   data->SetMaximum(ymax0);
 
-
-  TLine *line1 = new TLine(data->GetXaxis()->GetXmin(),-0.1184,data->GetXaxis()->GetXmax(),-0.1184);
+  delete line1;
+  line1 = new TLine(data->GetXaxis()->GetXmin(),-0.1184,data->GetXaxis()->GetXmax(),-0.1184);
   line1->SetLineStyle(7);
   line1->SetLineWidth(2);
   if (corrections==TString("AllCorr")) line1->Draw("SAME");
@@ -554,15 +661,15 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   //dataBacksc->LabelsDeflate("X");
   //dataBacksc->LabelsDeflate("Y");
   //dataBacksc->LabelsOption("v");
-  dataBacksc->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
-  dataBacksc->GetXaxis()->SetBinLabel(2,"0,1");//B
-  dataBacksc->GetXaxis()->SetBinLabel(3,"0,1,2,3");//C
-  dataBacksc->GetXaxis()->SetBinLabel(4,"0");//D
-  dataBacksc->GetXaxis()->SetBinLabel(5,"1");
-  dataBacksc->GetXaxis()->SetBinLabel(6,"2*,3*");
-  dataBacksc->GetXaxis()->SetBinLabel(7,"2,3");
-  dataBacksc->GetXaxis()->SetBinLabel(8,"2");
-  dataBacksc->GetXaxis()->SetBinLabel(9,"3");
+  //dataBacksc->GetXaxis()->SetBinLabel(1,"0,1,2*,3*");//A
+  dataBacksc->GetXaxis()->SetBinLabel(1,"0,1");//B
+  dataBacksc->GetXaxis()->SetBinLabel(2,"0,1,2,3");//C
+  dataBacksc->GetXaxis()->SetBinLabel(3,"0");//D
+  dataBacksc->GetXaxis()->SetBinLabel(4,"1");
+  //dataBacksc->GetXaxis()->SetBinLabel(6,"2*,3*");
+  dataBacksc->GetXaxis()->SetBinLabel(5,"2,3");
+  dataBacksc->GetXaxis()->SetBinLabel(6,"2");
+  dataBacksc->GetXaxis()->SetBinLabel(7,"3");
   dataBacksc->GetXaxis()->SetLabelSize(0.05);
   dataBacksc->GetXaxis()->SetTitle("Event Types Included");
   //dataBacksc->GetYaxis()->SetTitle("Asymmetry");
