@@ -49,7 +49,7 @@ badWPMT4 = []
 badEPMT1_runRanges = [] #These hold chunks of runs where PMT is dead or Bi pulser is not working.
 badEPMT2_runRanges = []
 badEPMT3_runRanges = []
-badEPMT4_runRanges = [(20000,23173)] #2012-2013 have weird Bi gain and odd lin curves
+badEPMT4_runRanges = [(20000,24000)] #2012-2013 have weird Bi gain and odd lin curves
 badWPMT1_runRanges = [(17359,18055)] #PMTW1 Bi pulser fell off for (17359,18055)
 badWPMT2_runRanges = [(16983,17297)] #PMTW2 dead for (16983,17297)
 badWPMT3_runRanges = []
@@ -775,7 +775,7 @@ class CalibrationManager:
             masterFile = open("%s/residuals/PMT_runQuality_master.dat"%(os.getenv("ANALYSIS_CODE")),'w')
             ereconFile = open("%s/residuals/PMT_EreconQuality_master.dat"%(os.getenv("ANALYSIS_CODE")),'w')
             
-            for run in range(16983,23174,1):
+            for run in range(16983,24000,1):
                 pmtList = [1,1,1,1,1,1,1,1]
                 ereconList = [1,1,1,1,1,1,1,1]
 

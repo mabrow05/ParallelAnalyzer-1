@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 
     // Only process event if it's an electron
     
-    if ( t->PID==1 ) {
+    if ( t->PID==1 || t->PID==6) { //PID==6 includes the APD events as they don't have coincidence on one side...
 
       std::vector <double> posex(3,0.);
       std::vector <double> poswx(3,0.);
@@ -757,6 +757,20 @@ int main(int argc, char *argv[])
       
       totalEvis=0.;
       
+      //Handling APD events
+      if (t->PID==6) {
+	if (t->PassedCathE && t->PassedCathW) {
+	  typeIndex=2;
+	  t->Type=2;
+	  t->Side = t->EvisE>t->EvisW?0:1;
+	} else if (t->PassedCathE || t->PassedCathW) {
+	  typeIndex=0;
+	  t->Type=0;
+	  t->Side = t->EvisE>t->EvisW?0:1;
+	} else t->Side=2; //This won't create an Erecon.
+	
+      }
+
       if (t->Side==0) {
 	totalEvis = t->Type==1 ? (t->EvisE+t->EvisW):t->EvisE;
 	if (t->EvisE>0. && totalEvis>0.) {
