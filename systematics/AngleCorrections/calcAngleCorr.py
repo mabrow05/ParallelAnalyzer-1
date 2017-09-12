@@ -202,7 +202,7 @@ if __name__=="__main__":
     anaChoices = ["A","B","C","D","F","G","H","J","K"]
     
     emin = 190.
-    emax = 750.
+    emax = 740.
     
     #doAngleCorr(2011,"C",emin,emax)
     for year in Year:

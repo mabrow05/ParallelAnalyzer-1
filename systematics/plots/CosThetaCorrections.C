@@ -11,6 +11,8 @@
 #include <TMultiGraph.h>
 #include <TMath.h>
 
+bool color = false;
+
 Int_t groupBin=4;
 Double_t enStart=50.;//10.*groupBin;
 
@@ -80,11 +82,15 @@ void CosThetaCorrections() {
   //Int_t octmin = year==2011?0:60;
   //Int_t octmax = year==2011?59:121;
 
-  int fill2011 = 3001;
-  int fill2012 = 3001;
-
-  int col2011 = 4;
-  int col2012 = 3;
+  Int_t col2011 = color?9:1;
+  Int_t col2012 = color?8:1;
+  Int_t fill2011 = color?3001:3004;
+  Int_t fill2012 = color?3001:3005;
+  Int_t marker2011 = 20;
+  Int_t marker2012 = 21;
+  Int_t lineStyle2011 = 1;
+  Int_t lineStyle2012 = color?1:2;
+  
 
   int startPoint=0;
   
@@ -115,13 +121,16 @@ void CosThetaCorrections() {
   g_delta30_2011->SetLineColor(col2011);
   g_delta30_2011->SetFillColor(col2011);
   g_delta30_2011->SetFillStyle(fill2011);
-  
+  g_delta30_2011->SetLineStyle(lineStyle2011);
+
   TGraphErrors *g_delta30_2012 = new TGraphErrors(delta30_2012[0].size()-startPoint,&delta30_2012[0][startPoint],&delta30_2012[1][startPoint],0,&delta30_2012[2][startPoint]);
   g_delta30_2012->SetMarkerStyle(0);
   g_delta30_2012->SetLineWidth(3);
   g_delta30_2012->SetLineColor(col2012);
   g_delta30_2012->SetFillColor(col2012);
   g_delta30_2012->SetFillStyle(fill2012);
+  g_delta30_2012->SetLineStyle(lineStyle2012);
+
   
   mg0->Add(g_delta30_2011);
   mg0->Add(g_delta30_2012);
@@ -155,14 +164,16 @@ void CosThetaCorrections() {
   g_delta31_2011->SetLineColor(col2011);
   g_delta31_2011->SetFillColor(col2011);
   g_delta31_2011->SetFillStyle(fill2011);
-  
+  g_delta31_2011->SetLineStyle(lineStyle2011);
+
   TGraphErrors *g_delta31_2012 = new TGraphErrors(delta31_2012[0].size()-startPoint,&delta31_2012[0][startPoint],&delta31_2012[1][startPoint],0,&delta31_2012[2][startPoint]);
   g_delta31_2012->SetMarkerStyle(0);
   g_delta31_2012->SetLineWidth(3);
   g_delta31_2012->SetLineColor(col2012);
   g_delta31_2012->SetFillColor(col2012);
   g_delta31_2012->SetFillStyle(fill2012);
-  
+  g_delta31_2012->SetLineStyle(lineStyle2012);
+
   mg1->Add(g_delta31_2011);
   mg1->Add(g_delta31_2012);
   mg1->SetMinimum(AnglelimitLow);
@@ -194,6 +205,7 @@ void CosThetaCorrections() {
   g_delta32_2011->SetLineColor(col2011);
   g_delta32_2011->SetFillColor(col2011);
   g_delta32_2011->SetFillStyle(fill2011);
+  g_delta32_2011->SetLineStyle(lineStyle2011);
   
   TGraphErrors *g_delta32_2012 = new TGraphErrors(delta32_2012[0].size()-startPoint,&delta32_2012[0][startPoint],&delta32_2012[1][startPoint],0,&delta32_2012[2][startPoint]);
   g_delta32_2012->SetMarkerStyle(0);
@@ -201,7 +213,8 @@ void CosThetaCorrections() {
   g_delta32_2012->SetLineColor(col2012);
   g_delta32_2012->SetFillColor(col2012);
   g_delta32_2012->SetFillStyle(fill2012);
-  
+  g_delta32_2012->SetLineStyle(lineStyle2012);
+
   mg2->Add(g_delta32_2011);
   mg2->Add(g_delta32_2012);
   mg2->SetMinimum(AnglelimitLow);
@@ -233,6 +246,8 @@ void CosThetaCorrections() {
   g_delta33_2011->SetLineColor(col2011);
   g_delta33_2011->SetFillColor(col2011);
   g_delta33_2011->SetFillStyle(fill2011);
+  g_delta33_2011->SetLineStyle(lineStyle2011);
+
   
   TGraphErrors *g_delta33_2012 = new TGraphErrors(delta33_2012[0].size()-startPoint,&delta33_2012[0][startPoint],&delta33_2012[1][startPoint],0,&delta33_2012[2][startPoint]);
   g_delta33_2012->SetMarkerStyle(0);
@@ -240,7 +255,8 @@ void CosThetaCorrections() {
   g_delta33_2012->SetLineColor(col2012);
   g_delta33_2012->SetFillColor(col2012);
   g_delta33_2012->SetFillStyle(fill2012);
-  
+  g_delta33_2012->SetLineStyle(lineStyle2012);
+
   mg3->Add(g_delta33_2011);
   mg3->Add(g_delta33_2012);
   mg3->SetMinimum(AnglelimitLow);
@@ -273,14 +289,16 @@ void CosThetaCorrections() {
   g_delta3_2011->SetLineColor(col2011);
   g_delta3_2011->SetFillColor(col2011);
   g_delta3_2011->SetFillStyle(fill2011);
-  
+  g_delta3_2011->SetLineStyle(lineStyle2011);
+
   TGraphErrors *g_delta3_2012 = new TGraphErrors(delta3_2012[0].size()-startPoint,&delta3_2012[0][startPoint],&delta3_2012[1][startPoint],0,&delta3_2012[2][startPoint]);
   g_delta3_2012->SetMarkerStyle(0);
   g_delta3_2012->SetLineWidth(3);
   g_delta3_2012->SetLineColor(col2012);
   g_delta3_2012->SetFillColor(col2012);
   g_delta3_2012->SetFillStyle(fill2012);
-  
+  g_delta3_2012->SetLineStyle(lineStyle2012);
+
   mgDELTA3->Add(g_delta3_2011);
   mgDELTA3->Add(g_delta3_2012);
   mgDELTA3->SetMinimum(AnglelimitLow);
@@ -301,7 +319,8 @@ void CosThetaCorrections() {
 
   
 
-  TString pdffile = TString::Format("Delta_3_byType_anaChC_%iBinAve.pdf",groupBin);
+  TString pdffile = TString::Format("Delta_3_byType_anaCh%s_%iBinAve%s.pdf",
+				    anaCh.Data(),groupBin,color?"_color":"");
 
   c0->Print(TString::Format("%s(",pdffile.Data()));
   c1->Print(pdffile);
