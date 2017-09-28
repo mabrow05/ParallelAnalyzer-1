@@ -63,10 +63,10 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TStrin
   return corrs;
 };
 
-std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
+std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type,TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../AngleCorrections/%s_delta_3%s.txt",year.Data(),(type==TString("ALL")?"":type.Data())));
+  std::ifstream infile(TString::Format("../AngleCorrections/%s_delta_3%s_anaCh%s.txt",year.Data(),(type==TString("ALL")?"":type.Data()),anaCh.Data()));
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
@@ -93,6 +93,9 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
       i++;
     }
   }
+  enbin.push_back(enbin[enbin.size()-1]+10.*groupBin);
+  c.push_back(c[c.size()-1]);
+  cerr.push_back(cerr[cerr.size()-1]);
   corrs.push_back(enbin);
   corrs.push_back(c);
   corrs.push_back(cerr);
@@ -147,7 +150,7 @@ void EnergyDependentCorrections(TString anaCh) {
   //std::vector<std::vector<Double_t> > delta31_2011 = readAngleCorr(year,"1");
   //std::vector<std::vector<Double_t> > delta32_2011 = readAngleCorr(year,"2");
   //std::vector<std::vector<Double_t> > delta33_2011 = readAngleCorr(year,"3");
-  std::vector<std::vector<Double_t> > delta3_2011 = readAngleCorr(year,"ALL");
+  std::vector<std::vector<Double_t> > delta3_2011 = readAngleCorr(year,"ALL",anaCh);
 
   year = "2012-2013";
   std::vector<std::vector<Double_t> > bs0_2012 = readBSCorr("0",year,anaCh);
@@ -159,7 +162,7 @@ void EnergyDependentCorrections(TString anaCh) {
   //std::vector<std::vector<Double_t> > delta31_2012 = readAngleCorr(year,"1");
   //std::vector<std::vector<Double_t> > delta32_2012 = readAngleCorr(year,"2");
   //std::vector<std::vector<Double_t> > delta33_2012 = readAngleCorr(year,"3");
-  std::vector<std::vector<Double_t> > delta3_2012 = readAngleCorr(year,"ALL");
+  std::vector<std::vector<Double_t> > delta3_2012 = readAngleCorr(year,"ALL",anaCh);
 
   std::vector<std::vector<Double_t> > totalCorr_2011(3,std::vector<Double_t>(0));
   std::vector<std::vector<Double_t> > totalCorr_2012(3,std::vector<Double_t>(0));
@@ -409,25 +412,25 @@ void EnergyDependentCorrections(TString anaCh) {
   TMultiGraph *mgAngle = new TMultiGraph();
   mgAngle->SetTitle("#Delta_{3} vs. Energy");  
   
-  TGraphErrors *g_cosTheta_2011 = new TGraphErrors(cosTheta_2011[0].size()-startPoint,&cosTheta_2011[0][startPoint],&cosTheta_2011[1][startPoint],0,&cosTheta_2011[2][startPoint]);
-  g_cosTheta_2011->SetMarkerStyle(0);
-  g_cosTheta_2011->SetLineWidth(3);
-  g_cosTheta_2011->SetLineColor(col2011);
-  g_cosTheta_2011->SetFillColor(col2011);
-  g_cosTheta_2011->SetFillStyle(fill2011);
-  g_cosTheta_2011->SetLineStyle(lineStyle2011);
+  TGraphErrors *g_delta3_2011 = new TGraphErrors(delta3_2011[0].size()-startPoint,&delta3_2011[0][startPoint],&delta3_2011[1][startPoint],0,&delta3_2011[2][startPoint]);
+  g_delta3_2011->SetMarkerStyle(0);
+  g_delta3_2011->SetLineWidth(3);
+  g_delta3_2011->SetLineColor(col2011);
+  g_delta3_2011->SetFillColor(col2011);
+  g_delta3_2011->SetFillStyle(fill2011);
+  g_delta3_2011->SetLineStyle(lineStyle2011);
 
   
-  TGraphErrors *g_cosTheta_2012 = new TGraphErrors(cosTheta_2012[0].size()-startPoint,&cosTheta_2012[0][startPoint],&cosTheta_2012[1][startPoint],0,&cosTheta_2012[2][startPoint]);
-  g_cosTheta_2012->SetMarkerStyle(0);
-  g_cosTheta_2012->SetLineWidth(3);
-  g_cosTheta_2012->SetLineColor(col2012);
-  g_cosTheta_2012->SetFillColor(col2012);
-  g_cosTheta_2012->SetFillStyle(fill2012);
-  g_cosTheta_2012->SetLineStyle(lineStyle2012);
+  TGraphErrors *g_delta3_2012 = new TGraphErrors(delta3_2012[0].size()-startPoint,&delta3_2012[0][startPoint],&delta3_2012[1][startPoint],0,&delta3_2012[2][startPoint]);
+  g_delta3_2012->SetMarkerStyle(0);
+  g_delta3_2012->SetLineWidth(3);
+  g_delta3_2012->SetLineColor(col2012);
+  g_delta3_2012->SetFillColor(col2012);
+  g_delta3_2012->SetFillStyle(fill2012);
+  g_delta3_2012->SetLineStyle(lineStyle2012);
 
-  mgAngle->Add(g_cosTheta_2011);
-  mgAngle->Add(g_cosTheta_2012);
+  mgAngle->Add(g_delta3_2011);
+  mgAngle->Add(g_delta3_2012);
   mgAngle->SetMinimum(AnglelimitLow);
   mgAngle->SetMaximum(AnglelimitHigh);
   
@@ -441,8 +444,8 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->Modified();
 
   TLegend *legAngle = new TLegend(0.57,0.7,0.87,0.8);
-  legAngle->AddEntry(g_cosTheta_2011,"2011-2012","lf");
-  legAngle->AddEntry(g_cosTheta_2012,"2012-2013","lf");
+  legAngle->AddEntry(g_delta3_2011,"2011-2012","lf");
+  legAngle->AddEntry(g_delta3_2012,"2012-2013","lf");
   legAngle->SetTextSize(0.05);
   legAngle->Draw("SAME");
 

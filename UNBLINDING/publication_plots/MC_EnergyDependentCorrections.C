@@ -63,7 +63,46 @@ std::vector <std::vector<Double_t> > readBSCorr(TString corr,TString year,TStrin
   return corrs;
 };
 
-std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) {
+std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type,TString anaCh) {
+
+  std::vector <std::vector<Double_t> > corrs;
+  std::ifstream infile(TString::Format("../../systematics/AngleCorrections/%s_delta_3%s_anaCh%s.txt",year.Data(),(type==TString("ALL")?"":type.Data()),anaCh.Data()));
+  std::vector<Double_t> enbin;
+  std::vector<Double_t> c;
+  std::vector<Double_t> cerr;
+  TString hold1,hold2;
+  Double_t en;
+  Int_t i=0;
+  Double_t aveEn=0., aveCorr=0., aveErr=0.;
+  while (infile >> en >> hold1 >> hold2 && en<800.) {
+    if (en<enStart) continue;
+    //std::cout << en << " " << hold2 << " " << errhold << "\n";
+    if (i<groupBin) {
+      aveEn+=en;
+      aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+      aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
+      i++;
+    } else {
+      enbin.push_back(aveEn/groupBin);
+      c.push_back(aveCorr/groupBin*100.);
+      cerr.push_back(aveErr/groupBin*100.);
+      i=0,aveEn=0.,aveCorr=0., aveErr=0.;
+      aveEn+=en;
+      aveCorr+=( hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold1.Data());
+      aveErr+=(hold1==TString("nan")||hold1==TString("-nan"))?0.:atof(hold2.Data());
+      i++;
+    }
+  }
+  enbin.push_back(enbin[enbin.size()-1]+10.*groupBin);
+  c.push_back(c[c.size()-1]);
+  cerr.push_back(cerr[cerr.size()-1]);
+  corrs.push_back(enbin);
+  corrs.push_back(c);
+  corrs.push_back(cerr);
+  return corrs;
+};
+
+/*std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
   std::ifstream infile;
@@ -117,22 +156,23 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString anaCh) 
   corrs.push_back(c);
   corrs.push_back(cerr);
   return corrs;
-};
+  };*/
 
 void EnergyDependentCorrections(TString anaCh) {
 
   gStyle->SetOptStat(0);
   gStyle->SetTitleSize(0.07,"t");
   gStyle->SetPadLeftMargin(0.12);
-  //gStyle->SetPadRightMargin(0.15);
+  gStyle->SetPadRightMargin(0.02);
+  gStyle->SetPadTopMargin(0.02);
   gStyle->SetPadBottomMargin(0.15);
-  gStyle->SetTitleYSize(0.05);
-  gStyle->SetTitleYOffset(1.);
-  gStyle->SetTitleXSize(0.05);
-  gStyle->SetTitleXOffset(1.2);
+  gStyle->SetTitleYSize(0.07);
+  gStyle->SetTitleYOffset(0.7);
+  gStyle->SetTitleXSize(0.07);
+  gStyle->SetTitleXOffset(0.9);
   gStyle->SetTitleSize(0.04,"Z");
   gStyle->SetTitleOffset(1.6,"Z");
-  gStyle->SetLabelSize(0.04,"xyz");
+  gStyle->SetLabelSize(0.05,"xyz");
   gStyle->SetLegendBorderSize(0);
   gStyle->SetFillStyle(0);
   gStyle->SetGridStyle(2);
@@ -161,7 +201,7 @@ void EnergyDependentCorrections(TString anaCh) {
   std::vector<std::vector<Double_t> > bs2_2011 = readBSCorr("2",year,anaCh);
   std::vector<std::vector<Double_t> > bs3_2011 = readBSCorr("3",year,anaCh);
   std::vector<std::vector<Double_t> > bsALL_2011 = readBSCorr("ALL",year,anaCh);
-  std::vector<std::vector<Double_t> > cosTheta_2011 = readAngleCorr(year,anaCh);
+  std::vector<std::vector<Double_t> > cosTheta_2011 = readAngleCorr(year,"ALL",anaCh);
 
   year = "2012-2013";
   std::vector<std::vector<Double_t> > bs0_2012 = readBSCorr("0",year,anaCh);
@@ -169,7 +209,7 @@ void EnergyDependentCorrections(TString anaCh) {
   std::vector<std::vector<Double_t> > bs2_2012 = readBSCorr("2",year,anaCh);
   std::vector<std::vector<Double_t> > bs3_2012 = readBSCorr("3",year,anaCh);
   std::vector<std::vector<Double_t> > bsALL_2012 = readBSCorr("ALL",year,anaCh);
-  std::vector<std::vector<Double_t> > cosTheta_2012 = readAngleCorr(year,anaCh);
+  std::vector<std::vector<Double_t> > cosTheta_2012 = readAngleCorr(year,"ALL",anaCh);
 
   std::vector<std::vector<Double_t> > totalCorr_2011(3,std::vector<Double_t>(0));
   std::vector<std::vector<Double_t> > totalCorr_2012(3,std::vector<Double_t>(0));
@@ -461,7 +501,7 @@ void EnergyDependentCorrections(TString anaCh) {
   gPad->SetGrid(0,1);
 
   TMultiGraph *mgTotalCorr = new TMultiGraph();
-  mgTotalCorr->SetTitle("#Delta_{MC} vs. Energy");  
+  mgTotalCorr->SetTitle("");//#Delta_{MC} vs. Energy");  
   
   TGraphErrors *g_totalCorr_2011 = new TGraphErrors(totalCorr_2011[0].size()-startPoint,&totalCorr_2011[0][startPoint],&totalCorr_2011[1][startPoint],0,&totalCorr_2011[2][startPoint]);
   g_totalCorr_2011->SetMarkerStyle(0);
@@ -494,21 +534,21 @@ void EnergyDependentCorrections(TString anaCh) {
 
   gPad->Modified();
 
-  TLegend *legTotalCorr = new TLegend(0.57,0.7,0.87,0.8);
+  TLegend *legTotalCorr = new TLegend(0.57,0.8,0.87,0.95);
   legTotalCorr->AddEntry(g_totalCorr_2011,"2011-2012","lf");
   legTotalCorr->AddEntry(g_totalCorr_2012,"2012-2013","lf");
-  legTotalCorr->SetTextSize(0.05);
+  legTotalCorr->SetTextSize(0.07);
   legTotalCorr->Draw("SAME");
   
 
   TString pdffile = TString::Format("TOTAL_MC_Corrections_anaCh%s_%iBinAve%s.pdf",anaCh.Data(),groupBin,(color?"_color":""));
 
-  c0->Print(TString::Format("%s(",pdffile.Data()));
-  c1->Print(pdffile);
-  c2->Print(pdffile);
-  c3->Print(pdffile);
-  cALLBS->Print(pdffile);
-  cAngle->Print(pdffile);
-  cTotalCorr->Print(TString::Format("%s)",pdffile.Data()));
+  //c0->Print(TString::Format("%s(",pdffile.Data()));
+  //c1->Print(pdffile);
+  //c2->Print(pdffile);
+  //c3->Print(pdffile);
+  //cALLBS->Print(pdffile);
+  //cAngle->Print(pdffile);
+  cTotalCorr->Print(TString::Format("%s",pdffile.Data()));
   
 }

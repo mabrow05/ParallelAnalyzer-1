@@ -13,18 +13,18 @@
 
 bool color = false;
 
-Int_t groupBin=4;
+Int_t groupBin=5;
 Double_t enStart=50.;//10.*groupBin;
 
 Double_t BSlimitLow = -1., BSlimitHigh = 3.;
-Double_t AnglelimitLow = -5., AnglelimitHigh = 3.;
+Double_t AnglelimitLow = -4., AnglelimitHigh = 3.;
 
 TString drawOpt = "0AL3";//"0AC4" "0AL3"
 
-std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
+std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type,TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../AngleCorrections/%s_delta_3%s.txt",year.Data(),(type==TString("ALL")?"":type.Data())));
+  std::ifstream infile(TString::Format("../AngleCorrections/%s_delta_3%s_anaCh%s.txt",year.Data(),(type==TString("ALL")?"":type.Data()),anaCh.Data()));
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
@@ -51,13 +51,16 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
       i++;
     }
   }
+  enbin.push_back(enbin[enbin.size()-1]+10.*groupBin);
+  c.push_back(c[c.size()-1]);
+  cerr.push_back(cerr[cerr.size()-1]);
   corrs.push_back(enbin);
   corrs.push_back(c);
   corrs.push_back(cerr);
   return corrs;
 };
 
-void CosThetaCorrections() {
+void CosThetaCorrections(TString anaCh) {
 
   gStyle->SetOptStat(0);
   gStyle->SetTitleSize(0.07,"t");
@@ -95,18 +98,18 @@ void CosThetaCorrections() {
   int startPoint=0;
   
   TString year = "2011-2012";
-  std::vector<std::vector<Double_t> > delta30_2011 = readAngleCorr(year,"0");
-  std::vector<std::vector<Double_t> > delta31_2011 = readAngleCorr(year,"1");
-  std::vector<std::vector<Double_t> > delta32_2011 = readAngleCorr(year,"2");
-  std::vector<std::vector<Double_t> > delta33_2011 = readAngleCorr(year,"3");
-  std::vector<std::vector<Double_t> > delta3_2011 = readAngleCorr(year,"ALL");
+  std::vector<std::vector<Double_t> > delta30_2011 = readAngleCorr(year,"0",anaCh);
+  std::vector<std::vector<Double_t> > delta31_2011 = readAngleCorr(year,"1",anaCh);
+  std::vector<std::vector<Double_t> > delta32_2011 = readAngleCorr(year,"2",anaCh);
+  std::vector<std::vector<Double_t> > delta33_2011 = readAngleCorr(year,"3",anaCh);
+  std::vector<std::vector<Double_t> > delta3_2011 = readAngleCorr(year,"ALL",anaCh);
     
   year = "2012-2013";
-  std::vector<std::vector<Double_t> > delta30_2012 = readAngleCorr(year,"0");
-  std::vector<std::vector<Double_t> > delta31_2012 = readAngleCorr(year,"1");
-  std::vector<std::vector<Double_t> > delta32_2012 = readAngleCorr(year,"2");
-  std::vector<std::vector<Double_t> > delta33_2012 = readAngleCorr(year,"3");
-  std::vector<std::vector<Double_t> > delta3_2012 = readAngleCorr(year,"ALL");
+  std::vector<std::vector<Double_t> > delta30_2012 = readAngleCorr(year,"0",anaCh);
+  std::vector<std::vector<Double_t> > delta31_2012 = readAngleCorr(year,"1",anaCh);
+  std::vector<std::vector<Double_t> > delta32_2012 = readAngleCorr(year,"2",anaCh);
+  std::vector<std::vector<Double_t> > delta33_2012 = readAngleCorr(year,"3",anaCh);
+  std::vector<std::vector<Double_t> > delta3_2012 = readAngleCorr(year,"ALL",anaCh);
   
   
   TCanvas *c0 = new TCanvas("c0","c0");
@@ -142,6 +145,8 @@ void CosThetaCorrections() {
   mg0->GetYaxis()->CenterTitle();
   mg0->GetXaxis()->SetTitle("Energy (keV)");
   mg0->GetXaxis()->CenterTitle();
+  mg0->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *leg0 = new TLegend(0.57,0.7,0.87,0.8);
@@ -184,6 +189,8 @@ void CosThetaCorrections() {
   mg1->GetYaxis()->CenterTitle();
   mg1->GetXaxis()->SetTitle("Energy (keV)");
   mg1->GetXaxis()->CenterTitle();
+  mg1->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *leg1 = new TLegend(0.57,0.7,0.87,0.8);
@@ -225,6 +232,7 @@ void CosThetaCorrections() {
   mg2->GetYaxis()->CenterTitle();
   mg2->GetXaxis()->SetTitle("Energy (keV)");
   mg2->GetXaxis()->CenterTitle();
+  mg2->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
 
   TLegend *leg2 = new TLegend(0.57,0.7,0.87,0.8);
@@ -267,6 +275,7 @@ void CosThetaCorrections() {
   mg3->GetYaxis()->CenterTitle();
   mg3->GetXaxis()->SetTitle("Energy (keV)");
   mg3->GetXaxis()->CenterTitle();
+  mg3->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
 
   TLegend *leg3 = new TLegend(0.57,0.7,0.87,0.8);
@@ -309,6 +318,7 @@ void CosThetaCorrections() {
   mgDELTA3->GetYaxis()->CenterTitle();
   mgDELTA3->GetXaxis()->SetTitle("Energy (keV)");
   mgDELTA3->GetXaxis()->CenterTitle();
+  mgDELTA3->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
 
   TLegend *legDELTA3 = new TLegend(0.57,0.7,0.87,0.8);
