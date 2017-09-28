@@ -753,8 +753,8 @@ if __name__ == "__main__":
 
     if 0:
     
-        lowBin = 19
-        highBin = 74
+        lowBin = 22
+        highBin = 66
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
@@ -824,10 +824,10 @@ if __name__ == "__main__":
         print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
-    if 1:
+    if 0:
         anaChoice = "C"
-        lowBin = 19
-        highBin = 73
+        lowBin = 19#19
+        highBin = 73#73
         
         errDeltaRecoil = 0.005 # These need to be fixed
         errDeltaRadiative = 0.005
@@ -1109,3 +1109,109 @@ if __name__ == "__main__":
                 o.write("\tTheory Corrections\n")
                 o.write("R.O.\t\t%0.2f\t\t%0.2f\t\t%0.2f\n"%(deltaRecoil2011[0]*100.,deltaRecoil2012[0]*100.,fabs(MC.errcombo([err010,err110])/result[0])*100.))#deltaRecoil[1]*100.))
                 o.write("Rad\t\t%0.2f\t\t%0.2f\t\t%0.2f\n\n\n"%(deltaRadiative2011[0]*100.,deltaRadiative2012[0]*100.,fabs(MC.errcombo([err011,err111])/result[0])*100.))#deltaRadiative[1]*100.))
+
+
+
+    if 1: 
+
+        MB_A0 = -0.120544
+        MB_staterr = 0.000435
+        MB_syst0err = 0.0020*fabs(MB_A0) # Energy # This is the total syst 0.000675
+        MB_syst1err = 0.0030*fabs(MB_A0) # delta2
+        MB_syst2err = 0.0033*fabs(MB_A0) # delta3
+        MB_syst3err = 0.0016*fabs(MB_A0) # gain
+        MB_syst4err = 0.0001*fabs(MB_A0) # mwpc eff
+        MB_syst5err = 0.0011*fabs(MB_A0) # field
+        MB_syst6err = 0.0002*fabs(MB_A0) # UCNBg
+        MB_syst7err = 0.0003*fabs(MB_A0) # muon
+        MB_syst8err = 0.0003*fabs(MB_A0) # R.O.
+        MB_syst9err = 0.0005*fabs(MB_A0) # Rad.
+        MB_depolerr = 0.0017*fabs(MB_A0)
+
+        MPM_A0 = -0.11954
+        MPM_staterr = 0.00055
+        MPM_syst0err = 0.0031*fabs(MPM_A0) # Energy # This is the total syst 0.00098
+        MPM_syst1err = 0.0034*fabs(MPM_A0) # delta2
+        MPM_syst2err = 0.0030*fabs(MPM_A0) # delta3
+        MPM_syst3err = 0.0018*fabs(MPM_A0) # gain
+        MPM_syst4err = 0.0008*fabs(MPM_A0) # mwpc eff
+        MPM_syst5err = 0.0010*fabs(MPM_A0) # field
+        MPM_syst6err = 0.0002*fabs(MPM_A0) # UCNBg
+        MPM_syst7err = 0.0003*fabs(MPM_A0) # muon
+        MPM_syst8err = 0.0003*fabs(MPM_A0) # R.O.
+        MPM_syst9err = 0.0005*fabs(MPM_A0) # Rad.
+        MPM_depolerr = 0.0056*fabs(MPM_A0)
+
+        if 1:
+            MPM_syst0err = 0.0020*fabs(MPM_A0) # Energy # This is the total syst 0.00098
+            MPM_syst1err = 0.0030*fabs(MPM_A0) # delta2
+            MPM_syst2err = 0.0033*fabs(MPM_A0) # delta3
+            MPM_syst3err = 0.0016*fabs(MPM_A0) # gain
+            MPM_syst4err = 0.0001*fabs(MPM_A0) # mwpc eff
+            MB_syst5err = 0.0010*fabs(MB_A0) # field
+            MPM_depolerr = 0.0017*fabs(MPM_A0)
+
+        MC = MeasCombiner()
+        
+        mu0 = MC.new_meas_mu(MB_A0) 
+        stat0 = MC.new_meas_err(mu0,MB_staterr)	# stat
+        err00 = MC.new_meas_err(mu0,MB_syst0err) # syst
+        err01 = MC.new_meas_err(mu0,MB_syst1err) 
+        err02 = MC.new_meas_err(mu0,MB_syst2err) 
+        err03 = MC.new_meas_err(mu0,MB_syst3err) 
+        err04 = MC.new_meas_err(mu0,MB_syst4err) 
+        err05 = MC.new_meas_err(mu0,MB_syst5err) 
+        err06 = MC.new_meas_err(mu0,MB_syst6err) 
+        err07 = MC.new_meas_err(mu0,MB_syst7err) 
+        err08 = MC.new_meas_err(mu0,MB_syst8err) 
+        err09 = MC.new_meas_err(mu0,MB_syst9err) 
+        depol0 = MC.new_meas_err(mu0,MB_depolerr) # depol
+
+        mu1 = MC.new_meas_mu(MPM_A0) 
+        stat1 = MC.new_meas_err(mu1,MPM_staterr)	# stat
+        err10 = MC.new_meas_err(mu1,MPM_syst0err) # syst
+        err11 = MC.new_meas_err(mu1,MPM_syst1err) 
+        err12 = MC.new_meas_err(mu1,MPM_syst2err) 
+        err13 = MC.new_meas_err(mu1,MPM_syst3err) 
+        err14 = MC.new_meas_err(mu1,MPM_syst4err) 
+        err15 = MC.new_meas_err(mu1,MPM_syst5err) 
+        err16 = MC.new_meas_err(mu1,MPM_syst6err) 
+        err17 = MC.new_meas_err(mu1,MPM_syst7err) 
+        err18 = MC.new_meas_err(mu1,MPM_syst8err) 
+        err19 = MC.new_meas_err(mu1,MPM_syst9err) 
+        depol1 = MC.new_meas_err(mu1,MPM_depolerr) # depol
+
+
+        MC.add_correlation(err00,err10,1.0)
+        MC.add_correlation(err01,err11,1.0)
+        MC.add_correlation(err02,err12,1.0)
+        MC.add_correlation(err03,err13,1.0)
+        MC.add_correlation(err04,err14,1.0)
+        MC.add_correlation(err05,err15,1.0)
+        MC.add_correlation(err06,err16,1.0)
+        MC.add_correlation(err07,err17,1.0)
+        MC.add_correlation(err08,err18,1.0)
+        MC.add_correlation(err09,err19,1.0)
+        MC.add_correlation(depol0,depol1,1.0)
+
+        result = MC.calc_combo()
+        
+
+        #### 2012 uncertainty table
+        print("\n\n****************** FINAL RESULT ****************\n\n")
+        print("A0 = %0.6f +/- %0.6f     (%0.3f%%)"%(result[0],result[1],100.*fabs(result[1]/result[0])))
+        print "stat =",MC.errcombo([stat0,stat1])
+        print "syst =",MC.errcombo([err00,err10,
+                                    err01,err11,
+                                    err02,err12,
+                                    err03,err13,
+                                    err04,err14,
+                                    err05,err15,
+                                    err06,err16,
+                                    err07,err17,
+                                    err08,err18,
+                                    err09,err19])
+        print("")
+        l = calcLambda(result[0],result[1])
+        print("lambda = %0.6f +/- %0.6f    (%0.3f%%)"%(l[0],l[1],100.*fabs(l[1]/l[0])))
+        print
