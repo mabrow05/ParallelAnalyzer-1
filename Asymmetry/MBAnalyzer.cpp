@@ -210,12 +210,12 @@ int main(int argc, char* argv[])
       exit(0);
     }
     
-    std::vector<TString> aCh {"A","B","C","D","F","G","H","J","K"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<TString> aCh {"C","D"};//{"A","B","C","D","F","G","H","J","K"};//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
     for (auto ach : aCh) {
-      //ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
+      ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
       //ProcessPairs(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
-      PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
-      PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
+      //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
+      //PlotFinalAsymmetries("Octet",octBegin, octEnd, std::string(ach.Data()), Elow, Ehigh, enBinWidth, UKdata, simulation, unblind);
     }
     
     // Loop over keys
@@ -265,12 +265,12 @@ void ProcessOctets(Int_t octBegin, Int_t octEnd, std::string anaChoice, Double_t
     try {
       OctetAsymmetry oct(octet,anaChoice,enBinWidth, 50., UKdata, simulation, UNBLIND);
       //oct.calcTotalAsymmetry(180.,780.);
-      oct.calcAsymmetryBinByBin(); 
+      //oct.calcAsymmetryBinByBin(); 
       //oct.calcNCSUSumAsymmetryBinByBin(); 
-      //oct.calcSuperSum();
+      oct.calcSuperSum();
       //oct.calcSuperSumNCSUstyle();
-      oct.writeAsymToFile();
-      //oct.writeSuperSumToFile(); 
+      //oct.writeAsymToFile();
+      oct.writeSuperSumToFile(); 
       
       //  octval << octet << "\t" 
       //     << oct.returnTotalAsymmetry() << "\t" 
@@ -505,6 +505,8 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
     
     //std::cout << enBinMedian[i] << " " << groupAsymByBin[1][i] << " " << groupAsymByBin[2][i] << std::endl;
   }
+
+
 
   // Plotting stuff
   std::string outFile;
@@ -898,7 +900,18 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	AsymAndError[0][i] *= (bsCorr[i]*angleCorr[i] / theoryCorr[i]); //Here is where the corrections to Ameas are made.. Need to add in delta theory
 	AsymAndError[1][i] *= (bsCorr[i]*angleCorr[i] / theoryCorr[i]);
       }
-      
+  
+
+        //Writing out corrected bin-by-bin asymmetries for Xuan.
+      if (realOutput && key==0 && !withPOL) {
+	std::string xuanOutFile = ( basePath2 + (UNBLIND?"UNBLINDED_":"") + corr + "_" +
+				    groupType +"AsymmetriesByBin_Octet"+itos(octet)+"_AnaCh" + anaChoice +".dat" );
+	std::ofstream xuanFile(xuanOutFile.c_str());
+	xuanFile << std::setprecision(15);
+	for (unsigned i=0;i<AsymAndError[0].size();++i) xuanFile << enBinMedian[i] << "\t" << AsymAndError[0][i] << "\t" << AsymAndError[1][i] << "\n";
+	xuanFile.close();
+      }
+
       
       std::string pdfPath = ( basePath2 + (UNBLIND?"UNBLINDED_":"") + corr + "_" +  "Asymmetry_Octet" + itos(octet) +
 			      "_AnaCh" + anaChoice + "_" + itos((int)Elow) + std::string("-") +itos((int)Ehigh) +
