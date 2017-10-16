@@ -246,36 +246,37 @@ def plotEnergyErrors(year=2011):
 					  key = graph.key.key(pos="tr"))
 	setTexrunner(gCx)
 			 
-        gdat = [ [x,100*fabs(energyErrorA(x,year)),100*energyErrorSimple(x,year),100*energyErrorRC(x,year)] for x in unifrange(50,850.,800) ]
+        #gdat = [ [x,100*fabs(energyErrorA(x,year)),100*energyErrorSimple(x,year),100*energyErrorRC(x,year)] for x in unifrange(50,850.,800) ]
 
-	gdatLower = [ [x,100*fabs(energyErrorA(x,year*10+1)),100*energyErrorSimple(x,year*10+1),100*energyErrorRC(x,year*10+1)] for x in unifrange(50,850.,800) ]
-	gdatUpper = [ [x,100*fabs(energyErrorA(x,year*10+2)),100*energyErrorSimple(x,year*10+2),100*energyErrorRC(x,year*10+2)] for x in unifrange(50,850.,800) ]
-	#gdat2010 = [ [x,100*energyErrorA(x,2010),100*energyErrorSimple(x,2010),100*energyErrorRC(x,2010)] for x in unifrange(50,850.,800) ]
-	#gdat2012 = [ [x,100*energyErrorA(x,2012),100*energyErrorSimple(x,2012),100*energyErrorRC(x,2012)] for x in unifrange(50,850.,800) ]
+	#gdatLower = [ [x,100*fabs(energyErrorA(x,year*10+1)),100*energyErrorSimple(x,year*10+1),100*energyErrorRC(x,year*10+1)] for x in unifrange(50,850.,800) ]
+	#gdatUpper = [ [x,100*fabs(energyErrorA(x,year*10+2)),100*energyErrorSimple(x,year*10+2),100*energyErrorRC(x,year*10+2)] for x in unifrange(50,850.,800) ]
+	gdat2010 = [ [x,100*energyErrorA(x,2010),100*energyErrorSimple(x,2010),100*energyErrorRC(x,2010)] for x in unifrange(50,850.,800) ]
+	gdat2011 = [ [x,100*energyErrorA(x,2011),100*energyErrorSimple(x,2011),100*energyErrorRC(x,2011)] for x in unifrange(50,850.,800) ]
+	gdat2012 = [ [x,100*energyErrorA(x,2012),100*energyErrorSimple(x,2012),100*energyErrorRC(x,2012)] for x in unifrange(50,850.,800) ]
 
 	#gCx.plot(graph.data.points(gdat[::8],x=1,y=3,title="$A={\\beta \\over 2}A_0$"),
         #         [ graph.style.line([style.linewidth.THick,style.linestyle.dotted]),])
 	#gCx.plot(graph.data.points(gdat,x=1,y=4,title="$A={\\beta \\over 2}(1+$R.C.$)A_0$"),
         #         [ graph.style.line([style.linewidth.THick,style.linestyle.dashed]),] )
-        gCx.plot(graph.data.points(gdat,x=1,y=2,title="%i Old Method"%year),
-                 [ graph.style.line([style.linewidth.THick]),])
+        #gCx.plot(graph.data.points(gdat,x=1,y=2,title="%i Old Method"%year),
+        #         [ graph.style.line([style.linewidth.THick]),])
 	#gCx.plot(graph.data.points(gdatUpper,x=1,y=2,title="%i Upper Edge"%year),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
-        gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i New Method"%year),
-                 [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
-        #gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
-        #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
-	#gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
+        #gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i New Method"%year),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
+        gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
+                 [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
+	gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
+                 [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
 			 
 	#print "Eavg MC MPM 2010=",weightStats(gdat2010,220,670)
-        #print "Eavg MC MB 2011="%year,weightStats(gdat,220,670)
-        #print "Eavg MC MB 2012=",weightStats(gdat2012,220,670)
+        print "Eavg MC MB 2011=",weightStats(gdat2011,190,740)
+        print "Eavg MC MB 2012=",weightStats(gdat2012,190,740)
 	
-	print "Eavg MC %i = "%year,weightStats(gdat,220,670)
-	print "Eavg MC Lower %i = "%year,weightStats(gdatLower,220,670)
-        print "Eavg MC Upper %i = "%year,weightStats(gdatUpper,220,670)
-	gCx.writetofile("%s/Corrections/EnergyUncert%i.pdf"%(baseOutPath,year))
+	#print "Eavg MC %i = "%year,weightStats(gdat,220,670)
+	#print "Eavg MC Lower %i = "%year,weightStats(gdatLower,220,670)
+        #print "Eavg MC Upper %i = "%year,weightStats(gdatUpper,220,670)
+	gCx.writetofile("%s/Corrections/EnergyUncert%s.pdf"%(baseOutPath,"ALL" ))
 
 
 def plotGainfluctErrors():
@@ -310,11 +311,13 @@ def plotGainfluctErrors():
 
 if __name__=="__main__":
 	year = 2012
-        readCalEnvelope(year)
-        theoryUncertaintyTable(year)
-        plotTheoryErrors(year)
+        #readCalEnvelope(year)
+        #theoryUncertaintyTable(year)
+        #plotTheoryErrors(year)
         #gainUncertaintyTable(year,0.0064)
-	linearityUncertaintyTable(year)
+	#linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
-	plotEnergyErrors(year)
+        readCalEnvelope(2011)
+        readCalEnvelope(2012)
+	plotEnergyErrors(20112)
 	#plotGainfluctErrors()

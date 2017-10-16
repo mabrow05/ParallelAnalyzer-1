@@ -85,14 +85,16 @@ void CosThetaCorrections(TString anaCh) {
   //Int_t octmin = year==2011?0:60;
   //Int_t octmax = year==2011?59:121;
 
-  Int_t col2011 = color?9:1;
-  Int_t col2012 = color?8:1;
-  Int_t fill2011 = color?3001:3004;
-  Int_t fill2012 = color?3001:3005;
+
+  Int_t col2011 = color?9:14;
+  Int_t col2012 = color?8:17;
+  Int_t fill2011 = 1001;
+  Int_t fill2012 = 1001;
   Int_t marker2011 = 20;
   Int_t marker2012 = 21;
   Int_t lineStyle2011 = 1;
   Int_t lineStyle2012 = color?1:2;
+
   
 
   int startPoint=0;
@@ -121,16 +123,16 @@ void CosThetaCorrections(TString anaCh) {
   TGraphErrors *g_delta30_2011 = new TGraphErrors(delta30_2011[0].size()-startPoint,&delta30_2011[0][startPoint],&delta30_2011[1][startPoint],0,&delta30_2011[2][startPoint]);
   g_delta30_2011->SetMarkerStyle(0);
   g_delta30_2011->SetLineWidth(3);
-  g_delta30_2011->SetLineColor(col2011);
-  g_delta30_2011->SetFillColor(col2011);
+  g_delta30_2011->SetLineColor(!color?1:col2011);
+  g_delta30_2011->SetFillColorAlpha(col2011,0.7);
   g_delta30_2011->SetFillStyle(fill2011);
   g_delta30_2011->SetLineStyle(lineStyle2011);
 
   TGraphErrors *g_delta30_2012 = new TGraphErrors(delta30_2012[0].size()-startPoint,&delta30_2012[0][startPoint],&delta30_2012[1][startPoint],0,&delta30_2012[2][startPoint]);
   g_delta30_2012->SetMarkerStyle(0);
   g_delta30_2012->SetLineWidth(3);
-  g_delta30_2012->SetLineColor(col2012);
-  g_delta30_2012->SetFillColor(col2012);
+  g_delta30_2012->SetLineColor(!color?1:col2012);
+  g_delta30_2012->SetFillColorAlpha(col2012,0.7);
   g_delta30_2012->SetFillStyle(fill2012);
   g_delta30_2012->SetLineStyle(lineStyle2012);
 
@@ -140,7 +142,7 @@ void CosThetaCorrections(TString anaCh) {
   mg0->SetMinimum(AnglelimitLow);
   mg0->SetMaximum(AnglelimitHigh);
   
-  mg0->Draw("ALP3");
+  mg0->Draw(drawOpt);
   mg0->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg0->GetYaxis()->CenterTitle();
   mg0->GetXaxis()->SetTitle("Energy (keV)");
@@ -166,16 +168,16 @@ void CosThetaCorrections(TString anaCh) {
   TGraphErrors *g_delta31_2011 = new TGraphErrors(delta31_2011[0].size()-startPoint,&delta31_2011[0][startPoint],&delta31_2011[1][startPoint],0,&delta31_2011[2][startPoint]);
   g_delta31_2011->SetMarkerStyle(0);
   g_delta31_2011->SetLineWidth(3);
-  g_delta31_2011->SetLineColor(col2011);
-  g_delta31_2011->SetFillColor(col2011);
+  g_delta31_2011->SetLineColor(!color?1:col2011);
+  g_delta31_2011->SetFillColorAlpha(col2011,0.7);
   g_delta31_2011->SetFillStyle(fill2011);
   g_delta31_2011->SetLineStyle(lineStyle2011);
 
   TGraphErrors *g_delta31_2012 = new TGraphErrors(delta31_2012[0].size()-startPoint,&delta31_2012[0][startPoint],&delta31_2012[1][startPoint],0,&delta31_2012[2][startPoint]);
   g_delta31_2012->SetMarkerStyle(0);
   g_delta31_2012->SetLineWidth(3);
-  g_delta31_2012->SetLineColor(col2012);
-  g_delta31_2012->SetFillColor(col2012);
+  g_delta31_2012->SetLineColor(!color?1:col2012);
+  g_delta31_2012->SetFillColorAlpha(col2012,0.7);
   g_delta31_2012->SetFillStyle(fill2012);
   g_delta31_2012->SetLineStyle(lineStyle2012);
 
@@ -184,7 +186,7 @@ void CosThetaCorrections(TString anaCh) {
   mg1->SetMinimum(AnglelimitLow);
   mg1->SetMaximum(AnglelimitHigh);
   
-  mg1->Draw("ALP3");
+  mg1->Draw(drawOpt);
   mg1->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg1->GetYaxis()->CenterTitle();
   mg1->GetXaxis()->SetTitle("Energy (keV)");
@@ -209,16 +211,16 @@ void CosThetaCorrections(TString anaCh) {
   TGraphErrors *g_delta32_2011 = new TGraphErrors(delta32_2011[0].size()-startPoint,&delta32_2011[0][startPoint],&delta32_2011[1][startPoint],0,&delta32_2011[2][startPoint]);
   g_delta32_2011->SetMarkerStyle(0);
   g_delta32_2011->SetLineWidth(3);
-  g_delta32_2011->SetLineColor(col2011);
-  g_delta32_2011->SetFillColor(col2011);
+  g_delta32_2011->SetLineColor(!color?1:col2011);
+  g_delta32_2011->SetFillColorAlpha(col2011,0.7);
   g_delta32_2011->SetFillStyle(fill2011);
   g_delta32_2011->SetLineStyle(lineStyle2011);
   
   TGraphErrors *g_delta32_2012 = new TGraphErrors(delta32_2012[0].size()-startPoint,&delta32_2012[0][startPoint],&delta32_2012[1][startPoint],0,&delta32_2012[2][startPoint]);
   g_delta32_2012->SetMarkerStyle(0);
   g_delta32_2012->SetLineWidth(3);
-  g_delta32_2012->SetLineColor(col2012);
-  g_delta32_2012->SetFillColor(col2012);
+  g_delta32_2012->SetLineColor(!color?1:col2012);
+  g_delta32_2012->SetFillColorAlpha(col2012,0.7);
   g_delta32_2012->SetFillStyle(fill2012);
   g_delta32_2012->SetLineStyle(lineStyle2012);
 
@@ -227,7 +229,7 @@ void CosThetaCorrections(TString anaCh) {
   mg2->SetMinimum(AnglelimitLow);
   mg2->SetMaximum(AnglelimitHigh);
   
-  mg2->Draw("ALP3");
+  mg2->Draw(drawOpt);
   mg2->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg2->GetYaxis()->CenterTitle();
   mg2->GetXaxis()->SetTitle("Energy (keV)");
@@ -251,8 +253,8 @@ void CosThetaCorrections(TString anaCh) {
   TGraphErrors *g_delta33_2011 = new TGraphErrors(delta33_2011[0].size()-startPoint,&delta33_2011[0][startPoint],&delta33_2011[1][startPoint],0,&delta33_2011[2][startPoint]);
   g_delta33_2011->SetMarkerStyle(0);
   g_delta33_2011->SetLineWidth(3);
-  g_delta33_2011->SetLineColor(col2011);
-  g_delta33_2011->SetFillColor(col2011);
+  g_delta33_2011->SetLineColor(!color?1:col2011);
+  g_delta33_2011->SetFillColorAlpha(col2011,0.7);
   g_delta33_2011->SetFillStyle(fill2011);
   g_delta33_2011->SetLineStyle(lineStyle2011);
 
@@ -260,8 +262,8 @@ void CosThetaCorrections(TString anaCh) {
   TGraphErrors *g_delta33_2012 = new TGraphErrors(delta33_2012[0].size()-startPoint,&delta33_2012[0][startPoint],&delta33_2012[1][startPoint],0,&delta33_2012[2][startPoint]);
   g_delta33_2012->SetMarkerStyle(0);
   g_delta33_2012->SetLineWidth(3);
-  g_delta33_2012->SetLineColor(col2012);
-  g_delta33_2012->SetFillColor(col2012);
+  g_delta33_2012->SetLineColor(!color?1:col2012);
+  g_delta33_2012->SetFillColorAlpha(col2012,0.7);
   g_delta33_2012->SetFillStyle(fill2012);
   g_delta33_2012->SetLineStyle(lineStyle2012);
 
@@ -270,7 +272,7 @@ void CosThetaCorrections(TString anaCh) {
   mg3->SetMinimum(AnglelimitLow);
   mg3->SetMaximum(AnglelimitHigh);
   
-  mg3->Draw("ALP3");
+  mg3->Draw(drawOpt);
   mg3->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg3->GetYaxis()->CenterTitle();
   mg3->GetXaxis()->SetTitle("Energy (keV)");
@@ -295,16 +297,16 @@ void CosThetaCorrections(TString anaCh) {
   TGraphErrors *g_delta3_2011 = new TGraphErrors(delta3_2011[0].size()-startPoint,&delta3_2011[0][startPoint],&delta3_2011[1][startPoint],0,&delta3_2011[2][startPoint]);
   g_delta3_2011->SetMarkerStyle(0);
   g_delta3_2011->SetLineWidth(3);
-  g_delta3_2011->SetLineColor(col2011);
-  g_delta3_2011->SetFillColor(col2011);
+  g_delta3_2011->SetLineColor(!color?1:col2011);
+  g_delta3_2011->SetFillColorAlpha(col2011,0.7);
   g_delta3_2011->SetFillStyle(fill2011);
   g_delta3_2011->SetLineStyle(lineStyle2011);
 
   TGraphErrors *g_delta3_2012 = new TGraphErrors(delta3_2012[0].size()-startPoint,&delta3_2012[0][startPoint],&delta3_2012[1][startPoint],0,&delta3_2012[2][startPoint]);
   g_delta3_2012->SetMarkerStyle(0);
   g_delta3_2012->SetLineWidth(3);
-  g_delta3_2012->SetLineColor(col2012);
-  g_delta3_2012->SetFillColor(col2012);
+  g_delta3_2012->SetLineColor(!color?1:col2012);
+  g_delta3_2012->SetFillColorAlpha(col2012,0.7);
   g_delta3_2012->SetFillStyle(fill2012);
   g_delta3_2012->SetLineStyle(lineStyle2012);
 
@@ -313,7 +315,7 @@ void CosThetaCorrections(TString anaCh) {
   mgDELTA3->SetMinimum(AnglelimitLow);
   mgDELTA3->SetMaximum(AnglelimitHigh);
   
-  mgDELTA3->Draw("ALP3");
+  mgDELTA3->Draw(drawOpt);
   mgDELTA3->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgDELTA3->GetYaxis()->CenterTitle();
   mgDELTA3->GetXaxis()->SetTitle("Energy (keV)");

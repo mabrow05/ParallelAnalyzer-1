@@ -87,7 +87,7 @@ Double_t getVudUncert(Double_t x, Double_t tau, Double_t dtau) {
 
 void Vud_vs_lambda() {
 
-  bool color = false;
+  bool color = true;
   bool data = true;
 
   Double_t tau1scale = 1.38; //bottle
@@ -118,10 +118,10 @@ void Vud_vs_lambda() {
   Double_t Vud = 0.97417;
   Double_t Vud_err = 0.00021;
 
-  std::vector<TString> Lambda1name {"Mund et al.","Mendenhall et al.","Brown et al.","Schumann et al."};
-  std::vector<Double_t> Lambda1year {2012,2013,2017,2008};
-  std::vector<Double_t> Lambda1vec {1.2748,1.2755,1.2783,1.275}; //Brown result 1.2783 +/- 0.0022 // raw abele (1.2739) and Mund (1.2761)
-  std::vector<Double_t> Lambda1vecErr {0.0014,0.0030,0.0022,0.016};
+  std::vector<TString> Lambda1name {"Mund et al.","Brown et al.","Schumann et al."};
+  std::vector<Double_t> Lambda1year {2013,2017,2008};
+  std::vector<Double_t> Lambda1vec {1.2748,1.2772,1.275}; //Brown result 1.2783 +/- 0.0022 // raw abele (1.2739) and Mund (1.2761)
+  std::vector<Double_t> Lambda1vecErr {0.0014,0.0020,0.016};
   Double_t Lambda1 = weightedAve(Lambda1vec,Lambda1vecErr);//1.2755;
   Double_t Lambda1_err = weightedAveErr(Lambda1vecErr);//0.0005;
 
@@ -254,7 +254,7 @@ void Vud_vs_lambda() {
   TGraphErrors *lambdaMeas11 = new TGraphErrors(1,&Lambda1vec[1],&Lambda1year[1],&Lambda1vecErr[1],0);
   lambdaMeas11->SetTitle("");
   lambdaMeas11->SetMarkerColor(1);//(fillColor_lambda1);
-  lambdaMeas11->SetMarkerStyle(22);
+  lambdaMeas11->SetMarkerStyle(20);
   if (data) lambdaMeas11->Draw("P SAME");
 
   TGraphErrors *lambdaMeas12 = new TGraphErrors(1,&Lambda1vec[2],&Lambda1year[2],&Lambda1vecErr[2],0);
@@ -263,13 +263,13 @@ void Vud_vs_lambda() {
   lambdaMeas12->SetMarkerStyle(21);
   if (data) lambdaMeas12->Draw("P SAME");
 
-  TGraphErrors *lambdaMeas13 = new TGraphErrors(1,&Lambda1vec[3],&Lambda1year[3],&Lambda1vecErr[3],0);
+  /*TGraphErrors *lambdaMeas13 = new TGraphErrors(1,&Lambda1vec[3],&Lambda1year[3],&Lambda1vecErr[3],0);
   lambdaMeas13->SetTitle("");
   lambdaMeas13->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas13->SetMarkerStyle(20);
   if (data) lambdaMeas13->Draw("P SAME");
 
-  /*TGraphErrors *lambdaMeas14 = new TGraphErrors(1,&Lambda1vec[4],&Lambda1year[4],&Lambda1vecErr[4],0);
+  TGraphErrors *lambdaMeas14 = new TGraphErrors(1,&Lambda1vec[4],&Lambda1year[4],&Lambda1vecErr[4],0);
   lambdaMeas14->SetTitle("");
   lambdaMeas14->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas14->SetMarkerStyle(34);
@@ -302,10 +302,10 @@ void Vud_vs_lambda() {
   
   
   TLegend *legA = new TLegend(0.16,0.16,0.46,0.40);
-  legA->SetTextSize(0.030);
+  legA->SetTextSize(0.035);
   legA->SetHeader("A_{0} measurements");
-  legA->AddEntry(lambdaMeas12,Lambda1name[2]+" (this work)","p");
-  legA->AddEntry(lambdaMeas11,Lambda1name[1],"p");
+  legA->AddEntry(lambdaMeas11,Lambda1name[1]+" (this work)","p");
+  //legA->AddEntry(lambdaMeas11,Lambda1name[1],"p");
   legA->AddEntry(lambdaMeas10,Lambda1name[0],"p");
   //legA->AddEntry(lambdaMeas10,Lambda1name[0],"p");
   legA->AddEntry(lambdaMeas22,Lambda2name[2],"p"); 
@@ -315,10 +315,10 @@ void Vud_vs_lambda() {
   //legA->AddEntry(lambdaMeas23,Lambda2name[3],"p");
   if (data) legA->Draw("SAME");
 
-  TLegend *legB = new TLegend(0.46,0.16,0.76,0.26);
-  legB->SetTextSize(0.030);
+  TLegend *legB = new TLegend(0.45,0.16,0.75,0.28);
+  legB->SetTextSize(0.035);
   legB->SetHeader("Other measurements");
-  legB->AddEntry(lambdaMeas13,Lambda1name[3],"p");
+  legB->AddEntry(lambdaMeas12,Lambda1name[2],"p");
   legB->AddEntry(lambdaMeas23,Lambda2name[3],"p"); 
   if (data) legB->Draw("SAME");
 
@@ -448,6 +448,7 @@ void Vud_vs_lambda() {
       std::cout << "Measurement " << i << "  not included in scale\n";
     }
   }
+  std::cout << "Chi2/(n-1) bottle lifetime: " << chi2nu(scaleVec,scaleVecErr)*(scaleVec.size()-1.) << "/("<<scaleVec.size()<<"-1)" << std::endl;
   std::cout << "Scale Factor bottle lifetime: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)) << std::endl;
   std::cout << "bottle lifetime w/ scaled error: " << t_bottle << " +/- "
 	    << terr_bottle*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";

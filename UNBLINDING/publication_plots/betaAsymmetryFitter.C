@@ -8,8 +8,9 @@ void betaAsymmetryFitter() {
   //gStyle->SetTitleSize(0.1,"t");
   //gStyle->SetTitleSize(0.1,"x");
   //gStyle->SetTitleSize(0.1,"y");
-  gStyle->SetStatX(0.75);
-  gStyle->SetStatY(0.9);
+  gStyle->SetOptStat(0);
+  //gStyle->SetStatX(0.75);
+  //gStyle->SetStatY(0.9);
   gStyle->SetStatBorderSize(0);
   //gStyle->SetOptStat(0);
   //gStyle->SetTitleOffset(0.85,"y");
@@ -25,8 +26,10 @@ void betaAsymmetryFitter() {
   gStyle->SetStatX(0.7);
   //gStyle->SetStatW(.09);
   gStyle->SetFillStyle(0000); 
-  gStyle->SetLegendBorderSize(0); 
-  
+  gStyle->SetLegendBorderSize(0);
+  gStyle->SetErrorX(0);
+
+  TH1::SetDefaultSumw2(true);
   
   TString octets2011 = "0-59";
   TString octets2012 = "60-121";
@@ -176,16 +179,18 @@ void betaAsymmetryFitter() {
 
 
   /////////////////////////////////////////////////////////////////////////////////////////
-  TCanvas *c2 = new TCanvas("c2","c2",700,700);
-  TPad *p1 = new TPad("p1","p1",0.,0.5,1.,1.);
-  TPad *p2 = new TPad("p2","p2",0.,0.28,1.,0.5);
-  TPad *p3 = new TPad("p3","p3",0.,0.06,1.,0.28);
+  TCanvas *c2 = new TCanvas("c2","c2",700,900);
+  TPad *p1 = new TPad("p1","p1",0.,0.6,1.,1.);
+  TPad *p2 = new TPad("p2","p2",0.,0.42,1.,0.6);
+  TPad *p3 = new TPad("p3","p3",0.,0.24,1.,0.42);
+  TPad *p4 = new TPad("p4","p4",0.,0.06,1.,0.24);
   //p2->SetBottomMargin(0.3);
   p1->Draw();
   p2->Draw();
   p3->Draw();
-  
-  p2->cd();
+  p4->Draw();
+
+  p3->cd();
 
   TGraphErrors *gr2 = new TGraphErrors(energy2011.size()-nskip,&energy2011[nskip],&Asym2011[nskip],NULL,&AsymErr2011[nskip]);
   gr2->SetTitle("");//TString::Format("A_{0} vs. Energy for 2011-2012").Data());
@@ -208,7 +213,7 @@ void betaAsymmetryFitter() {
   TF1 *f3 = new TF1("f3","[0]",190.,740.);
   f3->SetParameter(0,-0.1184);
   if (!color) f3->SetLineColor(1);
-  f3->SetLineStyle(2);
+  f3->SetLineStyle(1);
   f3->SetLineWidth(3);
   f3->SetParName(0,"A_{0}");
 
@@ -217,7 +222,7 @@ void betaAsymmetryFitter() {
   gr2->SetMinimum(-0.138);//f3->GetParameter(0)-0.02);
   gr2->SetMaximum(-0.094);//f3->GetParameter(0)+0.03);
   
-  gr2->Draw("AP0");
+  gr2->Draw("AP0Z");
 
   TPaveText *pv2011 = new TPaveText(0.3,0.67,0.7,0.95,"nbNDC");
   pv2011->SetBorderSize(0);
@@ -227,7 +232,7 @@ void betaAsymmetryFitter() {
   pv2011->GetLine(0)->SetTextFont(42);
   pv2011->Draw();
 
-  p3->cd();
+  p4->cd();
   //p3->SetBottomMargin(0.25);
 
   TGraphErrors *gr2_2012 = new TGraphErrors(energy2012.size()-nskip,&energy2012[nskip],&Asym2012[nskip],NULL,&AsymErr2012[nskip]);
@@ -251,7 +256,7 @@ void betaAsymmetryFitter() {
   TF1 *f3_2012 = new TF1("f3_2012","[0]",190.,740.);
   f3_2012->SetParameter(0,-0.1184);
   if (!color) f3_2012->SetLineColor(1);
-  f3_2012->SetLineStyle(2);
+  f3_2012->SetLineStyle(1);
   f3_2012->SetLineWidth(3);
   f3_2012->SetParName(0,"A_{0}");
 
@@ -261,7 +266,7 @@ void betaAsymmetryFitter() {
   //gr2_2012->SetMinimum(f3_2012->GetParameter(0)-0.02);
   //gr2_2012->SetMaximum(f3_2012->GetParameter(0)+0.03);
   
-  gr2_2012->Draw("AP0");
+  gr2_2012->Draw("AP0Z");
 
 
   TPaveText *pv2012 = new TPaveText(0.3,0.67,0.7,0.95,"nbNDC");
@@ -514,6 +519,42 @@ void betaAsymmetryFitter() {
   l->Draw();
   */
   //c1->cd(1);
+
+  p2->cd();
+
+  Int_t nBins = dataALL->GetNbinsX();
+  Double_t Min = dataALL->GetXaxis()->GetBinLowEdge(dataALL->GetXaxis()->GetFirst());
+  Double_t Max = dataALL->GetXaxis()->GetBinUpEdge(dataALL->GetXaxis()->GetLast());
+  
+  TH1D *residALL = new TH1D("residALL","", nBins, Min, Max);
+  residALL->Add(simALL,dataALL,1,-1);
+  residALL->SetFillColor(1);
+  residALL->GetXaxis()->SetRangeUser(0., xAxisMax);
+  residALL->GetXaxis()->SetTitleOffset(1.);
+  residALL->GetYaxis()->SetTitleOffset(0.5);
+  residALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
+  //residALL->GetXaxis()->SetTitle("Energy (keV)");
+  //residALL->SetMaximum(2.);
+  //residALL->SetMinimum(-2.);
+  residALL->SetLineWidth(2);
+  residALL->SetMarkerColor(color?kBlue:kBlack);
+  residALL->SetMarkerStyle(0);
+  residALL->SetMarkerSize(1.);
+  residALL->GetYaxis()->SetTitle("MC-Data (mHz/keV)");
+  residALL->GetYaxis()->SetLabelSize(0.12);
+  residALL->GetYaxis()->SetTitleOffset(0.5);
+  residALL->GetYaxis()->SetTitleSize(0.12);
+  residALL->GetXaxis()->SetLabelSize(0.12);
+  residALL->GetXaxis()->CenterTitle();
+  residALL->GetYaxis()->CenterTitle();
+  residALL->GetYaxis()->SetNdivisions(508);
+
+  
+
+  residALL->Draw("E3");
+  TLine *l = new TLine(Min, 0., xAxisMax, 0.);
+  l->SetLineStyle(2);
+  l->Draw();
 
   p1->cd();
   p1->SetBottomMargin(0.06);

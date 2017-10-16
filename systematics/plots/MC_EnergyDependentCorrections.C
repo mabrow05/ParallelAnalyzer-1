@@ -12,7 +12,7 @@
 #include <TMath.h>
 
 // Remember to print whichever one you want at the bottom to a pdf
-bool color = false;
+bool color = true;
 
 Int_t groupBin=5;
 Double_t enStart=50.;//10.*groupBin;
@@ -128,10 +128,10 @@ void EnergyDependentCorrections(TString anaCh) {
   //Int_t octmin = year==2011?0:60;
   //Int_t octmax = year==2011?59:121;
 
-  Int_t col2011 = color?9:1;
-  Int_t col2012 = color?8:1;
-  Int_t fill2011 = 3004;
-  Int_t fill2012 = 3005;
+  Int_t col2011 = color?9:14;
+  Int_t col2012 = color?8:17;
+  Int_t fill2011 = 1001;
+  Int_t fill2012 = 1001;
   Int_t marker2011 = 20;
   Int_t marker2012 = 21;
   Int_t lineStyle2011 = 1;
@@ -192,8 +192,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bs0_2011 = new TGraphErrors(bs0_2011[0].size()-startPoint,&bs0_2011[0][startPoint],&bs0_2011[1][startPoint],0,&bs0_2011[2][startPoint]);
   g_bs0_2011->SetMarkerStyle(0);
   g_bs0_2011->SetLineWidth(3);
-  g_bs0_2011->SetLineColor(col2011);
-  g_bs0_2011->SetFillColor(col2011);
+  g_bs0_2011->SetLineColor(!color?1:col2011);
+  g_bs0_2011->SetFillColorAlpha(col2011,0.7);
   g_bs0_2011->SetFillStyle(fill2011);
   g_bs0_2011->SetLineStyle(lineStyle2011);
   
@@ -203,8 +203,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bs0_2012 = new TGraphErrors(bs0_2012[0].size()-startPoint,&bs0_2012[0][startPoint],&bs0_2012[1][startPoint],0,&bs0_2012[2][startPoint]);
   g_bs0_2012->SetMarkerStyle(0);
   g_bs0_2012->SetLineWidth(3);
-  g_bs0_2012->SetLineColor(col2012);
-  g_bs0_2012->SetFillColor(col2012);
+  g_bs0_2012->SetLineColor(!color?1:col2012);
+  g_bs0_2012->SetFillColorAlpha(col2012,0.7);
   g_bs0_2012->SetFillStyle(fill2012);
   g_bs0_2012->SetLineStyle(lineStyle2012);
 
@@ -238,8 +238,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bs1_2011 = new TGraphErrors(bs1_2011[0].size()-startPoint,&bs1_2011[0][startPoint],&bs1_2011[1][startPoint],0,&bs1_2011[2][startPoint]);
   g_bs1_2011->SetMarkerStyle(0);
   g_bs1_2011->SetLineWidth(3);
-  g_bs1_2011->SetLineColor(col2011);
-  g_bs1_2011->SetFillColor(col2011);
+  g_bs1_2011->SetLineColor(!color?1:col2011);
+  g_bs1_2011->SetFillColorAlpha(col2011,0.7);
   g_bs1_2011->SetFillStyle(fill2011);
   g_bs1_2011->SetLineStyle(lineStyle2011);
 
@@ -247,8 +247,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bs1_2012 = new TGraphErrors(bs1_2012[0].size()-startPoint,&bs1_2012[0][startPoint],&bs1_2012[1][startPoint],0,&bs1_2012[2][startPoint]);
   g_bs1_2012->SetMarkerStyle(0);
   g_bs1_2012->SetLineWidth(3);
-  g_bs1_2012->SetLineColor(col2012);
-  g_bs1_2012->SetFillColor(col2012);
+  g_bs1_2012->SetLineColor(!color?1:col2012);
+  g_bs1_2012->SetFillColorAlpha(col2012,0.7);
   g_bs1_2012->SetFillStyle(fill2012);
   g_bs1_2012->SetLineStyle(lineStyle2012);
   
@@ -282,8 +282,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bs2_2011 = new TGraphErrors(bs2_2011[0].size()-startPoint,&bs2_2011[0][startPoint],&bs2_2011[1][startPoint],0,&bs2_2011[2][startPoint]);
   g_bs2_2011->SetMarkerStyle(0);
   g_bs2_2011->SetLineWidth(3);
-  g_bs2_2011->SetLineColor(col2011);
-  g_bs2_2011->SetFillColor(col2011);
+  g_bs2_2011->SetLineColor(!color?1:col2011);
+  g_bs2_2011->SetFillColorAlpha(col2011,0.7);
   g_bs2_2011->SetFillStyle(fill2011);
   g_bs2_2011->SetLineStyle(lineStyle2011);
 
@@ -291,8 +291,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bs2_2012 = new TGraphErrors(bs2_2012[0].size()-startPoint,&bs2_2012[0][startPoint],&bs2_2012[1][startPoint],0,&bs2_2012[2][startPoint]);
   g_bs2_2012->SetMarkerStyle(0);
   g_bs2_2012->SetLineWidth(3);
-  g_bs2_2012->SetLineColor(col2012);
-  g_bs2_2012->SetFillColor(col2012);
+  g_bs2_2012->SetLineColor(!color?1:col2012);
+  g_bs2_2012->SetFillColorAlpha(col2012,0.7);
   g_bs2_2012->SetFillStyle(fill2012);
   g_bs2_2012->SetLineStyle(lineStyle2012);
 
@@ -327,16 +327,16 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bs3_2011 = new TGraphErrors(bs3_2011[0].size()-startPoint,&bs3_2011[0][startPoint],&bs3_2011[1][startPoint],0,&bs3_2011[2][startPoint]);
   g_bs3_2011->SetMarkerStyle(0);
   g_bs3_2011->SetLineWidth(3);
-  g_bs3_2011->SetLineColor(col2011);
-  g_bs3_2011->SetFillColor(col2011);
+  g_bs3_2011->SetLineColor(!color?1:col2011);
+  g_bs3_2011->SetFillColorAlpha(col2011,0.7);
   g_bs3_2011->SetFillStyle(fill2011);
   g_bs3_2011->SetLineStyle(lineStyle2011);
 
   TGraphErrors *g_bs3_2012 = new TGraphErrors(bs3_2012[0].size()-startPoint,&bs3_2012[0][startPoint],&bs3_2012[1][startPoint],0,&bs3_2012[2][startPoint]);
   g_bs3_2012->SetMarkerStyle(0);
   g_bs3_2012->SetLineWidth(3);
-  g_bs3_2012->SetLineColor(col2012);
-  g_bs3_2012->SetFillColor(col2012);
+  g_bs3_2012->SetLineColor(!color?1:col2012);
+  g_bs3_2012->SetFillColorAlpha(col2012,0.7);
   g_bs3_2012->SetFillStyle(fill2012);
   g_bs3_2012->SetLineStyle(lineStyle2012);
 
@@ -371,8 +371,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bsALL_2011 = new TGraphErrors(bsALL_2011[0].size()-startPoint,&bsALL_2011[0][startPoint],&bsALL_2011[1][startPoint],0,&bsALL_2011[2][startPoint]);
   g_bsALL_2011->SetMarkerStyle(0);
   g_bsALL_2011->SetLineWidth(3);
-  g_bsALL_2011->SetLineColor(col2011);
-  g_bsALL_2011->SetFillColor(col2011);
+  g_bsALL_2011->SetLineColor(!color?1:col2011);
+  g_bsALL_2011->SetFillColorAlpha(col2011,0.7);
   g_bsALL_2011->SetFillStyle(fill2011);
   g_bsALL_2011->SetLineStyle(lineStyle2011);
 
@@ -380,8 +380,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_bsALL_2012 = new TGraphErrors(bsALL_2012[0].size()-startPoint,&bsALL_2012[0][startPoint],&bsALL_2012[1][startPoint],0,&bsALL_2012[2][startPoint]);
   g_bsALL_2012->SetMarkerStyle(0);
   g_bsALL_2012->SetLineWidth(3);
-  g_bsALL_2012->SetLineColor(col2012);
-  g_bsALL_2012->SetFillColor(col2012);
+  g_bsALL_2012->SetLineColor(!color?1:col2012);
+  g_bsALL_2012->SetFillColorAlpha(col2012,0.7);
   g_bsALL_2012->SetFillStyle(fill2012);
   g_bsALL_2012->SetLineStyle(lineStyle2012);
     
@@ -415,8 +415,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_delta3_2011 = new TGraphErrors(delta3_2011[0].size()-startPoint,&delta3_2011[0][startPoint],&delta3_2011[1][startPoint],0,&delta3_2011[2][startPoint]);
   g_delta3_2011->SetMarkerStyle(0);
   g_delta3_2011->SetLineWidth(3);
-  g_delta3_2011->SetLineColor(col2011);
-  g_delta3_2011->SetFillColor(col2011);
+  g_delta3_2011->SetLineColor(!color?1:col2011);
+  g_delta3_2011->SetFillColorAlpha(col2011,0.7);
   g_delta3_2011->SetFillStyle(fill2011);
   g_delta3_2011->SetLineStyle(lineStyle2011);
 
@@ -424,8 +424,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_delta3_2012 = new TGraphErrors(delta3_2012[0].size()-startPoint,&delta3_2012[0][startPoint],&delta3_2012[1][startPoint],0,&delta3_2012[2][startPoint]);
   g_delta3_2012->SetMarkerStyle(0);
   g_delta3_2012->SetLineWidth(3);
-  g_delta3_2012->SetLineColor(col2012);
-  g_delta3_2012->SetFillColor(col2012);
+  g_delta3_2012->SetLineColor(!color?1:col2012);
+  g_delta3_2012->SetFillColorAlpha(col2012,0.7);
   g_delta3_2012->SetFillStyle(fill2012);
   g_delta3_2012->SetLineStyle(lineStyle2012);
 
@@ -459,8 +459,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_totalCorr_2011 = new TGraphErrors(totalCorr_2011[0].size()-startPoint,&totalCorr_2011[0][startPoint],&totalCorr_2011[1][startPoint],0,&totalCorr_2011[2][startPoint]);
   g_totalCorr_2011->SetMarkerStyle(0);
   g_totalCorr_2011->SetLineWidth(3);
-  g_totalCorr_2011->SetLineColor(col2011);
-  g_totalCorr_2011->SetFillColor(col2011);
+  g_totalCorr_2011->SetLineColor(!color?1:col2011);
+  g_totalCorr_2011->SetFillColorAlpha(col2011,0.7);
   g_totalCorr_2011->SetFillStyle(fill2011);
   g_totalCorr_2011->SetLineStyle(lineStyle2011);
 
@@ -468,8 +468,8 @@ void EnergyDependentCorrections(TString anaCh) {
   TGraphErrors *g_totalCorr_2012 = new TGraphErrors(totalCorr_2012[0].size()-startPoint,&totalCorr_2012[0][startPoint],&totalCorr_2012[1][startPoint],0,&totalCorr_2012[2][startPoint]);
   g_totalCorr_2012->SetMarkerStyle(0);
   g_totalCorr_2012->SetLineWidth(3);
-  g_totalCorr_2012->SetLineColor(col2012);
-  g_totalCorr_2012->SetFillColor(col2012);
+  g_totalCorr_2012->SetLineColor(!color?1:col2012);
+  g_totalCorr_2012->SetFillColorAlpha(col2012,0.7);
   g_totalCorr_2012->SetFillStyle(fill2012);
   g_totalCorr_2012->SetLineStyle(lineStyle2012);
 
