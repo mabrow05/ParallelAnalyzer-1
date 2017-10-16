@@ -1167,6 +1167,12 @@ if __name__ == "__main__":
             cal.makeGlobalResiduals(rg)
             os.system("root -l -b -q 'plot_residuals.C(%i,%i)'"%(rg[0],rg[len(rg)-1]))
 
+        srcPers = [1,2,3,4,5,6,7,8,9,11,16,17,18,19,20,22,23]
+        for s in srcPers:
+            sarr = [s];
+            cal.makeGlobalResiduals(sarr)
+            os.system("root -l -b -q 'plot_residuals.C(%i,%i)'"%(s,s))
+
 
     #### All the steps for completely replaying runs (without doing a new calibration or new position maps along the way)
     if 0:

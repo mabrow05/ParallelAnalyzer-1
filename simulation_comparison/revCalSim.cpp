@@ -375,7 +375,7 @@ void revCalSimulation (Int_t runNumber, string source, int octet=-1)
     }
     else sprintf(temp,"%s/%s/analyzed_%i.root",simLocation.c_str(),source.c_str(),fileNum);
     //sprintf(temp,"/extern/mabrow05/ucna/XuanSim/%s/xuan_analyzed.root",source.c_str());
-    chain->AddFile(temp);
+    chain->AddFile(temp,0);
     fileNum++;
   }
 

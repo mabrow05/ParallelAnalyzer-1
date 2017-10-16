@@ -824,7 +824,7 @@ if __name__ == "__main__":
         print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
-    if 0:
+    if 1:
         anaChoice = "C"
         lowBin = 19#19
         highBin = 73#73
@@ -1112,7 +1112,7 @@ if __name__ == "__main__":
 
 
 
-    if 1: 
+    if 0: 
 
         MB_A0 = -0.120544
         MB_staterr = 0.000435
