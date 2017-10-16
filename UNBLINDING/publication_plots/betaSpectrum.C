@@ -16,6 +16,8 @@ void betaSpectrum(int octetStart, int octetEnd) {
   gStyle->SetLegendBorderSize(0);
   gStyle->SetFillStyle(0);
 
+  TH1::SetDefaultSumw2();
+
   TString normType = "ALL";
 
   Double_t normLow = 190.;

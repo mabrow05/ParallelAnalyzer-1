@@ -1215,3 +1215,173 @@ if __name__ == "__main__":
         l = calcLambda(result[0],result[1])
         print("lambda = %0.6f +/- %0.6f    (%0.3f%%)"%(l[0],l[1],100.*fabs(l[1]/l[0])))
         print
+
+
+
+    if 0: ####### Perkeo measurements
+
+        Abele97_A0 = -0.1189
+        Abele97_staterr = 0.0042*fabs(Abele97_A0)
+        Abele97_syst0err = 0.0074*fabs(Abele97_A0) # pol
+        Abele97_syst1err = 0.0014*fabs(Abele97_A0) # flipper
+        Abele97_syst2err = 0.0045*fabs(Abele97_A0) # BG
+        Abele97_syst3err = 0.00233*fabs(Abele97_A0) # detector
+        Abele97_syst4err = 0.0009*fabs(Abele97_A0) # backscattering
+        Abele97_syst5err = 0.001*fabs(Abele97_A0) # edge effect
+        Abele97_syst6err = 0.0001*fabs(Abele97_A0) # magnetic mirror effect
+        Abele97_syst7err = 0.000*fabs(Abele97_A0) # dead time
+        Abele97_syst8err = 0.0001*fabs(Abele97_A0) # Radiative
+        Abele97_syst9err = 0.0005*fabs(Abele97_A0) # neutron flux
+
+        Abele2002_A0 = -0.1189
+        Abele2002_staterr = 0.0045*fabs(Abele2002_A0)
+        Abele2002_syst0err = 0.003*fabs(Abele2002_A0) # pol
+        Abele2002_syst1err = 0.001*fabs(Abele2002_A0) # flipper
+        Abele2002_syst2err = 0.0025*fabs(Abele2002_A0) # BG
+        Abele2002_syst3err = 0.002315*fabs(Abele2002_A0) # detector
+        Abele2002_syst4err = 0.0017*fabs(Abele2002_A0) # backscattering
+        Abele2002_syst5err = 0.001*fabs(Abele2002_A0) # edge effect
+        Abele2002_syst6err = 0.0002*fabs(Abele2002_A0) # magnetic mirror effect
+        Abele2002_syst7err = 0.000*fabs(Abele2002_A0) # dead time
+        Abele2002_syst8err = 0.0005*fabs(Abele2002_A0) # Radiative
+        Abele2002_syst9err = 0.000*fabs(Abele2002_A0) # flux
+
+        Mund2013_A0 = -0.11996
+        Mund2013_staterr = 0.0038*fabs(Mund2013_A0)
+        Mund2013_syst0err = 0.001*fabs(Mund2013_A0) # pol
+        Mund2013_syst1err = 0.001*fabs(Mund2013_A0) # flipper
+        Mund2013_syst2err = 0.001*fabs(Mund2013_A0) # BG
+        Mund2013_syst3err = 0.0025*fabs(Mund2013_A0) # detector
+        Mund2013_syst4err = 0.00004*fabs(Mund2013_A0) # backscattering
+        Mund2013_syst5err = 0.0005*fabs(Mund2013_A0) # edge effect
+        Mund2013_syst6err = 0.0002*fabs(Mund2013_A0) # magnetic mirror effect
+        Mund2013_syst7err = 0.0001*fabs(Mund2013_A0) # dead time
+        Mund2013_syst8err = 0.0005*fabs(Mund2013_A0) # Radiative
+        Mund2013_syst9err = 0.000*fabs(Mund2013_A0) # flux
+
+        
+
+        if 1:
+            Abele97_syst2err = 0.001*fabs(Abele97_A0) # BG
+            Abele2002_syst2err = 0.001*fabs(Abele2002_A0)
+
+            Abele97_syst3err = 0.002315*fabs(Abele97_A0) #detector (not including mag mirror)
+            Mund2013_syst3err = 0.002315*fabs(Mund2013_A0)
+
+            #Abele97_syst4err = 0.00004*fabs(Abele97_A0) # Backscattering
+            #Abele2002_syst4err = 0.00004*fabs(Abele2002_A0)
+            
+            Abele97_syst5err = 0.0005*fabs(Abele97_A0) # edge effect
+            Abele2002_syst5err = 0.0005*fabs(Abele2002_A0)
+
+            Abele2002_syst6err = 0.0001*fabs(Abele2002_A0) # magnetic mirror
+            Mund2013_syst6err = 0.0001*fabs(Mund2013_A0)
+
+            Abele2002_syst8err = 0.0001*fabs(Abele2002_A0) # Radiative
+            Mund2013_syst8err = 0.0001*fabs(Mund2013_A0)
+            
+        MC = MeasCombiner()
+        
+        mu0 = MC.new_meas_mu(Abele97_A0) 
+        stat0 = MC.new_meas_err(mu0,Abele97_staterr)	# stat
+        err00 = MC.new_meas_err(mu0,Abele97_syst0err) 
+        err01 = MC.new_meas_err(mu0,Abele97_syst1err) 
+        err02 = MC.new_meas_err(mu0,Abele97_syst2err) 
+        err03 = MC.new_meas_err(mu0,Abele97_syst3err) 
+        err04 = MC.new_meas_err(mu0,Abele97_syst4err) 
+        err05 = MC.new_meas_err(mu0,Abele97_syst5err) 
+        err06 = MC.new_meas_err(mu0,Abele97_syst6err) 
+        err07 = MC.new_meas_err(mu0,Abele97_syst7err) 
+        err08 = MC.new_meas_err(mu0,Abele97_syst8err) 
+        err09 = MC.new_meas_err(mu0,Abele97_syst9err) 
+
+        mu1 = MC.new_meas_mu(Abele2002_A0) 
+        stat1 = MC.new_meas_err(mu1,Abele2002_staterr)	# stat
+        err10 = MC.new_meas_err(mu1,Abele2002_syst0err)
+        err11 = MC.new_meas_err(mu1,Abele2002_syst1err) 
+        err12 = MC.new_meas_err(mu1,Abele2002_syst2err) 
+        err13 = MC.new_meas_err(mu1,Abele2002_syst3err) 
+        err14 = MC.new_meas_err(mu1,Abele2002_syst4err) 
+        err15 = MC.new_meas_err(mu1,Abele2002_syst5err) 
+        err16 = MC.new_meas_err(mu1,Abele2002_syst6err) 
+        err17 = MC.new_meas_err(mu1,Abele2002_syst7err) 
+        err18 = MC.new_meas_err(mu1,Abele2002_syst8err) 
+        err19 = MC.new_meas_err(mu1,Abele2002_syst9err)
+
+        mu2 = MC.new_meas_mu(Mund2013_A0) 
+        stat2 = MC.new_meas_err(mu2,Mund2013_staterr)	# stat
+        err20 = MC.new_meas_err(mu2,Mund2013_syst0err)
+        err21 = MC.new_meas_err(mu2,Mund2013_syst1err) 
+        err22 = MC.new_meas_err(mu2,Mund2013_syst2err) 
+        err23 = MC.new_meas_err(mu2,Mund2013_syst3err) 
+        err24 = MC.new_meas_err(mu2,Mund2013_syst4err) 
+        err25 = MC.new_meas_err(mu2,Mund2013_syst5err) 
+        err26 = MC.new_meas_err(mu2,Mund2013_syst6err) 
+        err27 = MC.new_meas_err(mu2,Mund2013_syst7err) 
+        err28 = MC.new_meas_err(mu2,Mund2013_syst8err) 
+        err29 = MC.new_meas_err(mu2,Mund2013_syst9err) 
+
+
+        MC.add_correlation(err02,err12,1.0)
+        MC.add_correlation(err02,err22,1.0)
+        MC.add_correlation(err12,err22,1.0)
+
+        MC.add_correlation(err03,err13,1.0)
+        MC.add_correlation(err03,err23,1.0)
+        MC.add_correlation(err13,err23,1.0)
+
+        MC.add_correlation(err05,err15,1.0)
+        MC.add_correlation(err05,err25,1.0)
+        MC.add_correlation(err15,err25,1.0)
+
+        MC.add_correlation(err06,err16,1.0)
+        MC.add_correlation(err06,err26,1.0)
+        MC.add_correlation(err16,err26,1.0)
+
+        MC.add_correlation(err08,err18,1.0)
+        MC.add_correlation(err08,err28,1.0)
+        MC.add_correlation(err18,err28,1.0)
+
+        if 0: #Different Correlations
+            MC.add_correlation(err02,err12,min([Abele97_syst2err,Abele2002_syst2err])/max([Abele97_syst2err,Abele2002_syst2err]))
+            MC.add_correlation(err02,err22,min([Abele97_syst2err,Mund2013_syst2err])/max([Abele97_syst2err,Mund2013_syst2err]))
+            MC.add_correlation(err12,err22,min([Abele2002_syst2err,Mund2013_syst2err])/max([Abele2002_syst2err,Mund2013_syst2err]))
+            
+            MC.add_correlation(err03,err13,min([Abele97_syst3err,Abele2002_syst3err])/max([Abele97_syst3err,Abele2002_syst3err]))
+            MC.add_correlation(err03,err23,min([Abele97_syst3err,Mund2013_syst3err])/max([Abele97_syst3err,Mund2013_syst3err]))
+            MC.add_correlation(err13,err23,min([Abele2002_syst3err,Mund2013_syst3err])/max([Abele2002_syst3err,Mund2013_syst3err]))
+            
+            MC.add_correlation(err05,err15,min([Abele97_syst5err,Abele2002_syst5err])/max([Abele97_syst5err,Abele2002_syst5err]))
+            MC.add_correlation(err05,err25,min([Abele97_syst5err,Mund2013_syst5err])/max([Abele97_syst5err,Mund2013_syst5err]))
+            MC.add_correlation(err15,err25,min([Abele2002_syst5err,Mund2013_syst5err])/max([Abele2002_syst5err,Mund2013_syst5err]))
+            
+            MC.add_correlation(err06,err16,min([Abele97_syst6err,Abele2002_syst6err])/max([Abele97_syst6err,Abele2002_syst6err]))
+            MC.add_correlation(err06,err26,min([Abele97_syst6err,Mund2013_syst6err])/max([Abele97_syst6err,Mund2013_syst6err]))
+            MC.add_correlation(err16,err26,min([Abele2002_syst6err,Mund2013_syst6err])/max([Abele2002_syst6err,Mund2013_syst6err]))
+            
+            MC.add_correlation(err08,err18,min([Abele97_syst8err,Abele2002_syst8err])/max([Abele97_syst8err,Abele2002_syst8err]))
+            MC.add_correlation(err08,err28,min([Abele97_syst8err,Mund2013_syst8err])/max([Abele97_syst8err,Mund2013_syst8err]))
+            MC.add_correlation(err18,err28,min([Abele2002_syst8err,Mund2013_syst8err])/max([Abele2002_syst8err,Mund2013_syst8err]))
+        
+
+        result = MC.calc_combo()
+        
+
+        #### 2012 uncertainty table
+        print("\n\n****************** FINAL RESULT ****************\n\n")
+        print("A0 = %0.6f +/- %0.6f     (%0.3f%%)"%(result[0],result[1],100.*fabs(result[1]/result[0])))
+        print "stat =",MC.errcombo([stat0,stat1,stat2])
+        print "syst =",MC.errcombo([err00,err10,err20,
+                                    err01,err11,err21,
+                                    err02,err12,err22,
+                                    err03,err13,err23,
+                                    err04,err14,err24,
+                                    err05,err15,err25,
+                                    err06,err16,err26,
+                                    err07,err17,err27,
+                                    err08,err18,err28,
+                                    err09,err19,err29])
+        print("")
+        l = calcLambda(result[0],result[1])
+        print("lambda = %0.6f +/- %0.6f    (%0.3f%%)"%(l[0],l[1],100.*fabs(l[1]/l[0])))
+        print

@@ -7,6 +7,50 @@
 #include <TAxis.h>
 #include <TMultiGraph.h>
 
+
+std::vector<Double_t> calcLambda(Double_t A0,Double_t A0err) {
+  Double_t l = (-1.-TMath::Sqrt(1.-3.*A0*A0-2.*A0))/(3.*A0+2.);
+  Double_t lerr = TMath::Abs( ( (3.*A0+5.)/((3.*A0+2.)*(3.*A0+2.)*TMath::Sqrt(1.-3.*A0*A0-2.*A0)) + 3./(3.*A0+2.)/(3.*A0+2.) ) * A0err );
+  return std::vector<Double_t>{l,lerr};
+}
+
+Double_t chi2nu(std::vector<Double_t>& val, std::vector<Double_t>& err) {
+  Double_t numer = 0.;
+  Double_t denom = 0.;
+  for (UInt_t i=0;i<val.size();++i) {
+    numer+=(val[i]/err[i]/err[i]);
+    denom+=(1./err[i]/err[i]);
+  }
+  Double_t mu = numer/denom;
+  Double_t c2 = 0;
+  for (int i=0;i<val.size();++i) {
+    //if (i!=0) std::cout << " + ";
+    c2+= (val[i]-mu)*(val[i]-mu)/(err[i]*err[i]);
+    //std::cout << "("<<val[i]<<"-"<<mu<<")^2/"<<err[i]<<"^2";
+  }
+  //std::cout << " = " << c2 << std::endl;
+    
+  return c2/(val.size()-1);
+}
+
+Double_t chi2(std::vector<Double_t>& val, std::vector<Double_t>& err) {
+  Double_t numer = 0.;
+  Double_t denom = 0.;
+  for (UInt_t i=0;i<val.size();++i) {
+    numer+=(val[i]/err[i]/err[i]);
+    denom+=(1./err[i]/err[i]);
+  }
+  Double_t mu = numer/denom;
+  Double_t c2 = 0;
+  for (int i=0;i<val.size();++i) {
+    if (i!=0) std::cout << " + ";
+    c2+= (val[i]-mu)*(val[i]-mu)/(err[i]*err[i]);
+    std::cout << "("<<val[i]<<"-"<<mu<<")^2/"<<err[i]<<"^2";
+  }
+  std::cout << " = " << c2 << std::endl;
+  return c2;
+}
+
 Double_t weightedAve(std::vector<Double_t>& val, std::vector<Double_t>& err) { 
   Double_t numer = 0.;
   Double_t denom = 0.;
@@ -45,22 +89,26 @@ void Vud_vs_lambda() {
 
   bool color = true;
   bool data = true;
+
+  Double_t tau1scale = 1.38; //bottle
+  Double_t tau2scale = 1.;   //beam
   
-  Int_t fillStyle_vud = color?3002:3002;//3345;//3004;//3018;
-  Int_t fillStyle_lambda1 = color?3002:3002;//3354;//3005;//3017;
-  Int_t fillStyle_lambda2 = color?3002:3002;//3354//3005;//3017;
-  Int_t fillStyle_tau1 = color?3002:3003;//3002;
-  Int_t fillStyle_tau2 = color?3002:3003;//3002;
-  Int_t fillColor_vud = color?2:13; 
-  Int_t fillColor_lambda1 = color?1:1;//12;
-  Int_t fillColor_lambda2 = color?1:1;//12;
-  Int_t fillColor_tau1 = color?4:1;//14;
-  Int_t fillColor_tau2 = color?4:1;//14;
+  Int_t fillStyle_vud = color?1001:1001;//3002;
+  Int_t fillStyle_lambda1 = color?1001:1001;//3002;
+  Int_t fillStyle_lambda2 = color?1001:1001;//3002;
+  Int_t fillStyle_tau1 = color?1001:1001;//3003;
+  Int_t fillStyle_tau2 = color?1001:1001;//3003;
+  Int_t fillColor_vud = color?2:15;//13; 
+  Int_t fillColor_lambda1 = color?14:16;//1;//12;
+  Int_t fillColor_lambda2 = color?14:16;//1;//12;
+  Int_t fillColor_tau1 = color?4:17;//1;//14;
+  Int_t fillColor_tau2 = color?4:17;//1;//14;
 
   Double_t xmin = 1.253;
   Double_t xmax = 1.282;
   
   gStyle->SetPadLeftMargin(0.125);
+  gStyle->SetPadTopMargin(0.05);
   gStyle->SetPadRightMargin(0.125);
   gStyle->SetPadBottomMargin(0.115);
   gStyle->SetTitleSize(0.05,"xy");
@@ -70,10 +118,10 @@ void Vud_vs_lambda() {
   Double_t Vud = 0.97417;
   Double_t Vud_err = 0.00021;
 
-  std::vector<TString> Lambda1name {"Abele et al.","Mund et al.","Mendenhall et al.","Brown et al.","Schumann et al."};
-  std::vector<Double_t> Lambda1year {2002,2012,2013,2017,2008};
-  std::vector<Double_t> Lambda1vec {1.2739,1.2761,1.2756,1.2783,1.275}; //Brown result 1.2783 +/- 0.0022
-  std::vector<Double_t> Lambda1vecErr {0.0019,0.0017,0.0030,0.0022,0.016};
+  std::vector<TString> Lambda1name {"Mund et al.","Brown et al.","Schumann et al."};
+  std::vector<Double_t> Lambda1year {2013,2017,2008};
+  std::vector<Double_t> Lambda1vec {1.2748,1.2772,1.275}; //Brown result 1.2783 +/- 0.0022 // raw abele (1.2739) and Mund (1.2761)
+  std::vector<Double_t> Lambda1vecErr {0.0014,0.0020,0.016};
   Double_t Lambda1 = weightedAve(Lambda1vec,Lambda1vecErr);//1.2755;
   Double_t Lambda1_err = weightedAveErr(Lambda1vecErr);//0.0005;
 
@@ -86,12 +134,14 @@ void Vud_vs_lambda() {
 
 
   //UCN
+  std::vector<TString> Tau1name {"Arzumanov et al.","Steyerl et al.","Pichlmaier et al.","Serebrov et al.","Mampe et al.","Pattie et al."};
   std::vector<Double_t> Tau1vec {880.2,882.5,880.7,878.5,882.6,877.7};
   std::vector<Double_t> Tau1vecErr {1.2,2.1,1.8,0.8,2.7,0.8}; 
   Double_t Tau1 = weightedAve(Tau1vec,Tau1vecErr);
   Double_t dTau1 = weightedAveErr(Tau1vecErr);
 
   //beam
+  std::vector<TString> Tau2name {"Yue et al.","Byrne et al."};
   std::vector<Double_t> Tau2vec {887.7,889.2};
   std::vector<Double_t> Tau2vecErr {2.2,4.8}; 
   Double_t Tau2 = weightedAve(Tau2vec,Tau2vecErr);
@@ -124,7 +174,7 @@ void Vud_vs_lambda() {
   std::vector <Double_t> lambda1_yerr {1.,1.};
   TGraphErrors *lambda1 = new TGraphErrors(2,&lambda1_x[0],&lambda1_y[0],0,&lambda1_yerr[0]);
   lambda1->SetFillStyle(fillStyle_lambda1);
-  lambda1->SetFillColor(fillColor_lambda1);
+  lambda1->SetFillColorAlpha(fillColor_lambda1,0.8);
 
 
   std::vector <Double_t> lambda2_x {Lambda2-Lambda2_err,Lambda2+Lambda2_err};
@@ -132,7 +182,7 @@ void Vud_vs_lambda() {
   std::vector <Double_t> lambda2_yerr {1.,1.};
   TGraphErrors *lambda2 = new TGraphErrors(2,&lambda2_x[0],&lambda2_y[0],0,&lambda2_yerr[0]);
   lambda2->SetFillStyle(fillStyle_lambda2);
-  lambda2->SetFillColor(fillColor_lambda2);
+  lambda2->SetFillColorAlpha(fillColor_lambda2,0.8);
 
 
   std::vector <Double_t> tau1_y;
@@ -144,21 +194,21 @@ void Vud_vs_lambda() {
   
   for (Double_t i=1.2;i<1.3;i+=0.0001) {
     tau1_y.push_back(getVud(i,Tau1));
-    tau1_yerr.push_back(getVudUncert(i,Tau1,dTau1));
+    tau1_yerr.push_back(getVudUncert(i,Tau1,dTau1)*tau1scale);
     tau1_x.push_back(i);
     tau2_y.push_back(getVud(i,Tau2));
-    tau2_yerr.push_back(getVudUncert(i,Tau2,dTau2));
+    tau2_yerr.push_back(getVudUncert(i,Tau2,dTau2)*tau2scale);
     tau2_x.push_back(i);
     //std::cout << i << "\t" << getVud(i,Tau1) << "\t" << getVudUncert(i,Tau1,dTau1) << "\n";
   }
 
   TGraphErrors *tau1 = new TGraphErrors(tau1_x.size(),&tau1_x[0],&tau1_y[0],0,&tau1_yerr[0]);
   tau1->SetFillStyle(fillStyle_tau1);
-  tau1->SetFillColor(fillColor_tau1);
+  tau1->SetFillColorAlpha(fillColor_tau1,0.8);
 
   TGraphErrors *tau2 = new TGraphErrors(tau2_x.size(),&tau2_x[0],&tau2_y[0],0,&tau2_yerr[0]);
   tau2->SetFillStyle(fillStyle_tau2);
-  tau2->SetFillColor(fillColor_tau2);
+  tau2->SetFillColorAlpha(fillColor_tau2,0.8);
   
   TMultiGraph *mg = new TMultiGraph();
   mg->SetTitle("");
@@ -204,7 +254,7 @@ void Vud_vs_lambda() {
   TGraphErrors *lambdaMeas11 = new TGraphErrors(1,&Lambda1vec[1],&Lambda1year[1],&Lambda1vecErr[1],0);
   lambdaMeas11->SetTitle("");
   lambdaMeas11->SetMarkerColor(1);//(fillColor_lambda1);
-  lambdaMeas11->SetMarkerStyle(22);
+  lambdaMeas11->SetMarkerStyle(20);
   if (data) lambdaMeas11->Draw("P SAME");
 
   TGraphErrors *lambdaMeas12 = new TGraphErrors(1,&Lambda1vec[2],&Lambda1year[2],&Lambda1vecErr[2],0);
@@ -213,7 +263,7 @@ void Vud_vs_lambda() {
   lambdaMeas12->SetMarkerStyle(21);
   if (data) lambdaMeas12->Draw("P SAME");
 
-  TGraphErrors *lambdaMeas13 = new TGraphErrors(1,&Lambda1vec[3],&Lambda1year[3],&Lambda1vecErr[3],0);
+  /*TGraphErrors *lambdaMeas13 = new TGraphErrors(1,&Lambda1vec[3],&Lambda1year[3],&Lambda1vecErr[3],0);
   lambdaMeas13->SetTitle("");
   lambdaMeas13->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas13->SetMarkerStyle(20);
@@ -223,8 +273,8 @@ void Vud_vs_lambda() {
   lambdaMeas14->SetTitle("");
   lambdaMeas14->SetMarkerColor(1);//(fillColor_lambda1);
   lambdaMeas14->SetMarkerStyle(34);
-  if (data) lambdaMeas14->Draw("P SAME");
-
+  if (data) lambdaMeas14->Draw("P SAME");*/
+  
   TGraphErrors *lambdaMeas20 = new TGraphErrors(1,&Lambda2vec[0],&Lambda2year[0],&Lambda2vecErr[0],0);
   lambdaMeas20->SetTitle("");
   lambdaMeas20->SetMarkerColor(1);//(fillColor_lambda1);
@@ -252,12 +302,12 @@ void Vud_vs_lambda() {
   
   
   TLegend *legA = new TLegend(0.16,0.16,0.46,0.40);
-  legA->SetTextSize(0.030);
+  legA->SetTextSize(0.035);
   legA->SetHeader("A_{0} measurements");
-  legA->AddEntry(lambdaMeas13,Lambda1name[3]+" (this work)","p");
-  legA->AddEntry(lambdaMeas12,Lambda1name[2],"p");
-  legA->AddEntry(lambdaMeas11,Lambda1name[1],"p");
+  legA->AddEntry(lambdaMeas11,Lambda1name[1]+" (this work)","p");
+  //legA->AddEntry(lambdaMeas11,Lambda1name[1],"p");
   legA->AddEntry(lambdaMeas10,Lambda1name[0],"p");
+  //legA->AddEntry(lambdaMeas10,Lambda1name[0],"p");
   legA->AddEntry(lambdaMeas22,Lambda2name[2],"p"); 
   legA->AddEntry(lambdaMeas21,Lambda2name[1],"p"); 
   legA->AddEntry(lambdaMeas20,Lambda2name[0],"p");
@@ -265,21 +315,21 @@ void Vud_vs_lambda() {
   //legA->AddEntry(lambdaMeas23,Lambda2name[3],"p");
   if (data) legA->Draw("SAME");
 
-  TLegend *legB = new TLegend(0.44,0.16,0.74,0.26);
-  legB->SetTextSize(0.030);
+  TLegend *legB = new TLegend(0.45,0.16,0.75,0.28);
+  legB->SetTextSize(0.035);
   legB->SetHeader("Other measurements");
-  legB->AddEntry(lambdaMeas14,Lambda1name[4],"p");
+  legB->AddEntry(lambdaMeas12,Lambda1name[2],"p");
   legB->AddEntry(lambdaMeas23,Lambda2name[3],"p"); 
   if (data) legB->Draw("SAME");
 
-  TPaveText *tVud = new TPaveText(0.13,0.505,0.3,0.535,"nbNDC");
+  TPaveText *tVud = new TPaveText(0.13,0.522,0.3,0.562,"nbNDC");
   tVud->SetBorderSize(0);
   tVud->SetTextColor(color?fillColor_vud:1);
   tVud->AddText("PDG 0^{+}#rightarrow0^{+}");
   tVud->GetLine(0)->SetTextSize(0.035);
   tVud->Draw();
 
-  TPaveText *tTau1 = new TPaveText(0.432,0.79,0.592,0.83,"nbNDC");
+  TPaveText *tTau1 = new TPaveText(0.432,0.83,0.592,0.87,"nbNDC");
   tTau1->SetBorderSize(0);
   tTau1->SetTextColor(color?fillColor_tau2:1);
   tTau1->AddText("Bottle #tau_{n}");
@@ -287,7 +337,7 @@ void Vud_vs_lambda() {
   tTau1->GetLine(0)->SetTextSize(0.035);
   tTau1->Draw();
 
-  TPaveText *tTau2 = new TPaveText(0.137,0.79,0.257,0.83,"nbNDC");
+  TPaveText *tTau2 = new TPaveText(0.145,0.83,0.265,0.87,"nbNDC");
   tTau2->SetBorderSize(0);
   tTau2->SetTextColor(color?fillColor_tau2:1);
   tTau2->AddText("Beam #tau_{n}");
@@ -295,7 +345,7 @@ void Vud_vs_lambda() {
   tTau2->GetLine(0)->SetTextSize(0.035);
   tTau2->Draw();
 
-  TPaveText *tLambda1 = new TPaveText(0.683,0.532,0.832,0.664,"nbNDC");
+  TPaveText *tLambda1 = new TPaveText(0.683,0.57,0.832,0.675,"nbNDC");
   tLambda1->SetBorderSize(0);
   tLambda1->SetTextColor(color?fillColor_lambda2:1);
   tLambda1->AddText("Post-2002 #lambda");
@@ -303,7 +353,7 @@ void Vud_vs_lambda() {
   tLambda1->GetLine(0)->SetTextSize(0.035);
   tLambda1->Draw();
 
-  TPaveText *tLambda2 = new TPaveText(0.234,0.541,0.434,0.640,"nbNDC");
+  TPaveText *tLambda2 = new TPaveText(0.234,0.565,0.434,0.655,"nbNDC");
   tLambda2->SetBorderSize(0);
   tLambda2->SetTextColor(color?fillColor_lambda2:1);
   tLambda2->AddText("Pre-2002 #lambda");
@@ -313,4 +363,213 @@ void Vud_vs_lambda() {
   
   c1->Update();
   c1->Print(TString::Format("vud_vs_lambda%s%s.pdf",data?"":"_noData",color?"_color":""));
+
+  std::vector <Double_t> scaleVec;
+  std::vector <Double_t> scaleVecErr;
+  
+  //Lambda pre-2002
+  std::cout << "********** Pre-2002 Lambda ****************\n";
+  Double_t l_pre2002 = weightedAve(Lambda2vec,Lambda2vecErr);
+  Double_t lerr_pre2002 = weightedAveErr(Lambda2vecErr);
+  Double_t d0 = 3.*TMath::Sqrt(Lambda2vec.size())*lerr_pre2002;
+  for (int i=0;i<Lambda2vec.size(); ++i) {
+    if (Lambda2vecErr[i]<d0) {
+      scaleVec.push_back(Lambda2vec[i]);
+      scaleVecErr.push_back(Lambda2vecErr[i]);
+    }
+    else {
+      std::cout << "Measurement " << i << " (" << Lambda2name[i] << ") not included in scale\n";
+    }
+  }
+  std::cout << "Scale Factor lambda pre-2002: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)) << std::endl;
+  std::cout << "Lambda pre-2002 w/ scaled error: " << l_pre2002 << " +/- "
+	    << lerr_pre2002*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";
+  std::cout << "Lambda pre-2002 w/o scaled error: " << l_pre2002 << " +/- "
+	    << lerr_pre2002 << "\n\n";
+  scaleVec.resize(0);
+  scaleVecErr.resize(0);
+
+  //Lambda post-2002
+  std::cout << "********** Post-2002 Lambda ****************\n";
+  Double_t l_post2002 = weightedAve(Lambda1vec,Lambda1vecErr);
+  Double_t lerr_post2002 = weightedAveErr(Lambda1vecErr);
+  d0 = 3.*TMath::Sqrt(Lambda1vec.size())*lerr_post2002;
+  for (int i=0;i<Lambda1vec.size(); ++i) {
+    if (Lambda1vecErr[i]<d0) {
+      scaleVec.push_back(Lambda1vec[i]);
+      scaleVecErr.push_back(Lambda1vecErr[i]);
+    }
+    else {
+      std::cout << "Measurement " << i << " (" << Lambda1name[i] << ") not included in scale\n";
+    }
+  }
+  std::cout << "Scale Factor lambda post-2002: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))  << std::endl;
+  std::cout << "Lambda post-2002 w/ scaled error: " << l_post2002 << " +/- "
+	    << lerr_post2002*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";
+  std::cout << "Lambda post-2002 w/o scaled error: " << l_post2002 << " +/- "
+	    << lerr_post2002 << "\n\n";
+  scaleVec.resize(0);
+  scaleVecErr.resize(0);
+
+  //beam lifetime
+  std::cout << "********** Beam Neutron Lifetime ****************\n";
+  Double_t t_beam = weightedAve(Tau2vec,Tau2vecErr);
+  Double_t terr_beam = weightedAveErr(Tau2vecErr);
+  d0 = 3.*TMath::Sqrt(Tau2vec.size())*terr_beam;
+  for (int i=0;i<Tau2vec.size(); ++i) {
+    if (Tau2vecErr[i]<d0) {
+      scaleVec.push_back(Tau2vec[i]);
+      scaleVecErr.push_back(Tau2vecErr[i]);
+    }
+    else {
+      std::cout << "Measurement " << i << "  not included in scale\n";
+    }
+  }
+  std::cout << "Scale Factor beam lifetime: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))  << std::endl;
+  std::cout << "beam lifetime w/ scaled error: " << t_beam << " +/- "
+	    << terr_beam*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";
+  std::cout << "beam lifetime w/o scaled error: " << t_beam << " +/- "
+	    << terr_beam << "\n\n";
+  scaleVec.resize(0);
+  scaleVecErr.resize(0);
+
+
+  //bottle lifetime
+  std::cout << "********** Bottle Neutron Lifetime ****************\n";
+  Double_t t_bottle = weightedAve(Tau1vec,Tau1vecErr);
+  Double_t terr_bottle = weightedAveErr(Tau1vecErr);
+  d0 = 3.*TMath::Sqrt(Tau1vec.size())*terr_bottle;
+  for (int i=0;i<Tau1vec.size(); ++i) {
+    if (Tau1vecErr[i]<d0) {
+      scaleVec.push_back(Tau1vec[i]);
+      scaleVecErr.push_back(Tau1vecErr[i]);
+    }
+    else {
+      std::cout << "Measurement " << i << "  not included in scale\n";
+    }
+  }
+  std::cout << "Chi2/(n-1) bottle lifetime: " << chi2nu(scaleVec,scaleVecErr)*(scaleVec.size()-1.) << "/("<<scaleVec.size()<<"-1)" << std::endl;
+  std::cout << "Scale Factor bottle lifetime: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)) << std::endl;
+  std::cout << "bottle lifetime w/ scaled error: " << t_bottle << " +/- "
+	    << terr_bottle*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";
+  std::cout << "bottle lifetime w/o scaled error: " << t_bottle << " +/- "
+	    << terr_bottle << "\n\n";
+  
+  scaleVec.resize(0);
+  scaleVecErr.resize(0);
+
+
+  std::vector<Double_t> combo;
+  std::vector<Double_t> comboerr;
+  std::vector<TString> comboname;
+  
+  //Combined lifetime
+  std::cout << "\n********** Combined Lifetime ****************\n";
+  for (auto i:Tau2vec) combo.push_back(i);
+  for (auto i:Tau2vecErr) comboerr.push_back(i);
+  for (auto i:Tau2name) comboname.push_back(i);
+  for (auto i:Tau1vecErr) comboerr.push_back(i);
+  for (auto i:Tau1vec) combo.push_back(i);
+  for (auto i:Tau1name) comboname.push_back(i);
+  Double_t t_combo = weightedAve(combo,comboerr);
+  Double_t terr_combo = weightedAveErr(comboerr);
+  d0 = 3.*TMath::Sqrt(combo.size())*terr_combo;
+  for (int i=0;i<combo.size(); ++i) {
+    if (comboerr[i]<d0) {
+      scaleVec.push_back(combo[i]);
+      scaleVecErr.push_back(comboerr[i]);
+    }
+    else {
+      std::cout << "Measurement " << i << " (" << comboname[i] << ") not included in scale factor\n";
+    }
+  }
+  std::cout << "Scale Factor combined lifetime: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)) << std::endl;
+  std::cout << "combo lifetime w/ scaled error: " << t_combo << " +/- "
+	    << terr_combo*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";
+  std::cout << "combo lifetime w/o scaled error: " << t_combo << " +/- "
+	    << terr_combo << "\n\n";
+  
+  scaleVec.resize(0);
+  scaleVecErr.resize(0);
+  combo.resize(0);
+  comboerr.resize(0);
+  comboname.resize(0);
+
+
+  //Combined Lambda
+  std::cout << "\n\n********** Combined Lambda ****************\n";
+  for (auto i:Lambda2vec) combo.push_back(i);
+  for (auto i:Lambda2vecErr) comboerr.push_back(i);
+  for (auto i:Lambda2name) comboname.push_back(i);
+  for (auto i:Lambda1vecErr) comboerr.push_back(i);
+  for (auto i:Lambda1vec) combo.push_back(i);
+  for (auto i:Lambda1name) comboname.push_back(i);
+  Double_t l_combo = weightedAve(combo,comboerr);
+  Double_t lerr_combo = weightedAveErr(comboerr);
+  d0 = 3.*TMath::Sqrt(combo.size())*lerr_combo;
+  for (int i=0;i<combo.size(); ++i) {
+    if (comboerr[i]<d0) {
+      scaleVec.push_back(combo[i]);
+      scaleVecErr.push_back(comboerr[i]);
+    }
+    else {
+      std::cout << "Measurement " << i << " (" << comboname[i] << ") not included in scale factor\n";
+    }
+  }
+  std::cout << "Scale Factor combined lambda: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)) << std::endl ;
+  std::cout << "lambda combo w/ scaled error: " << l_combo << " +/- "
+	    << lerr_combo*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";
+  std::cout << "lambda combo w/o scaled error: " << l_combo << " +/- "
+	    << lerr_combo << "\n\n";
+  
+  scaleVec.resize(0);
+  scaleVecErr.resize(0);
+  
+  //Combined Lambda with an extra point included
+  std::cout << "\n\n********** Combined Lambda w/ extra measurements ****************\n";
+
+  std::vector <Double_t> newl = calcLambda(-0.1184,0.001*0.1184);
+
+  Double_t newLambdaOffsetFactor = 0.;//2.*0.00025; // 1 sigma (0.00025 or 0.025%)
+
+  //Lambda1 = Lambda2;
+  
+  for (int i=0; i<1; ++i) {
+    combo.push_back((Lambda1+Lambda1*newLambdaOffsetFactor));
+    comboerr.push_back( (Lambda1+Lambda1*newLambdaOffsetFactor)*newl[1]/newl[0]);
+    comboname.push_back(TString::Format("extra meas %i",i));
+    Lambda1vec.push_back( (Lambda1+Lambda1*newLambdaOffsetFactor) );
+    Lambda1vecErr.push_back( (Lambda1+Lambda1*newLambdaOffsetFactor)*newl[1]/newl[0]);
+  }
+
+  Double_t l_comboNew = weightedAve(combo,comboerr);
+  Double_t lerr_comboNew = weightedAveErr(comboerr);
+  d0 = 3.*TMath::Sqrt(combo.size())*lerr_comboNew;
+  for (int i=0;i<combo.size(); ++i) {
+    if (comboerr[i]<d0) {
+      scaleVec.push_back(combo[i]);
+      scaleVecErr.push_back(comboerr[i]);
+    }
+    else {
+      std::cout << "Measurement " << i << " (" << comboname[i] << ") not included in scale factor\n";
+    }
+  }
+  std::cout << "Scale Factor combined lambda: " << TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)) << std::endl << std::endl;
+  
+  Double_t New_lambda_combo = weightedAve(combo,comboerr);//1.2755;
+  Double_t New_lambda_combo_err = weightedAveErr(comboerr);//0.0005;
+  Double_t New_lambda_post2002 = weightedAve(Lambda1vec,Lambda1vecErr);//1.2755;
+  Double_t New_lambda_post2002_err = weightedAveErr(Lambda1vecErr);//0.0005;
+ 
+  std::cout << "\n\n\n";
+
+  std::cout << "Combo Lambda w/ scaled error: " << New_lambda_combo << " +/- "
+	    << New_lambda_combo_err*(TMath::Sqrt(chi2nu(scaleVec,scaleVecErr))>1.?TMath::Sqrt(chi2nu(scaleVec,scaleVecErr)):1.) << "\n";
+  std::cout << "Post 2002 Lambda w/ scaled error: " << New_lambda_post2002 << " +/- "
+	    << New_lambda_post2002_err*(TMath::Sqrt(chi2nu(Lambda1vec,Lambda1vecErr))>1.?TMath::Sqrt(chi2nu(Lambda1vec,Lambda1vecErr)):1.) << "\n";
+  
+  exit(0);
+  
+ 
+
 }

@@ -27,7 +27,7 @@ const static double peakSn = 368.4938;//317.8;
 const static double peakBiLow = 498.;//501.420;//448.8;
 const static double peakBiHigh = 993.789;//926.;
 
-bool color = false;
+bool color = true;
 
 
 
@@ -95,10 +95,10 @@ void errorEnvelope() {
   Double_t xmax = 1050.;
   TLine *zeroLine = new TLine(xmin,0.,xmax,0.);
 
-  Int_t col2011 = color?9:1;
-  Int_t col2012 = color?8:1;
-  Int_t fill2011 = 3004;
-  Int_t fill2012 = 3005;
+  Int_t col2011 = color?9:14;
+  Int_t col2012 = color?8:17;
+  Int_t fill2011 = 1001;
+  Int_t fill2012 = 1001;
   Int_t marker2011 = 20;
   Int_t marker2012 = 24;
 
@@ -144,13 +144,13 @@ void errorEnvelope() {
 
   TGraphErrors *gr2011 = new TGraphErrors(4,En2011,&env2011[0][0],dEn,&env2011[1][0]);
   gr2011->SetTitle(TString::Format("2011-2012"));
-  gr2011->SetMarkerColor(col2011);
-  gr2011->SetLineColor(col2011);
+  gr2011->SetMarkerColor(1);
+  gr2011->SetLineColor(1);
   gr2011->SetLineWidth(2);
   gr2011->SetMarkerStyle(marker2011);
   gr2011->SetMarkerSize(1.25);
   gr2011->SetFillStyle(fill2011);
-  gr2011->SetFillColor(col2011);  
+  gr2011->SetFillColorAlpha(col2011,1.0);  
 
 
   //Read in the error envelope from Kevin Hickerson
@@ -175,7 +175,7 @@ void errorEnvelope() {
   }
 
   TGraphAsymmErrors *finenv2011 = new TGraphAsymmErrors(high2011.size(),&en2011[0],&yenv2011[0],&xerr2011[0],&xerr2011[0],&maxEnv2011[0],&maxEnv2011[0]);
-  finenv2011->SetFillColor(col2011);
+  finenv2011->SetFillColorAlpha(col2011,0.8);
   finenv2011->SetFillStyle(fill2011);
 
 
@@ -192,8 +192,8 @@ void errorEnvelope() {
 
   TGraphErrors *gr2012 = new TGraphErrors(4,En2012,&env2012[0][0],dEn,&env2012[1][0]);
   gr2012->SetTitle(TString::Format("2012-2013"));
-  gr2012->SetMarkerColor(col2012);
-  gr2012->SetLineColor(col2012);
+  gr2012->SetMarkerColor(1);
+  gr2012->SetLineColor(1);
   gr2012->SetLineWidth(2);
   gr2012->SetMarkerStyle(marker2012);
   gr2012->SetMarkerSize(1.25);
@@ -221,7 +221,7 @@ void errorEnvelope() {
   }
 
   TGraphAsymmErrors *finenv2012 = new TGraphAsymmErrors(high2012.size(),&en2012[0],&yenv2012[0],&xerr2012[0],&xerr2012[0],&maxEnv2012[0],&maxEnv2012[0]);
-  finenv2012->SetFillColor(col2012);
+  finenv2012->SetFillColorAlpha(col2012,0.7);
   finenv2012->SetFillStyle(fill2012);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

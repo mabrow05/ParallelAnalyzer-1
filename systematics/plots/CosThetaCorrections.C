@@ -13,18 +13,18 @@
 
 bool color = false;
 
-Int_t groupBin=4;
+Int_t groupBin=5;
 Double_t enStart=50.;//10.*groupBin;
 
 Double_t BSlimitLow = -1., BSlimitHigh = 3.;
-Double_t AnglelimitLow = -5., AnglelimitHigh = 3.;
+Double_t AnglelimitLow = -4., AnglelimitHigh = 3.;
 
 TString drawOpt = "0AL3";//"0AC4" "0AL3"
 
-std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
+std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type,TString anaCh) {
 
   std::vector <std::vector<Double_t> > corrs;
-  std::ifstream infile(TString::Format("../AngleCorrections/%s_delta_3%s.txt",year.Data(),(type==TString("ALL")?"":type.Data())));
+  std::ifstream infile(TString::Format("../AngleCorrections/%s_delta_3%s_anaCh%s.txt",year.Data(),(type==TString("ALL")?"":type.Data()),anaCh.Data()));
   std::vector<Double_t> enbin;
   std::vector<Double_t> c;
   std::vector<Double_t> cerr;
@@ -51,13 +51,16 @@ std::vector <std::vector<Double_t> > readAngleCorr(TString year, TString type) {
       i++;
     }
   }
+  enbin.push_back(enbin[enbin.size()-1]+10.*groupBin);
+  c.push_back(c[c.size()-1]);
+  cerr.push_back(cerr[cerr.size()-1]);
   corrs.push_back(enbin);
   corrs.push_back(c);
   corrs.push_back(cerr);
   return corrs;
 };
 
-void CosThetaCorrections() {
+void CosThetaCorrections(TString anaCh) {
 
   gStyle->SetOptStat(0);
   gStyle->SetTitleSize(0.07,"t");
@@ -82,31 +85,33 @@ void CosThetaCorrections() {
   //Int_t octmin = year==2011?0:60;
   //Int_t octmax = year==2011?59:121;
 
-  Int_t col2011 = color?9:1;
-  Int_t col2012 = color?8:1;
-  Int_t fill2011 = color?3001:3004;
-  Int_t fill2012 = color?3001:3005;
+
+  Int_t col2011 = color?9:14;
+  Int_t col2012 = color?8:17;
+  Int_t fill2011 = 1001;
+  Int_t fill2012 = 1001;
   Int_t marker2011 = 20;
   Int_t marker2012 = 21;
   Int_t lineStyle2011 = 1;
   Int_t lineStyle2012 = color?1:2;
+
   
 
   int startPoint=0;
   
   TString year = "2011-2012";
-  std::vector<std::vector<Double_t> > delta30_2011 = readAngleCorr(year,"0");
-  std::vector<std::vector<Double_t> > delta31_2011 = readAngleCorr(year,"1");
-  std::vector<std::vector<Double_t> > delta32_2011 = readAngleCorr(year,"2");
-  std::vector<std::vector<Double_t> > delta33_2011 = readAngleCorr(year,"3");
-  std::vector<std::vector<Double_t> > delta3_2011 = readAngleCorr(year,"ALL");
+  std::vector<std::vector<Double_t> > delta30_2011 = readAngleCorr(year,"0",anaCh);
+  std::vector<std::vector<Double_t> > delta31_2011 = readAngleCorr(year,"1",anaCh);
+  std::vector<std::vector<Double_t> > delta32_2011 = readAngleCorr(year,"2",anaCh);
+  std::vector<std::vector<Double_t> > delta33_2011 = readAngleCorr(year,"3",anaCh);
+  std::vector<std::vector<Double_t> > delta3_2011 = readAngleCorr(year,"ALL",anaCh);
     
   year = "2012-2013";
-  std::vector<std::vector<Double_t> > delta30_2012 = readAngleCorr(year,"0");
-  std::vector<std::vector<Double_t> > delta31_2012 = readAngleCorr(year,"1");
-  std::vector<std::vector<Double_t> > delta32_2012 = readAngleCorr(year,"2");
-  std::vector<std::vector<Double_t> > delta33_2012 = readAngleCorr(year,"3");
-  std::vector<std::vector<Double_t> > delta3_2012 = readAngleCorr(year,"ALL");
+  std::vector<std::vector<Double_t> > delta30_2012 = readAngleCorr(year,"0",anaCh);
+  std::vector<std::vector<Double_t> > delta31_2012 = readAngleCorr(year,"1",anaCh);
+  std::vector<std::vector<Double_t> > delta32_2012 = readAngleCorr(year,"2",anaCh);
+  std::vector<std::vector<Double_t> > delta33_2012 = readAngleCorr(year,"3",anaCh);
+  std::vector<std::vector<Double_t> > delta3_2012 = readAngleCorr(year,"ALL",anaCh);
   
   
   TCanvas *c0 = new TCanvas("c0","c0");
@@ -118,16 +123,16 @@ void CosThetaCorrections() {
   TGraphErrors *g_delta30_2011 = new TGraphErrors(delta30_2011[0].size()-startPoint,&delta30_2011[0][startPoint],&delta30_2011[1][startPoint],0,&delta30_2011[2][startPoint]);
   g_delta30_2011->SetMarkerStyle(0);
   g_delta30_2011->SetLineWidth(3);
-  g_delta30_2011->SetLineColor(col2011);
-  g_delta30_2011->SetFillColor(col2011);
+  g_delta30_2011->SetLineColor(!color?1:col2011);
+  g_delta30_2011->SetFillColorAlpha(col2011,0.7);
   g_delta30_2011->SetFillStyle(fill2011);
   g_delta30_2011->SetLineStyle(lineStyle2011);
 
   TGraphErrors *g_delta30_2012 = new TGraphErrors(delta30_2012[0].size()-startPoint,&delta30_2012[0][startPoint],&delta30_2012[1][startPoint],0,&delta30_2012[2][startPoint]);
   g_delta30_2012->SetMarkerStyle(0);
   g_delta30_2012->SetLineWidth(3);
-  g_delta30_2012->SetLineColor(col2012);
-  g_delta30_2012->SetFillColor(col2012);
+  g_delta30_2012->SetLineColor(!color?1:col2012);
+  g_delta30_2012->SetFillColorAlpha(col2012,0.7);
   g_delta30_2012->SetFillStyle(fill2012);
   g_delta30_2012->SetLineStyle(lineStyle2012);
 
@@ -137,11 +142,13 @@ void CosThetaCorrections() {
   mg0->SetMinimum(AnglelimitLow);
   mg0->SetMaximum(AnglelimitHigh);
   
-  mg0->Draw("ALP3");
+  mg0->Draw(drawOpt);
   mg0->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg0->GetYaxis()->CenterTitle();
   mg0->GetXaxis()->SetTitle("Energy (keV)");
   mg0->GetXaxis()->CenterTitle();
+  mg0->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *leg0 = new TLegend(0.57,0.7,0.87,0.8);
@@ -161,16 +168,16 @@ void CosThetaCorrections() {
   TGraphErrors *g_delta31_2011 = new TGraphErrors(delta31_2011[0].size()-startPoint,&delta31_2011[0][startPoint],&delta31_2011[1][startPoint],0,&delta31_2011[2][startPoint]);
   g_delta31_2011->SetMarkerStyle(0);
   g_delta31_2011->SetLineWidth(3);
-  g_delta31_2011->SetLineColor(col2011);
-  g_delta31_2011->SetFillColor(col2011);
+  g_delta31_2011->SetLineColor(!color?1:col2011);
+  g_delta31_2011->SetFillColorAlpha(col2011,0.7);
   g_delta31_2011->SetFillStyle(fill2011);
   g_delta31_2011->SetLineStyle(lineStyle2011);
 
   TGraphErrors *g_delta31_2012 = new TGraphErrors(delta31_2012[0].size()-startPoint,&delta31_2012[0][startPoint],&delta31_2012[1][startPoint],0,&delta31_2012[2][startPoint]);
   g_delta31_2012->SetMarkerStyle(0);
   g_delta31_2012->SetLineWidth(3);
-  g_delta31_2012->SetLineColor(col2012);
-  g_delta31_2012->SetFillColor(col2012);
+  g_delta31_2012->SetLineColor(!color?1:col2012);
+  g_delta31_2012->SetFillColorAlpha(col2012,0.7);
   g_delta31_2012->SetFillStyle(fill2012);
   g_delta31_2012->SetLineStyle(lineStyle2012);
 
@@ -179,11 +186,13 @@ void CosThetaCorrections() {
   mg1->SetMinimum(AnglelimitLow);
   mg1->SetMaximum(AnglelimitHigh);
   
-  mg1->Draw("ALP3");
+  mg1->Draw(drawOpt);
   mg1->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg1->GetYaxis()->CenterTitle();
   mg1->GetXaxis()->SetTitle("Energy (keV)");
   mg1->GetXaxis()->CenterTitle();
+  mg1->GetXaxis()->SetLimits(0.,780.);
+
   gPad->Modified();
 
   TLegend *leg1 = new TLegend(0.57,0.7,0.87,0.8);
@@ -202,16 +211,16 @@ void CosThetaCorrections() {
   TGraphErrors *g_delta32_2011 = new TGraphErrors(delta32_2011[0].size()-startPoint,&delta32_2011[0][startPoint],&delta32_2011[1][startPoint],0,&delta32_2011[2][startPoint]);
   g_delta32_2011->SetMarkerStyle(0);
   g_delta32_2011->SetLineWidth(3);
-  g_delta32_2011->SetLineColor(col2011);
-  g_delta32_2011->SetFillColor(col2011);
+  g_delta32_2011->SetLineColor(!color?1:col2011);
+  g_delta32_2011->SetFillColorAlpha(col2011,0.7);
   g_delta32_2011->SetFillStyle(fill2011);
   g_delta32_2011->SetLineStyle(lineStyle2011);
   
   TGraphErrors *g_delta32_2012 = new TGraphErrors(delta32_2012[0].size()-startPoint,&delta32_2012[0][startPoint],&delta32_2012[1][startPoint],0,&delta32_2012[2][startPoint]);
   g_delta32_2012->SetMarkerStyle(0);
   g_delta32_2012->SetLineWidth(3);
-  g_delta32_2012->SetLineColor(col2012);
-  g_delta32_2012->SetFillColor(col2012);
+  g_delta32_2012->SetLineColor(!color?1:col2012);
+  g_delta32_2012->SetFillColorAlpha(col2012,0.7);
   g_delta32_2012->SetFillStyle(fill2012);
   g_delta32_2012->SetLineStyle(lineStyle2012);
 
@@ -220,11 +229,12 @@ void CosThetaCorrections() {
   mg2->SetMinimum(AnglelimitLow);
   mg2->SetMaximum(AnglelimitHigh);
   
-  mg2->Draw("ALP3");
+  mg2->Draw(drawOpt);
   mg2->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg2->GetYaxis()->CenterTitle();
   mg2->GetXaxis()->SetTitle("Energy (keV)");
   mg2->GetXaxis()->CenterTitle();
+  mg2->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
 
   TLegend *leg2 = new TLegend(0.57,0.7,0.87,0.8);
@@ -243,8 +253,8 @@ void CosThetaCorrections() {
   TGraphErrors *g_delta33_2011 = new TGraphErrors(delta33_2011[0].size()-startPoint,&delta33_2011[0][startPoint],&delta33_2011[1][startPoint],0,&delta33_2011[2][startPoint]);
   g_delta33_2011->SetMarkerStyle(0);
   g_delta33_2011->SetLineWidth(3);
-  g_delta33_2011->SetLineColor(col2011);
-  g_delta33_2011->SetFillColor(col2011);
+  g_delta33_2011->SetLineColor(!color?1:col2011);
+  g_delta33_2011->SetFillColorAlpha(col2011,0.7);
   g_delta33_2011->SetFillStyle(fill2011);
   g_delta33_2011->SetLineStyle(lineStyle2011);
 
@@ -252,8 +262,8 @@ void CosThetaCorrections() {
   TGraphErrors *g_delta33_2012 = new TGraphErrors(delta33_2012[0].size()-startPoint,&delta33_2012[0][startPoint],&delta33_2012[1][startPoint],0,&delta33_2012[2][startPoint]);
   g_delta33_2012->SetMarkerStyle(0);
   g_delta33_2012->SetLineWidth(3);
-  g_delta33_2012->SetLineColor(col2012);
-  g_delta33_2012->SetFillColor(col2012);
+  g_delta33_2012->SetLineColor(!color?1:col2012);
+  g_delta33_2012->SetFillColorAlpha(col2012,0.7);
   g_delta33_2012->SetFillStyle(fill2012);
   g_delta33_2012->SetLineStyle(lineStyle2012);
 
@@ -262,11 +272,12 @@ void CosThetaCorrections() {
   mg3->SetMinimum(AnglelimitLow);
   mg3->SetMaximum(AnglelimitHigh);
   
-  mg3->Draw("ALP3");
+  mg3->Draw(drawOpt);
   mg3->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg3->GetYaxis()->CenterTitle();
   mg3->GetXaxis()->SetTitle("Energy (keV)");
   mg3->GetXaxis()->CenterTitle();
+  mg3->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
 
   TLegend *leg3 = new TLegend(0.57,0.7,0.87,0.8);
@@ -286,16 +297,16 @@ void CosThetaCorrections() {
   TGraphErrors *g_delta3_2011 = new TGraphErrors(delta3_2011[0].size()-startPoint,&delta3_2011[0][startPoint],&delta3_2011[1][startPoint],0,&delta3_2011[2][startPoint]);
   g_delta3_2011->SetMarkerStyle(0);
   g_delta3_2011->SetLineWidth(3);
-  g_delta3_2011->SetLineColor(col2011);
-  g_delta3_2011->SetFillColor(col2011);
+  g_delta3_2011->SetLineColor(!color?1:col2011);
+  g_delta3_2011->SetFillColorAlpha(col2011,0.7);
   g_delta3_2011->SetFillStyle(fill2011);
   g_delta3_2011->SetLineStyle(lineStyle2011);
 
   TGraphErrors *g_delta3_2012 = new TGraphErrors(delta3_2012[0].size()-startPoint,&delta3_2012[0][startPoint],&delta3_2012[1][startPoint],0,&delta3_2012[2][startPoint]);
   g_delta3_2012->SetMarkerStyle(0);
   g_delta3_2012->SetLineWidth(3);
-  g_delta3_2012->SetLineColor(col2012);
-  g_delta3_2012->SetFillColor(col2012);
+  g_delta3_2012->SetLineColor(!color?1:col2012);
+  g_delta3_2012->SetFillColorAlpha(col2012,0.7);
   g_delta3_2012->SetFillStyle(fill2012);
   g_delta3_2012->SetLineStyle(lineStyle2012);
 
@@ -304,11 +315,12 @@ void CosThetaCorrections() {
   mgDELTA3->SetMinimum(AnglelimitLow);
   mgDELTA3->SetMaximum(AnglelimitHigh);
   
-  mgDELTA3->Draw("ALP3");
+  mgDELTA3->Draw(drawOpt);
   mgDELTA3->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgDELTA3->GetYaxis()->CenterTitle();
   mgDELTA3->GetXaxis()->SetTitle("Energy (keV)");
   mgDELTA3->GetXaxis()->CenterTitle();
+  mgDELTA3->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
 
   TLegend *legDELTA3 = new TLegend(0.57,0.7,0.87,0.8);
