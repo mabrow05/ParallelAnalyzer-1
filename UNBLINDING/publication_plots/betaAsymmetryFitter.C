@@ -543,7 +543,7 @@ void betaAsymmetryFitter() {
   residALL->GetYaxis()->SetTitle("MC-Data (mHz/keV)");
   residALL->GetYaxis()->SetLabelSize(0.12);
   residALL->GetYaxis()->SetTitleOffset(0.5);
-  residALL->GetYaxis()->SetTitleSize(0.12);
+  residALL->GetYaxis()->SetTitleSize(0.10);
   residALL->GetXaxis()->SetLabelSize(0.12);
   residALL->GetXaxis()->CenterTitle();
   residALL->GetYaxis()->CenterTitle();

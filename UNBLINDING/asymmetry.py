@@ -1044,6 +1044,8 @@ if __name__ == "__main__":
                 o.write("A0 = %0.6f +/- %0.6f\n"%(A0_2011,sumErrors([enUncert2011,statUncert2011,angleUncert2011,backscUncert2011,radiativeUncert2011,
                                                                  recoilUncert2011,fieldUncert2011,effUncert2011,depolCorr2011[1]*A0_2011,
                                                                  gainUncert2011,deltaMuonVetoErr*A0_2011,deltaNeutronBGErr*A0_2011])))
+                o.write("stat =%f\n"%MC.errcombo([stat0]))
+                o.write("syst =%f\n"%MC.errcombo([err01,err02,err03,err04,err05,err06,err07,err08,err09,err010,err011]))
                 o.write("\n")
                 
                 o.write("\t\t% Corr\t\t% Unc.\n")
@@ -1067,6 +1069,8 @@ if __name__ == "__main__":
                 o.write("A0 = %0.6f +/- %0.6f\n"%(A0_2012,sumErrors([enUncert2012,statUncert2012,angleUncert2012,backscUncert2012,radiativeUncert2012,
                                                                  recoilUncert2012,fieldUncert2012,effUncert2012,depolCorr2012[1]*A0_2012,
                                                                  gainUncert2012,deltaMuonVetoErr*A0_2012,deltaNeutronBGErr*A0_2012])))
+                o.write("stat =%f\n"%MC.errcombo([stat1]))
+                o.write("syst =%f\n"%MC.errcombo([err11,err12,err13,err14,err15,err16,err17,err18,err19,err110,err111]))
                 o.write("\n")
                 
                 o.write("\t\t% Corr\t\t% Unc.\n")
