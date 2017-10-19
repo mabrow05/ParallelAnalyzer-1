@@ -264,10 +264,12 @@ def plotEnergyErrors(year=2011):
         #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
         #gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i New Method"%year),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
-        gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
-                 [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
-	gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
+        #gCx.plot(graph.data.points(gdat2010,x=1,y=2,title="2010"),
+        #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
+	gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
                  [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
+	gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
+                 [ graph.style.line([style.linewidth.THick,color.rgb.green]),])
 			 
 	#print "Eavg MC MPM 2010=",weightStats(gdat2010,220,670)
         print "Eavg MC MB 2011=",weightStats(gdat2011,190,740)
