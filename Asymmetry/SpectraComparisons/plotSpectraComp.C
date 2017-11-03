@@ -4,9 +4,12 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   gStyle->SetOptStat(0);
 
   TString normType = "ALL";
+  TH1::SetDefaultSumw2(true);
+  gStyle->SetLegendBorderSize(0);
 
-  Double_t normLow = 0.;
-  Double_t normHigh = 780.;
+
+  Double_t normLow = 190.;
+  Double_t normHigh = 740.;
   
   Double_t xAxisMax = 800.;
 
@@ -16,14 +19,14 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   //Storing event fractions for data, E/W and sfON/OFF
   Double_t t0E_sfON, t0E_sfOFF, t1E_sfON, t1E_sfOFF, t2E_sfON, t2E_sfOFF, t3E_sfON, t3E_sfOFF;
   Double_t t0W_sfON, t0W_sfOFF, t1W_sfON, t1W_sfOFF, t2W_sfON, t2W_sfOFF, t3W_sfON, t3W_sfOFF;
-  t0E_sfON = t0E_sfOFF = t1E_sfON = t1E_sfOFF = t23E_sfON = t2E_sfOFF = t3E_sfOFF = 0;
-  t0W_sfON = t0W_sfOFF = t1W_sfON = t1W_sfOFF = t23W_sfON = t2W_sfOFF = t3E_sfOFF = 0.;
+  t0E_sfON = t0E_sfOFF = t1E_sfON = t1E_sfOFF =  t2E_sfOFF = t3E_sfOFF = 0;
+  t0W_sfON = t0W_sfOFF = t1W_sfON = t1W_sfOFF =  t2W_sfOFF = t3E_sfOFF = 0.;
 
   //Storing event fractions for sim, E/W and sfON/OFF
   Double_t sim_t0E_sfON, sim_t0E_sfOFF, sim_t1E_sfON, sim_t1E_sfOFF, sim_t2E_sfON, sim_t2E_sfOFF, sim_t3E_sfON, sim_t3E_sfOFF;
   Double_t sim_t0W_sfON, sim_t0W_sfOFF, sim_t1W_sfON, sim_t1W_sfOFF, sim_t2W_sfON, sim_t2W_sfOFF, sim_t3W_sfON, sim_t3W_sfOFF;
-  sim_t0E_sfON = sim_t0E_sfOFF = sim_t1E_sfON = sim_t1E_sfOFF = sim_t23E_sfON = sim_t2E_sfOFF = sim_t3E_sfOFF = 0;
-  sim_t0W_sfON = sim_t0W_sfOFF = sim_t1W_sfON = sim_t1W_sfOFF = sim_t23W_sfON = sim_t2W_sfOFF = sim_t3E_sfOFF = 0.;
+  sim_t0E_sfON = sim_t0E_sfOFF = sim_t1E_sfON = sim_t1E_sfOFF = sim_t2E_sfOFF = sim_t3E_sfOFF = 0;
+  sim_t0W_sfON = sim_t0W_sfOFF = sim_t1W_sfON = sim_t1W_sfOFF = sim_t2W_sfOFF = sim_t3E_sfOFF = 0.;
 
   
   TFile *data_file = new TFile(TString::Format("Octets_%i-%i_DATA.root",octetStart,octetEnd),"READ");
@@ -146,12 +149,14 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   double totalW_sfOFF = t0W_sfOFF;// + t1W_sfOFF + t2W_sfOFF + t3W_sfOFF;
   double totalW_sfON = t0W_sfON;// + t1W_sfON + t2W_sfON + t3W_sfON;
 
-  double fracData1 = 100.*data1->Integral(minEnBin,maxEnBin)/data0->Integral(minEnBin,maxEnBin);
-  double fracData2 = 100.*data2->Integral(minEnBin,maxEnBin)/data0->Integral(minEnBin,maxEnBin);
-  double fracData3 = 100.*data3->Integral(minEnBin,maxEnBin)/data0->Integral(minEnBin,maxEnBin);  
-  double fracSim1 = 100.*sim1->Integral(minEnBin,maxEnBin)/sim0->Integral(minEnBin,maxEnBin);
-  double fracSim2 = 100.*sim2->Integral(minEnBin,maxEnBin)/sim0->Integral(minEnBin,maxEnBin);
-  double fracSim3 = 100.*sim3->Integral(minEnBin,maxEnBin)/sim0->Integral(minEnBin,maxEnBin);  
+  double fracData0 = 100.*data0->Integral(minEnBin,maxEnBin)/dataALL->Integral(minEnBin,maxEnBin);
+  double fracData1 = 100.*data1->Integral(minEnBin,maxEnBin)/dataALL->Integral(minEnBin,maxEnBin);
+  double fracData2 = 100.*data2->Integral(minEnBin,maxEnBin)/dataALL->Integral(minEnBin,maxEnBin);
+  double fracData3 = 100.*data3->Integral(minEnBin,maxEnBin)/dataALL->Integral(minEnBin,maxEnBin);
+  double fracSim0 = 100.*sim0->Integral(minEnBin,maxEnBin)/simALL->Integral(minEnBin,maxEnBin);
+  double fracSim1 = 100.*sim1->Integral(minEnBin,maxEnBin)/simALL->Integral(minEnBin,maxEnBin);
+  double fracSim2 = 100.*sim2->Integral(minEnBin,maxEnBin)/simALL->Integral(minEnBin,maxEnBin);
+  double fracSim3 = 100.*sim3->Integral(minEnBin,maxEnBin)/simALL->Integral(minEnBin,maxEnBin);  
   
   std::cout << std::fixed;
   std::cout << std::setprecision(2);
@@ -167,16 +172,16 @@ void plotSpectraComp(int octetStart, int octetEnd) {
 	    << "Type 3E:\t" << t3E_sfON/totalE_sfON << "\t\t" << t3E_sfOFF/totalE_sfOFF << "\n"
 	    << "Type 3W:\t" << t3W_sfON/totalW_sfON << "\t\t" << t3W_sfOFF/totalW_sfOFF << "\n\n"
 	    << "********************************************\n\n"
-	    << "          Total Fractions (as % of type0)\n"
-	    << "Type\t\t1\t2\t3\n"
-	    << "Data\t\t"<<fracData1<<"\t"<<fracData2<<"\t"<<fracData3<<"\n"
-	    << "Sim\t\t"<<fracSim1<<"\t"<<fracSim2<<"\t"<<fracSim3<<"\n"
+	    << "          Total Fractions (as % of typeALL)\n"
+	    << "Type\t\t0\t1\t2\t3\n"
+	    << "Data\t\t"<<fracData0<<"\t"<<fracData1<<"\t"<<fracData2<<"\t"<<fracData3<<"\n"
+	    << "Sim\t\t"<<fracSim0<<"\t"<<fracSim1<<"\t"<<fracSim2<<"\t"<<fracSim3<<"\n"
 	    << "% Diff\t\t"
-	    << (fracSim1-fracData1)/fracData1*100.<<"\t"
-	    << (fracSim2-fracData2)/fracData2*100.<<"\t"
-	    << (fracSim3-fracData3)/fracData3*100.<<"\n\n***************************************\n\n";
+	    << (fracSim0/fracData0-1.)*100.<<"\t"
+	    << (fracSim1/fracData1-1.)*100.<<"\t"
+	    << (fracSim2/fracData2-1.)*100.<<"\t"
+	    << (fracSim3/fracData3-1.)*100.<<"\n\n***************************************\n\n";
  
-    
   //Normalize
   Double_t normFactor = 1.;
   Double_t normFactor_sfOFF_E = 1.;
@@ -348,18 +353,25 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   residALL->SetMarkerStyle(34);
   residALL->SetMarkerSize(1.);
 
-  TH1D *perc_residALL = new TH1D("perc_residALL","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
-  perc_residALL->Add(simALL,dataALL,1,-1);
-  perc_residALL->Divide(perc_residALL,dataALL,1.,1.);
+  TH1D *perc_residALL = new TH1D("perc_residALL","Fractional Residuals: MC/Data - 1", nBins, Min, Max);
+  //perc_residALL->Add(simALL,dataALL,1,-1);
+  perc_residALL->Divide(simALL,dataALL,1.,1.);
+  for (UInt_t i=1;i<perc_residALL->GetNbinsX();++i) {
+    perc_residALL->SetBinContent(i,perc_residALL->GetBinContent(i)-1.);
+    //std::cout << perc_residALL->GetBinContent(i) << std::endl;
+  }
+  perc_residALL->SetFillColor(kBlue);
+  perc_residALL->SetMarkerSize(0);
   perc_residALL->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_residALL->GetYaxis()->SetTitle("event rate (mHz/keV)");
   perc_residALL->SetMaximum(.1);
   perc_residALL->SetMinimum(-.1);
   perc_residALL->SetLineWidth(2);
   
+  
 
 
-  perc_residALL->Draw();
+  perc_residALL->Draw("E3");
   //residALL->Draw("E0");
   c1->Update();
   TLine *l = new TLine(Min, 0., xAxisMax, 0.);
@@ -395,6 +407,12 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   BG_dataALL->SetLineWidth(3);
   BG_dataALL->Draw("SAMEE0");
 
+  TLegend *leg = new TLegend(0.61,0.60,0.88,0.85);
+  leg->AddEntry(dataALL,"Data","p");
+  leg->AddEntry(simALL,"Monte Carlo","l");
+  leg->AddEntry(BG_dataALL,"Background","p");
+  leg->Draw("SAME");
+
 
   // Type 0
 
@@ -402,9 +420,9 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   TCanvas *c2 = new TCanvas("c2","c2", 1200., 600.);
   c2->Divide(2,1);
   c2->cd(2);
-  Int_t nBins = data0->GetNbinsX();
-  Double_t Min = data0->GetXaxis()->GetBinLowEdge(data0->GetXaxis()->GetFirst());
-  Double_t Max = data0->GetXaxis()->GetBinUpEdge(data0->GetXaxis()->GetLast());
+  nBins = data0->GetNbinsX();
+  Min = data0->GetXaxis()->GetBinLowEdge(data0->GetXaxis()->GetFirst());
+  Max = data0->GetXaxis()->GetBinUpEdge(data0->GetXaxis()->GetLast());
 
   //residual
   TH1D *resid0 = new TH1D("resid0","Residuals: MC-Data", nBins, Min, Max);
@@ -418,9 +436,14 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid0->SetMarkerStyle(34);
   resid0->SetMarkerSize(1.);
 
-  TH1D *perc_resid0 = new TH1D("perc_resid0","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
-  perc_resid0->Add(sim0,data0,1,-1);
-  perc_resid0->Divide(perc_resid0,data0,1.,1.);
+  TH1D *perc_resid0 = new TH1D("perc_resid0","Fractional Residuals: MC/Data - 1", nBins, Min, Max);
+  perc_resid0->Divide(sim0,data0,1.,1.);
+  for (UInt_t i=1;i<perc_resid0->GetNbinsX();++i) {
+    perc_resid0->SetBinContent(i,perc_resid0->GetBinContent(i)-1.);
+    //std::cout << perc_resid0->GetBinContent(i) << std::endl;
+  }
+  perc_resid0->SetFillColor(kBlue);
+  perc_resid0->SetMarkerSize(0);
   perc_resid0->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid0->GetYaxis()->SetTitle("event rate (mHz/keV)");
   perc_resid0->SetMaximum(.1);
@@ -437,10 +460,10 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   }
 
 
-  perc_resid0->Draw();
+  perc_resid0->Draw("E3");
   //resid0->Draw("E0");
   c2->Update();
-  TLine *l = new TLine(Min, 0., xAxisMax, 0.);
+  l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
   l->Draw();
 
@@ -472,7 +495,8 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   BG_data0->SetLineWidth(3);
   BG_data0->Draw("SAMEE0");
 
-  
+  leg->Draw("SAME");
+
 
   // Type 1
 
@@ -480,9 +504,9 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   TCanvas *c3 = new TCanvas("c3","c3", 1200., 600.);
   c3->Divide(2,1);
   c3->cd(2);
-  Int_t nBins = data1->GetNbinsX();
-  Double_t Min = data1->GetXaxis()->GetBinLowEdge(data1->GetXaxis()->GetFirst());
-  Double_t Max = data1->GetXaxis()->GetBinUpEdge(data1->GetXaxis()->GetLast());
+  nBins = data1->GetNbinsX();
+  Min = data1->GetXaxis()->GetBinLowEdge(data1->GetXaxis()->GetFirst());
+  Max = data1->GetXaxis()->GetBinUpEdge(data1->GetXaxis()->GetLast());
 
   //residual
   TH1D *resid1 = new TH1D("resid1","Residuals: MC-Data", nBins, Min, Max);
@@ -496,9 +520,14 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid1->SetMarkerStyle(34);
   resid1->SetMarkerSize(1.);
 
-  TH1D *perc_resid1 = new TH1D("perc_resid1","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
-  perc_resid1->Add(sim1,data1,1,-1);
-  perc_resid1->Divide(perc_resid1,data1,1.,1.);
+  TH1D *perc_resid1 = new TH1D("perc_resid1","Fractional Residuals: MC/Data - 1", nBins, Min, Max);
+  perc_resid1->Divide(sim1,data1,1.,1.);
+  for (UInt_t i=1;i<perc_resid1->GetNbinsX();++i) {
+    perc_resid1->SetBinContent(i,perc_resid1->GetBinContent(i)-1.);
+    //std::cout << perc_resid1->GetBinContent(i) << std::endl;
+  }
+  perc_resid1->SetFillColor(kBlue);
+  perc_resid1->SetMarkerSize(0);
   perc_resid1->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid1->GetYaxis()->SetTitle("event rate (mHz/keV)");
   perc_resid1->SetMaximum(.5);
@@ -507,10 +536,10 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
 
 
-  perc_resid1->Draw();
+  perc_resid1->Draw("E3");
   //resid1->Draw("E0");
   c3->Update();
-  TLine *l = new TLine(Min, 0., xAxisMax, 0.);
+  l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
   l->Draw();
 
@@ -542,15 +571,17 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   BG_data1->SetLineWidth(3);
   BG_data1->Draw("SAMEE0");
 
+  leg->Draw("SAME");
+
   // Type 2
 
   //Residuals...
   TCanvas *c4 = new TCanvas("c4","c4", 1200., 600.);
   c4->Divide(2,1);
   c4->cd(2);
-  Int_t nBins = data2->GetNbinsX();
-  Double_t Min = data2->GetXaxis()->GetBinLowEdge(data2->GetXaxis()->GetFirst());
-  Double_t Max = data2->GetXaxis()->GetBinUpEdge(data2->GetXaxis()->GetLast());
+  nBins = data2->GetNbinsX();
+  Min = data2->GetXaxis()->GetBinLowEdge(data2->GetXaxis()->GetFirst());
+  Max = data2->GetXaxis()->GetBinUpEdge(data2->GetXaxis()->GetLast());
 
   //residual
   TH1D *resid2 = new TH1D("resid2","Residuals: MC-Data", nBins, Min, Max);
@@ -564,9 +595,14 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid2->SetMarkerStyle(34);
   resid2->SetMarkerSize(1.);
 
-  TH1D *perc_resid2 = new TH1D("perc_resid2","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
-  perc_resid2->Add(sim2,data2,1,-1);
-  perc_resid2->Divide(perc_resid2,data2,1.,1.);
+  TH1D *perc_resid2 = new TH1D("perc_resid2","Fractional Residuals: MC/Data - 1", nBins, Min, Max);
+  perc_resid2->Divide(sim2,data2,1.,1.);
+  for (UInt_t i=1;i<perc_resid2->GetNbinsX();++i) {
+    perc_resid2->SetBinContent(i,perc_resid2->GetBinContent(i)-1.);
+    //std::cout << perc_resid2->GetBinContent(i) << std::endl;
+  }
+  perc_resid2->SetFillColor(kBlue);
+  perc_resid2->SetMarkerSize(0);
   perc_resid2->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid2->GetYaxis()->SetTitle("event rate (mHz/keV)");
   perc_resid2->SetMaximum(.5);
@@ -575,10 +611,10 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
 
 
-  perc_resid2->Draw();
+  perc_resid2->Draw("E3");
   //resid2->Draw("E0");
   c4->Update();
-  TLine *l = new TLine(Min, 0., xAxisMax, 0.);
+  l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
   l->Draw();
 
@@ -610,15 +646,17 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   BG_data2->SetLineWidth(3);
   BG_data2->Draw("SAMEE0");
 
+  leg->Draw("SAME");
+
   // Type 3
 
   //Residuals...
   TCanvas *c5 = new TCanvas("c5","c5", 1200., 600.);
   c5->Divide(2,1);
   c5->cd(2);
-  Int_t nBins = data3->GetNbinsX();
-  Double_t Min = data3->GetXaxis()->GetBinLowEdge(data3->GetXaxis()->GetFirst());
-  Double_t Max = data3->GetXaxis()->GetBinUpEdge(data3->GetXaxis()->GetLast());
+  nBins = data3->GetNbinsX();
+  Min = data3->GetXaxis()->GetBinLowEdge(data3->GetXaxis()->GetFirst());
+  Max = data3->GetXaxis()->GetBinUpEdge(data3->GetXaxis()->GetLast());
 
   //residual
   TH1D *resid3 = new TH1D("resid3","Residuals: MC-Data", nBins, Min, Max);
@@ -632,9 +670,14 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid3->SetMarkerStyle(34);
   resid3->SetMarkerSize(1.);
 
-  TH1D *perc_resid3 = new TH1D("perc_resid3","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
-  perc_resid3->Add(sim3,data3,1,-1);
-  perc_resid3->Divide(perc_resid3,data3,1.,1.);
+  TH1D *perc_resid3 = new TH1D("perc_resid3","Fractional Residuals: MC/Data - 1", nBins, Min, Max);
+  perc_resid3->Divide(sim3,data3,1.,1.);
+  for (UInt_t i=1;i<perc_resid3->GetNbinsX();++i) {
+    perc_resid3->SetBinContent(i,perc_resid3->GetBinContent(i)-1.);
+    //std::cout << perc_resid3->GetBinContent(i) << std::endl;
+  }
+  perc_resid3->SetFillColor(kBlue);
+  perc_resid3->SetMarkerSize(0);
   perc_resid3->GetXaxis()->SetRangeUser(0., xAxisMax);
   //perc_resid3->GetYaxis()->SetTitle("event rate (mHz/keV)");
   perc_resid3->SetMaximum(.5);
@@ -643,10 +686,10 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   
 
 
-  perc_resid3->Draw();
+  perc_resid3->Draw("E3");
   //resid3->Draw("E0");
   c5->Update();
-  TLine *l = new TLine(Min, 0., xAxisMax, 0.);
+  l = new TLine(Min, 0., xAxisMax, 0.);
   l->SetLineStyle(8);
   l->Draw();
 
@@ -678,6 +721,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   BG_data3->SetLineWidth(3);
   BG_data3->Draw("SAMEE0");
   
+  leg->Draw("SAME");
 
 
   TString pdfFile = TString::Format("spectraComp_%i-%i_Type%s_%0.0f-%0.0f.pdf",octetStart,octetEnd,normType.Data(), normLow, normHigh);
@@ -772,7 +816,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data0_sfOFF_E->GetXaxis()->GetBinUpEdge(data0->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_E->Add(sim0_sfOFF_E,data0_sfOFF_E,1,-1);
   resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -783,7 +827,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_E->SetMarkerStyle(34);
   resid_sfOFF_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_E->Add(sim0_sfOFF_E,data0_sfOFF_E,1,-1);
   perc_resid_sfOFF_E->Divide(sim0_sfOFF_E);
   perc_resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -850,7 +894,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data1_sfOFF_E->GetXaxis()->GetBinUpEdge(data1->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_E->Add(sim1_sfOFF_E,data1_sfOFF_E,1,-1);
   resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -861,7 +905,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_E->SetMarkerStyle(34);
   resid_sfOFF_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_E->Add(sim1_sfOFF_E,data1_sfOFF_E,1,-1);
   perc_resid_sfOFF_E->Divide(sim1_sfOFF_E);
   perc_resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -919,7 +963,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data2_sfOFF_E->GetXaxis()->GetBinUpEdge(data2->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_E->Add(sim2_sfOFF_E,data2_sfOFF_E,1,-1);
   resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -930,7 +974,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_E->SetMarkerStyle(34);
   resid_sfOFF_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_E->Add(sim2_sfOFF_E,data2_sfOFF_E,1,-1);
   perc_resid_sfOFF_E->Divide(sim2_sfOFF_E);
   perc_resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -988,7 +1032,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data3_sfOFF_E->GetXaxis()->GetBinUpEdge(data3->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_E = new TH1D("resid_sfOFF_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_E->Add(sim3_sfOFF_E,data3_sfOFF_E,1,-1);
   resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -999,7 +1043,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_E->SetMarkerStyle(34);
   resid_sfOFF_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_E = new TH1D("perc_resid_sfOFF_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_E->Add(sim3_sfOFF_E,data3_sfOFF_E,1,-1);
   perc_resid_sfOFF_E->Divide(sim3_sfOFF_E);
   perc_resid_sfOFF_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1138,7 +1182,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data0_sfON_E->GetXaxis()->GetBinUpEdge(data0->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_E->Add(sim0_sfON_E,data0_sfON_E,1,-1);
   resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1149,7 +1193,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_E->SetMarkerStyle(34);
   resid_sfON_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_E->Add(sim0_sfON_E,data0_sfON_E,1,-1);
   perc_resid_sfON_E->Divide(sim0_sfON_E);
   perc_resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1215,7 +1259,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data1_sfON_E->GetXaxis()->GetBinUpEdge(data1->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_E->Add(sim1_sfON_E,data1_sfON_E,1,-1);
   resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1226,7 +1270,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_E->SetMarkerStyle(34);
   resid_sfON_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_E->Add(sim1_sfON_E,data1_sfON_E,1,-1);
   perc_resid_sfON_E->Divide(sim1_sfON_E);
   perc_resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1284,7 +1328,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data2_sfON_E->GetXaxis()->GetBinUpEdge(data2->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_E->Add(sim2_sfON_E,data2_sfON_E,1,-1);
   resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1295,7 +1339,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_E->SetMarkerStyle(34);
   resid_sfON_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_E->Add(sim2_sfON_E,data2_sfON_E,1,-1);
   perc_resid_sfON_E->Divide(sim2_sfON_E);
   perc_resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1353,7 +1397,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data3_sfON_E->GetXaxis()->GetBinUpEdge(data3->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_E = new TH1D("resid_sfON_E","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_E->Add(sim3_sfON_E,data3_sfON_E,1,-1);
   resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_E->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1364,7 +1408,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_E->SetMarkerStyle(34);
   resid_sfON_E->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_E = new TH1D("perc_resid_sfON_E","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_E->Add(sim3_sfON_E,data3_sfON_E,1,-1);
   perc_resid_sfON_E->Divide(sim3_sfON_E);
   perc_resid_sfON_E->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1503,7 +1547,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data0_sfOFF_W->GetXaxis()->GetBinUpEdge(data0->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_W->Add(sim0_sfOFF_W,data0_sfOFF_W,1,-1);
   resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1514,7 +1558,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_W->SetMarkerStyle(34);
   resid_sfOFF_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_W->Add(sim0_sfOFF_W,data0_sfOFF_W,1,-1);
   perc_resid_sfOFF_W->Divide(sim0_sfOFF_W);
   perc_resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1579,7 +1623,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data1_sfOFF_W->GetXaxis()->GetBinUpEdge(data1->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_W->Add(sim1_sfOFF_W,data1_sfOFF_W,1,-1);
   resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1590,7 +1634,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_W->SetMarkerStyle(34);
   resid_sfOFF_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_W->Add(sim1_sfOFF_W,data1_sfOFF_W,1,-1);
   perc_resid_sfOFF_W->Divide(sim1_sfOFF_W);
   perc_resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1648,7 +1692,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data2_sfOFF_W->GetXaxis()->GetBinUpEdge(data2->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_W->Add(sim2_sfOFF_W,data2_sfOFF_W,1,-1);
   resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1659,7 +1703,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_W->SetMarkerStyle(34);
   resid_sfOFF_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_W->Add(sim2_sfOFF_W,data2_sfOFF_W,1,-1);
   perc_resid_sfOFF_W->Divide(sim2_sfOFF_W);
   perc_resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1717,7 +1761,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data3_sfOFF_W->GetXaxis()->GetBinUpEdge(data3->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfOFF_W = new TH1D("resid_sfOFF_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfOFF_W->Add(sim3_sfOFF_W,data3_sfOFF_W,1,-1);
   resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfOFF_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1728,7 +1772,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfOFF_W->SetMarkerStyle(34);
   resid_sfOFF_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfOFF_W = new TH1D("perc_resid_sfOFF_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfOFF_W->Add(sim3_sfOFF_W,data3_sfOFF_W,1,-1);
   perc_resid_sfOFF_W->Divide(sim3_sfOFF_W);
   perc_resid_sfOFF_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1869,7 +1913,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data0_sfON_W->GetXaxis()->GetBinUpEdge(data0->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_W->Add(sim0_sfON_W,data0_sfON_W,1,-1);
   resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1880,7 +1924,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_W->SetMarkerStyle(34);
   resid_sfON_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_W->Add(sim0_sfON_W,data0_sfON_W,1,-1);
   perc_resid_sfON_W->Divide(sim0_sfON_W);
   perc_resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -1946,7 +1990,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data1_sfON_W->GetXaxis()->GetBinUpEdge(data1->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_W->Add(sim1_sfON_W,data1_sfON_W,1,-1);
   resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -1957,7 +2001,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_W->SetMarkerStyle(34);
   resid_sfON_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","East Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_W->Add(sim1_sfON_W,data1_sfON_W,1,-1);
   perc_resid_sfON_W->Divide(sim1_sfON_W);
   perc_resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -2015,7 +2059,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data2_sfON_W->GetXaxis()->GetBinUpEdge(data2->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_W->Add(sim2_sfON_W,data2_sfON_W,1,-1);
   resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -2026,7 +2070,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_W->SetMarkerStyle(34);
   resid_sfON_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_W->Add(sim2_sfON_W,data2_sfON_W,1,-1);
   perc_resid_sfON_W->Divide(sim2_sfON_W);
   perc_resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
@@ -2084,7 +2128,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   Max = data3_sfON_W->GetXaxis()->GetBinUpEdge(data3->GetXaxis()->GetLast());
 
   //residual
-  TH1D *resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
+  resid_sfON_W = new TH1D("resid_sfON_W","Residuals: MC-Data", nBins, Min, Max);
   resid_sfON_W->Add(sim3_sfON_W,data3_sfON_W,1,-1);
   resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);
   resid_sfON_W->GetYaxis()->SetTitle("event rate (mHz/keV)");
@@ -2095,7 +2139,7 @@ void plotSpectraComp(int octetStart, int octetEnd) {
   resid_sfON_W->SetMarkerStyle(34);
   resid_sfON_W->SetMarkerSize(1.);
 
-  TH1D *perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
+  perc_resid_sfON_W = new TH1D("perc_resid_sfON_W","West Fractional Residuals: (MC-Data)/MC", nBins, Min, Max);
   perc_resid_sfON_W->Add(sim3_sfON_W,data3_sfON_W,1,-1);
   perc_resid_sfON_W->Divide(sim3_sfON_W);
   perc_resid_sfON_W->GetXaxis()->SetRangeUser(0., xAxisMax);

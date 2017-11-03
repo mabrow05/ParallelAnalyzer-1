@@ -2,10 +2,12 @@
 
 void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t ebinHigh=670) {
   
-  bool color = false;
+  bool color = true;
   
   bool withSim = false;//true;
   bool CorrAndUnCorr = true;//false;
+
+  if (withSim) withPOL = false;
 
   double ymin0 = -0.128;
   double ymax0 = -0.108;
@@ -25,6 +27,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   Int_t markerCorrBS = 20;
   Int_t colorBS = color?2:1;
   Int_t color0 = color?4:1;
+  Int_t colorUnCorr = 1;
 
   TString year = "2011-2012";
   
@@ -68,7 +71,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   
   for (Int_t i=0; i<anaChoicesT0.size(); i++) {
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),corrections.Data(),
 				(withPOL?"_withPOL":""),anaChoicesT0[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -83,7 +86,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
     
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),"AllCorr",
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),"AllCorr",
 				(withPOL?"_withPOL":""),anaChoicesT0[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -98,7 +101,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
     
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),corrections.Data(),(withPOL?"_withPOL":""),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),corrections.Data(),(withPOL?"_withPOL":""),
 				anaChoicesALL[i].Data(),ebinLow,ebinHigh,
 				year==TString("2011-2012")?"0-59":"60-121").Data() );
     
@@ -113,7 +116,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
 
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),"AllCorr",(withPOL?"_withPOL":""),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),"AllCorr",(withPOL?"_withPOL":""),
 				anaChoicesALL[i].Data(),ebinLow,ebinHigh,
 				year==TString("2011-2012")?"0-59":"60-121").Data() );
     
@@ -130,7 +133,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   
   for (Int_t i=0; i<anaChoicesBacksc.size(); i++) {
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),corrections.Data(),
 				(withPOL?"_withPOL":""),anaChoicesBacksc[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -145,7 +148,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
     
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),"AllCorr",
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),"AllCorr",
 				(withPOL?"_withPOL":""),anaChoicesBacksc[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -201,7 +204,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   
   for (Int_t i=0; i<anaChoicesT0_2012.size(); i++) {
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),corrections.Data(),
 				(withPOL?"_withPOL":""),anaChoicesT0_2012[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -216,7 +219,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
     
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),"AllCorr",
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),"AllCorr",
 				(withPOL?"_withPOL":""),anaChoicesT0_2012[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -231,7 +234,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
     
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),corrections.Data(),(withPOL?"_withPOL":""),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),corrections.Data(),(withPOL?"_withPOL":""),
 				anaChoicesALL_2012[i].Data(),ebinLow,ebinHigh,
 				year==TString("2011-2012")?"0-59":"60-121").Data() );
     
@@ -246,7 +249,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
 
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),"AllCorr",(withPOL?"_withPOL":""),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),"AllCorr",(withPOL?"_withPOL":""),
 				anaChoicesALL_2012[i].Data(),ebinLow,ebinHigh,
 				year==TString("2011-2012")?"0-59":"60-121").Data() );
     
@@ -263,7 +266,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   
   for (Int_t i=0; i<anaChoicesBacksc_2012.size(); i++) {
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),corrections.Data(),
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),corrections.Data(),
 				(withPOL?"_withPOL":""),anaChoicesBacksc_2012[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -278,7 +281,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
     infile.close();
     
     infile.open(TString::Format("%s/Asymmetries/UNBLINDED_%s%s_OctetAsymmetries_AnaCh%s_%i-%i_Octets_%s.txt",
-				getenv("ANALYSIS_RESULTS"),"AllCorr",
+				getenv(withSim?"SIM_ANALYSIS_RESULTS":"ANALYSIS_RESULTS"),"AllCorr",
 				(withPOL?"_withPOL":""),anaChoicesBacksc_2012[i].Data(),
 				ebinLow,ebinHigh,year==TString("2011-2012")?"0-59":"60-121").Data());
     
@@ -339,8 +342,8 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   gPad->SetTopMargin(0.0);
 
   TH1F * dataALL = new TH1F("dataALL","",AsymmDataALL.size(),0.5,AsymmDataALL.size()+0.5);
-  dataALL->SetMarkerColor(color0);
-  dataALL->SetLineColor(color0);
+  dataALL->SetMarkerColor(colorUnCorr);
+  dataALL->SetLineColor(colorUnCorr);
   dataALL->SetLineWidth(1);
   dataALL->SetMarkerStyle(markerUncorrBS);
   dataALL->SetMarkerSize(1);
@@ -415,8 +418,8 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   p2011->SetTicks(0,1);
   
   TH1F * t0_2011 = new TH1F("t0_2011","",3,0.5,3.+0.5);
-  t0_2011->SetMarkerColor(color0);
-  t0_2011->SetLineColor(color0);
+  t0_2011->SetMarkerColor(colorUnCorr);
+  t0_2011->SetLineColor(colorUnCorr);
   t0_2011->SetLineWidth(1);
   t0_2011->SetMarkerStyle(markerUncorrBS);
   t0_2011->GetYaxis()->SetNdivisions(506);
@@ -467,8 +470,8 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
 
 
   TH1F * dataALL_2012 = new TH1F("dataALL_2012","",AsymmDataALL_2012.size(),0.5,AsymmDataALL_2012.size()+0.5);
-  dataALL_2012->SetMarkerColor(color0);
-  dataALL_2012->SetLineColor(color0);
+  dataALL_2012->SetMarkerColor(colorUnCorr);
+  dataALL_2012->SetLineColor(colorUnCorr);
   dataALL_2012->SetLineWidth(1);
   dataALL_2012->SetMarkerStyle(markerUncorrBS);
   dataALL_2012->GetYaxis()->SetNdivisions(512);
@@ -541,8 +544,8 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   p2012->SetTicks(0,1);
   
   TH1F * t0_2012 = new TH1F("t0_2012","",3,0.5,3.+0.5);
-  t0_2012->SetMarkerColor(color0);
-  t0_2012->SetLineColor(color0);
+  t0_2012->SetMarkerColor(colorUnCorr);
+  t0_2012->SetLineColor(colorUnCorr);
   t0_2012->SetLineWidth(1);
   t0_2012->SetMarkerStyle(markerUncorrBS);
   t0_2012->GetYaxis()->SetNdivisions(506);
