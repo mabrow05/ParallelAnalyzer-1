@@ -7,19 +7,19 @@ void CombinedTwoDim_ErrorPlotter() {
 
   gStyle->SetTitleSize(0.08,"t");
   gStyle->SetPadLeftMargin(0.15);
-  gStyle->SetPadRightMargin(0.15);
+  gStyle->SetPadRightMargin(0.18);
   gStyle->SetPadBottomMargin(0.15);
-  gStyle->SetTitleYSize(0.04);//0.5
-  gStyle->SetTitleYOffset(1.7);//1.3
-  gStyle->SetTitleXSize(0.04);
-  gStyle->SetTitleXOffset(1.7);
-  gStyle->SetTitleSize(0.04,"Z");
-  gStyle->SetTitleOffset(1.6,"Z");
+  gStyle->SetTitleOffset(1.0,"xy");
+  gStyle->SetTitleSize(0.05,"XYZ");
+  gStyle->SetTitleOffset(1.,"Z");
   gStyle->SetLabelSize(0.04,"xyz");
   gStyle->SetOptFit(1111);
   gStyle->SetStatY(0.85);
   gStyle->SetStatX(0.975);
   gStyle->SetStatW(.09);
+
+  TString drawOpt = "colz"; //"lego20"
+  //gStyle->SetPalette(kTemperatureMap);
 
   
   
@@ -86,7 +86,7 @@ void CombinedTwoDim_ErrorPlotter() {
     Double_t lowerWindow = atof(windowStr.substr(0,3).c_str());
 
 
-    if ( lowerWindow==180. ) {
+    if ( lowerWindow==190. ) {
       minPlotEn.push_back(upperWindow);
       minPlotStat.push_back(stat_hold*100.);
       minPlotSyst.push_back(syst_hold*100.);
@@ -172,33 +172,35 @@ void CombinedTwoDim_ErrorPlotter() {
   }
 
 
-  /*const Int_t Number=4;
-  Double_t Red[Number]    = { 1.00, 0.00, 1.00, 1.00};
-  Double_t Green[Number]   = { 1.00, 0.00, 1.00, 0.00};
-  Double_t Blue[Number]  = { 1.00, 1.00, 1.00, 0.00};
-  Int_t nb=500;
+  const Int_t Number=4;
+  Double_t Red[Number]    = { 0., 0.00, 1., 1.00};
+  Double_t Green[Number]   = { 0., 1.00, 1., 0.};
+  Double_t Blue[Number]  = { 1.00, 0.00, 0.00,0.};
+  Int_t nb=50;
   
-  Double_t Length[Number] = {0.0, en_minval, 0.50*(en_maxval+en_minval), en_maxval}; 
-  TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nb);*/
+  Double_t Length[Number] = {0.0, 0.33, 0.66, 1.0}; 
+  TColor::CreateGradientColorTable(Number,Length,Red,Green,Blue,nb);
 
-  gStyle->SetPalette(104);
     
   TCanvas *cStat = new TCanvas("cStat","cStat");
-  stat->Draw("lego20");
+  //stat->Smooth(5);
+  stat->Draw(drawOpt);
   stat->GetXaxis()->SetTitle("Maximum Energy (keV)");
   stat->GetYaxis()->SetTitle("Minimum Energy (keV)");
-  stat->GetZaxis()->SetRangeUser(stat_minval*0.99,stat_maxval);
-  stat->GetZaxis()->SetTitle("% Error");
+  stat->GetZaxis()->SetRangeUser(stat_minval*0.9,stat_maxval*0.7);
+  //stat->GetZaxis()->SetRangeUser(0.,tot_maxval*0.9);
+  stat->GetZaxis()->SetTitle("#frac{#DeltaA}{A} (%)");
   stat->GetXaxis()->CenterTitle();
   stat->GetYaxis()->CenterTitle();
   stat->GetZaxis()->CenterTitle();
   
   TCanvas *cSyst = new TCanvas("cSyst","cSyst");
-  syst->Draw("lego20");
+  syst->Draw(drawOpt);
   syst->GetXaxis()->SetTitle("Maximum Energy (keV)");
   syst->GetYaxis()->SetTitle("Minimum Energy (keV)");
-  syst->GetZaxis()->SetRangeUser(syst_minval*0.99,syst_maxval);
-  syst->GetZaxis()->SetTitle("% Error");
+  syst->GetZaxis()->SetRangeUser(syst_minval*0.99,syst_maxval*0.9);
+  //syst->GetZaxis()->SetRangeUser(0.,tot_maxval*0.9);
+  syst->GetZaxis()->SetTitle("#frac{#DeltaA}{A} (%)");
   syst->GetXaxis()->CenterTitle();
   syst->GetYaxis()->CenterTitle();
   syst->GetZaxis()->CenterTitle();
@@ -213,14 +215,19 @@ void CombinedTwoDim_ErrorPlotter() {
  
   
   TCanvas *cTot = new TCanvas("cTot","cTot");
-  tot->Draw("lego20");
+  tot->Draw(drawOpt);
   tot->GetXaxis()->SetTitle("Maximum Energy (keV)");
   tot->GetYaxis()->SetTitle("Minimum Energy (keV)");
-  tot->GetZaxis()->SetRangeUser(tot_minval*0.99,tot_maxval);
-  tot->GetZaxis()->SetTitle("% Error");
+  tot->GetZaxis()->SetRangeUser(tot_minval*0.99,tot_maxval*0.7);
+  //tot->GetZaxis()->SetRangeUser(0.,tot_maxval*0.9);
+  tot->GetZaxis()->SetTitle("#frac{#DeltaA}{A} (%)");
   tot->GetXaxis()->CenterTitle();
   tot->GetYaxis()->CenterTitle();
   tot->GetZaxis()->CenterTitle();
+
+  cStat->Print("TwoDimUncert.pdf(");
+  cSyst->Print("TwoDimUncert.pdf");
+  cTot->Print("TwoDimUncert.pdf");
 
   gStyle->SetErrorX(0);
 
@@ -299,21 +306,24 @@ void CombinedTwoDim_ErrorPlotter() {
 
   TCanvas *c10 = new TCanvas("c10","c10");
   TGraph *st = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotStat[0]);
-  st->SetLineWidth(2);
+  st->SetLineWidth(3);
   st->SetLineStyle(1);
+  st->SetLineColor(1);
 
   TGraph *sys = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotSyst[0]);
   sys->SetLineWidth(2);
-  sys->SetLineStyle(2);
-
+  sys->SetLineStyle(1);
+  sys->SetLineColor(2);
+  
   TGraph *t = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotTot[0]);
   t->SetLineWidth(2);
-  t->SetLineStyle(6);
+  t->SetLineStyle(1);
+  t->SetLineColor(4);
 
   TMultiGraph *minplot = new TMultiGraph();
-  minplot->Add(st,"L");
-  minplot->Add(sys,"L");
-  minplot->Add(t,"L");
+  minplot->Add(st,"C");
+  minplot->Add(sys,"C");
+  minplot->Add(t,"C");
   minplot->SetTitle("Systematic and Statistical Uncertainty vs. Upper Analysis Cut");
   minplot->Draw("A");
   minplot->GetXaxis()->SetTitle("Upper Analysis Cut (keV)");
@@ -325,4 +335,5 @@ void CombinedTwoDim_ErrorPlotter() {
   l->AddEntry(sys,"Systematics","l");
   l->Draw("SAME");
   c10->Update();
+  c10->Print("TwoDimUncert.pdf)");
 }

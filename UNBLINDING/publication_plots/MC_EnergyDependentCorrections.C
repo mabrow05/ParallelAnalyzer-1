@@ -12,7 +12,7 @@
 #include <TMath.h>
 
 // Remember to print whichever one you want at the bottom to a pdf
-bool color = false;
+bool color = true;
 
 Int_t groupBin=5;
 Double_t enStart=50.;//10.*groupBin;

@@ -329,10 +329,10 @@ void Vud_vs_lambda() {
   tVud->GetLine(0)->SetTextSize(0.035);
   tVud->Draw();
 
-  TPaveText *tTau1 = new TPaveText(0.432,0.83,0.592,0.87,"nbNDC");
+  TPaveText *tTau1 = new TPaveText(0.438,0.83,0.592,0.87,"nbNDC");
   tTau1->SetBorderSize(0);
   tTau1->SetTextColor(color?fillColor_tau2:1);
-  tTau1->AddText("Bottle #tau_{n}");
+  tTau1->AddText("UCN #tau_{n}");
   tTau1->GetLine(0)->SetTextAngle(-42.2);
   tTau1->GetLine(0)->SetTextSize(0.035);
   tTau1->Draw();
