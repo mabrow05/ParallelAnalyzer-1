@@ -15,6 +15,14 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   double yminBS = -0.17;
   double ymaxBS = -0.005;
 
+  if (withSim) {
+   ymin0 = -0.1188;
+   ymax0 = -0.1180;
+    
+   yminBS = -0.125;
+   ymaxBS = -0.107;
+  }
+  
   const Int_t numAnaChT0 = 7;
   const Int_t numAnaChBacksc = 7;
   TString anChALL[numAnaChT0] = {"B","C","D","F","H","J","K"};//
@@ -337,7 +345,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
 
   c1->cd(1);
 
-  gPad->SetGridy();
+  if (!withSim) gPad->SetGridy();
   gPad->SetTicks(0,1);
   gPad->SetTopMargin(0.0);
 
@@ -383,9 +391,9 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   dataALL->Draw("E1X0");
 
   TLine *line1 = new TLine(dataALL->GetXaxis()->GetXmin(),-0.1184,dataALL->GetXaxis()->GetXmax(),-0.1184);
-  line1->SetLineStyle(7);
-  line1->SetLineWidth(1);
-  if (corrections==TString("AllCorr")) line1->Draw("SAME");
+  line1->SetLineStyle(2);
+  line1->SetLineWidth(2);
+  if (withSim) line1->Draw("SAME");
 
   TH1F * corrDataALL = new TH1F("corrDataALL","",AsymmCorrDataALL.size(),0.5,AsymmCorrDataALL.size()+0.5);
   corrDataALL->SetMarkerColor(color0);
@@ -439,8 +447,8 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   t0_2011->GetXaxis()->SetBinLabel(3,"0");//D
   t0_2011->GetXaxis()->SetLabelSize(0.14);
   t0_2011->GetYaxis()->SetLabelSize(0.09);
-  t0_2011->SetMinimum(-0.126);
-  t0_2011->SetMaximum(-0.1190);
+  t0_2011->SetMinimum(withSim?ymin0:-0.126);
+  t0_2011->SetMaximum(withSim?ymax0:-0.1190);
 
   t0_2011->Draw("E1X0");
 
@@ -512,7 +520,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   TLine *line1_2012 = new TLine(dataALL_2012->GetXaxis()->GetXmin(),-0.1184,dataALL_2012->GetXaxis()->GetXmax(),-0.1184);
   line1_2012->SetLineStyle(7);
   line1_2012->SetLineWidth(1);
-  if (corrections==TString("AllCorr")) line1->Draw("SAME");
+  if (withSim) line1->Draw("SAME");
 
   TH1F * corrDataALL_2012 = new TH1F("corrDataALL_2012","",AsymmCorrDataALL_2012.size(),0.5,AsymmCorrDataALL_2012.size()+0.5);
   corrDataALL_2012->SetMarkerColor(color0);
@@ -565,8 +573,8 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   t0_2012->GetXaxis()->SetBinLabel(3,"0");//D
   t0_2012->GetXaxis()->SetLabelSize(0.14);
   t0_2012->GetYaxis()->SetLabelSize(0.09);
-  t0_2012->SetMinimum(-0.1272);
-  t0_2012->SetMaximum(-0.1195);
+  t0_2012->SetMinimum(withSim?ymin0:-0.1272);
+  t0_2012->SetMaximum(withSim?ymax0:-0.1195);
 
   t0_2012->Draw("E1X0");
 
@@ -585,7 +593,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   }
   corrt0_2012->Draw("E1X0 SAME");
 
-  c1->Print(TString::Format("CorrVsUncorr_singleAxis%s.pdf",(color?"_color":"")));
+  c1->Print(TString::Format("CorrVsUncorr_singleAxis%s%s.pdf",(withSim?"_SIM":""),(color?"_color":"")));
 
   ///////////////// Multiple Axes /////////////////////////
 

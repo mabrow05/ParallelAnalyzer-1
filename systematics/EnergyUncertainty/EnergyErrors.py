@@ -179,9 +179,9 @@ def plotTheoryErrors(year=2011):
 
 
         gCx.plot(graph.data.points(gdat,x=1,y=2,title="Recoil Order"),
-                 [ graph.style.line([style.linewidth.THick]),])
+                 [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
         gCx.plot(graph.data.points(gdat,x=1,y=3,title="Radiative"),
-                 [ graph.style.line([style.linewidth.THick,style.linestyle.dotted]),])
+                 [ graph.style.line([style.linewidth.THick,style.linestyle.dotted,color.rgb.blue]),])
        
 	
 	print "%s Eavg Radiative = "%year,weightStats(gdat,220,670)
@@ -310,14 +310,14 @@ def plotGainfluctErrors():
 
 
 if __name__=="__main__":
-	year = 2012
+	year = 2011
         #readCalEnvelope(year)
         #theoryUncertaintyTable(year)
-        #plotTheoryErrors(year)
+        plotTheoryErrors(year)
         #gainUncertaintyTable(year,0.0064)
 	#linearityUncertaintyTable(year)
 	#gainFluctsUncertaintyTable()
-        readCalEnvelope(2011)
-        readCalEnvelope(2012)
-	plotEnergyErrors(20112)
+        #readCalEnvelope(2011)
+        #readCalEnvelope(2012)
+	#plotEnergyErrors(20112)
 	#plotGainfluctErrors()
