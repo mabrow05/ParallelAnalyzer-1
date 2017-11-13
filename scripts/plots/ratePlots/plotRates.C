@@ -235,7 +235,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //cEast->cd(1);
   
   TGraphErrors *eastFG = new TGraphErrors(runNumber.size(),&runNumber[0], &fgrate[0][0],0,&fgrateErr[0][0]);
-  eastFG->SetTitle(TString::Format("%s East %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
+  eastFG->SetTitle("");//SetTitle(TString::Format("%s East %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
   eastFG->GetYaxis()->SetTitle("Event Rate (Hz)");
   eastFG->GetXaxis()->SetTitle("Run Number");
   eastFG->SetMarkerStyle(20);
@@ -254,7 +254,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //East->cd(2);
 
   TGraphErrors *eastBG = new TGraphErrors(runNumber.size(),&runNumber[0], &bgrate[0][0], 0, &bgrateErr[0][0]);
-  eastBG->SetTitle(TString::Format("%s East %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
+  eastBG->SetTitle("");//SetTitle(TString::Format("%s East %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
   eastBG->GetYaxis()->SetTitle("Event Rate (Hz)");
   eastBG->GetXaxis()->SetTitle("Run Number");
   eastBG->SetMarkerStyle(26);
@@ -269,7 +269,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   eastBGfit->SetLineWidth(3);
   eastBG->Fit(eastBGfit,"R");
 
-  TLegend *eastLeg = new TLegend(0.55,0.5,0.8,0.66);
+  TLegend *eastLeg = new TLegend(0.5,0.4,0.8,0.66);
   eastLeg->AddEntry(eastFG,"Foreground","ep");
   eastLeg->AddEntry(eastFGfit,TString::Format("Ave Rate = %0.2f Hz",eastFGfit->GetParameter(0)),"l");
   eastLeg->AddEntry(eastBG,"Background","ep");
@@ -286,7 +286,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //cWest->cd(1);
   
   TGraphErrors *westFG = new TGraphErrors(runNumber.size(),&runNumber[0], &fgrate[1][0],0,&fgrateErr[1][0]);
-  westFG->SetTitle(TString::Format("%s West %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));  westFG->GetYaxis()->SetTitle("Event Rate (Hz)");
+  westFG->SetTitle("");//SetTitle(TString::Format("%s West %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));  westFG->GetYaxis()->SetTitle("Event Rate (Hz)");
   westFG->GetXaxis()->SetTitle("Run Number");
   westFG->SetMarkerStyle(20);
   westFG->SetMarkerColor(kBlack);
@@ -304,7 +304,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //West->cd(2);
 
   TGraphErrors *westBG = new TGraphErrors(runNumber.size(),&runNumber[0], &bgrate[1][0], 0, &bgrateErr[1][0]);
-  westBG->SetTitle(TString::Format("%s West %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
+  westBG->SetTitle("");//SetTitle(TString::Format("%s West %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
   westBG->GetYaxis()->SetTitle("Event Rate (Hz)");
   westBG->GetXaxis()->SetTitle("Run Number");
   westBG->SetMarkerStyle(26);
@@ -319,7 +319,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   westBGfit->SetLineWidth(3);
   westBG->Fit(westBGfit,"R");
 
-  TLegend *westLeg = new TLegend(0.55,0.5,0.8,0.66);
+  TLegend *westLeg = new TLegend(0.5,0.4,0.8,0.66);
   westLeg->AddEntry(westFG,"Foreground","ep");
   westLeg->AddEntry(westFGfit,TString::Format("Ave Rate = %0.2f Hz",westFGfit->GetParameter(0)),"l");
   westLeg->AddEntry(westBG,"Background","ep");
@@ -337,7 +337,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //cEast_Octets->cd(1);
   
   TGraphErrors *east_octetsFG = new TGraphErrors(octetNumber.size(),&octetNumber[0], &octet_fgrate[0][0],0,&octet_fgrateErr[0][0]);
-  east_octetsFG->SetTitle(TString::Format("%s East Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
+  east_octetsFG->SetTitle("");//SetTitle(TString::Format("%s East Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
   east_octetsFG->GetYaxis()->SetTitle("Event Rate (Hz)");
   east_octetsFG->GetXaxis()->SetTitle("Octet Number");
   east_octetsFG->SetMarkerStyle(20);
@@ -356,7 +356,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //East_Octets->cd(2);
 
   TGraphErrors *east_octetsBG = new TGraphErrors(octetNumber.size(),&octetNumber[0], &octet_bgrate[0][0], 0, &octet_bgrateErr[0][0]);
-  east_octetsBG->SetTitle(TString::Format("%s East Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
+  east_octetsBG->SetTitle("");//SetTitle(TString::Format("%s East Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
   east_octetsBG->GetYaxis()->SetTitle("Event Rate (Hz)");
   east_octetsBG->GetXaxis()->SetTitle("Octet Number");
   east_octetsBG->SetMarkerStyle(26);
@@ -371,7 +371,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   east_octetsBGfit->SetLineWidth(3);
   east_octetsBG->Fit(east_octetsBGfit,"R");
 
-  TLegend *east_octetsLeg = new TLegend(0.55,0.5,0.8,0.66);
+  TLegend *east_octetsLeg = new TLegend(0.5,0.4,0.8,0.66);
   east_octetsLeg->AddEntry(east_octetsFG,"Foreground","ep");
   east_octetsLeg->AddEntry(east_octetsFGfit,TString::Format("Ave Rate = %0.2f Hz",east_octetsFGfit->GetParameter(0)),"l");
   east_octetsLeg->AddEntry(east_octetsBG,"Background","ep");
@@ -388,7 +388,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //cWest_Octets->cd(1);
   
   TGraphErrors *west_octetsFG = new TGraphErrors(octetNumber.size(),&octetNumber[0], &octet_fgrate[1][0],0,&octet_fgrateErr[1][0]);
-  west_octetsFG->SetTitle(TString::Format("%s West Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
+  west_octetsFG->SetTitle("");//SetTitle(TString::Format("%s West Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
   west_octetsFG->GetYaxis()->SetTitle("Event Rate (Hz)");
   west_octetsFG->GetXaxis()->SetTitle("Octet Number");
   west_octetsFG->SetMarkerStyle(20);
@@ -407,7 +407,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   //West_Octets->cd(2);
 
   TGraphErrors *west_octetsBG = new TGraphErrors(octetNumber.size(),&octetNumber[0], &octet_bgrate[1][0], 0, &octet_bgrateErr[1][0]);
-  west_octetsBG->SetTitle(TString::Format("%s West Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
+  west_octetsBG->SetTitle("");//SetTitle(TString::Format("%s West Octets %0.0f-%0.0f keV Integrated Rates",year.Data(),binMin*10., binMax*10.));
   west_octetsBG->GetYaxis()->SetTitle("Event Rate (Hz)");
   west_octetsBG->GetXaxis()->SetTitle("Octet Number");
   west_octetsBG->SetMarkerStyle(26);
@@ -422,7 +422,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   west_octetsBGfit->SetLineWidth(3);
   west_octetsBG->Fit(west_octetsBGfit,"R");
 
-  TLegend *west_octetsLeg = new TLegend(0.55,0.5,0.8,0.66);
+  TLegend *west_octetsLeg = new TLegend(0.5,0.4,0.8,0.66);
   west_octetsLeg->AddEntry(west_octetsFG,"Foreground","ep");
   west_octetsLeg->AddEntry(west_octetsFGfit,TString::Format("Ave Rate = %0.2f Hz",west_octetsFGfit->GetParameter(0)),"l");
   west_octetsLeg->AddEntry(west_octetsBG,"Background","ep");
