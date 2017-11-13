@@ -175,13 +175,13 @@ def plotTheoryErrors(year=2011):
 					  key = graph.key.key(pos="tl"))
 	setTexrunner(gCx)
 			 
-        gdat = [ [x,100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,795.,79)  ]
+        gdat = [ [x,100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,775.,77)  ]
 
 
         gCx.plot(graph.data.points(gdat,x=1,y=2,title="Recoil Order"),
-                 [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
+                 [ graph.style.line([style.linewidth.THick,style.linestyle.dotted,color.rgb.red]),])
         gCx.plot(graph.data.points(gdat,x=1,y=3,title="Radiative"),
-                 [ graph.style.line([style.linewidth.THick,style.linestyle.dotted,color.rgb.blue]),])
+                 [ graph.style.line([style.linewidth.THick,style.linestyle.dashed,color.rgb.blue]),])
        
 	
 	print "%s Eavg Radiative = "%year,weightStats(gdat,220,670)
@@ -264,10 +264,12 @@ def plotEnergyErrors(year=2011):
         #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
         #gCx.plot(graph.data.points(gdatLower,x=1,y=2,title="%i New Method"%year),
         #         [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
-        gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
-                 [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
-	gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
+        #gCx.plot(graph.data.points(gdat2010,x=1,y=2,title="2010"),
+        #         [ graph.style.line([style.linewidth.THick,color.rgb.red]),])
+	gCx.plot(graph.data.points(gdat2011,x=1,y=2,title="2011-2012"),
                  [ graph.style.line([style.linewidth.THick,color.rgb.blue]),])
+	gCx.plot(graph.data.points(gdat2012,x=1,y=2,title="2012-2013"),
+                 [ graph.style.line([style.linewidth.THick,color.rgb.green]),])
 			 
 	#print "Eavg MC MPM 2010=",weightStats(gdat2010,220,670)
         print "Eavg MC MB 2011=",weightStats(gdat2011,190,740)
