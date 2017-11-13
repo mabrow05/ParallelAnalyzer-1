@@ -243,7 +243,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   eastFG->GetYaxis()->CenterTitle();
   eastFG->SetMarkerStyle(20);
   eastFG->SetMarkerColor(kBlack);
-  eastFG->SetMinimum(0.75*eastMin);
+  eastFG->SetMinimum(5.e-2);//0.75*eastMin);
   eastFG->SetMaximum(1.5*eastMax);
   eastFG->Draw("AP");
 
@@ -296,7 +296,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   westFG->GetYaxis()->CenterTitle();
   westFG->SetMarkerStyle(20);
   westFG->SetMarkerColor(kBlack);
-  westFG->SetMinimum(0.75*westMin);
+  westFG->SetMinimum(5.e-2);//SetMinimum(0.75*westMin);
   westFG->SetMaximum(1.5*westMax);
   westFG->Draw("AP");
 
@@ -350,7 +350,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   east_octetsFG->GetYaxis()->CenterTitle();
   east_octetsFG->SetMarkerStyle(20);
   east_octetsFG->SetMarkerColor(kBlack);
-  east_octetsFG->SetMinimum(0.75*octet_eastMin);
+  east_octetsFG->SetMinimum(5.e-2);//SetMinimum(0.75*octet_eastMin);
   east_octetsFG->SetMaximum(1.5*octet_eastMax);
   east_octetsFG->Draw("AP");
 
@@ -403,7 +403,7 @@ void plotRates(TString year, TString anaCh, int emin, int emax) {
   west_octetsFG->GetYaxis()->CenterTitle();
   west_octetsFG->SetMarkerStyle(20);
   west_octetsFG->SetMarkerColor(kBlack);
-  west_octetsFG->SetMinimum(0.75*octet_westMin);
+  west_octetsFG->SetMinimum(5.e-2);//SetMinimum(0.75*octet_westMin);
   west_octetsFG->SetMaximum(1.5*octet_westMax);
   west_octetsFG->Draw("AP");
 
