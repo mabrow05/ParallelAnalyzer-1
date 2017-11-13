@@ -118,14 +118,14 @@ void Vud_vs_lambda() {
   Double_t Vud = 0.97417;
   Double_t Vud_err = 0.00021;
 
-  std::vector<TString> Lambda1name {"Mund et al.","Brown et al.","Schumann et al."};
+  std::vector<TString> Lambda1name {"Mund #font[50]{et al.}","Brown #font[50]{et al.}","Schumann #font[50]{et al.}"};
   std::vector<Double_t> Lambda1year {2013,2017,2008};
   std::vector<Double_t> Lambda1vec {1.2748,1.2772,1.275}; //Brown result 1.2783 +/- 0.0022 // raw abele (1.2739) and Mund (1.2761)
   std::vector<Double_t> Lambda1vecErr {0.0014,0.0020,0.016};
   Double_t Lambda1 = weightedAve(Lambda1vec,Lambda1vecErr);//1.2755;
   Double_t Lambda1_err = weightedAveErr(Lambda1vecErr);//0.0005;
 
-  std::vector<TString> Lambda2name{"Bopp et al.","Yerozolimsky et al.","Liaud et al.","Mostovoi et al."};
+  std::vector<TString> Lambda2name{"Bopp #font[50]{et al.}","Yerozolimsky #font[50]{et al.}","Liaud #font[50]{et al.}","Mostovoi #font[50]{et al.}"};
   std::vector<Double_t> Lambda2year {1986,1997,1997.5,2001};
   std::vector<Double_t> Lambda2vec {1.262,1.2594,1.266,1.2686};
   std::vector<Double_t> Lambda2vecErr {0.005,0.0038,0.004,0.0047};
@@ -134,14 +134,14 @@ void Vud_vs_lambda() {
 
 
   //UCN
-  std::vector<TString> Tau1name {"Arzumanov et al.","Steyerl et al.","Pichlmaier et al.","Serebrov et al.","Mampe et al.","Pattie et al."};
+  std::vector<TString> Tau1name {"Arzumanov #font[50]{et al.}","Steyerl #font[50]{et al.}","Pichlmaier #font[50]{et al.}","Serebrov #font[50]{et al.}","Mampe #font[50]{et al.}","Pattie #font[50]{et al.}"};
   std::vector<Double_t> Tau1vec {880.2,882.5,880.7,878.5,882.6,877.7};
   std::vector<Double_t> Tau1vecErr {1.2,2.1,1.8,0.8,2.7,0.8}; 
   Double_t Tau1 = weightedAve(Tau1vec,Tau1vecErr);
   Double_t dTau1 = weightedAveErr(Tau1vecErr);
 
   //beam
-  std::vector<TString> Tau2name {"Yue et al.","Byrne et al."};
+  std::vector<TString> Tau2name {"Yue #font[50]{et al.}","Byrne #font[50]{et al.}"};
   std::vector<Double_t> Tau2vec {887.7,889.2};
   std::vector<Double_t> Tau2vecErr {2.2,4.8}; 
   Double_t Tau2 = weightedAve(Tau2vec,Tau2vecErr);
