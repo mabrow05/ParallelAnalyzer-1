@@ -922,7 +922,7 @@ if __name__ == "__main__":
         deltaEff2012Err = 0.0001
 
         deltaField2012 = 0.
-        deltaField2012Err = 0.001
+        deltaField2012Err = 0.0012
         
         A2012 = uncertaintyHandler(2012,anaChoice)
         A2012.statUncertainties()
