@@ -35,8 +35,8 @@ if __name__=="__main__":
     octmin = 0 if year=="2011-2012" else 60
     octmax = 59 if year=="2012-2013" else 121
 
-    emin = 220.
-    emax = 750.
+    emin = 190.
+    emax = 740.
 
     #filemin=200
     #filemax=220

@@ -9,10 +9,11 @@ void CombinedTwoDim_ErrorPlotter() {
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetPadRightMargin(0.18);
   gStyle->SetPadBottomMargin(0.15);
+  gStyle->SetPadTopMargin(0.05);
   gStyle->SetTitleOffset(1.0,"xy");
-  gStyle->SetTitleSize(0.05,"XYZ");
-  gStyle->SetTitleOffset(1.,"Z");
-  gStyle->SetLabelSize(0.04,"xyz");
+  gStyle->SetTitleSize(0.06,"XYZ");
+  gStyle->SetTitleOffset(1.1,"Z");
+  gStyle->SetLabelSize(0.05,"xyz");
   gStyle->SetOptFit(1111);
   gStyle->SetStatY(0.85);
   gStyle->SetStatX(0.975);
@@ -63,6 +64,8 @@ void CombinedTwoDim_ErrorPlotter() {
   Double_t syst_minval=1000., syst_maxval=-1000.;
   Double_t tot_minval=1000., tot_maxval=-1000.;
 
+  Double_t finalA = 0.;
+
   std::vector<Double_t> minPlotEn;
   std::vector<Double_t> minPlotStat;
   std::vector<Double_t> minPlotSyst;
@@ -86,6 +89,8 @@ void CombinedTwoDim_ErrorPlotter() {
     Double_t lowerWindow = atof(windowStr.substr(0,3).c_str());
 
 
+    if ( lowerWindow==190. && upperWindow==740. ) finalA = asymm_hold;
+    
     if ( lowerWindow==190. ) {
       minPlotEn.push_back(upperWindow);
       minPlotStat.push_back(stat_hold*100.);
@@ -146,16 +151,16 @@ void CombinedTwoDim_ErrorPlotter() {
   Int_t nbinsX = (xbinHigh-xbinLow)/10.;
   
   //Two dimensional plots for each error in minimization
-  TH2D *as = new TH2D("as","Asymmetry vs. Analysis Window",
+  TH2D *as = new TH2D("as","",//"Asymmetry vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
   
-  TH2D *stat = new TH2D("stat","Statistical Uncertainty vs. Analysis Window",
+  TH2D *stat = new TH2D("stat","",//"Statistical Uncertainty vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
 
-  TH2D *syst = new TH2D("syst","Systematic Uncertainty vs. Analysis Window",
+  TH2D *syst = new TH2D("syst","",//"Systematic Uncertainty vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
 
-  TH2D *tot = new TH2D("tot","Total Uncertainty vs. Analysis Window",
+  TH2D *tot = new TH2D("tot","",//"Total Uncertainty vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
 
   for (UInt_t bin=0; bin<xBinVal.size(); ++bin) {
@@ -163,8 +168,8 @@ void CombinedTwoDim_ErrorPlotter() {
     Int_t xbin = tot->GetXaxis()->FindBin(xBinVal[bin]);
     Int_t ybin = tot->GetYaxis()->FindBin(yBinVal[bin]);
 
-    as->SetBinContent(xbin,ybin,-asymm[bin]);
-    as->SetBinError(xbin,ybin,-asymm[bin]*statistics[bin]/100.);
+    as->SetBinContent(xbin,ybin,(asymm[bin]/finalA>0.99?asymm[bin]/finalA:0.99));
+    as->SetBinError(xbin,ybin,asymm[bin]*statistics[bin]/100./finalA);
     stat->SetBinContent(xbin,ybin,statistics[bin]);
     syst->SetBinContent(xbin,ybin,sim[bin]);
     tot->SetBinContent(xbin,ybin,total[bin]);
@@ -189,7 +194,7 @@ void CombinedTwoDim_ErrorPlotter() {
   stat->GetYaxis()->SetTitle("Minimum Energy (keV)");
   stat->GetZaxis()->SetRangeUser(stat_minval*0.9,stat_maxval*0.7);
   //stat->GetZaxis()->SetRangeUser(0.,tot_maxval*0.9);
-  stat->GetZaxis()->SetTitle("#frac{#DeltaA}{A} (%)");
+  stat->GetZaxis()->SetTitle("#deltaA/A (%)");
   stat->GetXaxis()->CenterTitle();
   stat->GetYaxis()->CenterTitle();
   stat->GetZaxis()->CenterTitle();
@@ -200,7 +205,7 @@ void CombinedTwoDim_ErrorPlotter() {
   syst->GetYaxis()->SetTitle("Minimum Energy (keV)");
   syst->GetZaxis()->SetRangeUser(syst_minval*0.99,syst_maxval*0.9);
   //syst->GetZaxis()->SetRangeUser(0.,tot_maxval*0.9);
-  syst->GetZaxis()->SetTitle("#frac{#DeltaA}{A} (%)");
+  syst->GetZaxis()->SetTitle("#deltaA/A (%)");
   syst->GetXaxis()->CenterTitle();
   syst->GetYaxis()->CenterTitle();
   syst->GetZaxis()->CenterTitle();
@@ -220,7 +225,7 @@ void CombinedTwoDim_ErrorPlotter() {
   tot->GetYaxis()->SetTitle("Minimum Energy (keV)");
   tot->GetZaxis()->SetRangeUser(tot_minval*0.99,tot_maxval*0.7);
   //tot->GetZaxis()->SetRangeUser(0.,tot_maxval*0.9);
-  tot->GetZaxis()->SetTitle("#frac{#DeltaA}{A} (%)");
+  tot->GetZaxis()->SetTitle("#deltaA/A (%)");
   tot->GetXaxis()->CenterTitle();
   tot->GetYaxis()->CenterTitle();
   tot->GetZaxis()->CenterTitle();
@@ -232,15 +237,16 @@ void CombinedTwoDim_ErrorPlotter() {
   gStyle->SetErrorX(0);
 
   TCanvas *cAs = new TCanvas("cAs","cAs");
-  as->Draw("E");
+  //gPad->SetRightMargin(0.22);
+  as->Draw(drawOpt);
   as->GetXaxis()->SetTitle("Maximum Energy (keV)");
   as->GetYaxis()->SetTitle("Minimum Energy (keV)");
-  as->SetMarkerStyle(25);
-  as->SetMarkerColor(kBlue);
-  as->GetZaxis()->SetRangeUser(-as_maxval*0.99,-as_minval*1.01);
+  //as->SetMarkerStyle(25);
+  //as->SetMarkerColor(kBlue);
+  as->GetZaxis()->SetRangeUser(0.99,1.01);
   //as->SetMinimum(0.120);
   //as->SetMaximum(0.125);
-  as->GetZaxis()->SetTitle("|A|");
+  as->GetZaxis()->SetTitle("A/A_{min}");
   as->GetXaxis()->CenterTitle();
   as->GetYaxis()->CenterTitle();
   as->GetZaxis()->CenterTitle();
@@ -320,20 +326,24 @@ void CombinedTwoDim_ErrorPlotter() {
   t->SetLineStyle(1);
   t->SetLineColor(4);
 
+  gPad->SetRightMargin(0.05);
+
   TMultiGraph *minplot = new TMultiGraph();
   minplot->Add(st,"C");
   minplot->Add(sys,"C");
   minplot->Add(t,"C");
-  minplot->SetTitle("Systematic and Statistical Uncertainty vs. Upper Analysis Cut");
+  minplot->SetTitle("");//("Systematic and Statistical Uncertainty vs. Upper Analysis Cut");
   minplot->Draw("A");
   minplot->GetXaxis()->SetTitle("Upper Analysis Cut (keV)");
-  minplot->GetYaxis()->SetTitle("#DeltaA/A (%)");				
+  minplot->GetYaxis()->SetTitle("#deltaA/A (%)");				
 
-  TLegend *l = new TLegend(0.6,0.65,0.8,0.85);
+  TLegend *l = new TLegend(0.60,0.65,0.88,0.90);
   l->AddEntry(t,"Total","l");
   l->AddEntry(st,"Statistics","l");
   l->AddEntry(sys,"Systematics","l");
   l->Draw("SAME");
   c10->Update();
+
+  cAs->Print("TwoDimUncert.pdf");
   c10->Print("TwoDimUncert.pdf)");
 }

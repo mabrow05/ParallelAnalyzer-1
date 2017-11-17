@@ -10,7 +10,7 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   gStyle->SetOptStat(11);
   //gStyle->SetOptStat(0);
   //gStyle->SetStatFontSize(0.020);
-  gStyle->SetOptFit(1011); // 1111
+  gStyle->SetOptFit(1111); // 1111
   gStyle->SetOptTitle(1);
   gStyle->SetTitleFontSize(0.05);
   //gStyle->SetTitleX(0.17);
@@ -306,19 +306,19 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "rms = " << rmsBi1 << endl;
 
   
-  TString pdffile = "final_residuals.pdf";
+  TString pdffile = TString::Format("final_residuals_%i-%i.pdf",calLow,calHigh);
   
   cout << endl << "Results of Gaussian Fits:\n";
   errEnv << endl << "Results of Gaussian Fits:\n";
 
   // Ce 
-  c1 = new TCanvas("c1", "c1");
+  TCanvas *c1 = new TCanvas("c1", "c1");
   c1->SetLogy(0);
 
   hisCeE->SetXTitle(" Ce E_{Q} Error [keV]");
   hisCeE->GetXaxis()->CenterTitle();
   hisCeE->SetLineColor(1);
-  hisCeE->Draw();
+  hisCeE->Draw("E");
   hisCeE->Fit("gaus", "", "", -8.0, 8.0);
   cout << "meanCeEast = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -326,13 +326,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   //In 
-  c2 = new TCanvas("c2", "c2");
+  TCanvas *c2 = new TCanvas("c2", "c2");
   c2->SetLogy(0);
 
   hisInE->SetXTitle(" In E_{Q} Error [keV]");
   hisInE->GetXaxis()->CenterTitle();
   hisInE->SetLineColor(1);
-  hisInE->Draw();
+  hisInE->Draw("E");
   hisInE->Fit("gaus", "", "", -8.0, 8.0);
   cout << "meanInEast = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -340,13 +340,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn 
-  c3 = new TCanvas("c3", "c3");
+  TCanvas *c3 = new TCanvas("c3", "c3");
   c3->SetLogy(0);
 
   hisSnE->SetXTitle(" Sn E_{Q} Error [keV]");
   hisSnE->GetXaxis()->CenterTitle();
   hisSnE->SetLineColor(1);
-  hisSnE->Draw();
+  hisSnE->Draw("E");
   hisSnE->Fit("gaus", "", "", -25.0, 25.0);
   cout << "meanSnEast = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -354,13 +354,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 
-  c4 = new TCanvas("c4", "c4");
+  TCanvas *c4 = new TCanvas("c4", "c4");
   c4->SetLogy(0);
 
   hisBi1E->SetXTitle(" Bi1 E_{Q} Error [keV]");
   hisBi1E->GetXaxis()->CenterTitle();
   hisBi1E->SetLineColor(1);
-  hisBi1E->Draw();
+  hisBi1E->Draw("E");
   hisBi1E->Fit("gaus", "","", -46., 46.);
   cout << "meanBi1East = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -368,13 +368,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi2 
-  c5 = new TCanvas("c5", "c5");
+  TCanvas *c5 = new TCanvas("c5", "c5");
   c5->SetLogy(0);
 
   hisBi2E->SetXTitle(" Bi2 E_{Q} Error [keV]");
   hisBi2E->GetXaxis()->CenterTitle();
   hisBi2E->SetLineColor(1);
-  hisBi2E->Draw();
+  hisBi2E->Draw("E");
   hisBi2E->Fit("gaus", "","", -46., 46.);
 
   cout << "meanBi2East = " << gaus->GetParameter(1) << endl;
@@ -384,13 +384,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   
   
   // Ce West
-  c6 = new TCanvas("c6", "c6");
+  TCanvas *c6 = new TCanvas("c6", "c6");
   c6->SetLogy(0);
 
   hisCeW->SetXTitle("West Ce E_{Q} Error [keV]");
   hisCeW->GetXaxis()->CenterTitle();
   hisCeW->SetLineColor(1);
-  hisCeW->Draw();
+  hisCeW->Draw("E");
   hisCeW->Fit("gaus", "", "", -8., 8.);
   cout << "meanCeWest = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -398,13 +398,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // In West
-  c7 = new TCanvas("c7", "c7");
+  TCanvas *c7 = new TCanvas("c7", "c7");
   c7->SetLogy(0);
 
   hisInW->SetXTitle("West In E_{Q} Error [keV]");
   hisInW->GetXaxis()->CenterTitle();
   hisInW->SetLineColor(1);
-  hisInW->Draw();
+  hisInW->Draw("E");
   hisInW->Fit("gaus", "", "", -8., 8.);
   cout << "meanInWest = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -413,13 +413,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
 
 
   // Sn West
-  c8 = new TCanvas("c8", "c8");
+  TCanvas *c8 = new TCanvas("c8", "c8");
   c8->SetLogy(0);
 
   hisSnW->SetXTitle("West Sn E_{Q} Error [keV]");
   hisSnW->GetXaxis()->CenterTitle();
   hisSnW->SetLineColor(1);
-  hisSnW->Draw();
+  hisSnW->Draw("E");
   hisSnW->Fit("gaus", "", "", -25., 25.);
   cout << "meanSnWest = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -427,13 +427,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 West
-  c9 = new TCanvas("c9", "c9");
+  TCanvas *c9 = new TCanvas("c9", "c9");
   c9->SetLogy(0);
 
   hisBi1W->SetXTitle("West Bi1 E_{Q} Error [keV]");
   hisBi1W->GetXaxis()->CenterTitle();
   hisBi1W->SetLineColor(1);
-  hisBi1W->Draw();
+  hisBi1W->Draw("E");
   hisBi1W->Fit("gaus", "", "", -46., 46.);
   cout << "meanBi1West = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -441,13 +441,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi2 West
-  c10 = new TCanvas("c10", "c10");
+  TCanvas *c10 = new TCanvas("c10", "c10");
   c10->SetLogy(0);
 
   hisBi2W->SetXTitle("West Bi2 E_{Q} Error [keV]");
   hisBi2W->GetXaxis()->CenterTitle();
   hisBi2W->SetLineColor(1);
-  hisBi2W->Draw();
+  hisBi2W->Draw("E");
   hisBi2W->Fit("gaus", "", "", -46., 46.);
   cout << "meanBi2West = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -456,13 +456,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   
 
   // Ce 
-  c11= new TCanvas("c11", "c11");
+  TCanvas *c11= new TCanvas("c11", "c11");
   c11->SetLogy(0);
 
   hisCe->SetXTitle("Total Ce E_{Q} Error [keV]");
   hisCe->GetXaxis()->CenterTitle();
   hisCe->SetLineColor(1);
-  hisCe->Draw();
+  hisCe->Draw("E");
   hisCe->Fit("gaus", "", "", -8.0, 8.0);
   cout << "meanCe = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -470,13 +470,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // In 
-  c12= new TCanvas("c12", "c12");
+  TCanvas *c12= new TCanvas("c12", "c12");
   c12->SetLogy(0);
 
   hisIn->SetXTitle("Total In E_{Q} Error [keV]");
   hisIn->GetXaxis()->CenterTitle();
   hisIn->SetLineColor(1);
-  hisIn->Draw();
+  hisIn->Draw("E");
   hisIn->Fit("gaus", "", "", -10.0, 10.0);
   cout << "meanIn = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -484,13 +484,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Sn 
-  c13 = new TCanvas("c13", "c13");
+  TCanvas *c13 = new TCanvas("c13", "c13");
   c13->SetLogy(0);
 
   hisSn->SetXTitle("Total Sn E_{Q} Error [keV]");
   hisSn->GetXaxis()->CenterTitle();
   hisSn->SetLineColor(1);
-  hisSn->Draw();
+  hisSn->Draw("E");
   hisSn->Fit("gaus", "", "", -25.0, 25.0);
   cout << "meanSn = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -498,13 +498,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi1 
-  c14 = new TCanvas("c14", "c14");
+  TCanvas *c14 = new TCanvas("c14", "c14");
   c14->SetLogy(0);
 
   hisBi1->SetXTitle("Total Bi1 E_{Q} Error [keV]");
   hisBi1->GetXaxis()->CenterTitle();
   hisBi1->SetLineColor(1);
-  hisBi1->Draw();
+  hisBi1->Draw("E");
   hisBi1->Fit("gaus", "", "", -46., 46.);
   cout << "meanBi1 = " << gaus->GetParameter(1) << endl;
   cout << "     sigma = " << gaus->GetParameter(2)  << endl;
@@ -512,13 +512,13 @@ void plot_residuals(Int_t calLow, Int_t calHigh)
   errEnv << "sigma = " << gaus->GetParameter(2) << endl;
 
   // Bi2 
-  c15 = new TCanvas("c15", "c15");
+  TCanvas *c15 = new TCanvas("c15", "c15");
   c15->SetLogy(0);
 
   hisBi2->SetXTitle("Total Bi2 E_{Q} Error [keV]");
   hisBi2->GetXaxis()->CenterTitle();
   hisBi2->SetLineColor(1);
-  hisBi2->Draw();
+  hisBi2->Draw("E");
   hisBi2->Fit("gaus", "", "", -46., 46.);
 
   cout << "meanBi2 = " << gaus->GetParameter(1) << endl;
