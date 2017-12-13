@@ -824,8 +824,8 @@ if __name__ == "__main__":
         print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
-    if 0:
-        anaChoice = "C"
+    if 1:
+        anaChoice = "D"
         lowBin = 19#19
         highBin = 73#73
         
@@ -1039,7 +1039,7 @@ if __name__ == "__main__":
 
 
         if UNBLIND:
-            with open("UNBLINDED_RESULTS.txt","w") as o:
+            with open("UNBLINDED_RESULTS_anaCh%s.txt"%(anaChoice),"w") as o:
                 o.write("****************** 2011-2012 ****************\n\n\n")
                 o.write("A0 = %0.6f +/- %0.6f\n"%(A0_2011,sumErrors([enUncert2011,statUncert2011,angleUncert2011,backscUncert2011,radiativeUncert2011,
                                                                  recoilUncert2011,fieldUncert2011,effUncert2011,depolCorr2011[1]*A0_2011,
@@ -1122,14 +1122,14 @@ if __name__ == "__main__":
 
     if 1: 
 
-        MB_A0 = -0.120544
+        MB_A0 = -0.120541
         MB_staterr = 0.000435
         MB_syst0err = 0.0020*fabs(MB_A0) # Energy # This is the total syst 0.000675
         MB_syst1err = 0.0030*fabs(MB_A0) # delta2
         MB_syst2err = 0.0033*fabs(MB_A0) # delta3
         MB_syst3err = 0.0016*fabs(MB_A0) # gain
         MB_syst4err = 0.0001*fabs(MB_A0) # mwpc eff
-        MB_syst5err = 0.0011*fabs(MB_A0) # field
+        MB_syst5err = 0.0012*fabs(MB_A0) # field
         MB_syst6err = 0.0002*fabs(MB_A0) # UCNBg
         MB_syst7err = 0.0003*fabs(MB_A0) # muon
         MB_syst8err = 0.0003*fabs(MB_A0) # R.O.
