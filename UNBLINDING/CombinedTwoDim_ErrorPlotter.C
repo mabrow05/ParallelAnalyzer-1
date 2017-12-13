@@ -312,17 +312,17 @@ void CombinedTwoDim_ErrorPlotter() {
 
   TCanvas *c10 = new TCanvas("c10","c10");
   TGraph *st = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotStat[0]);
-  st->SetLineWidth(3);
-  st->SetLineStyle(1);
+  st->SetLineWidth(2);
+  st->SetLineStyle(7);
   st->SetLineColor(1);
 
   TGraph *sys = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotSyst[0]);
   sys->SetLineWidth(2);
-  sys->SetLineStyle(1);
+  sys->SetLineStyle(8);
   sys->SetLineColor(2);
   
   TGraph *t = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotTot[0]);
-  t->SetLineWidth(2);
+  t->SetLineWidth(3);
   t->SetLineStyle(1);
   t->SetLineColor(4);
 

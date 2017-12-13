@@ -1,4 +1,3 @@
-
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -263,7 +262,7 @@ void EnergyDependentCorrections(TString anaCh) {
   mg0->Draw(drawOpt);
   mg0->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg0->GetYaxis()->CenterTitle();
-  mg0->GetXaxis()->SetTitle("Energy (keV)");
+  mg0->GetXaxis()->SetTitle("E_{recon} (keV)");
   mg0->GetXaxis()->CenterTitle();
   mg0->GetXaxis()->SetLimits(0.,780.);
   gPad->Modified();
@@ -307,7 +306,7 @@ void EnergyDependentCorrections(TString anaCh) {
   mg1->Draw(drawOpt);
   mg1->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg1->GetYaxis()->CenterTitle();
-  mg1->GetXaxis()->SetTitle("Energy (keV)");
+  mg1->GetXaxis()->SetTitle("E_{recon} (keV)");
   mg1->GetXaxis()->CenterTitle();
   mg1->GetXaxis()->SetLimits(0.,780.);
 
@@ -352,7 +351,7 @@ void EnergyDependentCorrections(TString anaCh) {
   mg2->Draw(drawOpt);
   mg2->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg2->GetYaxis()->CenterTitle();
-  mg2->GetXaxis()->SetTitle("Energy (keV)");
+  mg2->GetXaxis()->SetTitle("E_{recon} (keV)");
   mg2->GetXaxis()->CenterTitle();
   mg2->GetXaxis()->SetLimits(0.,780.);
     
@@ -395,7 +394,7 @@ void EnergyDependentCorrections(TString anaCh) {
   mg3->Draw(drawOpt);
   mg3->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mg3->GetYaxis()->CenterTitle();
-  mg3->GetXaxis()->SetTitle("Energy (keV)");
+  mg3->GetXaxis()->SetTitle("E_{recon} (keV)");
   mg3->GetXaxis()->CenterTitle();
   mg3->GetXaxis()->SetLimits(0.,780.);
 
@@ -440,7 +439,7 @@ void EnergyDependentCorrections(TString anaCh) {
   mgALLBS->Draw(drawOpt);
   mgALLBS->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgALLBS->GetYaxis()->CenterTitle();
-  mgALLBS->GetXaxis()->SetTitle("Energy (keV)");
+  mgALLBS->GetXaxis()->SetTitle("E_{recon} (keV)");
   mgALLBS->GetXaxis()->CenterTitle();
   mgALLBS->GetXaxis()->SetLimits(0.,780.);
 
@@ -484,7 +483,7 @@ void EnergyDependentCorrections(TString anaCh) {
   mgAngle->Draw(drawOpt);
   mgAngle->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgAngle->GetYaxis()->CenterTitle();
-  mgAngle->GetXaxis()->SetTitle("Energy (keV)");
+  mgAngle->GetXaxis()->SetTitle("E_{recon} (keV)");
   mgAngle->GetXaxis()->CenterTitle();
   mgAngle->GetXaxis()->SetLimits(0.,780.);
 
@@ -529,7 +528,7 @@ void EnergyDependentCorrections(TString anaCh) {
   mgTotalCorr->Draw(drawOpt);
   mgTotalCorr->GetYaxis()->SetTitle("#DeltaA/A (%)");
   mgTotalCorr->GetYaxis()->CenterTitle();
-  mgTotalCorr->GetXaxis()->SetTitle("Energy (keV)");
+  mgTotalCorr->GetXaxis()->SetTitle("E_{recon} (keV)");
   mgTotalCorr->GetXaxis()->CenterTitle();
   mgTotalCorr->GetXaxis()->SetLimits(0.,780.);
 
