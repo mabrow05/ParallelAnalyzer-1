@@ -244,12 +244,12 @@ void SetUpTree(TTree *tree) {
 void revCalSimulation (Int_t runNumber, string b, string A) 
 {
 
-  int numFiles = 1;//(b==std::string("inf")?200:(A==std::string("-1")?200:20));
+  int numFiles = 250;//(b==std::string("inf")?200:(A==std::string("-1")?200:20));
 
   bool allEvtsTrigg = false; //This just removes the use of the trigger function for an initial calibration. 
                             // Once a calibration is established (or if running on Betas), you can keep this false
 
-  bool simProperStatistics = true; // If True, this uses the actual data run to determine the number of Type 0s to simulate
+  bool simProperStatistics = false; // If True, this uses the actual data run to determine the number of Type 0s to simulate
 
   
   cout << "Running reverse calibration for run " << runNumber << endl;  
@@ -313,8 +313,13 @@ void revCalSimulation (Int_t runNumber, string b, string A)
 
   //Decide which simulation to use...
   TChain *chain = new TChain("anaTree"); 
+
+  std::string geom;
+  if (runNumber<20000) geom = "2011-2012_geom";
+  else if (runNumber>=21087 && runNumber<21679) geom = "2012-2013_isobutane_geom";
+  else geom = "2012-2013_geom";
   
-  TString fileLocation = TString::Format("/extern/mabrow05/ucna/xuan_stuff/fromSept2017Onwards/A_%s_b_%s/",A.c_str(),b.c_str());
+  TString fileLocation = TString::Format("/extern/mabrow05/ucna/xuan_stuff/%s/A_%s_b_%s/",geom.c_str(),A.c_str(),b.c_str());
  
   std::cout << "Using simulation from " << fileLocation << "...\n";
 

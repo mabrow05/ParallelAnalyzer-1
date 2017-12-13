@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
     }
     
 
-    std::vector<TString> aCh {"A","B","C","D","F","G","H","J","K"};//{"C","D"};//;//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
+    std::vector<TString> aCh {};//{"A","B","C","D","F","G","H","J","K"};//{"C","D"};//;//{"J","K","C","D","F"};//{"A","B","C","D","F","G","H","J","K"};//{"G","H"};//{"J","K","G"};//{"F","A","H"};//{"A","B","G","H"};//{"C","J","K","H"};//"A","D"
 
     for (auto ach : aCh) {
       //ProcessOctets(octBegin, octEnd, std::string(ach.Data()), enBinWidth, UKdata, simulation, unblind);
@@ -230,8 +230,8 @@ int main(int argc, char* argv[])
 
    
     //ProcessOctets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, unblind);
-    //PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
-    //PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
+    PlotAsymmetriesByGrouping("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
+    PlotFinalAsymmetries("Octet",octBegin, octEnd, analysisChoice, Elow, Ehigh, enBinWidth, UKdata, simulation, unblind, key);
     
 
     //ProcessQuartets(octBegin, octEnd, analysisChoice, enBinWidth, UKdata, simulation, unblind);
@@ -394,7 +394,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
 	  if (realOutput) {
 	    infile >> txt >> Asym >> AsymError;
 	    rawAsymByGroup[0].push_back(isQuartet?quartet:isPair?pair:octet);
-	    rawAsymByGroup[1].push_back(-Asym); // Note the negative sign here to turn the raw asymmetry into purely a positive number (by definition, it is negative)
+	    rawAsymByGroup[1].push_back(Asym); // Note the negative sign here to turn the raw asymmetry into purely a positive number (by definition, it is negative)
 	    rawAsymByGroup[2].push_back(AsymError);
 	    
 	    //std::cout << octet << " " << Asym << " " << AsymError << std::endl;
@@ -533,18 +533,20 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   gStyle->SetTitleSize(0.06,"y");
   gStyle->SetTitleOffset(1.2,"y");
   gStyle->SetTitleOffset(0.9,"x");
-  gStyle->SetPadTopMargin(0.14);
+  gStyle->SetPadTopMargin(0.08);
   gStyle->SetPadBottomMargin(0.13);
   gStyle->SetPadLeftMargin(0.15);
+  gStyle->SetPadRightMargin(0.02);
   gStyle->SetLabelSize(0.04,"xyz");
 
   gStyle->SetOptFit(1111);//1111);
   gStyle->SetTitleX(0.5);
   gStyle->SetStatX(0.75);
-  gStyle->SetStatY(0.83);
-  //gStyle->SetStatBorderSize(0);
+  gStyle->SetStatY(0.9);
+  gStyle->SetStatFontSize(0);
+  gStyle->SetStatBorderSize(0);
   
-
+  gStyle->SetFitFormat("0.5g");
   
   
    
@@ -554,20 +556,31 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   TGraphErrors *g;
   TF1 *fit;
 
-  TCanvas *c1 = new TCanvas("c1", "c1", 700, 500);
+  TCanvas *c1 = new TCanvas("c1", "c1", 1000, 400);
   if (realOutput) {
     
+    gStyle->SetStatH(0.3);
+    gStyle->SetStatW(0.27);
+    gStyle->SetStatX(0.85);
+    gPad->SetLeftMargin(0.12); 
+    gPad->SetBottomMargin(0.15); 
+    gStyle->SetLabelSize(0.06,"xyz");
+   //gPad->SetRightMargin(0.02);
     
     g = new TGraphErrors(rawAsymByGroup[0].size(), &rawAsymByGroup[0][0],&rawAsymByGroup[1][0],&errorX[0], &rawAsymByGroup[2][0]);
     title = "Raw Measured Asymmetry " + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
-    g->SetTitle(title.c_str());
+    g->SetTitle("");//title.c_str());
     
     g->SetMarkerStyle(20);
     g->SetLineWidth(1);
     g->Draw("AP");
     g->GetXaxis()->SetLimits(rawAsymByGroup[0][0]-2., rawAsymByGroup[0][rawAsymByGroup[0].size()-1]+2.);
     g->GetXaxis()->SetTitle(TString::Format("%s Number",groupType.c_str()));
-    g->GetYaxis()->SetTitle("Raw Asymmetry");
+    g->GetYaxis()->SetTitle("Raw Asymmetry A_{SR}");
+    g->GetYaxis()->SetTitleOffset(0.7);
+    g->GetXaxis()->SetTitleOffset(0.8);
+    g->GetYaxis()->SetTitleSize(0.08);
+    g->GetXaxis()->SetTitleSize(0.08);
     g->GetXaxis()->CenterTitle();
     g->GetYaxis()->CenterTitle();
     
@@ -597,12 +610,16 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
       octval.close();*/
     
     g->Draw("AP");
-    g->SetMinimum(fit->GetParameter(0)-0.02);//((simulation && !AsymmOn) ? -0.05 : 0.03);
-    g->SetMaximum(fit->GetParameter(0)+0.02);//(simulation && !AsymmOn) ? 0.05 : 0.07);
+    g->SetMinimum(-0.07);//fit->GetParameter(0)-0.02);//((simulation && !AsymmOn) ? -0.05 : 0.03);
+    g->SetMaximum(0.0);//fit->GetParameter(0)+0.02);//(simulation && !AsymmOn) ? 0.05 : 0.07);
     c1->Update();
   }
 
-
+  gStyle->SetStatH(0.2);
+  gStyle->SetStatW(0.3);
+  gStyle->SetStatX(0.85);
+  gStyle->SetLabelSize(0.04,"xyz");
+    
   TGraphErrors *gBeta;
   TF1 *fitBeta;
   std::string corrText = corr=="UnCorr" ? " 2A_{SR}/#beta " : ( corr=="DeltaExpOnly" ? " 2A_{SR}#upoint(1+#Delta_{exp})/#beta " : 
@@ -615,7 +632,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
     
     TGraphErrors *gBeta = new TGraphErrors(AsymByGroup[0].size(), &AsymByGroup[0][0],&AsymByGroup[1][0],&errorX[0], &AsymByGroup[2][0]);
     title = groupType+"-By-"+groupType+corrText + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
-    gBeta->SetTitle(title.c_str());
+    gBeta->SetTitle("");//(title.c_str());
     gBeta->SetMarkerStyle(20);
     gBeta->SetLineWidth(1);
     gBeta->GetXaxis()->SetLimits(rawAsymByGroup[0][0]-2., rawAsymByGroup[0][rawAsymByGroup[0].size()-1]+2.);
@@ -652,7 +669,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   Int_t offset = 4;
   TGraphErrors *g2 = new TGraphErrors(enBinMedian.size()-offset, &enBinMedian[offset], &groupRawAsymByBin[1][offset], 0, &groupRawAsymByBin[2][offset]);
   title = groupType + corrText2 + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
-  g2->SetTitle(title.c_str());
+  g2->SetTitle("");//(title.c_str());
   g2->SetMarkerStyle(20);
   g2->SetLineWidth(1);
   g2->GetXaxis()->SetLimits(0., 800.);
@@ -676,7 +693,7 @@ void PlotFinalAsymmetries(std::string groupType, Int_t octBegin, Int_t octEnd, s
   TCanvas *c4 = new TCanvas("c4", "c4", 700, 500);
   TGraphErrors *gBeta2 = new TGraphErrors(enBinMedian.size()-offset, &enBinMedian[offset], &groupAsymByBin[1][offset], 0, &groupAsymByBin[2][offset]);
   title = groupType + corrText + itos((int)Elow) + std::string("-") +itos((int)Ehigh) + std::string(" keV Window");
-  gBeta2->SetTitle(title.c_str());
+  gBeta2->SetTitle("");//(title.c_str());
   gBeta2->SetMarkerStyle(20);
   gBeta2->SetLineWidth(1);
   gBeta2->GetXaxis()->SetLimits(0., 800.);
@@ -1097,7 +1114,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	gOct->Fit("fitOct","R");
 	
 	std::ofstream ofile(outfilePath[quart].c_str());
-	ofile << "RawA_SR " << -(fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
+	ofile << "RawA_SR " << (fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
       
 	gOct->Draw("AP");
 	gOct->SetMinimum(-0.1);
@@ -1237,7 +1254,7 @@ void PlotAsymmetriesByGrouping(std::string groupType, Int_t octBegin, Int_t octE
 	  gOct->Fit("fitOct","R");
 	  
 	  std::ofstream ofile(outfilePath[quart].c_str());
-	  ofile << "RawA_SR " << -(fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
+	  ofile << "RawA_SR " << (fitOct->GetParameter(0)) << " " << fitOct->GetParError(0) << std::endl;
 	  
 	  gOct->Draw("AP");
 	  gOct->SetMinimum(-0.1);
