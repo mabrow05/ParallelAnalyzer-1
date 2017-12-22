@@ -105,15 +105,16 @@ void Vud_vs_lambda() {
   Int_t fillColor_tau2 = color?4:17;//1;//14;
 
   Double_t xmin = 1.253;
-  Double_t xmax = 1.282;
+  Double_t xmax = 1.2805;
   
-  gStyle->SetPadLeftMargin(0.125);
+  gStyle->SetPadLeftMargin(0.130);
   gStyle->SetPadTopMargin(0.05);
   gStyle->SetPadRightMargin(0.125);
   gStyle->SetPadBottomMargin(0.115);
-  gStyle->SetTitleSize(0.05,"xy");
+  gStyle->SetTitleSize(0.06,"xy");
   gStyle->SetLegendBorderSize(0);
   gStyle->SetFillStyle(0);
+  gStyle->SetLabelSize(0.042,"xyz");
 
   Double_t Vud = 0.97417;
   Double_t Vud_err = 0.00021;
@@ -221,10 +222,10 @@ void Vud_vs_lambda() {
   mg->Draw("A");
   mg->GetXaxis()->SetTitle("|#lambda|");
   //mg->GetXaxis()->SetNdivisions(505);
-  mg->GetXaxis()->SetTitleOffset(1);
+  mg->GetXaxis()->SetTitleOffset(0.85);
   mg->GetXaxis()->CenterTitle();
   mg->GetYaxis()->SetTitle("V_{ud}");
-  mg->GetYaxis()->SetTitleOffset(1.1);
+  mg->GetYaxis()->SetTitleOffset(1.05);
   mg->GetYaxis()->CenterTitle();
 
   mg->GetXaxis()->SetLimits(xmin,xmax);
@@ -301,8 +302,8 @@ void Vud_vs_lambda() {
 
   
   
-  TLegend *legA = new TLegend(0.16,0.16,0.46,0.40);
-  legA->SetTextSize(0.035);
+  TLegend *legA = new TLegend(0.16,0.16,0.46,0.42);
+  legA->SetTextSize(0.040);
   legA->SetHeader("A_{0} measurements");
   legA->AddEntry(lambdaMeas11,Lambda1name[1]+" (this work)","p");
   //legA->AddEntry(lambdaMeas11,Lambda1name[1],"p");
@@ -315,50 +316,50 @@ void Vud_vs_lambda() {
   //legA->AddEntry(lambdaMeas23,Lambda2name[3],"p");
   if (data) legA->Draw("SAME");
 
-  TLegend *legB = new TLegend(0.45,0.16,0.75,0.28);
-  legB->SetTextSize(0.035);
+  TLegend *legB = new TLegend(0.48,0.16,0.78,0.30);
+  legB->SetTextSize(0.040);
   legB->SetHeader("Other measurements");
   legB->AddEntry(lambdaMeas12,Lambda1name[2],"p");
   legB->AddEntry(lambdaMeas23,Lambda2name[3],"p"); 
   if (data) legB->Draw("SAME");
 
-  TPaveText *tVud = new TPaveText(0.13,0.522,0.3,0.562,"nbNDC");
+  TPaveText *tVud = new TPaveText(0.13,0.530,0.3,0.570,"nbNDC");
   tVud->SetBorderSize(0);
   tVud->SetTextColor(color?fillColor_vud:1);
   tVud->AddText("PDG 0^{+}#rightarrow0^{+}");
-  tVud->GetLine(0)->SetTextSize(0.035);
+  tVud->GetLine(0)->SetTextSize(0.039);
   tVud->Draw();
 
-  TPaveText *tTau1 = new TPaveText(0.438,0.83,0.592,0.87,"nbNDC");
+  TPaveText *tTau1 = new TPaveText(0.46,0.84,0.61,0.88,"nbNDC");
   tTau1->SetBorderSize(0);
   tTau1->SetTextColor(color?fillColor_tau2:1);
   tTau1->AddText("UCN #tau_{n}");
   tTau1->GetLine(0)->SetTextAngle(-42.2);
-  tTau1->GetLine(0)->SetTextSize(0.035);
+  tTau1->GetLine(0)->SetTextSize(0.039);
   tTau1->Draw();
 
-  TPaveText *tTau2 = new TPaveText(0.145,0.83,0.265,0.87,"nbNDC");
+  TPaveText *tTau2 = new TPaveText(0.15,0.83,0.27,0.87,"nbNDC");
   tTau2->SetBorderSize(0);
   tTau2->SetTextColor(color?fillColor_tau2:1);
   tTau2->AddText("Beam #tau_{n}");
   tTau2->GetLine(0)->SetTextAngle(-42.2);
-  tTau2->GetLine(0)->SetTextSize(0.035);
+  tTau2->GetLine(0)->SetTextSize(0.039);
   tTau2->Draw();
 
-  TPaveText *tLambda1 = new TPaveText(0.683,0.57,0.832,0.675,"nbNDC");
+  TPaveText *tLambda1 = new TPaveText(0.7,0.58,0.90,0.69,"nbNDC");
   tLambda1->SetBorderSize(0);
   tLambda1->SetTextColor(color?fillColor_lambda2:1);
   tLambda1->AddText("Post-2002 #lambda");
   tLambda1->GetLine(0)->SetTextAngle(-90);
-  tLambda1->GetLine(0)->SetTextSize(0.035);
+  tLambda1->GetLine(0)->SetTextSize(0.039);
   tLambda1->Draw();
 
-  TPaveText *tLambda2 = new TPaveText(0.234,0.565,0.434,0.655,"nbNDC");
+  TPaveText *tLambda2 = new TPaveText(0.234,0.57,0.434,0.67,"nbNDC");
   tLambda2->SetBorderSize(0);
   tLambda2->SetTextColor(color?fillColor_lambda2:1);
   tLambda2->AddText("Pre-2002 #lambda");
   tLambda2->GetLine(0)->SetTextAngle(-90);
-  tLambda2->GetLine(0)->SetTextSize(0.035);
+  tLambda2->GetLine(0)->SetTextSize(0.039);
   tLambda2->Draw();
   
   c1->Update();

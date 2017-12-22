@@ -540,10 +540,10 @@ void betaAsymmetryFitter() {
   residALL->SetMarkerColor(color?kBlue:kBlack);
   residALL->SetMarkerStyle(0);
   residALL->SetMarkerSize(1.);
-  residALL->GetYaxis()->SetTitle("MC-Data (mHz/keV)");
+  residALL->GetYaxis()->SetTitle("MC-Data");
   residALL->GetYaxis()->SetLabelSize(0.12);
-  residALL->GetYaxis()->SetTitleOffset(0.5);
-  residALL->GetYaxis()->SetTitleSize(0.10);
+  residALL->GetYaxis()->SetTitleOffset(0.4);
+  residALL->GetYaxis()->SetTitleSize(0.14);
   residALL->GetXaxis()->SetLabelSize(0.12);
   residALL->GetXaxis()->CenterTitle();
   residALL->GetYaxis()->CenterTitle();
@@ -603,7 +603,7 @@ void betaAsymmetryFitter() {
   TPaveText *pv_xTitle = new TPaveText(0.3,0.01,0.7,0.04,"nbNDC");
   pv_xTitle->SetBorderSize(0);
   pv_xTitle->AddText("E_{recon} (keV)");
-  pv_xTitle->GetLine(0)->SetTextSize(0.035);
+  pv_xTitle->GetLine(0)->SetTextSize(0.040);
   pv_xTitle->GetLine(0)->SetTextFont(42);
   pv_xTitle->Draw();
   

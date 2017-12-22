@@ -497,7 +497,7 @@ void EnergyDependentCorrections(TString anaCh) {
 
   //////////////////// TotalCorr ///////////////////
   TCanvas *cTotalCorr = new TCanvas("cTotalCorr","cTotalCorr");
-  gPad->SetGrid(0,1);
+  //gPad->SetGrid(0,1);
 
   TMultiGraph *mgTotalCorr = new TMultiGraph();
   mgTotalCorr->SetTitle("");//#Delta_{MC} vs. Energy");  

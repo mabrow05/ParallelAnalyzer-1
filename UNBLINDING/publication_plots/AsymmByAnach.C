@@ -345,7 +345,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
 
   c1->cd(1);
 
-  if (!withSim) gPad->SetGridy();
+  //if (!withSim) gPad->SetGridy();
   gPad->SetTicks(0,1);
   gPad->SetTopMargin(0.0);
 
@@ -472,7 +472,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
 
   // First make one plot with same scale for all event types
   c1->cd(2);
-  gPad->SetGridy();
+  //gPad->SetGridy();
   gPad->SetTicks(0,1);
   gPad->SetTopMargin(0.0);
 
@@ -734,7 +734,7 @@ void AsymmByAnach(TString corrections, bool withPOL, Int_t ebinLow=220, Int_t eb
   if (withSim) simBacksc->Draw("SAME E1X0");
 
   pad1->Draw();
-  pad1->SetGridy();
+  //pad1->SetGridy();
   pad1->cd();
 
   data->GetYaxis()->SetAxisColor(color0);
