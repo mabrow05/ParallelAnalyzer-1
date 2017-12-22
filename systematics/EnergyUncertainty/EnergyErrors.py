@@ -170,12 +170,13 @@ def theoryUncertaintyTable(year=2011):
 def plotTheoryErrors(year=2011):
 
 	gCx=graph.graphxy(width=15,height=8,
-					  x=graph.axis.lin(title="Energy [keV]",min=0,max=780),
-					  y=graph.axis.lin(title="uncertainty $\\Delta A/A$ [\\%]",min=0,max=3.),
+					  x=graph.axis.lin(title="Energy (keV)",min=0,max=780),
+					  y=graph.axis.lin(title=" $% Correction (Delta A/A)$",min=0,max=3.),
 					  key = graph.key.key(pos="tl"))
 	setTexrunner(gCx)
 			 
-        gdat = [ [x,100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,775.,77)  ]
+        #gdat = [ [x,100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,775.,77)  ]
+        gdat = [ [x,-100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),-100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,775.,77)  ]
 
 
         gCx.plot(graph.data.points(gdat,x=1,y=2,title="Recoil Order"),
