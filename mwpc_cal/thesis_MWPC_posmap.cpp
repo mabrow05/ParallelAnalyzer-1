@@ -47,7 +47,7 @@ void plot_position_map(int XePeriod, double binWidth)
   palette[8] = 12;
   palette[9] = 1;
   gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
-  //gStyle->SetPalette(2);  // z-axis color scale for 2D histograms
+  //gStyle->SetPalette(57);  // z-axis color scale for 2D histograms
   //gStyle->SetOptStat(11);
   gStyle->SetOptStat(0);
   gStyle->SetStatFontSize(0.030);
@@ -151,7 +151,7 @@ void plot_position_map(int XePeriod, double binWidth)
   filenameOutLast  = filenameOut;
   filenameOutLast += ")";
 
-  TCanvas * c0 = new TCanvas("c0", "canvas", 1000, 800);
+  TCanvas * c0 = new TCanvas("c0", "canvas", 900, 800);
   hisE[4]->Draw("colz");
   hisE[4]->SetXTitle("x [mm]");
   hisE[4]->SetYTitle("y [mm]");
@@ -163,7 +163,7 @@ void plot_position_map(int XePeriod, double binWidth)
     
   c0->Print(filenameOutFirst);
 
-  TCanvas * c1 = new TCanvas("c1", "canvas", 1000, 800);
+  TCanvas * c1 = new TCanvas("c1", "canvas", 900, 800);
   hisW[4]->Draw("colz");
   hisW[4]->SetXTitle("x [mm]");
   hisW[4]->SetYTitle("y [mm]");
@@ -171,6 +171,7 @@ void plot_position_map(int XePeriod, double binWidth)
   hisW[4]->GetYaxis()->CenterTitle();
   hisW[4]->GetYaxis()->CenterTitle();
   hisW[4]->SetAxisRange(0.,2.,"Z");
+  hisW[4]->SetTitle("");
 
   c1->Print(filenameOutLast);
 
