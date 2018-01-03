@@ -35,9 +35,15 @@ void widthCompare(Int_t srcPeriod) {
   }
   std::cout << "made it\n";
 
-  gStyle->SetOptFit(0011);
-  gStyle->SetPadLeftMargin(0.15);
-  gStyle->SetTitleYOffset(1.5);
+  gStyle->SetOptFit(0000);
+  gStyle->SetPadLeftMargin(0.17);
+  gStyle->SetTitleYOffset(1.2);
+  //gStyle->SetPadBottomMargin(0.17);
+  gStyle->SetTitleXOffset(0.8);
+  gStyle->SetTitleSize(0.06,"t");
+  gStyle->SetLabelSize(0.045,"xy");
+  gStyle->SetFillStyle(0000); 
+
 
   TCanvas *c1 = new TCanvas("c1","c1",1200,800);
   c1->Divide(2,1);
@@ -46,13 +52,15 @@ void widthCompare(Int_t srcPeriod) {
   TGraph *gE = new TGraph(dataEastWidth.size(),&dataEastWidth[0],&simEastWidth[0]);
   gE->SetMarkerStyle(kOpenCircle);
   gE->SetMarkerColor(kBlue);
-  gE->SetTitle("Source Widths East");
+  gE->SetTitle("East");
   gE->Draw("AP");
-  gE->GetXaxis()->SetLimits(0.,120.);
-  gE->SetMaximum(120.);
+  gE->GetXaxis()->SetLimits(0.,90.);
+  gE->SetMaximum(90.);
   gE->SetMinimum(0.);
-  gE->GetXaxis()->SetTitle("Data Widths");
-  gE->GetYaxis()->SetTitle("Simulated Widths");
+  gE->GetXaxis()->SetTitle("Data Widths (keV)");
+  gE->GetXaxis()->SetTitleSize(0.06);
+  gE->GetYaxis()->SetTitleSize(0.06);
+  gE->GetYaxis()->SetTitle("Simulated Widths (keV)");
   gE->Draw("AP");
   c1->Update();
 
@@ -62,19 +70,29 @@ void widthCompare(Int_t srcPeriod) {
   gE->Fit(f);
   gPad->Modified();
 
+  TPaveText *pvEast = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+  pvEast->SetBorderSize(0);
+  pvEast->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				  f->GetParameter(0),f->GetParError(0)));
+  pvEast->GetLine(0)->SetTextSize(0.045);
+  pvEast->GetLine(0)->SetTextFont(42);
+  pvEast->Draw();
+
 
   c1->cd(2);
 
   TGraph *gW = new TGraph(dataWestWidth.size(),&dataWestWidth[0],&simWestWidth[0]);
   gW->SetMarkerStyle(kOpenCircle);
   gW->SetMarkerColor(kBlue);
-  gW->SetTitle("Source Widths West");
+  gW->SetTitle("West");
   gW->Draw("AP");
-  gW->GetXaxis()->SetLimits(0.,120.);
-  gW->SetMaximum(120.);
+  gW->GetXaxis()->SetLimits(0.,90.);
+  gW->SetMaximum(90.);
   gW->SetMinimum(0.);
-  gW->GetXaxis()->SetTitle("Data Widths");
-  gW->GetYaxis()->SetTitle("Simulated Widths");
+  gW->GetXaxis()->SetTitle("Data Widths (keV)");
+  gW->GetYaxis()->SetTitle("Simulated Widths (keV)");
+  gW->GetXaxis()->SetTitleSize(0.06);
+  gW->GetYaxis()->SetTitleSize(0.06);
   gW->Draw("AP");
   c1->Update();
 
@@ -82,6 +100,14 @@ void widthCompare(Int_t srcPeriod) {
 
   gW->Fit(f);
   gPad->Modified();
+
+  TPaveText *pvWest = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+  pvWest->SetBorderSize(0);
+  pvWest->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				  f->GetParameter(0),f->GetParError(0)));
+  pvWest->GetLine(0)->SetTextSize(0.045);
+  pvWest->GetLine(0)->SetTextFont(42);
+  pvWest->Draw();
 
   c1->Print(TString::Format("widthsErecon_runPeriod_%i.pdf",srcPeriod));
 

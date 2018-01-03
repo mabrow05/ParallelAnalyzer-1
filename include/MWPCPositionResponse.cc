@@ -553,7 +553,7 @@ std::vector<double> MWPCCathodeHandler::fitGaus2Points(std::vector<double> x, st
   double s_plus = y[1];
   
   //We will use the average width as seen from studying the normal fit to gaussian
-  double sigma = _sigma / TMath::Sqrt( 0.6 );
+  double sigma = _sigma ;
   // Calculate mean
   double mu = (p_plus - p_minus) != 0. ? (p_minus + p_plus) / 2. + sigma*sigma / (p_plus - p_minus) * TMath::Log(s_plus/s_minus) : 85. ;
 

@@ -6,6 +6,7 @@ void EQ2EtrueFitter(TString geom) {
   gStyle->SetTitleSize(0.08,"t");
   gStyle->SetPadBottomMargin(0.15);
   gStyle->SetPadLeftMargin(0.15);
+  gStyle->SetPadRightMargin(0.05);
   gStyle->SetTitleYSize(0.05);
   //gStyle->SetTitleYOffset(0.1);
   gStyle->SetTitleXSize(0.05);
@@ -21,7 +22,7 @@ void EQ2EtrueFitter(TString geom) {
   //gStyle->SetTitleStyle(0); 
   //gStyle->SetCanvasBorderSize(0); 
   //gStyle->SetFrameBorderSize(0); 
-  //gStyle->SetLegendBorderSize(0); 
+  gStyle->SetLegendBorderSize(0); 
   //gStyle->SetStatBorderSize(0); 
   //gStyle->SetTitleBorderSize(0);
 
@@ -134,16 +135,16 @@ void EQ2EtrueFitter(TString geom) {
 
   TGraphErrors *t0E = new TGraphErrors(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0E[type0lowOffset-1],&EtrueMid[type0lowOffset-1],&err_EQtype0E[type0lowOffset-1],0); 
   t0E->SetMarkerColor(kBlue);
-  t0E->SetMarkerStyle(21);
+  t0E->SetMarkerStyle(25);
   //t0E->SetMarkerSize(.8);
   TGraphErrors *t1E = new TGraphErrors(numDataPoints-(type1lowOffset+type1highOffset),&EQtype1E[type1lowOffset-1],&EtrueMid[type1lowOffset-1],&err_EQtype1E[type1lowOffset-1],0);
   t1E->SetMarkerColor(kRed);
-  t1E->SetMarkerStyle(20);
+  t1E->SetMarkerStyle(24);
   TGraphErrors *t2E = new TGraphErrors(numDataPoints-11,&EQtype2E[8],&EtrueMid[8],&err_EQtype2E[8],0);
   TGraphErrors *t3E = new TGraphErrors(numDataPoints-11,&EQtype3E[8],&EtrueMid[8],&err_EQtype3E[8],0);
   TGraphErrors *t23E = new TGraphErrors(numDataPoints-(type23lowOffset+type23highOffset),&EQtype23E[type23lowOffset-1],&EtrueMid[type23lowOffset-1],&err_EQtype23E[type23lowOffset-1],0);
   t23E->SetMarkerColor(kGreen);
-  t23E->SetMarkerStyle(22);
+  t23E->SetMarkerStyle(26);
 
   t0E->Fit(func0,"","",EQtype0E[type0lowOffset-1],800.);
   t1E->Fit(func1,"","",EQtype1E[type1lowOffset-1],800.);
@@ -185,15 +186,15 @@ void EQ2EtrueFitter(TString geom) {
 
   TGraphErrors *t0W = new TGraphErrors(numDataPoints-(type0lowOffset+type0highOffset),&EQtype0W[type0lowOffset-1],&EtrueMid[type0lowOffset-1],&err_EQtype0W[type0lowOffset-1],0); 
   t0W->SetMarkerColor(kBlue);
-  t0W->SetMarkerStyle(21);
+  t0W->SetMarkerStyle(25);
   TGraphErrors *t1W = new TGraphErrors(numDataPoints-(type1lowOffset+type1highOffset),&EQtype1W[type1lowOffset-1],&EtrueMid[type1lowOffset-1],&err_EQtype1W[type1lowOffset-1],0);
   t1W->SetMarkerColor(kRed);
-  t1W->SetMarkerStyle(20);
+  t1W->SetMarkerStyle(24);
   TGraphErrors *t2W = new TGraphErrors(numDataPoints-11,&EQtype2W[8],&EtrueMid[8],&err_EQtype2W[8],0);
   TGraphErrors *t3W = new TGraphErrors(numDataPoints-11,&EQtype3W[8],&EtrueMid[8],&err_EQtype3W[8],0);
   TGraphErrors *t23W = new TGraphErrors(numDataPoints-(type23lowOffset+type23highOffset),&EQtype23W[type23lowOffset-1],&EtrueMid[type23lowOffset-1],&err_EQtype23W[type23lowOffset-1],0);
   t23W->SetMarkerColor(kGreen);
-  t23W->SetMarkerStyle(22);
+  t23W->SetMarkerStyle(26);
 
   t0W->Fit(func0,"","",EQtype0W[type0lowOffset-1],800.);
   t1W->Fit(func1,"","",EQtype1W[type1lowOffset-1],800.);
@@ -243,15 +244,19 @@ void EQ2EtrueFitter(TString geom) {
   east->SetMinimum(0.);
   east->SetMaximum(800.);
   east->GetXaxis()->SetLimits(0.,800.);
-  east->GetXaxis()->SetTitle("E_{Q} (keV)");
-  east->GetYaxis()->SetTitle("E_{true} (keV)");
+  east->GetXaxis()->SetTitle("E_{vis} (keV)");
+  east->GetYaxis()->SetTitle("E_{recon} (keV)");
   east->GetXaxis()->CenterTitle();
   east->GetYaxis()->CenterTitle();
-  east->GetXaxis()->SetTitleOffset(1.4);
-  east->GetYaxis()->SetTitleOffset(1.4);
+  east->GetXaxis()->SetTitleOffset(1.1);
+  east->GetXaxis()->SetTitleSize(0.06);
+  east->GetXaxis()->SetLabelSize(0.05);
+  east->GetYaxis()->SetTitleOffset(1.2);
+  east->GetYaxis()->SetTitleSize(0.06);
+  east->GetYaxis()->SetLabelSize(0.05);
   east->Draw("AP");
 
-  TLegend *leg0 = new TLegend(0.55,0.25,0.85,0.375);
+  TLegend *leg0 = new TLegend(0.55,0.25,0.85,0.5);
   leg0->AddEntry(t0E,"  Type 0","p");
   leg0->AddEntry(t1E,"  Type 1","p");
   leg0->AddEntry(t23E,"  Type 2/3","p");
@@ -262,12 +267,16 @@ void EQ2EtrueFitter(TString geom) {
   west->SetMinimum(0.);
   west->SetMaximum(800.);
   west->GetXaxis()->SetLimits(0.,800.);
-  west->GetXaxis()->SetTitle("E_{Q} (keV)");
-  west->GetYaxis()->SetTitle("E_{true} (keV)");
+  west->GetXaxis()->SetTitle("E_{vis} (keV)");
+  west->GetYaxis()->SetTitle("E_{recon} (keV)");
   west->GetXaxis()->CenterTitle();
   west->GetYaxis()->CenterTitle();
-  west->GetXaxis()->SetTitleOffset(1.4);
-  west->GetYaxis()->SetTitleOffset(1.4);
+  west->GetXaxis()->SetTitleOffset(1.1);
+  west->GetXaxis()->SetTitleSize(0.06);
+  west->GetXaxis()->SetLabelSize(0.05);
+  west->GetYaxis()->SetTitleOffset(1.2);
+  west->GetYaxis()->SetTitleSize(0.06);
+  west->GetYaxis()->SetLabelSize(0.05);
   west->Draw("AP");
 
   leg0->Draw();

@@ -35,6 +35,8 @@ void CombinedTwoDim_ErrorPlotter() {
   //gStyle->SetStatBorderSize(0); 
   //gStyle->SetTitleBorderSize(0);
 
+  gStyle->SetNumberContours(255);
+
   std::vector < Double_t > asymm;
   std::vector < Double_t > statistics;
   std::vector < Double_t > sim;
@@ -65,6 +67,7 @@ void CombinedTwoDim_ErrorPlotter() {
   Double_t tot_minval=1000., tot_maxval=-1000.;
 
   Double_t finalA = 0.;
+  Double_t finalA_err=0.;
 
   std::vector<Double_t> minPlotEn;
   std::vector<Double_t> minPlotStat;
@@ -89,7 +92,7 @@ void CombinedTwoDim_ErrorPlotter() {
     Double_t lowerWindow = atof(windowStr.substr(0,3).c_str());
 
 
-    if ( lowerWindow==190. && upperWindow==740. ) finalA = asymm_hold;
+    if ( lowerWindow==190. && upperWindow==740. ) finalA = asymm_hold, finalA_err = stat_hold*100.;
     
     if ( lowerWindow==190. ) {
       minPlotEn.push_back(upperWindow);
@@ -153,6 +156,13 @@ void CombinedTwoDim_ErrorPlotter() {
   //Two dimensional plots for each error in minimization
   TH2D *as = new TH2D("as","",//"Asymmetry vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
+  for (int i=0; i<=nbinsX; ++i) {
+    for (int j=0; j<=nbinsY; ++j) {
+      as->SetBinContent(i,j,-3.);
+    }
+  }
+  TH2D *as2 = new TH2D("as2","",//"Asymmetry vs. Analysis Window",
+		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
   
   TH2D *stat = new TH2D("stat","",//"Statistical Uncertainty vs. Analysis Window",
 		      nbinsX,xbinLow,xbinHigh,nbinsY,ybinLow,ybinHigh);
@@ -168,11 +178,15 @@ void CombinedTwoDim_ErrorPlotter() {
     Int_t xbin = tot->GetXaxis()->FindBin(xBinVal[bin]);
     Int_t ybin = tot->GetYaxis()->FindBin(yBinVal[bin]);
 
-    as->SetBinContent(xbin,ybin,(asymm[bin]/finalA>0.99?asymm[bin]/finalA:0.99));
+    // as->SetBinContent(xbin,ybin,(asymm[bin]/finalA>0.99?asymm[bin]/finalA:0.99));
+    Double_t x = (asymm[bin]-finalA)/((total[bin]*asymm[bin])/100.); //+finalA_err*finalA
+    as->SetBinContent(xbin,ybin,x<-2.?-2.:x);
     as->SetBinError(xbin,ybin,asymm[bin]*statistics[bin]/100./finalA);
     stat->SetBinContent(xbin,ybin,statistics[bin]);
     syst->SetBinContent(xbin,ybin,sim[bin]);
     tot->SetBinContent(xbin,ybin,total[bin]);
+
+    as2->SetBinContent(xbin,ybin,TMath::Abs(x)<1.?1.:0.);
 
   }
 
@@ -236,93 +250,74 @@ void CombinedTwoDim_ErrorPlotter() {
 
   gStyle->SetErrorX(0);
 
+  TEllipse *ell = new TEllipse(740.,190.,10.,10.);
+  ell->SetFillStyle(0);
+  ell->SetLineColor(1);
+  ell->SetLineStyle(2);
+  ell->SetLineWidth(2);
+  
+
   TCanvas *cAs = new TCanvas("cAs","cAs");
-  //gPad->SetRightMargin(0.22);
+  gPad->SetRightMargin(0.24);
   as->Draw(drawOpt);
   as->GetXaxis()->SetTitle("Maximum Energy (keV)");
   as->GetYaxis()->SetTitle("Minimum Energy (keV)");
   //as->SetMarkerStyle(25);
   //as->SetMarkerColor(kBlue);
-  as->GetZaxis()->SetRangeUser(0.99,1.01);
+  //as->GetZaxis()->SetRangeUser(0.99,1.01);
+  as->GetZaxis()->SetRangeUser(-2.,2.);
   //as->SetMinimum(0.120);
   //as->SetMaximum(0.125);
-  as->GetZaxis()->SetTitle("A/A_{min}");
+  as->GetZaxis()->SetTitle("#frac{A#minusA_{min}}{#deltaA}");
+  as->GetZaxis()->SetTitleOffset(1.25);
   as->GetXaxis()->CenterTitle();
   as->GetYaxis()->CenterTitle();
   as->GetZaxis()->CenterTitle();
+
+  ell->Draw("same");
   cAs->Update();
+  cAs->Print("TwoDimUncert.pdf");
 
-  TCanvas *c1 = new TCanvas("c1","c1",1200,1200);
-  c1->Divide(2,2);
 
-  c1->cd(1);
-
-  for (UInt_t i=0; i<en150.size(); ++i) {
-    std::cout << en150[i] << " " << a150[i] << " " << a150_err[i] << endl;
-   
-  }
+  gStyle->SetPalette(kDeepSea);
   
-  TGraphErrors *g150 = new TGraphErrors(en150.size(),&en150[0],&a150[0],
-					0,&a150_err[0]);
-  g150->SetMarkerStyle(kOpenSquare);
-  g150->SetLineWidth(2);
-  g150->SetTitle("Lower Window Edge at 150 keV");
-  g150->GetXaxis()->SetTitle("Upper Window Edge (keV)");
-  g150->GetYaxis()->SetTitle("Asymmetry");
+  TCanvas *cAs2 = new TCanvas("cAs2","cAs2");
+  gPad->SetRightMargin(0.05);
+  as2->Draw("col");
+  as2->GetXaxis()->SetTitle("Maximum Energy (keV)");
+  as2->GetYaxis()->SetTitle("Minimum Energy (keV)");
+  //as2->SetMarkerStyle(25);
+  //as2->SetMarkerColor(kBlue);
+  //as2->GetZaxis()->SetRangeUser(0.99,1.01);
+  //as2->GetZaxis()->SetRangeUser(-2.,2.);
+  //as2->SetMinimum(0.120);
+  //as2->SetMaximum(0.125);
+  //as2->GetZaxis()->SetTitle("");
+  as2->GetXaxis()->CenterTitle();
+  as2->GetYaxis()->CenterTitle();
+  as2->GetZaxis()->CenterTitle();
+
+  ell->Draw("SAME");
   
-  g150->Draw("AP");
-
-  c1->cd(2);
-
-  TGraphErrors *g200 = new TGraphErrors(en200.size(),&en200[0],&a200[0],
-					0,&a200_err[0]);
-  g200->SetMarkerStyle(kOpenSquare);
-  g200->SetLineWidth(2);
-  g200->GetXaxis()->SetTitle("Upper Window Edge (keV)");
-  g200->GetYaxis()->SetTitle("Asymmetry");
-  g200->SetTitle("Lower Window Edge at 200 keV");
-
+  cAs2->Update();
+  cAs2->Print("TwoDimUncert.pdf");
   
-  g200->Draw("AP");
-
-  c1->cd(3);
-
-  TGraphErrors *g250 = new TGraphErrors(en250.size(),&en250[0],&a250[0],
-					0,&a250_err[0]);
-  g250->SetMarkerStyle(kOpenSquare);
-  g250->SetLineWidth(2);
-  g250->GetXaxis()->SetTitle("Upper Window Edge (keV)");
-  g250->GetYaxis()->SetTitle("Asymmetry");
-  g250->SetTitle("Lower Window Edge at 250 keV");
-
-  g250->Draw("AP");
-
-  c1->cd(4);
-
-  TGraphErrors *g300 = new TGraphErrors(en300.size(),&en300[0],&a300[0],
-					0,&a300_err[0]);
-  g300->SetMarkerStyle(kOpenSquare);
-  g300->SetLineWidth(2);
-  g300->GetXaxis()->SetTitle("Upper Window Edge (keV)");
-  g300->GetYaxis()->SetTitle("Asymmetry");
-  g300->SetTitle("Lower Window Edge at 300 keV");
-
-  g300->Draw("AP");
+  
 
 
   TCanvas *c10 = new TCanvas("c10","c10");
   TGraph *st = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotStat[0]);
-  st->SetLineWidth(3);
-  st->SetLineStyle(1);
+  st->SetLineWidth(2);
+  st->SetLineStyle(7);
   st->SetLineColor(1);
 
   TGraph *sys = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotSyst[0]);
   sys->SetLineWidth(2);
-  sys->SetLineStyle(1);
+  sys->SetLineStyle(8);
   sys->SetLineColor(2);
   
   TGraph *t = new TGraph(minPlotEn.size(),&minPlotEn[0],&minPlotTot[0]);
-  t->SetLineWidth(2);
+  t->SetLineWidth(3);
   t->SetLineStyle(1);
   t->SetLineColor(4);
 
@@ -344,6 +339,6 @@ void CombinedTwoDim_ErrorPlotter() {
   l->Draw("SAME");
   c10->Update();
 
-  cAs->Print("TwoDimUncert.pdf");
+  
   c10->Print("TwoDimUncert.pdf)");
 }

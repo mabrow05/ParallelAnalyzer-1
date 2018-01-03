@@ -117,7 +117,7 @@ void betaAsymmetryFitter() {
   c1->cd(1);
   TGraphErrors *gr1 = new TGraphErrors(energy2011.size(),&energy2011[0],&AsymWithEnDep2011[0],NULL,&AsymWithEnDepErr2011[0]);
   gr1->SetTitle(TString::Format("A(E) vs. Energy for 2011-2012").Data());
-  gr1->GetXaxis()->SetTitle("Energy (keV)");
+  gr1->GetXaxis()->SetTitle("E_{recon} (keV)");
   gr1->GetYaxis()->SetTitle("A(E)");
   gr1->GetXaxis()->CenterTitle();
   gr1->GetYaxis()->CenterTitle();
@@ -152,7 +152,7 @@ void betaAsymmetryFitter() {
 
   TGraphErrors *gr1_2012 = new TGraphErrors(energy2012.size(),&energy2012[0],&AsymWithEnDep2012[0],NULL,&AsymWithEnDepErr2012[0]);
   gr1_2012->SetTitle(TString::Format("A(E) vs. Energy for 2012-2013").Data());
-  gr1_2012->GetXaxis()->SetTitle("Energy (keV)");
+  gr1_2012->GetXaxis()->SetTitle("E_{recon} (keV)");
   gr1_2012->GetYaxis()->SetTitle("A(E)");
   gr1_2012->GetXaxis()->CenterTitle();
   gr1_2012->GetYaxis()->CenterTitle();
@@ -540,10 +540,10 @@ void betaAsymmetryFitter() {
   residALL->SetMarkerColor(color?kBlue:kBlack);
   residALL->SetMarkerStyle(0);
   residALL->SetMarkerSize(1.);
-  residALL->GetYaxis()->SetTitle("MC-Data (mHz/keV)");
+  residALL->GetYaxis()->SetTitle("MC-Data");
   residALL->GetYaxis()->SetLabelSize(0.12);
-  residALL->GetYaxis()->SetTitleOffset(0.5);
-  residALL->GetYaxis()->SetTitleSize(0.10);
+  residALL->GetYaxis()->SetTitleOffset(0.4);
+  residALL->GetYaxis()->SetTitleSize(0.14);
   residALL->GetXaxis()->SetLabelSize(0.12);
   residALL->GetXaxis()->CenterTitle();
   residALL->GetYaxis()->CenterTitle();
@@ -602,8 +602,8 @@ void betaAsymmetryFitter() {
   c2->cd();
   TPaveText *pv_xTitle = new TPaveText(0.3,0.01,0.7,0.04,"nbNDC");
   pv_xTitle->SetBorderSize(0);
-  pv_xTitle->AddText("Energy (keV)");
-  pv_xTitle->GetLine(0)->SetTextSize(0.035);
+  pv_xTitle->AddText("E_{recon} (keV)");
+  pv_xTitle->GetLine(0)->SetTextSize(0.040);
   pv_xTitle->GetLine(0)->SetTextFont(42);
   pv_xTitle->Draw();
   
