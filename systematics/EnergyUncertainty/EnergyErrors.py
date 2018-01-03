@@ -171,17 +171,17 @@ def plotTheoryErrors(year=2011):
 
 	gCx=graph.graphxy(width=15,height=8,
 					  x=graph.axis.lin(title="Energy (keV)",min=0,max=780),
-					  y=graph.axis.lin(title=" $% Correction (Delta A/A)$",min=0,max=3.),
-					  key = graph.key.key(pos="tl"))
+					  y=graph.axis.lin(title="Correction $(A_0-A)/A$ $(\%)$",min=-3.,max=0.),
+					  key = graph.key.key(pos="bl"))
 	setTexrunner(gCx)
 			 
         #gdat = [ [x,100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,775.,77)  ]
         gdat = [ [x,-100*WilkinsonRWM(x)/(1+WilkinsonRWM(x)),-100*shann_h_minus_g_a2pi(x)/(1+shann_h_minus_g_a2pi(x)) ] for x in unifrange(5.,775.,77)  ]
 
 
-        gCx.plot(graph.data.points(gdat,x=1,y=2,title="Recoil Order"),
+        gCx.plot(graph.data.points(gdat,x=1,y=2,title="Recoil Order $\\Delta_{\\rm{RO}}$"),
                  [ graph.style.line([style.linewidth.THick,style.linestyle.dotted,color.rgb.red]),])
-        gCx.plot(graph.data.points(gdat,x=1,y=3,title="Radiative"),
+        gCx.plot(graph.data.points(gdat,x=1,y=3,title="Radiative $\\Delta_{\\rm{rad}}$"),
                  [ graph.style.line([style.linewidth.THick,style.linestyle.dashed,color.rgb.blue]),])
        
 	
