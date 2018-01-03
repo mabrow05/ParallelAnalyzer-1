@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
   gStyle->SetTitleYOffset(1.2);
   gStyle->SetTitleXSize(0.05);
   gStyle->SetTitleXOffset(1.2);
-  gStyle->SetLabelSize(0.03,"xyz");
+  gStyle->SetLabelSize(0.045,"xyz");
   //gStyle->SetOptFit(1111);
   //gStyle->SetStatY(0.85);
   //gStyle->SetStatX(0.975);

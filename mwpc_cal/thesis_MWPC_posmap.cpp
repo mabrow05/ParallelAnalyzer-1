@@ -46,8 +46,8 @@ void plot_position_map(int XePeriod, double binWidth)
   palette[7] = 13;
   palette[8] = 12;
   palette[9] = 1;
-  gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
-  //gStyle->SetPalette(57);  // z-axis color scale for 2D histograms
+  //gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
+  gStyle->SetPalette(57);  // z-axis color scale for 2D histograms
   //gStyle->SetOptStat(11);
   gStyle->SetOptStat(0);
   gStyle->SetStatFontSize(0.030);
@@ -57,16 +57,17 @@ void plot_position_map(int XePeriod, double binWidth)
   //gStyle->SetTitleX(0.17);
   //gStyle->SetTitleAlign(13);
   //gStyle->SetTitleOffset(0.80, "x");
-  //gStyle->SetTitleOffset(1.30, "y");
+  gStyle->SetTitleOffset(0.9, "y");
   //gStyle->SetPadTickX(1);
   //gStyle->SetPadTickY(1);
   //gStyle->SetNdivisions(510,"X");
   //gStyle->SetNdivisions(510,"Y");
   //gStyle->SetNdivisions(9,"Z");
-  //gStyle->SetPadLeftMargin(0.13); // 0.13
-  //gStyle->SetPadRightMargin(0.15); // 0.04
- gStyle->SetPadTopMargin(0.05); // 0.30
-  //gStyle->SetLabelSize(0.045, "X");
+  gStyle->SetPadLeftMargin(0.12); // 0.13
+  gStyle->SetPadRightMargin(0.12); // 0.04
+  gStyle->SetPadTopMargin(0.05); // 0.30
+  gStyle->SetPadBottomMargin(0.12); // 0.30
+  gStyle->SetLabelSize(0.045, "XYZ");
   //gStyle->SetLabelSize(0.045, "Y");
   //gStyle->SetLabelSize(0.045, "Z");
   //gStyle->SetLabelOffset(0.00, "X");

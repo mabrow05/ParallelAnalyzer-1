@@ -63,8 +63,8 @@ void plot_position_map(int XePeriod, double binWidth, TString fitType)
   palette[7] = 13;
   palette[8] = 12;
   palette[9] = 1;
-  gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
-  //gStyle->SetPalette(2);  // z-axis color scale for 2D histograms
+  //gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
+  gStyle->SetPalette(57);  // z-axis color scale for 2D histograms
   //gStyle->SetOptStat(11);
   gStyle->SetOptStat(0);
   gStyle->SetStatFontSize(0.030);
@@ -92,7 +92,9 @@ void plot_position_map(int XePeriod, double binWidth, TString fitType)
   gStyle->SetTitleSize(0.050, "Y");
   //gROOT->ForceStyle();
 
-  
+  gStyle->SetNumberContours(255);
+
+    
   PositionMap posmap(binWidth, 50.);
   posmap.setRCflag(false); // plotting non RC maps
   posmap.readPositionMap(XePeriod,fitType);

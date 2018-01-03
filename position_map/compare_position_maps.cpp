@@ -65,8 +65,8 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   palette[7] = 13;
   palette[8] = 12;
   palette[9] = 1;
-  gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
-  //gStyle->SetPalette(2);  // z-axis color scale for 2D histograms
+  //gStyle->SetPalette(10,palette);  // z-axis color scale for 2D histograms
+  gStyle->SetPalette(57);  // z-axis color scale for 2D histograms
   //gStyle->SetOptStat(11);
   gStyle->SetOptStat(0);
   gStyle->SetStatFontSize(0.030);
@@ -93,6 +93,8 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   gStyle->SetTitleSize(0.050, "X");
   gStyle->SetTitleSize(0.050, "Y");
   //gROOT->ForceStyle();
+
+  gStyle->SetNumberContours(255);
 
   
   PositionMap posmap1(binWidth, 50.);
@@ -181,7 +183,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisE3->GetXaxis()->CenterTitle();
   hisE3->GetYaxis()->CenterTitle();
   hisE3->GetYaxis()->CenterTitle();
-  hisE3->SetAxisRange(0.75,1.25,"Z");
+   hisE3->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -213,7 +215,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisE2->GetXaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
   hisE2->GetYaxis()->CenterTitle();
-  hisE2->SetAxisRange(0.75,1.25,"Z");
+  hisE2->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -251,7 +253,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisE0->GetXaxis()->CenterTitle();
   hisE0->GetYaxis()->CenterTitle();
   hisE0->GetYaxis()->CenterTitle();
-  hisE0->SetAxisRange(0.75,1.25,"Z");
+  hisE0->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -283,7 +285,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisE1->GetXaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
   hisE1->GetYaxis()->CenterTitle();
-  hisE1->SetAxisRange(0.75,1.25,"Z");
+  hisE1->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -320,7 +322,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisW1->GetXaxis()->CenterTitle();
   hisW1->GetYaxis()->CenterTitle();
   hisW1->GetYaxis()->CenterTitle();
-  hisW1->SetAxisRange(0.75,1.25,"Z");
+  hisW1->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -352,7 +354,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisW0->GetXaxis()->CenterTitle();
   hisW0->GetYaxis()->CenterTitle();
   hisW0->GetYaxis()->CenterTitle();
-  hisW0->SetAxisRange(0.75,1.25,"Z");
+  hisW0->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -390,7 +392,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisW2->GetXaxis()->CenterTitle();
   hisW2->GetYaxis()->CenterTitle();
   hisW2->GetYaxis()->CenterTitle();
-  hisW2->SetAxisRange(0.75,1.25,"Z");
+  hisW2->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
@@ -422,7 +424,7 @@ void plot_position_map( TString fitType1, TString fitType2, int XePeriod, double
   hisW3->GetXaxis()->CenterTitle();
   hisW3->GetYaxis()->CenterTitle();
   hisW3->GetYaxis()->CenterTitle();
-  hisW3->SetAxisRange(0.75,1.25,"Z");
+  hisW3->SetAxisRange(0.55,1.45,"Z");
 
   /*
   TEllipse *ell = new TEllipse(0,0,45,45);
