@@ -7,7 +7,7 @@ from math import *
 from PyxUtils import *
 from DecayPhysics import *
 #from review.ErrorEnvelope import *
-from CorrectionsPlotter import *
+#from CorrectionsPlotter import *
 
 # These are the error envelopes
 limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.025),(1200,1200*0.025)],

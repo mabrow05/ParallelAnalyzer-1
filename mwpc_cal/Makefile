@@ -37,6 +37,10 @@ plot_MWPC_position_map.exe: plot_MWPC_position_map.o $(objects)
 	$(CXX) $(CXXFLAGS) -o plot_MWPC_position_map.exe plot_MWPC_position_map.o $(objects) $(LIBS)
 	@echo "Done"
 
+thesis_MWPC_posmap.exe: thesis_MWPC_posmap.o $(objects)
+	$(CXX) $(CXXFLAGS) -o thesis_MWPC_posmap.exe thesis_MWPC_posmap.o $(objects) $(LIBS)
+	@echo "Done"
+
 MWPC_calibration.exe: MWPC_calibration.o $(objects)
 	$(CXX) $(CXXFLAGS) -o MWPC_calibration.exe MWPC_calibration.o $(objects) $(LIBS)
 	@echo "Done"
