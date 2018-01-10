@@ -1738,5 +1738,4 @@ void LinearityCurves(Int_t runPeriod, bool useTanh=false)
   TString pdfFile = TString::Format("linCurves_SrcPeriod_%i.pdf",runPeriod);
   c1->Print(pdfFile);
 
-
 }
