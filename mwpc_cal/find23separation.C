@@ -63,7 +63,7 @@ void find23separation(TString geom) {
   //TH1D::AddDirectory(false);
   
   TFile *f = new TFile(TString::Format("Backscatters_%i-%i.root",octMin,octMax),
-		       "UPDATE");
+		       "READ");
 
   for ( Int_t hist=0; hist<numEnergyBins; ++hist ) {
 
@@ -106,7 +106,7 @@ void find23separation(TString geom) {
     misIDE[hist] = new TH1D(TString::Format("misIDE_%0.0f-%0.0f",binLowEdge,binHighEdge),
 			   TString::Format("Properly Identified Fraction %0.0f-%0.0f keV",binLowEdge,binHighEdge),
 			   nbins, binWidth/2., 20.+binWidth/2.);
-    misIDE[hist]->GetXaxis()->SetTitle("Position of Separation Cut in E_{MWPC} (keV)");
+    misIDE[hist]->GetXaxis()->SetTitle("Position of Separation Cut in E_{MWPC} [keV]");
     misIDE[hist]->GetYaxis()->SetTitle("Fraction of Correctly Identified Events");
     misIDE[hist]->GetXaxis()->CenterTitle();
     misIDE[hist]->GetYaxis()->CenterTitle();
@@ -173,7 +173,7 @@ void find23separation(TString geom) {
     misIDW[hist] = new TH1D(TString::Format("misIDW_%0.0f-%0.0f",binLowEdge,binHighEdge),
 			   TString::Format("Properly Identified Fraction %0.0f-%0.0f keV",binLowEdge,binHighEdge),
 			   nbins, binWidth/2., 20.+binWidth/2.);
-    misIDW[hist]->GetXaxis()->SetTitle("Position of Separation Cut in E_{MWPC} (keV)");
+    misIDW[hist]->GetXaxis()->SetTitle("Position of Separation Cut in E_{MWPC} [keV]");
     misIDW[hist]->GetYaxis()->SetTitle("Fraction of Correctly Identified Events");
     misIDW[hist]->GetXaxis()->CenterTitle();
     misIDW[hist]->GetYaxis()->CenterTitle();
@@ -223,16 +223,19 @@ void find23separation(TString geom) {
   }
 
   TCanvas *c1 = new TCanvas("c1","c1");
-  misIDE[3]->Draw();
+  misIDE[2]->Draw();
 
+  
   TCanvas *c2 = new TCanvas("c2");
-
+  gPad->SetTopMargin(0.05);
+  gPad->SetRightMargin(0.05);
+  
 
   TGraph *gE = new TGraph(numEnergyBins,enBinMidE,fitValE);
   gE->SetMarkerStyle(26);
-  gE->SetTitle("Type 2/3 Separation Parameterization");
-  gE->GetXaxis()->SetTitle("Scintillator Energy (keV)");
-  gE->GetYaxis()->SetTitle("Wirechamber Energy Cut (keV)");
+  gE->SetTitle("");//"Type 2/3 Separation Parameterization");
+  gE->GetXaxis()->SetTitle("Scintillator Energy [keV]");
+  gE->GetYaxis()->SetTitle("Wirechamber Energy Cut [keV]");
   gE->SetLineWidth(2);
   gE->GetXaxis()->CenterTitle();
   gE->GetYaxis()->CenterTitle();
@@ -243,9 +246,9 @@ void find23separation(TString geom) {
 
   TGraph *gW = new TGraph(numEnergyBins,enBinMidW,fitValW);
   gW->SetMarkerStyle(24);
-  gW->SetTitle("Type 2/3 Separation Parameterization");
-  gW->GetXaxis()->SetTitle("Scintillator Energy (keV)");
-  gW->GetYaxis()->SetTitle("Wirechamber Energy Cut (keV)");
+  //gW->SetTitle("Type 2/3 Separation Parameterization");
+  gW->GetXaxis()->SetTitle("Scintillator Energy [keV]");
+  gW->GetYaxis()->SetTitle("Wirechamber Energy Cut [keV]");
   gW->GetXaxis()->CenterTitle();
   gW->GetYaxis()->CenterTitle();
   gW->SetMarkerColor(kRed);
@@ -260,8 +263,8 @@ void find23separation(TString geom) {
   TGraph *ave = new TGraph(numEnergyBins,enBinMidW,aveFit);
   ave->SetMarkerStyle(1);
   ave->SetTitle("Type 2/3 Separation Parameterization");
-  ave->GetXaxis()->SetTitle("Scintillator Energy (keV)");
-  ave->GetYaxis()->SetTitle("Wirechamber Energy Cut (keV)");
+  ave->GetXaxis()->SetTitle("Scintillator Energy [keV]");
+  ave->GetYaxis()->SetTitle("Wirechamber Energy Cut [keV]");
   ave->GetXaxis()->CenterTitle();
   ave->GetYaxis()->CenterTitle();
   ave->SetMarkerColor(0);
@@ -318,7 +321,7 @@ void find23separation(TString geom) {
     c0->cd(1);
 
     hType2E[i]->SetTitle(TString::Format("East E_{MWPC} (%0.0f-%0.0f keV bin)",binLowEdge,binHighEdge));
-    hType2E[i]->GetXaxis()->SetTitle("E_{MWPC} (keV)");
+    hType2E[i]->GetXaxis()->SetTitle("E_{MWPC} [keV]");
     hType2E[i]->GetXaxis()->CenterTitle();
     hType2E[i]->SetLineColor(kBlue);
     hType2E[i]->SetLineWidth(2);
@@ -344,7 +347,7 @@ void find23separation(TString geom) {
     
     
     hType2W[i]->SetTitle(TString::Format("West E_{MWPC} (%0.0f-%0.0f keV)",binLowEdge,binHighEdge));
-    hType2W[i]->GetXaxis()->SetTitle("E_{MWPC} (keV)");
+    hType2W[i]->GetXaxis()->SetTitle("E_{MWPC} [keV]");
     hType2W[i]->GetXaxis()->CenterTitle();
     hType2W[i]->SetLineColor(kBlue);
     hType2W[i]->SetLineWidth(2);
@@ -372,6 +375,100 @@ void find23separation(TString geom) {
     delete leg;
     delete line;
   }
+
+  gStyle->SetTitleOffset(1.30, "x");
+  gStyle->SetTitleOffset(1.1, "y");
+  gStyle->SetPadLeftMargin(0.11); // 0.13
+  gStyle->SetPadRightMargin(0.05); // 0.04
+  gStyle->SetPadBottomMargin(0.12); // 0.30
+  gStyle->SetPadTopMargin(0.05); // 0.30
+  gStyle->SetLabelSize(0.05, "XYZ");
+  //gStyle->SetLabelSize(0.045, "Y");
+  //gStyle->SetLabelSize(0.045, "Z");
+  //gStyle->SetLabelOffset(0.00, "X");
+  //gStyle->SetTitleOffset(0.8, "X");
+  //gStyle->SetTitleSize(0.080, "X");
+  gStyle->SetTitleSize(0.050, "Y");
+
+  //Borders on Legends and titles and stats
+  gStyle->SetFillStyle(0000); 
+  //gStyle->SetStatStyle(0); 
+  //gStyle->SetTitleStyle(0); 
+  //gStyle->SetCanvasBorderSize(0); 
+  //gStyle->SetFrameBorderSize(0); 
+  gStyle->SetLegendBorderSize(0); 
+  //gStyle->SetStatBorderSize(0); 
+  //gStyle->SetTitleBorderSize(0);
+  
+  
+  c0 = new TCanvas("c0","c0",600,700);
+
+  hType2E[2]->SetTitle("");
+  hType2E[2]->GetXaxis()->SetTitle("E_{MWPC} [keV]");
+  hType2E[2]->GetXaxis()->CenterTitle();
+  hType2E[2]->SetLineColor(kBlue);
+  hType2E[2]->SetLineWidth(2);
+  hType2E[2]->GetXaxis()->SetTitleOffset(1.0);
+  hType2E[2]->GetXaxis()->SetTitleSize(0.05);
+  hType2E[2]->GetXaxis()->SetLabelSize(0.04);
+  hType2E[2]->GetYaxis()->SetLabelSize(0.04);
+  
+
+  hType2E[2]->Draw();
+
+  
+  hType3E[2]->SetLineColor(kBlue);
+  hType3E[2]->SetLineWidth(2);
+  hType3E[2]->SetLineStyle(7);
+  hType3E[2]->Draw("SAME");
+  c0->Update();
+    
+  leg = new TLegend(0.55,0.70,0.85,0.85);
+  leg->AddEntry(hType2E[2],"Type 2");
+  leg->AddEntry(hType3E[2],"Type 3");
+  leg->Draw("SAME");
+  
+  line = new TLine(fitValE[2],0.,fitValE[2],gPad->GetUymax());
+  line->SetLineWidth(2);
+  line->SetLineStyle(7);
+  line->Draw("SAME");
+    
+  TCanvas *c3 = new TCanvas("c3","c3",600,700);
+    
+  hType2W[2]->SetTitle("");
+  hType2W[2]->GetXaxis()->SetTitle("E_{MWPC} [keV]");
+  hType2W[2]->GetXaxis()->CenterTitle();
+  hType2W[2]->SetLineColor(kBlue);
+  hType2W[2]->SetLineWidth(2);
+  hType2W[2]->Draw();
+  hType2W[2]->GetXaxis()->SetTitleOffset(1.);
+  hType2W[2]->GetXaxis()->SetTitleSize(0.05);
+  hType2W[2]->GetXaxis()->SetLabelSize(0.04);
+  hType2W[2]->GetYaxis()->SetLabelSize(0.04);
+
+  
+  hType3W[2]->SetLineColor(kBlue);
+  hType3W[2]->SetLineWidth(2);
+  hType3W[2]->SetLineStyle(7);
+  hType3W[2]->Draw("SAME");
+  c3->Update();
+  
+  leg = new TLegend(0.55,0.70,0.85,0.85);
+  leg->AddEntry(hType2W[2],"Type 2");
+  leg->AddEntry(hType3W[2],"Type 3");
+  leg->Draw("SAME");
+  
+  line = new TLine(fitValW[2],0.,fitValW[2],gPad->GetUymax());
+  line->SetLineWidth(2);
+  line->SetLineStyle(7);
+  line->Draw("SAME");
+  
+  c0->Print(TString::Format("Thesis_sepPlot_%s_200-300keV.pdf(",geom.Data()));
+  c3->Print(TString::Format("Thesis_sepPlot_%s_200-300keV.pdf)",geom.Data()));
+  
+  delete c0; delete c3;
+  delete leg;
+  delete line;
 
   
   

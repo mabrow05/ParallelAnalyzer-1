@@ -76,8 +76,16 @@ bool isSourceInFidCut(Int_t run, string src, Double_t fidCut, Int_t side) {
 void width_fitter(Int_t calPeriod)
 {
 
-  gStyle->SetPadLeftMargin(0.15);
-  gStyle->SetTitleYOffset(1.5);
+  gStyle->SetOptFit(0000);
+  gStyle->SetPadLeftMargin(0.17);
+  gStyle->SetTitleYOffset(1.2);
+  gStyle->SetPadTopMargin(0.05);
+  gStyle->SetPadRightMargin(0.05);
+  gStyle->SetPadBottomMargin(0.13);
+  gStyle->SetTitleXOffset(1.);
+  gStyle->SetTitleSize(0.05,"xy");
+  gStyle->SetLabelSize(0.04,"xy");
+  gStyle->SetFillStyle(0000); 
 
   //Read in sim and data widths
 
@@ -222,11 +230,18 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
 
   
 
-  cout << i << endl;
+  //cout << i << endl;
 
-  TCanvas *c1 = new TCanvas("c1", "c1", 1400, 1000);
+  TCanvas *c0 = new TCanvas("c0");
+  TCanvas *c1 = new TCanvas("c0");
+  TCanvas *c2 = new TCanvas("c0");
+  TCanvas *c3 = new TCanvas("c0");
+  TCanvas *c4 = new TCanvas("c0");
+  TCanvas *c5 = new TCanvas("c0");
+  TCanvas *c6 = new TCanvas("c0");
+  TCanvas *c7 = new TCanvas("c0");
 
-  TPad *p0 = new TPad("p0","East 1", 0.0, 0.5, 0.25, 1.0);
+  /*TPad *p0 = new TPad("p0","East 1", 0.0, 0.5, 0.25, 1.0);
   TPad *p1 = new TPad("p1","East 2", 0.25, 0.5, 0.5, 1.0);
   TPad *p2 = new TPad("p2","East 3", 0.5, 0.5, 0.75, 1.0);
   TPad *p3 = new TPad("p3","East 4", 0.75, 0.5, 1.0, 1.0);
@@ -242,7 +257,7 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   p5->Draw();
   p6->Draw(); 
   p7->Draw(); 
-
+  */
 
   TF1 *f1 = new TF1("f1","[0]*x",0., 300.);
   f1->SetParameter(0,1.);
@@ -258,17 +273,17 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   Double_t maxRange = 200.;
 
   
-  p0->cd();
+  c0->cd();
 
   if (finalDataWidths[0].size()>0) {
 
     TGraphErrors *pmt0 = new TGraphErrors(finalDataWidths[0].size(), &finalSimWidths[0][0], &finalDataWidths[0][0],
 					  &finalSimWidthErrors[0][0], &finalDataWidthErrors[0][0]);
-    pmt0->SetTitle("PMT East 1");
+    pmt0->SetTitle("");//"PMT East 1");
     pmt0->SetMarkerColor(1);
     pmt0->SetLineColor(1);
     pmt0->SetMarkerStyle(20);
-    pmt0->SetMarkerSize(0.25);
+    pmt0->SetMarkerSize(1);
     pmt0->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt0->GetYaxis()->SetTitle("Actual Width (keV)");
     pmt0->SetMinimum(0.0);
@@ -283,7 +298,15 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[0] = 1.;
     else slope[0] = f1->GetParameter(0);
-    
+
+
+    TPaveText *pv0 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv0->SetBorderSize(0);
+    pv0->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv0->GetLine(0)->SetTextSize(0.045);
+    pv0->GetLine(0)->SetTextFont(42);
+    pv0->Draw("SAME");
   }
   
   else slope[0]=1.;
@@ -292,16 +315,16 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   attempt = 0;
   f1->SetParameter(0,1.);
 
-  p1->cd();
+  c1->cd();
 
   if (finalDataWidths[1].size()>0) {
     TGraphErrors *pmt1 = new TGraphErrors(finalDataWidths[1].size(), &finalSimWidths[1][0], &finalDataWidths[1][0],
 					  &finalSimWidthErrors[1][0], &finalDataWidthErrors[1][0]);
-    pmt1->SetTitle("PMT East 2");
+    pmt1->SetTitle("");//"PMT East 2");
     pmt1->SetMarkerColor(1);
     pmt1->SetLineColor(1);
     pmt1->SetMarkerStyle(20);
-    pmt1->SetMarkerSize(0.25);
+    pmt1->SetMarkerSize(1);
     pmt1->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt1->GetYaxis()->SetTitle("Actual Width (keV)");
     pmt1->SetMinimum(0.0);
@@ -316,6 +339,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[1] = 1.;
     else slope[1] = f1->GetParameter(0);
+
+    TPaveText *pv1 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv1->SetBorderSize(0);
+    pv1->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv1->GetLine(0)->SetTextSize(0.045);
+    pv1->GetLine(0)->SetTextFont(42);
+    pv1->Draw("SAME");
   }
 
   else slope[1]=1.;
@@ -324,17 +355,17 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   attempt = 0;
   f1->SetParameter(0,1.);
 
-  p2->cd();
+  c2->cd();
 
 
   if (finalDataWidths[2].size()>0) {
     TGraphErrors *pmt2 = new TGraphErrors(finalDataWidths[2].size(), &finalSimWidths[2][0], &finalDataWidths[2][0],
 					  &finalSimWidthErrors[2][0], &finalDataWidthErrors[2][0]);   
-    pmt2->SetTitle("PMT East 3");
+    pmt2->SetTitle("");//"PMT East 3");
     pmt2->SetMarkerColor(1);
     pmt2->SetLineColor(1);
     pmt2->SetMarkerStyle(20);
-    pmt2->SetMarkerSize(0.25);
+    pmt2->SetMarkerSize(1);
     pmt2->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt2->GetYaxis()->SetTitle("Actual Width (keV)");  
     pmt2->SetMinimum(0.0);
@@ -349,6 +380,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[2] = 1.;
     else slope[2] = f1->GetParameter(0);
+
+    TPaveText *pv2 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv2->SetBorderSize(0);
+    pv2->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv2->GetLine(0)->SetTextSize(0.045);
+    pv2->GetLine(0)->SetTextFont(42);
+    pv2->Draw("SAME");
   }
 
   else slope[2]=1.;
@@ -358,17 +397,17 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   f1->SetParameter(0,1.);
 
 
-  p3->cd();
+  c3->cd();
 
   if (finalDataWidths[3].size()>0) {
 
     TGraphErrors *pmt3 = new TGraphErrors(finalDataWidths[3].size(), &finalSimWidths[3][0], &finalDataWidths[3][0],
 					  &finalSimWidthErrors[3][0], &finalDataWidthErrors[3][0]);
-    pmt3->SetTitle("PMT East 4");
+    pmt3->SetTitle("");//"PMT East 4");
     pmt3->SetMarkerColor(1);
     pmt3->SetLineColor(1);
     pmt3->SetMarkerStyle(20);
-    pmt3->SetMarkerSize(0.25);
+    pmt3->SetMarkerSize(1);
     pmt3->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt3->GetYaxis()->SetTitle("Actual Width (keV)");
     pmt3->SetMinimum(0.0);
@@ -384,6 +423,13 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     if (status!=TString("CONVERGED ")) slope[3] = 1.;
     else slope[3] = f1->GetParameter(0);
 
+    TPaveText *pv3 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv3->SetBorderSize(0);
+    pv3->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv3->GetLine(0)->SetTextSize(0.045);
+    pv3->GetLine(0)->SetTextFont(42);
+    pv3->Draw("SAME");
   }
   
   else slope[3]=1.;
@@ -393,17 +439,17 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   f1->SetParameter(0,1.);
 
 
-  p4->cd();
+  c4->cd();
 
   if (finalDataWidths[4].size()>0) {
     
     TGraphErrors *pmt4 = new TGraphErrors(finalDataWidths[4].size(), &finalSimWidths[4][0], &finalDataWidths[4][0],
 					  &finalSimWidthErrors[4][0], &finalDataWidthErrors[4][0]);
-    pmt4->SetTitle("PMT West 1");
+    pmt4->SetTitle("");//"PMT West 1");
     pmt4->SetMarkerColor(1);
     pmt4->SetLineColor(1);
     pmt4->SetMarkerStyle(20);
-    pmt4->SetMarkerSize(0.25);
+    pmt4->SetMarkerSize(1);
     pmt4->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt4->GetYaxis()->SetTitle("Actual Width (keV)");
     pmt4->SetMinimum(0.0);
@@ -418,6 +464,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[4] = 1.;
     else slope[4] = f1->GetParameter(0);
+
+    TPaveText *pv4 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv4->SetBorderSize(0);
+    pv4->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv4->GetLine(0)->SetTextSize(0.045);
+    pv4->GetLine(0)->SetTextFont(42);
+    pv4->Draw("SAME");
   }
 
   else slope[4]=1.;
@@ -427,17 +481,17 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   f1->SetParameter(0,1.);
 
 
-  p5->cd();
+  c5->cd();
 
   if (finalDataWidths[5].size()>0) {
 
     TGraphErrors *pmt5 = new TGraphErrors(finalDataWidths[5].size(), &finalSimWidths[5][0], &finalDataWidths[5][0],
 					  &finalSimWidthErrors[5][0], &finalDataWidthErrors[5][0]);
-    pmt5->SetTitle("PMT West 2");
+    pmt5->SetTitle("");//"PMT West 2");
     pmt5->SetMarkerColor(1);
     pmt5->SetLineColor(1);
     pmt5->SetMarkerStyle(20);
-    pmt5->SetMarkerSize(0.25);
+    pmt5->SetMarkerSize(1);
     pmt5->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt5->GetYaxis()->SetTitle("Actual Width (keV)");
     pmt5->SetMinimum(0.0);
@@ -452,6 +506,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[5] = 1.;
     else slope[5] = f1->GetParameter(0);
+
+    TPaveText *pv5 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv5->SetBorderSize(0);
+    pv5->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv5->GetLine(0)->SetTextSize(0.045);
+    pv5->GetLine(0)->SetTextFont(42);
+    pv5->Draw("SAME");
   }
 
   else slope[5]=1.;
@@ -461,17 +523,17 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   f1->SetParameter(0,1.);
 
 
-  p6->cd();
+  c6->cd();
 
   if (finalDataWidths[6].size()>0) {
 
     TGraphErrors *pmt6 = new TGraphErrors(finalDataWidths[6].size(), &finalSimWidths[6][0], &finalDataWidths[6][0],
 					  &finalSimWidthErrors[6][0], &finalDataWidthErrors[6][0]);
-    pmt6->SetTitle("PMT West 3");
+    pmt6->SetTitle("");//"PMT West 3");
     pmt6->SetMarkerColor(1);
     pmt6->SetLineColor(1);
     pmt6->SetMarkerStyle(20);
-    pmt6->SetMarkerSize(0.25);
+    pmt6->SetMarkerSize(1);
     pmt6->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt6->GetYaxis()->SetTitle("Actual Width (keV)");  
     pmt6->SetMinimum(0.0);
@@ -486,6 +548,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[6] = 1.;
     else slope[6] = f1->GetParameter(0);
+
+    TPaveText *pv6 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv6->SetBorderSize(0);
+    pv6->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv6->GetLine(0)->SetTextSize(0.045);
+    pv6->GetLine(0)->SetTextFont(42);
+    pv6->Draw("SAME");
   }
   
   else slope[6]=1.;
@@ -495,17 +565,17 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   f1->SetParameter(0,1.);
 
 
-  p7->cd();
+  c7->cd();
 
   if (finalDataWidths[7].size()>0) {
     
     TGraphErrors *pmt7 = new TGraphErrors(finalDataWidths[7].size(), &finalSimWidths[7][0], &finalDataWidths[7][0],
 					  &finalSimWidthErrors[7][0], &finalDataWidthErrors[7][0]);
-    pmt7->SetTitle("PMT West 4");
+    pmt7->SetTitle("");//"PMT West 4");
     pmt7->SetMarkerColor(1);
     pmt7->SetLineColor(1);
-    pmt7->SetMarkerStyle(20);
-    pmt7->SetMarkerSize(0.25);
+    pmt7->SetMarkerStyle(24);
+    pmt7->SetMarkerSize(1);
     pmt7->GetXaxis()->SetTitle("Simulated Width (keV)");
     pmt7->GetYaxis()->SetTitle("Actual Width (keV)");
     pmt7->SetMinimum(0.0);
@@ -520,6 +590,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[7] = 1.;
     else slope[7] = f1->GetParameter(0);
+
+    TPaveText *pv7 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv7->SetBorderSize(0);
+    pv7->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv7->GetLine(0)->SetTextSize(0.045);
+    pv7->GetLine(0)->SetTextFont(42);
+    pv7->Draw("SAME");
   }
   
   else slope[7]=1.;
@@ -531,7 +609,7 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
 
   //Calculate new k 
 
-  sprintf(tempfile,"%s/simulation_comparison/nPE_per_keV/nPE_per_keV_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
+  /*sprintf(tempfile,"%s/simulation_comparison/nPE_per_keV/nPE_per_keV_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
   ofstream new_k_fileout(tempfile);
 
   sprintf(tempfile,"%s/simulation_comparison/nPE_per_keV/prev_nPE_per_keV_%i.dat",getenv("ANALYSIS_CODE"),calPeriod);
@@ -550,5 +628,5 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   }
   old_k_fileout.close();
   new_k_fileout.close();
-  
+  */
 }

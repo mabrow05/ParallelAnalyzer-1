@@ -38,29 +38,31 @@ void widthCompare(Int_t srcPeriod) {
   gStyle->SetOptFit(0000);
   gStyle->SetPadLeftMargin(0.17);
   gStyle->SetTitleYOffset(1.2);
-  //gStyle->SetPadBottomMargin(0.17);
-  gStyle->SetTitleXOffset(0.8);
+  gStyle->SetPadTopMargin(0.05);
+  gStyle->SetPadRightMargin(0.05);
+  gStyle->SetPadBottomMargin(0.13);
+  gStyle->SetTitleXOffset(1.);
   gStyle->SetTitleSize(0.06,"t");
   gStyle->SetLabelSize(0.045,"xy");
   gStyle->SetFillStyle(0000); 
 
 
-  TCanvas *c1 = new TCanvas("c1","c1",1200,800);
-  c1->Divide(2,1);
-  c1->cd(1);
+  TCanvas *c1 = new TCanvas("c1","c1",600,800);
 
   TGraph *gE = new TGraph(dataEastWidth.size(),&dataEastWidth[0],&simEastWidth[0]);
   gE->SetMarkerStyle(kOpenCircle);
   gE->SetMarkerColor(kBlue);
-  gE->SetTitle("East");
+  gE->SetTitle("");//East");
   gE->Draw("AP");
   gE->GetXaxis()->SetLimits(0.,90.);
   gE->SetMaximum(90.);
   gE->SetMinimum(0.);
-  gE->GetXaxis()->SetTitle("Data Widths (keV)");
-  gE->GetXaxis()->SetTitleSize(0.06);
-  gE->GetYaxis()->SetTitleSize(0.06);
-  gE->GetYaxis()->SetTitle("Simulated Widths (keV)");
+  gE->GetXaxis()->SetTitle("Data Widths [keV]");
+  gE->GetXaxis()->SetTitleSize(0.055);
+  gE->GetXaxis()->CenterTitle();
+  gE->GetYaxis()->SetTitleSize(0.055);
+  gE->GetYaxis()->CenterTitle();
+  gE->GetYaxis()->SetTitle("Simulated Widths [keV]");
   gE->Draw("AP");
   c1->Update();
 
@@ -79,22 +81,24 @@ void widthCompare(Int_t srcPeriod) {
   pvEast->Draw();
 
 
-  c1->cd(2);
+  TCanvas *c2 = new TCanvas("c2","c2",600,800);
 
   TGraph *gW = new TGraph(dataWestWidth.size(),&dataWestWidth[0],&simWestWidth[0]);
   gW->SetMarkerStyle(kOpenCircle);
   gW->SetMarkerColor(kBlue);
-  gW->SetTitle("West");
+  gW->SetTitle("");//West");
   gW->Draw("AP");
   gW->GetXaxis()->SetLimits(0.,90.);
   gW->SetMaximum(90.);
   gW->SetMinimum(0.);
-  gW->GetXaxis()->SetTitle("Data Widths (keV)");
-  gW->GetYaxis()->SetTitle("Simulated Widths (keV)");
-  gW->GetXaxis()->SetTitleSize(0.06);
-  gW->GetYaxis()->SetTitleSize(0.06);
+  gW->GetXaxis()->SetTitle("Data Widths [keV]");
+  gW->GetYaxis()->SetTitle("Simulated Widths [keV]");
+  gW->GetXaxis()->SetTitleSize(0.055);
+  gW->GetYaxis()->SetTitleSize(0.055);
+  gW->GetXaxis()->CenterTitle();
+  gW->GetYaxis()->CenterTitle();
   gW->Draw("AP");
-  c1->Update();
+  c2->Update();
 
 
 
@@ -109,6 +113,7 @@ void widthCompare(Int_t srcPeriod) {
   pvWest->GetLine(0)->SetTextFont(42);
   pvWest->Draw();
 
-  c1->Print(TString::Format("widthsErecon_runPeriod_%i.pdf",srcPeriod));
+  c1->Print(TString::Format("widthsErecon_runPeriod_%i.pdf(",srcPeriod));
+  c2->Print(TString::Format("widthsErecon_runPeriod_%i.pdf)",srcPeriod));
 
 }
