@@ -299,13 +299,16 @@ int main(int argc, char *argv[])
   // Now fit the data to extract the conversion factor
 
   gStyle->SetTitleSize(0.08,"t");
-  gStyle->SetPadBottomMargin(0.15);
+  gStyle->SetPadBottomMargin(0.12);
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetTitleYSize(0.05);
-  gStyle->SetTitleYOffset(1.2);
+  gStyle->SetTitleYOffset(1.33);
   gStyle->SetTitleXSize(0.05);
-  gStyle->SetTitleXOffset(1.2);
+  gStyle->SetTitleXOffset(1.1);
   gStyle->SetLabelSize(0.045,"xyz");
+  gStyle->SetPadTopMargin(0.05);
+  gStyle->SetPadRightMargin(0.05);
+
   //gStyle->SetOptFit(1111);
   //gStyle->SetStatY(0.85);
   //gStyle->SetStatX(0.975);
@@ -331,12 +334,11 @@ int main(int argc, char *argv[])
   f2->SetParameter(0,0.);
   f2->SetParameter(1,0.01);
   
-  TCanvas *c1 = new TCanvas("c1","c1",1000,600);
-  c1->Divide(2,1);
-  c1->cd(1);
+  TCanvas *c1 = new TCanvas("c1","c1",600,600);
+  
   
   TGraphErrors *gEast = new TGraphErrors(nEnergyBins, EdataMPV, EsimMPV, EdataMPVerr, EsimMPVerr);
-  gEast->SetTitle(TString::Format("%s %i East Wirechamber Calibration",(doingOctet?"Octet":"Run"),octetNumber));
+  gEast->SetTitle("");//TString::Format("%s %i East Wirechamber Calibration",(doingOctet?"Octet":"Run"),octetNumber));
   gEast->SetMarkerStyle(20);
   gEast->SetMarkerColor(kBlue);
   gEast->SetLineColor(kRed);
@@ -360,10 +362,10 @@ int main(int argc, char *argv[])
 
   c1->Update();
 
-  c1->cd(2);
+  TCanvas *c2 = new TCanvas("c2","c2",600,600);
   
   TGraphErrors *gWest = new TGraphErrors(nEnergyBins, WdataMPV, WsimMPV, WdataMPVerr, WsimMPVerr);
-  gWest->SetTitle(TString::Format("%s %i West Wirechamber Calibration",(doingOctet?"Octet":"Run"),octetNumber));
+  gWest->SetTitle("");
   gWest->SetMarkerStyle(20);
   gWest->SetMarkerColor(kBlue);
   gWest->SetLineColor(kRed);
@@ -378,7 +380,7 @@ int main(int argc, char *argv[])
   gWest->GetXaxis()->SetLimits(0.,max<4000. ? max+30. : max);
   gWest->SetMinimum(0.);
   gWest->Draw("AP");
-  c1->Update();
+  c2->Update();
 
   gWest->Fit(f2,"","",WdataMPV[nEnergyBins-1]-50., max<4000. ? max+30. : max);
 
@@ -386,7 +388,7 @@ int main(int argc, char *argv[])
   westFactor = f2->GetParameter(1);
   westFactorErr = f2->GetParError(1);
 
-  c1->Update();
+  c2->Update();
 
 
   //Now Calculate the extrapolations to zero
@@ -397,7 +399,7 @@ int main(int argc, char *argv[])
   double cE =  (eastOffset + eastFactor*xE) / TMath::Power(xE,(alphaE));
 
   // Draw the extrapolated function
-  c1->cd(1);
+  c1->cd();
 
   TF1 *fElow = new TF1("fElow","[0]*TMath::Power(x,[1])",0.,xE);
   fElow->SetParameters(cE, alphaE);
@@ -411,7 +413,7 @@ int main(int argc, char *argv[])
   double cW =  (westOffset + westFactor*xW) / TMath::Power(xW,(alphaW));
 
   // Draw the extrapolated function
-  c1->cd(2);
+  c2->cd();
 
   TF1 *fWlow = new TF1("fWlow","[0]*TMath::Power(x,[1])",0.,xW);
   fWlow->SetParameters(cW, alphaW);
@@ -419,7 +421,8 @@ int main(int argc, char *argv[])
   fWlow->SetLineStyle(7);
   fWlow->Draw("SAME");
 
-  c1->Print(TString::Format("%s/%s/MWPC_cal%s_%i.pdf",getenv("MWPC_CALIBRATION"),(doingOctet?"octets":"runs"),(doingOctet?"_octet":""),octetNumber));
+  c1->Print(TString::Format("%s/%s/MWPC_cal%s_%i.pdf(",getenv("MWPC_CALIBRATION"),(doingOctet?"octets":"runs"),(doingOctet?"_octet":""),octetNumber));
+  c2->Print(TString::Format("%s/%s/MWPC_cal%s_%i.pdf)",getenv("MWPC_CALIBRATION"),(doingOctet?"octets":"runs"),(doingOctet?"_octet":""),octetNumber));
     
   std::ofstream mwpcFile(TString::Format("%s/%s/MWPC_cal%s_%i.dat",getenv("MWPC_CALIBRATION"),(doingOctet?"octets":"runs"),(doingOctet?"_octet":""),octetNumber).Data());
 
