@@ -83,8 +83,8 @@ void width_fitter(Int_t calPeriod)
   gStyle->SetPadRightMargin(0.05);
   gStyle->SetPadBottomMargin(0.13);
   gStyle->SetTitleXOffset(1.);
-  gStyle->SetTitleSize(0.06,"xy");
-  gStyle->SetLabelSize(0.045,"xy");
+  gStyle->SetTitleSize(0.05,"xy");
+  gStyle->SetLabelSize(0.04,"xy");
   gStyle->SetFillStyle(0000); 
 
   //Read in sim and data widths
@@ -298,7 +298,15 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[0] = 1.;
     else slope[0] = f1->GetParameter(0);
-    
+
+
+    TPaveText *pv0 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv0->SetBorderSize(0);
+    pv0->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv0->GetLine(0)->SetTextSize(0.045);
+    pv0->GetLine(0)->SetTextFont(42);
+    pv0->Draw("SAME");
   }
   
   else slope[0]=1.;
@@ -331,6 +339,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[1] = 1.;
     else slope[1] = f1->GetParameter(0);
+
+    TPaveText *pv1 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv1->SetBorderSize(0);
+    pv1->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv1->GetLine(0)->SetTextSize(0.045);
+    pv1->GetLine(0)->SetTextFont(42);
+    pv1->Draw("SAME");
   }
 
   else slope[1]=1.;
@@ -364,6 +380,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[2] = 1.;
     else slope[2] = f1->GetParameter(0);
+
+    TPaveText *pv2 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv2->SetBorderSize(0);
+    pv2->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv2->GetLine(0)->SetTextSize(0.045);
+    pv2->GetLine(0)->SetTextFont(42);
+    pv2->Draw("SAME");
   }
 
   else slope[2]=1.;
@@ -399,6 +423,13 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     if (status!=TString("CONVERGED ")) slope[3] = 1.;
     else slope[3] = f1->GetParameter(0);
 
+    TPaveText *pv3 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv3->SetBorderSize(0);
+    pv3->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv3->GetLine(0)->SetTextSize(0.045);
+    pv3->GetLine(0)->SetTextFont(42);
+    pv3->Draw("SAME");
   }
   
   else slope[3]=1.;
@@ -433,6 +464,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[4] = 1.;
     else slope[4] = f1->GetParameter(0);
+
+    TPaveText *pv4 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv4->SetBorderSize(0);
+    pv4->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv4->GetLine(0)->SetTextSize(0.045);
+    pv4->GetLine(0)->SetTextFont(42);
+    pv4->Draw("SAME");
   }
 
   else slope[4]=1.;
@@ -467,6 +506,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[5] = 1.;
     else slope[5] = f1->GetParameter(0);
+
+    TPaveText *pv5 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv5->SetBorderSize(0);
+    pv5->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv5->GetLine(0)->SetTextSize(0.045);
+    pv5->GetLine(0)->SetTextFont(42);
+    pv5->Draw("SAME");
   }
 
   else slope[5]=1.;
@@ -501,6 +548,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[6] = 1.;
     else slope[6] = f1->GetParameter(0);
+
+    TPaveText *pv6 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv6->SetBorderSize(0);
+    pv6->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv6->GetLine(0)->SetTextSize(0.045);
+    pv6->GetLine(0)->SetTextFont(42);
+    pv6->Draw("SAME");
   }
   
   else slope[6]=1.;
@@ -535,6 +590,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     }
     if (status!=TString("CONVERGED ")) slope[7] = 1.;
     else slope[7] = f1->GetParameter(0);
+
+    TPaveText *pv7 = new TPaveText(0.3,0.8,0.6,0.9,"nbNDC");
+    pv7->SetBorderSize(0);
+    pv7->AddText(TString::Format("slope = %0.3f #pm %0.3f",
+				    f1->GetParameter(0),f1->GetParError(0)));
+    pv7->GetLine(0)->SetTextSize(0.045);
+    pv7->GetLine(0)->SetTextFont(42);
+    pv7->Draw("SAME");
   }
   
   else slope[7]=1.;
