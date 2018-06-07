@@ -735,7 +735,7 @@ if __name__ == "__main__":
     
     #minimizerCombo() # 180-740 with uncertainty of 0.006019 
 
-    year=2011
+    year=2012
     uncert = uncertaintyHandler(year,"C")
     #uncert.minimizer()
 
@@ -751,10 +751,10 @@ if __name__ == "__main__":
 
     #also consider analysis choice "B" which seems to have the lowers Total uncert
 
-    if 0:
+    if 1:
     
-        lowBin = 22
-        highBin = 66
+        lowBin = 19
+        highBin = 73
         
         uncert.statUncertainties()
         uncert.readEnergyUncertainties()
@@ -824,7 +824,7 @@ if __name__ == "__main__":
         print("Total Individual MC Uncert: %f +/- %f"%(uncert.calcMCCorr( getBinEnergyMid(lowBin),getBinEnergyMid(highBin))[0],
                                                        indErrors))
         
-    if 1:
+    if 0:
         anaChoice = "D"
         lowBin = 19#19
         highBin = 73#73

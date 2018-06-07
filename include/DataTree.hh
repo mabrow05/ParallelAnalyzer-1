@@ -96,6 +96,7 @@ public:
   Int_t Side; //Earlier Trigger side
   Double_t ProbIII; //Probability of type 3 event
   Double_t Erecon; //Final reconstructed energy of an event
+  Double_t Erecon_ee; //Final reconstructed energy of an event, assuming it was en e+ e- pair
   Double_t old_Erecon; //Final reconstructed energy of an event using only weighted average
   Double_t gaus_Erecon; //Final reconstructed energy of event using gaussian for all
 

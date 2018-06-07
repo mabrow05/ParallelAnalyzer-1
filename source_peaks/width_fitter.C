@@ -77,8 +77,9 @@ void width_fitter(Int_t calPeriod)
 {
 
   gStyle->SetOptFit(0000);
+  gStyle->SetOptStat(0000);
   gStyle->SetPadLeftMargin(0.17);
-  gStyle->SetTitleYOffset(1.2);
+  gStyle->SetTitleYOffset(1.3);
   gStyle->SetPadTopMargin(0.05);
   gStyle->SetPadRightMargin(0.05);
   gStyle->SetPadBottomMargin(0.13);
@@ -232,14 +233,14 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
 
   //cout << i << endl;
 
-  TCanvas *c0 = new TCanvas("c0");
-  TCanvas *c1 = new TCanvas("c0");
-  TCanvas *c2 = new TCanvas("c0");
-  TCanvas *c3 = new TCanvas("c0");
-  TCanvas *c4 = new TCanvas("c0");
-  TCanvas *c5 = new TCanvas("c0");
-  TCanvas *c6 = new TCanvas("c0");
-  TCanvas *c7 = new TCanvas("c0");
+  TCanvas *c0 = new TCanvas("c0","c0",600,800);
+  TCanvas *c1 = new TCanvas("c1","c1",600,800);
+  TCanvas *c2 = new TCanvas("c2","c2",600,800);
+  TCanvas *c3 = new TCanvas("c3","c3",600,800);
+  TCanvas *c4 = new TCanvas("c4","c4",600,800);
+  TCanvas *c5 = new TCanvas("c5","c5",600,800);
+  TCanvas *c6 = new TCanvas("c6","c6",600,800);
+  TCanvas *c7 = new TCanvas("c7","c7",600,800);
 
   /*TPad *p0 = new TPad("p0","East 1", 0.0, 0.5, 0.25, 1.0);
   TPad *p1 = new TPad("p1","East 2", 0.25, 0.5, 0.5, 1.0);
@@ -264,7 +265,7 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   f1->SetParLimits(0,0.5,1.5);
   f1->SetLineStyle(2);
   f1->SetLineWidth(1);
-  gStyle->SetOptFit();
+  //gStyle->SetOptFit();
   
   TString status = " ";
   Int_t nAttempts = 5;
@@ -282,10 +283,10 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt0->SetTitle("");//"PMT East 1");
     pmt0->SetMarkerColor(1);
     pmt0->SetLineColor(1);
-    pmt0->SetMarkerStyle(20);
+    pmt0->SetMarkerStyle(24);
     pmt0->SetMarkerSize(1);
-    pmt0->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt0->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt0->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt0->GetYaxis()->SetTitle("Data Width [keV]");
     pmt0->SetMinimum(0.0);
     pmt0->SetMaximum(TMath::MaxElement(finalDataWidths[0].size(),&finalDataWidths[0][0])+50.);
     pmt0->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[0].size(),&finalSimWidths[0][0])+50.);   
@@ -323,10 +324,10 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt1->SetTitle("");//"PMT East 2");
     pmt1->SetMarkerColor(1);
     pmt1->SetLineColor(1);
-    pmt1->SetMarkerStyle(20);
+    pmt1->SetMarkerStyle(24);
     pmt1->SetMarkerSize(1);
-    pmt1->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt1->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt1->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt1->GetYaxis()->SetTitle("Data Width [keV]");
     pmt1->SetMinimum(0.0);
     pmt1->SetMaximum(TMath::MaxElement(finalDataWidths[1].size(),&finalDataWidths[1][0])+50.);
     pmt1->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[1].size(),&finalSimWidths[1][0])+50.);   
@@ -364,10 +365,10 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt2->SetTitle("");//"PMT East 3");
     pmt2->SetMarkerColor(1);
     pmt2->SetLineColor(1);
-    pmt2->SetMarkerStyle(20);
+    pmt2->SetMarkerStyle(24);
     pmt2->SetMarkerSize(1);
-    pmt2->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt2->GetYaxis()->SetTitle("Actual Width (keV)");  
+    pmt2->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt2->GetYaxis()->SetTitle("Data Width [keV]");  
     pmt2->SetMinimum(0.0);
     pmt2->SetMaximum(TMath::MaxElement(finalDataWidths[2].size(),&finalDataWidths[2][0])+50.);
     pmt2->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[2].size(),&finalSimWidths[2][0])+50.);   
@@ -406,10 +407,10 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt3->SetTitle("");//"PMT East 4");
     pmt3->SetMarkerColor(1);
     pmt3->SetLineColor(1);
-    pmt3->SetMarkerStyle(20);
+    pmt3->SetMarkerStyle(24);
     pmt3->SetMarkerSize(1);
-    pmt3->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt3->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt3->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt3->GetYaxis()->SetTitle("Data Width [keV]");
     pmt3->SetMinimum(0.0);
     pmt3->SetMaximum(TMath::MaxElement(finalDataWidths[3].size(),&finalDataWidths[3][0])+50.);
     pmt3->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[3].size(),&finalSimWidths[3][0])+50.);
@@ -448,10 +449,10 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt4->SetTitle("");//"PMT West 1");
     pmt4->SetMarkerColor(1);
     pmt4->SetLineColor(1);
-    pmt4->SetMarkerStyle(20);
+    pmt4->SetMarkerStyle(24);
     pmt4->SetMarkerSize(1);
-    pmt4->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt4->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt4->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt4->GetYaxis()->SetTitle("Data Width [keV]");
     pmt4->SetMinimum(0.0);
     pmt4->SetMaximum(TMath::MaxElement(finalDataWidths[4].size(),&finalDataWidths[4][0])+50.);
     pmt4->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[4].size(),&finalSimWidths[4][0])+50.);   
@@ -490,10 +491,10 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt5->SetTitle("");//"PMT West 2");
     pmt5->SetMarkerColor(1);
     pmt5->SetLineColor(1);
-    pmt5->SetMarkerStyle(20);
+    pmt5->SetMarkerStyle(24);
     pmt5->SetMarkerSize(1);
-    pmt5->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt5->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt5->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt5->GetYaxis()->SetTitle("Data Width [keV]");
     pmt5->SetMinimum(0.0);
     pmt5->SetMaximum(TMath::MaxElement(finalDataWidths[5].size(),&finalDataWidths[5][0])+50.);
     pmt5->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[5].size(),&finalSimWidths[5][0])+50.);   
@@ -532,10 +533,10 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt6->SetTitle("");//"PMT West 3");
     pmt6->SetMarkerColor(1);
     pmt6->SetLineColor(1);
-    pmt6->SetMarkerStyle(20);
+    pmt6->SetMarkerStyle(24);
     pmt6->SetMarkerSize(1);
-    pmt6->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt6->GetYaxis()->SetTitle("Actual Width (keV)");  
+    pmt6->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt6->GetYaxis()->SetTitle("Data Width [keV]");  
     pmt6->SetMinimum(0.0);
     pmt6->SetMaximum(TMath::MaxElement(finalDataWidths[6].size(),&finalDataWidths[6][0])+50.);
     pmt6->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[6].size(),&finalSimWidths[6][0])+50.);   
@@ -576,8 +577,8 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
     pmt7->SetLineColor(1);
     pmt7->SetMarkerStyle(24);
     pmt7->SetMarkerSize(1);
-    pmt7->GetXaxis()->SetTitle("Simulated Width (keV)");
-    pmt7->GetYaxis()->SetTitle("Actual Width (keV)");
+    pmt7->GetXaxis()->SetTitle("Simulated Width [keV]");
+    pmt7->GetYaxis()->SetTitle("Data Width [keV]");
     pmt7->SetMinimum(0.0);
     pmt7->SetMaximum(TMath::MaxElement(finalDataWidths[7].size(),&finalDataWidths[7][0])+50.);
     pmt7->GetXaxis()->SetLimits(0.0,TMath::MaxElement(finalDataWidths[7].size(),&finalSimWidths[7][0])+50.);   
@@ -603,9 +604,15 @@ for ( UInt_t i=0; i<8; ++i ) {  simWidthRun[i].push_back(run); simWidthSrc[i].pu
   else slope[7]=1.;
 
 
-  TString pdffile = TString::Format("%s/simulation_comparison/nPE_per_keV/width_comp_%i.pdf",getenv("ANALYSIS_CODE"),calPeriod);
+  TString pdffile = TString::Format("%s/simulation_comparison/nPE_per_keV/final_width_comp_%i.pdf",getenv("ANALYSIS_CODE"),calPeriod);
+  c0->Print(pdffile+"(");
   c1->Print(pdffile);
-
+  c2->Print(pdffile);
+  c3->Print(pdffile);
+  c4->Print(pdffile);
+  c5->Print(pdffile);
+  c6->Print(pdffile);
+  c7->Print(pdffile+")");
 
   //Calculate new k 
 

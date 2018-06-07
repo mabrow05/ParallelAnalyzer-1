@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 
     // Only process event if it's an electron
     
-    if ( t->PID==1 || t->PID==6) { //PID==6 includes the APD events as they don't have coincidence on one side...
+    if ( t->PID==1 || t->PID==6 ) { //PID==6 includes the APD events as they don't have coincidence on one side...
 
       std::vector <double> posex(3,0.);
       std::vector <double> poswx(3,0.);
@@ -756,7 +756,7 @@ int main(int argc, char *argv[])
       typeIndex = t->Type==0 ? 0:(t->Type==1 ? 1:2); //for retrieving the parameters from EQ2Etrue
       
       totalEvis=0.;
-      
+      t->Erecon_ee = 0.;
       //Handling APD events
       if (t->PID==6) {
 	if (t->PassedCathE && t->PassedCathW) {
@@ -790,6 +790,11 @@ int main(int argc, char *argv[])
 	}
 	else t->Erecon=-1.;
       }
+      
+      if (t->Type==1 && t->EvisW>0. && t->EvisE>0.) {
+	t->Erecon_ee = eRecon.getErecon(0,0,t->EvisE) + eRecon.getErecon(1,0,t->EvisW);
+      }
+
     }
     else if (t->PID==0) {
       

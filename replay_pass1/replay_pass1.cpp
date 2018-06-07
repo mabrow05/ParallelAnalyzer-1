@@ -519,13 +519,13 @@ int main(int argc, char *argv[])
       if ( (timeEastTwoFold > cutEastTwoFold) && (timeWestTwoFold < cutWestTwoFold) ) {
         scintillatorHitFirstEast = true;
       }
-      if ( (timeEastTwoFold < cutEastTwoFold) && (timeWestTwoFold > cutWestTwoFold) ) {
+      else if ( (timeEastTwoFold < cutEastTwoFold) && (timeWestTwoFold > cutWestTwoFold) ) {
         scintillatorHitFirstWest = true;
       }
-      if ( (timeEastTwoFold > cutEastTwoFold) && (timeWestTwoFold > cutWestTwoFold) ) {
+      else if ( (timeEastTwoFold > cutEastTwoFold) && (timeWestTwoFold > cutWestTwoFold) ) {
         scintillatorHitBothBad = true;
       }
-      if ( (timeEastTwoFold < cutEastTwoFold) && (timeWestTwoFold < cutWestTwoFold) ) {
+      else if ( (timeEastTwoFold < cutEastTwoFold) && (timeWestTwoFold < cutWestTwoFold) ) {
         scintillatorHitBothBad = true;
       }
     }
@@ -547,7 +547,7 @@ int main(int argc, char *argv[])
               (!scintillatorHitEast && !mwpcHitEast && scintillatorHitWest && !mwpcHitWest) ) { PID = 0; side = scintillatorHitEast ? 0 : 1; }
     else if ( (coincidenceEast && !scintillatorHitWest && !mwpcHitWest) ||
               (!scintillatorHitEast && !mwpcHitEast && coincidenceWest) ||
-              (coincidenceEast && coincidenceWest && !scintillatorHitBothBad) ||
+              (coincidenceEast && coincidenceWest) ||
               (coincidenceEast && !scintillatorHitWest && mwpcHitWest) ||
               (!scintillatorHitEast && mwpcHitEast && coincidenceWest) ) PID = 1;
     else PID = 6;
@@ -562,7 +562,7 @@ int main(int argc, char *argv[])
         type = 0;
         side = 1;
       }
-      if (coincidenceEast && coincidenceWest && !scintillatorHitBothBad) {
+      if (coincidenceEast && coincidenceWest) {
         type = 1;
         if (scintillatorHitFirstEast) side = 0;
         if (scintillatorHitFirstWest) side = 1;
@@ -710,6 +710,7 @@ int main(int argc, char *argv[])
     t->Side = side;
     t->ProbIII = 0.;
     t->Erecon = 0.;
+    t->Erecon_ee = 0.;
     t->old_Erecon = 0.;
     t->gaus_Erecon = 0.;
 
