@@ -18,10 +18,11 @@ limdat = {2008:[(0,5.0),(250,5.0),(500,500*0.013),(900,900*0.025),(1000,1000*0.0
 }
 
 
-def readCalEnvelope(year=2011,upper=True):
-        envLower = []
-        envUpper = []
-        env = []
+def readCalEnvelope(year=2011):
+        envLower = [] # list of pairs (KE, err) for the Lower edge of the envelope
+        envUpper = [] # list of pairs (KE, err) for the Upper edge of the envelope
+        env = []      # list of pairs (KE, err) for the maximum of the Lower and Upper edge
+
         with open('envolopeValues-%i-deg2-cal4-curves1000.tsv'%year,'rb') as tsvin:
                 tsvin = csv.reader(tsvin, delimiter='\t')
                 for row in tsvin:
@@ -29,13 +30,11 @@ def readCalEnvelope(year=2011,upper=True):
                         envUpper.append( ( float(row[0]),float(row[2]) ) )
                         env.append( ( float(row[0]),max([fabs(float(row[1])),fabs(float(row[2]))]) ) )
                         print("%s\t%s\t%s"%(row[0],row[1],row[2]))
-        limdat[year*10+1] = envLower
-        limdat[year*10+2] = envUpper
-        limdat[year] = env
-        #if upper:
-        #        limdat[year] = envUpper
-        #else:
-        #        limdat[year] = envLower
+
+        limdat[year*10+1] = envLower # limdat is in this case a global python dictionary to hold 
+        limdat[year*10+2] = envUpper # the different envelopes with the key as year*10+(1 or 2), so for 2011, 20111 
+        limdat[year] = env           # for the lower edge and 20112 for the upper edge. For the maximum envelope,
+                                     # which is the one used for the final uncertainty, the key is simply 2011. 
                         
 def calEnvelope(E,year=2011):	
 	i = 0
